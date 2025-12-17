@@ -1,0 +1,12 @@
+{
+    "home": {
+        "title": "BambiGO",
+        "currentLocation": "目前位置",
+        "askBambiGO": "問 BambiGO..."
+    },
+    "status": {
+        "crowded": "擁擠",
+        "normal": "順暢",
+        "delayed": "延誤 {minutes} 分"
+    }
+}
