@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useAppStore } from '@/stores/appStore';
 import { FacilityProfile } from '@/components/ui/FacilityProfile';
+import { NodeTabs } from '@/components/node/NodeTabs';
 import { ChatOverlay } from '@/components/chat/ChatOverlay';
 import { TripGuardStatus } from '@/components/guard/TripGuardStatus';
 import { SubscriptionModal } from '@/components/guard/SubscriptionModal';
@@ -88,21 +89,40 @@ export default function Home() {
                             )}
                         </div>
 
-                        {/* L1 Profile (Only show if Core) */}
-                        {isCore && profile ? (
-                            <FacilityProfile counts={profile.category_counts} vibeTags={profile.vibe_tags} />
-                        ) : isCore ? (
-                            <div className="p-4 bg-gray-50 text-gray-500 rounded-lg text-sm text-center">
-                                正在分析生活機能數據... (或無資料)
-                            </div>
-                        ) : null}
+                        {/* Node Content Tabs (L1/L2/L3) */}
+                        <div className="mt-4">
+                            <NodeTabs
+                                nodeData={nodeData}
+                                profile={isCore ? profile : null}
+                            />
+                        </div>
 
-                        {/* Buffer Zone Message */}
+                        {/* Buffer Zone Message (Handled optionally inside tabs or here) */}
                         {!isCore && (
-                            <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
-                                ℹ️ 此區域僅提供基本導航
+                            <div className="mt-2 p-3 bg-yellow-50 text-yellow-800 rounded-lg text-xs">
+                                ℹ️ 此區域僅提供基本導航 (This zone has limited AI features)
                             </div>
                         )}
+
+                        {/* Actions (Plan a Trip) */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => {
+                                    useAppStore.getState().addMessage({
+                                        role: 'assistant',
+                                        content: `已將「${nodeData.name?.['zh-TW'] || nodeData.name?.['en']}」加入您的行程草稿！`
+                                    });
+                                    // Close sheet optional, or show success UI
+                                    useAppStore.getState().setChatOpen(true); // Helper: Open chat to show confirmation
+                                }}
+                                className="flex-1 bg-indigo-600 text-white font-medium py-3 rounded-full hover:bg-indigo-700 transition active:scale-95 shadow-lg shadow-indigo-200"
+                            >
+                                📅 加入行程
+                            </button>
+                            <button className="p-3 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200">
+                                ❤️
+                            </button>
+                        </div>
 
                         {/* AI Input Placeholder */}
                         <div className="mt-4">
@@ -119,6 +139,19 @@ export default function Home() {
             )}
 
             {/* Bottom Nav Placeholder (optional) */}
+
+            {/* Bottom Floating Chat Trigger (Visible when sheet is closed) */}
+            {!isBottomSheetOpen && (
+                <div className="absolute bottom-6 left-4 right-4 z-10 flex justify-center">
+                    <button
+                        onClick={() => useAppStore.getState().setChatOpen(true)}
+                        className="w-full max-w-md bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-full px-6 py-4 flex items-center gap-3 text-left transition-transform active:scale-95 border border-indigo-50"
+                    >
+                        <span className="text-xl">✨</span>
+                        <span className="text-gray-500 font-medium">問 BambiGO... (帶我去上野)</span>
+                    </button>
+                </div>
+            )}
 
             {/* Chat Interface */}
             <ChatOverlay />

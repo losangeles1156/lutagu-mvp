@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useAppStore } from '@/stores/appStore';
-import { fetchNearbyNodes, NodeDatum } from '@/lib/api/nodes';
+import { fetchNearbyNodes, fetchAllNodes, NodeDatum } from '@/lib/api/nodes';
 import { NodeMarker } from './NodeMarker';
 
 // Fix leafet icon
@@ -44,14 +44,12 @@ export default function AppMap() {
     const defaultCenter = [35.6895, 139.6917];
 
     useEffect(() => {
-        if (userLocation) {
-            fetchNearbyNodes(userLocation.lat, userLocation.lon, 5000) // 5km radius
-                .then(data => setNodes(data));
-        } else {
-            // Fallback: fetch initial Tokyo Hubs if no location
-            // or just wait. For MVP we can fetch predefined list if we want.
-        }
-    }, [userLocation]);
+        // Always fetch ALL nodes for manual planning visibility
+        fetchAllNodes().then(data => {
+            console.log('Loaded nodes:', data.length);
+            setNodes(data);
+        });
+    }, []);
 
     return (
         <div className="w-full h-screen relative z-0">

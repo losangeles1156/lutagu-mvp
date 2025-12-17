@@ -1,8 +1,9 @@
 {
-    "home": {
+    "Home": {
         "title": "BambiGO",
         "currentLocation": "目前位置",
-        "askBambiGO": "問 BambiGO..."
+        "askBambiGO": "問 BambiGO...",
+        "aiPlaceholder": "問 BambiGO..."
     },
     "status": {
         "crowded": "擁擠",

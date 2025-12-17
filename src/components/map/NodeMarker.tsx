@@ -24,18 +24,20 @@ export function NodeMarker({ node, zone }: NodeMarkerProps) {
         setBottomSheetOpen(true);
     };
 
-    if (zone === 'outer') return null; // Don't show markers in outer zone
+    // if (zone === 'outer') return null; // Logic removed: All nodes should be visible for manual planning
 
-    const isCore = zone === 'core';
+    // Use node's own zone for styling, fallback to 'core' if undefined
+    const nodeZone = node.is_hub ? 'core' : 'buffer';
+    const isCoreNode = nodeZone === 'core';
 
-    // Custom DivIcon based on zone
+    // Custom DivIcon based on node type/zone
     const icon = L.divIcon({
-        className: isCore ? 'node-marker-core' : 'node-marker-buffer',
-        html: isCore
+        className: isCoreNode ? 'node-marker-core' : 'node-marker-buffer',
+        html: isCoreNode
             ? `<div class="w-8 h-8 bg-indigo-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs">${node.is_hub ? '★' : ''}</div>`
             : `<div class="w-3 h-3 bg-gray-500 rounded-full border border-white"></div>`,
-        iconSize: isCore ? [32, 32] : [12, 12],
-        iconAnchor: isCore ? [16, 16] : [6, 6]
+        iconSize: isCoreNode ? [32, 32] : [12, 12],
+        iconAnchor: isCoreNode ? [16, 16] : [6, 6]
     });
 
     return (

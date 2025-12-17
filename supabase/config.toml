@@ -1,0 +1,11 @@
+project_id = "evubeqeaafdjnuocyhmb"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "auth"]
+extra_search_path = ["public", "extensions"]
+
+[db]
+port = 54322
+shadow_port = 54320
