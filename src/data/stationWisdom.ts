@@ -175,5 +175,69 @@ export const STATION_WISDOM: Record<string, StationWisdomData> = {
                 severity: 'high'
             }
         ]
+    },
+    // Shinjuku Station (The Boss)
+    'odpt:Station:JR-East.Shinjuku': {
+        traps: [
+            {
+                type: 'exit',
+                title: '🌀 東西出口迷宮 (East/West Maze)',
+                content: '新宿站的 JR 系統，東口與西口在地下不互通（除非走特定通道）。一旦出錯閘門，要繞外圍一大圈才能到對面。',
+                advice: '⚠️ 絕對守則：出閘門前請確認目標是「東口」還是「西口」。若走錯，建議不下樓，直接走地面層的「大ガード (大鐵橋)」繞過去。',
+                severity: 'critical'
+            },
+            {
+                type: 'transfer',
+                title: '🚇 大江戶線轉乘地獄 (Deep Transfer)',
+                content: '大江戶線的「新宿站」位於地下七層，距離 JR 改札口極遠。',
+                advice: '💡 行動建議：若要轉乘大江戶線，請改去「新宿西口站」而非「新宿站」，兩者其實更近且沒那麼深。',
+                severity: 'high'
+            }
+        ],
+        hacks: [
+            '🌧️ **地下通路王**：新宿三丁目到西口都廳，均有地下道相連。下雨天可從「Subnade」地下街一路逛到東口，完全不必淋雨。',
+            '🆕 **新南口直達**：要去「Busta 新宿 (巴士轉運站)」請務必找「新南改札」，出來直達手扶梯上樓即是，千萬別走去東/西口。'
+        ]
+    },
+
+    // Shibuya Station (The Labyrinth)
+    'odpt:Station:TokyoMetro.Shibuya': {
+        traps: [
+            {
+                type: 'transfer',
+                title: '🆙 銀座線空口謎題 (Sky Subway)',
+                content: '雖然是地下鐵，但澀谷站的銀座線月台在 **三樓**！而副都心線在地下五樓。',
+                advice: '⚠️ 轉乘警示：銀座線轉乘副都心線/東橫線，垂直移動距離極大，請預留 10-15 分鐘的「登山」時間。',
+                severity: 'high'
+            },
+            {
+                type: 'exit',
+                title: '🚧 迷宮工事中 (Construction Chaos)',
+                content: '澀谷站周邊工程持續進行中，出口位置常有變動。',
+                advice: '🛑 能夠搭乘的車種：請認準「Hachiko Gate (八公改札)」作為唯一真理，其他出口容易迷失在工地迷宮中。',
+                severity: 'medium'
+            }
+        ],
+        hacks: [
+            '🏙️ **Scramble Square 捷徑**：利用 Scramble Square 百貨的電梯，可以直接從 B2 地鐵層殺到 3F 的銀座線/JR 連通道，避開人擠人的手扶梯。',
+            '🖼️ **神話明日壁畫**：在通往井之頭線的連通道上，有岡本太郎巨大的壁畫「明日的神話」，是免費且震撼的藝術景點。'
+        ]
+    },
+
+    // Ikebukuro Station (The Owl)
+    'odpt:Station:JR-East.Ikebukuro': {
+        traps: [
+            {
+                type: 'exit',
+                title: '🦉 東西百貨悖論 (West-East Paradox)',
+                content: '池袋的最大陷阱：「西武百貨在東口，東武百貨在西口」。',
+                advice: '⚠️ 記憶口訣：東口是西武 (Seibu)，西口是東武 (Tobu)。想去西武百貨請往「東口」走！',
+                severity: 'critical'
+            }
+        ],
+        hacks: [
+            '🦉 **貓頭鷹地標**：東口的「Ikefukurou (貓頭鷹石像)」是最佳會合點，比八公像難找一點但人也比較少。',
+            '🍜 **拉麵激戰區**：東口往 SunShine City 的路上是拉麵一級戰區，無敵家、一蘭都在這附近。'
+        ]
     }
 };

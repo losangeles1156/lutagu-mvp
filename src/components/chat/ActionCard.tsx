@@ -1,6 +1,8 @@
 import { MapPin, Info, CalendarPlus, Train, Car, Navigation, Zap, Banknote } from 'lucide-react';
+import { TrapCard } from './TrapCard';
+import { HackCard } from './HackCard';
 
-export type ActionType = 'navigate' | 'details' | 'trip' | 'transit' | 'taxi' | 'discovery';
+export type ActionType = 'navigate' | 'details' | 'trip' | 'transit' | 'taxi' | 'discovery' | 'trap' | 'hack';
 
 export interface Action {
     type: ActionType;
@@ -10,6 +12,10 @@ export interface Action {
     price?: string;
     timeSaved?: string;
     metadata?: any;
+    // New fields for Wisdom Cards
+    title?: string;
+    content?: string;
+    severity?: 'medium' | 'high' | 'critical';
 }
 
 interface ActionCardProps {
@@ -63,6 +69,15 @@ const CONFIG: Record<string, any> = {
 };
 
 export function ActionCard({ action, onClick }: ActionCardProps) {
+    // 1. Specialized Cards
+    if (action.type === 'trap') {
+        return <TrapCard action={action} onClick={onClick} />;
+    }
+    if (action.type === 'hack') {
+        return <HackCard action={action} onClick={onClick} />;
+    }
+
+    // 2. Standard Cards (Legacy Logic)
     const config = CONFIG[action.type] || CONFIG.details;
     const Icon = config.icon;
 
