@@ -208,7 +208,7 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                         🦌
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-white/70 text-[10px] uppercase tracking-[0.2em] mb-1">Bambi's Strategy</h4>
+                                        <h4 className="font-black text-white/70 text-[10px] uppercase tracking-[0.2em] mb-1">Bambi&apos;s Strategy</h4>
                                         <h3 className="font-black text-lg mb-1">{nudge.title}</h3>
                                         <p className="text-sm font-bold leading-relaxed opacity-90">{nudge.content}</p>
                                         <div className="mt-4 bg-white/20 p-3 rounded-xl border border-white/20 text-xs font-black">

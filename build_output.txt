@@ -1,0 +1,34 @@
+
+> bambigo-pwa@0.1.0 build
+> next build
+
+   ??Next.js 14.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+
+[next-intl] Reading request configuration from ./src/i18n.ts is deprecated, please see https://next-intl.dev/blog/next-intl-3-22#i18n-request ??you can either move your configuration to ./i18n/request.ts or provide a custom path in your Next.js config:
+
+const withNextIntl = createNextIntlPlugin(
+  './path/to/i18n/request.tsx'
+);
+
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: C:\Users\losan\Desktop\BambiGO\node_modules\next-pwa\register.js
+> [PWA] Service worker: C:\Users\losan\Desktop\BambiGO\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+ ??Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/components/guard/SubscriptionModal.tsx
+12:39  Error: React Hook "React.useState" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+
+./src/components/node/NodeTabs.tsx
+211:131  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

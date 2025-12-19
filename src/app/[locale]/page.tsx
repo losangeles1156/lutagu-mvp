@@ -11,7 +11,7 @@ import { TripGuardStatus } from '@/components/guard/TripGuardStatus';
 import { SubscriptionModal } from '@/components/guard/SubscriptionModal';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useEffect, useState } from 'react';
-import { fetchNodeConfig, FacilityProfile as IFacilityProfile } from '@/lib/api/nodes';
+import { fetchNodeConfig, NodeProfile } from '@/lib/api/nodes';
 import { Cloud, Settings, Heart, Calendar, ArrowRight, MessageSquare, Map as MapIcon, ShieldCheck, User, LocateFixed, Layers, Plus, Minus } from 'lucide-react';
 
 // Leaflet must be dynamic import with no SSR
@@ -26,7 +26,7 @@ export default function Home() {
     const { currentNodeId, isBottomSheetOpen, activeTab, setActiveTab, setMapCenter } = useAppStore();
 
     const [nodeData, setNodeData] = useState<any>(null);
-    const [profile, setProfile] = useState<IFacilityProfile | null>(null);
+    const [profile, setProfile] = useState<NodeProfile | null>(null);
 
     // Fetch node details when ID changes
     useEffect(() => {
@@ -259,45 +259,43 @@ export default function Home() {
 
 
                         </div>
-                        </div>
+                    )}
+                </div>
             )}
-        </div>
-    )
-}
 
-{/* 4. Bottom Navigation Bar */ }
-<div className="absolute bottom-6 left-6 right-6 z-30">
-    <div className="glass-effect rounded-[32px] p-2 flex justify-between items-center shadow-[0_15px_40px_rgba(0,0,0,0.15)] bg-white/80 border border-white/50">
-        <button
-            onClick={() => setActiveTab('explore')}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'explore' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
-        >
-            <MapIcon size={20} fill={activeTab === 'explore' ? "white" : "none"} />
-            <span className="text-[10px] font-black uppercase tracking-tighter">探索</span>
-        </button>
-        <button
-            onClick={() => setActiveTab('trips')}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'trips' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 -rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
-        >
-            <ShieldCheck size={20} fill={activeTab === 'trips' ? "white" : "none"} />
-            <span className="text-[10px] font-black uppercase tracking-tighter">守護</span>
-        </button>
-        <button
-            onClick={() => setActiveTab('me')}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
-        >
-            <User size={20} fill={activeTab === 'me' ? "white" : "none"} />
-            <span className="text-[10px] font-black uppercase tracking-tighter">我的</span>
-        </button>
-    </div>
-</div>
+            {/* 4. Bottom Navigation Bar */}
+            <div className="absolute bottom-6 left-6 right-6 z-30">
+                <div className="glass-effect rounded-[32px] p-2 flex justify-between items-center shadow-[0_15px_40px_rgba(0,0,0,0.15)] bg-white/80 border border-white/50">
+                    <button
+                        onClick={() => setActiveTab('explore')}
+                        className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'explore' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        <MapIcon size={20} fill={activeTab === 'explore' ? "white" : "none"} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">探索</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('trips')}
+                        className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'trips' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 -rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        <ShieldCheck size={20} fill={activeTab === 'trips' ? "white" : "none"} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">守護</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('me')}
+                        className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        <User size={20} fill={activeTab === 'me' ? "white" : "none"} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">我的</span>
+                    </button>
+                </div>
+            </div>
 
-{/* Chat Interface */ }
-<ChatOverlay />
+            {/* Chat Interface */}
+            <ChatOverlay />
 
-{/* Guard Modal */ }
-<SubscriptionModal />
-        </main >
+            {/* Guard Modal */}
+            <SubscriptionModal />
+        </main>
     );
 }
 

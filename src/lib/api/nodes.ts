@@ -6,12 +6,41 @@ export interface NodeDatum {
     city_id: string;
     name: any;
     type: string;
-    location: any; // PostGIS Point or GeoJSON
+    location: { coordinates: [number, number] }; // Unified to [lon, lat]
     geohash: string;
     vibe: string | null;
     is_hub: boolean;
     parent_hub_id: string | null;
     zone: string;
+}
+
+/**
+ * Ensures location is always a GeoJSON-like object { coordinates: [lon, lat] }
+ * Handles: WKT strings, Objects with coordinates, or raw DB geography format
+ */
+export function parseLocation(loc: any): { coordinates: [number, number] } {
+    if (!loc) return { coordinates: [0, 0] };
+
+    // Case 1: Already correct object
+    if (loc.coordinates && Array.isArray(loc.coordinates)) {
+        return { coordinates: [loc.coordinates[0], loc.coordinates[1]] };
+    }
+
+    // Case 2: WKT String (e.g. "POINT(139.7774 35.7141)")
+    if (typeof loc === 'string' && loc.startsWith('POINT')) {
+        const matches = loc.match(/\(([^)]+)\)/);
+        if (matches) {
+            const parts = matches[1].split(' ');
+            return { coordinates: [parseFloat(parts[0]), parseFloat(parts[1])] };
+        }
+    }
+
+    // Case 3: Standard object from PostGIS (Sometime it's {type: "Point", coordinates: [...]})
+    if (loc.type === 'Point' && loc.coordinates) {
+        return { coordinates: loc.coordinates as [number, number] };
+    }
+
+    return { coordinates: [0, 0] };
 }
 
 // L1: Location DNA
@@ -582,10 +611,18 @@ export async function fetchNodeConfig(nodeId: string) {
         }
         // ----------------------------------
 
-        return { node: finalNode, profile: enrichedProfile, error: null };
+        return {
+            node: { ...finalNode, location: parseLocation(finalNode.location) },
+            profile: enrichedProfile,
+            error: null
+        };
     }
 
-    return { node: finalNode, profile: finalProfile, error: null };
+    return {
+        node: { ...finalNode, location: parseLocation(finalNode?.location) },
+        profile: finalProfile,
+        error: null
+    };
 }
 
 // Fetch logic for specific zones (e.g., get all Hubs in a city)
@@ -616,7 +653,11 @@ export async function fetchAllNodes() {
 
     if (error) {
         console.error('Error fetching nodes from RPC, using hardcoded fallback:', error);
-        return CORE_STATIONS_FALLBACK as any[];
+        return CORE_STATIONS_FALLBACK.map(n => ({ ...n, location: parseLocation(n.location) })) as any[];
     }
-    return data as NodeDatum[];
+
+    return (data as any[]).map(n => ({
+        ...n,
+        location: parseLocation(n.location)
+    })) as NodeDatum[];
 }

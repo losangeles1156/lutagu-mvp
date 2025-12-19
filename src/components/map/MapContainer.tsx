@@ -20,12 +20,26 @@ function MapController({ center, isTooFar, fallback }: {
     const setMapCenter = useAppStore(state => state.setMapCenter);
     const lastTargetRef = useRef<{ lat: number, lon: number } | null>(null);
 
-    // Priority: Store MapCenter > Props (User Location IF NOT TOO FAR)
     const target = mapCenter || (isTooFar ? null : center);
+    const { currentNodeId } = useAppStore();
+    const [prevNodeId, setPrevNodeId] = useState<string | null>(null);
 
     useEffect(() => {
+        // 1. Handle Selection Centering
+        if (currentNodeId && currentNodeId !== prevNodeId) {
+            fetchAllNodes().then(nodes => {
+                const selectedNode = nodes.find(n => n.id === currentNodeId);
+                if (selectedNode) {
+                    const [lon, lat] = selectedNode.location.coordinates;
+                    map.flyTo([lat, lon], 16, { animate: true, duration: 1.2 });
+                    setPrevNodeId(currentNodeId);
+                }
+            });
+            return;
+        }
+
+        // 2. Handle System Centering (Fallback or User Location)
         if (!target && isTooFar && !mapCenter) {
-            // Default center if user is far and no manual center set
             const fallbackTarget = fallback;
             if (JSON.stringify(lastTargetRef.current) !== JSON.stringify(fallbackTarget)) {
                 map.flyTo([fallbackTarget.lat, fallbackTarget.lon], 15, { animate: true, duration: 1.5 });
@@ -35,7 +49,6 @@ function MapController({ center, isTooFar, fallback }: {
         }
 
         if (target) {
-            // Only fly if target actually changed to prevent rubber-banding while panning
             const targetChanged = JSON.stringify(lastTargetRef.current) !== JSON.stringify(target);
             if (targetChanged) {
                 map.flyTo([target.lat, target.lon], 15, {
@@ -43,13 +56,9 @@ function MapController({ center, isTooFar, fallback }: {
                     duration: 1.5
                 });
                 lastTargetRef.current = target;
-
-                // If it was a manual center-to-user action, we clear the manual mapCenter 
-                // after reaching it to allow free panning again if needed? 
-                // Actually, keeping mapCenter is better for consistency.
             }
         }
-    }, [target, map, isTooFar, fallback, mapCenter]);
+    }, [target, map, isTooFar, fallback, mapCenter, currentNodeId, prevNodeId]);
 
     // Clear mapCenter if user starts dragging to allow manual exploration
     useEffect(() => {

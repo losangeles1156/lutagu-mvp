@@ -6,10 +6,9 @@ import { useAppStore } from '@/stores/appStore';
 
 export function SubscriptionModal() {
     const { isSubscriptionModalOpen, setSubscriptionModalOpen, isTripGuardActive, setTripGuardActive } = useAppStore();
+    const [isLoading, setIsLoading] = React.useState(false);
 
     if (!isSubscriptionModalOpen) return null;
-
-    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleActivate = async () => {
         setIsLoading(true);

@@ -28,7 +28,18 @@ const VIBE_STYLE: Record<string, { color: string; icon: string }> = {
 
 export function NodeMarker({ node, zone }: NodeMarkerProps) {
     const { setCurrentNode, setBottomSheetOpen, currentNodeId } = useAppStore();
-    const [lon, lat] = node.location.coordinates;
+
+    // Robust coordinate extraction
+    let lon = 0, lat = 0;
+    if (Array.isArray(node.location.coordinates)) {
+        [lon, lat] = node.location.coordinates;
+    } else if (node.location.coordinates && typeof node.location.coordinates === 'object') {
+        // Handle { lon: ..., lat: ... } if it happens
+        const coords = node.location.coordinates as any;
+        lon = coords.lon || coords.x || 0;
+        lat = coords.lat || coords.y || 0;
+    }
+
     const isSelected = currentNodeId === node.id;
 
     const handleClick = () => {
@@ -45,39 +56,47 @@ export function NodeMarker({ node, zone }: NodeMarkerProps) {
     // Create a dynamic premium icon using SVG + Lucide
     const iconMarkup = renderToStaticMarkup(
         <div className={`relative flex items-center justify-center transition-all duration-300 ${isSelected ? 'scale-125 -translate-y-2' : 'scale-100'}`}>
-            {/* Outer Pulse for selected or hub nodes */}
-            {(isSelected || (isCoreNode && node.is_hub)) && (
-                <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${isSelected ? 'bg-indigo-500' : (vibeConfig?.color || 'bg-rose-400')}`} />
+            {/* 1. Pulse Layer (For Hubs or Selected) */}
+            {(isSelected || node.is_hub) && (
+                <>
+                    <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${isSelected ? 'bg-indigo-500' : (vibeConfig?.color || 'bg-rose-400')}`} style={{ animationDuration: '3s' }} />
+                    <div className={`absolute -inset-2 rounded-full animate-pulse opacity-10 ${isSelected ? 'bg-indigo-400' : (vibeConfig?.color || 'bg-rose-300')}`} />
+                </>
             )}
 
-            {/* Icon Container */}
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transform rotate-45 transition-all border-2 ${isSelected
-                ? 'bg-indigo-600 border-white text-white ring-4 ring-indigo-500/20'
+            {/* 2. Marker Body (Diamond shape 2.1 style) */}
+            <div className={`w-11 h-11 rounded-[14px] flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.15)] transform rotate-45 transition-all border-[1.5px] ${isSelected
+                ? 'bg-indigo-600 border-white text-white ring-4 ring-indigo-500/10'
                 : vibeConfig
-                    ? `${vibeConfig.color} border-white text-white`
-                    : 'bg-white border-indigo-100 text-indigo-600 hover:border-indigo-300'
+                    ? `${vibeConfig.color} border-white/80 text-white`
+                    : 'bg-white border-gray-100 text-indigo-600'
                 }`}>
                 <div className="-rotate-45 flex items-center justify-center">
                     {isSelected ? (
-                        <MapPin size={22} fill="white" className="animate-bounce-short" />
-                    ) : vibeConfig ? (
+                        <MapPin size={24} fill="white" className="animate-bounce-short" />
+                    ) : (vibeConfig && !node.is_hub) ? (
                         <span className="text-sm">{vibeConfig.icon}</span>
                     ) : node.is_hub ? (
-                        <span className="text-sm font-bold">★</span>
+                        <div className="relative">
+                            <span className="text-sm font-black drop-shadow-md">★</span>
+                            {vibeConfig && <span className="absolute -top-3 -right-3 text-[10px] bg-white rounded-full p-0.5 shadow-sm">{vibeConfig.icon}</span>}
+                        </div>
                     ) : (
                         <MapPin size={18} />
                     )}
                 </div>
             </div>
 
-            {/* Label Tooltip for selected node */}
-            {isSelected && (
-                <div className="absolute -top-12 bg-gray-900 text-white text-[10px] px-3 py-1.5 rounded-xl font-black whitespace-nowrap shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-300">
+            {/* 3. Dynamic Label for Hubs or Selected */}
+            {(isSelected || node.is_hub) && (
+                <div className={`absolute -top-12 px-3 py-1.5 rounded-full font-black whitespace-nowrap shadow-xl transition-all duration-500 border border-white/20 backdrop-blur-md ${isSelected
+                    ? 'bg-gray-900 text-white scale-110'
+                    : 'bg-white/90 text-gray-800 text-[9px] scale-90'
+                    }`}>
                     <div className="flex items-center gap-1.5">
-                        {vibeConfig && <span>{vibeConfig.icon}</span>}
-                        {node.name?.['zh-TW'] || node.name?.['en']}
+                        {vibeConfig && <span className="text-xs">{vibeConfig.icon}</span>}
+                        <span>{node.name?.['zh-TW'] || node.name?.['en']}</span>
                     </div>
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
                 </div>
             )}
         </div>
@@ -86,9 +105,11 @@ export function NodeMarker({ node, zone }: NodeMarkerProps) {
     const customIcon = L.divIcon({
         html: iconMarkup,
         className: 'custom-node-icon',
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
     });
+
+    if (!lat || !lon) return null; // Safety
 
     return (
         <Marker
