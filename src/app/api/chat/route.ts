@@ -21,42 +21,43 @@ export async function POST(req: NextRequest) {
         let useMock = false;
 
         try {
-            if (!process.env.DIFY_API_KEY) throw new Error('No Dify API Key');
+            // Check for n8n configuration first, then Dify (as fallback if direct mode desires, but we are switching entirely)
+            // Ideally we rely on n8n to handle Dify.
+            if (!process.env.N8N_WEBHOOK_URL) throw new Error('No N8N_WEBHOOK_URL configured');
 
-            const response = await fetch(`${process.env.DIFY_API_URL}/chat-messages`, {
+            const response = await fetch(process.env.N8N_WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.DIFY_API_KEY}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    // Add authentication header if configured
+                    ...(process.env.N8N_WEBHOOK_SECRET ? { 'Authorization': `Bearer ${process.env.N8N_WEBHOOK_SECRET}` } : {})
                 },
                 body: JSON.stringify({
-                    inputs: difyInputs,
+                    messages: messages, // Send full history or just last message? n8n flow expects body.messages array access in our design
                     query: lastMessage,
-                    response_mode: 'blocking',
-                    user: 'bambigo-user-v2' // Hardcoded for MVP, should be real User ID
+                    userLocation,
+                    zone,
+                    user: 'bambigo-user-v2'
                 })
             });
 
             if (!response.ok) {
-                console.warn('Dify API Warning:', response.status);
-                useMock = true; // Fallback to mock
+                console.warn('n8n Webhook Warning:', response.status);
+                useMock = true;
             } else {
                 const data = await response.json();
-                const rawAnswer = data.answer;
 
-                // Parse Structured JSON from Dify
-                try {
-                    const jsonMatch = rawAnswer.match(/\{[\s\S]*\}/);
-                    const stringToParse = jsonMatch ? jsonMatch[0] : rawAnswer;
-                    const parsed = JSON.parse(stringToParse);
-                    if (parsed.message) clientAnswer = parsed.message;
-                    if (parsed.action_cards && Array.isArray(parsed.action_cards)) clientActions = parsed.action_cards;
-                } catch (e) {
-                    clientAnswer = rawAnswer;
-                }
+                // Expecting n8n to return { answer: "...", actions: [...] }
+                // Based on our n8n workflow design
+                if (data.answer) clientAnswer = data.answer;
+                if (data.actions && Array.isArray(data.actions)) clientActions = data.actions;
+
+                // If n8n returns raw string or different format, strict typing might fail, 
+                // but our n8n workflow ensures standard structure.
             }
-        } catch (difyError) {
-            console.warn('Dify Connection Failed, using Mock:', difyError);
+
+        } catch (n8nError) {
+            console.warn('n8n Connection Failed, attempting Mock override:', n8nError);
             useMock = true;
         }
 

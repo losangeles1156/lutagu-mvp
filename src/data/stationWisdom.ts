@@ -90,11 +90,54 @@ export const STATION_WISDOM: Record<string, StationWisdomData> = {
         traps: [
             {
                 type: 'transfer',
-                title: '🚅 列車過站不停警示 (Skip Stop)',
-                content: '注意！都營淺草線的「Airport快特 (Airport Kaitoku)」列車 **不會停靠** 淺草橋站。',
-                advice: '🛑 能夠搭乘的車種：請搭乘普通或各站停車的班次。',
+                title: '🪜 轉乘陷阱 (Stair Master)',
+                content: '雖然淺草橋站有 JR 總武線和都營淺草線，但兩者轉乘 **需要出站並走一段樓梯**，且電梯位置隱密。',
+                advice: '⚠️ 心理建設：攜帶大件行李者，請務必尋找 A3 出口（有電梯），否則將面臨長長的樓梯挑戰。',
                 severity: 'medium'
             }
+        ],
+        hacks: [
+            '🧵 **手作天堂**：出站即是「江戶通」，滿街都是飾品材料、皮革、珠寶的批發店，價格甚至是市價的一半！',
+            '🎎 **人形老舖**：此地也是著名的「久月」等人形娃娃專賣區。'
+        ]
+    },
+    'odpt:Station:TokyoMetro.Tawaramachi': {
+        traps: [
+            {
+                type: 'exit',
+                title: '🍳 合羽橋道具街陷阱 (Kitchen Street)',
+                content: '想去合羽橋道具街？最近的出口是 3 號，但 **只有樓梯**。',
+                advice: '⚠️ 行動建議：若有重物，請改走 2 號出口（有電梯），雖然要多過一個馬路，但省力很多。',
+                severity: 'medium'
+            }
+        ],
+        hacks: [
+            '🍞 **知名麵包店**：著名的「Pelican」麵包店就在附近，需預約才買得到！'
+        ]
+    },
+    'odpt:Station:JR-East.Uguisudani': {
+        traps: [
+            {
+                type: 'exit',
+                title: '🎭 南北出口大不同 (North vs South)',
+                content: '鶯谷站的北口與南口氛圍截然不同！北口是著名的「摩鐵街 (Love Hotel Hill)」，南口則是通往上野公園與博物館的文教區。',
+                advice: '💡 若要去東京國立博物館，請務必走 **南口**，北口走出來會讓你懷疑人生（或非常尷尬）。',
+                severity: 'high'
+            }
+        ]
+    },
+    'odpt:Station:JR-East.Okachimachi': {
+        traps: [],
+        hacks: [
+            '🐟 **阿美橫町尾端**：這裡是阿美橫町的另一端，相較於上野站的擁擠，從御徒町進入通常人潮稍少一點，且海鮮丼名店多集中在此側。',
+            '💎 **珠寶批發**：車站周邊是日本最大的珠寶飾品批發區。'
+        ]
+    },
+    'odpt:Station:TokyoMetro.Iriya': {
+        traps: [],
+        hacks: [
+            '👻 **鬼子母神**：每年七月的「朝顏市（牽牛花市）」非常熱鬧。',
+            '🍲 **老舖天丼**：附近有許多百年老店，價格比淺草親民許多。'
         ]
     },
     'odpt:Station:Toei.Asakusa.Ningyocho': {

@@ -254,53 +254,294 @@ export async function fetchNodeConfig(nodeId: string) {
             l4_nudges: [
                 { type: 'primary', title: '善用地下連通道', content: '今日天氣炎熱。', advice: '利用地下道可直通各大百貨，避開地面日曬。' }
             ]
-        };
-
-        // Find if current node ID matches any of our mock keys
-        const mockKey = Object.keys(mockProfiles).find(key => nodeId.includes(key));
-        if(mockKey) {
-            // Only use mock if DB profile is missing, or merge them?
-            // For demo, we prioritize mock but allow real profile attributes if they exist
-            const enrichedProfile = {
-                node_id: nodeId,
-                ...mockProfiles[mockKey],
-                ...(finalProfile || {}) // Real data overwrites mock if it exists
-            };
-            return { node: finalNode, profile: enrichedProfile, error: null };
+        },
+        'Kuramae': {
+            category_counts: {
+                medical: 5, shopping: 40, dining: 60, leisure: 15, education: 2, finance: 5,
+                workspace: 30, housing: 80, religion: 5, nature: 20, accommodation: 10
+            },
+            vibe_tags: ['#東京布魯克林', '#職人咖啡', '#手工藝', '#隅田川', '#倉庫改建'],
+            l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
+            l3_facilities: [
+                { id: 'k-c-1', category: 'dining', subCategory: 'cafe', location: 'A2 出口旁', attributes: { name: 'Dandelion Chocolate', note: '附設內用區' } },
+                { id: 'k-n-1', category: 'nature', subCategory: 'riverside', location: '隅田川露台', attributes: { note: '適合散步' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '隅田川散步建議', content: '接近黃昏時分。', advice: '現在是前往隅田川露台欣賞晴空塔點燈的最佳時刻。' }
+            ]
+        },
+        'Okachimachi': {
+            category_counts: {
+                medical: 10, shopping: 300, dining: 200, leisure: 50, education: 2, finance: 15,
+                workspace: 40, housing: 20, religion: 5, nature: 0, accommodation: 15
+            },
+            vibe_tags: ['#阿美橫町尾端', '#珠寶批發', '#吉池海鮮', '#高架下', '#便宜好貨'],
+            l2_status: { congestion: 4, line_status: [], weather: { temp: 24, condition: 'Clear' } },
+            l3_facilities: [
+                { id: 'o-s-1', category: 'shopping', subCategory: 'supermarket', location: '吉池大樓', attributes: { name: '吉池', note: '專業海鮮超市' } },
+                { id: 'o-e-1', category: 'accessibility', subCategory: 'elevator', location: '吉池大樓側', attributes: { note: '避開人潮捷徑' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '高架下通行', content: '主要道路人潮擁擠。', advice: '沿著高架橋下移動，不僅有很多特色小店，還能避開日曬雨淋。' }
+            ]
+        },
+        'Uguisudani': {
+            category_counts: {
+                medical: 5, shopping: 20, dining: 40, leisure: 30, education: 1, finance: 5,
+                workspace: 10, housing: 60, religion: 10, nature: 15, accommodation: 80
+            },
+            vibe_tags: ['#昭和感', '#情侶旅館街', '#串燒', '#公共澡堂', '#隱密後花園'],
+            l2_status: { congestion: 1, line_status: [], weather: { temp: 24, condition: 'Night' } },
+            l3_facilities: [
+                { id: 'u-b-1', category: 'leisure', subCategory: 'sento', location: '北口步行 3 分', attributes: { name: '萩之湯', note: '都內最大級錢湯' } },
+                { id: 'u-e-1', category: 'accessibility', subCategory: 'elevator', location: '南口天橋', attributes: { note: '隱密出口' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '北口 vs 南口', content: '兩出口氛圍截然不同。', advice: '南口通往上野公園的寧靜，北口則是熱鬧的夜生活區，請依需求選擇。' }
+            ]
+        },
+        'Asakusabashi': {
+            category_counts: {
+                medical: 5, shopping: 150, dining: 80, leisure: 10, education: 1, finance: 10,
+                workspace: 40, housing: 30, religion: 2, nature: 5, accommodation: 20
+            },
+            vibe_tags: ['#問屋街', '#手作材料', '#人形老舖', '#總武線轉乘', '#職人聖地'],
+            l2_status: { congestion: 3, line_status: [{ line: '淺草線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
+            l3_facilities: [
+                { id: 'ab-s-1', category: 'shopping', subCategory: 'stationery', location: '東口步行 1 分', attributes: { name: 'Shimojima', note: '包裝用品/文具/廁所' } },
+                { id: 'ab-d-1', category: 'dining', subCategory: 'izakaya', location: '高架下', attributes: { note: '老派居酒屋聚集' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '垂直轉乘陷阱', content: '淺草線(地下) <-> 總武線(高架)。', advice: '轉乘落差極大且距離較遠，請預留 10 分鐘以上移動時間。' }
+            ]
+        },
+        'Tawaramachi': {
+            category_counts: {
+                medical: 5, shopping: 200, dining: 50, leisure: 5, education: 0, finance: 5,
+                workspace: 10, housing: 30, religion: 15, nature: 0, accommodation: 15
+            },
+            vibe_tags: ['#合羽橋道具街', '#食品模型', '#料理人', '#金色河童', '#職人魂'],
+            l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
+            l3_facilities: [
+                { id: 'tm-s-1', category: 'shopping', subCategory: 'specialty_store', location: '道具街入口', attributes: { name: 'Niimi', note: '巨型廚師像地標' } },
+                { id: 'tm-r-1', category: 'religion', subCategory: 'temple', location: '步行 5 分', attributes: { name: '東本願寺' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '職人街的作息', content: '店家打烊時間極早。', advice: '合羽橋道具街大多在 17:00 關門，請務必在白天前往。' }
+            ]
+        },
+        'Iriya': {
+            category_counts: {
+                medical: 8, shopping: 30, dining: 40, leisure: 10, education: 5, finance: 5,
+                workspace: 10, housing: 100, religion: 20, nature: 10, accommodation: 10
+            },
+            vibe_tags: ['#入谷朝顏市', '#鬼子母神', '#昭和巷弄', '#下町生活', '#鰻魚飯'],
+            l2_status: { congestion: 1, line_status: [], weather: { temp: 24, condition: 'Clear' } },
+            l3_facilities: [
+                { id: 'ir-s-1', category: 'shopping', subCategory: 'supermarket', location: '十字路口', attributes: { name: '業務超市', note: '便宜補給' } },
+                { id: 'ir-r-1', category: 'religion', subCategory: 'temple', location: '步行 3 分', attributes: { name: '真源寺', note: '入谷鬼子母神' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '生活禮儀', content: '此區為純住宅區。', advice: '許多名店藏身於巷弄民宅中，排隊或移動時請降低音量。' }
+            ]
+        },
+        'Higashi-ginza': {
+            category_counts: {
+                medical: 15, shopping: 100, dining: 150, leisure: 60, education: 5, finance: 10,
+                workspace: 50, housing: 10, religion: 5, nature: 0, accommodation: 30
+            },
+            vibe_tags: ['#歌舞伎座直結', '#排隊三明治', '#岩手銀河廣場', '#演藝場', '#大人約會'],
+            l2_status: { congestion: 3, line_status: [], weather: { temp: 24, condition: 'Clear' } },
+            l3_facilities: [
+                { id: 'hg-s-1', category: 'shopping', subCategory: 'specialty_store', location: '3號出口', attributes: { name: '歌舞伎座地下街', note: '免票入場買伴手禮' } },
+                { id: 'hg-d-1', category: 'dining', subCategory: 'cafe', location: '4號出口', attributes: { name: '喫茶You', note: '傳說級蛋包飯' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '避開散場人潮', content: '歌舞伎座散場時極度擁擠。', advice: '建議利用地下連通道步行至銀座站乘車，僅需 5 分鐘。' }
+            ]
+        },
+        'Nihombashi': {
+            category_counts: {
+                medical: 20, shopping: 200, dining: 150, leisure: 40, education: 5, finance: 100,
+                workspace: 150, housing: 5, religion: 10, nature: 5, accommodation: 40
+            },
+            vibe_tags: ['#道路元標', '#百貨本店', '#麒麟之翼', '#金融街', '#傳統革新'],
+            l2_status: { congestion: 3, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
+            l3_facilities: [
+                { id: 'nb-l-1', category: 'leisure', subCategory: 'landmark', location: '橋上', attributes: { name: '日本國道路元標', note: '日本公路原點' } },
+                { id: 'nb-s-1', category: 'shopping', subCategory: 'department_store', location: 'B4 出口', attributes: { name: '三越本店', note: '歷史建築' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '免費巡迴巴士', content: '周邊歷史建築眾多。', advice: '推薦搭乘免費的「Metrolink」巡迴巴士，輕鬆遊覽日本橋與東京站周邊。' }
+            ]
+        },
+        'Ningyocho': {
+            category_counts: {
+                medical: 15, shopping: 80, dining: 120, leisure: 20, education: 5, finance: 10,
+                workspace: 30, housing: 60, religion: 25, nature: 5, accommodation: 20
+            },
+            vibe_tags: ['#甘酒橫丁', '#水天宮', '#人形燒', '#老舖壽喜燒', '#江戶情懷'],
+            l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
+            l3_facilities: [
+                { id: 'nc-r-1', category: 'religion', subCategory: 'shrine', location: '6號出口', attributes: { name: '水天宮', note: '安產祈願名所' } },
+                { id: 'nc-d-1', category: 'dining', subCategory: 'sweets', location: '甘酒橫丁', attributes: { name: '柳屋', note: '百年鯛魚燒' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '甘酒橫丁必吃', content: '排隊名店眾多。', advice: '柳屋鯛魚燒建議避開下午 3 點高峰，或選擇平日上午前往。' }
+            ]
+        },
+        'Higashi-nihombashi': {
+            category_counts: {
+                medical: 5, shopping: 100, dining: 50, leisure: 10, education: 2, finance: 10,
+                workspace: 60, housing: 40, religion: 5, nature: 5, accommodation: 50
+            },
+            vibe_tags: ['#批發街', '#成衣問屋', '#新宿線轉乘', '#多站共構', '#商旅聚集'],
+            l2_status: { congestion: 3, line_status: [{ line: '新宿線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
+            l3_facilities: [
+                { id: 'hn-s-1', category: 'shopping', subCategory: 'wholesale', location: '周邊', attributes: { note: '大多店鋪謝絕零售' } },
+                { id: 'hn-t-1', category: 'transport', subCategory: 'transfer', location: '地下通路', attributes: { note: '連接馬喰橫山/馬喰町' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '三角轉乘迷宮', content: '三站共構(淺草/新宿/總武)。', advice: '轉乘通道極為複雜且長，請務必確認地面上的顏色指引：淺草(紅)、新宿(草綠)、總武(黃)。' }
+            ]
+        },
+        'Kyobashi': {
+            category_counts: {
+                medical: 10, shopping: 30, dining: 80, leisure: 60, education: 5, finance: 50,
+                workspace: 120, housing: 10, religion: 0, nature: 2, accommodation: 30
+            },
+            vibe_tags: ['#藝術畫廊', '#古董街', '#高級辦公區', '#京橋Edogrand', '#隱藏美食'],
+            l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
+            l3_facilities: [
+                { id: 'kb-l-1', category: 'leisure', subCategory: 'museum', location: '步行 5 分', attributes: { name: 'Artizon Museum', note: '前石橋美術館' } },
+                { id: 'kb-s-1', category: 'shopping', subCategory: 'mall', location: '直結', attributes: { name: 'Kyobashi Edogrand', note: '現代化複合設施' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '免費藝術散步', content: '周邊畫廊林立。', advice: '許多古董店與畫廊歡迎參觀，是東京最密集的藝術區域之一。' }
+            ]
+        },
+        'Mitsukoshimae': {
+            category_counts: {
+                medical: 15, shopping: 250, dining: 150, leisure: 50, education: 5, finance: 80,
+                workspace: 100, housing: 5, religion: 15, nature: 5, accommodation: 20
+            },
+            vibe_tags: ['#三越獅像', '#Coredo室町', '#金魚展', '#福德神社', '#購物天國'],
+            l2_status: { congestion: 3, line_status: [{ line: '半藏門線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
+            l3_facilities: [
+                { id: 'mm-r-1', category: 'religion', subCategory: 'shrine', location: 'Coredo 後方', attributes: { name: '福德神社', note: '求中獎運' } },
+                { id: 'mm-d-1', category: 'dining', subCategory: 'restaurant', location: 'Coredo 室町', attributes: { note: '老舖新開聚集地' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '地下直通攻略', content: '雨天最佳備案。', advice: '地下通道可從三越前一路走到日本橋甚至東京站，完全不必淋雨。' }
+            ]
+        },
+        'Kanda': {
+            category_counts: {
+                medical: 20, shopping: 50, dining: 300, leisure: 40, education: 30, finance: 40,
+                workspace: 80, housing: 20, religion: 10, nature: 5, accommodation: 50
+            },
+            vibe_tags: ['#咖哩激戰區', '#古書店街', '#學生街', '#居酒屋', '#運動用品'],
+            l2_status: { congestion: 3, line_status: [{ line: 'JR線', status: 'normal' }], weather: { temp: 24, condition: 'Sunny' } },
+            l3_facilities: [
+                { id: 'kd-d-1', category: 'dining', subCategory: 'restaurant', location: '車站周邊', attributes: { name: '神田咖哩街', note: '超過 400 間咖哩店' } },
+                { id: 'kd-s-1', category: 'shopping', subCategory: 'bookstore', location: '靖國通', attributes: { name: '神保町古書街', note: '世界最大規模(步行圈)' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '午餐時間警報', content: '上班族用餐一級戰區。', advice: '平日 11:30-13:30 各大咖哩名店皆需排隊，建議錯峰前往。' }
+            ]
+        },
+        'Inaricho': {
+            category_counts: {
+                medical: 10, shopping: 40, dining: 50, leisure: 20, education: 5, finance: 5,
+                workspace: 10, housing: 80, religion: 50, nature: 5, accommodation: 15
+            },
+            vibe_tags: ['#佛壇街', '#下町錢湯', '#稻荷神社', '#寧靜巷弄', '#淺草玄關'],
+            l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
+            l3_facilities: [
+                { id: 'in-l-1', category: 'leisure', subCategory: 'sento', location: '步行 5 分', attributes: { name: '壽湯', note: '附設露天風呂的有名錢湯' } },
+                { id: 'in-r-1', category: 'religion', subCategory: 'shrine', location: '車站旁', attributes: { name: '下谷神社', note: '東京最古老的稻荷神社' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '錢湯禮儀', content: '體驗在地入浴文化。', advice: '進入浴池前請務必先將身體洗淨，並將盤起的頭髮或毛巾置於頭上，勿浸入水中。' }
+            ]
+        },
+        'Minowa': {
+            category_counts: {
+                medical: 10, shopping: 60, dining: 40, leisure: 20, education: 2, finance: 5,
+                workspace: 5, housing: 80, religion: 10, nature: 5, accommodation: 10
+            },
+            vibe_tags: ['#JoyfulMinowa', '#都電荒川線', '#復古商店街', '#下町生活', '#昭和風情'],
+            l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
+            l3_facilities: [
+                { id: 'mi-s-1', category: 'shopping', subCategory: 'arcade', location: '車站旁', attributes: { name: 'Joyful Minowa', note: '有屋頂的復古商店街' } },
+                { id: 'mi-t-1', category: 'transport', subCategory: 'tram', location: '步行 5 分', attributes: { name: '都電荒川線', note: '三之輪橋站' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '路面電車轉乘', content: '東京僅存的路面電車。', advice: '若要前往早稻田方向，請步行至「三之輪橋站」搭乘都電荒川線，可享受悠閒的東京散策。' }
+            ]
+        },
+        'Shin-Okachimachi': {
+            category_counts: {
+                medical: 5, shopping: 100, dining: 50, leisure: 10, education: 2, finance: 10,
+                workspace: 40, housing: 80, religion: 10, nature: 5, accommodation: 5
+            },
+            vibe_tags: ['#佐竹商店街', '#大江戶線轉乘', '#職人批發', '#懷舊拱廊', '#下町中心'],
+            l2_status: { congestion: 2, line_status: [{ line: '大江戶線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
+            l3_facilities: [
+                { id: 'so-s-1', category: 'shopping', subCategory: 'arcade', location: 'A2 出口', attributes: { name: '佐竹商店街', note: '日本第二古老商店街' } },
+                { id: 'so-t-1', category: 'transport', subCategory: 'transfer', location: '地下', attributes: { note: '筑波快線轉乘' } }
+            ],
+            l4_nudges: [
+                { type: 'primary', title: '深層地下鐵陷阱', content: '大江戶線月台極深。', advice: '從地面改札口到月台需搭乘 3 次長扶梯，請預留 5-8 分鐘進站時間。' }
+            ]
         }
+    };
+
+    // Find if current node ID matches any of our mock keys
+    const mockKey = Object.keys(mockProfiles).find(key => nodeId.includes(key));
+    if (mockKey) {
+        // Only use mock if DB profile is missing, or merge them?
+        // For demo, we prioritize mock but allow real profile attributes if they exist
+        const enrichedProfile = {
+            node_id: nodeId,
+            ...mockProfiles[mockKey],
+            ...(finalProfile || {}) // Real data overwrites mock if it exists
+        };
+        return { node: finalNode, profile: enrichedProfile, error: null };
+    }
 
     return { node: finalNode, profile: finalProfile, error: null };
+}
+
+// Fetch logic for specific zones (e.g., get all Hubs in a city)
+export async function fetchCityHubs(cityId: string) {
+    const { data, error } = await supabase
+        .from('nodes')
+        .select('*')
+        .eq('city_id', cityId)
+        .eq('is_hub', true);
+
+    if (error) {
+        console.error('Error fetching city hubs:', error);
+        return [];
     }
+    return data;
+}
 
-    // Fetch logic for specific zones (e.g., get all Hubs in a city)
-    export async function fetchCityHubs(cityId: string) {
-        const { data, error } = await supabase
-            .from('nodes')
-            .select('*')
-            .eq('city_id', cityId)
-            .eq('is_hub', true);
+// Fetch ALL nodes for manual map exploration (Using large radius from Tokyo center)
+export async function fetchAllNodes() {
+    // 35.6895, 139.6917 is Tokyo Station
+    // 50000 meters = 50km radius covers all of Tokyo + suburbs
+    const { data, error } = await supabase
+        .rpc('nearby_nodes', {
+            user_lat: 35.6895,
+            user_lon: 139.6917,
+            radius_meters: 50000
+        });
 
-        if (error) {
-            console.error('Error fetching city hubs:', error);
-            return [];
-        }
-        return data;
+    if (error) {
+        console.error('Error fetching nodes from RPC, using hardcoded fallback:', error);
+        return CORE_STATIONS_FALLBACK as any[];
     }
-
-    // Fetch ALL nodes for manual map exploration (Using large radius from Tokyo center)
-    export async function fetchAllNodes() {
-        // 35.6895, 139.6917 is Tokyo Station
-        // 50000 meters = 50km radius covers all of Tokyo + suburbs
-        const { data, error } = await supabase
-            .rpc('nearby_nodes', {
-                user_lat: 35.6895,
-                user_lon: 139.6917,
-                radius_meters: 50000
-            });
-
-        if (error) {
-            console.error('Error fetching nodes from RPC, using hardcoded fallback:', error);
-            return CORE_STATIONS_FALLBACK as any[];
-        }
-        return data as NodeDatum[];
-    }
+    return data as NodeDatum[];
+}

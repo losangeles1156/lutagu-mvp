@@ -177,6 +177,8 @@ export default function Home() {
                                         )}
                                     </div>
                                 </div>
+                            </div>
+                            <button className="p-3 bg-gray-100 rounded-full text-gray-500 hover:bg-rose-50 hover:text-rose-500 transition-colors">
                                 <Heart size={24} />
                             </button>
                             <button
