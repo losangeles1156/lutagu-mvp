@@ -1,17 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase Client (Service Role needed if bypassing RLS, or Anon if RLS allows INSERT)
-// Ideally for "subscribing", we should use the authenticated user's client if we had auth.
-// For MVP, we'll use the service role key if available, or just anon key 
-// assuming RLS policies allow inserts for now or if we pass a user_id.
-// ACTUALLY: The table has `user_id uuid references users(id) not null`. 
-// We need a valid user_id. Since we don't have full auth yet, the frontend likely doesn't send a token.
-// WE WILL MOCK THE USER ID for MVP (or use a predefined guest user).
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Guest user ID for MVP - used when no authentication is present
+// This provides a consistent guest user instead of randomly picking from the database
+const GUEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+/**
+ * Ensures the guest user exists in the database
+ * Returns the guest user ID
+ */
+async function ensureGuestUser(): Promise<string> {
+    const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', GUEST_USER_ID)
+        .single();
+
+    if (existingUser) {
+        return GUEST_USER_ID;
+    }
+
+    // Guest user doesn't exist, try to create it
+    // Note: This requires the user to exist in auth.users first (Supabase constraint)
+    // For now, we'll return an error if the guest user doesn't exist
+    throw new Error('Guest user not configured. Please set up authentication or create a guest user in the database.');
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -21,8 +38,7 @@ export async function POST(req: NextRequest) {
             activeDays = [1, 2, 3, 4, 5],
             startTime = '07:00',
             endTime = '23:30',
-            notificationMethod = 'line',
-            mockUserId // Optional: allow frontend to pass a mock ID for testing
+            notificationMethod = 'line'
         } = body;
 
         // Validation
@@ -30,31 +46,24 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing routeIds' }, { status: 400 });
         }
 
-        // --- USER ID HANDLING (MVP HACK) ---
-        // In a real app, we get this from the session (req.cookies).
-        // For this MVP, we will try to find a 'guest' user or creating one if needed is too complex.
-        // Let's assume we use a hardcoded 'demo-user-id' UUID if not provided.
-        // But the DB references `users(id)`. We need a real ID that exists in `users` table.
-        // Let's query for ANY user to attach this to, or use a specific one.
+        // Get user ID from session or use guest user for MVP
+        // TODO: Replace with proper Supabase auth session once authentication is implemented
+        // For now, use a consistent guest user instead of randomly picking users
+        let userId: string;
 
-        let userId = mockUserId;
+        try {
+            // In the future, check for authenticated session here:
+            // const { data: { session } } = await supabase.auth.getSession()
+            // if (session?.user) { userId = session.user.id; }
 
-        if (!userId) {
-            // Fallback: lookup a user with email 'guest@bambigo.com' or similar, 
-            // OR just pick the first user found.
-            const { data: users, error: userError } = await supabase
-                .from('users')
-                .select('id')
-                .limit(1);
-
-            if (userError || !users || users.length === 0) {
-                // Create a dummy user if none exists (unlikely in dev but good for safety)
-                console.warn('No users found. Creating temp user not supported in this route yet.');
-                return NextResponse.json({ error: 'No valid user found to attach subscription to.' }, { status: 500 });
-            }
-            userId = users[0].id;
+            // For MVP, use consistent guest user
+            userId = await ensureGuestUser();
+        } catch (error) {
+            console.error('Failed to get user ID:', error);
+            return NextResponse.json({
+                error: 'User authentication failed. Please ensure guest user is configured in the database.'
+            }, { status: 500 });
         }
-        // -----------------------------------
 
         const { data, error } = await supabase
             .from('trip_subscriptions')
