@@ -3,14 +3,38 @@ import { NextRequest, NextResponse } from 'next/server';
 const ODPT_API_KEY = process.env.ODPT_API_KEY;
 const BASE_URL = 'https://api.odpt.org/api/v4';
 
-export async function GET(req: NextRequest) {
-    if (!ODPT_API_KEY) {
-        return NextResponse.json({ error: 'ODPT_API_KEY not configured' }, { status: 500 });
-    }
+// Mock data for graceful degradation when API is unavailable
+const MOCK_TRAIN_STATUS = [
+    { railway: 'odpt.Railway:TokyoMetro.Ginza', operator: 'TokyoMetro', status: '平常運転', text: '現在、平常通り運転しています。', cause: null, updatedAt: new Date().toISOString() },
+    { railway: 'odpt.Railway:TokyoMetro.Hibiya', operator: 'TokyoMetro', status: '平常運転', text: '現在、平常通り運転しています。', cause: null, updatedAt: new Date().toISOString() },
+    { railway: 'odpt.Railway:Toei.Asakusa', operator: 'Toei', status: '平常運転', text: '現在、平常通り運転しています。', cause: null, updatedAt: new Date().toISOString() },
+    { railway: 'odpt.Railway:Toei.Oedo', operator: 'Toei', status: '平常運転', text: '現在、平常通り運転しています。', cause: null, updatedAt: new Date().toISOString() },
+    { railway: 'odpt.Railway:JR-East.Yamanote', operator: 'JR-East', status: '平常運転', text: '現在、平常通り運転しています。', cause: null, updatedAt: new Date().toISOString() },
+];
 
+const MOCK_FACILITIES = [
+    { id: 'bf-1', category: 'elevator', location: 'B1 不忍口', attributes: { wheelchair_accessible: true, note: '車いす対応' } },
+    { id: 'bf-2', category: 'escalator', location: '中央改札', attributes: { wheelchair_accessible: false, note: '上り専用' } },
+    { id: 'bf-3', category: 'toilet', location: 'B1 改札内', attributes: { wheelchair_accessible: true, note: '多機能トイレあり' } },
+];
+
+export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const mode = searchParams.get('mode') || 'position'; // 'position' or 'status'
     const railway = searchParams.get('railway'); // e.g., 'odpt.Railway:TokyoMetro.Ginza'
+
+    // If no API key, return mock data gracefully
+    if (!ODPT_API_KEY) {
+        console.warn('ODPT_API_KEY not configured, returning mock data');
+        if (mode === 'position') {
+            return NextResponse.json({ trains: [], message: 'Using offline mode' });
+        } else if (mode === 'status') {
+            return NextResponse.json({ status: MOCK_TRAIN_STATUS, message: 'Using offline mode' });
+        } else if (mode === 'facility') {
+            return NextResponse.json({ facilities: MOCK_FACILITIES, message: 'Using offline mode' });
+        }
+        return NextResponse.json({ error: 'Invalid mode' }, { status: 400 });
+    }
 
     try {
         if (mode === 'position') {
@@ -86,6 +110,15 @@ export async function GET(req: NextRequest) {
 
     } catch (error: any) {
         console.error('ODPT API Error:', error.message);
+        // Return mock data instead of 500 error
+        if (mode === 'position') {
+            return NextResponse.json({ trains: [], message: 'API temporarily unavailable' });
+        } else if (mode === 'status') {
+            return NextResponse.json({ status: MOCK_TRAIN_STATUS, message: 'API temporarily unavailable' });
+        } else if (mode === 'facility') {
+            return NextResponse.json({ facilities: MOCK_FACILITIES, message: 'API temporarily unavailable' });
+        }
         return NextResponse.json({ error: 'Failed to fetch ODPT data' }, { status: 500 });
     }
 }
+

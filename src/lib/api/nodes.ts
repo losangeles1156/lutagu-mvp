@@ -208,15 +208,27 @@ export const mockProfiles: Record<string, any> = {
         vibe_tags: ['#阿美橫町', '#文化森林', '#美術館巡禮', '#下町風情', '#交通心臟'],
         l2_status: {
             congestion: 2,
-            line_status: [], // Fetched dynamically
+            line_status: [
+                { line: '銀座線', status: 'normal' },
+                { line: '日比谷線', status: 'normal' },
+                { line: '京成線', status: 'normal' }
+            ],
             weather: { temp: 24, condition: 'Cloudy' }
         },
         l3_facilities: [
             { id: 'u-t-1', category: 'toilet', subCategory: 'station_toilet', location: 'B1 不忍口改札內', attributes: { has_washlet: true, wheelchair_accessible: true } },
-            { id: 'u-l-1', category: 'locker', subCategory: 'coin_locker', location: '1F 中央口旁', attributes: { sizes: ['S', 'M', 'L'], count: 150 } }
+            { id: 'u-t-2', category: 'toilet', subCategory: 'station_toilet', location: 'B2 中央口改札外', attributes: { has_washlet: true, wheelchair_accessible: false } },
+            { id: 'u-l-1', category: 'locker', subCategory: 'coin_locker', location: '1F 中央口旁', attributes: { sizes: ['S', 'M', 'L'], count: 150 } },
+            { id: 'u-l-2', category: 'locker', subCategory: 'coin_locker', location: 'B1 不忍口改札外', attributes: { sizes: ['S', 'M', 'L', 'XL'], count: 80 } },
+            { id: 'u-e-1', category: 'accessibility', subCategory: 'elevator', location: 'B2-1F 中央口', attributes: { wheelchair_accessible: true, note: '地鐵直達月台' } },
+            { id: 'u-e-2', category: 'accessibility', subCategory: 'elevator', location: 'B1-地上 不忍口', attributes: { wheelchair_accessible: true, note: '通往不忍池' } },
+            { id: 'u-c-1', category: 'charging', subCategory: 'charging_spot', location: '改札外 BECK\'S咖啡', attributes: { outlet_type: ['Type-A', 'USB'], is_free: true } },
+            { id: 'u-w-1', category: 'wifi', subCategory: 'free_wifi', location: '改札內全區', attributes: { name: 'METRO_FREE_WiFi', note: '限時30分' } }
         ],
         l4_nudges: [
-            { type: 'primary', title: '建議不忍口出站', content: '阿美橫町正在打折，且此出口人流較少。', advice: '往京成上野方向移動。' }
+            { type: 'primary', title: '建議不忍口出站', content: '阿美橫町正在打折，且此出口人流較少。', advice: '往京成上野方向移動。' },
+            { type: 'secondary', title: '美術館巡禮路線', content: '上野公園內有五座美術館。', advice: '從公園口出站，依順序參觀：東京都美術館 → 國立西洋美術館 → 上野之森美術館，可享受完整藝術饗宴。' },
+            { type: 'secondary', title: '深夜注意', content: '夜間人流稀少區域較多。', advice: '22:00後建議避免從湯島方向步行，可使用計程車或選擇JR站內動線。' }
         ]
     },
     // Duplicates removed (Asakusa) - see reconciled entry below
@@ -250,13 +262,31 @@ export const mockProfiles: Record<string, any> = {
             shrine_count: 1, temple_count: 0, museum_count: 3
         },
         vibe_tags: ['#國家門戶', '#紅磚建築', '#商務中樞', '#丸之內', '#伴手禮戰區'],
-        l2_status: { congestion: 4, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
+        l2_status: {
+            congestion: 4,
+            line_status: [
+                { line: '中央線', status: 'normal' },
+                { line: '山手線', status: 'normal' },
+                { line: '京葉線', status: 'normal' },
+                { line: '東海道新幹線', status: 'normal' }
+            ],
+            weather: { temp: 24, condition: 'Cloudy' }
+        },
         l3_facilities: [
-            { id: 't-a-1', category: 'accommodation', subCategory: 'luxury_hotel', location: '丸之內南口直結', attributes: { name: '東京車站大飯店' } },
-            { id: 't-e-1', category: 'accessibility', subCategory: 'elevator', location: '丸之內北口', attributes: { connects_floors: ['B1', '1F'] } }
+            { id: 't-t-1', category: 'toilet', subCategory: 'station_toilet', location: '丸之內南口改札內', attributes: { has_washlet: true, wheelchair_accessible: true } },
+            { id: 't-t-2', category: 'toilet', subCategory: 'station_toilet', location: '八重洲北口改札外', attributes: { has_washlet: true, wheelchair_accessible: true } },
+            { id: 't-l-1', category: 'locker', subCategory: 'coin_locker', location: '丸之內地下改札', attributes: { sizes: ['S', 'M', 'L', 'XL'], count: 500 } },
+            { id: 't-l-2', category: 'locker', subCategory: 'coin_locker', location: '八重洲地下街', attributes: { sizes: ['S', 'M', 'L', 'XL', 'XXL'], count: 800 } },
+            { id: 't-a-1', category: 'accommodation', subCategory: 'luxury_hotel', location: '丸之內南口直結', attributes: { name: '東京車站大飯店', note: '站內唯一五星級' } },
+            { id: 't-e-1', category: 'accessibility', subCategory: 'elevator', location: '丸之內北口', attributes: { connects_floors: ['B1', '1F'], wheelchair_accessible: true } },
+            { id: 't-e-2', category: 'accessibility', subCategory: 'elevator', location: '八重洲南口', attributes: { connects_floors: ['B5', 'B1', '1F'], wheelchair_accessible: true, note: '直達京葉線' } },
+            { id: 't-c-1', category: 'charging', subCategory: 'charging_lounge', location: 'KITTE 1F', attributes: { outlet_type: ['Type-A', 'Type-C', 'USB'], is_free: true } },
+            { id: 't-w-1', category: 'wifi', subCategory: 'free_wifi', location: '改札內外全區', attributes: { name: 'JR-EAST_FREE_WiFi', note: '需登錄' } }
         ],
         l4_nudges: [
-            { type: 'primary', title: '京葉線轉乘警示', content: '前往迪士尼的京葉線月台距離極遠 (800m)。', advice: '請預留至少 20 分鐘步行時間，或使用電動步道。' }
+            { type: 'primary', title: '京葉線轉乘警示', content: '前往迪士尼的京葉線月台距離極遠 (800m)。', advice: '請預留至少 20 分鐘步行時間，或使用電動步道。' },
+            { type: 'primary', title: '便當激戰區', content: '東京車站是全日本車站便當種類最多的地方。', advice: '祭 MATSURI (南口)、駅弁屋 (中央口) 提供 200 種以上車站便當，建議發車前 30 分先選購。' },
+            { type: 'secondary', title: '丸之內側 vs 八重洲側', content: '車站東西兩側氛圍迥異。', advice: '丸之內：紅磚站舍、商業區、KITTE。八重洲：現代化購物中心、高速巴士站。依目的選擇出口。' }
         ]
     },
     'odpt:Station:TokyoMetro.Ginza': {
