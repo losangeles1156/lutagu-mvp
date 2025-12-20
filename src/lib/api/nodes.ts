@@ -216,14 +216,26 @@ export const mockProfiles: Record<string, any> = {
             weather: { temp: 24, condition: 'Cloudy' }
         },
         l3_facilities: [
-            { id: 'u-t-1', category: 'toilet', subCategory: 'station_toilet', location: 'B1 不忍口改札內', attributes: { has_washlet: true, wheelchair_accessible: true } },
-            { id: 'u-t-2', category: 'toilet', subCategory: 'station_toilet', location: 'B2 中央口改札外', attributes: { has_washlet: true, wheelchair_accessible: false } },
-            { id: 'u-l-1', category: 'locker', subCategory: 'coin_locker', location: '1F 中央口旁', attributes: { sizes: ['S', 'M', 'L'], count: 150 } },
-            { id: 'u-l-2', category: 'locker', subCategory: 'coin_locker', location: 'B1 不忍口改札外', attributes: { sizes: ['S', 'M', 'L', 'XL'], count: 80 } },
-            { id: 'u-e-1', category: 'accessibility', subCategory: 'elevator', location: 'B2-1F 中央口', attributes: { wheelchair_accessible: true, note: '地鐵直達月台' } },
-            { id: 'u-e-2', category: 'accessibility', subCategory: 'elevator', location: 'B1-地上 不忍口', attributes: { wheelchair_accessible: true, note: '通往不忍池' } },
-            { id: 'u-c-1', category: 'charging', subCategory: 'charging_spot', location: '改札外 BECK\'S咖啡', attributes: { outlet_type: ['Type-A', 'USB'], is_free: true } },
-            { id: 'u-w-1', category: 'wifi', subCategory: 'free_wifi', location: '改札內全區', attributes: { name: 'METRO_FREE_WiFi', note: '限時30分' } }
+            // Tokyo Metro (B1-B2 地下層)
+            { id: 'u-t-1', category: 'toilet', subCategory: 'station_toilet', location: 'Metro銀座線 往JR方向驗票口內', attributes: { has_washlet: true, wheelchair_accessible: true } },
+            { id: 'u-t-2', category: 'toilet', subCategory: 'station_toilet', location: 'Metro日比谷線 電梯專用出口驗票口外', attributes: { has_washlet: true, wheelchair_accessible: true } },
+            // JR East (3F 高架層)
+            { id: 'u-t-3', category: 'toilet', subCategory: 'station_toilet', location: 'JR 3F 大連絡橋通道', attributes: { has_washlet: true, wheelchair_accessible: true } },
+            { id: 'u-t-4', category: 'toilet', subCategory: 'station_toilet', location: 'JR 3F ecute Ueno 內', attributes: { has_washlet: true, wheelchair_accessible: true, note: '含育嬰室' } },
+            // 置物櫃
+            { id: 'u-l-1', category: 'locker', subCategory: 'coin_locker', location: 'JR 1F 中央口改札外', attributes: { sizes: ['S', 'M', 'L', 'XL'], count: 300, note: '最大量置物櫃區' } },
+            { id: 'u-l-2', category: 'locker', subCategory: 'coin_locker', location: 'Metro B1 不忍口改札外', attributes: { sizes: ['S', 'M', 'L'], count: 80 } },
+            { id: 'u-l-3', category: 'locker', subCategory: 'coin_locker', location: 'JR 3F 公園口改札內', attributes: { sizes: ['S', 'M', 'L'], count: 100 } },
+            { id: 'u-l-4', category: 'locker', subCategory: 'coin_locker', location: 'JR 3F 入谷口改札內', attributes: { sizes: ['S', 'M', 'L', 'XL'], count: 150, note: 'ecute 方向通道' } },
+            // 無障礙電梯
+            { id: 'u-e-1', category: 'accessibility', subCategory: 'elevator', location: 'Metro銀座線 月台～JR方向驗票口', attributes: { wheelchair_accessible: true } },
+            { id: 'u-e-2', category: 'accessibility', subCategory: 'elevator', location: 'Metro銀座線 公園驗票口～5a出口', attributes: { wheelchair_accessible: true, note: '通往上野公園' } },
+            { id: 'u-e-3', category: 'accessibility', subCategory: 'elevator', location: 'Metro日比谷線 1號月台～驗票口', attributes: { wheelchair_accessible: true } },
+            { id: 'u-e-4', category: 'accessibility', subCategory: 'elevator', location: 'JR 正面廣場 通往Metro驗票口層', attributes: { wheelchair_accessible: true, note: '7:30-22:00 限定' } },
+            // 充電 & WiFi
+            { id: 'u-c-1', category: 'charging', subCategory: 'charging_spot', location: 'JR 3F ecute Ueno 咖啡廳', attributes: { outlet_type: ['Type-A', 'Type-C'], is_free: true } },
+            { id: 'u-w-1', category: 'wifi', subCategory: 'free_wifi', location: 'Metro 改札內全區', attributes: { name: 'METRO_FREE_WiFi', note: '限時30分' } },
+            { id: 'u-w-2', category: 'wifi', subCategory: 'free_wifi', location: 'JR 改札內外全站', attributes: { name: 'JR-EAST_FREE_WiFi', note: '需登錄' } }
         ],
         l4_nudges: [
             { type: 'primary', title: '建議不忍口出站', content: '阿美橫町正在打折，且此出口人流較少。', advice: '往京成上野方向移動。' },
