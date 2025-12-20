@@ -1,59 +1,61 @@
 'use client';
 
-import { MapPin, Star, ArrowRight } from 'lucide-react';
-
-interface Facility {
-    id: string;
-    name: string;
-    type: string;
-    distance: string;
-    rating?: number;
-    image?: string;
-}
+import { useRef } from 'react';
+import { ArrowRight, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface FacilityCarouselProps {
     title: string;
-    facilities: Facility[];
+    facilities: any[];
 }
 
 export function FacilityCarousel({ title, facilities }: FacilityCarouselProps) {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const tCommon = useTranslations('common');
+    const tFacility = useTranslations('facilityProfile');
+
+    if (!facilities || facilities.length === 0) return null;
+
     return (
-        <div className="space-y-4">
+        <div className="space-y-3 py-2">
             <div className="flex justify-between items-end px-1">
-                <h3 className="text-xl font-black text-gray-900">{title}</h3>
-                <button className="text-sm font-bold text-indigo-600 flex items-center gap-1 active:scale-95 transition-transform">
-                    查看全部 <ArrowRight size={14} />
+                <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 flex items-center gap-2">
+                    <span className="w-1 h-4 bg-indigo-600 rounded-full"></span>
+                    {title}
+                </h3>
+                <button className="text-[10px] font-bold text-indigo-600 flex items-center gap-1 hover:gap-2 transition-all">
+                    {tCommon('viewAll')} <ArrowRight size={14} />
                 </button>
             </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-4 px-1 no-scrollbar -mx-1 snap-x">
+            <div
+                ref={scrollContainerRef}
+                className="flex gap-4 overflow-x-auto pb-4 pt-1 px-1 snap-x scrollbar-hide -ml-2 pl-2"
+            >
                 {facilities.map((facility) => (
                     <div
                         key={facility.id}
-                        className="flex-shrink-0 w-64 snap-start bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group active:scale-[0.98] transition-all"
+                        className="min-w-[200px] bg-white rounded-2xl p-3 border border-black/[0.03] shadow-sm flex gap-3 snap-start"
                     >
-                        {/* Image Placeholder */}
-                        <div className="h-32 bg-indigo-50 relative">
-                            <div className="absolute top-3 left-3 bg-white/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-black text-indigo-600 uppercase tracking-wider">
-                                {facility.type}
-                            </div>
-                            {facility.rating && (
-                                <div className="absolute top-3 right-3 bg-indigo-600 px-2 py-0.5 rounded-lg text-[10px] font-black text-white flex items-center gap-1 shadow-lg shadow-indigo-200">
-                                    <Star size={10} fill="white" />
-                                    {facility.rating}
-                                </div>
-                            )}
-                            <div className="w-full h-full flex items-center justify-center opacity-20 text-4xl">
-                                {facility.type === 'cafe' ? '☕' : facility.type === 'shop' ? '🛍️' : '🍴'}
+                        <div className="w-16 h-16 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden relative">
+                            {/* Placeholder for actual image */}
+                            <div className="absolute inset-0 flex items-center justify-center text-2xl">
+                                🏪
                             </div>
                         </div>
-
-                        {/* Content */}
-                        <div className="p-4">
-                            <h4 className="font-bold text-gray-900 truncate mb-1">{facility.name}</h4>
-                            <div className="flex items-center gap-1 text-gray-400 text-xs font-medium">
+                        <div className="flex flex-col justify-center gap-1">
+                            <h4 className="text-xs font-bold text-gray-900 line-clamp-1">{facility.name}</h4>
+                            <div className="flex items-center gap-1 text-[10px] text-gray-500 font-medium">
                                 <MapPin size={10} />
-                                <span>距離 {facility.distance}</span>
+                                <span>{tCommon('distance')} {facility.distance}</span>
+                            </div>
+                            <div className="flex gap-1 mt-1">
+                                {facility.tags?.map((tag: string) => (
+                                    <span key={tag} className="text-[9px] bg-gray-50 px-1.5 py-0.5 rounded text-gray-600 border border-gray-100">
+                                        {tag}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                     </div>

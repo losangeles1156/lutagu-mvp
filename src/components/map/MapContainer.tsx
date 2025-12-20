@@ -9,6 +9,7 @@ import { useAppStore } from '@/stores/appStore';
 import { fetchAllNodes, NodeDatum } from '@/lib/api/nodes';
 import { NodeMarker } from './NodeMarker';
 import { TrainLayer } from './TrainLayer';
+import { useLocale } from 'next-intl';
 
 // Component to handle map center updates
 function MapController({ center, isTooFar, fallback }: {
@@ -90,6 +91,7 @@ export default function AppMap() {
     const { zone, userLocation, isTooFar, centerFallback } = useZoneAwareness();
     const [nodes, setNodes] = useState<NodeDatum[]>([]);
     const [gpsAlert, setGpsAlert] = useState<{ show: boolean, type: 'far' | 'denied' }>({ show: false, type: 'far' });
+    const locale = useLocale();
 
     // Default center is Ueno if user is far
     const defaultCenter: [number, number] = [centerFallback.lat, centerFallback.lon];
@@ -134,7 +136,8 @@ export default function AppMap() {
                             parent_hub_id: null,
                             zone: 'user'
                         } as any}
-                        zone="core" // Highlight user always
+                        zone="core"
+                        locale={locale}
                     />
                 )}
 
@@ -144,6 +147,7 @@ export default function AppMap() {
                         key={node.id}
                         node={node}
                         zone={zone}
+                        locale={locale}
                     />
                 ))}
 

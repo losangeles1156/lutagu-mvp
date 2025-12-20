@@ -1,16 +1,19 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface VibeTagsProps {
     tags: string[];
 }
 
 export function VibeTags({ tags }: VibeTagsProps) {
+    const tNode = useTranslations('node');
+
     if (!tags || tags.length === 0) return null;
 
     return (
-        <div className="flex flex-wrap gap-2 pb-2" aria-label="氛圍標籤">
+        <div className="flex flex-wrap gap-2 pb-2" aria-label={tNode('vibeTags')}>
             {tags.map((tag) => (
                 <span
                     key={tag}

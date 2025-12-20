@@ -10,7 +10,10 @@ interface WeatherAlert {
     severity: 'info' | 'warning' | 'critical';
 }
 
+import { useTranslations } from 'next-intl';
+
 export function WeatherBanner() {
+    const tWeather = useTranslations('weather');
     const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
     const [isVisible, setIsVisible] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -68,7 +71,7 @@ export function WeatherBanner() {
                         {icons[mainAlert.severity]}
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-0.5">JMA Weather Alert</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-0.5">{tWeather('jmaAlert')}</span>
                         <span className="text-xs font-bold truncate max-w-[200px] drop-shadow-sm">{mainAlert.title}</span>
                     </div>
                 </div>
@@ -78,7 +81,7 @@ export function WeatherBanner() {
                         onClick={() => setIsExpanded(!isExpanded)}
                         className="text-[10px] font-bold bg-white/20 px-2 py-1 rounded-full hover:bg-white/30 transition-colors"
                     >
-                        {isExpanded ? '收起' : '詳情'}
+                        {isExpanded ? tWeather('collapse') : tWeather('details')}
                     </button>
                     <button onClick={() => setIsVisible(false)} className="opacity-60 hover:opacity-100">
                         <X size={16} />

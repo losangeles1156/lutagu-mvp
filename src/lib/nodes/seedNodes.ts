@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '../supabase';
 
-const SEED_NODES = [
+export const SEED_NODES = [
     {
         id: 'odpt:Station:TokyoMetro.Ueno',
         city_id: 'tokyo_core',
@@ -11,7 +11,7 @@ const SEED_NODES = [
         is_hub: true,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'busy'
+        vibe: 'culture'
     },
     {
         id: 'odpt:Station:JR-East.Akihabara',
@@ -23,7 +23,7 @@ const SEED_NODES = [
         is_hub: true,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'electric'
+        vibe: 'geek'
     },
     {
         id: 'odpt:Station:JR-East.Tokyo',
@@ -44,6 +44,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '銀座', 'ja': '銀座', 'en': 'Ginza' },
         type: 'station',
         location: 'POINT(139.7665 35.6712)',
+        vibe: 'luxury',
         geohash: 'xn76u',
         is_hub: true,
         zone: 'core',
@@ -55,6 +56,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '京橋', 'ja': '京橋', 'en': 'Kyobashi' },
         type: 'station',
         location: 'POINT(139.7702 35.6766)',
+        vibe: 'art',
         geohash: 'xn76u',
         is_hub: false,
         zone: 'core',
@@ -66,6 +68,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '三越前', 'ja': '三越前', 'en': 'Mitsukoshimae' },
         type: 'station',
         location: 'POINT(139.7738 35.6856)',
+        vibe: 'shopping',
         geohash: 'xn76u',
         is_hub: false,
         zone: 'core',
@@ -77,6 +80,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '神田', 'ja': '神田', 'en': 'Kanda' },
         type: 'station',
         location: 'POINT(139.7707 35.6917)',
+        vibe: 'curry',
         geohash: 'xn77k',
         is_hub: true,
         zone: 'core',
@@ -89,6 +93,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '東銀座', 'ja': '東銀座', 'en': 'Higashi-ginza' },
         type: 'station',
         location: 'POINT(139.7675 35.6694)',
+        vibe: 'theater',
         geohash: 'xn76u',
         is_hub: false,
         zone: 'core',
@@ -100,6 +105,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '日本橋', 'ja': '日本橋', 'en': 'Nihombashi' },
         type: 'station',
         location: 'POINT(139.7745 35.6812)',
+        vibe: 'tradition',
         geohash: 'xn76u',
         is_hub: true,
         zone: 'core',
@@ -111,6 +117,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '人形町', 'ja': '人形町', 'en': 'Ningyocho' },
         type: 'station',
         location: 'POINT(139.7821 35.6865)',
+        vibe: 'shitamachi',
         geohash: 'xn77k',
         is_hub: false,
         zone: 'core',
@@ -122,6 +129,7 @@ const SEED_NODES = [
         name: { 'zh-TW': '東日本橋', 'ja': '東日本橋', 'en': 'Higashi-nihombashi' },
         type: 'station',
         location: 'POINT(139.7853 35.6922)',
+        vibe: 'wholesale',
         geohash: 'xn77k',
         is_hub: false,
         zone: 'core',
@@ -138,7 +146,7 @@ const SEED_NODES = [
         is_hub: true,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'traditional_hub'
+        vibe: 'traditional'
     },
     {
         id: 'odpt:Station:Toei.Kuramae',
@@ -150,7 +158,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'coffee_craft'
+        vibe: 'craft'
     },
     {
         id: 'odpt:Station:JR-East.Okachimachi',
@@ -162,7 +170,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'market_busy'
+        vibe: 'market'
     },
     {
         id: 'odpt:Station:JR-East.Uguisudani',
@@ -174,7 +182,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'retro_hotel'
+        vibe: 'retro'
     },
     {
         id: 'odpt:Station:Toei.Asakusabashi',
@@ -186,7 +194,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'craft_wholesale'
+        vibe: 'wholesale_craft'
     },
     {
         id: 'odpt:Station:TokyoMetro.Tawaramachi',
@@ -198,7 +206,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'kitchenware'
+        vibe: 'kitchen'
     },
     {
         id: 'odpt:Station:TokyoMetro.Iriya',
@@ -210,7 +218,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'shitamachi_market'
+        vibe: 'quiet'
     },
     {
         id: 'odpt:Station:TokyoMetro.Inaricho',
@@ -222,7 +230,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'quiet_temple'
+        vibe: 'temple'
     },
     {
         id: 'odpt:Station:TokyoMetro.Minowa',
@@ -234,7 +242,7 @@ const SEED_NODES = [
         is_hub: false,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'retro_tram'
+        vibe: 'tram'
     },
     {
         id: 'odpt:Station:Toei.ShinOkachimachi',
@@ -246,7 +254,103 @@ const SEED_NODES = [
         is_hub: true,
         zone: 'core',
         source_dataset: 'odpt_seed',
-        vibe: 'retro_arcade'
+        vibe: 'arcade'
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Yushima',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '湯島', 'ja': '湯島', 'en': 'Yushima' },
+        type: 'station',
+        location: 'POINT(139.7711 35.7077)',
+        geohash: 'xn77k',
+        is_hub: false,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'scholar'
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Tsukiji',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '築地', 'ja': '築地', 'en': 'Tsukiji' },
+        type: 'station',
+        location: 'POINT(139.7715 35.6695)',
+        geohash: 'xn76u',
+        is_hub: false,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'market'
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Ochanomizu',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '御茶之水', 'ja': '御茶ノ水', 'en': 'Ochanomizu' },
+        type: 'station',
+        location: 'POINT(139.7638 35.6994)',
+        geohash: 'xn77k',
+        is_hub: false,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'academic'
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Kasumigaseki',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '霞關', 'ja': '霞ヶ関', 'en': 'Kasumigaseki' },
+        type: 'station',
+        location: 'POINT(139.7513 35.6726)',
+        geohash: 'xn76u',
+        is_hub: false,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'government'
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Iidabashi',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '飯田橋', 'ja': '飯田橋', 'en': 'Iidabashi' },
+        type: 'station',
+        location: 'POINT(139.7450 35.7021)',
+        geohash: 'xn77k',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'hub'
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Otemachi',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '大手町', 'ja': '大手町', 'en': 'Otemachi' },
+        type: 'station',
+        location: 'POINT(139.7639 35.6867)',
+        geohash: 'xn76u',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'business'
+    },
+    {
+        id: 'odpt:Station:Toei.UenoOkachimachi',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '上野御徒町', 'ja': '上野御徒町', 'en': 'UenoOkachimachi' },
+        type: 'station',
+        location: 'POINT(139.7749 35.7077)',
+        geohash: 'xn77k',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'market'
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Kayabacho',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '茅場町', 'ja': '茅場町', 'en': 'Kayabacho' },
+        type: 'station',
+        location: 'POINT(139.7801 35.6797)',
+        geohash: 'xn76u',
+        is_hub: false,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'business'
     }
 ];
 

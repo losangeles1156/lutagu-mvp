@@ -8,6 +8,95 @@
     "status": {
         "crowded": "混雑",
         "normal": "正常",
-        "delayed": "{minutes}分遅延"
+        "delayed": "{minutes}分遅延",
+        "ready": "スタンバイ",
+        "ginzaDelay": "銀座線遅延"
+    },
+    "nav": {
+        "explore": "探索",
+        "guard": "見守り",
+        "me": "マイ"
+    },
+    "tripGuard": {
+        "title": "旅の見守り",
+        "noSubscription": "登録中の路線なし",
+        "subscriptionHint": "路線を登録すると、遅延発生時にBambiが自動でお知らせします。",
+        "startExploring": "スポットを探す"
+    },
+    "profile": {
+        "title": "設定",
+        "guestMode": "ゲストモード",
+        "loginRegister": "ログイン / 登録"
+    },
+    "node": {
+        "addToTrip": "旅程に追加",
+        "addedToTrip": "「{name}」を旅程に追加しました！",
+        "bufferZoneMessage": "このエリアは現在基本情報のみ提供しています。Bambi AIの感性ナビは拡張中です。",
+        "locationDna": "ロケーションDNA",
+        "vicinity": "周辺施設",
+        "vibeTags": "雰囲気タグ",
+        "analyzingL1": "L1 DNAデータを分析中...",
+        "noL3Facilities": "このエリアにはL3施設がありません"
+    },
+    "tabs": {
+        "dna": "DNA (L1)",
+        "live": "LIVE (L2)",
+        "facility": "FACILITY (L3)",
+        "bambi": "BAMBI (L4)"
+    },
+    "l2": {
+        "density": "混雑予測",
+        "crowdedLevel": "混雑",
+        "normalLevel": "普通",
+        "comfortLevel": "空いている",
+        "wait": "待ち時間",
+        "min": "分",
+        "service": "運行情報",
+        "allLinesNormal": "全路線",
+        "runningNormal": "現在正常運転中",
+        "delay": "遅延",
+        "normalOperation": "正常運行",
+        "delayOccurred": "遅延発生中",
+        "weatherAlert": "【気象警報】"
+    },
+    "l3": {
+        "stationToilet": "駅トイレ",
+        "coinLocker": "コインロッカー",
+        "elevator": "バリアフリーエレベーター",
+        "wheelchairFriendly": "車椅子対応",
+        "largeLuggage": "大型荷物可"
+    },
+    "l4": {
+        "bambiStrategy": "Bambiの戦略",
+        "suggestion": "提案",
+        "psychAlert": "心の準備アラート"
+    },
+    "weather": {
+        "alert": "気象警報",
+        "details": "詳細",
+        "collapse": "閉じる",
+        "jmaAlert": "JMA Weather Alert"
+    },
+    "map": {
+        "yourLocation": "現在地",
+        "tooFarMessage": "感性ナビエリアから離れています。上野駅を中心に表示しました。"
+    },
+    "facilityProfile": {
+        "medical": "医療",
+        "shopping": "買い物",
+        "dining": "食事",
+        "leisure": "レジャー",
+        "education": "教育",
+        "finance": "金融",
+        "accommodation": "宿泊",
+        "workspace": "仕事",
+        "housing": "住居",
+        "religion": "信仰",
+        "nature": "自然",
+        "countSuffix": "件"
+    },
+    "common": {
+        "viewAll": "すべて見る",
+        "distance": "距離"
     }
 }

@@ -45,12 +45,24 @@ export function parseLocation(loc: any): { coordinates: [number, number] } {
 
 // L1: Location DNA
 export interface CategoryCounts {
+    // Broad Categories (Legacy/Aggregated)
     medical: number;
     shopping: number;
     dining: number;
     leisure: number;
     education: number;
     finance: number;
+
+    // P1-1 Specific Counts (MVP Guide)
+    convenience_count?: number;
+    drugstore_count?: number;
+    restaurant_count?: number;
+    cafe_count?: number;
+    shrine_count?: number;
+    temple_count?: number;
+    museum_count?: number;
+
+    // Others
     nature?: number;
     religion?: number;
     accommodation?: number;
@@ -121,77 +133,41 @@ export async function fetchNearbyNodes(lat: number, lon: number, radiusMeters: n
     return data as NodeDatum[];
 }
 
-const CORE_STATIONS_FALLBACK = [
-    {
-        id: 'odpt:Station:TokyoMetro.Ueno',
-        city_id: 'tokyo_core',
-        name: { 'zh-TW': '上野', 'en': 'Ueno', 'ja': '上野' },
-        type: 'station',
-        location: { coordinates: [139.7773, 35.7138] },
-        vibe: 'culture',
-        is_hub: true
-    },
-    {
-        id: 'odpt:Station:TokyoMetro.Asakusa',
-        city_id: 'tokyo_core',
-        name: { 'zh-TW': '淺草', 'en': 'Asakusa', 'ja': '淺草' },
-        type: 'station',
-        location: { coordinates: [139.7976, 35.7119] },
-        vibe: 'tourism',
-        is_hub: true
-    },
-    {
-        id: 'odpt:Station:JR-East.Tokyo',
-        city_id: 'tokyo_core',
-        name: { 'zh-TW': '東京', 'en': 'Tokyo', 'ja': '東京' },
-        type: 'station',
-        location: { coordinates: [139.7671, 35.6812] },
-        vibe: 'transit',
-        is_hub: true
-    },
-    {
-        id: 'odpt:Station:JR-East.Akihabara',
-        city_id: 'tokyo_core',
-        name: { 'zh-TW': '秋葉原', 'en': 'Akihabara', 'ja': '秋葉原' },
-        type: 'station',
-        location: { coordinates: [139.7753, 35.6984] },
-        vibe: 'geek',
-        is_hub: true
-    },
-    {
-        id: 'odpt:Station:TokyoMetro.Ginza',
-        city_id: 'tokyo_core',
-        name: { 'zh-TW': '銀座', 'en': 'Ginza', 'ja': '銀座' },
-        type: 'station',
-        location: { coordinates: [139.7619, 35.6719] },
-        vibe: 'luxury',
-        is_hub: true
-    },
-    {
-        id: 'odpt:Station:TokyoMetro.Yushima',
-        city_id: 'tokyo_core',
-        name: { 'zh-TW': '湯島', 'en': 'Yushima', 'ja': '湯島' },
-        type: 'station',
-        location: { coordinates: [139.7711, 35.7077] },
-        vibe: 'scholar',
-        is_hub: false
+import { SEED_NODES } from '../nodes/seedNodes';
+
+const CORE_STATIONS_FALLBACK = SEED_NODES.map(node => {
+    // Parse coordinates if they are string (WKT)
+    let coords = [0, 0];
+    if (typeof node.location === 'string' && node.location.startsWith('POINT')) {
+        const matches = node.location.match(/\(([^)]+)\)/);
+        if (matches) {
+            const parts = matches[1].split(' ');
+            coords = [parseFloat(parts[0]), parseFloat(parts[1])];
+        }
+    } else if ((node.location as any).coordinates) {
+        coords = (node.location as any).coordinates;
     }
-];
+
+    return {
+        ...node,
+        location: { coordinates: coords }
+    };
+});
 
 // Internal Node ID to ODPT Station ID Mapping
 const NODE_TO_ODPT: Record<string, string> = {
-    'ueno': 'odpt.Station:TokyoMetro.Ginza.Ueno',
-    'asakusa': 'odpt.Station:TokyoMetro.Ginza.Asakusa',
-    'akihabara': 'odpt.Station:TokyoMetro.Hibiya.Akihabara',
-    'tokyo': 'odpt.Station:TokyoMetro.Marunouchi.Tokyo',
-    'ginza': 'odpt.Station:TokyoMetro.Ginza.Ginza',
-    'kuramae': 'odpt.Station:Toei.Asakusa.Kuramae',
-    'shin_okachimachi': 'odpt.Station:Toei.Oedo.ShinOkachimachi',
-    'ningyocho': 'odpt.Station:TokyoMetro.Hibiya.Ningyocho',
-    'kanda': 'odpt.Station:TokyoMetro.Ginza.Kanda',
-    'nihombashi': 'odpt.Station:TokyoMetro.Ginza.Nihombashi',
-    'mitsukoshimae': 'odpt.Station:TokyoMetro.Ginza.Mitsukoshimae',
-    'higashi_ginza': 'odpt.Station:TokyoMetro.Hibiya.HigashiGinza'
+    'odpt:Station:TokyoMetro.Ueno': 'odpt.Station:TokyoMetro.Ginza.Ueno',
+    'odpt:Station:TokyoMetro.Asakusa': 'odpt.Station:TokyoMetro.Ginza.Asakusa',
+    'odpt:Station:JR-East.Akihabara': 'odpt.Station:TokyoMetro.Hibiya.Akihabara',
+    'odpt:Station:JR-East.Tokyo': 'odpt.Station:TokyoMetro.Marunouchi.Tokyo',
+    'odpt:Station:TokyoMetro.Ginza': 'odpt.Station:TokyoMetro.Ginza.Ginza',
+    'odpt:Station:Toei.Kuramae': 'odpt.Station:Toei.Asakusa.Kuramae',
+    'odpt:Station:Toei.ShinOkachimachi': 'odpt.Station:Toei.Oedo.ShinOkachimachi',
+    'odpt:Station:Toei.Ningyocho': 'odpt.Station:TokyoMetro.Hibiya.Ningyocho',
+    'odpt:Station:JR-East.Kanda': 'odpt.Station:TokyoMetro.Ginza.Kanda',
+    'odpt:Station:Toei.Nihombashi': 'odpt.Station:TokyoMetro.Ginza.Nihombashi',
+    'odpt:Station:TokyoMetro.Mitsukoshimae': 'odpt.Station:TokyoMetro.Ginza.Mitsukoshimae',
+    'odpt:Station:Toei.HigashiGinza': 'odpt.Station:TokyoMetro.Hibiya.HigashiGinza'
 };
 
 // Mapping of ODPT Station IDs to Coordinates (MVP Core 14 Stations + Key Hubs)
@@ -221,11 +197,13 @@ function getOperatorFromId(nodeId: string): string | null {
 }
 
 // Mock Enrichment for Demo Stations (L1-L4 compliant)
-const mockProfiles: Record<string, any> = {
-    'Ueno': {
+export const mockProfiles: Record<string, any> = {
+    'odpt:Station:TokyoMetro.Ueno': {
         category_counts: {
             medical: 8, shopping: 120, dining: 150, leisure: 45, education: 12, finance: 20,
-            nature: 45, religion: 12, accommodation: 35, workspace: 50, housing: 10
+            nature: 45, religion: 12, accommodation: 35, workspace: 50, housing: 10,
+            convenience_count: 15, drugstore_count: 8, restaurant_count: 80, cafe_count: 35,
+            shrine_count: 5, temple_count: 7, museum_count: 6
         },
         vibe_tags: ['#阿美橫町', '#文化森林', '#美術館巡禮', '#下町風情', '#交通心臟'],
         l2_status: {
@@ -241,27 +219,14 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '建議不忍口出站', content: '阿美橫町正在打折，且此出口人流較少。', advice: '往京成上野方向移動。' }
         ]
     },
-    'Asakusa': {
-        category_counts: { medical: 15, shopping: 200, dining: 180, leisure: 150, education: 5, finance: 10 },
-        vibe_tags: ['#雷門', '#仲見世通', '#水上巴士', '#下町風情', '#傳統工藝'],
-        l2_status: {
-            congestion: 5,
-            line_status: [],
-            weather: { temp: 24, condition: 'Clear' }
-        },
-        l3_facilities: [
-            { id: 'a-t-1', category: 'toilet', subCategory: 'public_toilet', location: '雷門對面觀光中心 8F', attributes: { is_free: true, has_view: true } },
-            { id: 'a-l-1', category: 'locker', subCategory: 'coin_locker', location: '銀座線 1 號出口旁', attributes: { sizes: ['L', 'XL'], count: 80 } },
-            { id: 'a-e-1', category: 'accessibility', subCategory: 'elevator', location: 'A2b 出口', attributes: { note: '唯一地面直達電梯' } }
-        ],
-        l4_nudges: [
-            { type: 'primary', title: '避開雷門正面人潮', content: '仲見世通目前極度擁擠。', advice: '建議從傳法院通繞道，或走地下街直通新仲見世。' }
-        ]
-    },
-    'Akihabara': {
+    // Duplicates removed (Asakusa) - see reconciled entry below
+
+    'odpt:Station:JR-East.Akihabara': {
         category_counts: {
             medical: 5, shopping: 250, dining: 120, leisure: 100, education: 2, finance: 10,
-            workspace: 60, housing: 5, religion: 8, nature: 2, accommodation: 15
+            workspace: 60, housing: 5, religion: 8, nature: 2, accommodation: 15,
+            convenience_count: 12, drugstore_count: 15, restaurant_count: 60, cafe_count: 40, // Maid cafes included
+            shrine_count: 2, temple_count: 0, museum_count: 1
         },
         vibe_tags: ['#電氣街', '#御宅文化', '#IT產業', '#女僕喫茶', '#次文化聖地'],
         l2_status: {
@@ -277,10 +242,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '週日步行者天國', content: '中央通目前禁止車輛通行。', advice: '這是在馬路中央拍照的絕佳機會，但請小心人群。' }
         ]
     },
-    'Tokyo': {
+    'odpt:Station:JR-East.Tokyo': {
         category_counts: {
             medical: 20, shopping: 150, dining: 200, leisure: 50, education: 5, finance: 80,
-            workspace: 300, housing: 0, religion: 2, nature: 30, accommodation: 50
+            workspace: 300, housing: 0, religion: 2, nature: 30, accommodation: 50,
+            convenience_count: 20, drugstore_count: 10, restaurant_count: 120, cafe_count: 60,
+            shrine_count: 1, temple_count: 0, museum_count: 3
         },
         vibe_tags: ['#國家門戶', '#紅磚建築', '#商務中樞', '#丸之內', '#伴手禮戰區'],
         l2_status: { congestion: 4, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
@@ -292,10 +259,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '京葉線轉乘警示', content: '前往迪士尼的京葉線月台距離極遠 (800m)。', advice: '請預留至少 20 分鐘步行時間，或使用電動步道。' }
         ]
     },
-    'Ginza': {
+    'odpt:Station:TokyoMetro.Ginza': {
         category_counts: {
             medical: 30, shopping: 300, dining: 250, leisure: 80, education: 5, finance: 40,
-            workspace: 100, housing: 10, religion: 5, nature: 5, accommodation: 40
+            workspace: 100, housing: 10, religion: 5, nature: 5, accommodation: 40,
+            convenience_count: 18, drugstore_count: 12, restaurant_count: 180, cafe_count: 55,
+            shrine_count: 3, temple_count: 1, museum_count: 2
         },
         vibe_tags: ['#奢華購物', '#步行者天國', '#歌舞伎座', '#大人味', '#米其林'],
         l2_status: { congestion: 3, line_status: [], weather: { temp: 25, condition: 'Clear' } },
@@ -307,25 +276,14 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '善用地下連通道', content: '今日天氣炎熱。', advice: '利用地下道可直通各大百貨，避開地面日曬。' }
         ]
     },
-    'Kuramae': {
-        category_counts: {
-            medical: 5, shopping: 40, dining: 60, leisure: 15, education: 2, finance: 5,
-            workspace: 30, housing: 80, religion: 5, nature: 20, accommodation: 10
-        },
-        vibe_tags: ['#東京布魯克林', '#職人咖啡', '#手工藝', '#隅田川', '#倉庫改建'],
-        l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
-        l3_facilities: [
-            { id: 'k-c-1', category: 'dining', subCategory: 'cafe', location: 'A2 出口旁', attributes: { name: 'Dandelion Chocolate', note: '附設內用區' } },
-            { id: 'k-n-1', category: 'nature', subCategory: 'riverside', location: '隅田川露台', attributes: { note: '適合散步' } }
-        ],
-        l4_nudges: [
-            { type: 'primary', title: '隅田川散步建議', content: '接近黃昏時分。', advice: '現在是前往隅田川露台欣賞晴空塔點燈的最佳時刻。' }
-        ]
-    },
-    'Okachimachi': {
+    // Duplicates removed (Kuramae) - see reconciled entry below
+
+    'odpt:Station:JR-East.Okachimachi': {
         category_counts: {
             medical: 10, shopping: 300, dining: 200, leisure: 50, education: 2, finance: 15,
-            workspace: 40, housing: 20, religion: 5, nature: 0, accommodation: 15
+            workspace: 40, housing: 20, religion: 5, nature: 0, accommodation: 15,
+            convenience_count: 10, drugstore_count: 8, restaurant_count: 90, cafe_count: 25,
+            shrine_count: 2, temple_count: 1, museum_count: 0
         },
         vibe_tags: ['#阿美橫町尾端', '#珠寶批發', '#吉池海鮮', '#高架下', '#便宜好貨'],
         l2_status: { congestion: 4, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -337,10 +295,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '高架下通行', content: '主要道路人潮擁擠。', advice: '沿著高架橋下移動，不僅有很多特色小店，還能避開日曬雨淋。' }
         ]
     },
-    'Uguisudani': {
+    'odpt:Station:JR-East.Uguisudani': {
         category_counts: {
             medical: 5, shopping: 20, dining: 40, leisure: 30, education: 1, finance: 5,
-            workspace: 10, housing: 60, religion: 10, nature: 15, accommodation: 80
+            workspace: 10, housing: 60, religion: 10, nature: 15, accommodation: 80,
+            convenience_count: 8, drugstore_count: 3, restaurant_count: 25, cafe_count: 10,
+            shrine_count: 3, temple_count: 4, museum_count: 1
         },
         vibe_tags: ['#昭和感', '#情侶旅館街', '#串燒', '#公共澡堂', '#隱密後花園'],
         l2_status: { congestion: 1, line_status: [], weather: { temp: 24, condition: 'Night' } },
@@ -352,10 +312,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '北口 vs 南口', content: '兩出口氛圍截然不同。', advice: '南口通往上野公園的寧靜，北口則是熱鬧的夜生活區，請依需求選擇。' }
         ]
     },
-    'Asakusabashi': {
+    'odpt:Station:Toei.Asakusabashi': {
         category_counts: {
             medical: 5, shopping: 150, dining: 80, leisure: 10, education: 1, finance: 10,
-            workspace: 40, housing: 30, religion: 2, nature: 5, accommodation: 20
+            workspace: 40, housing: 30, religion: 2, nature: 5, accommodation: 20,
+            convenience_count: 9, drugstore_count: 5, restaurant_count: 40, cafe_count: 15,
+            shrine_count: 2, temple_count: 0, museum_count: 0
         },
         vibe_tags: ['#問屋街', '#手作材料', '#人形老舖', '#總武線轉乘', '#職人聖地'],
         l2_status: { congestion: 3, line_status: [{ line: '淺草線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
@@ -367,10 +329,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '垂直轉乘陷阱', content: '淺草線(地下) <-> 總武線(高架)。', advice: '轉乘落差極大且距離較遠，請預留 10 分鐘以上移動時間。' }
         ]
     },
-    'Tawaramachi': {
+    'odpt:Station:TokyoMetro.Tawaramachi': {
         category_counts: {
             medical: 5, shopping: 200, dining: 50, leisure: 5, education: 0, finance: 5,
-            workspace: 10, housing: 30, religion: 15, nature: 0, accommodation: 15
+            workspace: 10, housing: 30, religion: 15, nature: 0, accommodation: 15,
+            convenience_count: 6, drugstore_count: 2, restaurant_count: 30, cafe_count: 12,
+            shrine_count: 1, temple_count: 8, museum_count: 0
         },
         vibe_tags: ['#合羽橋道具街', '#食品模型', '#料理人', '#金色河童', '#職人魂'],
         l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -382,10 +346,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '職人街的作息', content: '店家打烊時間極早。', advice: '合羽橋道具街大多在 17:00 關門，請務必在白天前往。' }
         ]
     },
-    'Iriya': {
+    'odpt:Station:TokyoMetro.Iriya': {
         category_counts: {
             medical: 8, shopping: 30, dining: 40, leisure: 10, education: 5, finance: 5,
-            workspace: 10, housing: 100, religion: 20, nature: 10, accommodation: 10
+            workspace: 10, housing: 100, religion: 20, nature: 10, accommodation: 10,
+            convenience_count: 7, drugstore_count: 4, restaurant_count: 25, cafe_count: 8,
+            shrine_count: 4, temple_count: 10, museum_count: 0
         },
         vibe_tags: ['#入谷朝顏市', '#鬼子母神', '#昭和巷弄', '#下町生活', '#鰻魚飯'],
         l2_status: { congestion: 1, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -397,10 +363,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '生活禮儀', content: '此區為純住宅區。', advice: '許多名店藏身於巷弄民宅中，排隊或移動時請降低音量。' }
         ]
     },
-    'Higashi-ginza': {
+    'odpt:Station:Toei.HigashiGinza': {
         category_counts: {
             medical: 15, shopping: 100, dining: 150, leisure: 60, education: 5, finance: 10,
-            workspace: 50, housing: 10, religion: 5, nature: 0, accommodation: 30
+            workspace: 50, housing: 10, religion: 5, nature: 0, accommodation: 30,
+            convenience_count: 10, drugstore_count: 6, restaurant_count: 80, cafe_count: 40,
+            shrine_count: 1, temple_count: 0, museum_count: 1
         },
         vibe_tags: ['#歌舞伎座直結', '#排隊三明治', '#岩手銀河廣場', '#演藝場', '#大人約會'],
         l2_status: { congestion: 3, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -412,10 +380,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '避開散場人潮', content: '歌舞伎座散場時極度擁擠。', advice: '建議利用地下連通道步行至銀座站乘車，僅需 5 分鐘。' }
         ]
     },
-    'Nihombashi': {
+    'odpt:Station:Toei.Nihombashi': {
         category_counts: {
             medical: 20, shopping: 200, dining: 150, leisure: 40, education: 5, finance: 100,
-            workspace: 150, housing: 5, religion: 10, nature: 5, accommodation: 40
+            workspace: 150, housing: 5, religion: 10, nature: 5, accommodation: 40,
+            convenience_count: 15, drugstore_count: 8, restaurant_count: 100, cafe_count: 45,
+            shrine_count: 3, temple_count: 0, museum_count: 2
         },
         vibe_tags: ['#道路元標', '#百貨本店', '#麒麟之翼', '#金融街', '#傳統革新'],
         l2_status: { congestion: 3, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
@@ -427,10 +397,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '免費巡迴巴士', content: '周邊歷史建築眾多。', advice: '推薦搭乘免費的「Metrolink」巡迴巴士，輕鬆遊覽日本橋與東京站周邊。' }
         ]
     },
-    'Ningyocho': {
+    'odpt:Station:Toei.Ningyocho': {
         category_counts: {
             medical: 15, shopping: 80, dining: 120, leisure: 20, education: 5, finance: 10,
-            workspace: 30, housing: 60, religion: 25, nature: 5, accommodation: 20
+            workspace: 30, housing: 60, religion: 25, nature: 5, accommodation: 20,
+            convenience_count: 12, drugstore_count: 6, restaurant_count: 70, cafe_count: 25,
+            shrine_count: 8, temple_count: 4, museum_count: 0
         },
         vibe_tags: ['#甘酒橫丁', '#水天宮', '#人形燒', '#老舖壽喜燒', '#江戶情懷'],
         l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -442,10 +414,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '甘酒橫丁必吃', content: '排隊名店眾多。', advice: '柳屋鯛魚燒建議避開下午 3 點高峰，或選擇平日上午前往。' }
         ]
     },
-    'Higashi-nihombashi': {
+    'odpt:Station:Toei.HigashiNihombashi': {
         category_counts: {
             medical: 5, shopping: 100, dining: 50, leisure: 10, education: 2, finance: 10,
-            workspace: 60, housing: 40, religion: 5, nature: 5, accommodation: 50
+            workspace: 60, housing: 40, religion: 5, nature: 5, accommodation: 50,
+            convenience_count: 8, drugstore_count: 3, restaurant_count: 35, cafe_count: 10,
+            shrine_count: 1, temple_count: 0, museum_count: 0
         },
         vibe_tags: ['#批發街', '#成衣問屋', '#新宿線轉乘', '#多站共構', '#商旅聚集'],
         l2_status: { congestion: 3, line_status: [{ line: '新宿線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
@@ -457,10 +431,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '三角轉乘迷宮', content: '三站共構(淺草/新宿/總武)。', advice: '轉乘通道極為複雜且長，請務必確認地面上的顏色指引：淺草(紅)、新宿(草綠)、總武(黃)。' }
         ]
     },
-    'Kyobashi': {
+    'odpt:Station:TokyoMetro.Kyobashi': {
         category_counts: {
             medical: 10, shopping: 30, dining: 80, leisure: 60, education: 5, finance: 50,
-            workspace: 120, housing: 10, religion: 0, nature: 2, accommodation: 30
+            workspace: 120, housing: 10, religion: 0, nature: 2, accommodation: 30,
+            convenience_count: 10, drugstore_count: 5, restaurant_count: 50, cafe_count: 25,
+            shrine_count: 0, temple_count: 0, museum_count: 4
         },
         vibe_tags: ['#藝術畫廊', '#古董街', '#高級辦公區', '#京橋Edogrand', '#隱藏美食'],
         l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -472,10 +448,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '免費藝術散步', content: '周邊畫廊林立。', advice: '許多古董店與畫廊歡迎參觀，是東京最密集的藝術區域之一。' }
         ]
     },
-    'Mitsukoshimae': {
+    'odpt:Station:TokyoMetro.Mitsukoshimae': {
         category_counts: {
             medical: 15, shopping: 250, dining: 150, leisure: 50, education: 5, finance: 80,
-            workspace: 100, housing: 5, religion: 15, nature: 5, accommodation: 20
+            workspace: 100, housing: 5, religion: 15, nature: 5, accommodation: 20,
+            convenience_count: 12, drugstore_count: 8, restaurant_count: 90, cafe_count: 35,
+            shrine_count: 1, temple_count: 0, museum_count: 1
         },
         vibe_tags: ['#三越獅像', '#Coredo室町', '#金魚展', '#福德神社', '#購物天國'],
         l2_status: { congestion: 3, line_status: [{ line: '半藏門線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
@@ -487,10 +465,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '地下直通攻略', content: '雨天最佳備案。', advice: '地下通道可從三越前一路走到日本橋甚至東京站，完全不必淋雨。' }
         ]
     },
-    'Kanda': {
+    'odpt:Station:JR-East.Kanda': {
         category_counts: {
             medical: 20, shopping: 50, dining: 300, leisure: 40, education: 30, finance: 40,
-            workspace: 80, housing: 20, religion: 10, nature: 5, accommodation: 50
+            workspace: 80, housing: 20, religion: 10, nature: 5, accommodation: 50,
+            convenience_count: 15, drugstore_count: 10, restaurant_count: 150, cafe_count: 30,
+            shrine_count: 2, temple_count: 1, museum_count: 0
         },
         vibe_tags: ['#咖哩激戰區', '#古書店街', '#學生街', '#居酒屋', '#運動用品'],
         l2_status: { congestion: 3, line_status: [{ line: 'JR線', status: 'normal' }], weather: { temp: 24, condition: 'Sunny' } },
@@ -502,10 +482,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '午餐時間警報', content: '上班族用餐一級戰區。', advice: '平日 11:30-13:30 各大咖哩名店皆需排隊，建議錯峰前往。' }
         ]
     },
-    'Inaricho': {
+    'odpt:Station:TokyoMetro.Inaricho': {
         category_counts: {
             medical: 10, shopping: 40, dining: 50, leisure: 20, education: 5, finance: 5,
-            workspace: 10, housing: 80, religion: 50, nature: 5, accommodation: 15
+            workspace: 10, housing: 80, religion: 50, nature: 5, accommodation: 15,
+            convenience_count: 6, drugstore_count: 3, restaurant_count: 20, cafe_count: 8,
+            shrine_count: 5, temple_count: 8, museum_count: 0
         },
         vibe_tags: ['#佛壇街', '#下町錢湯', '#稻荷神社', '#寧靜巷弄', '#淺草玄關'],
         l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -517,10 +499,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '錢湯禮儀', content: '體驗在地入浴文化。', advice: '進入浴池前請務必先將身體洗淨，並將盤起的頭髮或毛巾置於頭上，勿浸入水中。' }
         ]
     },
-    'Minowa': {
+    'odpt:Station:TokyoMetro.Minowa': {
         category_counts: {
             medical: 10, shopping: 60, dining: 40, leisure: 20, education: 2, finance: 5,
-            workspace: 5, housing: 80, religion: 10, nature: 5, accommodation: 10
+            workspace: 5, housing: 80, religion: 10, nature: 5, accommodation: 10,
+            convenience_count: 5, drugstore_count: 4, restaurant_count: 25, cafe_count: 10,
+            shrine_count: 2, temple_count: 3, museum_count: 1
         },
         vibe_tags: ['#JoyfulMinowa', '#都電荒川線', '#復古商店街', '#下町生活', '#昭和風情'],
         l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
@@ -532,10 +516,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '路面電車轉乘', content: '東京僅存的路面電車。', advice: '若要前往早稻田方向，請步行至「三之輪橋站」搭乘都電荒川線，可享受悠閒的東京散策。' }
         ]
     },
-    'Shin-Okachimachi': {
+    'odpt:Station:Toei.ShinOkachimachi': {
         category_counts: {
             medical: 5, shopping: 100, dining: 50, leisure: 10, education: 2, finance: 10,
-            workspace: 40, housing: 80, religion: 10, nature: 5, accommodation: 5
+            workspace: 40, housing: 80, religion: 10, nature: 5, accommodation: 5,
+            convenience_count: 8, drugstore_count: 4, restaurant_count: 30, cafe_count: 12,
+            shrine_count: 2, temple_count: 2, museum_count: 0
         },
         vibe_tags: ['#佐竹商店街', '#大江戶線轉乘', '#職人批發', '#懷舊拱廊', '#下町中心'],
         l2_status: { congestion: 2, line_status: [{ line: '大江戶線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
@@ -547,10 +533,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '深層地下鐵陷阱', content: '大江戶線月台極深。', advice: '從地面改札口到月台需搭乘 3 次長扶梯，請預留 5-8 分鐘進站時間。' }
         ]
     },
-    'Yushima': {
+    'odpt:Station:TokyoMetro.Yushima': {
         category_counts: {
             medical: 15, shopping: 30, dining: 60, leisure: 40, education: 80, finance: 10,
-            workspace: 20, housing: 80, religion: 60, nature: 20, accommodation: 30
+            workspace: 20, housing: 80, religion: 60, nature: 20, accommodation: 30,
+            convenience_count: 6, drugstore_count: 3, restaurant_count: 40, cafe_count: 15,
+            shrine_count: 5, temple_count: 2, museum_count: 2
         },
         vibe_tags: ['#湯島天神', '#學問之神', '#梅花祭', '#男坂女坂', '#夫婦坂'],
         l2_status: { congestion: 2, line_status: [], weather: { temp: 24, condition: 'Clear' } },
@@ -562,8 +550,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '男坂與女坂', content: '通往神社的兩條坡道。', advice: '男坂極陡峭，適合想挑戰且快速登頂的人；女坂較緩和，適合悠閒散步。' }
         ]
     },
-    'Tsukiji': {
-        category_counts: { medical: 10, shopping: 50, dining: 300, leisure: 20, transport: 15, nature: 10 },
+    'odpt:Station:TokyoMetro.Tsukiji': {
+        category_counts: {
+            medical: 10, shopping: 50, dining: 300, leisure: 20, transport: 15, nature: 10,
+            convenience_count: 5, drugstore_count: 2, restaurant_count: 150, cafe_count: 20, // Market stalls counted
+            shrine_count: 1, temple_count: 2, museum_count: 0
+        },
         vibe_tags: ['#場外市場', '#新鮮海產', '#本願寺', '#美食天堂', '#早市體驗'],
         l2_status: { congestion: 4, line_status: [], weather: { temp: 24, condition: 'Clear' } },
         l3_facilities: [
@@ -574,8 +566,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '築地早市攻略', content: '場外市場大多數名店在中午即打烊。', advice: '建議在上午 10 點前抵達，避開正午收攤時刻，並享受最新鮮的漁獲。' }
         ]
     },
-    'Ochanomizu': {
-        category_counts: { medical: 50, shopping: 80, dining: 100, education: 150, leisure: 30, religion: 20 },
+    'odpt:Station:TokyoMetro.Ochanomizu': {
+        category_counts: {
+            medical: 50, shopping: 80, dining: 100, education: 150, leisure: 30, religion: 20,
+            convenience_count: 15, drugstore_count: 10, restaurant_count: 60, cafe_count: 40,
+            shrine_count: 2, temple_count: 1, museum_count: 1
+        },
         vibe_tags: ['#樂器街', '#醫學中樞', '#尼古拉堂', '#神田川', '#學術氛圍'],
         l2_status: { congestion: 4, line_status: [], weather: { temp: 23, condition: 'Cloudy' } },
         l3_facilities: [
@@ -586,8 +582,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '兩站轉乘注意', content: 'JR 與丸之內線站體獨立。', advice: '兩線轉乘需出站步行過聖橋，雨天請攜帶雨具，步行時間約 5 分鐘。' }
         ]
     },
-    'Kasumigaseki': {
-        category_counts: { medical: 5, shopping: 20, dining: 60, workspace: 400, transport: 20, nature: 50 },
+    'odpt:Station:TokyoMetro.Kasumigaseki': {
+        category_counts: {
+            medical: 5, shopping: 20, dining: 60, workspace: 400, transport: 20, nature: 50,
+            convenience_count: 20, drugstore_count: 5, restaurant_count: 40, cafe_count: 25,
+            shrine_count: 0, temple_count: 0, museum_count: 1
+        },
         vibe_tags: ['#官廳街', '#政治中樞', '#日比谷公園', '#公務員', '#嚴謹氛圍'],
         l2_status: { congestion: 3, line_status: [], weather: { temp: 24, condition: 'Clear' } },
         l3_facilities: [
@@ -598,8 +598,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '隱藏的政府食堂', content: '在此上班的人極多。', advice: '部分政府機關大樓開放民眾進入使用地下食堂，價格實惠且份量十足，是午餐的好選擇。' }
         ]
     },
-    'Iidabashi': {
-        category_counts: { medical: 10, shopping: 100, dining: 120, education: 40, leisure: 30, nature: 20 },
+    'odpt:Station:TokyoMetro.Iidabashi': {
+        category_counts: {
+            medical: 10, shopping: 100, dining: 120, education: 40, leisure: 30, nature: 20,
+            convenience_count: 12, drugstore_count: 8, restaurant_count: 70, cafe_count: 40,
+            shrine_count: 3, temple_count: 2, museum_count: 1
+        },
         vibe_tags: ['#五線交匯', '#神樂坂玄關', '#東京大神宮', '#外濠公園', '#運河咖啡'],
         l2_status: { congestion: 4, line_status: [], weather: { temp: 24, condition: 'Cloudy' } },
         l3_facilities: [
@@ -610,8 +614,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '神樂坂散步起點', content: '此處坡道較多。', advice: '從地下鐵 B3 出口直接抵達神樂坂下，沿坡而上可感受隱藏在巷弄間的小巴黎風情。' }
         ]
     },
-    'Otemachi': {
-        category_counts: { medical: 20, shopping: 80, dining: 150, workspace: 500, finance: 120, nature: 40 },
+    'odpt:Station:TokyoMetro.Otemachi': {
+        category_counts: {
+            medical: 20, shopping: 80, dining: 150, workspace: 500, finance: 120, nature: 40,
+            convenience_count: 25, drugstore_count: 12, restaurant_count: 100, cafe_count: 60,
+            shrine_count: 1, temple_count: 0, museum_count: 0
+        },
         vibe_tags: ['#地鐵心臟', '#企業總部', '#皇居外苑', '#地下迷宮', '#商務精英'],
         l2_status: { congestion: 4, line_status: [], weather: { temp: 24, condition: 'Clear' } },
         l3_facilities: [
@@ -622,12 +630,14 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '究極轉乘陷阱', content: '五條路線(丸/東/千/半/三)交織。', advice: '轉乘距离可達 500m 以上，請預留充足時間，並善用地下連通道直通東京站換乘 JR。' }
         ]
     },
-    'Asakusa': {
+    'odpt:Station:TokyoMetro.Asakusa': {
         category_counts: {
             medical: 20, shopping: 300, dining: 400, leisure: 100, education: 5, finance: 20,
-            workspace: 30, housing: 80, religion: 50, nature: 20, accommodation: 150
+            workspace: 30, housing: 80, religion: 50, nature: 20, accommodation: 150,
+            convenience_count: 25, drugstore_count: 15, restaurant_count: 200, cafe_count: 80,
+            shrine_count: 5, temple_count: 15, museum_count: 3
         },
-        vibe_tags: ['#雷門', '#仲見世通', '#淺草寺', '#和服體驗', '#人力車'],
+        vibe_tags: ['#雷門', '#仲見世通', '#淺草寺', '#水上巴士', '#下町風情'],
         l2_status: { congestion: 4, line_status: [{ line: '銀座線', status: 'normal' }, { line: '淺草線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
         l3_facilities: [
             { id: 'as-l-1', category: 'leisure', subCategory: 'landmark', location: '1號出口', attributes: { name: '雷門', note: '東京地標' } },
@@ -637,12 +647,14 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '人力車體驗', content: '從不同視角看淺草。', advice: '人力車伕通常熟知隱藏拍照點，若懂日語還能聽到有趣的歷史故事。' }
         ]
     },
-    'Kuramae': {
+    'odpt:Station:Toei.Kuramae': {
         category_counts: {
             medical: 10, shopping: 50, dining: 60, leisure: 10, education: 5, finance: 5,
-            workspace: 40, housing: 100, religion: 10, nature: 10, accommodation: 20
+            workspace: 40, housing: 100, religion: 10, nature: 10, accommodation: 20,
+            convenience_count: 8, drugstore_count: 3, restaurant_count: 35, cafe_count: 25,
+            shrine_count: 2, temple_count: 3, museum_count: 0
         },
-        vibe_tags: ['#文具控', '#隅田川', '#職人咖啡', '#手作體驗', '#生活雜貨'],
+        vibe_tags: ['#東京布魯克林', '#職人咖啡', '#隅田川', '#文具控', '#倉庫改建'],
         l2_status: { congestion: 2, line_status: [{ line: '淺草線', status: 'normal' }, { line: '大江戶線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
         l3_facilities: [
             { id: 'ku-d-1', category: 'dining', subCategory: 'cafe', location: '隅田川旁', attributes: { name: 'Dandelion Chocolate', note: '來自舊金山的巧克力工廠' } },
@@ -652,10 +664,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '地上轉乘注意', content: '兩條與地下鐵無地下連通。', advice: '淺草線與大江戶線需出站轉乘，且距離約 300 公尺，請預留轉乘時間。' }
         ]
     },
-    'Ueno-okachimachi': {
+    'odpt:Station:Toei.UenoOkachimachi': {
         category_counts: {
             medical: 15, shopping: 250, dining: 200, leisure: 30, education: 2, finance: 10,
-            workspace: 20, housing: 50, religion: 5, nature: 5, accommodation: 30
+            workspace: 20, housing: 50, religion: 5, nature: 5, accommodation: 30,
+            convenience_count: 12, drugstore_count: 10, restaurant_count: 120, cafe_count: 40,
+            shrine_count: 2, temple_count: 1, museum_count: 1
         },
         vibe_tags: ['#阿美橫町', '#大江戶線', '#御徒町轉乘', '#平價購物', '#多國籍料理'],
         l2_status: { congestion: 3, line_status: [{ line: '大江戶線', status: 'normal' }], weather: { temp: 24, condition: 'Cloudy' } },
@@ -667,10 +681,12 @@ const mockProfiles: Record<string, any> = {
             { type: 'primary', title: '超級轉乘樞紐', content: '連接銀座線、日比谷線、JR。', advice: '透過地下通道可連接上野廣小路站(銀座線)、仲御徒町站(日比谷線)與御徒町站(JR)，雨天也非常方便。' }
         ]
     },
-    'Kayabacho': {
+    'odpt:Station:TokyoMetro.Kayabacho': {
         category_counts: {
             medical: 20, shopping: 30, dining: 100, leisure: 10, education: 5, finance: 30,
-            workspace: 200, housing: 40, religion: 5, nature: 10, accommodation: 40
+            workspace: 200, housing: 40, religion: 5, nature: 10, accommodation: 40,
+            convenience_count: 10, drugstore_count: 5, restaurant_count: 70, cafe_count: 30,
+            shrine_count: 1, temple_count: 0, museum_count: 0
         },
         vibe_tags: ['#證券街', '#商業午餐', '#隅田川露台', '#下班小酌', '#交通便利'],
         l2_status: { congestion: 3, line_status: [{ line: '東西線', status: 'normal' }, { line: '日比谷線', status: 'normal' }], weather: { temp: 24, condition: 'Clear' } },
@@ -717,80 +733,72 @@ export async function fetchNodeConfig(nodeId: string) {
 
     // Existing Mock Profile Logic
     let enrichedProfile = null;
-    // Simple mock key matching
-    const mockKey = Object.keys(mockProfiles).find(key => nodeId.includes(key));
-
-    if (mockKey) {
+    // Strict mock key matching
+    if (mockProfiles[nodeId]) {
         enrichedProfile = {
             node_id: nodeId,
-            ...mockProfiles[mockKey],
+            ...mockProfiles[nodeId],
             ...(finalProfile || {})
         };
-
-        // --- REAL-TIME STATUS INJECTION (MVP FIX) ---
-        try {
-            // Find operator or railway from node or profile
-            const operator = getOperatorFromId(nodeId);
-            if (operator) {
-                const statusRes = await fetch(`/api/train?mode=status`);
-                if (statusRes.ok) {
-                    const { status } = await statusRes.json();
-                    const operatorStatus = (status as any[]).filter(s => s.operator.includes(operator));
-
-                    if (operatorStatus.length > 0) {
-                        enrichedProfile = {
-                            ...enrichedProfile,
-                            l2_status: {
-                                ...enrichedProfile.l2_status,
-                                line_status: operatorStatus.map(s => ({
-                                    line: s.railway.replace(/.*[:\.]/, ''),
-                                    status: s.status === 'Normal' ? 'normal' : 'delay',
-                                    message: s.text
-                                }))
-                            }
-                        };
-                    }
-                }
-            }
-
-            // --- ACCESSIBILITY FETCH (P0-3) ---
-            const odptId = NODE_TO_ODPT[nodeId.toLowerCase()] ||
-                Object.entries(NODE_TO_ODPT).find(([k]) => nodeId.toLowerCase().includes(k))?.[1];
-
-            if (odptId) {
-                const facRes = await fetch(`/api/train?mode=facility&station=${odptId}`);
-                if (facRes.ok) {
-                    const { facilities } = await facRes.json();
-                    if (facilities && facilities.length > 0) {
-                        // Merge or override L3 facilities
-                        enrichedProfile = {
-                            ...enrichedProfile,
-                            l3_facilities: [
-                                ...(enrichedProfile.l3_facilities || []),
-                                ...facilities
-                            ]
-                        };
-                    }
-                }
-            }
-        } catch (e) {
-            console.warn('Real-time fetch failed:', e);
-        }
-        // ----------------------------------
-
-        return {
-            node: { ...finalNode, location: parseLocation(finalNode.location) },
-            profile: enrichedProfile,
-            error: null
-        };
     }
+    // --- REAL-TIME STATUS INJECTION (MVP FIX) ---
+    try {
+        // Find operator or railway from node or profile
+        const operator = getOperatorFromId(nodeId);
+        if (operator) {
+            const statusRes = await fetch(`/api/train?mode=status`);
+            if (statusRes.ok) {
+                const { status } = await statusRes.json();
+                const operatorStatus = (status as any[]).filter(s => s.operator.includes(operator));
+
+                if (operatorStatus.length > 0) {
+                    enrichedProfile = {
+                        ...enrichedProfile,
+                        l2_status: {
+                            ...enrichedProfile.l2_status,
+                            line_status: operatorStatus.map(s => ({
+                                line: s.railway.replace(/.*[:\.]/, ''),
+                                status: s.status === 'Normal' ? 'normal' : 'delay',
+                                message: s.text
+                            }))
+                        }
+                    };
+                }
+            }
+        }
+
+        // --- ACCESSIBILITY FETCH (P0-3) ---
+        const odptId = NODE_TO_ODPT[nodeId];
+
+        if (odptId) {
+            const facRes = await fetch(`/api/train?mode=facility&station=${odptId}`);
+            if (facRes.ok) {
+                const { facilities } = await facRes.json();
+                if (facilities && facilities.length > 0) {
+                    // Merge or override L3 facilities
+                    enrichedProfile = {
+                        ...enrichedProfile,
+                        l3_facilities: [
+                            ...(enrichedProfile.l3_facilities || []),
+                            ...facilities
+                        ]
+                    };
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Real-time fetch failed:', e);
+    }
+    // ----------------------------------
 
     return {
-        node: { ...finalNode, location: parseLocation(finalNode?.location) },
-        profile: finalProfile,
+        node: { ...finalNode, location: parseLocation(finalNode.location) },
+        profile: enrichedProfile,
         error: null
     };
 }
+
+
 
 // Fetch logic for specific zones (e.g., get all Hubs in a city)
 export async function fetchCityHubs(cityId: string) {

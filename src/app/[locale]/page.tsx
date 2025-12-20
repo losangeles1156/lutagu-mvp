@@ -22,6 +22,12 @@ const MapContainer = dynamic(
 
 export default function Home() {
     const t = useTranslations('Home');
+    const tNav = useTranslations('nav');
+    const tTrip = useTranslations('tripGuard');
+    const tProfile = useTranslations('profile');
+    const tNode = useTranslations('node');
+    const tStatus = useTranslations('status');
+    const tMap = useTranslations('map');
     const { zone, userLocation, isTooFar, centerFallback } = useZoneAwareness();
     const { currentNodeId, isBottomSheetOpen, activeTab, setActiveTab, setMapCenter } = useAppStore();
 
@@ -53,41 +59,41 @@ export default function Home() {
             {/* 1.1 Other Tab Views */}
             {activeTab === 'trips' && (
                 <div className="absolute inset-0 z-5 bg-gray-50 p-6 pt-24 overflow-y-auto pb-32">
-                    <h1 className="text-3xl font-black mb-6">行程守護</h1>
+                    <h1 className="text-3xl font-black mb-6">{tTrip('title')}</h1>
                     <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 mb-4">
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600">
                                 <ShieldCheck size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg">尚未訂閱任何行程</h3>
-                                <p className="text-sm text-gray-500">訂閱後，Bambi 會在異常發生時自動提醒你。</p>
+                                <h3 className="font-bold text-lg">{tTrip('noSubscription')}</h3>
+                                <p className="text-sm text-gray-500">{tTrip('subscriptionHint')}</p>
                             </div>
                         </div>
-                        <button className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl">開始探索景點</button>
+                        <button className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl">{tTrip('startExploring')}</button>
                     </div>
                 </div>
             )}
 
             {activeTab === 'me' && (
                 <div className="absolute inset-0 z-5 bg-gray-50 p-6 pt-24 overflow-y-auto">
-                    <h1 className="text-3xl font-black mb-6">個人設定</h1>
+                    <h1 className="text-3xl font-black mb-6">{tProfile('title')}</h1>
                     <div className="space-y-4">
                         <div className="bg-white p-4 rounded-3xl flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600">
                                     <User size={20} />
                                 </div>
-                                <span className="font-bold text-gray-700">訪客模式</span>
+                                <span className="font-bold text-gray-700">{tProfile('guestMode')}</span>
                             </div>
-                            <button className="text-indigo-600 font-bold text-sm">登入 / 註冊</button>
+                            <button className="text-indigo-600 font-bold text-sm">{tProfile('loginRegister')}</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* 2. Top Bar (Status) */}
-            <div className="absolute top-0 left-0 right-0 z-10 p-5 pointer-events-none">
+            {/* 2. Top Bar (Status) - z-[200] to stay above WeatherBanner */}
+            <div className="absolute top-0 left-0 right-0 z-[200] p-5 pt-16 pointer-events-none">
                 <div className="flex justify-between items-start pointer-events-auto">
                     {/* Weather / Status Pill */}
                     <div className="glass-effect rounded-full px-4 py-2 flex gap-3 items-center animate-in slide-in-from-top duration-500 shadow-xl shadow-black/5">
@@ -102,7 +108,7 @@ export default function Home() {
                                 <span>銀座線延誤</span>
                             </div>
                         ) : (
-                            <span className="text-gray-500 text-sm font-bold opacity-60 px-1">READY</span>
+                            <span className="text-gray-500 text-sm font-bold opacity-60 px-1">{tStatus('ready')}</span>
                         )}
                     </div>
 
@@ -128,7 +134,7 @@ export default function Home() {
                                     setMapCenter(centerFallback);
                                     useAppStore.getState().addMessage({
                                         role: 'assistant',
-                                        content: '📍 您目前距離感性導航區域較遠，地圖已自動回正至上野車站中心點。'
+                                        content: tMap('tooFarMessage')
                                     });
                                 } else if (userLocation) {
                                     setMapCenter(userLocation);
@@ -235,7 +241,7 @@ export default function Home() {
                             {!isCore && (
                                 <div className="flex items-center gap-3 p-4 bg-orange-50/50 border border-orange-100 rounded-2xl text-orange-800 text-sm">
                                     <div className="p-2 bg-white rounded-xl shadow-sm">ℹ️</div>
-                                    <span>此區域目前僅提供基礎資訊，Bambi AI 的感性導航功能正在擴張中。</span>
+                                    <span>{tNode('bufferZoneMessage')}</span>
                                 </div>
                             )}
 
@@ -252,7 +258,7 @@ export default function Home() {
                                     className="flex-[2] bg-indigo-600 text-white font-bold py-4 rounded-3xl hover:bg-indigo-700 transition active:scale-95 shadow-xl shadow-indigo-200 flex items-center justify-center gap-2"
                                 >
                                     <Calendar size={20} />
-                                    <span>加入我的行程</span>
+                                    <span>{tNode('addToTrip')}</span>
                                     <ArrowRight size={18} className="opacity-50" />
                                 </button>
                             </div>
@@ -271,21 +277,21 @@ export default function Home() {
                         className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'explore' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         <MapIcon size={20} fill={activeTab === 'explore' ? "white" : "none"} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter">探索</span>
+                        <span className="text-[10px] font-black uppercase tracking-tighter">{tNav('explore')}</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('trips')}
                         className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'trips' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 -rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         <ShieldCheck size={20} fill={activeTab === 'trips' ? "white" : "none"} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter">守護</span>
+                        <span className="text-[10px] font-black uppercase tracking-tighter">{tNav('guard')}</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('me')}
                         className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         <User size={20} fill={activeTab === 'me' ? "white" : "none"} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter">我的</span>
+                        <span className="text-[10px] font-black uppercase tracking-tighter">{tNav('me')}</span>
                     </button>
                 </div>
             </div>

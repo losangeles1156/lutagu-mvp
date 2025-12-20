@@ -8,6 +8,95 @@
     "status": {
         "crowded": "擁擠",
         "normal": "順暢",
-        "delayed": "延誤 {minutes} 分"
+        "delayed": "延誤 {minutes} 分",
+        "ready": "就緒",
+        "ginzaDelay": "銀座線延誤"
+    },
+    "nav": {
+        "explore": "探索",
+        "guard": "守護",
+        "me": "我的"
+    },
+    "tripGuard": {
+        "title": "行程守護",
+        "noSubscription": "尚未訂閱任何行程",
+        "subscriptionHint": "訂閱後，Bambi 會在異常發生時自動提醒你。",
+        "startExploring": "開始探索景點"
+    },
+    "profile": {
+        "title": "個人設定",
+        "guestMode": "訪客模式",
+        "loginRegister": "登入 / 註冊"
+    },
+    "node": {
+        "addToTrip": "加入我的行程",
+        "addedToTrip": "已將「{name}」加入您的行程草稿！",
+        "bufferZoneMessage": "此區域目前僅提供基礎資訊，Bambi AI 的感性導航功能正在擴張中。",
+        "locationDna": "地點基因 (Location DNA)",
+        "vicinity": "周邊設施 (Vicinity)",
+        "vibeTags": "氛圍標籤",
+        "analyzingL1": "正在分析 L1 基因數據...",
+        "noL3Facilities": "此區域暫無 L3 設施資訊"
+    },
+    "tabs": {
+        "dna": "DNA (L1)",
+        "live": "LIVE (L2)",
+        "facility": "FACILITY (L3)",
+        "bambi": "BAMBI (L4)"
+    },
+    "l2": {
+        "density": "人流預測 (Density)",
+        "crowdedLevel": "較為擁擠",
+        "normalLevel": "普通",
+        "comfortLevel": "舒適",
+        "wait": "預計候車 (Wait)",
+        "min": "分",
+        "service": "運行情報 (Service)",
+        "allLinesNormal": "所有路線",
+        "runningNormal": "目前運作正常",
+        "delay": "Delay",
+        "normalOperation": "正常運行",
+        "delayOccurred": "發生延誤",
+        "weatherAlert": "【天候警告】"
+    },
+    "l3": {
+        "stationToilet": "車站廁所",
+        "coinLocker": "置物櫃",
+        "elevator": "無障礙電梯",
+        "wheelchairFriendly": "輪椅友善",
+        "largeLuggage": "大型行李可"
+    },
+    "l4": {
+        "bambiStrategy": "Bambi's Strategy",
+        "suggestion": "建議",
+        "psychAlert": "心理建設警示"
+    },
+    "weather": {
+        "alert": "氣象警報",
+        "details": "詳情",
+        "collapse": "收起",
+        "jmaAlert": "JMA Weather Alert"
+    },
+    "map": {
+        "yourLocation": "您的位置",
+        "tooFarMessage": "您目前距離感性導航區域較遠，地圖已自動回正至上野車站中心點。"
+    },
+    "facilityProfile": {
+        "medical": "醫療",
+        "shopping": "購物",
+        "dining": "餐飲",
+        "leisure": "休閒",
+        "education": "教育",
+        "finance": "金融",
+        "accommodation": "住宿",
+        "workspace": "辦公",
+        "housing": "居住",
+        "religion": "信仰",
+        "nature": "自然",
+        "countSuffix": "處"
+    },
+    "common": {
+        "viewAll": "查看全部",
+        "distance": "距離"
     }
 }

@@ -8,6 +8,7 @@ import { FacilityCarousel } from '../ui/FacilityCarousel';
 import { NodeProfile } from '@/lib/api/nodes';
 import { FacilityFingerprint } from './FacilityFingerprint';
 import { VibeTags } from './VibeTags';
+import { useLocale, useTranslations } from 'next-intl';
 import {
     AlertOctagon, Zap, Smile, MapPin as MapIcon, Star, ArrowRight,
     Map as MapIcon2, AlertTriangle, Clock, Users, Navigation, Info,
@@ -60,6 +61,12 @@ interface NodeTabsProps {
 
 export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
     const [activeTab, setActiveTab] = useState<'l1' | 'l2' | 'l3' | 'l4'>('l1');
+    const locale = useLocale();
+    const tTabs = useTranslations('tabs');
+    const tL2 = useTranslations('l2');
+    const tL3 = useTranslations('l3');
+    const tL4 = useTranslations('l4');
+    const tNode = useTranslations('node');
 
     return (
         <div className="flex flex-col gap-4">
@@ -72,7 +79,7 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                         : 'text-gray-400 hover:text-gray-600 hover:bg-white/50 scale-[0.98]'
                         }`}
                 >
-                    DNA (L1)
+                    {tTabs('dna')}
                 </button>
                 <button
                     onClick={() => setActiveTab('l2')}
@@ -81,7 +88,7 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                         : 'text-gray-400 hover:text-gray-600 hover:bg-white/50 scale-[0.98]'
                         }`}
                 >
-                    LIVE (L2)
+                    {tTabs('live')}
                 </button>
                 <button
                     onClick={() => setActiveTab('l3')}
@@ -90,7 +97,7 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                         : 'text-gray-400 hover:text-gray-600 hover:bg-white/50 scale-[0.98]'
                         }`}
                 >
-                    FACILITY (L3)
+                    {tTabs('facility')}
                 </button>
                 <button
                     onClick={() => setActiveTab('l4')}
@@ -99,7 +106,7 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                         : 'text-gray-400 hover:text-gray-600 hover:bg-white/50 scale-[0.98]'
                         }`}
                 >
-                    BAMBI (L4)
+                    {tTabs('bambi')}
                 </button>
             </div>
 
@@ -115,10 +122,10 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                         <div className="p-1.5 bg-indigo-600 rounded-lg text-white">
                                             <Star size={16} fill="currentColor" />
                                         </div>
-                                        <h3 className="font-black text-sm uppercase tracking-widest text-gray-900">地點基因 (Location DNA)</h3>
+                                        <h3 className="font-black text-sm uppercase tracking-widest text-gray-900">{tNode('locationDna')}</h3>
                                     </div>
                                     <VibeTags tags={profile.vibe_tags} />
-                                    <FacilityFingerprint counts={profile.category_counts} />
+                                    <FacilityFingerprint counts={profile.category_counts} locale={locale} />
                                 </div>
 
                                 {/* 2. Emotional Context Description */}
@@ -168,22 +175,22 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                         <>「嗅覺與知識的雙重饗宴。空氣中總是飄散著咖哩的香辛與舊書的紙香。這裡是上班族的午餐戰場，也是愛書人的精神故鄉。」</>
                                     ) : (nodeData?.name?.['zh-TW'] === '湯島' || nodeData?.name?.['en']?.includes('Yushima')) ? (
                                         <>「學問之神的庇護地。男坂的陡峭象徵求學的艱辛，而女坂則有梅花的溫柔相伴。在甜酒的香氣中，感受代代學子的祈願與希望。」</>
+                                    ) : (nodeData?.name?.['zh-TW'] === '築地' || nodeData?.name?.['en']?.includes('Tsukiji')) ? (
+                                        <>「東京的美食靈魂。雖然場內市場已遷，但場外的活力依舊。在清晨的喧囂與玉子燒的香氣中，感受這座城市最鮮活的生命力。」</>
+                                    ) : (nodeData?.name?.['zh-TW'] === '御茶之水' || nodeData?.name?.['en']?.includes('Ochanomizu')) ? (
+                                        <>「樂器與學術的交響樂章。在神田川的潺潺流水聲中，學生們揹著吉他穿梭於古書店與醫院之間。這裡是青春與智慧的交匯處。」</>
+                                    ) : (nodeData?.name?.['zh-TW'] === '霞關' || nodeData?.name?.['en']?.includes('Kasumigaseki')) ? (
+                                        <>「國家運行的靜謐引擎。在莊嚴的官廳建築群中，日比谷公園的綠意提供了珍貴的喘息空間。這裡是決定這個國家未來的核心。」</>
+                                    ) : (nodeData?.name?.['zh-TW'] === '飯田橋' || nodeData?.name?.['en']?.includes('Iidabashi')) ? (
+                                        <>「運河與坡道的交匯點。神樂坂的石板路通往迷人的小巴黎，而外濠公園的櫻花則映照著水面。在這裡，東京展現了最浪漫的一面。」</>
+                                    ) : (nodeData?.name?.['zh-TW'] === '大手町' || nodeData?.name?.['en']?.includes('Otemachi')) ? (
+                                        <>「菁英們的地下迷宮。連接著無數企業總部與皇居的寧靜。在地底深處的繁忙步伐中，推動著世界經濟的脈動。」</>
+                                    ) : (nodeData?.name?.['zh-TW'] === '茅場町' || nodeData?.name?.['en']?.includes('Kayabacho')) ? (
+                                        <>「商業的靜默守護者。作為證券街的後盾，這裡有著務實而堅毅的氣息。在隅田川露台的微風中，暫時忘卻數字的跳動。」</>
+
                                     ) : (
                                         <>「這裡不只是交通點，更是觀察東京生活縮影的最佳視窗。不論是尋找隱藏美食還是感受文化氣息，Bambi 都能為您導航那些難以言喻的城市魅力。」</>
                                     )}
-                                </div>
-
-                                {/* 3. Surrounding Facilities */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-1.5 bg-indigo-100 rounded-lg text-indigo-600">
-                                            <MapIcon2 size={16} />
-                                        </div>
-                                        <h3 className="font-black text-sm uppercase tracking-widest text-gray-900">周邊設施 (Vicinity)</h3>
-                                    </div>
-                                    <div className="bg-white rounded-3xl p-4 border border-black/[0.03] shadow-sm">
-                                        <FacilityFingerprint counts={profile.category_counts} />
-                                    </div>
                                 </div>
                             </div>
                         ) : (
@@ -198,11 +205,11 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                     <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="grid grid-cols-2 gap-3">
                             <div className="p-4 bg-white rounded-2xl border border-black/[0.03] shadow-sm">
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">人流預測 (Density)</h4>
+                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{tL2('density')}</h4>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-bold text-gray-900">
-                                            {(profile?.l2_status?.congestion || 1) >= 4 ? '較為擁擠' : (profile?.l2_status?.congestion || 1) >= 2 ? '普通' : '舒適'}
+                                            {(profile?.l2_status?.congestion || 1) >= 4 ? tL2('crowdedLevel') : (profile?.l2_status?.congestion || 1) >= 2 ? tL2('normalLevel') : tL2('comfortLevel')}
                                         </span>
                                         <span className="text-[10px] font-black text-indigo-500">{(profile?.l2_status?.congestion || 1) * 20}%</span>
                                     </div>
@@ -215,14 +222,14 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                 </div>
                             </div>
                             <div className="p-4 bg-white rounded-2xl border border-black/[0.03] shadow-sm">
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">預計候車 (Wait)</h4>
+                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{tL2('wait')}</h4>
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
                                         <Zap size={16} fill="currentColor" />
                                     </div>
                                     <div className="text-sm font-bold text-gray-900 flex items-baseline gap-1">
                                         <span>{profile?.l2_status?.congestion ? (profile.l2_status.congestion * 2) : 3}</span>
-                                        <span className="text-[10px] text-gray-400">min</span>
+                                        <span className="text-[10px] text-gray-400">{tL2('min')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -236,7 +243,7 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                 <div className="p-1.5 bg-rose-100 rounded-lg text-rose-600">
                                     <Zap size={14} fill="currentColor" />
                                 </div>
-                                <h3 className="font-black text-[10px] uppercase tracking-widest text-gray-900">運行情報 (Service)</h3>
+                                <h3 className="font-black text-[10px] uppercase tracking-widest text-gray-900">{tL2('service')}</h3>
                             </div>
 
                             {!profile?.l2_status?.line_status || profile.l2_status.line_status.length === 0 ? (
@@ -245,8 +252,8 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                         <Smile size={18} />
                                     </div>
                                     <div>
-                                        <h4 className="text-xs font-black uppercase text-green-900">所有路線</h4>
-                                        <p className="text-xs font-medium text-green-700">目前運作正常</p>
+                                        <h4 className="text-xs font-black uppercase text-green-900">{tL2('allLinesNormal')}</h4>
+                                        <p className="text-xs font-medium text-green-700">{tL2('runningNormal')}</p>
                                     </div>
                                 </div>
                             ) : (
@@ -287,9 +294,9 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                         </div>
                                         <div>
                                             <h4 className="text-sm font-black text-gray-900">
-                                                {fac.subCategory === 'station_toilet' ? '車站廁所' :
-                                                    fac.subCategory === 'coin_locker' ? '置物櫃' :
-                                                        fac.subCategory === 'elevator' ? '無障礙電梯' :
+                                                {fac.subCategory === 'station_toilet' ? tL3('stationToilet') :
+                                                    fac.subCategory === 'coin_locker' ? tL3('coinLocker') :
+                                                        fac.subCategory === 'elevator' ? tL3('elevator') :
                                                             fac.category}
                                             </h4>
                                             <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-tight">
@@ -306,14 +313,14 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                     <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-50">
                                         {fac.attributes.wheelchair_accessible && (
                                             <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100 flex items-center gap-1">
-                                                <span className="text-[10px]">♿</span> 輪椅友善
+                                                <span className="text-[10px]">♿</span> {tL3('wheelchairFriendly')}
                                             </span>
                                         )}
                                         {fac.attributes.has_washlet && (
                                             <span className="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">WASHLET</span>
                                         )}
                                         {fac.attributes.sizes && fac.attributes.sizes.includes('L') && (
-                                            <span className="text-[9px] font-black bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full border border-orange-100">大型行李可</span>
+                                            <span className="text-[9px] font-black bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full border border-orange-100">{tL3('largeLuggage')}</span>
                                         )}
                                         {fac.attributes.note && (
                                             <span className="text-[9px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-md italic">
@@ -324,7 +331,7 @@ export function NodeTabs({ nodeData, profile }: NodeTabsProps) {
                                 )}
                             </div>
                         )) : (
-                            <div className="p-8 text-center text-gray-400 italic text-xs">此區域暫無 L3 設施資訊</div>
+                            <div className="p-8 text-center text-gray-400 italic text-xs">{tNode('noL3Facilities')}</div>
                         )}
                     </div>
                 )}

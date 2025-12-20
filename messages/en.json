@@ -8,6 +8,95 @@
     "status": {
         "crowded": "Crowded",
         "normal": "Normal",
-        "delayed": "Delayed {minutes} min"
+        "delayed": "Delayed {minutes} min",
+        "ready": "READY",
+        "ginzaDelay": "Ginza Line Delay"
+    },
+    "nav": {
+        "explore": "Explore",
+        "guard": "Guard",
+        "me": "Me"
+    },
+    "tripGuard": {
+        "title": "Trip Guard",
+        "noSubscription": "No active subscriptions",
+        "subscriptionHint": "Subscribe to routes, Bambi will alert you automatically when disruptions occur.",
+        "startExploring": "Start Exploring"
+    },
+    "profile": {
+        "title": "Settings",
+        "guestMode": "Guest Mode",
+        "loginRegister": "Login / Register"
+    },
+    "node": {
+        "addToTrip": "Add to My Trip",
+        "addedToTrip": "Added \"{name}\" to your trip draft!",
+        "bufferZoneMessage": "This area currently provides basic info only. Bambi AI's empathetic navigation is expanding.",
+        "locationDna": "Location DNA",
+        "vicinity": "Vicinity",
+        "vibeTags": "Vibe Tags",
+        "analyzingL1": "Analyzing L1 DNA data...",
+        "noL3Facilities": "No L3 facilities available in this area"
+    },
+    "tabs": {
+        "dna": "DNA (L1)",
+        "live": "LIVE (L2)",
+        "facility": "FACILITY (L3)",
+        "bambi": "BAMBI (L4)"
+    },
+    "l2": {
+        "density": "Density",
+        "crowdedLevel": "Crowded",
+        "normalLevel": "Normal",
+        "comfortLevel": "Comfortable",
+        "wait": "Wait Time",
+        "min": "min",
+        "service": "Service Status",
+        "allLinesNormal": "All Lines",
+        "runningNormal": "Currently operating normally",
+        "delay": "Delay",
+        "normalOperation": "Normal",
+        "delayOccurred": "Delay occurred",
+        "weatherAlert": "Weather Alert: "
+    },
+    "l3": {
+        "stationToilet": "Station Toilet",
+        "coinLocker": "Coin Locker",
+        "elevator": "Accessible Elevator",
+        "wheelchairFriendly": "Wheelchair Accessible",
+        "largeLuggage": "Large Luggage OK"
+    },
+    "l4": {
+        "bambiStrategy": "Bambi's Strategy",
+        "suggestion": "Suggestion",
+        "psychAlert": "Psychological Preparation"
+    },
+    "weather": {
+        "alert": "Weather Alert",
+        "details": "Details",
+        "collapse": "Collapse",
+        "jmaAlert": "JMA Weather Alert"
+    },
+    "map": {
+        "yourLocation": "Your Location",
+        "tooFarMessage": "You are currently far from the empathetic navigation zone. Map has been centered on Ueno Station."
+    },
+    "facilityProfile": {
+        "medical": "Medical",
+        "shopping": "Shopping",
+        "dining": "Dining",
+        "leisure": "Leisure",
+        "education": "Education",
+        "finance": "Finance",
+        "accommodation": "Stay",
+        "workspace": "Work",
+        "housing": "Living",
+        "religion": "Religion",
+        "nature": "Nature",
+        "countSuffix": "spots"
+    },
+    "common": {
+        "viewAll": "View All",
+        "distance": "Distance"
     }
 }
