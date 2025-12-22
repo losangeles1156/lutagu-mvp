@@ -83,7 +83,7 @@ export function L1_DNA({ nodeData, profile }: L1_DNAProps) {
                     <div className="relative z-10">
                         <h4 className="text-[10px] font-black uppercase text-indigo-500 tracking-widest mb-2">Bambi AI Insight</h4>
                         <p className="text-sm font-bold text-gray-800 italic leading-relaxed font-serif">
-                            "{nodeData?.vibe ? nodeData.vibe : 'Analyzing local atmosphere...'} : A unique blend of tradition and modernity."
+                            &quot;{nodeData?.vibe ? nodeData.vibe : 'Analyzing local atmosphere...'}&quot; : A unique blend of tradition and modernity.
                         </p>
                     </div>
                 </div>
@@ -108,8 +108,8 @@ export function L1_DNA({ nodeData, profile }: L1_DNAProps) {
                                     setExpandedSub(null); // Reset sub selection
                                 }}
                                 className={`flex-shrink-0 snap-start flex flex-col items-center gap-2 p-3 min-w-[80px] rounded-2xl border transition-all duration-300 ${isSelected
-                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200 scale-105'
-                                        : 'bg-white border-gray-100 text-gray-500 hover:border-indigo-200 hover:bg-indigo-50'
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200 scale-105'
+                                    : 'bg-white border-gray-100 text-gray-500 hover:border-indigo-200 hover:bg-indigo-50'
                                     }`}
                             >
                                 <span className="text-2xl filter drop-shadow-sm">{config.icon}</span>

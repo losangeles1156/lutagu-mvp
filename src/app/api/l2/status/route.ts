@@ -30,7 +30,24 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Failed to fetch status' }, { status: 500 });
         }
 
-        return NextResponse.json(data?.value || null);
+        if (!data) return NextResponse.json(null);
+
+        // Transform Flat DB columns (from n8n) to Frontend Interface
+        const l2Status = {
+            congestion: data.status_code === 'DELAY' ? 4 : (data.status_code === 'SUSPENDED' ? 5 : 2),
+            line_status: [{
+                line: 'Sourced via n8n',
+                status: data.status_code?.toLowerCase() || 'normal',
+                message: data.reason_ja || 'Operating normally'
+            }],
+            weather: {
+                temp: data.weather_info?.temp || 0,
+                condition: data.weather_info?.condition || 'Unknown'
+            },
+            updated_at: data.updated_at
+        };
+
+        return NextResponse.json(l2Status);
     } catch (e) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }

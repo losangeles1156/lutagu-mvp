@@ -798,6 +798,27 @@ export async function fetchNodeConfig(nodeId: string) {
             ...(finalProfile || {})
         };
     }
+
+    // [New] Real-time L2 Data Override
+    try {
+        // Only fetch if running on client or if we can access the internal API URL
+        // In this case, we use a simple fetch to the Next.js API route we just fixed
+        if (typeof window !== 'undefined') {
+            const l2Res = await fetch(`/api/l2/status?station_id=${nodeId}`);
+            if (l2Res.ok) {
+                const l2Data = await l2Res.json();
+                if (l2Data) {
+                    if (!enrichedProfile) enrichedProfile = { node_id: nodeId, category_counts: {} as any, vibe_tags: [] };
+
+                    // Override with Real Data
+                    enrichedProfile.l2_status = l2Data;
+                    console.log(`[L2] Applied real-time data for ${nodeId}`, l2Data);
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to fetch real-time L2 data', e);
+    }
     // --- REAL-TIME STATUS INJECTION (MVP FIX) ---
     // --- REAL-TIME STATUS INJECTION (MVP FIX) ---
     const odptId = NODE_TO_ODPT[nodeId];
