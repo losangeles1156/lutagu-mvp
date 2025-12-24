@@ -31,3 +31,6 @@ ts-debug.log*
 # Typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Data Sync Files
+bambigo-v3.0/*.json

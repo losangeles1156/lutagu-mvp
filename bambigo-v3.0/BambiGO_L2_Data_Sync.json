@@ -56,11 +56,11 @@
                     "parameters": [
                         {
                             "name": "apikey",
-                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2dWJlcWVhYWZkam51b2N5aG1iIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTYwNjM1OSwiZXhwIjoyMDgxMTgyMzU5fQ.I1W0Y0tVr2J-aYbEMqwOiTlsGEnq1P6ZGCoBNnFRYQ0"
+                            "value": "{{SUPABASE_ANON_KEY}}"
                         },
                         {
                             "name": "Authorization",
-                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2dWJlcWVhYWZkam51b2N5aG1iIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTYwNjM1OSwiZXhwIjoyMDgxMTgyMzU5fQ.I1W0Y0tVr2J-aYbEMqwOiTlsGEnq1P6ZGCoBNnFRYQ0"
+                            "value": "Bearer {{SUPABASE_ANON_KEY}}"
                         },
                         {
                             "name": "Prefer",
