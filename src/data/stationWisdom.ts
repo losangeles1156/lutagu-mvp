@@ -278,14 +278,94 @@ export const STATION_WISDOM: Record<string, StationWisdomData> = {
                 content: '雖然站名相同，但銀座線與半藏門線月臺相距甚遠，轉乘需步行約 5-8 分鐘。',
                 advice: '⚠️ 心理建設：請預留轉乘時間，通道設有自動步道可減輕負擔。',
                 severity: 'medium'
+            },
+            {
+                type: 'transfer',
+                title: '🏙️ 百貨公司陷阱 (Department Store Maze)',
+                content: '三越前站與三越百貨、Coredo 室町等多家百貨直結，地下通道非常複雜。',
+                advice: '⚠️ 注意：去不同分館請看準出口標號（如 A1、A4），否則在地下很容易迷路。',
+                severity: 'medium'
             }
         ],
         hacks: [
             '🏛️ **三越本館直達**：A5 出口直接通往日本最古老的三越百貨本店 B1 美食街。',
+            '🏮 **福德神社**：藏身於現代建築 Coredo 室町後方的歷史神社，以求中獎運聞名。',
             '🏦 **金庫街氛圍**：周邊是日本銀行總部，街道建築充滿明治時代的厚重感，適合散步拍照。',
             '🎬 **Coredo 室町**：A6 出口直通 Coredo 室町，有電影院與深夜營業的餐飲店。'
         ],
-        l3Facilities: [] // Auto-populated by Scraper
+        l3Facilities: [
+            // === 廁所 (Toilets) ===
+            {
+                type: 'toilet',
+                floor: 'Metro B1',
+                operator: 'Metro',
+                location: {
+                    zh: '半藏門線 驗票口內 (近三越口)',
+                    en: 'Inside Hanzomon Line Gate (near Mitsukoshi)',
+                    ja: '半蔵門線 改札内（三越口付近）'
+                },
+                attributes: { wheelchair: true, hasWashlet: true },
+                source: 'https://www.tokyometro.jp/lang_tcn/station/mitsukoshimae/accessibility/'
+            },
+            {
+                type: 'toilet',
+                floor: 'Metro B1',
+                operator: 'Metro',
+                location: {
+                    zh: '銀座線 驗票口內 (近日本橋方面改札)',
+                    en: 'Inside Ginza Line Gate (near Nihonbashi)',
+                    ja: '銀座線 改札内（日本橋方面改札付近）'
+                },
+                attributes: { wheelchair: true, hasWashlet: true }
+            },
+            // === 置物櫃 (Lockers) ===
+            {
+                type: 'locker',
+                floor: 'Metro B1',
+                operator: 'Metro',
+                location: {
+                    zh: 'A9出口手前',
+                    en: 'Before Exit A9',
+                    ja: 'A9出口手前'
+                },
+                attributes: { count: 30, sizes: ['S', 'M', 'L'] },
+                source: 'https://coinlocker.click/mitsukoshimae-station.php'
+            },
+            {
+                type: 'locker',
+                floor: 'Metro B1',
+                operator: 'Metro',
+                location: {
+                    zh: 'A5出口橫 (三越前)',
+                    en: 'Next to Exit A5 (Mitsukoshi)',
+                    ja: 'A5出口横'
+                },
+                attributes: { count: 20, sizes: ['S', 'M'] }
+            },
+            // === 電梯 (Elevators) ===
+            {
+                type: 'elevator',
+                floor: 'Metro B1/GF',
+                operator: 'Metro',
+                location: {
+                    zh: 'A7出口 (往日本橋室町)',
+                    en: 'Exit A7 (to Nihonbashi Muromachi)',
+                    ja: 'A7出口'
+                },
+                attributes: { wheelchair: true }
+            },
+            {
+                type: 'elevator',
+                floor: 'Metro B1/GF',
+                operator: 'Metro',
+                location: {
+                    zh: 'A1出口 (往日本橋本町)',
+                    en: 'Exit A1 (to Nihonbashi Honcho)',
+                    ja: 'A1出口'
+                },
+                attributes: { wheelchair: true }
+            }
+        ]
     },
     // Tsukiji (Metro)
     'odpt:Station:TokyoMetro.Tsukiji': {
@@ -2164,106 +2244,6 @@ export const STATION_WISDOM: Record<string, StationWisdomData> = {
             {
                 type: 'wifi',
                 floor: 'Metro/Toei',
-                operator: 'Metro',
-                location: {
-                    zh: '改札內',
-                    en: 'Inside Ticket Gate',
-                    ja: '改札内'
-                },
-                attributes: { ssid: 'METRO_FREE_WiFi' }
-            }
-        ]
-    },
-    'odpt:Station:TokyoMetro.Mitsukoshimae': {
-        traps: [
-            {
-                type: 'transfer',
-                title: '🏙️ 百貨公司陷阱 (Department Store Maze)',
-                content: '三越前站與三越百貨、Coredo 室町等多家百貨直結，地下通道非常複雜。',
-                advice: '⚠️ 注意：去不同分館請看準出口標號（如 A1、A4），否則在地下很容易迷路。',
-                severity: 'medium'
-            }
-        ],
-        hacks: [
-            '🏮 **福德神社**：藏身於現代建築 Coredo 室町後方的歷史神社，以求中獎運聞名。',
-            '🖼️ **三井紀念美術館**：隱藏在三井本館內的優雅美術館。'
-        ],
-        l3Facilities: [
-            // === 廁所 (Toilets) ===
-            {
-                type: 'toilet',
-                floor: 'Metro B1',
-                operator: 'Metro',
-                location: {
-                    zh: '半藏門線 驗票口內 (近三越口)',
-                    en: 'Inside Hanzomon Line Gate (near Mitsukoshi)',
-                    ja: '半蔵門線 改札内（三越口付近）'
-                },
-                attributes: { wheelchair: true, hasWashlet: true },
-                source: 'https://www.tokyometro.jp/lang_tcn/station/mitsukoshimae/accessibility/'
-            },
-            {
-                type: 'toilet',
-                floor: 'Metro B1',
-                operator: 'Metro',
-                location: {
-                    zh: '銀座線 驗票口內 (近日本橋方面改札)',
-                    en: 'Inside Ginza Line Gate (near Nihonbashi)',
-                    ja: '銀座線 改札内（日本橋方面改札付近）'
-                },
-                attributes: { wheelchair: true, hasWashlet: true }
-            },
-            // === 置物櫃 (Lockers) ===
-            {
-                type: 'locker',
-                floor: 'Metro B1',
-                operator: 'Metro',
-                location: {
-                    zh: 'A9出口手前',
-                    en: 'Before Exit A9',
-                    ja: 'A9出口手前'
-                },
-                attributes: { count: 30, sizes: ['S', 'M', 'L'] },
-                source: 'https://coinlocker.click/mitsukoshimae-station.php'
-            },
-            {
-                type: 'locker',
-                floor: 'Metro B1',
-                operator: 'Metro',
-                location: {
-                    zh: '銀座線室町三丁目方面改札外',
-                    en: 'Outside Ginza Line Muromachi 3-chome Gate',
-                    ja: '銀座線室町三丁目方面改札外'
-                },
-                attributes: { count: 25, sizes: ['S', 'M'] }
-            },
-            // === 電梯 (Elevators) ===
-            {
-                type: 'elevator',
-                floor: 'Metro B3',
-                operator: 'Metro',
-                location: {
-                    zh: '半藏門線月台 → 穿堂層',
-                    en: 'Hanzomon Line Platform → Concourse',
-                    ja: '半蔵門線ホーム → コンコース'
-                },
-                attributes: { wheelchair: true }
-            },
-            {
-                type: 'elevator',
-                floor: 'Metro GF',
-                operator: 'Metro',
-                location: {
-                    zh: 'A1出口 (日本橋室町野村大樓)',
-                    en: 'Exit A1 (Nihonbashi Muromachi Nomura Bldg)',
-                    ja: 'A1出口（日本橋室町野村ビル）'
-                },
-                attributes: { wheelchair: true }
-            },
-            // === WiFi ===
-            {
-                type: 'wifi',
-                floor: 'Metro B1',
                 operator: 'Metro',
                 location: {
                     zh: '改札內',
