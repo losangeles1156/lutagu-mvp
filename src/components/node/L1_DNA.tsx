@@ -34,12 +34,17 @@ interface L1_DNAProps {
 export function L1_DNA({ data }: L1_DNAProps) {
     const tL1 = useTranslations('l1');
     const locale = useLocale();
-    const { l1_categories = [], description = { ja: '', en: '', zh: '' } } = data || {};
+    // Destructure new l1_dna object, fallback to empty structure
+    const { l1_dna, description = { ja: '', en: '', zh: '' } } = data || {};
+    const { categories = {}, vibe_tags = [] } = l1_dna || {};
+
+    // Get categories as array for mapping
+    const categoryList = Object.values(categories);
 
     // State for expanded category
     const [selectedCatId, setSelectedCatId] = useState<string | null>(null);
 
-    const selectedCategory = l1_categories.find(c => c.id === selectedCatId);
+    const selectedCategory = selectedCatId ? categories[selectedCatId] : null;
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom duration-500">
@@ -62,6 +67,16 @@ export function L1_DNA({ data }: L1_DNAProps) {
                         <p className="text-sm font-bold text-gray-800 italic leading-relaxed font-serif">
                             &quot;{getLocaleString(description, locale)}&quot;
                         </p>
+                        {/* Vibe Tags Display */}
+                        {vibe_tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                                {vibe_tags.map(tag => (
+                                    <span key={tag.id} className="text-[10px] bg-white/80 border border-indigo-100 px-2 py-1 rounded-full text-indigo-600 font-bold shadow-sm">
+                                        #{getLocaleString(tag.label, locale)}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -70,15 +85,15 @@ export function L1_DNA({ data }: L1_DNAProps) {
             <div>
                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3">{tL1('nearbyHighlights')}</h4>
 
-                {l1_categories.length === 0 ? (
+                {categoryList.length === 0 ? (
                     <div className="p-4 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                         {tL1('noHighlights')}
                     </div>
                 ) : (
                     <div className="grid grid-cols-5 gap-y-4 gap-x-2">
-                        {l1_categories.slice(0, 10).map((cat) => {
-                            // Use ID for reliable icon mapping if the data's 'icon' string is loose
-                            const Icon = ICON_MAP[cat.id] || ICON_MAP[cat.icon] || MapPin;
+                        {categoryList.slice(0, 10).map((cat) => {
+                            // Use ID for reliable icon mapping
+                            const Icon = ICON_MAP[cat.id] || MapPin;
                             const isSelected = selectedCatId === cat.id;
 
                             return (
@@ -92,9 +107,13 @@ export function L1_DNA({ data }: L1_DNAProps) {
                                 >
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all ${isSelected
                                         ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
-                                        : 'bg-white border-gray-200 text-gray-400 group-hover:border-indigo-200 group-hover:text-indigo-500'
+                                        : 'bg-white border-gray-200 text-gray-400 group-hover:border-indigo-200 group-hover:text-indigo-500 relative'
                                         }`}>
                                         <Icon size={18} strokeWidth={2.5} />
+                                        {/* Count Badge */}
+                                        <div className="absolute -top-1 -right-1 bg-gray-900 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                                            {cat.count > 99 ? '99+' : cat.count}
+                                        </div>
                                     </div>
                                     <span className={`text-[9px] font-bold truncate max-w-full tracking-tight ${isSelected ? 'text-indigo-700' : 'text-gray-500'}`}>
                                         {getLocaleString(cat.label, locale)}
@@ -115,7 +134,7 @@ export function L1_DNA({ data }: L1_DNAProps) {
                             <h5 className="font-bold text-gray-900 flex items-center gap-2">
                                 {getLocaleString(selectedCategory.label, locale)}
                                 <span className="bg-gray-900 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
-                                    {selectedCategory.items.length}
+                                    {selectedCategory.representative_spots?.length || 0}
                                 </span>
                             </h5>
                             <button
@@ -126,10 +145,10 @@ export function L1_DNA({ data }: L1_DNAProps) {
                             </button>
                         </div>
 
-                        {/* Items List */}
+                        {/* Items List (Representative Spots) */}
                         <div className="max-h-[300px] overflow-y-auto divide-y divide-gray-50 bg-white">
-                            {selectedCategory.items.map((item) => (
-                                <div key={item.id} className="p-4 hover:bg-gray-50 transition-colors flex items-start gap-3 group/item">
+                            {(selectedCategory.representative_spots || []).map((item, idx) => (
+                                <div key={item.osm_id || idx} className="p-4 hover:bg-gray-50 transition-colors flex items-start gap-3 group/item">
                                     <div className="mt-1 p-1.5 bg-gray-100 text-gray-400 rounded-lg group-hover/item:bg-indigo-50 group-hover/item:text-indigo-600 transition-colors">
                                         <MapPin size={14} />
                                     </div>
@@ -137,12 +156,13 @@ export function L1_DNA({ data }: L1_DNAProps) {
                                         <h6 className="text-sm font-bold text-gray-900 leading-tight mb-0.5 truncate">
                                             {getLocaleString(item.name, locale)}
                                         </h6>
+                                        {/* Since location is removed, we show a generic text or subcategory if available */}
                                         <p className="text-xs text-gray-500 font-medium">
-                                            {getLocaleString(item.location, locale)}
+                                            Nearby Spot
                                         </p>
                                     </div>
                                     <a
-                                        href={item.googleMapLink}
+                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getLocaleString(item.name, locale))}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="mt-0.5 p-2 bg-gray-100 text-gray-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all shadow-sm flex-shrink-0"
@@ -152,6 +172,11 @@ export function L1_DNA({ data }: L1_DNAProps) {
                                     </a>
                                 </div>
                             ))}
+                            {(!selectedCategory.representative_spots || selectedCategory.representative_spots.length === 0) && (
+                                <div className="p-4 text-center text-xs text-gray-400">
+                                    {tL1('noSpots')}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

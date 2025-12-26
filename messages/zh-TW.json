@@ -42,7 +42,8 @@
         "dna": "生活機能",
         "live": "即時動態",
         "facility": "服務設施",
-        "bambi": "智慧建議"
+        "bambi": "智慧建議",
+        "transit": "交通時刻"
     },
     "tag": {
         "shopping": "購物",
@@ -224,11 +225,11 @@
         "accessible": "無障礙設施"
     },
     "l4": {
+        "initialMessage": "嗨！我在 {station}。你想去哪裡？我可以為你查詢路線、票價和時刻表。",
         "strategyTitle": "Bambi 策略",
         "subtitle": "基於即時數據的智慧建議",
         "topPick": "首選推薦",
         "alternatives": "替代方案",
-        "thinking": "思考中...",
         "disclaimer": "建議是根據當前交通、天氣和設施狀態生成的。",
         "bambiStrategy": "Bambi 建議",
         "suggestion": "建議",
@@ -246,6 +247,24 @@
             "family": "親子同遊",
             "accessibility": "行動不便",
             "vibe": "探索體驗"
+        },
+        "chips": {
+            "synthesize": "合成策略",
+            "route": "規劃路線",
+            "nearby": "附近景點"
+        },
+        "thinking": {
+            "initializing": "正在啟動認知引擎...",
+            "l2": "分析 L2 即時路況與天氣...",
+            "l3": "查詢 L3 設施與 ODPT 時刻表...",
+            "kb": "讀取專家知識庫 (Tips & Hacks)...",
+            "synthesizing": "正在根據您的需求合成最佳策略..."
+        },
+        "card": {
+            "title": "已合成最佳策略",
+            "reasoning": "決策依據",
+            "l2Verified": "即時路況驗證",
+            "odptVerified": "ODPT 時刻表確認"
         }
     },
     "weather": {

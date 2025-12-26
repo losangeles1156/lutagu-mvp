@@ -5,19 +5,36 @@
 export type LocaleString = { ja: string; en: string; zh: string };
 
 // --- L1: DNA (Location) ---
-export interface L1Item {
-    id: string;
-    name: LocaleString; // Display Name
-    location: LocaleString; // e.g., "Park Exit, 2 mins walk"
-    googleMapLink: string; // URL for navigation
-    tags?: string[];
+export interface L1_Item {
+    name: LocaleString;
+    osm_id?: string;
 }
 
-export interface L1Category {
-    id: string; // e.g., 'cafe', 'shopping', 'attraction'
-    label: LocaleString; // Display Label
-    icon: string; // Lucide icon name or emoji
-    items: L1Item[];
+export interface L1_Subcategory {
+    count: number;
+    label: LocaleString;
+}
+
+export interface L1_Category {
+    id: string; // e.g., 'shopping'
+    count: number;
+    label: LocaleString;
+    subcategories?: { [key: string]: L1_Subcategory };
+    representative_spots?: L1_Item[];
+}
+
+export interface L1_VibeTag {
+    id: string;
+    label: LocaleString;
+    score: number; // 1-5
+    description?: LocaleString;
+}
+
+// Replaces the old array of category objects with a map + vibe tags
+export interface L1_DNA_Data {
+    categories: { [key: string]: L1_Category };
+    vibe_tags: L1_VibeTag[];
+    last_updated: string;
 }
 
 // --- L2: Live (Vitals) ---
@@ -87,7 +104,7 @@ export interface StationUIProfile {
     };
 
     // L1: 300m DNA
-    l1_categories: L1Category[];
+    l1_dna: L1_DNA_Data;
 
     // L2: Live Status
     l2: {

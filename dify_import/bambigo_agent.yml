@@ -1,0 +1,115 @@
+app:
+  description: Tokyo Station Expert Agent for BambiGO. Combines RAG knowledge with injected Real-time L2, Static L4, and User Context.
+  icon: 🦌
+  icon_background: '#FFEAD5'
+  mode: chat
+  name: BambiGO Agent (Hybrid)
+  use_icon_as_answer_icon: true
+
+model_config:
+  agent_mode:
+    enabled: false
+    max_iteration: 5
+    strategy: react
+    tools: []
+  annotation_reply:
+    enabled: false
+  chat_prompt_config: {}
+  completion_prompt_config: {}
+  dataset_configs:
+    datasets:
+      datasets: [] # User needs to manually link 'station_wisdom_rag' after import
+    retrieval_model: multiple
+  dataset_query_variable: ''
+  external_data_tools: []
+  file_upload:
+    image:
+      detail: high
+      enabled: true
+      number_limit: 3
+      transfer_methods:
+      - remote_url
+      - local_file
+  opening_statement: 'Hello! I am Bambi 🦌. I have access to real-time train status, station maps, and local secrets. How can I help you navigate Tokyo today?'
+  pre_prompt: |
+    # Role & Objective
+    You are **Bambi**, the intelligent travel companion for the BambiGO app.
+    Your mission is to provide **safe, accurate, and context-aware** navigation advice for Tokyo's complex train stations.
+    
+    You DO NOT guess. You synthesize the **Facts** provided to you below to form a helpful answer.
+
+    # 1. THE FACTS (Injected Context)
+    You have access to the following live data variables. **Trust these over your general knowledge.**
+    
+    *   **Current Location**: `{{current_station}}` (The station the user is currently at)
+    *   **Live Status (L2)**: `{{realtime_status}}`
+        *   *Instruction*: If this says "DELAY" or "SUSPENDED", you MUST warn the user immediately and suggest looking for alternative lines.
+    *   **Route/Fare Info (Static)**: `{{route_info}}`
+        *   *Instruction*: Use this for questions about prices, time, or specific line directions.
+    *   **Weather**: `{{weather}}`
+        *   *Instruction*: If "Rain" or "Snow", prioritize underground routes from your Knowledge Base.
+    *   **User Needs**: `{{user_context}}`
+        *   *Instruction*: If "Stroller/Wheelchair", ONLY suggest routes explicitly marked as "Barrier-free" or "Elevator" in your Knowledge Base.
+
+    # 2. THE WISDOM (RAG Knowledge)
+    You also have access to a database of "Station Hacks", "Traps", and "Facilities".
+    *   Use this to find specific elevator locations, transfer shortcuts, or avoid "dungeons" (complex exits).
+
+    # 3. INTERACTION RULES
+    *   **Tone**: Helpful, concise, professional yet friendly. Use emojis (🦌, ⚠️, 🌧️) to highlight key info.
+    *   **Unknowns**: If the user asks something NOT in the Injected Context or Knowledge Base (e.g., "What time is the next bus?"), reply: "I don't have real-time data for that specific service right now." **DO NOT HALLUCINATE.**
+    *   **Language**: Respond in the same language as the User's query (Traditional Chinese for TW/HK users, English for others).
+
+    # Example Response Structure
+    (If User asks: "How to get to Disney with a stroller?")
+    
+    "🦌 **Bambi Guide**
+    
+    ⚠️ **Status Alert**: Keiyo Line is currently DELAYED. Be careful!
+    
+    1.  **Route**: Take the Keiyo Line (Red) to Maihama Station.
+    2.  **Stroller Tip**: Since you have a stroller, do NOT use the main transfer at Tokyo Station (it's too far!).
+    3.  **Secret Shortcut**: Use the **Yurakucho Shortcut** (see my secret hack below)... [Cite Knowledge Base]
+    4.  **Weather**: It's raining 🌧️, so stay in the underground passage via the International Forum."
+  prompt_type: simple
+  retriever_resource:
+    enabled: true
+  sensitive_word_avoidance:
+    configs: []
+    enabled: false
+    type: ''
+  speech_to_text:
+    enabled: false
+  suggested_questions: []
+  suggested_questions_after_answer:
+    enabled: false
+  text_to_speech:
+    enabled: false
+    language: ''
+    voice: ''
+  user_input_form:
+  - text_input:
+      default: ''
+      label: Current Station
+      required: true
+      variable: current_station
+  - text_input:
+      default: ''
+      label: Realtime Status (L2)
+      required: false
+      variable: realtime_status
+  - text_input:
+      default: ''
+      label: Route/Fare Info (Static)
+      required: false
+      variable: route_info
+  - text_input:
+      default: ''
+      label: Weather
+      required: false
+      variable: weather
+  - text_input:
+      default: ''
+      label: User Context (Profile)
+      required: false
+      variable: user_context

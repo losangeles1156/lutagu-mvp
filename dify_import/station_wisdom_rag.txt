@@ -1,0 +1,911 @@
+### Station Context: TokyoMetro.Ginza
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🤝 銀座線與日比谷線轉乘 (Ginza to Hibiya): 雖然這兩條線路共享銀座站，但轉乘需要經過漫長的地下通道，特別是如果你在車廂兩端下車。 (Advice: ⚠️ 建議：跟隨藍色（日比谷線）或橙色（銀座線）的地面指示箭頭，並注意不要誤出站。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 💎 **出口陷阱**：如果你要去銀座四丁目的三越百貨，請尋找 A7 或 A8 出口，這比走 A1 快得多。
+- [Hack] 🎨 **藝術地下道**：地下道內常有藝術展覽，轉乘時不妨放慢腳步欣賞。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: Toei.Nihombashi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚧 東西線與銀座線轉乘 (Tozai to Ginza): 東西線日本橋站位置較深，轉乘銀座線需要經過數段樓梯或電梯。 (Advice: ⚠️ 注意：轉乘約需 5-8 分鐘，趕時間時請特別留意。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🛍️ **高島屋直結**：B0 出口直通日本橋高島屋百貨，是逛街的最佳入口。
+- [Hack] 🌉 **日本橋本體**：從 B12 出口上來即是歷史悠久的日本橋古橋。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Nihombashi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🪜 東西線深層陷阱 (Tozai Depth): 東西線月臺位於地下深處，轉乘銀座線需上下多層樓梯。 (Advice: ⚠️ 建議：尋找「Coredo 日本橋」方向的電梯，避開繁忙的中央樓梯。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏢 **Coredo 直結**：B12 出口直通 Coredo 日本橋，享用美食非常方便。
+- [Hack] 💴 **金融歷史散步**：從 B1 出口出來，即是著名的日本銀行舊館與貨幣博物館。
+
+---
+
+### Station Context: TokyoMetro.Mitsukoshimae
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚇 半藏門線轉乘距離 (Long Transfer): 雖然站名相同，但銀座線與半藏門線月臺相距甚遠，轉乘需步行約 5-8 分鐘。 (Advice: ⚠️ 心理建設：請預留轉乘時間，通道設有自動步道可減輕負擔。)
+- [Trap] 🏙️ 百貨公司陷阱 (Department Store Maze): 三越前站與三越百貨、Coredo 室町等多家百貨直結，地下通道非常複雜。 (Advice: ⚠️ 注意：去不同分館請看準出口標號（如 A1、A4），否則在地下很容易迷路。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏛️ **三越本館直達**：A5 出口直接通往日本最古老的三越百貨本店 B1 美食街。
+- [Hack] 🏮 **福德神社**：藏身於現代建築 Coredo 室町後方的歷史神社，以求中獎運聞名。
+- [Hack] 🏦 **金庫街氛圍**：周邊是日本銀行總部，街道建築充滿明治時代的厚重感，適合散步拍照。
+- [Hack] 🎬 **Coredo 室町**：A6 出口直通 Coredo 室町，有電影院與深夜營業的餐飲店。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Tsukiji
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🐟 場外市場出口 (Exit Confusion): 要去築地場外市場吃海鮮？請務必走 **1號出口 (本願寺方面)**。 (Advice: ⚠️ 注意：若走錯到 3/4 號出口，需要過大馬路才能抵達市場。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🙏 **本願寺巡禮**：1號出口出來即是風格獨特的「築地本願寺」，建築風格融合印度與佛教元素。
+- [Hack] 🍣 **晨間壽司**：場外市場許多名店清晨 5:00 就開門，建議早起避開觀光人潮。
+- [Hack] 🍙 **飯糰名店**：雖然握壽司很有名，但 1 號出口附近的飯糰專賣店也是在地人的首選。
+
+**Facilities (L3 Services):**
+- [toilet] 本願寺改札外 [Wheelchair] [BabyRoom]
+- [elevator] 1, 2 號出口 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Kayabacho
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 📈 **金融街之胃**：車站周邊有無數平價且高品質的蕎麥麵店，服務於東京證券交易所的商務人士。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.HigashiGinza
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🎭 歌舞伎散場人潮 (Kabukiza Crowd): 歌舞伎座就在車站上方，演出結束時（通常是下午 4:00 或晚上 8:00）車站會瞬間爆滿。 (Advice: ⚠️ 建議：避開演出散場時間，或改走地下道至銀座站搭車（步行僅 5 分鐘）。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🎭 **歌舞伎座直結**：3號出口直接連通歌舞伎座地下廣場，那裡有許多特色伴手禮與便當店（不用買票也能逛）。
+- [Hack] 🚶 **銀座地下連通**：從這裡可以沿著地下道一路走到銀座站甚至有樂町，雨天完全不用淋雨。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Hatchobori
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚂 京葉線轉乘距離 (Keiyo Transfer): 日比谷線與 JR 京葉線的轉乘雖然比東京站近，但仍需步行約 5-7 分鐘。 (Advice: ⚠️ 注意：早晚尖峰時段轉乘通道非常擁擠，請預留充裕時間。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌉 **隅田川露台**：從 B4 出口步行 3 分鐘即可抵達隅田川河岸，是欣賞東京天際線的隱藏景點。
+- [Hack] 🐢 **去迪士尼的捷徑**：比起在東京站轉乘京葉線，許多內行人喜歡搭日比谷線到八丁堀轉車，距離更短更輕鬆。
+- [Hack] 🍱 **商務午餐**：八丁堀是著名的商務區，周邊地下街有無數超值的中午定食。
+
+**Facilities (L3 Services):**
+- [toilet] 八丁堀交差點方面改札外 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Ueno
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚄 新幹線搭乘警示 (High Depth): 上野站的新幹線月臺位於地下四層，非常深！從上野公園/不忍口進站後，需連續搭乘 **四段長扶梯** 才能抵達。 (Advice: ⚠️ 心理建設：請務必預留 **至少 15 分鐘** 的進站緩衝時間。絕對不要在發車前 5 分鐘才抵達驗票口，你會趕不上。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏛️ **文化天橋 (Panda Bridge)**：從公園口出站後，可直接走天橋（官方稱熊貓橋）通往國立科學博物館與上野大廳，避開 1F 的擁擠人潮。
+- [Hack] 🛍️ **阿美橫町切入點**：想去阿美橫町？不要走「中央改札」，改走「不忍改札」過馬路就是入口，省下 5 分鐘迷路時間。
+- [Hack] 🌧️ **雨天地下網**：上野站地下通道發達，可一路連通至京成上野站與地鐵站，下雨天完全不必淋雨。
+- [Hack] 🚶 **散步去淺草**：由此沿淺草通步行至淺草約 25-30 分，可省下地鐵票並欣賞下町風光。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: JR-East.Tokyo
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🏃 京葉線轉乘陷阱 (Far Transfer): 京葉線（去迪士尼的路線）月臺距離山手線非常遠，實際上接近「有樂町站」。 (Advice: ⚠️ 心理建設：轉乘通道長達 800 公尺，步行需 15-20 分鐘。請把它當作是「走到下一站」的距離感。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] ⚡️ **京葉線隱藏捷徑 (Yurakucho Shortcut)**：要去迪士尼？與其在站內走 20 分鐘，不如**在「JR 有樂町站」下車**！\n1. 從「京橋口」出站，往「東京國際論壇 (Tokyo International Forum)」走。\n2. 看到「Side Square」下樓梯（或搭後方電梯），直接抵達京葉線丸之內口。\n3. 嬰兒車友善，且避開站內人潮。
+- [Hack] 🎫 **丸之內南口紅磚站舍**：國家重要文化財，必拍照點！從丸之內地下廣場搭電梯上1F即可抵達。
+- [Hack] 🍱 **駅弁屋 祭**：中央通路有超過200種車站便當，建議發車前30分鐘來選購。
+- [Hack] 🔄 **北自由通路**：想在「丸之內」與「八重洲」之間移動但不進站？請走「北自由通路」，這是免費的穿梭捷徑。
+- [Hack] 🎨 **顏色辨識法**：迷路時看地板顏色——紅色系往丸之內（西），藍/綠色系往八重洲（東）。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: Toei.Asakusa.Oshiage
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🗼 晴空塔人潮 (Skytree Crowds): 押上站是前往晴空塔的主要車站，假日與連假期間人潮非常洶湧。 (Advice: 💡 建議：若要前往晴空塔，請預留出站時間。回程若遇人潮管制，可考慮步行至鄰近車站搭乘。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] ✈️ **直通成田**：此站直通京成線往成田機場，是個非常方便的轉運點。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: Toei.Asakusa.Asakusa
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🧳 電梯陷阱 (Elevator Trap): 淺草站出口雖多，但直通地面的電梯 **只有一座**！ (Advice: ⚠️ 行動建議：攜帶大型行李的旅客，請務必尋找「駒形橋方面」的 **A2b 出口** 或 **1號出口** (雷門旁)，這是有電梯的出口。)
+- [Trap] 🚧 四個淺草站混淆 (The 4 Asakusas): 地鐵銀座線、都營淺草線、東武鐵道、筑波快線 (TX) 都有「淺草站」。 (Advice: ⚠️ 絕對注意：筑波快線的淺草站距離其他三站約 600 公尺（步行10分），轉乘極不方便，請勿安排在此站轉乘 TX。)
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: Toei.Asakusa.Kuramae
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚅 列車過站不停警示 (Skip Stop): 注意！都營淺草線的「Airport快特 (Airport Kaitoku)」列車 **不會停靠** 藏前站。 (Advice: 🛑 能夠搭乘的車種：除了 Airport 快特以外的車種（普通、快速、特急等）皆可搭乘。若誤搭快特，請在下一站換車折返。)
+- [Trap] 🔄 大江戶線轉乘陷阱 (Street Transfer): 淺草線藏前站與大江戶線藏前站 **在站外轉乘**，需出站走一般道路約 300 公尺。 (Advice: ⚠️ 心理建設：這不是站內轉乘，請做好要走出戶外過馬路的準備。轉乘時間需抓 10-15 分鐘。)
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: Toei.Asakusa.Asakusabashi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🪜 轉乘陷阱 (Stair Master): 雖然淺草橋站有 JR 總武線和都營淺草線，但兩者轉乘 **需要出站並走一段樓梯**，且電梯位置隱密。 (Advice: ⚠️ 心理建設：攜帶大件行李者，請務必尋找 A3 出口（有電梯），否則將面臨長長的樓梯挑戰。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🧵 **手作天堂**：出站即是「江戶通」，滿街都是飾品材料、皮革、珠寶的批發店，價格甚至是市價的一半！
+- [Hack] 🎎 **人形老舖**：此地也是著名的「久月」等人形娃娃專賣區。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Tawaramachi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🍳 合羽橋道具街陷阱 (Kitchen Street): 想去合羽橋道具街？最近的出口是 3 號，但 **只有樓梯**。 (Advice: ⚠️ 行動建議：若有重物，請改走 2 號出口（有電梯），雖然要多過一個馬路，但省力很多。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍞 **知名麵包店**：著名的「Pelican」麵包店就在附近，需預約才買得到！
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: JR-East.Uguisudani
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🎭 南北出口大不同 (North vs South): 鶯谷站的北口與南口氛圍截然不同！北口是著名的「摩鐵街 (Love Hotel Hill)」，南口則是通往上野公園與博物館的文教區。 (Advice: 💡 若要去東京國立博物館，請務必走 **南口**，北口走出來會讓你懷疑人生（或非常尷尬）。)
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Yushima
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] ⛩️ 湯島天滿宮捷徑 (Shrine Shortcut): 要去湯島天滿宮（求學問的神社）？最近的是 3 號出口。 (Advice: 💡 若攜帶推車，3 號出口有電梯直達地面。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🎓 **合格祈願**：步行 2 分鐘即達湯島天滿宮，考生必看。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Minowa
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚋 都電荒川線轉乘 (Tram Transfer): 三之輪站可轉乘都電荒川線（三之輪橋站），但需步行約 5 分鐘。 (Advice: ⚠️ 心理建設：這不是站內轉乘，需走出地面通過商店街。)
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Inaricho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] ⛔ 兩側月台不互通 (Direction Trap): 稻荷町站的 1 號及 2 號月台在地下並不相通！ (Advice: ⚠️ 絕對守則：進站前請確認方向。往澀谷請走 1 號出口，往淺草請走 2 號出口或電梯專用口。若走錯需出站過馬路。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍜 **美食巷弄**：附近有許多平價且高品質的拉麵與沾麵店，是避開上野人潮的好選擇。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: Toei.ShinOkachimachi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚀 TX 轉乘樞紐 (TX Transfer): 此站是都營大江戶線與 Tsukuba Express (TX) 的重要轉乘站，兩線共用 B1 穿堂層。 (Advice: 💡 提示：雖然共用層，但轉乘仍需經過轉乘專用閘門，Suica/Pasmo 餘額請充足。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🛍️ **佐竹商店街**：日本第二古老的商店街，氛圍非常復古且有許多平價美食。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: Toei.UenoOkachimachi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚉 四線交會迷宮 (Quad-Line Maze): 此站地下連通上野廣小路 (銀座線)、仲御徒町 (日比谷線) 及 JR 御徒町站，範圍非常大。 (Advice: ⚠️ 心理建設：轉乘雖然在地下，但移動距離可能超過 300 公尺，請預留 5-8 分鐘。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌧️ **雨天捷徑**：利用這條超長地下走廊，可以從上野站一路走到御徒町站而不淋雨。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: JR-East.Okachimachi
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🐟 **阿美橫町尾端**：這裡是阿美橫町的另一端，相較於上野站的擁擠，從御徒町進入通常人潮稍少一點，且海鮮丼名店多集中在此側。
+- [Hack] 💎 **珠寶批發**：車站周邊是日本最大的珠寶飾品批發區。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Iriya
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 👻 **鬼子母神**：每年七月的「朝顏市（牽牛花市）」非常熱鬧。
+- [Hack] 🍲 **老舖天丼**：附近有許多百年老店，價格比淺草親民許多。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Kasumigaseki
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🏛️ 政府機關迷宮 (Government Maze): 霞關站是日本政府機關的中心，出口眾多且複雜，容易迷失方向。 (Advice: ⚠️ 絕對守則：請務必確認要前往的政府機關或目的地，並記住對應的出口編號。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍽️ **地下食堂探險**：部分政府機關大樓開放民眾進入使用地下食堂，價格實惠且份量十足，是午餐的好選擇。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.Iidabashi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🎢 五線交匯長廊 (Five-Line Corridor): 飯田橋站匯集了東西線、有楽町線、南北線、大江戶線與 JR，轉乘路徑極長。 (Advice: ⚠️ 注意：東西線與其他線路轉乘需步行 5-10 分鐘，請務必跟隨地面顏色指引指標。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] ⛩️ **東京大神宮**：從西口出站步行約 5 分鐘，是東京最具代表性的戀愛結緣神社。
+- [Hack] 🚢 **Canal Cafe**：位於神田川邊的景觀咖啡廳，特別是櫻花季時美不勝收。
+
+**Facilities (L3 Services):**
+
+---
+
+### Station Context: TokyoMetro.UenoHirokoji
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏬 **松坂屋直結**：與老牌百貨松坂屋地下直連，下雨天逛街購物非常方便。
+- [Hack] 🐼 **熊貓廣場**：出站即是上野御徒町的熊貓廣場，常有市集活動。
+
+**Facilities (L3 Services):**
+- [toilet] 上野公園方面改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.NakaOkachimachi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 💜 紫色大迷宮 (Purple Connection): 日比谷線仲御徒町站位於整個御徒町地下連通網的最東端。 (Advice: ⚠️ 注意：若要轉乘大江戶線，需走過長長的地下商店街。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🛍️ **多慶屋**：出口旁就是著名的紫色大樓「多慶屋」，零食藥妝批發價。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Otemachi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🌀 東京最大迷宮 (The Labyrinth): 大手町站共有 5 條路線交會，是東京地下鐵最大的迷宮。從千代田線走到東西線可能需要 15 分鐘。 (Advice: ⚠️ 絕對守則：請務必看著頭頂的顏色指標前進，絕對不要憑感覺走。丸之內線(紅)、東西線(藍)、千代田線(綠)、半藏門線(紫)、三田線(深藍)。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍱 **Otemachi One**：C4/C5 出口直結的新大樓，B1 有許多高檔但平價的便當店，適合商務午餐。
+- [Hack] 🌲 **皇居東御苑**：C13b 出口出來就是皇居的大手門，是離皇居最近的入口。
+
+**Facilities (L3 Services):**
+- [toilet] 丸之內線 改札內 [Wheelchair]
+- [toilet] 東西線 中央改札內 [Wheelchair] [BabyRoom]
+- [toilet] 千代田線 往綾瀨方向月台 [Wheelchair]
+- [elevator] A5 出口 (丸之內線側) [Wheelchair]
+- [elevator] B2c 出口 (東西線側) [Wheelchair]
+- [elevator] C14 出口 (千代田線側) [Wheelchair]
+
+---
+
+### Station Context: JR-East.Akihabara
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🔄 總武線空中轉乘 (Sky High Sobu): 總武線月台位於 6 樓，山手線/京濱東北線位於 2 樓。轉乘時需搭乘極長的電扶梯。 (Advice: ⚠️ 注意：人潮眾多時電扶梯會大排長龍，轉乘請預留 5-8 分鐘。)
+- [Trap] ⚡ 電器街 vs 昭和通 (West vs East): 秋葉原站被 JR 線路切分為二，西側是「電器街/動漫區」，東側是「Yodobashi Camera/日比谷線」。 (Advice: ⚠️ 注意：若走錯邊要繞一大圈。請記住：看動漫走「電器街口」，買家電走「中央改札」或「昭和通口」。)
+- [Trap] 🚇 日比谷線轉乘地雷 (Hibiya Trap): 日比谷線月台位於車站極東側，距離電器街核心區較遠。 (Advice: ⚠️ 建議：若搭日比谷線要去電器街，請走「3號出口」，或利用 JR 中央改札旁的「東西自由通路」穿越。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🛍️ **Yodobashi Akiba**：昭和通口直結，全日本最大的電器百貨，B1-8F 應有盡有。
+- [Hack] 🥛 **牛奶小站**：總武線月台上有專賣日本各地玻璃瓶牛奶的販賣部，非常受歡迎。
+- [Hack] 🌉 **東西自由通路**：這是唯一不需進站即可穿越車站東西兩側的捷徑，位於中央改札口旁。
+- [Hack] 🚶 **末廣町捷徑**：若要去電器街北側（女僕店、唐吉訶德），搭銀座線到「末廣町站」其實比秋葉原站更近。
+
+**Facilities (L3 Services):**
+- [toilet] 電氣街口 改札內 [Wheelchair]
+- [toilet] 中央改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Akihabara
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌊 **神田川穿越**：日比谷線秋葉原站位於神田川下方，因此位置較深。
+
+**Facilities (L3 Services):**
+- [toilet] 站務室旁 (改札外) [Wheelchair] [BabyRoom]
+- [elevator] 3號出口 (昭和通口) [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Shimbashi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚂 轉乘大迷宮 (Transfer Maze): 新橋站連結了 JR、銀座線、淺草線與百合海鷗號，且各站體相對獨立。 (Advice: ⚠️ 建議：從淺草線轉乘銀座線需步行約 5-8 分鐘，請務必沿著黃色地面顏色標示前進。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍺 **SL 廣場**：西口站前的蒸汽火車頭是典型的集合點，周邊有全東京最密集的平價居酒屋。
+- [Hack] 🏙️ **汐留通路**：前往汐留方向可以走地下空調通道「Sio-Site」，夏天不怕熱。
+
+**Facilities (L3 Services):**
+- [toilet] 銀座線 驗票口內 (近 JR 轉乘口) [Wheelchair]
+- [toilet] 淺草線 A3 出口附近改札外 [Wheelchair] [BabyRoom]
+
+---
+
+### Station Context: TokyoMetro.Roppongi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🗻 全日本最深月台 (Japan\: 都營大江戶線月台高達地下 7 層（約 42 公尺），光是搭電扶梯就要 5 分鐘。 (Advice: ⚠️ 注意：趕時間的人請儘量利用日比谷線，或預留充足的垂直移動時間。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏢 **ヒルズ與ミッドタウン**：兩個大開發區分別位於不同出口，ヒルズ走 1c 出口，ミッドタウン走 8 號出口。
+- [Hack] 🖼️ **藝術三角**：車站周邊環繞著森美術館、國立新美術館與三得利美術館，文化氛圍濃厚。
+
+**Facilities (L3 Services):**
+- [toilet] 西麻布方面驗票口內 [Wheelchair]
+- [toilet] 大江戶線 驗票口內 [Wheelchair] [BabyRoom]
+
+---
+
+### Station Context: Toei.Daimon
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🛬 **機場玄關**：轉乘單軌電車前往羽田機場非常方便，是大門/濱松町的核心角色。
+- [Hack] 🗼 **增上寺首選**：從 B1 出口步行 5 分鐘即可抵達東京塔腳下的壯觀佛寺。
+
+**Facilities (L3 Services):**
+- [toilet] 淺草線/大江戶線 轉乘口內 [Wheelchair]
+
+---
+
+### Station Context: JR-East.Hamamatsucho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚝 單軌轉乘提示 (Monorail Transfer): JR 與單軌電車轉乘時，南口與北口的功能不同。 (Advice: ⚠️ 建議：大行李者請使用南口轉乘，有無障礙專屬動線。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🚶 **竹芝平臺**：從北口可以走步行平臺直達竹芝碼頭，欣賞海邊景色。
+
+**Facilities (L3 Services):**
+- [toilet] 南口改札內 廁所旁 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Omotesando
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🎨 跨月台便利轉乘 (Cross-platform Transfer): 銀座線與半藏門線在表參道站是共享月台的，轉乘非常簡單。 (Advice: ⚠️ 撇步：如果你是這兩線互轉，直接在對面月台等車即可，不需要走任何樓梯。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🥨 **Echika 表參道**：改札內有著名的美食區與麵包店，是轉乘時補充能量的好地方。
+- [Hack] 🍎 **Apple Store 直結**：A2 出口上來就是標誌性的 Apple Store。
+
+**Facilities (L3 Services):**
+- [toilet] 神宮前・原宿方面改札內 (近 B2 出口) [Wheelchair] [BabyRoom]
+
+---
+
+### Station Context: TokyoMetro.Hiroo
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌳 **有栖川宮紀念公園**：從 1 號出口步行 3 分鐘，這是一個極其安靜且充滿自然氛圍的公園。
+- [Hack] 🥖 **外國人超市**：National Azabu 位於 門前，可以買到許多稀有的進口商品。
+
+**Facilities (L3 Services):**
+- [toilet] 西麻布方面驗票口內 [Wheelchair]
+- [elevator] 4 號出口旁 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: TokyoMetro.Akasakamitsuke
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚥 絕非直結的「永田町」轉乘 (Not Really Connected): 赤坂見附與永田町雖然在地圖上重疊，但實際轉乘某些線路（如半藏門線）需步行約 5-10 分鐘。 (Advice: ⚠️ 注意：如果你在赤坂見附下車要轉乘南北線或半藏門線，請有步行超過 500m 的心理準備。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍛 **美食地下道**：車站連通道「ベルビー赤坂」內有無數高品質餐廳，適合商務晚餐。
+
+**Facilities (L3 Services):**
+- [toilet] 驗票口內 永田町方向通道 [Wheelchair]
+
+---
+
+### Station Context: Toei.Asakusa
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚇 淺草站大迷宮 (Asakusa Station Maze): 淺草站有都營淺草線、東京Metro銀座線、東武線三條路線交會，但彼此並非直結。 (Advice: ⚠️ 建議：從都營淺草線轉乘銀座線需要出站再入站，步行約 5-8 分鐘。記得先跟站務員確認最短路徑。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] ⛩️ **雷門最近出口**：A4 出口步行 1 分鐘即可抵達著名的雷門。
+- [Hack] 🍡 **仲見世通り**：雷門到淺草寺之間的參道商店街，約 250 公尺長，可以邊吃邊逛。
+- [Hack] 🚤 **水上巴士**：從吾妻橋可以搭水上巴士到御台場和葛西臨海公園。
+
+**Facilities (L3 Services):**
+- [toilet] 淺草線改札內 [Wheelchair]
+- [elevator] A2b 出口（雷門方面） [Wheelchair]
+- [elevator] A4 出口 [Wheelchair]
+- [elevator] A5 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Kuramae
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] ⚠️ 淺草線與大江戶線不直結！ (Lines NOT Connected): 藏前站的淺草線和大江戶線雖然同名，但兩者是完全分離的車站建築，需要步行地下通道約 5 分鐘。 (Advice: ⚠️ 注意：如果你需要在藏前轉乘這兩條線，請務必預留至少 10 分鐘的轉乘時間。通道有明確標示但距離較長。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🎨 **藏前職人街**：這一帶有許多手工藝品店和咖啡廳，是東京的「布魯克林」。
+- [Hack] 🧵 **手芸材料**：浅草橋至蔵前一帶是日本最大的手工藝材料批發區。
+
+**Facilities (L3 Services):**
+- [toilet] 淺草線改札內 [Wheelchair]
+- [toilet] 大江戶線改札內 [Wheelchair]
+- [elevator] A2 出口 [Wheelchair]
+- [elevator] A6 出口 [Wheelchair]
+- [elevator] A7 出口 [Wheelchair]
+- [elevator] A0 出口 [Wheelchair]
+- [wifi] 全站 (兩線皆有) 
+
+---
+
+### Station Context: Toei.Asakusabashi
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🎎 **人形批發街**：從 A3 出口出站，即可看到日本最大的人形（人偶）批發商店街。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Hibiya
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🤝 有樂町轉乘連通 (Connected Hub): 日比谷站與有樂町站（有樂町線/JR）通過地下通道相連，但距離較遠。 (Advice: ⚠️ 注意：雖然是同一付費區（Metro），但從千代田線走到有樂町線需 5-8 分鐘。)
+
+**Facilities (L3 Services):**
+- [toilet] 幸橋方面改札內 [Wheelchair]
+- [elevator] A11 出口 [Wheelchair]
+- [elevator] 千代田線月台 → 改札 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Yurakucho
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🎫 **JR 轉乘口**：利用 D2 出口可直接抵達 JR 有樂町站中央口。
+
+**Facilities (L3 Services):**
+- [toilet] 改札外 D2 出口附近 [Wheelchair] [BabyRoom]
+- [elevator] D7 出口 [Wheelchair]
+
+---
+
+### Station Context: JR-East.Ochanomizu
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🌉 聖橋口 vs 御茶之水橋口: 兩個出口相距甚遠，聖橋口靠近秋葉原側（湯島聖堂），御茶之水橋口靠近明治大學/醫院。 (Advice: ⚠️ 建議：去樂器街請走御茶之水橋口；去神田明神請走聖橋口。)
+
+**Facilities (L3 Services):**
+- [toilet] 御茶之水橋口 改札內 [Wheelchair] [BabyRoom]
+- [toilet] 聖橋口 改札內 [Wheelchair]
+
+---
+
+### Station Context: Toei.Jimbocho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 📚 書街迷宮 (Book Town Maze): 神保町站出口眾多，且通往不同主題的書店區。 (Advice: ⚠️ 建議：去三省堂書店請走 A7，去古書中心請走 A6。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍛 **咖哩聖地**：神保町是東京咖哩一級戰區，A7 出口附近的 Bondy 非常有名。
+
+**Facilities (L3 Services):**
+- [toilet] 新宿線/三田線 改札內 [Wheelchair]
+- [elevator] A9 出口 [Wheelchair]
+
+---
+
+### Station Context: JR-East.Kanda
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍻 **上班族天堂**：西口、南口周邊居酒屋林立，是體驗日本上班族下班文化的最佳地點。
+
+**Facilities (L3 Services):**
+- [toilet] 北口/南口 改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Kudanshita
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🏯 武道館出口 (Budokan Exit): 要去日本武道館看演唱會，請務必走「2號出口」。演唱會結束時人潮極度擁擠，建議稍微提早離開或在此這稍作休息。 (Advice: ⚠️ 技巧：除了 2 號出口，也可利用 1 號出口（雖稍遠但較不擁擠）。)
+
+**Facilities (L3 Services):**
+- [toilet] 東西線/半藏門線 改札內 [Wheelchair]
+- [elevator] 6號出口 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Nagatacho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] ♾️ 赤坂見附連通 (Endless Walk): 永田町站與赤坂見附站（銀座線/丸之內線）在付費區內連通，但高低差極大（需搭多次長電扶梯）。 (Advice: ⚠️ 注意：轉乘距離約 300-400 公尺，相當於步行 5-8 分鐘。)
+
+**Facilities (L3 Services):**
+- [toilet] 半藏門線/有樂町線 改札內 [Wheelchair] [BabyRoom]
+- [elevator] 9b 出口 (Tokyo Garden Terrace) [Wheelchair]
+
+---
+
+### Station Context: JR-East.Nippori
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] ✈️ Skyliner 轉乘陷阱 (Airport Transfer): 要從 JR 轉乘京成 Skyliner 去機場？千萬別走「南口」！ (Advice: ⚠️ 絕對守則：請務必走 **北改札口**，那裡才有 JR 直通京成的轉乘專用閘門。南口沒有轉乘機制，需出站重進，且只有樓梯。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🛍️ **ecute 日暮里**：北改札內有著名的 ecute 商場，是購買伴手禮和便當的最後一站。
+- [Hack] 🐈 **谷中銀座**：從西口步行 5 分鐘即達著名的「貓町」谷中銀座商店街。
+
+**Facilities (L3 Services):**
+- [elevator] 北改札 → 月台 [Wheelchair]
+
+---
+
+### Station Context: Toei.Takaracho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚪 出口陷阱 (Exit Trap): 寶町站的改札口分為兩側，且改札內無法互通。 (Advice: ⚠️ 注意：進站前請確認方向（押上方面或西馬込方面），以免進錯月台。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🖼️ **藝術街區**：周邊有許多畫廊和古董店，是銀座藝術圈的延伸。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A7 出口 [Wheelchair]
+- [elevator] A8 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.HigashiNihombashi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚇 三角轉乘 (Triangle Transfer): 東日本橋站與馬喰橫山（新宿線）、馬喰町（JR總武快速）地下直結，但通道錯綜複雜。 (Advice: ⚠️ 建議：轉乘新宿線請走橘色標示通道，轉乘JR請走藍色標示通道，步行約 3-5 分鐘。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 👕 **問屋街**：日本最大的纖維批發街就在地面上，零售店也不少。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] B4 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Kachidoki
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🏢 上班族大遷徙 (Commuter Rush): 勝鬨站周邊高樓林立，早晚高峰時段改札口極度擁擠。 (Advice: ⚠️ 注意：早上 8:30-9:30 盡量避開此站，人流管制可能導致進出站需時 10 分鐘以上。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌉 **勝鬨橋**：步行可達著名的可開合勝鬨橋，夜景迷人。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A1, A4a, A4b, A2a 出口 (共4台) [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Tsukishima
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🥘 **文字燒街**：出站即是「西仲通り商店街」，聚集了數十家文字燒名店。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] 8a, 10 號出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Tsukijishijo
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🐟 新舊市場之別 (Market Location): 站名雖然是「築地市場」，但場內市場已搬遷。這裡主要靠近朝日新聞社與銀座南緣。 (Advice: ⚠️ 建議：要去「築地場外市場」吃海鮮，這裡可以，但築地站（日比谷線）可能更近一側。)
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A1, A2 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.BakuroYokoyama
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🧵 **批發區核心**：與東日本橋連通，是採購衣物雜貨的最佳起點。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A1, A3 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Hamacho
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌳 **濱町公園**：A2 出口直結中央區立濱町公園，是市中心的綠洲。
+- [Hack] 🎭 **明治座**：著名的劇場「明治座」就在車站旁。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A1, A2 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Ningyocho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🏮 人形町懷舊街道出口 (Old Town Exit): 人形町站有兩個不同線路的站體，出口分佈較廣。 (Advice: ⚠️ 注意：去甘酒橫丁請走 A1 或 A2 出口。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍮 **人形燒元祖**：在 A2 出口附近有幾家創業百年的老店，味道非常道地。
+- [Hack] 🦊 **小網神社**：雖然不是直結，但從 A2 出口步行 5 分鐘即可抵達以洗錢、強運聞名的人氣神社。
+
+**Facilities (L3 Services):**
+- [toilet] 日本橋方向改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Kyobashi
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏛️ **明治屋本館**：從 7 號出口可以直通具有歷史價值的明治屋超商。
+- [Hack] 🏢 **東京中城八重洲**：從 6 號出口出發步行 5 分鐘即可抵達最新的商業地標。
+
+**Facilities (L3 Services):**
+- [toilet] 驗票口內 [Wheelchair]
+
+---
+
+### Station Context: Toei.HigashiGinza
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🎭 歌舞伎座直結 (Kabukiza Direct): Higashi-ginza 與歌舞伎座直結，演出結束後人潮會瞬間爆發。 (Advice: ⚠️ 建議：避開演出散場時間進入車站。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🍵 **木挽町廣場**：地下 2 樓的廣場即使不進場看戲也能買到歌舞伎主題的伴手禮。
+
+**Facilities (L3 Services):**
+- [toilet] 歌舞伎座方面改札外 [Wheelchair]
+
+---
+
+### Station Context: Toei.Asakusa.Ningyocho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚅 列車過站不停警示 (Skip Stop): 注意！都營淺草線的「Airport快特 (Airport Kaitoku)」列車 **不會停靠** 人形町站。 (Advice: 🛑 能夠搭乘的車種：請搭乘普通或各站停車的班次。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] ⛩️ **洗錢神社**：步行可達著名的小網神社（求財運），是近年熱門景點。
+
+---
+
+### Station Context: Toei.Asakusa.Higashiginza
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚅 列車過站不停警示 (Skip Stop): 注意！都營淺草線的「Airport快特 (Airport Kaitoku)」列車 **不會停靠** 東銀座站。 (Advice: 🛑 能夠搭乘的車種：請搭乘普通或各站停車的班次。)
+
+---
+
+### Station Context: Toei.Asakusa.Sengakuji
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🔀 命運的分歧點 (Destination Trap): 泉岳寺站是淺草線往「西馬込」與「京急線（羽田機場）」的分歧點。 (Advice: ⚠️ 轉乘攻略：若要往五反田、西馬込方向，無論何種列車都可先上車，只需在 **泉岳寺站** 下車換乘往西馬込的列車即可，無需在月台苦等直達車。)
+
+---
+
+### Station Context: JR-East.Shinjuku
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🌀 東西出口迷宮 (East/West Maze): 新宿站的 JR 系統，東口與西口在地下不互通（除非走特定通道）。一旦出錯閘門，要繞外圍一大圈才能到對面。 (Advice: ⚠️ 絕對守則：出閘門前請確認目標是「東口」還是「西口」。若走錯，建議不下樓，直接走地面層的「大ガード (大鐵橋)」繞過去。)
+- [Trap] 🚇 大江戶線轉乘地獄 (Deep Transfer): 大江戶線的「新宿站」位於地下七層，距離 JR 改札口極遠。 (Advice: 💡 行動建議：若要轉乘大江戶線，請改去「新宿西口站」而非「新宿站」，兩者其實更近且沒那麼深。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌧️ **地下通路王**：新宿三丁目到西口都廳，均有地下道相連。下雨天可從「Subnade」地下街一路逛到東口，完全不必淋雨。
+- [Hack] 🆕 **新南口直達**：要去「Busta 新宿 (巴士轉運站)」請務必找「新南改札」，出來直達手扶梯上樓即是，千萬別走去東/西口。
+
+**Facilities (L3 Services):**
+- [toilet] 東口改札內 [Wheelchair]
+- [toilet] 新南改札內 (Busta方向) [Wheelchair] [BabyRoom]
+- [toilet] 丸之內線改札內 [Wheelchair]
+
+---
+
+### Station Context: TokyoMetro.Shibuya
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🆙 銀座線空口謎題 (Sky Subway): 雖然是地下鐵，但澀谷站的銀座線月台在 **三樓**！而副都心線在地下五樓。 (Advice: ⚠️ 轉乘警示：銀座線轉乘副都心線/東橫線，垂直移動距離極大，請預留 10-15 分鐘的「登山」時間。)
+- [Trap] 🚧 迷宮工事中 (Construction Chaos): 澀谷站周邊工程持續進行中，出口位置常有變動。 (Advice: 🛑 能夠搭乘的車種：請認準「Hachiko Gate (八公改札)」作為唯一真理，其他出口容易迷失在工地迷宮中。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏙️ **Scramble Square 捷徑**：利用 Scramble Square 百貨的電梯，可以直接從 B2 地鐵層殺到 3F 的銀座線/JR 連通道，避開人擠人的手扶梯。
+- [Hack] 🖼️ **神話明日壁畫**：在通往井之頭線的連通道上，有岡本太郎巨大的壁畫「明日的神話」，是免費且震撼的藝術景點。
+
+**Facilities (L3 Services):**
+- [toilet] 銀座線改札內 [Wheelchair]
+- [toilet] 副都心線改札內 [Wheelchair] [BabyRoom]
+- [toilet] 八公改札內 [Wheelchair]
+
+---
+
+### Station Context: JR-East.Ikebukuro
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🦉 東西百貨悖論 (West-East Paradox): 池袋的最大陷阱：「西武百貨在東口，東武百貨在西口」。 (Advice: ⚠️ 記憶口訣：東口是西武 (Seibu)，西口是東武 (Tobu)。想去西武百貨請往「東口」走！)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🦉 **貓頭鷹地標**：東口的「Ikefukurou (貓頭鷹石像)」是最佳會合點，比八公像難找一點但人也比較少。
+- [Hack] 🍜 **拉麵激戰區**：東口往 SunShine City 的路上是拉麵一級戰區，無敵家、一蘭都在這附近。
+
+**Facilities (L3 Services):**
+- [toilet] 中央改札內 [Wheelchair]
+- [toilet] 丸之內線改札內 [Wheelchair]
+
+---
+
+### Station Context: Toei.Ogawamachi
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚇 站名混淆 (Station Name): 別將「小川町 (Ogawamachi)」與埼玉縣的同名車站搞混。這裡直結丸之內線「淡路町」站。 (Advice: ⚠️ 轉乘提示：可經由地下連通道前往淡路町站（丸之內線）或新御茶之水站（千代田線）。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🎿 **體育用品街**：B5 出口直達靖國通，滿滿的滑雪、登山用品店。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] B7 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Kudanshita
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🥋 武道館活動 (Budokan Crowds): 當日本武道館有演唱會或活動時，車站會擠得水洩不通。 (Advice: ⚠️ 逃生路線：活動結束後建議稍微走遠一點到飯田橋或神保町搭車。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌸 **千鳥之淵**：2 號出口出來就是著名的賞櫻勝地千鳥之淵。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] 6 號出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Iwamotocho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚶 秋葉原步行 (Akiba Walk): 雖然廣播會說可轉乘秋葉原站，但需要過橋步行約 5-8 分鐘。 (Advice: ⚠️ 注意：轉乘日比谷線秋葉原站最近，JR 秋葉原站稍遠。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🌉 **神田川景色**：A4 出口出來的和泉橋上可以拍攝神田川與列車交錯的景色。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A6 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Hibiya
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🦕 **哥吉拉雕像**：A4 出口附近的日比谷 Chanter 廣場有新的哥吉拉雕像。
+- [Hack] 🏞️ **日比谷公園**：A14 出口直結公園，是市中心的休憩場所。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A9 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Uchisaiwaicho
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚇 地下無限連廊 (Endless Tunnel): 這裡的地下通道與霞關、日比谷、銀座甚至東銀座都相連。 (Advice: 💡 探索：下雨天可以一路走到銀座不用淋雨，但小心迷路。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🏨 **帝國飯店**：A13 出口最近帝國飯店。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A7 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+
+### Station Context: Toei.Ichigaya
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] 🚇 路線分隔 (Line Separation): 都営新宿線的市谷站與有樂町線/南北線的市谷站改札口有一段距離。 (Advice: ⚠️ 建議：轉乘預留 5-7 分鐘。)
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] 🎣 **釣魚堀**：車站月台就能看到護城河上的釣魚場，是市谷的招牌風景。
+
+**Facilities (L3 Services):**
+- [toilet] 改札內 [Wheelchair]
+- [elevator] A2 出口 [Wheelchair]
+- [elevator] A3 出口 [Wheelchair]
+- [wifi] 全站 
+
+---
+

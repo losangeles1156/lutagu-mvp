@@ -1,0 +1,5790 @@
+[
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B33ED",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2025-03-17T12:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2025-03-15",
+    "owl:sameAs": "odpt.StationTimetable:Toei.Oedo.UshigomeKagurazaka.InnerLoop.SaturdayHoliday",
+    "odpt:railway": "odpt.Railway:Toei.Oedo",
+    "odpt:station": "odpt.Station:Toei.Oedo.UshigomeKagurazaka",
+    "odpt:calendar": "odpt.Calendar:SaturdayHoliday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:InnerLoop",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.504A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "504A",
+        "odpt:departureTime": "05:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.506A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "506A",
+        "odpt:departureTime": "05:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.508A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "508A",
+        "odpt:departureTime": "05:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.510A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "510A",
+        "odpt:departureTime": "05:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.512A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "512A",
+        "odpt:departureTime": "05:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.514A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "514A",
+        "odpt:departureTime": "06:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.516A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "516A",
+        "odpt:departureTime": "06:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.617A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "617A",
+        "odpt:departureTime": "06:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.518A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "518A",
+        "odpt:departureTime": "06:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.619A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "619A",
+        "odpt:departureTime": "06:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.520A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "520A",
+        "odpt:departureTime": "06:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.621A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "621A",
+        "odpt:departureTime": "06:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.522A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "522A",
+        "odpt:departureTime": "06:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.623A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "623A",
+        "odpt:departureTime": "06:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.524A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "524A",
+        "odpt:departureTime": "07:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.625A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "625A",
+        "odpt:departureTime": "07:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.626A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "626A",
+        "odpt:departureTime": "07:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.644A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "644A",
+        "odpt:departureTime": "07:17",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.627A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "627A",
+        "odpt:departureTime": "07:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.628A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "628A",
+        "odpt:departureTime": "07:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.629A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "629A",
+        "odpt:departureTime": "07:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.630A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "630A",
+        "odpt:departureTime": "07:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.745A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "745A",
+        "odpt:departureTime": "07:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.642A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "642A",
+        "odpt:departureTime": "07:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.631A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "631A",
+        "odpt:departureTime": "07:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.632A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "632A",
+        "odpt:departureTime": "07:58",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.601A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "601A",
+        "odpt:departureTime": "08:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.641A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "641A",
+        "odpt:departureTime": "08:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.702A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "702A",
+        "odpt:departureTime": "08:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.703A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "703A",
+        "odpt:departureTime": "08:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.704A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "704A",
+        "odpt:departureTime": "08:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.705A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "705A",
+        "odpt:departureTime": "08:28",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.743A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "743A",
+        "odpt:departureTime": "08:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.706A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "706A",
+        "odpt:departureTime": "08:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.707A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "707A",
+        "odpt:departureTime": "08:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.708A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "708A",
+        "odpt:departureTime": "08:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.709A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "709A",
+        "odpt:departureTime": "08:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.710A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "710A",
+        "odpt:departureTime": "08:58",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.711A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "711A",
+        "odpt:departureTime": "09:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.712A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "712A",
+        "odpt:departureTime": "09:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.713A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "713A",
+        "odpt:departureTime": "09:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.814A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "814A",
+        "odpt:departureTime": "09:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.815A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "815A",
+        "odpt:departureTime": "09:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.816A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "816A",
+        "odpt:departureTime": "09:28",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.817A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "817A",
+        "odpt:departureTime": "09:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.818A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "818A",
+        "odpt:departureTime": "09:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.819A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "819A",
+        "odpt:departureTime": "09:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.820A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "820A",
+        "odpt:departureTime": "09:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.821A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "821A",
+        "odpt:departureTime": "09:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.822A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "822A",
+        "odpt:departureTime": "10:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.823A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "823A",
+        "odpt:departureTime": "10:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.924A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "924A",
+        "odpt:departureTime": "10:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.925A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "925A",
+        "odpt:departureTime": "10:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.926A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "926A",
+        "odpt:departureTime": "10:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.927A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "927A",
+        "odpt:departureTime": "10:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.928A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "928A",
+        "odpt:departureTime": "10:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.929A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "929A",
+        "odpt:departureTime": "10:46",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.930A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "930A",
+        "odpt:departureTime": "10:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.931A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "931A",
+        "odpt:departureTime": "11:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.932A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "932A",
+        "odpt:departureTime": "11:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1001A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1001A",
+        "odpt:departureTime": "11:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1002A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1002A",
+        "odpt:departureTime": "11:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1003A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1003A",
+        "odpt:departureTime": "11:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1004A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1004A",
+        "odpt:departureTime": "11:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1005A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1005A",
+        "odpt:departureTime": "11:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1006A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1006A",
+        "odpt:departureTime": "11:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1007A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1007A",
+        "odpt:departureTime": "11:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1008A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1008A",
+        "odpt:departureTime": "11:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1009A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1009A",
+        "odpt:departureTime": "12:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1010A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1010A",
+        "odpt:departureTime": "12:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1111A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1111A",
+        "odpt:departureTime": "12:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1112A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1112A",
+        "odpt:departureTime": "12:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1113A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1113A",
+        "odpt:departureTime": "12:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1114A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1114A",
+        "odpt:departureTime": "12:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1115A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1115A",
+        "odpt:departureTime": "12:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1116A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1116A",
+        "odpt:departureTime": "12:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1117A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1117A",
+        "odpt:departureTime": "12:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1118A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1118A",
+        "odpt:departureTime": "12:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1119A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1119A",
+        "odpt:departureTime": "13:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1120A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1120A",
+        "odpt:departureTime": "13:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1221A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1221A",
+        "odpt:departureTime": "13:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1222A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1222A",
+        "odpt:departureTime": "13:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1223A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1223A",
+        "odpt:departureTime": "13:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1224A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1224A",
+        "odpt:departureTime": "13:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1225A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1225A",
+        "odpt:departureTime": "13:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1226A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1226A",
+        "odpt:departureTime": "13:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1227A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1227A",
+        "odpt:departureTime": "13:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1228A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1228A",
+        "odpt:departureTime": "13:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1229A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1229A",
+        "odpt:departureTime": "14:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1230A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1230A",
+        "odpt:departureTime": "14:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1331A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1331A",
+        "odpt:departureTime": "14:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1332A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1332A",
+        "odpt:departureTime": "14:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1301A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1301A",
+        "odpt:departureTime": "14:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1302A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1302A",
+        "odpt:departureTime": "14:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1303A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1303A",
+        "odpt:departureTime": "14:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1304A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1304A",
+        "odpt:departureTime": "14:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1305A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1305A",
+        "odpt:departureTime": "14:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1306A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1306A",
+        "odpt:departureTime": "14:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1307A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1307A",
+        "odpt:departureTime": "15:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1308A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1308A",
+        "odpt:departureTime": "15:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1409A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1409A",
+        "odpt:departureTime": "15:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1410A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1410A",
+        "odpt:departureTime": "15:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1411A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1411A",
+        "odpt:departureTime": "15:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1412A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1412A",
+        "odpt:departureTime": "15:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1413A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1413A",
+        "odpt:departureTime": "15:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1414A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1414A",
+        "odpt:departureTime": "15:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1415A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1415A",
+        "odpt:departureTime": "15:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1416A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1416A",
+        "odpt:departureTime": "15:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1417A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1417A",
+        "odpt:departureTime": "16:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1418A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1418A",
+        "odpt:departureTime": "16:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1519A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1519A",
+        "odpt:departureTime": "16:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1520A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1520A",
+        "odpt:departureTime": "16:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1521A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1521A",
+        "odpt:departureTime": "16:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1522A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1522A",
+        "odpt:departureTime": "16:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1523A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1523A",
+        "odpt:departureTime": "16:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1524A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1524A",
+        "odpt:departureTime": "16:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1525A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1525A",
+        "odpt:departureTime": "16:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1526A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1526A",
+        "odpt:departureTime": "16:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1527A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1527A",
+        "odpt:departureTime": "17:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1528A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1528A",
+        "odpt:departureTime": "17:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1629A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1629A",
+        "odpt:departureTime": "17:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1630A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1630A",
+        "odpt:departureTime": "17:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1631A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1631A",
+        "odpt:departureTime": "17:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1632A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1632A",
+        "odpt:departureTime": "17:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1601A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1601A",
+        "odpt:departureTime": "17:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1602A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1602A",
+        "odpt:departureTime": "17:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1603A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1603A",
+        "odpt:departureTime": "17:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1604A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1604A",
+        "odpt:departureTime": "17:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1605A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1605A",
+        "odpt:departureTime": "18:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1606A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1606A",
+        "odpt:departureTime": "18:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1707A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1707A",
+        "odpt:departureTime": "18:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1708A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1708A",
+        "odpt:departureTime": "18:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1709A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1709A",
+        "odpt:departureTime": "18:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1710A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1710A",
+        "odpt:departureTime": "18:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1711A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1711A",
+        "odpt:departureTime": "18:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1712A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1712A",
+        "odpt:departureTime": "18:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1713A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1713A",
+        "odpt:departureTime": "18:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1714A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1714A",
+        "odpt:departureTime": "18:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1715A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1715A",
+        "odpt:departureTime": "19:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1716A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1716A",
+        "odpt:departureTime": "19:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1817A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1817A",
+        "odpt:departureTime": "19:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1818A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1818A",
+        "odpt:departureTime": "19:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1819A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1819A",
+        "odpt:departureTime": "19:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1820A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1820A",
+        "odpt:departureTime": "19:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1822A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1822A",
+        "odpt:departureTime": "19:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1823A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1823A",
+        "odpt:departureTime": "19:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1824A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1824A",
+        "odpt:departureTime": "19:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1825A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1825A",
+        "odpt:departureTime": "20:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1826A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1826A",
+        "odpt:departureTime": "20:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1827A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1827A",
+        "odpt:departureTime": "20:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1928A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1928A",
+        "odpt:departureTime": "20:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1929A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1929A",
+        "odpt:departureTime": "20:28",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1931A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1931A",
+        "odpt:departureTime": "20:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1932A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1932A",
+        "odpt:departureTime": "20:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1901A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1901A",
+        "odpt:departureTime": "20:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1902A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1902A",
+        "odpt:departureTime": "20:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1903A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1903A",
+        "odpt:departureTime": "21:05",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2005A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2005A",
+        "odpt:departureTime": "21:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2006A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2006A",
+        "odpt:departureTime": "21:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2007A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2007A",
+        "odpt:departureTime": "21:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2008A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2008A",
+        "odpt:departureTime": "21:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2009A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2009A",
+        "odpt:departureTime": "21:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2011A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2011A",
+        "odpt:departureTime": "21:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2012A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2012A",
+        "odpt:departureTime": "21:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2014A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2014A",
+        "odpt:departureTime": "22:02",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2015A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2015A",
+        "odpt:departureTime": "22:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2116A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2116A",
+        "odpt:departureTime": "22:16",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2117A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2117A",
+        "odpt:departureTime": "22:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2118A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2118A",
+        "odpt:departureTime": "22:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2119A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2119A",
+        "odpt:departureTime": "22:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2120A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2120A",
+        "odpt:departureTime": "22:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2122A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2122A",
+        "odpt:departureTime": "22:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2124A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2124A",
+        "odpt:departureTime": "23:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2125A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2125A",
+        "odpt:departureTime": "23:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2226A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2226A",
+        "odpt:departureTime": "23:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2229A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2229A",
+        "odpt:departureTime": "23:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2232A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2232A",
+        "odpt:departureTime": "23:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2201A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2201A",
+        "odpt:departureTime": "00:02",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2303A",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2303A",
+        "odpt:departureTime": "00:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B33EE",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2025-03-17T12:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2025-03-17",
+    "owl:sameAs": "odpt.StationTimetable:Toei.Oedo.UshigomeKagurazaka.InnerLoop.Weekday",
+    "odpt:railway": "odpt.Railway:Toei.Oedo",
+    "odpt:station": "odpt.Station:Toei.Oedo.UshigomeKagurazaka",
+    "odpt:calendar": "odpt.Calendar:Weekday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:InnerLoop",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.535A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "535A",
+        "odpt:departureTime": "05:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.507A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "507A",
+        "odpt:departureTime": "05:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.510A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "510A",
+        "odpt:departureTime": "05:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.511A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "511A",
+        "odpt:departureTime": "05:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.513A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "513A",
+        "odpt:departureTime": "05:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.537A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "537A",
+        "odpt:departureTime": "06:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.515A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "515A",
+        "odpt:departureTime": "06:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.641A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "641A",
+        "odpt:departureTime": "06:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.518A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "518A",
+        "odpt:departureTime": "06:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.619A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "619A",
+        "odpt:departureTime": "06:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.544A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "544A",
+        "odpt:departureTime": "06:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.622A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "622A",
+        "odpt:departureTime": "06:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.523A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "523A",
+        "odpt:departureTime": "06:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.524A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "524A",
+        "odpt:departureTime": "06:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.547A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "547A",
+        "odpt:departureTime": "07:02",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.525A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "525A",
+        "odpt:departureTime": "07:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.648A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "648A",
+        "odpt:departureTime": "07:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.626A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "626A",
+        "odpt:departureTime": "07:16",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.649A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "649A",
+        "odpt:departureTime": "07:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.727A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "727A",
+        "odpt:departureTime": "07:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.650A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "650A",
+        "odpt:departureTime": "07:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.728A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "728A",
+        "odpt:departureTime": "07:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.633A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "633A",
+        "odpt:departureTime": "07:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.751A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "751A",
+        "odpt:departureTime": "07:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.629A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "629A",
+        "odpt:departureTime": "07:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.730A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "730A",
+        "odpt:departureTime": "07:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.631A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "631A",
+        "odpt:departureTime": "07:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.652A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "652A",
+        "odpt:departureTime": "07:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.732A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "732A",
+        "odpt:departureTime": "07:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.601A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "601A",
+        "odpt:departureTime": "08:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.602A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "602A",
+        "odpt:departureTime": "08:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.603A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "603A",
+        "odpt:departureTime": "08:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.604A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "604A",
+        "odpt:departureTime": "08:17",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.705A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "705A",
+        "odpt:departureTime": "08:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.735A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "735A",
+        "odpt:departureTime": "08:28",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.706A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "706A",
+        "odpt:departureTime": "08:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.707A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "707A",
+        "odpt:departureTime": "08:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.743A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "743A",
+        "odpt:departureTime": "08:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.708A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "708A",
+        "odpt:departureTime": "08:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.709A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "709A",
+        "odpt:departureTime": "08:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.710A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "710A",
+        "odpt:departureTime": "08:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.736A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "736A",
+        "odpt:departureTime": "08:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.711A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "711A",
+        "odpt:departureTime": "09:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.712A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "712A",
+        "odpt:departureTime": "09:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.713A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "713A",
+        "odpt:departureTime": "09:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.814A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "814A",
+        "odpt:departureTime": "09:17",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.837A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "837A",
+        "odpt:departureTime": "09:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.815A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "815A",
+        "odpt:departureTime": "09:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.816A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "816A",
+        "odpt:departureTime": "09:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.817A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "817A",
+        "odpt:departureTime": "09:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.818A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "818A",
+        "odpt:departureTime": "09:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.819A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "819A",
+        "odpt:departureTime": "09:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.820A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "820A",
+        "odpt:departureTime": "09:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.821A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "821A",
+        "odpt:departureTime": "09:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.822A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "822A",
+        "odpt:departureTime": "09:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.823A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "823A",
+        "odpt:departureTime": "10:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.824A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "824A",
+        "odpt:departureTime": "10:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.925A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "925A",
+        "odpt:departureTime": "10:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.926A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "926A",
+        "odpt:departureTime": "10:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.927A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "927A",
+        "odpt:departureTime": "10:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.928A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "928A",
+        "odpt:departureTime": "10:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.929A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "929A",
+        "odpt:departureTime": "10:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.930A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "930A",
+        "odpt:departureTime": "10:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.931A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "931A",
+        "odpt:departureTime": "11:02",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.932A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "932A",
+        "odpt:departureTime": "11:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1001A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1001A",
+        "odpt:departureTime": "11:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1002A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1002A",
+        "odpt:departureTime": "11:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1003A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1003A",
+        "odpt:departureTime": "11:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1004A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1004A",
+        "odpt:departureTime": "11:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1005A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1005A",
+        "odpt:departureTime": "11:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1006A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1006A",
+        "odpt:departureTime": "11:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1007A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1007A",
+        "odpt:departureTime": "11:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1008A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1008A",
+        "odpt:departureTime": "11:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1009A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1009A",
+        "odpt:departureTime": "12:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1010A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1010A",
+        "odpt:departureTime": "12:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1111A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1111A",
+        "odpt:departureTime": "12:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1112A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1112A",
+        "odpt:departureTime": "12:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1113A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1113A",
+        "odpt:departureTime": "12:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1114A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1114A",
+        "odpt:departureTime": "12:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1115A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1115A",
+        "odpt:departureTime": "12:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1116A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1116A",
+        "odpt:departureTime": "12:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1117A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1117A",
+        "odpt:departureTime": "12:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1118A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1118A",
+        "odpt:departureTime": "12:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1119A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1119A",
+        "odpt:departureTime": "13:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1120A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1120A",
+        "odpt:departureTime": "13:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1221A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1221A",
+        "odpt:departureTime": "13:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1222A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1222A",
+        "odpt:departureTime": "13:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1223A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1223A",
+        "odpt:departureTime": "13:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1224A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1224A",
+        "odpt:departureTime": "13:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1225A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1225A",
+        "odpt:departureTime": "13:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1226A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1226A",
+        "odpt:departureTime": "13:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1227A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1227A",
+        "odpt:departureTime": "13:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1228A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1228A",
+        "odpt:departureTime": "13:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1229A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1229A",
+        "odpt:departureTime": "14:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1230A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1230A",
+        "odpt:departureTime": "14:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1331A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1331A",
+        "odpt:departureTime": "14:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1332A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1332A",
+        "odpt:departureTime": "14:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1301A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1301A",
+        "odpt:departureTime": "14:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1302A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1302A",
+        "odpt:departureTime": "14:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1303A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1303A",
+        "odpt:departureTime": "14:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1304A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1304A",
+        "odpt:departureTime": "14:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1305A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1305A",
+        "odpt:departureTime": "14:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1306A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1306A",
+        "odpt:departureTime": "14:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1307A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1307A",
+        "odpt:departureTime": "15:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1308A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1308A",
+        "odpt:departureTime": "15:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1409A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1409A",
+        "odpt:departureTime": "15:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1410A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1410A",
+        "odpt:departureTime": "15:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1411A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1411A",
+        "odpt:departureTime": "15:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1412A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1412A",
+        "odpt:departureTime": "15:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1413A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1413A",
+        "odpt:departureTime": "15:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1561A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1561A",
+        "odpt:departureTime": "15:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1414A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1414A",
+        "odpt:departureTime": "15:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1415A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1415A",
+        "odpt:departureTime": "15:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1416A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1416A",
+        "odpt:departureTime": "15:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1417A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1417A",
+        "odpt:departureTime": "16:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1418A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1418A",
+        "odpt:departureTime": "16:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1519A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1519A",
+        "odpt:departureTime": "16:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1520A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1520A",
+        "odpt:departureTime": "16:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1521A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1521A",
+        "odpt:departureTime": "16:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1522A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1522A",
+        "odpt:departureTime": "16:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1523A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1523A",
+        "odpt:departureTime": "16:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1524A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1524A",
+        "odpt:departureTime": "16:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1525A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1525A",
+        "odpt:departureTime": "16:46",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1571A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1571A",
+        "odpt:departureTime": "16:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1526A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1526A",
+        "odpt:departureTime": "16:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1527A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1527A",
+        "odpt:departureTime": "16:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1662A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1662A",
+        "odpt:departureTime": "17:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1528A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1528A",
+        "odpt:departureTime": "17:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1663A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1663A",
+        "odpt:departureTime": "17:10",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1529A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1529A",
+        "odpt:departureTime": "17:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1664A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1664A",
+        "odpt:departureTime": "17:16",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1630A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1630A",
+        "odpt:departureTime": "17:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1631A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1631A",
+        "odpt:departureTime": "17:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1672A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1672A",
+        "odpt:departureTime": "17:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1632A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1632A",
+        "odpt:departureTime": "17:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1601A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1601A",
+        "odpt:departureTime": "17:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1602A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1602A",
+        "odpt:departureTime": "17:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1603A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1603A",
+        "odpt:departureTime": "17:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1604A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1604A",
+        "odpt:departureTime": "17:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1673A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1673A",
+        "odpt:departureTime": "17:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1605A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1605A",
+        "odpt:departureTime": "18:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1606A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1606A",
+        "odpt:departureTime": "18:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1607A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1607A",
+        "odpt:departureTime": "18:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1708A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1708A",
+        "odpt:departureTime": "18:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1709A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1709A",
+        "odpt:departureTime": "18:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1710A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1710A",
+        "odpt:departureTime": "18:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1774A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1774A",
+        "odpt:departureTime": "18:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1711A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1711A",
+        "odpt:departureTime": "18:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1712A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1712A",
+        "odpt:departureTime": "18:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1713A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1713A",
+        "odpt:departureTime": "18:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1761A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1761A",
+        "odpt:departureTime": "18:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1714A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1714A",
+        "odpt:departureTime": "19:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1715A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1715A",
+        "odpt:departureTime": "19:05",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1716A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1716A",
+        "odpt:departureTime": "19:10",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1817A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1817A",
+        "odpt:departureTime": "19:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1818A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1818A",
+        "odpt:departureTime": "19:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1819A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1819A",
+        "odpt:departureTime": "19:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1820A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1820A",
+        "odpt:departureTime": "19:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1821A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1821A",
+        "odpt:departureTime": "19:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1822A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1822A",
+        "odpt:departureTime": "19:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1823A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1823A",
+        "odpt:departureTime": "19:47",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1824A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1824A",
+        "odpt:departureTime": "19:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1825A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1825A",
+        "odpt:departureTime": "19:58",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1871A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1871A",
+        "odpt:departureTime": "20:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1826A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1826A",
+        "odpt:departureTime": "20:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1827A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1827A",
+        "odpt:departureTime": "20:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1962A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1962A",
+        "odpt:departureTime": "20:17",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1928A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1928A",
+        "odpt:departureTime": "20:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1929A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1929A",
+        "odpt:departureTime": "20:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1964A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1964A",
+        "odpt:departureTime": "20:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1930A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1930A",
+        "odpt:departureTime": "20:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1931A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1931A",
+        "odpt:departureTime": "20:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1972A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1972A",
+        "odpt:departureTime": "20:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1932A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1932A",
+        "odpt:departureTime": "20:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1901A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1901A",
+        "odpt:departureTime": "21:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1902A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1902A",
+        "odpt:departureTime": "21:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1903A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1903A",
+        "odpt:departureTime": "21:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1904A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1904A",
+        "odpt:departureTime": "21:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2005A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2005A",
+        "odpt:departureTime": "21:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2006A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2006A",
+        "odpt:departureTime": "21:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2007A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2007A",
+        "odpt:departureTime": "21:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2008A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2008A",
+        "odpt:departureTime": "21:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2009A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2009A",
+        "odpt:departureTime": "21:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2074A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2074A",
+        "odpt:departureTime": "21:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2012A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2012A",
+        "odpt:departureTime": "21:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2013A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2013A",
+        "odpt:departureTime": "22:02",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2061A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2061A",
+        "odpt:departureTime": "22:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2114A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2114A",
+        "odpt:departureTime": "22:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2116A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2116A",
+        "odpt:departureTime": "22:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2117A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2117A",
+        "odpt:departureTime": "22:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2118A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2118A",
+        "odpt:departureTime": "22:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2119A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2119A",
+        "odpt:departureTime": "22:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2121A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2121A",
+        "odpt:departureTime": "22:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2123A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2123A",
+        "odpt:departureTime": "22:58",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2124A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2124A",
+        "odpt:departureTime": "23:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2271A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2271A",
+        "odpt:departureTime": "23:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2227A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2227A",
+        "odpt:departureTime": "23:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2228A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2228A",
+        "odpt:departureTime": "23:46",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2231A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2231A",
+        "odpt:departureTime": "23:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2332A",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2332A",
+        "odpt:departureTime": "00:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.Tochomae"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B33EB",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2025-03-17T12:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2025-03-15",
+    "owl:sameAs": "odpt.StationTimetable:Toei.Oedo.UshigomeKagurazaka.OuterLoop.SaturdayHoliday",
+    "odpt:railway": "odpt.Railway:Toei.Oedo",
+    "odpt:station": "odpt.Station:Toei.Oedo.UshigomeKagurazaka",
+    "odpt:calendar": "odpt.Calendar:SaturdayHoliday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:OuterLoop",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.531B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "531B",
+        "odpt:departureTime": "05:18"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.502B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "502B",
+        "odpt:departureTime": "05:33"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.504B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "504B",
+        "odpt:departureTime": "05:47"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.506B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "506B",
+        "odpt:departureTime": "05:59"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.608B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "608B",
+        "odpt:departureTime": "06:11"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.610B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "610B",
+        "odpt:departureTime": "06:19"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.612B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "612B",
+        "odpt:departureTime": "06:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.614B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "614B",
+        "odpt:departureTime": "06:38"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.616B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "616B",
+        "odpt:departureTime": "06:48"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.617B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "617B",
+        "odpt:departureTime": "06:55"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.618B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "618B",
+        "odpt:departureTime": "07:01"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.619B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "619B",
+        "odpt:departureTime": "07:05"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.720B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "720B",
+        "odpt:departureTime": "07:11"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.721B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "721B",
+        "odpt:departureTime": "07:17"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.722B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "722B",
+        "odpt:departureTime": "07:23"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.723B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "723B",
+        "odpt:departureTime": "07:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.724B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "724B",
+        "odpt:departureTime": "07:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.725B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "725B",
+        "odpt:departureTime": "07:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.726B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "726B",
+        "odpt:departureTime": "07:45"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.744B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "744B",
+        "odpt:departureTime": "07:50"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.727B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "727B",
+        "odpt:departureTime": "07:55"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.728B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "728B",
+        "odpt:departureTime": "08:00"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.729B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "729B",
+        "odpt:departureTime": "08:05"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.830B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "830B",
+        "odpt:departureTime": "08:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.845B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "845B",
+        "odpt:departureTime": "08:15"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.842B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "842B",
+        "odpt:departureTime": "08:20"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.831B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "831B",
+        "odpt:departureTime": "08:25"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.832B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "832B",
+        "odpt:departureTime": "08:30"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.801B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "801B",
+        "odpt:departureTime": "08:35"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.841B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "841B",
+        "odpt:departureTime": "08:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.802B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "802B",
+        "odpt:departureTime": "08:44"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.803B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "803B",
+        "odpt:departureTime": "08:50"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.804B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "804B",
+        "odpt:departureTime": "08:55"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.805B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "805B",
+        "odpt:departureTime": "09:01"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.843B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "843B",
+        "odpt:departureTime": "09:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.806B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "806B",
+        "odpt:departureTime": "09:09"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.907B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "907B",
+        "odpt:departureTime": "09:13"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.908B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "908B",
+        "odpt:departureTime": "09:19"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.909B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "909B",
+        "odpt:departureTime": "09:25"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.910B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "910B",
+        "odpt:departureTime": "09:31"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.911B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "911B",
+        "odpt:departureTime": "09:37"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.912B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "912B",
+        "odpt:departureTime": "09:42"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.913B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "913B",
+        "odpt:departureTime": "09:48"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.914B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "914B",
+        "odpt:departureTime": "09:54"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.915B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "915B",
+        "odpt:departureTime": "10:00"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.916B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "916B",
+        "odpt:departureTime": "10:06"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1017B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1017B",
+        "odpt:departureTime": "10:12"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1018B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1018B",
+        "odpt:departureTime": "10:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1019B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1019B",
+        "odpt:departureTime": "10:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1020B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1020B",
+        "odpt:departureTime": "10:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1021B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1021B",
+        "odpt:departureTime": "10:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1022B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1022B",
+        "odpt:departureTime": "10:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1023B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1023B",
+        "odpt:departureTime": "10:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1024B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1024B",
+        "odpt:departureTime": "10:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1025B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1025B",
+        "odpt:departureTime": "10:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1026B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1026B",
+        "odpt:departureTime": "11:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1127B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1127B",
+        "odpt:departureTime": "11:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1128B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1128B",
+        "odpt:departureTime": "11:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1129B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1129B",
+        "odpt:departureTime": "11:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1130B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1130B",
+        "odpt:departureTime": "11:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1131B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1131B",
+        "odpt:departureTime": "11:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1132B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1132B",
+        "odpt:departureTime": "11:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1101B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1101B",
+        "odpt:departureTime": "11:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1102B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1102B",
+        "odpt:departureTime": "11:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1103B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1103B",
+        "odpt:departureTime": "11:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1104B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1104B",
+        "odpt:departureTime": "12:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1205B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1205B",
+        "odpt:departureTime": "12:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1206B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1206B",
+        "odpt:departureTime": "12:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1207B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1207B",
+        "odpt:departureTime": "12:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1208B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1208B",
+        "odpt:departureTime": "12:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1209B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1209B",
+        "odpt:departureTime": "12:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1210B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1210B",
+        "odpt:departureTime": "12:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1211B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1211B",
+        "odpt:departureTime": "12:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1212B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1212B",
+        "odpt:departureTime": "12:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1213B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1213B",
+        "odpt:departureTime": "12:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1214B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1214B",
+        "odpt:departureTime": "13:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1315B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1315B",
+        "odpt:departureTime": "13:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1316B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1316B",
+        "odpt:departureTime": "13:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1317B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1317B",
+        "odpt:departureTime": "13:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1318B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1318B",
+        "odpt:departureTime": "13:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1319B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1319B",
+        "odpt:departureTime": "13:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1320B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1320B",
+        "odpt:departureTime": "13:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1321B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1321B",
+        "odpt:departureTime": "13:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1322B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1322B",
+        "odpt:departureTime": "13:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1323B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1323B",
+        "odpt:departureTime": "13:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1324B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1324B",
+        "odpt:departureTime": "14:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1425B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1425B",
+        "odpt:departureTime": "14:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1426B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1426B",
+        "odpt:departureTime": "14:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1427B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1427B",
+        "odpt:departureTime": "14:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1428B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1428B",
+        "odpt:departureTime": "14:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1429B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1429B",
+        "odpt:departureTime": "14:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1430B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1430B",
+        "odpt:departureTime": "14:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1431B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1431B",
+        "odpt:departureTime": "14:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1432B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1432B",
+        "odpt:departureTime": "14:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1401B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1401B",
+        "odpt:departureTime": "14:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1402B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1402B",
+        "odpt:departureTime": "15:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1503B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1503B",
+        "odpt:departureTime": "15:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1504B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1504B",
+        "odpt:departureTime": "15:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1505B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1505B",
+        "odpt:departureTime": "15:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1506B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1506B",
+        "odpt:departureTime": "15:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1507B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1507B",
+        "odpt:departureTime": "15:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1508B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1508B",
+        "odpt:departureTime": "15:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1509B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1509B",
+        "odpt:departureTime": "15:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1510B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1510B",
+        "odpt:departureTime": "15:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1511B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1511B",
+        "odpt:departureTime": "15:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1512B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1512B",
+        "odpt:departureTime": "16:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1613B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1613B",
+        "odpt:departureTime": "16:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1614B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1614B",
+        "odpt:departureTime": "16:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1615B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1615B",
+        "odpt:departureTime": "16:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1616B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1616B",
+        "odpt:departureTime": "16:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1617B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1617B",
+        "odpt:departureTime": "16:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1618B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1618B",
+        "odpt:departureTime": "16:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1619B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1619B",
+        "odpt:departureTime": "16:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1620B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1620B",
+        "odpt:departureTime": "16:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1621B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1621B",
+        "odpt:departureTime": "16:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1622B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1622B",
+        "odpt:departureTime": "17:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1723B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1723B",
+        "odpt:departureTime": "17:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1724B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1724B",
+        "odpt:departureTime": "17:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1725B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1725B",
+        "odpt:departureTime": "17:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1726B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1726B",
+        "odpt:departureTime": "17:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1727B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1727B",
+        "odpt:departureTime": "17:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1728B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1728B",
+        "odpt:departureTime": "17:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1729B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1729B",
+        "odpt:departureTime": "17:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1730B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1730B",
+        "odpt:departureTime": "17:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1731B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1731B",
+        "odpt:departureTime": "17:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1732B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1732B",
+        "odpt:departureTime": "18:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1801B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1801B",
+        "odpt:departureTime": "18:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1802B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1802B",
+        "odpt:departureTime": "18:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1803B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1803B",
+        "odpt:departureTime": "18:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1804B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1804B",
+        "odpt:departureTime": "18:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1805B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1805B",
+        "odpt:departureTime": "18:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1806B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1806B",
+        "odpt:departureTime": "18:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1807B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1807B",
+        "odpt:departureTime": "18:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1808B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1808B",
+        "odpt:departureTime": "18:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1809B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1809B",
+        "odpt:departureTime": "18:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1810B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1810B",
+        "odpt:departureTime": "19:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1911B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1911B",
+        "odpt:departureTime": "19:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1912B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1912B",
+        "odpt:departureTime": "19:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1913B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1913B",
+        "odpt:departureTime": "19:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1914B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1914B",
+        "odpt:departureTime": "19:25"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1915B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1915B",
+        "odpt:departureTime": "19:32"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1916B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1916B",
+        "odpt:departureTime": "19:39"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1917B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1917B",
+        "odpt:departureTime": "19:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1918B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1918B",
+        "odpt:departureTime": "19:53"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1919B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1919B",
+        "odpt:departureTime": "20:00"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1920B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1920B",
+        "odpt:departureTime": "20:07"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2022B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2022B",
+        "odpt:departureTime": "20:14"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2023B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2023B",
+        "odpt:departureTime": "20:21"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2024B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2024B",
+        "odpt:departureTime": "20:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2025B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2025B",
+        "odpt:departureTime": "20:35"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2026B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2026B",
+        "odpt:departureTime": "20:42"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2027B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2027B",
+        "odpt:departureTime": "20:49"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2028B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2028B",
+        "odpt:departureTime": "20:56"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2029B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2029B",
+        "odpt:departureTime": "21:03"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2031B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2031B",
+        "odpt:departureTime": "21:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2132B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2132B",
+        "odpt:departureTime": "21:17"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2101B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2101B",
+        "odpt:departureTime": "21:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2102B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2102B",
+        "odpt:departureTime": "21:31"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2103B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2103B",
+        "odpt:departureTime": "21:39"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2105B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2105B",
+        "odpt:departureTime": "21:48"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2106B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2106B",
+        "odpt:departureTime": "21:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2108B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2108B",
+        "odpt:departureTime": "22:06"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2209B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2209B",
+        "odpt:departureTime": "22:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2211B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2211B",
+        "odpt:departureTime": "22:19"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2212B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2212B",
+        "odpt:departureTime": "22:25"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2214B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2214B",
+        "odpt:departureTime": "22:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2215B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2215B",
+        "odpt:departureTime": "22:39"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2216B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2216B",
+        "odpt:departureTime": "22:47",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2217B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2217B",
+        "odpt:departureTime": "22:53"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2218B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2218B",
+        "odpt:departureTime": "23:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2319B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2319B",
+        "odpt:departureTime": "23:14"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2322B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2322B",
+        "odpt:departureTime": "23:26"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2324B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2324B",
+        "odpt:departureTime": "23:35"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2325B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2325B",
+        "odpt:departureTime": "23:43"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2326B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2326B",
+        "odpt:departureTime": "23:57"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2429B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2429B",
+        "odpt:departureTime": "00:10",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2432B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2432B",
+        "odpt:departureTime": "00:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2401B",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2401B",
+        "odpt:departureTime": "00:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B33EC",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2025-03-17T12:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2025-03-17",
+    "owl:sameAs": "odpt.StationTimetable:Toei.Oedo.UshigomeKagurazaka.OuterLoop.Weekday",
+    "odpt:railway": "odpt.Railway:Toei.Oedo",
+    "odpt:station": "odpt.Station:Toei.Oedo.UshigomeKagurazaka",
+    "odpt:calendar": "odpt.Calendar:Weekday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:OuterLoop",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.501B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "501B",
+        "odpt:departureTime": "05:18"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.504B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "504B",
+        "odpt:departureTime": "05:33"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.535B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "535B",
+        "odpt:departureTime": "05:47"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.507B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "507B",
+        "odpt:departureTime": "05:59"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.610B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "610B",
+        "odpt:departureTime": "06:12"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.611B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "611B",
+        "odpt:departureTime": "06:21"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.613B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "613B",
+        "odpt:departureTime": "06:29"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.637B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "637B",
+        "odpt:departureTime": "06:37"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.615B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "615B",
+        "odpt:departureTime": "06:45"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.641B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "641B",
+        "odpt:departureTime": "06:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.618B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "618B",
+        "odpt:departureTime": "06:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.619B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "619B",
+        "odpt:departureTime": "07:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.644B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "644B",
+        "odpt:departureTime": "07:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.722B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "722B",
+        "odpt:departureTime": "07:17"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.723B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "723B",
+        "odpt:departureTime": "07:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.724B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "724B",
+        "odpt:departureTime": "07:30"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.747B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "747B",
+        "odpt:departureTime": "07:36"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.725B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "725B",
+        "odpt:departureTime": "07:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.748B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "748B",
+        "odpt:departureTime": "07:44"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.726B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "726B",
+        "odpt:departureTime": "07:47"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.749B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "749B",
+        "odpt:departureTime": "07:51"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.727B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "727B",
+        "odpt:departureTime": "07:54"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.750B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "750B",
+        "odpt:departureTime": "07:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.728B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "728B",
+        "odpt:departureTime": "08:01"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.733B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "733B",
+        "odpt:departureTime": "08:05"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.751B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "751B",
+        "odpt:departureTime": "08:08"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.829B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "829B",
+        "odpt:departureTime": "08:12"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.830B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "830B",
+        "odpt:departureTime": "08:15"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.831B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "831B",
+        "odpt:departureTime": "08:19"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.852B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "852B",
+        "odpt:departureTime": "08:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.832B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "832B",
+        "odpt:departureTime": "08:29"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.801B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "801B",
+        "odpt:departureTime": "08:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.802B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "802B",
+        "odpt:departureTime": "08:39"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.803B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "803B",
+        "odpt:departureTime": "08:43"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.804B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "804B",
+        "odpt:departureTime": "08:49"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.805B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "805B",
+        "odpt:departureTime": "08:53"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.835B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "835B",
+        "odpt:departureTime": "08:59"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.806B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "806B",
+        "odpt:departureTime": "09:03"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.807B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "807B",
+        "odpt:departureTime": "09:08"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.943B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "943B",
+        "odpt:departureTime": "09:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.908B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "908B",
+        "odpt:departureTime": "09:15"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.909B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "909B",
+        "odpt:departureTime": "09:20"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.910B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "910B",
+        "odpt:departureTime": "09:25"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.936B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "936B",
+        "odpt:departureTime": "09:30"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.911B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "911B",
+        "odpt:departureTime": "09:35"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.912B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "912B",
+        "odpt:departureTime": "09:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.913B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "913B",
+        "odpt:departureTime": "09:45"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.914B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "914B",
+        "odpt:departureTime": "09:50"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.937B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "937B",
+        "odpt:departureTime": "09:55"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.915B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "915B",
+        "odpt:departureTime": "10:00"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.916B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "916B",
+        "odpt:departureTime": "10:05"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1017B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1017B",
+        "odpt:departureTime": "10:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1018B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1018B",
+        "odpt:departureTime": "10:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1019B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1019B",
+        "odpt:departureTime": "10:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1020B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1020B",
+        "odpt:departureTime": "10:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1021B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1021B",
+        "odpt:departureTime": "10:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1022B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1022B",
+        "odpt:departureTime": "10:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1023B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1023B",
+        "odpt:departureTime": "10:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1024B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1024B",
+        "odpt:departureTime": "10:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1025B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1025B",
+        "odpt:departureTime": "10:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1026B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1026B",
+        "odpt:departureTime": "11:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1127B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1127B",
+        "odpt:departureTime": "11:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1128B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1128B",
+        "odpt:departureTime": "11:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1129B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1129B",
+        "odpt:departureTime": "11:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1130B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1130B",
+        "odpt:departureTime": "11:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1131B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1131B",
+        "odpt:departureTime": "11:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1132B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1132B",
+        "odpt:departureTime": "11:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1101B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1101B",
+        "odpt:departureTime": "11:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1102B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1102B",
+        "odpt:departureTime": "11:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1103B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1103B",
+        "odpt:departureTime": "11:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1104B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1104B",
+        "odpt:departureTime": "12:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1205B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1205B",
+        "odpt:departureTime": "12:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1206B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1206B",
+        "odpt:departureTime": "12:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1207B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1207B",
+        "odpt:departureTime": "12:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1208B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1208B",
+        "odpt:departureTime": "12:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1209B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1209B",
+        "odpt:departureTime": "12:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1210B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1210B",
+        "odpt:departureTime": "12:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1211B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1211B",
+        "odpt:departureTime": "12:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1212B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1212B",
+        "odpt:departureTime": "12:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1213B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1213B",
+        "odpt:departureTime": "12:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1214B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1214B",
+        "odpt:departureTime": "13:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1315B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1315B",
+        "odpt:departureTime": "13:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1316B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1316B",
+        "odpt:departureTime": "13:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1317B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1317B",
+        "odpt:departureTime": "13:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1318B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1318B",
+        "odpt:departureTime": "13:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1319B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1319B",
+        "odpt:departureTime": "13:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1320B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1320B",
+        "odpt:departureTime": "13:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1321B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1321B",
+        "odpt:departureTime": "13:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1322B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1322B",
+        "odpt:departureTime": "13:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1323B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1323B",
+        "odpt:departureTime": "13:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1324B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1324B",
+        "odpt:departureTime": "14:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1425B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1425B",
+        "odpt:departureTime": "14:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1426B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1426B",
+        "odpt:departureTime": "14:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1427B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1427B",
+        "odpt:departureTime": "14:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1428B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1428B",
+        "odpt:departureTime": "14:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1429B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1429B",
+        "odpt:departureTime": "14:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1430B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1430B",
+        "odpt:departureTime": "14:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1431B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1431B",
+        "odpt:departureTime": "14:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1432B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1432B",
+        "odpt:departureTime": "14:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1401B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1401B",
+        "odpt:departureTime": "14:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1402B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1402B",
+        "odpt:departureTime": "15:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1503B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1503B",
+        "odpt:departureTime": "15:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1504B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1504B",
+        "odpt:departureTime": "15:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1505B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1505B",
+        "odpt:departureTime": "15:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1506B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1506B",
+        "odpt:departureTime": "15:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1507B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1507B",
+        "odpt:departureTime": "15:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1508B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1508B",
+        "odpt:departureTime": "15:40"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1509B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1509B",
+        "odpt:departureTime": "15:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1510B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1510B",
+        "odpt:departureTime": "15:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1511B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1511B",
+        "odpt:departureTime": "15:58"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1512B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1512B",
+        "odpt:departureTime": "16:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1613B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1613B",
+        "odpt:departureTime": "16:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1661B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1661B",
+        "odpt:departureTime": "16:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1614B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1614B",
+        "odpt:departureTime": "16:22"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1615B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1615B",
+        "odpt:departureTime": "16:28"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1616B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1616B",
+        "odpt:departureTime": "16:33"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1617B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1617B",
+        "odpt:departureTime": "16:38"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1618B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1618B",
+        "odpt:departureTime": "16:43"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1619B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1619B",
+        "odpt:departureTime": "16:46"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1620B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1620B",
+        "odpt:departureTime": "16:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1621B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1621B",
+        "odpt:departureTime": "16:57"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1622B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1622B",
+        "odpt:departureTime": "17:02"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1623B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1623B",
+        "odpt:departureTime": "17:07"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1724B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1724B",
+        "odpt:departureTime": "17:12"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1725B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1725B",
+        "odpt:departureTime": "17:16"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1771B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1771B",
+        "odpt:departureTime": "17:21"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1726B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1726B",
+        "odpt:departureTime": "17:25"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1727B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1727B",
+        "odpt:departureTime": "17:30"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1762B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1762B",
+        "odpt:departureTime": "17:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1728B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1728B",
+        "odpt:departureTime": "17:38"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1763B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1763B",
+        "odpt:departureTime": "17:43"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1729B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1729B",
+        "odpt:departureTime": "17:47"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1764B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1764B",
+        "odpt:departureTime": "17:51"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1730B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1730B",
+        "odpt:departureTime": "17:56"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1731B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1731B",
+        "odpt:departureTime": "18:00"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1772B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1772B",
+        "odpt:departureTime": "18:05"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1732B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1732B",
+        "odpt:departureTime": "18:09"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1801B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1801B",
+        "odpt:departureTime": "18:14"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1802B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1802B",
+        "odpt:departureTime": "18:19"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1803B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1803B",
+        "odpt:departureTime": "18:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1804B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1804B",
+        "odpt:departureTime": "18:29"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1873B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1873B",
+        "odpt:departureTime": "18:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1805B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1805B",
+        "odpt:departureTime": "18:39"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1806B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1806B",
+        "odpt:departureTime": "18:43"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1807B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1807B",
+        "odpt:departureTime": "18:48"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1808B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1808B",
+        "odpt:departureTime": "18:54"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1809B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1809B",
+        "odpt:departureTime": "18:59"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1810B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1810B",
+        "odpt:departureTime": "19:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1874B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1874B",
+        "odpt:departureTime": "19:09"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1911B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1911B",
+        "odpt:departureTime": "19:14"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1912B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1912B",
+        "odpt:departureTime": "19:19"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1913B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1913B",
+        "odpt:departureTime": "19:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1961B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1961B",
+        "odpt:departureTime": "19:29"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1914B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1914B",
+        "odpt:departureTime": "19:35"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1915B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1915B",
+        "odpt:departureTime": "19:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1916B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1916B",
+        "odpt:departureTime": "19:41"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1917B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1917B",
+        "odpt:departureTime": "19:47"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1918B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1918B",
+        "odpt:departureTime": "19:53"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1919B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1919B",
+        "odpt:departureTime": "19:59"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1920B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1920B",
+        "odpt:departureTime": "20:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.1921B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1921B",
+        "odpt:departureTime": "20:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2022B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2022B",
+        "odpt:departureTime": "20:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2023B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2023B",
+        "odpt:departureTime": "20:18"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2024B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2024B",
+        "odpt:departureTime": "20:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2025B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2025B",
+        "odpt:departureTime": "20:30"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2071B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2071B",
+        "odpt:departureTime": "20:36"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2026B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2026B",
+        "odpt:departureTime": "20:42"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2027B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2027B",
+        "odpt:departureTime": "20:48"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2062B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2062B",
+        "odpt:departureTime": "20:54"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2028B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2028B",
+        "odpt:departureTime": "20:59"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2029B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2029B",
+        "odpt:departureTime": "21:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2064B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2064B",
+        "odpt:departureTime": "21:06"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2130B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2130B",
+        "odpt:departureTime": "21:12"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2131B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2131B",
+        "odpt:departureTime": "21:18"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2172B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2172B",
+        "odpt:departureTime": "21:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2132B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2132B",
+        "odpt:departureTime": "21:30"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2101B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2101B",
+        "odpt:departureTime": "21:36"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2102B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2102B",
+        "odpt:departureTime": "21:42"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2103B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2103B",
+        "odpt:departureTime": "21:49"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2104B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2104B",
+        "odpt:departureTime": "21:56"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2106B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2106B",
+        "odpt:departureTime": "22:04"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2107B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2107B",
+        "odpt:departureTime": "22:10"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2208B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2208B",
+        "odpt:departureTime": "22:17"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2209B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2209B",
+        "odpt:departureTime": "22:24"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2274B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2274B",
+        "odpt:departureTime": "22:31"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2212B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2212B",
+        "odpt:departureTime": "22:39"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2213B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2213B",
+        "odpt:departureTime": "22:45"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2261B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2261B",
+        "odpt:departureTime": "22:52"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2214B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2214B",
+        "odpt:departureTime": "22:59"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2216B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2216B",
+        "odpt:departureTime": "23:06"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2217B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2217B",
+        "odpt:departureTime": "23:12"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2318B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2318B",
+        "odpt:departureTime": "23:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2321B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2321B",
+        "odpt:departureTime": "23:25"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2323B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2323B",
+        "odpt:departureTime": "23:34"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2324B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2324B",
+        "odpt:departureTime": "23:43"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2371B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2371B",
+        "odpt:departureTime": "23:57"
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2427B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2427B",
+        "odpt:departureTime": "00:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2428B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2428B",
+        "odpt:departureTime": "00:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Oedo.2431B",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2431B",
+        "odpt:departureTime": "00:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Oedo.KiyosumiShirakawa"
+        ]
+      }
+    ]
+  }
+]

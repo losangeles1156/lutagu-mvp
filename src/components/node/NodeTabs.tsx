@@ -7,13 +7,17 @@ import {
     Dna,
     Activity,
     Grid,
-    Sparkles
+    Sparkles,
+    TrainFront
 } from 'lucide-react';
 import { L1_DNA } from '@/components/node/L1_DNA';
 import { L2_Live } from '@/components/node/L2_Live';
 import { L3_Facilities } from '@/components/node/L3_Facilities';
 import { L4_Bambi } from '@/components/node/L4_Bambi';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { TimetableBoard } from '@/components/odpt/TimetableBoard';
+import { FareTable } from '@/components/odpt/FareTable';
+import { guessOperator } from '@/hooks/useOdptData';
 
 // Tab Configuration
 const TABS = [
@@ -29,13 +33,17 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
 
     // Use real profile data or fallback to basic node structure
     const rawData = profile || nodeData || {};
+    const operator = rawData.id ? guessOperator(rawData.id) : '';
 
     // [Adapter] Transform Backend L1 Counts to UI L1 Structure
     const l1Adapter = (() => {
-        if ((rawData.l1_categories?.length || 0) > 0) return rawData.l1_categories;
+        // If the new format already exists, use it
+        if (rawData.l1_dna) return rawData.l1_dna;
+
+        // If the OLD array format exists (legacy support/transition), convert it
+        // (Skipping for now as we assume cold data or mock counts)
 
         const counts = rawData.category_counts || {};
-        const stationName = rawData.name?.en || 'Station';
 
         // Helper for labels
         const labels: Record<string, { ja: string, en: string, zh: string }> = {
@@ -51,25 +59,38 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
             nature: { ja: '自然', en: 'Nature', zh: '自然' }
         };
 
-        return Object.entries(counts).map(([key, count]) => {
-            if (typeof count !== 'number' || count <= 0) return null;
-            if (!labels[key]) return null;
+        const categories: Record<string, any> = {};
 
-            return {
+        Object.entries(counts).forEach(([key, count]) => {
+            if (typeof count !== 'number' || count <= 0) return;
+            if (!labels[key]) return;
+
+            categories[key] = {
                 id: key,
+                count: count,
                 label: labels[key],
-                icon: key,
-                items: [
+                subcategories: {},
+                representative_spots: [
                     {
-                        id: `${key}-search`,
-                        name: { ja: `${labels[key].ja}を検索`, en: `Search ${labels[key].en}`, zh: `搜尋${labels[key].zh}` },
-                        location: { ja: '周辺', en: 'Nearby', zh: '周邊' },
-                        googleMapLink: `https://www.google.com/maps/search/${key}+near+${stationName}`,
-                        tags: ['Search']
+                        name: { ja: `${labels[key].ja}スポット`, en: `${labels[key].en} Spot`, zh: `${labels[key].zh}地點` },
+                        osm_id: 'mock-1'
+                    },
+                    {
+                        name: { ja: `人気の${labels[key].ja}`, en: `Popular ${labels[key].en}`, zh: `熱門${labels[key].zh}` },
+                        osm_id: 'mock-2'
                     }
                 ]
             };
-        }).filter(Boolean);
+        });
+
+        return {
+            categories,
+            vibe_tags: [
+                { id: 'vibe1', label: { en: 'Bustling', ja: '賑やか', zh: '熱鬧' }, score: 5 },
+                { id: 'vibe2', label: { en: 'Convenient', ja: '便利', zh: '便利' }, score: 4 }
+            ],
+            last_updated: new Date().toISOString()
+        };
     })();
 
     // [Adapter] Transform Backend L2 Status to UI L2 Structure
@@ -103,12 +124,20 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
 
     const standardData = {
         ...rawData,
-        l1_categories: l1Adapter,
+        // Ensure name is a proper LocaleString even if rawData is messy
+        name: {
+            ja: rawData.name?.ja || rawData.title || 'Station',
+            en: rawData.name?.en || rawData.title || 'Station',
+            zh: rawData.name?.zh || rawData.name?.['zh-TW'] || rawData.title || '車站'
+        },
+        id: rawData.id || rawData.node_id, // Normalize ID
+        l3_facilities: rawData.l3_facilities || [], // Default to array
+        l1_dna: l1Adapter,
         l2: l2Adapter
     };
 
     return (
-        <div className="w-full max-w-md mx-auto bg-white min-h-[50vh] flex flex-col">
+        <div className="w-full h-full bg-white flex flex-col">
 
             {/* Tab Navigation (Sticky Header) */}
             <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">

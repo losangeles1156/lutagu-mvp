@@ -1,0 +1,71 @@
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host dify-k7m9.zeabur.app:443 was resolved.
+* IPv6: (none)
+* IPv4: 35.74.85.73
+*   Trying 35.74.85.73:443...
+* Connected to dify-k7m9.zeabur.app (35.74.85.73) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+} [325 bytes data]
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* (304) (IN), TLS handshake, Unknown (8):
+{ [15 bytes data]
+* (304) (IN), TLS handshake, Certificate (11):
+{ [2657 bytes data]
+* (304) (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* (304) (IN), TLS handshake, Finished (20):
+{ [36 bytes data]
+* (304) (OUT), TLS handshake, Finished (20):
+} [36 bytes data]
+* SSL connection using TLSv1.3 / AEAD-CHACHA20-POLY1305-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=*.zeabur.app
+*  start date: Oct 18 23:03:17 2025 GMT
+*  expire date: Jan 16 23:03:16 2026 GMT
+*  subjectAltName: host "dify-k7m9.zeabur.app" matched cert's "*.zeabur.app"
+*  issuer: C=US; O=Let's Encrypt; CN=R12
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://dify-k7m9.zeabur.app/v1/chat-messages
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: dify-k7m9.zeabur.app]
+* [HTTP/2] [1] [:path: /v1/chat-messages]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [authorization: Bearer app-c0kcm9DLx4lyxGoPP2Nnvbr9]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [content-length: 102]
+> POST /v1/chat-messages HTTP/2
+> Host: dify-k7m9.zeabur.app
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Authorization: Bearer app-c0kcm9DLx4lyxGoPP2Nnvbr9
+> Content-Type: application/json
+> Content-Length: 102
+> 
+} [102 bytes data]
+* upload completely sent off: 102 bytes
+100   102    0     0  100   102      0     87  0:00:01  0:00:01 --:--:--    87100   102    0     0  100   102      0     46  0:00:02  0:00:02 --:--:--    46100   102    0     0  100   102      0     32  0:00:03  0:00:03 --:--:--    32100   102    0     0  100   102      0     24  0:00:04  0:00:04 --:--:--    24< HTTP/2 200 
+< access-control-allow-origin: *
+< alt-svc: h3=":443"; ma=86400
+< content-type: application/json
+< date: Fri, 26 Dec 2025 09:56:58 GMT
+< server: nginx/1.27.5
+< x-env: PRODUCTION
+< x-version: 1.10.1
+< x-zeabur-ip-country: TW
+< x-zeabur-request-id: hnd1::eda35717-4ab8-4015-a69f-32297b881735
+< content-length: 1222
+< 
+{ [1222 bytes data]
+100  1324  100  1222  100   102    257     21  0:00:04  0:00:04 --:--:--   278
+* Connection #0 to host dify-k7m9.zeabur.app left intact
+{"event": "message", "task_id": "fbfbc41c-4f1a-42b3-b0f0-42dc6baa0a7a", "id": "710225e9-f177-4dc2-81f0-3bba776b3757", "message_id": "710225e9-f177-4dc2-81f0-3bba776b3757", "conversation_id": "f80d1a26-9b2b-4656-a0cb-4d9cc6f861c0", "mode": "chat", "answer": "\ud83e\udd8c **Hello! I'm Bambi, your intelligent Tokyo travel companion.**\n\nI'm here to help you navigate the city's complex train stations safely and easily. Whether you need the fastest route, elevator locations for a stroller or wheelchair, or tips to avoid getting lost in \"station dungeons,\" I'm ready to assist! \ud83e\udd8c\n\nHow can I help you with your journey today? Please let me know your current station or where you're planning to go! \ud83d\ude89", "metadata": {"annotation_reply": null, "retriever_resources": [], "usage": {"prompt_tokens": 731, "prompt_unit_price": "0.5", "prompt_price_unit": "0.000001", "prompt_price": "0.0003655", "completion_tokens": 496, "completion_unit_price": "3", "completion_price_unit": "0.000001", "completion_price": "0.001488", "total_tokens": 1227, "total_price": "0.0018535", "currency": "USD", "latency": 4.292779634997714, "time_to_first_token": null, "time_to_generate": null}}, "created_at": 1766743014}

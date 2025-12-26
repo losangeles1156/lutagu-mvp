@@ -1,0 +1,4494 @@
+[
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B3338",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2025-02-03T16:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2025-02-08",
+    "owl:sameAs": "odpt.StationTimetable:Toei.NipporiToneri.Nippori.Outbound.SaturdayHoliday",
+    "odpt:railway": "odpt.Railway:Toei.NipporiToneri",
+    "odpt:station": "odpt.Station:Toei.NipporiToneri.Nippori",
+    "odpt:calendar": "odpt.Calendar:SaturdayHoliday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:Outbound",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.563B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "563B",
+        "odpt:departureTime": "05:33",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.565B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "565B",
+        "odpt:departureTime": "05:41",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.573B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "573B",
+        "odpt:departureTime": "05:48",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.567B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "567B",
+        "odpt:departureTime": "05:56",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.653A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "653A",
+        "odpt:departureTime": "06:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.655A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "655A",
+        "odpt:departureTime": "06:12",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.659A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "659A",
+        "odpt:departureTime": "06:19",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.671A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "671A",
+        "odpt:departureTime": "06:26",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.663A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "663A",
+        "odpt:departureTime": "06:33",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.665A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "665A",
+        "odpt:departureTime": "06:39",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.673A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "673A",
+        "odpt:departureTime": "06:44",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.667A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "667A",
+        "odpt:departureTime": "06:48",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.651B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "651B",
+        "odpt:departureTime": "06:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.653B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "653B",
+        "odpt:departureTime": "06:56",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.769A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "769A",
+        "odpt:departureTime": "07:00",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.755A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "755A",
+        "odpt:departureTime": "07:04",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.757A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "757A",
+        "odpt:departureTime": "07:08",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.759A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "759A",
+        "odpt:departureTime": "07:12",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.771A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "771A",
+        "odpt:departureTime": "07:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.761A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "761A",
+        "odpt:departureTime": "07:20",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.763A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "763A",
+        "odpt:departureTime": "07:24",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.765A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "765A",
+        "odpt:departureTime": "07:28",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.773A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "773A",
+        "odpt:departureTime": "07:32",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.767A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "767A",
+        "odpt:departureTime": "07:36",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.751A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "751A",
+        "odpt:departureTime": "07:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.753A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "753A",
+        "odpt:departureTime": "07:44",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.769B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "769B",
+        "odpt:departureTime": "07:48",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.755B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "755B",
+        "odpt:departureTime": "07:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.757B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "757B",
+        "odpt:departureTime": "07:56",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.859A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "859A",
+        "odpt:departureTime": "08:00",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.871A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "871A",
+        "odpt:departureTime": "08:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.861A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "861A",
+        "odpt:departureTime": "08:08",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.863A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "863A",
+        "odpt:departureTime": "08:12",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.865A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "865A",
+        "odpt:departureTime": "08:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.873A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "873A",
+        "odpt:departureTime": "08:20",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.867A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "867A",
+        "odpt:departureTime": "08:24",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.851A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "851A",
+        "odpt:departureTime": "08:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.853A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "853A",
+        "odpt:departureTime": "08:32",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.869A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "869A",
+        "odpt:departureTime": "08:36",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.855A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "855A",
+        "odpt:departureTime": "08:40",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.857A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "857A",
+        "odpt:departureTime": "08:44",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.859B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "859B",
+        "odpt:departureTime": "08:48",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.871B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "871B",
+        "odpt:departureTime": "08:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.861B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "861B",
+        "odpt:departureTime": "08:56",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.963A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "963A",
+        "odpt:departureTime": "09:00",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.965A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "965A",
+        "odpt:departureTime": "09:04",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.973A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "973A",
+        "odpt:departureTime": "09:08",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.967A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "967A",
+        "odpt:departureTime": "09:12",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.951A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "951A",
+        "odpt:departureTime": "09:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.953A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "953A",
+        "odpt:departureTime": "09:20",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.969A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "969A",
+        "odpt:departureTime": "09:24",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.955A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "955A",
+        "odpt:departureTime": "09:29",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.957A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "957A",
+        "odpt:departureTime": "09:33",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.959A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "959A",
+        "odpt:departureTime": "09:38",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.971A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "971A",
+        "odpt:departureTime": "09:42",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.961A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "961A",
+        "odpt:departureTime": "09:47",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.963B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "963B",
+        "odpt:departureTime": "09:51",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.965B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "965B",
+        "odpt:departureTime": "09:56",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1073A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1073A",
+        "odpt:departureTime": "10:00",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1051A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1051A",
+        "odpt:departureTime": "10:05",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1053A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1053A",
+        "odpt:departureTime": "10:10",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1055A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1055A",
+        "odpt:departureTime": "10:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1057A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1057A",
+        "odpt:departureTime": "10:22",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1059A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1059A",
+        "odpt:departureTime": "10:28",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1061A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1061A",
+        "odpt:departureTime": "10:34",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1063A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1063A",
+        "odpt:departureTime": "10:40",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1065A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1065A",
+        "odpt:departureTime": "10:46",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1051B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1051B",
+        "odpt:departureTime": "10:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1053B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1053B",
+        "odpt:departureTime": "10:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1155A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1155A",
+        "odpt:departureTime": "11:04",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1157A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1157A",
+        "odpt:departureTime": "11:10",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1159A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1159A",
+        "odpt:departureTime": "11:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1161A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1161A",
+        "odpt:departureTime": "11:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1163A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1163A",
+        "odpt:departureTime": "11:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1165A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1165A",
+        "odpt:departureTime": "11:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1151A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1151A",
+        "odpt:departureTime": "11:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1153A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1153A",
+        "odpt:departureTime": "11:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1155B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1155B",
+        "odpt:departureTime": "11:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1157B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1157B",
+        "odpt:departureTime": "11:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1259A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1259A",
+        "odpt:departureTime": "12:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1261A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1261A",
+        "odpt:departureTime": "12:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1263A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1263A",
+        "odpt:departureTime": "12:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1265A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1265A",
+        "odpt:departureTime": "12:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1251A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1251A",
+        "odpt:departureTime": "12:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1253A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1253A",
+        "odpt:departureTime": "12:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1255A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1255A",
+        "odpt:departureTime": "12:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1257A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1257A",
+        "odpt:departureTime": "12:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1259B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1259B",
+        "odpt:departureTime": "12:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1261B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1261B",
+        "odpt:departureTime": "12:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1363A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1363A",
+        "odpt:departureTime": "13:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1365A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1365A",
+        "odpt:departureTime": "13:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1351A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1351A",
+        "odpt:departureTime": "13:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1353A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1353A",
+        "odpt:departureTime": "13:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1355A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1355A",
+        "odpt:departureTime": "13:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1357A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1357A",
+        "odpt:departureTime": "13:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1359A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1359A",
+        "odpt:departureTime": "13:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1361A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1361A",
+        "odpt:departureTime": "13:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1363B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1363B",
+        "odpt:departureTime": "13:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1365B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1365B",
+        "odpt:departureTime": "13:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1451A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1451A",
+        "odpt:departureTime": "14:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1453A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1453A",
+        "odpt:departureTime": "14:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1455A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1455A",
+        "odpt:departureTime": "14:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1457A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1457A",
+        "odpt:departureTime": "14:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1459A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1459A",
+        "odpt:departureTime": "14:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1461A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1461A",
+        "odpt:departureTime": "14:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1463A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1463A",
+        "odpt:departureTime": "14:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1465A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1465A",
+        "odpt:departureTime": "14:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1451B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1451B",
+        "odpt:departureTime": "14:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1453B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1453B",
+        "odpt:departureTime": "14:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1555A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1555A",
+        "odpt:departureTime": "15:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1557A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1557A",
+        "odpt:departureTime": "15:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1559A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1559A",
+        "odpt:departureTime": "15:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1561A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1561A",
+        "odpt:departureTime": "15:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1563A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1563A",
+        "odpt:departureTime": "15:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1565A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1565A",
+        "odpt:departureTime": "15:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1551A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1551A",
+        "odpt:departureTime": "15:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1553A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1553A",
+        "odpt:departureTime": "15:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1555B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1555B",
+        "odpt:departureTime": "15:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1557B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1557B",
+        "odpt:departureTime": "15:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1659A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1659A",
+        "odpt:departureTime": "16:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1661A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1661A",
+        "odpt:departureTime": "16:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1663A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1663A",
+        "odpt:departureTime": "16:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1665A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1665A",
+        "odpt:departureTime": "16:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1651A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1651A",
+        "odpt:departureTime": "16:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1653A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1653A",
+        "odpt:departureTime": "16:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1655A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1655A",
+        "odpt:departureTime": "16:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1657A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1657A",
+        "odpt:departureTime": "16:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1659B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1659B",
+        "odpt:departureTime": "16:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1661B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1661B",
+        "odpt:departureTime": "16:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1763A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1763A",
+        "odpt:departureTime": "17:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1765A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1765A",
+        "odpt:departureTime": "17:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1751A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1751A",
+        "odpt:departureTime": "17:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1753A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1753A",
+        "odpt:departureTime": "17:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1755A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1755A",
+        "odpt:departureTime": "17:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1757A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1757A",
+        "odpt:departureTime": "17:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1759A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1759A",
+        "odpt:departureTime": "17:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1761A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1761A",
+        "odpt:departureTime": "17:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1763B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1763B",
+        "odpt:departureTime": "17:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1765B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1765B",
+        "odpt:departureTime": "17:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1851A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1851A",
+        "odpt:departureTime": "18:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1853A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1853A",
+        "odpt:departureTime": "18:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1855A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1855A",
+        "odpt:departureTime": "18:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1857A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1857A",
+        "odpt:departureTime": "18:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1859A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1859A",
+        "odpt:departureTime": "18:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1861A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1861A",
+        "odpt:departureTime": "18:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1863A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1863A",
+        "odpt:departureTime": "18:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1865A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1865A",
+        "odpt:departureTime": "18:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1851B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1851B",
+        "odpt:departureTime": "18:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1853B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1853B",
+        "odpt:departureTime": "18:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1955A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1955A",
+        "odpt:departureTime": "19:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1957A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1957A",
+        "odpt:departureTime": "19:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1959A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1959A",
+        "odpt:departureTime": "19:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1961A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1961A",
+        "odpt:departureTime": "19:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1963A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1963A",
+        "odpt:departureTime": "19:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1965A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1965A",
+        "odpt:departureTime": "19:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1951A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1951A",
+        "odpt:departureTime": "19:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1953A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1953A",
+        "odpt:departureTime": "19:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1955B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1955B",
+        "odpt:departureTime": "19:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1957B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1957B",
+        "odpt:departureTime": "19:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2059A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2059A",
+        "odpt:departureTime": "20:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2061A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2061A",
+        "odpt:departureTime": "20:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2063A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2063A",
+        "odpt:departureTime": "20:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2065A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2065A",
+        "odpt:departureTime": "20:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2051A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2051A",
+        "odpt:departureTime": "20:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2053A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2053A",
+        "odpt:departureTime": "20:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2055A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2055A",
+        "odpt:departureTime": "20:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2057A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2057A",
+        "odpt:departureTime": "20:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2059B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2059B",
+        "odpt:departureTime": "20:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2061B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2061B",
+        "odpt:departureTime": "20:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2163A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2163A",
+        "odpt:departureTime": "21:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2165A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2165A",
+        "odpt:departureTime": "21:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2151A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2151A",
+        "odpt:departureTime": "21:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2153A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2153A",
+        "odpt:departureTime": "21:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2155A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2155A",
+        "odpt:departureTime": "21:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2157A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2157A",
+        "odpt:departureTime": "21:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2159A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2159A",
+        "odpt:departureTime": "21:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2161A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2161A",
+        "odpt:departureTime": "21:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2163B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2163B",
+        "odpt:departureTime": "21:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2165B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2165B",
+        "odpt:departureTime": "21:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2251A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2251A",
+        "odpt:departureTime": "22:03",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2253A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2253A",
+        "odpt:departureTime": "22:09",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2255A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2255A",
+        "odpt:departureTime": "22:15",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2257A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2257A",
+        "odpt:departureTime": "22:21",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2259A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2259A",
+        "odpt:departureTime": "22:27",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2261A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2261A",
+        "odpt:departureTime": "22:33",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2263A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2263A",
+        "odpt:departureTime": "22:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2265A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2265A",
+        "odpt:departureTime": "22:47",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2251B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2251B",
+        "odpt:departureTime": "22:54",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2355A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2355A",
+        "odpt:departureTime": "23:02",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2357A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2357A",
+        "odpt:departureTime": "23:09",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2359A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2359A",
+        "odpt:departureTime": "23:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2361A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2361A",
+        "odpt:departureTime": "23:23",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2363A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2363A",
+        "odpt:departureTime": "23:31",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2365A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2365A",
+        "odpt:departureTime": "23:38",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2351A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2351A",
+        "odpt:departureTime": "23:45",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2355B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2355B",
+        "odpt:departureTime": "23:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2357B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2357B",
+        "odpt:departureTime": "23:59",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2459A",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2459A",
+        "odpt:departureTime": "00:03",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B3339",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2025-02-03T16:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2025-02-03",
+    "owl:sameAs": "odpt.StationTimetable:Toei.NipporiToneri.Nippori.Outbound.Weekday",
+    "odpt:railway": "odpt.Railway:Toei.NipporiToneri",
+    "odpt:station": "odpt.Station:Toei.NipporiToneri.Nippori",
+    "odpt:calendar": "odpt.Calendar:Weekday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:Outbound",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.569B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "569B",
+        "odpt:departureTime": "05:33",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.565B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "565B",
+        "odpt:departureTime": "05:41",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.583B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "583B",
+        "odpt:departureTime": "05:48",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.551B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "551B",
+        "odpt:departureTime": "05:55",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.675A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "675A",
+        "odpt:departureTime": "06:01",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.677A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "677A",
+        "odpt:departureTime": "06:08",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.659A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "659A",
+        "odpt:departureTime": "06:15",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.667A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "667A",
+        "odpt:departureTime": "06:21",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.669A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "669A",
+        "odpt:departureTime": "06:27",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.681A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "681A",
+        "odpt:departureTime": "06:31",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.665A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "665A",
+        "odpt:departureTime": "06:35",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.671B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "671B",
+        "odpt:departureTime": "06:38",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.683A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "683A",
+        "odpt:departureTime": "06:41",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.673B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "673B",
+        "odpt:departureTime": "06:44",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.651A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "651A",
+        "odpt:departureTime": "06:48",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.653B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "653B",
+        "odpt:departureTime": "06:51",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.675B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "675B",
+        "odpt:departureTime": "06:54",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.655B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "655B",
+        "odpt:departureTime": "06:57",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.777A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "777A",
+        "odpt:departureTime": "07:01",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.757A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "757A",
+        "odpt:departureTime": "07:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.759A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "759A",
+        "odpt:departureTime": "07:07",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.779A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "779A",
+        "odpt:departureTime": "07:10",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.767A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "767A",
+        "odpt:departureTime": "07:13",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.761A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "761A",
+        "odpt:departureTime": "07:17",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.769A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "769A",
+        "odpt:departureTime": "07:20",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.763A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "763A",
+        "odpt:departureTime": "07:23",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.781A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "781A",
+        "odpt:departureTime": "07:26",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.765A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "765A",
+        "odpt:departureTime": "07:30",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.771A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "771A",
+        "odpt:departureTime": "07:33",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.783A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "783A",
+        "odpt:departureTime": "07:36",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.773A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "773A",
+        "odpt:departureTime": "07:39",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.751A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "751A",
+        "odpt:departureTime": "07:43",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.753A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "753A",
+        "odpt:departureTime": "07:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.775A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "775A",
+        "odpt:departureTime": "07:49",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.755A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "755A",
+        "odpt:departureTime": "07:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.777B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "777B",
+        "odpt:departureTime": "07:56",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.757B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "757B",
+        "odpt:departureTime": "07:59",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.859A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "859A",
+        "odpt:departureTime": "08:02",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.879A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "879A",
+        "odpt:departureTime": "08:05",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.867A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "867A",
+        "odpt:departureTime": "08:08",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.861A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "861A",
+        "odpt:departureTime": "08:12",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.869A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "869A",
+        "odpt:departureTime": "08:15",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.863A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "863A",
+        "odpt:departureTime": "08:18",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.881A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "881A",
+        "odpt:departureTime": "08:21",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.865A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "865A",
+        "odpt:departureTime": "08:25",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.871A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "871A",
+        "odpt:departureTime": "08:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.883A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "883A",
+        "odpt:departureTime": "08:31",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.873A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "873A",
+        "odpt:departureTime": "08:34",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.851A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "851A",
+        "odpt:departureTime": "08:38",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.853A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "853A",
+        "odpt:departureTime": "08:41",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.875A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "875A",
+        "odpt:departureTime": "08:44",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.855A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "855A",
+        "odpt:departureTime": "08:47",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.877A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "877A",
+        "odpt:departureTime": "08:50",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.857A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "857A",
+        "odpt:departureTime": "08:54",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.859B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "859B",
+        "odpt:departureTime": "08:57",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.979A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "979A",
+        "odpt:departureTime": "09:00",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.967A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "967A",
+        "odpt:departureTime": "09:03",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.961A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "961A",
+        "odpt:departureTime": "09:07",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.969A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "969A",
+        "odpt:departureTime": "09:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.963A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "963A",
+        "odpt:departureTime": "09:13",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.981A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "981A",
+        "odpt:departureTime": "09:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.965A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "965A",
+        "odpt:departureTime": "09:20",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.971A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "971A",
+        "odpt:departureTime": "09:23",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.983A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "983A",
+        "odpt:departureTime": "09:26",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.973A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "973A",
+        "odpt:departureTime": "09:29",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.951A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "951A",
+        "odpt:departureTime": "09:33",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.953A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "953A",
+        "odpt:departureTime": "09:36",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.975A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "975A",
+        "odpt:departureTime": "09:39",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.955A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "955A",
+        "odpt:departureTime": "09:43",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.977A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "977A",
+        "odpt:departureTime": "09:46",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.957A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "957A",
+        "odpt:departureTime": "09:49",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.959A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "959A",
+        "odpt:departureTime": "09:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.979B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "979B",
+        "odpt:departureTime": "09:57",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1061A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1061A",
+        "odpt:departureTime": "10:01",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1063A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1063A",
+        "odpt:departureTime": "10:05",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1081A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1081A",
+        "odpt:departureTime": "10:09",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1065A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1065A",
+        "odpt:departureTime": "10:13",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1083A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1083A",
+        "odpt:departureTime": "10:18",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1051A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1051A",
+        "odpt:departureTime": "10:23",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1053A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1053A",
+        "odpt:departureTime": "10:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1055A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1055A",
+        "odpt:departureTime": "10:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1057A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1057A",
+        "odpt:departureTime": "10:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1059A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1059A",
+        "odpt:departureTime": "10:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1061B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1061B",
+        "odpt:departureTime": "10:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1063B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1063B",
+        "odpt:departureTime": "10:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1165A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1165A",
+        "odpt:departureTime": "11:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1151A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1151A",
+        "odpt:departureTime": "11:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1153A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1153A",
+        "odpt:departureTime": "11:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1155A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1155A",
+        "odpt:departureTime": "11:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1157A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1157A",
+        "odpt:departureTime": "11:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1159A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1159A",
+        "odpt:departureTime": "11:34",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1161A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1161A",
+        "odpt:departureTime": "11:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1163A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1163A",
+        "odpt:departureTime": "11:46",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1165B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1165B",
+        "odpt:departureTime": "11:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1151B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1151B",
+        "odpt:departureTime": "11:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1253A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1253A",
+        "odpt:departureTime": "12:04",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1255A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1255A",
+        "odpt:departureTime": "12:10",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1257A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1257A",
+        "odpt:departureTime": "12:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1259A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1259A",
+        "odpt:departureTime": "12:22",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1261A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1261A",
+        "odpt:departureTime": "12:28",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1263A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1263A",
+        "odpt:departureTime": "12:34",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1265A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1265A",
+        "odpt:departureTime": "12:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1251A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1251A",
+        "odpt:departureTime": "12:46",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1253B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1253B",
+        "odpt:departureTime": "12:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1255B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1255B",
+        "odpt:departureTime": "12:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1357A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1357A",
+        "odpt:departureTime": "13:04",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1359A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1359A",
+        "odpt:departureTime": "13:10",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1361A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1361A",
+        "odpt:departureTime": "13:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1363A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1363A",
+        "odpt:departureTime": "13:22",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1365A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1365A",
+        "odpt:departureTime": "13:28",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1351A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1351A",
+        "odpt:departureTime": "13:34",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1353A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1353A",
+        "odpt:departureTime": "13:40",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1355A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1355A",
+        "odpt:departureTime": "13:46",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1357B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1357B",
+        "odpt:departureTime": "13:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1359B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1359B",
+        "odpt:departureTime": "13:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1461A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1461A",
+        "odpt:departureTime": "14:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1463A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1463A",
+        "odpt:departureTime": "14:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1465A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1465A",
+        "odpt:departureTime": "14:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1451A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1451A",
+        "odpt:departureTime": "14:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1453A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1453A",
+        "odpt:departureTime": "14:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1455A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1455A",
+        "odpt:departureTime": "14:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1457A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1457A",
+        "odpt:departureTime": "14:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1459A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1459A",
+        "odpt:departureTime": "14:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1461B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1461B",
+        "odpt:departureTime": "14:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1463B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1463B",
+        "odpt:departureTime": "14:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1565A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1565A",
+        "odpt:departureTime": "15:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1551A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1551A",
+        "odpt:departureTime": "15:10",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1553A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1553A",
+        "odpt:departureTime": "15:16",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1555A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1555A",
+        "odpt:departureTime": "15:21",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1557A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1557A",
+        "odpt:departureTime": "15:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1559A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1559A",
+        "odpt:departureTime": "15:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1561A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1561A",
+        "odpt:departureTime": "15:39",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1563A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1563A",
+        "odpt:departureTime": "15:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1565B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1565B",
+        "odpt:departureTime": "15:51",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1551B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1551B",
+        "odpt:departureTime": "15:58",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1685A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1685A",
+        "odpt:departureTime": "16:04",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1653A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1653A",
+        "odpt:departureTime": "16:09",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1655A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1655A",
+        "odpt:departureTime": "16:14",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1657A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1657A",
+        "odpt:departureTime": "16:18",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1687A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1687A",
+        "odpt:departureTime": "16:23",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1659A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1659A",
+        "odpt:departureTime": "16:27",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1661A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1661A",
+        "odpt:departureTime": "16:31",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1689A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1689A",
+        "odpt:departureTime": "16:35",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1663A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1663A",
+        "odpt:departureTime": "16:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1665A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1665A",
+        "odpt:departureTime": "16:44",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1691B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1691B",
+        "odpt:departureTime": "16:48",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1651A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1651A",
+        "odpt:departureTime": "16:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1685B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1685B",
+        "odpt:departureTime": "16:57",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1793A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1793A",
+        "odpt:departureTime": "17:01",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1753A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1753A",
+        "odpt:departureTime": "17:05",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1755A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1755A",
+        "odpt:departureTime": "17:09",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1757A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1757A",
+        "odpt:departureTime": "17:13",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1787A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1787A",
+        "odpt:departureTime": "17:17",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1759A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1759A",
+        "odpt:departureTime": "17:22",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1761A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1761A",
+        "odpt:departureTime": "17:26",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1789A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1789A",
+        "odpt:departureTime": "17:30",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1763A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1763A",
+        "odpt:departureTime": "17:34",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1765A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1765A",
+        "odpt:departureTime": "17:38",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1791A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1791A",
+        "odpt:departureTime": "17:42",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1751A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1751A",
+        "odpt:departureTime": "17:47",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1785A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1785A",
+        "odpt:departureTime": "17:51",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1793B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1793B",
+        "odpt:departureTime": "17:55",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1753B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1753B",
+        "odpt:departureTime": "17:59",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1855A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1855A",
+        "odpt:departureTime": "18:03",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1857A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1857A",
+        "odpt:departureTime": "18:07",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1887A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1887A",
+        "odpt:departureTime": "18:12",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1859A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1859A",
+        "odpt:departureTime": "18:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1861A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1861A",
+        "odpt:departureTime": "18:20",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1889A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1889A",
+        "odpt:departureTime": "18:24",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1863A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1863A",
+        "odpt:departureTime": "18:28",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1865A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1865A",
+        "odpt:departureTime": "18:32",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1891A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1891A",
+        "odpt:departureTime": "18:37",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1851A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1851A",
+        "odpt:departureTime": "18:41",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1885A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1885A",
+        "odpt:departureTime": "18:45",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1893A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1893A",
+        "odpt:departureTime": "18:49",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1853A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1853A",
+        "odpt:departureTime": "18:53",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1855B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1855B",
+        "odpt:departureTime": "18:57",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1957A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1957A",
+        "odpt:departureTime": "19:02",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1987A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1987A",
+        "odpt:departureTime": "19:06",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1959A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1959A",
+        "odpt:departureTime": "19:10",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1961A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1961A",
+        "odpt:departureTime": "19:14",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1989A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1989A",
+        "odpt:departureTime": "19:18",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1963A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1963A",
+        "odpt:departureTime": "19:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1965A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1965A",
+        "odpt:departureTime": "19:27",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1991A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1991A",
+        "odpt:departureTime": "19:31",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1951A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1951A",
+        "odpt:departureTime": "19:35",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1985A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1985A",
+        "odpt:departureTime": "19:39",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1993A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1993A",
+        "odpt:departureTime": "19:43",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1953A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1953A",
+        "odpt:departureTime": "19:47",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1955A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1955A",
+        "odpt:departureTime": "19:52",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.1957B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "1957B",
+        "odpt:departureTime": "19:56",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2087A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2087A",
+        "odpt:departureTime": "20:00",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2059A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2059A",
+        "odpt:departureTime": "20:04",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2061A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2061A",
+        "odpt:departureTime": "20:08",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2089A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2089A",
+        "odpt:departureTime": "20:12",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2063A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2063A",
+        "odpt:departureTime": "20:17",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2065A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2065A",
+        "odpt:departureTime": "20:21",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2091A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2091A",
+        "odpt:departureTime": "20:25",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2051A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2051A",
+        "odpt:departureTime": "20:29",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2085A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2085A",
+        "odpt:departureTime": "20:33",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2093A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2093A",
+        "odpt:departureTime": "20:37",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2053A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2053A",
+        "odpt:departureTime": "20:42",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2055A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2055A",
+        "odpt:departureTime": "20:46",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2057A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2057A",
+        "odpt:departureTime": "20:50",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2087B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2087B",
+        "odpt:departureTime": "20:54",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2059B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2059B",
+        "odpt:departureTime": "20:58",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2161A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2161A",
+        "odpt:departureTime": "21:02",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2189A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2189A",
+        "odpt:departureTime": "21:07",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2163A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2163A",
+        "odpt:departureTime": "21:11",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2165A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2165A",
+        "odpt:departureTime": "21:15",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2191A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2191A",
+        "odpt:departureTime": "21:19",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2151A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2151A",
+        "odpt:departureTime": "21:23",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2185A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2185A",
+        "odpt:departureTime": "21:27",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2193A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2193A",
+        "odpt:departureTime": "21:32",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2153A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2153A",
+        "odpt:departureTime": "21:36",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2155A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2155A",
+        "odpt:departureTime": "21:40",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2157A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2157A",
+        "odpt:departureTime": "21:44",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2187A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2187A",
+        "odpt:departureTime": "21:48",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2159A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2159A",
+        "odpt:departureTime": "21:52",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2161B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2161B",
+        "odpt:departureTime": "21:56",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2289A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2289A",
+        "odpt:departureTime": "22:01",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2263A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2263A",
+        "odpt:departureTime": "22:05",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2265A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2265A",
+        "odpt:departureTime": "22:09",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2291A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2291A",
+        "odpt:departureTime": "22:13",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2251A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2251A",
+        "odpt:departureTime": "22:18",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2285A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2285A",
+        "odpt:departureTime": "22:22",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2293A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2293A",
+        "odpt:departureTime": "22:27",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2253A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2253A",
+        "odpt:departureTime": "22:32",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2257A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2257A",
+        "odpt:departureTime": "22:38",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2287A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2287A",
+        "odpt:departureTime": "22:43",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2261A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2261A",
+        "odpt:departureTime": "22:49",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2289B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2289B",
+        "odpt:departureTime": "22:55",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2363A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2363A",
+        "odpt:departureTime": "23:01",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2391A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2391A",
+        "odpt:departureTime": "23:06",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2351A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2351A",
+        "odpt:departureTime": "23:12",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2393A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2393A",
+        "odpt:departureTime": "23:17",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2353A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2353A",
+        "odpt:departureTime": "23:22",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2357A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2357A",
+        "odpt:departureTime": "23:27",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2387A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2387A",
+        "odpt:departureTime": "23:33",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2361A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2361A",
+        "odpt:departureTime": "23:39",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2389A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2389A",
+        "odpt:departureTime": "23:45",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2363B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2363B",
+        "odpt:departureTime": "23:51",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2391B",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2391B",
+        "odpt:departureTime": "23:57",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2451A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2451A",
+        "odpt:departureTime": "00:03",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2493A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2493A",
+        "odpt:departureTime": "00:10",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2453A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2453A",
+        "odpt:departureTime": "00:16",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2457A",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2457A",
+        "odpt:departureTime": "00:23",
+        "odpt:platformNumber": "1",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.NipporiToneri.2487A",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "2487A",
+        "odpt:departureTime": "00:30",
+        "odpt:platformNumber": "2",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.NipporiToneri.MinumadaiShinsuikoen"
+        ]
+      }
+    ]
+  }
+]

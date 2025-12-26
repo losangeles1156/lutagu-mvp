@@ -1,249 +1,262 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { StationUIProfile, ActionCard } from '@/lib/types/stationStandard';
-import { getLocaleString } from '@/lib/utils/localeUtils';
-import { Sparkles, ArrowRight, Clock, Briefcase, Wallet, Armchair, Baby, Accessibility, Compass, MapPin } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { StationUIProfile } from '@/lib/types/stationStandard';
+import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2 } from 'lucide-react';
 
 interface L4_BambiProps {
     data: StationUIProfile;
 }
 
+interface Message {
+    role: 'user' | 'assistant';
+    content: string;
+    isStrategy?: boolean; // New flag for structured response
+}
+
 export function L4_Bambi({ data }: L4_BambiProps) {
     const tL4 = useTranslations('l4');
-    const locale = useLocale();
-    const { l4_cards: staticL4Cards, id: stationId } = data; // Use static L4 cards as fallback or initial state
+    const { id: stationId, name } = data || {};
 
-    // User Demand State
-    const [selectedDemand, setSelectedDemand] = useState<string | null>(null);
+    // Robust Name Resolution
+    const displayName = (name?.zh && name?.zh !== '車站' && name?.zh !== 'Station')
+        ? name.zh
+        : (name?.en || name?.ja || (stationId?.split(':').pop()?.split('.').pop()) || '車站');
+
+    useEffect(() => {
+        console.log('[L4_Bambi] Data:', data);
+        console.log('[L4_Bambi] DisplayName:', displayName);
+    }, [data, displayName]);
+
+    // Chat State
+    const [messages, setMessages] = useState<Message[]>([]);
+
+    // Initialize greeting ONLY once when displayName becomes available
+    const [hasGreeted, setHasGreeted] = useState(false);
+    useEffect(() => {
+        if (displayName && !hasGreeted) {
+            setMessages([{ role: 'assistant', content: tL4('initialMessage', { station: displayName }) }]);
+            setHasGreeted(true);
+        }
+    }, [displayName, hasGreeted, tL4]);
+
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Cognitive State Visualization
+    const [thinkingStep, setThinkingStep] = useState<string>('');
+
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Hybrid UI State
     const [destination, setDestination] = useState('');
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [showResult, setShowResult] = useState(false);
-    const [dynamicCards, setDynamicCards] = useState<ActionCard[]>([]);
+    const [selectedDemand, setSelectedDemand] = useState<string | null>(null);
 
-    // If we have dynamic result, use it. Otherwise fall back to static data if no interaction yet.
-    // BUT user complaint says static data is boring. 
-    // Let's prioritization: Dynamic > Static (Initial)
-    const displayCards = dynamicCards.length > 0 ? dynamicCards : (showResult ? [] : (staticL4Cards || []));
+    // Scroll to bottom
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages, thinkingStep]);
 
-    // Sort logic (Primary First)
-    const sortedCards = [...displayCards].sort((a, b) =>
-        (a.type === 'primary' ? -1 : 1)
-    );
+    // Send Message Logic
+    const handleSend = async (text: string, contextOverride?: string) => {
+        if (!text.trim() || isLoading) return;
 
-    const primaryCard = sortedCards.find(c => c.type === 'primary');
-    const secondaryCards = sortedCards.filter(c => c.type === 'secondary');
+        const userMsg = { role: 'user' as const, content: text };
+        setMessages(prev => [...prev, userMsg]);
+        setInput('');
+        setIsLoading(true);
+        setThinkingStep(tL4('thinking.initializing'));
 
-    // Demand Options Configuration (7 Contexts)
-    const demandOptions = [
+        // Fake "Thinking Steps" to visualize the 4 Dimensions
+        const steps = [
+            tL4('thinking.l2'),
+            tL4('thinking.l3'),
+            tL4('thinking.kb'),
+            tL4('thinking.synthesizing')
+        ];
+
+        let stepIdx = 0;
+        const stepInterval = setInterval(() => {
+            if (stepIdx < steps.length) {
+                setThinkingStep(steps[stepIdx]);
+                stepIdx++;
+            }
+        }, 1500);
+
+        try {
+            // Force Chinese response in instructions
+            const prompt = contextOverride || text;
+
+            const response = await fetch('/api/agent/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [...messages, userMsg],
+                    nodeId: stationId,
+                    inputs: {
+                        user_context: `[SYSTEM: USER_LOCATION_ENFORCED] User is at ${displayName}. Use Traditional Chinese. Requirement: ${text}`
+                    }
+                })
+            });
+
+            clearInterval(stepInterval);
+
+            if (!response.ok) throw new Error('Network error');
+            if (!response.body) throw new Error('No body');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedResponse = '';
+
+            // Add an empty assistant message to stream into
+            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+            setThinkingStep('');
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.event === 'message') {
+                                accumulatedResponse += data.answer;
+                                setMessages(prev => {
+                                    const newMsgs = [...prev];
+                                    newMsgs[newMsgs.length - 1].content = accumulatedResponse;
+                                    return newMsgs;
+                                });
+                            }
+                        } catch (e) {
+                            // Partials or heartbeat
+                        }
+                    }
+                }
+            }
+
+        } catch (error) {
+            console.error('Chat Error:', error);
+            setMessages(prev => [...prev, { role: 'assistant', content: '抱歉，連線發生錯誤。' }]);
+            clearInterval(stepInterval);
+        } finally {
+            setIsLoading(false);
+            setThinkingStep('');
+        }
+    };
+
+    const demands = [
         { id: 'speed', icon: Clock, label: tL4('demands.speed') },
         { id: 'luggage', icon: Briefcase, label: tL4('demands.luggage') },
         { id: 'budget', icon: Wallet, label: tL4('demands.budget') },
         { id: 'comfort', icon: Armchair, label: tL4('demands.comfort') },
         { id: 'family', icon: Baby, label: tL4('demands.family') },
-        { id: 'accessibility', icon: Accessibility, label: tL4('demands.accessibility') },
-        { id: 'vibe', icon: Compass, label: tL4('demands.vibe') },
+        { id: 'accessibility', icon: Compass, label: tL4('demands.accessibility') }
     ];
 
-    const handleGenerate = async () => {
-        if (!selectedDemand && !destination) return; // Basic validation
-        setIsAnalyzing(true);
-        setShowResult(false);
-
-        try {
-            const res = await fetch('/api/strategy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    stationId, // Need to ensure stationId is passed correctly from props
-                    demand: selectedDemand,
-                    destination,
-                    locale: locale
-                })
-            });
-
-            if (!res.ok) throw new Error('Failed to fetch strategy');
-
-            const result = await res.json();
-            setDynamicCards(result.cards || []);
-            setShowResult(true);
-
-        } catch (error) {
-            console.error('L4 Generation Error:', error);
-            // Fallback?
-        } finally {
-            setIsAnalyzing(false);
-        }
-    };
-
-    // Reset when inputs change
-    const onDemandSelect = (id: string) => {
-        if (selectedDemand === id) {
-            setSelectedDemand(null);
-        } else {
-            setSelectedDemand(id);
-        }
-        setShowResult(false);
-        setDynamicCards([]); // Clear previous results
-    }
-
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom duration-500 pb-20">
-
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-1">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                    <Sparkles size={16} />
-                </div>
-                <div>
-                    <h3 className="text-sm font-black text-gray-900">{tL4('strategyTitle')}</h3>
-                    <p className="text-[10px] text-gray-500 font-medium">{tL4('subtitle')}</p>
+        <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
+            {/* Header Area */}
+            <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-2">
+                    <div className="p-2 bg-indigo-600 rounded-xl text-white">
+                        <Sparkles size={18} />
+                    </div>
+                    <div>
+                        <h3 className="font-black text-slate-800 tracking-tight">{tL4('bambiStrategy')}</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{tL4('subtitle')}</p>
+                    </div>
                 </div>
             </div>
 
-            {/* 1. Demand Menu (User Needs) - 7 Types */}
-            <div>
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">{tL4('demandCard')}</h4>
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {demandOptions.map((opt) => {
-                        const Icon = opt.icon;
-                        const isSelected = selectedDemand === opt.id;
-                        return (
-                            <button
-                                key={opt.id}
-                                onClick={() => onDemandSelect(opt.id)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isSelected
-                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-105'
-                                    : 'bg-white border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600'
-                                    }`}
-                            >
-                                <Icon size={12} />
-                                {opt.label}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* Destination Input & Generate Action */}
-                <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-                    <div>
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                            目的地 / Destination
-                        </label>
-                        <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                            <input
-                                type="text"
-                                value={destination}
-                                onChange={(e) => {
-                                    setDestination(e.target.value);
-                                    setShowResult(false);
-                                    setDynamicCards([]);
-                                }}
-                                placeholder="例如: 成田機場, 新宿..."
-                                className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-gray-400"
-                            />
+            {/* Message Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+                {messages.map((msg, idx) => (
+                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${msg.role === 'user'
+                            ? 'bg-indigo-600 text-white rounded-tr-none'
+                            : 'bg-white text-slate-700 rounded-tl-none border border-slate-100'
+                            }`}>
+                            <div className="flex items-center gap-2 mb-1 opacity-50">
+                                {msg.role === 'user' ? <User size={12} /> : <Bot size={12} />}
+                                <span className="text-[10px] font-black uppercase tracking-tighter">
+                                    {msg.role === 'user' ? 'User' : 'BAMBI'}
+                                </span>
+                            </div>
+                            <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
                         </div>
                     </div>
+                ))}
 
+                {/* Thinking Indicator */}
+                {thinkingStep && (
+                    <div className="flex justify-start animate-in fade-in slide-in-from-left-2 duration-300">
+                        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+                            <Loader2 size={16} className="text-indigo-600 animate-spin" />
+                            <span className="text-xs font-bold text-slate-500 animate-pulse">{thinkingStep}</span>
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Overlay (Hybrid Strategy) */}
+            <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px]">
+                <div className="space-y-4 max-w-lg mx-auto">
+                    {/* Destination Input */}
+                    <div className="relative group">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                            <MapPin size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder={tL4('chips.route') + ' (e.g. 新宿)'}
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600 transition-all"
+                        />
+                    </div>
+
+                    {/* Demand Chips */}
+                    <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
+                        {demands.map(demand => (
+                            <button
+                                key={demand.id}
+                                onClick={() => setSelectedDemand(selectedDemand === demand.id ? null : demand.id)}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-black whitespace-nowrap transition-all ${selectedDemand === demand.id
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-md scale-105'
+                                    : 'bg-white border-slate-100 text-slate-500 hover:border-indigo-200'
+                                    }`}
+                            >
+                                <demand.icon size={14} />
+                                {demand.label}
+                                {selectedDemand === demand.id && <CheckCircle2 size={12} className="ml-1" />}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Action Button */}
                     <button
-                        onClick={handleGenerate}
-                        disabled={isAnalyzing || (!selectedDemand && !destination)}
-                        className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all ${isAnalyzing || (!selectedDemand && !destination)
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-200 hover:scale-[1.02] active:scale-95'
+                        onClick={() => {
+                            const demandLabel = demands.find(d => d.id === selectedDemand)?.label || '';
+                            const combinedText = `我想去「${destination}」。我的需求是「${demandLabel}」。`;
+                            handleSend(combinedText, combinedText);
+                        }}
+                        disabled={!destination || isLoading}
+                        className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-sm tracking-widest transition-all ${!destination || isLoading
+                            ? 'bg-slate-100 text-slate-300'
+                            : 'bg-indigo-600 text-white shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:scale-[1.02] active:scale-95'
                             }`}
                     >
-                        {isAnalyzing ? (
-                            <>
-                                <Sparkles className="animate-spin" size={16} />
-                                分析中...
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles size={16} />
-                                生成最佳行動建議
-                            </>
-                        )}
+                        <Sparkles size={18} />
+                        {tL4('chips.synthesize')}
                     </button>
                 </div>
             </div>
-
-            {/* 2. Results Section (Conditional) */}
-            {showResult && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    {/* Primary Recommendation */}
-                    {primaryCard ? (
-                        <div className="relative group overflow-hidden rounded-3xl bg-gray-900 text-white shadow-xl shadow-indigo-200 transaction-all hover:scale-[1.01] duration-300">
-                            {/* Background Gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-700 to-indigo-900 opacity-90" />
-
-                            {/* Content */}
-                            <div className="relative p-6 z-10">
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] font-black uppercase tracking-widest text-indigo-100 mb-4 shadow-sm">
-                                    <Sparkles size={10} />
-                                    {tL4('topPick')}
-                                </div>
-
-                                <h2 className="text-xl font-black leading-tight mb-2 text-white">
-                                    {getLocaleString(primaryCard.title, locale)}
-                                </h2>
-                                <p className="text-sm font-medium text-indigo-100 leading-relaxed mb-6 opacity-90 whitespace-pre-line">
-                                    {getLocaleString(primaryCard.description, locale)}
-                                </p>
-
-                                <a
-                                    href={primaryCard.actionUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full bg-white text-indigo-900 font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-indigo-50 active:scale-95 transition-all shadow-lg"
-                                >
-                                    {getLocaleString(primaryCard.actionLabel, locale)}
-                                    <ArrowRight size={18} />
-                                </a>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="p-6 bg-gray-50 rounded-2xl border border-dashed text-center text-gray-400 text-xs">
-                            {tL4('thinking')}
-                        </div>
-                    )}
-
-                    {/* 3. Secondary Options */}
-                    {secondaryCards.length > 0 && (
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between px-1 pt-2">
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{tL4('alternatives')}</h4>
-                            </div>
-
-                            {secondaryCards.map((card) => (
-                                <div key={card.id} className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all">
-                                    <h5 className="font-bold text-gray-900 mb-1">{getLocaleString(card.title, locale)}</h5>
-                                    <p className="text-xs text-gray-500 mb-3 leading-relaxed whitespace-pre-line">{getLocaleString(card.description, locale)}</p>
-
-                                    {card.actionUrl && (
-                                        <a
-                                            href={card.actionUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline"
-                                        >
-                                            {getLocaleString(card.actionLabel, locale)}
-                                            <ArrowRight size={14} />
-                                        </a>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Disclaimer */}
-            <p className="text-[9px] text-gray-300 text-center px-6 leading-normal">
-                {tL4('disclaimer')}
-            </p>
-        </div >
+        </div>
     );
 }

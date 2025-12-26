@@ -1,0 +1,206 @@
+{
+    "name": "BambiGO L1: Sequential OSM Fetcher V2",
+    "nodes": [
+        {
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.start",
+            "typeVersion": 1,
+            "position": [
+                240,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Define Categories to fetch sequentially\nreturn [\n  { json: { category: 'shopping', query_key: 'shop' } },\n  { json: { category: 'dining', query_key: 'amenity', query_val: 'restaurant|cafe|fast_food' } },\n  { json: { category: 'medical', query_key: 'amenity', query_val: 'pharmacy|clinic|hospital|dentist' } },\n  { json: { category: 'leisure', query_key: 'leisure' } },\n  { json: { category: 'education', query_key: 'amenity', query_val: 'school|university|kindergarten' } },\n  { json: { category: 'finance', query_key: 'amenity', query_val: 'bank|atm' } },\n  { json: { category: 'accommodation', query_key: 'tourism', query_val: 'hotel|hostel|guest_house' } },\n  { json: { category: 'culture', query_key: 'tourism', query_val: 'museum|art_gallery' } },\n  { json: { category: 'service', query_key: 'amenity', query_val: 'post_office|police|townhall' } },\n  { json: { category: 'nature', query_key: 'leisure', query_val: 'park|garden' } }\n];"
+            },
+            "name": "Set Categories",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "Loop Categories",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "// Construct Overpass Query for THIS single category\nconst category = items[0].json.category;\nconst key = items[0].json.query_key;\nconst val = items[0].json.query_val || '';\nconst lat = $node[\"Start\"].json.lat || 35.7141;\nconst lon = $node[\"Start\"].json.lon || 139.7774;\nconst radius = 1000;\n\n// Construct selector\nlet selector = `[\"${key}\"]`;\nif (val) {\n  selector = `[\"${key}\"~\"${val}\"]`;\n}\n\nconst query = `\n[out:json][timeout:25];\n(\n  node${selector}(around:${radius},${lat},${lon});\n  way${selector}(around:${radius},${lat},${lon});\n  relation${selector}(around:${radius},${lat},${lon});\n);\nout center body;\n`;\n\nreturn [\n  {\n    json: {\n      query,\n      category,\n      target_lat: lat,\n      target_lon: lon\n    }\n  }\n];"
+            },
+            "name": "Build Context",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                900,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "requestMethod": "POST",
+                "url": "https://overpass-api.de/api/interpreter",
+                "options": {},
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "data",
+                            "value": "={{$node[\"Build Context\"].json[\"query\"]}}"
+                        }
+                    ]
+                }
+            },
+            "name": "OSM API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "name": "Rate Limit",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                200
+            ],
+            "webhookId": "b1b2b3b4-b5b6-b7b8-b9b0-b1b2b3b4b5b6"
+        },
+        {
+            "parameters": {
+                "functionCode": "// Process Raw Data - Extract only essential info\nconst elements = items[0].json.elements || [];\nconst category = $node[\"Build Context\"].json[\"category\"];\nconst origin = {\n  lat: $node[\"Build Context\"].json[\"target_lat\"],\n  lon: $node[\"Build Context\"].json[\"target_lon\"]\n};\n\nconst processed = elements.map(el => {\n  const tags = el.tags || {};\n  // Skip unnamed if desired, or keep all\n  if (!tags.name) return null;\n\n  const lat = el.lat || el.center?.lat;\n  const lon = el.lon || el.center?.lon;\n\n  return {\n    osm_id: el.id,\n    name: tags.name,\n    name_en: tags[\"name:en\"] || null,\n    category: category,\n    location: { lat, lon },\n    tags: tags // Pass all tags to backend for advanced processing\n  };\n}).filter(i => i !== null);\n\nreturn [\n  {\n    json: {\n      category,\n      count: processed.length,\n      items: processed,\n      origin\n    }\n  }\n];"
+            },
+            "name": "Clean Data",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1500,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "requestMethod": "POST",
+                "url": "http://localhost:3000/api/l1/ingest",
+                "jsonParameters": true,
+                "options": {},
+                "bodyParametersJson": "={{JSON.stringify($json)}}"
+            },
+            "name": "Send to Backend",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                1700,
+                200
+            ]
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Set Categories",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set Categories": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Categories",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Categories": {
+            "main": [
+                [
+                    {
+                        "node": "Build Context",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Context": {
+            "main": [
+                [
+                    {
+                        "node": "OSM API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OSM API": {
+            "main": [
+                [
+                    {
+                        "node": "Rate Limit",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Rate Limit": {
+            "main": [
+                [
+                    {
+                        "node": "Clean Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Clean Data": {
+            "main": [
+                [
+                    {
+                        "node": "Send to Backend",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send to Backend": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Categories",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

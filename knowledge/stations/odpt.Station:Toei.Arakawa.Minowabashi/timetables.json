@@ -1,0 +1,4244 @@
+[
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B3249",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2023-11-25T09:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2019-12-22",
+    "owl:sameAs": "odpt.StationTimetable:Toei.Arakawa.Minowabashi.Toei.Waseda.Holiday",
+    "odpt:railway": "odpt.Railway:Toei.Arakawa",
+    "odpt:station": "odpt.Station:Toei.Arakawa.Minowabashi",
+    "odpt:calendar": "odpt.Calendar:Holiday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:Toei.Waseda",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0107",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0107",
+        "odpt:departureTime": "05:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0154",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0154",
+        "odpt:departureTime": "06:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0204",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0204",
+        "odpt:departureTime": "06:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0253",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0253",
+        "odpt:departureTime": "06:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0298",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0298",
+        "odpt:departureTime": "06:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0351",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0351",
+        "odpt:departureTime": "06:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0390",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0390",
+        "odpt:departureTime": "07:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0452",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0452",
+        "odpt:departureTime": "07:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0512",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0512",
+        "odpt:departureTime": "07:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0563",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0563",
+        "odpt:departureTime": "07:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0616",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0616",
+        "odpt:departureTime": "07:47",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0670",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0670",
+        "odpt:departureTime": "07:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0713",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0713",
+        "odpt:departureTime": "08:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0752",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0752",
+        "odpt:departureTime": "08:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0793",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0793",
+        "odpt:departureTime": "08:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0826",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0826",
+        "odpt:departureTime": "08:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0861",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0861",
+        "odpt:departureTime": "08:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0907",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0907",
+        "odpt:departureTime": "08:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0946",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0946",
+        "odpt:departureTime": "08:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0977",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0977",
+        "odpt:departureTime": "09:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1014",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1014",
+        "odpt:departureTime": "09:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1045",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1045",
+        "odpt:departureTime": "09:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1090",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1090",
+        "odpt:departureTime": "09:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1122",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1122",
+        "odpt:departureTime": "09:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1158",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1158",
+        "odpt:departureTime": "09:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1182",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1182",
+        "odpt:departureTime": "09:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1210",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1210",
+        "odpt:departureTime": "09:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1233",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1233",
+        "odpt:departureTime": "09:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5251",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5251",
+        "odpt:departureTime": "10:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5255",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5255",
+        "odpt:departureTime": "10:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5259",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5259",
+        "odpt:departureTime": "10:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5261",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5261",
+        "odpt:departureTime": "10:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5263",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5263",
+        "odpt:departureTime": "10:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5267",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5267",
+        "odpt:departureTime": "10:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5271",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5271",
+        "odpt:departureTime": "10:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5275",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5275",
+        "odpt:departureTime": "10:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5279",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5279",
+        "odpt:departureTime": "10:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5283",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5283",
+        "odpt:departureTime": "10:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5287",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5287",
+        "odpt:departureTime": "11:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5291",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5291",
+        "odpt:departureTime": "11:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5295",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5295",
+        "odpt:departureTime": "11:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5299",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5299",
+        "odpt:departureTime": "11:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5303",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5303",
+        "odpt:departureTime": "11:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5307",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5307",
+        "odpt:departureTime": "11:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5311",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5311",
+        "odpt:departureTime": "11:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5315",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5315",
+        "odpt:departureTime": "11:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5319",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5319",
+        "odpt:departureTime": "11:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5323",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5323",
+        "odpt:departureTime": "11:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5327",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5327",
+        "odpt:departureTime": "12:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5331",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5331",
+        "odpt:departureTime": "12:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5335",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5335",
+        "odpt:departureTime": "12:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5339",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5339",
+        "odpt:departureTime": "12:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5343",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5343",
+        "odpt:departureTime": "12:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5347",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5347",
+        "odpt:departureTime": "12:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5351",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5351",
+        "odpt:departureTime": "12:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5355",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5355",
+        "odpt:departureTime": "12:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5359",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5359",
+        "odpt:departureTime": "12:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5363",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5363",
+        "odpt:departureTime": "12:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5367",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5367",
+        "odpt:departureTime": "13:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5371",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5371",
+        "odpt:departureTime": "13:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5375",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5375",
+        "odpt:departureTime": "13:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5379",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5379",
+        "odpt:departureTime": "13:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5383",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5383",
+        "odpt:departureTime": "13:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5387",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5387",
+        "odpt:departureTime": "13:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5391",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5391",
+        "odpt:departureTime": "13:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5395",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5395",
+        "odpt:departureTime": "13:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5399",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5399",
+        "odpt:departureTime": "13:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5403",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5403",
+        "odpt:departureTime": "13:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5407",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5407",
+        "odpt:departureTime": "14:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5411",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5411",
+        "odpt:departureTime": "14:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5415",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5415",
+        "odpt:departureTime": "14:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5419",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5419",
+        "odpt:departureTime": "14:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5423",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5423",
+        "odpt:departureTime": "14:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5427",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5427",
+        "odpt:departureTime": "14:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5431",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5431",
+        "odpt:departureTime": "14:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5435",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5435",
+        "odpt:departureTime": "14:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5439",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5439",
+        "odpt:departureTime": "14:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5443",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5443",
+        "odpt:departureTime": "14:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5447",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5447",
+        "odpt:departureTime": "15:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2245",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2245",
+        "odpt:departureTime": "15:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2271",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2271",
+        "odpt:departureTime": "15:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2293",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2293",
+        "odpt:departureTime": "15:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2320",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2320",
+        "odpt:departureTime": "15:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2350",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2350",
+        "odpt:departureTime": "15:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2374",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2374",
+        "odpt:departureTime": "15:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2398",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2398",
+        "odpt:departureTime": "15:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2420",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2420",
+        "odpt:departureTime": "15:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2447",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2447",
+        "odpt:departureTime": "15:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2477",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2477",
+        "odpt:departureTime": "16:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2504",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2504",
+        "odpt:departureTime": "16:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2526",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2526",
+        "odpt:departureTime": "16:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2553",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2553",
+        "odpt:departureTime": "16:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2581",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2581",
+        "odpt:departureTime": "16:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2612",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2612",
+        "odpt:departureTime": "16:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2641",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2641",
+        "odpt:departureTime": "16:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2663",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2663",
+        "odpt:departureTime": "16:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2689",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2689",
+        "odpt:departureTime": "16:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2715",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2715",
+        "odpt:departureTime": "16:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2741",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2741",
+        "odpt:departureTime": "17:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2769",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2769",
+        "odpt:departureTime": "17:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2796",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2796",
+        "odpt:departureTime": "17:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2820",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2820",
+        "odpt:departureTime": "17:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2851",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2851",
+        "odpt:departureTime": "17:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2880",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2880",
+        "odpt:departureTime": "17:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2906",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2906",
+        "odpt:departureTime": "17:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2934",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2934",
+        "odpt:departureTime": "17:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2964",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2964",
+        "odpt:departureTime": "17:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2991",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2991",
+        "odpt:departureTime": "17:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3007",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3007",
+        "odpt:departureTime": "17:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3050",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3050",
+        "odpt:departureTime": "18:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3071",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3071",
+        "odpt:departureTime": "18:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3097",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3097",
+        "odpt:departureTime": "18:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3137",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3137",
+        "odpt:departureTime": "18:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3164",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3164",
+        "odpt:departureTime": "18:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3194",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3194",
+        "odpt:departureTime": "18:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3214",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3214",
+        "odpt:departureTime": "18:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3229",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3229",
+        "odpt:departureTime": "18:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3267",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3267",
+        "odpt:departureTime": "18:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3296",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3296",
+        "odpt:departureTime": "19:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3328",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3328",
+        "odpt:departureTime": "19:10",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3363",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3363",
+        "odpt:departureTime": "19:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3395",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3395",
+        "odpt:departureTime": "19:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3429",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3429",
+        "odpt:departureTime": "19:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3461",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3461",
+        "odpt:departureTime": "19:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3488",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3488",
+        "odpt:departureTime": "19:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3519",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3519",
+        "odpt:departureTime": "19:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3542",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3542",
+        "odpt:departureTime": "20:02",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3592",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3592",
+        "odpt:departureTime": "20:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3636",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3636",
+        "odpt:departureTime": "20:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3657",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3657",
+        "odpt:departureTime": "20:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3679",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3679",
+        "odpt:departureTime": "20:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3720",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3720",
+        "odpt:departureTime": "20:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3758",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3758",
+        "odpt:departureTime": "20:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3807",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3807",
+        "odpt:departureTime": "21:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3833",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3833",
+        "odpt:departureTime": "21:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3854",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3854",
+        "odpt:departureTime": "21:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3901",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3901",
+        "odpt:departureTime": "21:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3943",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3943",
+        "odpt:departureTime": "21:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3981",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3981",
+        "odpt:departureTime": "22:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4024",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4024",
+        "odpt:departureTime": "22:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4052",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4052",
+        "odpt:departureTime": "22:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4077",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4077",
+        "odpt:departureTime": "22:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4131",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4131",
+        "odpt:departureTime": "22:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4161",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4161",
+        "odpt:departureTime": "23:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4201",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4201",
+        "odpt:departureTime": "23:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B324A",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2023-11-25T09:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2021-02-20",
+    "owl:sameAs": "odpt.StationTimetable:Toei.Arakawa.Minowabashi.Toei.Waseda.Saturday",
+    "odpt:railway": "odpt.Railway:Toei.Arakawa",
+    "odpt:station": "odpt.Station:Toei.Arakawa.Minowabashi",
+    "odpt:calendar": "odpt.Calendar:Saturday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:Toei.Waseda",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0107",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0107",
+        "odpt:departureTime": "05:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0154",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0154",
+        "odpt:departureTime": "06:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0204",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0204",
+        "odpt:departureTime": "06:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0256",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0256",
+        "odpt:departureTime": "06:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0305",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0305",
+        "odpt:departureTime": "06:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0377",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0377",
+        "odpt:departureTime": "06:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0399",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0399",
+        "odpt:departureTime": "07:05",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0434",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0434",
+        "odpt:departureTime": "07:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0465",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0465",
+        "odpt:departureTime": "07:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0508",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0508",
+        "odpt:departureTime": "07:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0521",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0521",
+        "odpt:departureTime": "07:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0563",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0563",
+        "odpt:departureTime": "07:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0597",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0597",
+        "odpt:departureTime": "07:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0616",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0616",
+        "odpt:departureTime": "07:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0652",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0652",
+        "odpt:departureTime": "07:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0686",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0686",
+        "odpt:departureTime": "08:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0713",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0713",
+        "odpt:departureTime": "08:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0746",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0746",
+        "odpt:departureTime": "08:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0771",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0771",
+        "odpt:departureTime": "08:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0800",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0800",
+        "odpt:departureTime": "08:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0834",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0834",
+        "odpt:departureTime": "08:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0861",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0861",
+        "odpt:departureTime": "08:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0893",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0893",
+        "odpt:departureTime": "08:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0918",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0918",
+        "odpt:departureTime": "08:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0946",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0946",
+        "odpt:departureTime": "08:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0977",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0977",
+        "odpt:departureTime": "09:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1005",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1005",
+        "odpt:departureTime": "09:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1036",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1036",
+        "odpt:departureTime": "09:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1063",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1063",
+        "odpt:departureTime": "09:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1097",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1097",
+        "odpt:departureTime": "09:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1130",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1130",
+        "odpt:departureTime": "09:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1158",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1158",
+        "odpt:departureTime": "09:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1170",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1170",
+        "odpt:departureTime": "09:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1182",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1182",
+        "odpt:departureTime": "09:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1210",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1210",
+        "odpt:departureTime": "09:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1233",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1233",
+        "odpt:departureTime": "09:54",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5251",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5251",
+        "odpt:departureTime": "10:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5255",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5255",
+        "odpt:departureTime": "10:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5259",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5259",
+        "odpt:departureTime": "10:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5261",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5261",
+        "odpt:departureTime": "10:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5263",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5263",
+        "odpt:departureTime": "10:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5265",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5265",
+        "odpt:departureTime": "10:28",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5269",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5269",
+        "odpt:departureTime": "10:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5273",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5273",
+        "odpt:departureTime": "10:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5277",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5277",
+        "odpt:departureTime": "10:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5281",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5281",
+        "odpt:departureTime": "10:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5285",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5285",
+        "odpt:departureTime": "10:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5289",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5289",
+        "odpt:departureTime": "11:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5293",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5293",
+        "odpt:departureTime": "11:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5297",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5297",
+        "odpt:departureTime": "11:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5301",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5301",
+        "odpt:departureTime": "11:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5305",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5305",
+        "odpt:departureTime": "11:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5309",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5309",
+        "odpt:departureTime": "11:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5313",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5313",
+        "odpt:departureTime": "11:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5317",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5317",
+        "odpt:departureTime": "11:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5321",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5321",
+        "odpt:departureTime": "11:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5325",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5325",
+        "odpt:departureTime": "11:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5329",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5329",
+        "odpt:departureTime": "12:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5333",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5333",
+        "odpt:departureTime": "12:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5337",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5337",
+        "odpt:departureTime": "12:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5341",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5341",
+        "odpt:departureTime": "12:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5345",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5345",
+        "odpt:departureTime": "12:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5349",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5349",
+        "odpt:departureTime": "12:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5353",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5353",
+        "odpt:departureTime": "12:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5357",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5357",
+        "odpt:departureTime": "12:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5361",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5361",
+        "odpt:departureTime": "12:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5365",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5365",
+        "odpt:departureTime": "12:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5369",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5369",
+        "odpt:departureTime": "13:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5373",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5373",
+        "odpt:departureTime": "13:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5377",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5377",
+        "odpt:departureTime": "13:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5381",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5381",
+        "odpt:departureTime": "13:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5385",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5385",
+        "odpt:departureTime": "13:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5389",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5389",
+        "odpt:departureTime": "13:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5393",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5393",
+        "odpt:departureTime": "13:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5397",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5397",
+        "odpt:departureTime": "13:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5401",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5401",
+        "odpt:departureTime": "13:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5405",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5405",
+        "odpt:departureTime": "13:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5409",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5409",
+        "odpt:departureTime": "14:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5413",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5413",
+        "odpt:departureTime": "14:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5417",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5417",
+        "odpt:departureTime": "14:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5421",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5421",
+        "odpt:departureTime": "14:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5425",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5425",
+        "odpt:departureTime": "14:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5429",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5429",
+        "odpt:departureTime": "14:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5433",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5433",
+        "odpt:departureTime": "14:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5437",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5437",
+        "odpt:departureTime": "14:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5441",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5441",
+        "odpt:departureTime": "14:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5445",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5445",
+        "odpt:departureTime": "14:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5449",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5449",
+        "odpt:departureTime": "15:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2254",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2254",
+        "odpt:departureTime": "15:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2280",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2280",
+        "odpt:departureTime": "15:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2303",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2303",
+        "odpt:departureTime": "15:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2334",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2334",
+        "odpt:departureTime": "15:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2358",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2358",
+        "odpt:departureTime": "15:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2382",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2382",
+        "odpt:departureTime": "15:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2408",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2408",
+        "odpt:departureTime": "15:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2433",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2433",
+        "odpt:departureTime": "15:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2460",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2460",
+        "odpt:departureTime": "15:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2488",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2488",
+        "odpt:departureTime": "16:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2510",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2510",
+        "odpt:departureTime": "16:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2540",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2540",
+        "odpt:departureTime": "16:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2567",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2567",
+        "odpt:departureTime": "16:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2593",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2593",
+        "odpt:departureTime": "16:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2621",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2621",
+        "odpt:departureTime": "16:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2649",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2649",
+        "odpt:departureTime": "16:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2674",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2674",
+        "odpt:departureTime": "16:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2702",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2702",
+        "odpt:departureTime": "16:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2725",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2725",
+        "odpt:departureTime": "16:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2751",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2751",
+        "odpt:departureTime": "17:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2779",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2779",
+        "odpt:departureTime": "17:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2808",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2808",
+        "odpt:departureTime": "17:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2834",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2834",
+        "odpt:departureTime": "17:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2863",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2863",
+        "odpt:departureTime": "17:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2887",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2887",
+        "odpt:departureTime": "17:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2911",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2911",
+        "odpt:departureTime": "17:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2944",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2944",
+        "odpt:departureTime": "17:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2968",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2968",
+        "odpt:departureTime": "17:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2996",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2996",
+        "odpt:departureTime": "17:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3025",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3025",
+        "odpt:departureTime": "18:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3055",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3055",
+        "odpt:departureTime": "18:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3084",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3084",
+        "odpt:departureTime": "18:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3115",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3115",
+        "odpt:departureTime": "18:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3140",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3140",
+        "odpt:departureTime": "18:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3171",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3171",
+        "odpt:departureTime": "18:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3194",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3194",
+        "odpt:departureTime": "18:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3214",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3214",
+        "odpt:departureTime": "18:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3253",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3253",
+        "odpt:departureTime": "18:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3289",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3289",
+        "odpt:departureTime": "19:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3312",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3312",
+        "odpt:departureTime": "19:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3328",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3328",
+        "odpt:departureTime": "19:10",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3348",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3348",
+        "odpt:departureTime": "19:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3373",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3373",
+        "odpt:departureTime": "19:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3401",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3401",
+        "odpt:departureTime": "19:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3433",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3433",
+        "odpt:departureTime": "19:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3452",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3452",
+        "odpt:departureTime": "19:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3471",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3471",
+        "odpt:departureTime": "19:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3505",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3505",
+        "odpt:departureTime": "19:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3535",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3535",
+        "odpt:departureTime": "19:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3564",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3564",
+        "odpt:departureTime": "20:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3603",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3603",
+        "odpt:departureTime": "20:16",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3646",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3646",
+        "odpt:departureTime": "20:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3684",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3684",
+        "odpt:departureTime": "20:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3722",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3722",
+        "odpt:departureTime": "20:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3767",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3767",
+        "odpt:departureTime": "20:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3811",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3811",
+        "odpt:departureTime": "21:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3860",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3860",
+        "odpt:departureTime": "21:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3894",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3894",
+        "odpt:departureTime": "21:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3921",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3921",
+        "odpt:departureTime": "21:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3950",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3950",
+        "odpt:departureTime": "21:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3984",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3984",
+        "odpt:departureTime": "22:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4024",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4024",
+        "odpt:departureTime": "22:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4048",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4048",
+        "odpt:departureTime": "22:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4077",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4077",
+        "odpt:departureTime": "22:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4108",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4108",
+        "odpt:departureTime": "22:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4138",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4138",
+        "odpt:departureTime": "22:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4161",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4161",
+        "odpt:departureTime": "23:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4201",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4201",
+        "odpt:departureTime": "23:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "urn:ucode:_00001C000000000000010000031B324B",
+    "@type": "odpt:StationTimetable",
+    "dc:date": "2023-11-25T09:00:00+09:00",
+    "@context": "http://vocab.odpt.org/context_odpt_StationTimetable.jsonld",
+    "dct:issued": "2021-02-22",
+    "owl:sameAs": "odpt.StationTimetable:Toei.Arakawa.Minowabashi.Toei.Waseda.Weekday",
+    "odpt:railway": "odpt.Railway:Toei.Arakawa",
+    "odpt:station": "odpt.Station:Toei.Arakawa.Minowabashi",
+    "odpt:calendar": "odpt.Calendar:Weekday",
+    "odpt:operator": "odpt.Operator:Toei",
+    "odpt:railDirection": "odpt.RailDirection:Toei.Waseda",
+    "odpt:stationTimetableObject": [
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0107",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0107",
+        "odpt:departureTime": "05:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0154",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0154",
+        "odpt:departureTime": "06:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0213",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0213",
+        "odpt:departureTime": "06:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0248",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0248",
+        "odpt:departureTime": "06:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5233",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5233",
+        "odpt:departureTime": "06:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0305",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0305",
+        "odpt:departureTime": "06:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0351",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0351",
+        "odpt:departureTime": "06:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0377",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0377",
+        "odpt:departureTime": "07:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0399",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0399",
+        "odpt:departureTime": "07:05",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0427",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0427",
+        "odpt:departureTime": "07:10",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0452",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0452",
+        "odpt:departureTime": "07:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0479",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0479",
+        "odpt:departureTime": "07:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0521",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0521",
+        "odpt:departureTime": "07:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0540",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0540",
+        "odpt:departureTime": "07:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0563",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0563",
+        "odpt:departureTime": "07:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0597",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0597",
+        "odpt:departureTime": "07:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0616",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0616",
+        "odpt:departureTime": "07:47",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0636",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0636",
+        "odpt:departureTime": "07:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0664",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0664",
+        "odpt:departureTime": "07:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0686",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0686",
+        "odpt:departureTime": "07:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0709",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0709",
+        "odpt:departureTime": "08:04",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0734",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0734",
+        "odpt:departureTime": "08:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0752",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0752",
+        "odpt:departureTime": "08:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0783",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0783",
+        "odpt:departureTime": "08:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0800",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0800",
+        "odpt:departureTime": "08:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0826",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0826",
+        "odpt:departureTime": "08:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0857",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0857",
+        "odpt:departureTime": "08:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0885",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0885",
+        "odpt:departureTime": "08:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0907",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0907",
+        "odpt:departureTime": "08:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0929",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0929",
+        "odpt:departureTime": "08:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0954",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0954",
+        "odpt:departureTime": "08:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT0986",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT0986",
+        "odpt:departureTime": "09:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1005",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1005",
+        "odpt:departureTime": "09:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1036",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1036",
+        "odpt:departureTime": "09:12",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1045",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1045",
+        "odpt:departureTime": "09:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1077",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1077",
+        "odpt:departureTime": "09:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1108",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1108",
+        "odpt:departureTime": "09:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1135",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1135",
+        "odpt:departureTime": "09:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1170",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1170",
+        "odpt:departureTime": "09:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1182",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1182",
+        "odpt:departureTime": "09:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1196",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1196",
+        "odpt:departureTime": "09:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1223",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1223",
+        "odpt:departureTime": "09:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT1243",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT1243",
+        "odpt:departureTime": "09:56",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5253",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5253",
+        "odpt:departureTime": "10:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5257",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5257",
+        "odpt:departureTime": "10:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2691",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2691",
+        "odpt:departureTime": "10:16",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2957",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2957",
+        "odpt:departureTime": "10:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2985",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2985",
+        "odpt:departureTime": "10:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5267",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5267",
+        "odpt:departureTime": "10:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5271",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5271",
+        "odpt:departureTime": "10:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5275",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5275",
+        "odpt:departureTime": "10:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5279",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5279",
+        "odpt:departureTime": "10:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5283",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5283",
+        "odpt:departureTime": "10:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5287",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5287",
+        "odpt:departureTime": "11:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5293",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5293",
+        "odpt:departureTime": "11:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5297",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5297",
+        "odpt:departureTime": "11:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5301",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5301",
+        "odpt:departureTime": "11:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5305",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5305",
+        "odpt:departureTime": "11:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5309",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5309",
+        "odpt:departureTime": "11:34",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5313",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5313",
+        "odpt:departureTime": "11:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5319",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5319",
+        "odpt:departureTime": "11:47",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5323",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5323",
+        "odpt:departureTime": "11:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5327",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5327",
+        "odpt:departureTime": "12:00",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5331",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5331",
+        "odpt:departureTime": "12:06",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5335",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5335",
+        "odpt:departureTime": "12:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5339",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5339",
+        "odpt:departureTime": "12:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5345",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5345",
+        "odpt:departureTime": "12:26",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5349",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5349",
+        "odpt:departureTime": "12:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5353",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5353",
+        "odpt:departureTime": "12:39",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5357",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5357",
+        "odpt:departureTime": "12:45",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5361",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5361",
+        "odpt:departureTime": "12:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5365",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5365",
+        "odpt:departureTime": "12:58",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5371",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5371",
+        "odpt:departureTime": "13:05",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5375",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5375",
+        "odpt:departureTime": "13:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5379",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5379",
+        "odpt:departureTime": "13:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5383",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5383",
+        "odpt:departureTime": "13:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5387",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5387",
+        "odpt:departureTime": "13:31",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5391",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5391",
+        "odpt:departureTime": "13:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5397",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5397",
+        "odpt:departureTime": "13:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5401",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5401",
+        "odpt:departureTime": "13:50",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5405",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5405",
+        "odpt:departureTime": "13:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5409",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5409",
+        "odpt:departureTime": "14:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5413",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5413",
+        "odpt:departureTime": "14:10",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5417",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5417",
+        "odpt:departureTime": "14:16",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5423",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5423",
+        "odpt:departureTime": "14:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5427",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5427",
+        "odpt:departureTime": "14:29",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5431",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5431",
+        "odpt:departureTime": "14:36",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5435",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5435",
+        "odpt:departureTime": "14:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5439",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5439",
+        "odpt:departureTime": "14:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5443",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5443",
+        "odpt:departureTime": "14:55",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT5449",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT5449",
+        "odpt:departureTime": "15:02",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2250",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2250",
+        "odpt:departureTime": "15:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2280",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2280",
+        "odpt:departureTime": "15:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2303",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2303",
+        "odpt:departureTime": "15:21",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2350",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2350",
+        "odpt:departureTime": "15:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2374",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2374",
+        "odpt:departureTime": "15:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2398",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2398",
+        "odpt:departureTime": "15:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2420",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2420",
+        "odpt:departureTime": "15:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2439",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2439",
+        "odpt:departureTime": "15:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2465",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2465",
+        "odpt:departureTime": "15:58",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2488",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2488",
+        "odpt:departureTime": "16:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2508",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2508",
+        "odpt:departureTime": "16:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2529",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2529",
+        "odpt:departureTime": "16:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2553",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2553",
+        "odpt:departureTime": "16:18",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2581",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2581",
+        "odpt:departureTime": "16:23",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2602",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2602",
+        "odpt:departureTime": "16:28",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2621",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2621",
+        "odpt:departureTime": "16:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2649",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2649",
+        "odpt:departureTime": "16:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2670",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2670",
+        "odpt:departureTime": "16:43",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2689",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2689",
+        "odpt:departureTime": "16:48",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2715",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2715",
+        "odpt:departureTime": "16:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2733",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2733",
+        "odpt:departureTime": "16:58",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2751",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2751",
+        "odpt:departureTime": "17:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2779",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2779",
+        "odpt:departureTime": "17:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2799",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2799",
+        "odpt:departureTime": "17:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2825",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2825",
+        "odpt:departureTime": "17:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2851",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2851",
+        "odpt:departureTime": "17:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2880",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2880",
+        "odpt:departureTime": "17:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2893",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2893",
+        "odpt:departureTime": "17:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2924",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2924",
+        "odpt:departureTime": "17:41",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2944",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2944",
+        "odpt:departureTime": "17:46",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2968",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2968",
+        "odpt:departureTime": "17:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT2996",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT2996",
+        "odpt:departureTime": "17:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3025",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3025",
+        "odpt:departureTime": "18:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3055",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3055",
+        "odpt:departureTime": "18:08",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3071",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3071",
+        "odpt:departureTime": "18:13",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3089",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3089",
+        "odpt:departureTime": "18:17",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3115",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3115",
+        "odpt:departureTime": "18:22",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3140",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3140",
+        "odpt:departureTime": "18:27",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3161",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3161",
+        "odpt:departureTime": "18:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3181",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3181",
+        "odpt:departureTime": "18:37",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3200",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3200",
+        "odpt:departureTime": "18:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3217",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3217",
+        "odpt:departureTime": "18:47",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3253",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3253",
+        "odpt:departureTime": "18:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3267",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3267",
+        "odpt:departureTime": "18:57",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3296",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3296",
+        "odpt:departureTime": "19:03",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3322",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3322",
+        "odpt:departureTime": "19:09",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3348",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3348",
+        "odpt:departureTime": "19:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3373",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3373",
+        "odpt:departureTime": "19:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3391",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3391",
+        "odpt:departureTime": "19:24",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3419",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3419",
+        "odpt:departureTime": "19:32",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3447",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3447",
+        "odpt:departureTime": "19:38",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3465",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3465",
+        "odpt:departureTime": "19:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3505",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3505",
+        "odpt:departureTime": "19:52",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3535",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3535",
+        "odpt:departureTime": "19:59",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3564",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3564",
+        "odpt:departureTime": "20:07",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3597",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3597",
+        "odpt:departureTime": "20:15",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3642",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3642",
+        "odpt:departureTime": "20:25",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3657",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3657",
+        "odpt:departureTime": "20:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3684",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3684",
+        "odpt:departureTime": "20:35",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3720",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3720",
+        "odpt:departureTime": "20:44",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3747",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3747",
+        "odpt:departureTime": "20:53",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3800",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3800",
+        "odpt:departureTime": "21:05",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3847",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3847",
+        "odpt:departureTime": "21:19",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3895",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3895",
+        "odpt:departureTime": "21:33",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3923",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3923",
+        "odpt:departureTime": "21:42",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3950",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3950",
+        "odpt:departureTime": "21:51",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT3984",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT3984",
+        "odpt:departureTime": "22:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4024",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4024",
+        "odpt:departureTime": "22:11",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.Waseda"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4048",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4048",
+        "odpt:departureTime": "22:20",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4077",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4077",
+        "odpt:departureTime": "22:30",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OtsukaEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4108",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4108",
+        "odpt:departureTime": "22:40",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4131",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4131",
+        "odpt:departureTime": "22:49",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4161",
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4161",
+        "odpt:departureTime": "23:01",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.OjiEkimae"
+        ]
+      },
+      {
+        "odpt:train": "odpt.Train:Toei.Arakawa.ODPT4201",
+        "odpt:isLast": true,
+        "odpt:trainType": "odpt.TrainType:Toei.Local",
+        "odpt:trainNumber": "ODPT4201",
+        "odpt:departureTime": "23:14",
+        "odpt:destinationStation": [
+          "odpt.Station:Toei.Arakawa.ArakawaShakomae"
+        ]
+      }
+    ]
+  }
+]

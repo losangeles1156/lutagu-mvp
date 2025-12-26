@@ -34,3 +34,5 @@ next-env.d.ts
 
 # Data Sync Files
 bambigo-v3.0/*.json
+l1_workflow.json
+

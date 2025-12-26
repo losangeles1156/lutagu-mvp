@@ -357,10 +357,15 @@ export async function fetchNodeConfig(nodeId: string) {
         // Map StationFacility to ServiceFacility format
         const wisdomFacilities = finalL3.map((f: any, idx: number) => {
             // [Localization] Handle both string (legacy) and object (multilingual) formats
-            const rawLoc = f.location;
+            const rawLoc = f.location || {};
             const locObj = (typeof rawLoc === 'string')
                 ? { 'zh-TW': rawLoc, 'en': rawLoc, 'ja': rawLoc, 'zh': rawLoc }
-                : { 'zh-TW': rawLoc.zh, 'en': rawLoc.en, 'ja': rawLoc.ja, 'zh': rawLoc.zh }; // Map 'zh' to 'zh-TW' for next-intl or keeps compatible keys
+                : {
+                    'zh-TW': rawLoc.zh || rawLoc['zh-TW'] || 'N/A',
+                    'en': rawLoc.en || 'N/A',
+                    'ja': rawLoc.ja || 'N/A',
+                    'zh': rawLoc.zh || rawLoc['zh-TW'] || 'N/A'
+                };
 
             return {
                 id: `${nodeId}-l3-${idx}`,
@@ -570,6 +575,10 @@ export async function fetchNodeConfig(nodeId: string) {
 
     // --- END REAL-TIME INJECTION ---
 
+    if (!finalNode) {
+        return { node: null, profile: null, error: 'Node not found' };
+    }
+
     return {
         node: { ...finalNode, location: parseLocation(finalNode.location) },
         profile: enrichedProfile,
@@ -669,37 +678,37 @@ export async function fetchAllNodes() {
         ODPT_TO_NODE[odptId] = nodeId;
     });
 
-    return (data as any[]).map(n => {
+    return (data as any[] || []).filter(Boolean).map(n => {
         const seed = SEED_NODES.find(s => s.id === n.id);
 
         // Try to find L2 data using:
         // 1. Direct ID match (if n.id is the logical ID)
         // 2. Reverse Mapped ID (if n.id is the physical ODPT ID)
-        const logicalId = ODPT_TO_NODE[n.id] || n.id;
+        const logicalId = (n?.id && ODPT_TO_NODE[n.id]) || n?.id;
         const l2 = l2Map[logicalId];
 
         // Custom Map Design Overrides (Hardcoded for UI Consistency)
         let mapDesign = undefined;
         let tier = undefined;
 
-        if (n.id.includes('Ueno')) {
+        if (n?.id?.includes('Ueno')) {
             tier = 'major';
             mapDesign = { icon: 'park', color: '#F39700' };
-        } else if (n.id.includes('Tokyo')) {
+        } else if (n?.id?.includes('Tokyo')) {
             tier = 'major';
             mapDesign = { icon: 'red_brick', color: '#E25822' }; // Marunouchi Red
-        } else if (n.id.includes('Akihabara')) {
+        } else if (n?.id?.includes('Akihabara')) {
             tier = 'major';
             mapDesign = { icon: 'electric', color: '#FFE600' }; // Electric Yellow
-        } else if (n.id.includes('Asakusa') && !n.id.includes('bashi')) { // Exclude Asakusabashi
+        } else if (n?.id?.includes('Asakusa') && !n?.id?.includes('bashi')) { // Exclude Asakusabashi
             tier = 'major';
             mapDesign = { icon: 'lantern', color: '#D32F2F' }; // Lantern Red
         }
 
         return {
             ...n,
-            name: seed ? seed.name : n.name,
-            location: parseLocation(n.location),
+            name: seed ? seed.name : n?.name,
+            location: parseLocation(n?.location),
             is_hub: !n.parent_hub_id, // Ensure is_hub is set (V3.0 Logic)
             tier,
             mapDesign,

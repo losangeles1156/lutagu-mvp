@@ -4,104 +4,53 @@ import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useAppStore } from '@/stores/appStore';
-import { FacilityProfile } from '@/components/ui/FacilityProfile';
 import { NodeTabs } from '@/components/node/NodeTabs';
-import { ChatOverlay } from '@/components/chat/ChatOverlay';
 import { TripGuardStatus } from '@/components/guard/TripGuardStatus';
-import { SubscriptionModal } from '@/components/guard/SubscriptionModal';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useEffect, useState } from 'react';
 import { fetchNodeConfig, NodeProfile } from '@/lib/api/nodes';
-import { Cloud, Settings, Heart, Calendar, ArrowRight, MessageSquare, Map as MapIcon, ShieldCheck, User, LocateFixed, Layers, Plus, Minus, X } from 'lucide-react';
+import { Settings, X, Plus, Minus, LocateFixed, Layers, MessageSquare, Heart } from 'lucide-react';
 
-// Leaflet must be dynamic import with no SSR
 const MapContainer = dynamic(
     () => import('@/components/map/MapContainer'),
     { ssr: false, loading: () => <div className="w-full h-screen bg-gray-100 animate-pulse" /> }
 );
 
 export default function Home() {
-    const t = useTranslations('Home');
-    const tNav = useTranslations('nav');
-    const tTrip = useTranslations('tripGuard');
-    const tProfile = useTranslations('profile');
     const tNode = useTranslations('node');
-    const tStatus = useTranslations('status');
-    const tMap = useTranslations('map');
-    const { zone, userLocation, isTooFar, centerFallback } = useZoneAwareness();
-    const { currentNodeId, isBottomSheetOpen, activeTab, setActiveTab, setMapCenter, setBottomSheetOpen, setCurrentNode } = useAppStore();
+    const { userLocation, isTooFar, centerFallback } = useZoneAwareness();
+    const { currentNodeId, isBottomSheetOpen, setMapCenter, setBottomSheetOpen, setCurrentNode, activeTab } = useAppStore();
 
     const [nodeData, setNodeData] = useState<any>(null);
     const [profile, setProfile] = useState<NodeProfile | null>(null);
 
-    // Fetch node details when ID changes
     useEffect(() => {
         if (currentNodeId) {
+            console.log('[Page] Fetching Node Config for:', currentNodeId);
             fetchNodeConfig(currentNodeId).then(({ node, profile }) => {
                 setNodeData(node);
                 setProfile(profile);
             });
+        } else {
+            setNodeData(null);
+            setProfile(null);
         }
     }, [currentNodeId]);
 
-    // Zone specific UI Logic
-    const isCore = zone === 'core';
-    const isBuffer = zone === 'buffer';
-
     return (
-        <main className="flex min-h-screen flex-col items-center justify-between relative overflow-hidden">
+        <main className="flex min-h-screen flex-col items-center relative overflow-hidden bg-white">
 
-            {/* 1. Map Layer */}
-            <div className={`absolute inset-0 z-0 transition-opacity duration-500 ${activeTab === 'explore' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            {/* 1. Map Layer (Visible only when sidebar/panel is thin or closed, but here we cover it) */}
+            <div className={`absolute inset-0 z-0 transition-opacity duration-300 ${activeTab === 'explore' ? 'opacity-100' : 'opacity-0'}`}>
                 <MapContainer />
             </div>
 
-            {/* 1.1 Other Tab Views */}
-            {activeTab === 'trips' && (
-                <div className="absolute inset-0 z-5 bg-gray-50 p-6 pt-24 overflow-y-auto pb-32">
-                    <h1 className="text-3xl font-black mb-6">{tTrip('title')}</h1>
-                    <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 mb-4">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600">
-                                <ShieldCheck size={24} />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-lg">{tTrip('noSubscription')}</h3>
-                                <p className="text-sm text-gray-500">{tTrip('subscriptionHint')}</p>
-                            </div>
-                        </div>
-                        <button className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl">{tTrip('startExploring')}</button>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'me' && (
-                <div className="absolute inset-0 z-5 bg-gray-50 p-6 pt-24 overflow-y-auto">
-                    <h1 className="text-3xl font-black mb-6">{tProfile('title')}</h1>
-                    <div className="space-y-4">
-                        <div className="bg-white p-4 rounded-3xl flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600">
-                                    <User size={20} />
-                                </div>
-                                <span className="font-bold text-gray-700">{tProfile('guestMode')}</span>
-                            </div>
-                            <button className="text-indigo-600 font-bold text-sm">{tProfile('loginRegister')}</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 2. Top Bar (Status) - z-[200] to stay above WeatherBanner */}
-            <div className="absolute top-0 left-0 right-0 z-[200] p-6 pt-16 pointer-events-none">
+            {/* 2. Top Bar (System UI) */}
+            <div className="absolute top-0 left-0 right-0 z-10 p-6 pt-16 pointer-events-none">
                 <div className="flex justify-between items-start pointer-events-auto">
-                    {/* Weather / Status Pill */}
-
-
-                    {/* Settings / Locale */}
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 ml-auto">
                         <TripGuardStatus />
-                        <button className="glass-effect rounded-2xl p-3.5 hover:bg-white transition-all active:scale-90 shadow-xl shadow-black/5 text-gray-500">
+                        <button className="glass-effect rounded-2xl p-3.5 hover:bg-white transition-all text-gray-500">
                             <Settings size={22} />
                         </button>
                         <LanguageSwitcher />
@@ -109,204 +58,39 @@ export default function Home() {
                 </div>
             </div>
 
-            {/* 2.1 Map Floating Action Buttons (FABs) */}
-            {
-                activeTab === 'explore' && !isBottomSheetOpen && (
-                    <div className="absolute right-6 bottom-36 z-10 flex flex-col gap-4 animate-in fade-in slide-in-from-right duration-700">
+            {/* 3. FULL SCREEN NODE DETAILS (Overlay Layer) */}
+            {isBottomSheetOpen && (
+                <div className="absolute inset-0 z-50 bg-white flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
+
+                    {/* Fixed Top Close Area */}
+                    <div className="w-full h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-white/80 backdrop-blur-xl sticky top-0 z-[60]">
+                        <div className="flex flex-col">
+                            <h2 className="text-xl font-black text-gray-900 leading-none">
+                                {nodeData?.name?.zh || nodeData?.name?.['zh-TW'] || nodeData?.title || (currentNodeId?.split('.').pop()) || 'Station'}
+                            </h2>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                                {nodeData?.type || 'Node'} Details
+                            </span>
+                        </div>
                         <button
                             onClick={() => {
-                                if (isTooFar) {
-                                    setMapCenter(centerFallback);
-                                    useAppStore.getState().addMessage({
-                                        role: 'assistant',
-                                        content: tMap('tooFarMessage')
-                                    });
-                                } else if (userLocation) {
-                                    setMapCenter(userLocation);
-                                }
+                                setBottomSheetOpen(false);
+                                setCurrentNode(null);
                             }}
-                            className="glass-effect rounded-[22px] p-4 shadow-2xl shadow-indigo-100 text-indigo-600 active:scale-90 hover:scale-105 transition-all group"
+                            className="p-3 bg-gray-100 rounded-2xl text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-90"
                         >
-                            <LocateFixed size={26} className="group-hover:rotate-12 transition-transform" />
-                        </button>
-                        <div className="flex flex-col glass-effect rounded-[22px] shadow-2xl shadow-black/5 overflow-hidden">
-                            <button className="p-4 border-b border-black/[0.03] text-gray-500 hover:bg-white active:scale-90 transition-all">
-                                <Plus size={22} />
-                            </button>
-                            <button className="p-4 text-gray-500 hover:bg-white active:scale-90 transition-all">
-                                <Minus size={22} />
-                            </button>
-                        </div>
-                        <button className="glass-effect rounded-[22px] p-4 shadow-2xl shadow-black/5 text-gray-500 hover:bg-white active:scale-90 transition-all">
-                            <Layers size={22} />
+                            <X size={24} />
                         </button>
                     </div>
-                )
-            }
 
-            {/* 3. Bottom Sheet */}
-            {isBottomSheetOpen && (
-                <>
-                    {/* Click-outside overlay */}
-                    <div
-                        className="absolute inset-0 z-15 bg-black/5 backdrop-blur-[1px] transition-opacity duration-300"
-                        onClick={() => {
-                            setBottomSheetOpen(false);
-                            setCurrentNode(null);
-                        }}
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 z-20 bg-white/90 backdrop-blur-3xl rounded-t-[40px] shadow-[0_-20px_60px_rgba(0,0,0,0.1)] transition-transform duration-500 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-500 border-t border-white/50 scrollbar-hide">
-                        {/* Handle + Close Button */}
-                        <div className="w-full flex justify-center items-center pt-4 pb-2 sticky top-0 bg-white/80 backdrop-blur-xl z-30 relative">
-                            <div className="w-16 h-1.5 bg-black/[0.08] rounded-full" />
-                            <button
-                                onClick={() => {
-                                    setBottomSheetOpen(false);
-                                    setCurrentNode(null);
-                                }}
-                                className="absolute top-3 right-4 p-2 bg-gray-100 rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors"
-                                aria-label="Close panel"
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        {!nodeData ? (
-                            // Skeleton Loader
-                            <div className="p-6 space-y-6">
-                                <div className="space-y-3">
-                                    <div className="h-8 w-1/3 bg-gray-100 rounded-lg animate-pulse" />
-                                    <div className="flex gap-2">
-                                        <div className="h-4 w-16 bg-gray-100 rounded-md animate-pulse" />
-                                        <div className="h-4 w-20 bg-gray-100 rounded-md animate-pulse" />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-4 gap-4 pt-4 border-b border-gray-50 pb-4">
-                                    {[1, 2, 3, 4].map(i => (
-                                        <div key={i} className="h-8 bg-gray-100 rounded-lg animate-pulse" />
-                                    ))}
-                                </div>
-                                <div className="h-40 bg-gray-50 rounded-3xl animate-pulse" />
-                            </div>
-                        ) : (
-                            // Real Content
-                            <div className="p-6 space-y-6">
-                                {/* Header */}
-                                <div className="relative">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h2 className="text-3xl font-black text-gray-900 tracking-tight">
-                                                {nodeData.name?.['zh-TW'] || nodeData.name?.['en'] || 'Unknown'}
-                                            </h2>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-sm font-medium text-gray-400">{nodeData.type}</span>
-                                                {nodeData.vibe && (
-                                                    <>
-                                                        <div className="w-1 h-1 bg-gray-300 rounded-full" />
-                                                        <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                                                            {nodeData.vibe}
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="absolute top-0 right-0 flex items-center">
-                                        <button className="p-3 bg-gray-100 rounded-full text-gray-500 hover:bg-rose-50 hover:text-rose-500 transition-colors">
-                                            <Heart size={24} />
-                                        </button>
-                                        <button
-                                            onClick={() => useAppStore.getState().setChatOpen(true)}
-                                            className="p-3 bg-indigo-50 rounded-full text-indigo-600 hover:bg-indigo-100 transition-colors ml-2"
-                                        >
-                                            <MessageSquare size={24} />
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                useAppStore.getState().setBottomSheetOpen(false);
-                                                useAppStore.getState().setCurrentNode(null);
-                                            }}
-                                            className="p-3 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition-colors ml-2"
-                                        >
-                                            <Minus size={24} className="rotate-45" /> {/* Close Icon */}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Node Content Tabs (L1/L2/L3) */}
-                                <div className="mt-2 bg-gray-50/50 p-1 rounded-2xl">
-                                    <NodeTabs
-                                        nodeData={nodeData}
-                                        profile={profile}
-                                    />
-                                </div>
-
-                                {/* Buffer Zone Message */}
-                                {!isCore && (
-                                    <div className="flex items-center gap-3 p-4 bg-orange-50/50 border border-orange-100 rounded-2xl text-orange-800 text-sm">
-                                        <div className="p-2 bg-white rounded-xl shadow-sm">ℹ️</div>
-                                        <span>{tNode('bufferZoneMessage')}</span>
-                                    </div>
-                                )}
-
-                                {/* Actions (Plan a Trip) */}
-                                <div className="flex gap-3 pt-2">
-                                    <button
-                                        onClick={() => {
-                                            useAppStore.getState().addMessage({
-                                                role: 'assistant',
-                                                content: `已將「${nodeData.name?.['zh-TW'] || nodeData.name?.['en']}」加入您的行程草稿！`
-                                            });
-                                            useAppStore.getState().setChatOpen(true);
-                                        }}
-                                        className="flex-[2] bg-indigo-600 text-white font-bold py-4 rounded-3xl hover:bg-indigo-700 transition active:scale-95 shadow-xl shadow-indigo-200 flex items-center justify-center gap-2"
-                                    >
-                                        <Calendar size={20} />
-                                        <span>{tNode('addToTrip')}</span>
-                                        <ArrowRight size={18} className="opacity-50" />
-                                    </button>
-                                </div>
-
-
-                            </div>
-                        )}
+                    {/* Content Component Area (Fills remaining space) */}
+                    <div className="flex-1 overflow-hidden">
+                        <NodeTabs nodeData={nodeData} profile={profile} />
                     </div>
-                </>
+                </div>
             )}
 
-            {/* 4. Bottom Navigation Bar */}
-            <div className="absolute bottom-6 left-6 right-6 z-30">
-                <div className="glass-effect rounded-[32px] p-2 flex justify-between items-center shadow-[0_15px_40px_rgba(0,0,0,0.15)] bg-white/80 border border-white/50">
-                    <button
-                        onClick={() => { setActiveTab('explore'); if (activeTab !== 'explore') { setBottomSheetOpen(false); setCurrentNode(null); } }}
-                        className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'explore' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <MapIcon size={20} fill={activeTab === 'explore' ? "white" : "none"} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter">{tNav('explore')}</span>
-                    </button>
-                    <button
-                        onClick={() => { setActiveTab('trips'); setBottomSheetOpen(false); setCurrentNode(null); }}
-                        className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'trips' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 -rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <ShieldCheck size={20} fill={activeTab === 'trips' ? "white" : "none"} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter">{tNav('guard')}</span>
-                    </button>
-                    <button
-                        onClick={() => { setActiveTab('me'); setBottomSheetOpen(false); setCurrentNode(null); }}
-                        className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 rotate-1' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <User size={20} fill={activeTab === 'me' ? "white" : "none"} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter">{tNav('me')}</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Chat Interface */}
-            <ChatOverlay />
-
-            {/* Guard Modal */}
-            <SubscriptionModal />
+            {/* 4. Other App Navigation or Overlays hidden for now if panel is open */}
         </main>
     );
 }
-

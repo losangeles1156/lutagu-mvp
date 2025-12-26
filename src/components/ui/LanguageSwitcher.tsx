@@ -50,9 +50,9 @@ export function LanguageSwitcher() {
     };
 
     const labels: Record<string, string> = {
-        'zh-TW': '🇭🇰 繁體中文',
-        'en': '🇺🇸 English',
-        'ja': '🇯🇵 日本語'
+        'zh-TW': '繁體中文',
+        'en': 'English',
+        'ja': '日本語'
     };
 
     return (
@@ -72,8 +72,8 @@ export function LanguageSwitcher() {
                                 key={l}
                                 onClick={() => handleChange(l)}
                                 className={`w-full px-4 py-3 text-xs font-black text-left rounded-xl transition-all duration-300 flex items-center justify-between ${locale === l
-                                        ? 'text-indigo-600 bg-indigo-50 shadow-inner'
-                                        : 'text-gray-500 hover:bg-black/[0.03] hover:text-gray-900'
+                                    ? 'text-indigo-600 bg-indigo-50 shadow-inner'
+                                    : 'text-gray-500 hover:bg-black/[0.03] hover:text-gray-900'
                                     }`}
                             >
                                 <span>{labels[l]}</span>
