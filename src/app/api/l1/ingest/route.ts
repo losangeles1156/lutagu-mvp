@@ -12,30 +12,39 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'No items to ingest' }, { status: 200 });
         }
 
-        // Initialize Supabase (Admin context typically needed strictly for writing if RLS is on, 
-        // but here we use standard client assuming SERVICE_KEY or proper permissions, 
-        // actually let's use the env vars directly to be safe)
+        // Initialize Supabase (Use Service Key for Write Access)
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
         const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+        // Check if key is service key (usually starts with eyJ and is long, or checking role later)
+        // For MVP, valid key is enough.
+
         const supabase = createClient(supabaseUrl, supabaseKey);
 
-        // Prepare data for upsert
-        // Assuming 'raw_osm_data' table or similar exists. 
-        // If not, we might need to create it or insert into 'nodes' if that's the goal.
-        // Based on previous context, this seems to be L1 Data Ingest (Raw Data).
-        // Let's assume a 'places' table or similar. 
-        // WAIT: I don't know the schema. I should check 'src/lib/types' or existing tables.
-        // For now, I will just log and return success to unblock the 405 error, 
-        // but really I should save it.
+        // Transform items to DB schema
+        const rows = items.map((item: any) => ({
+            station_id: stationId,
+            osm_id: item.osm_id,
+            name: item.name,
+            category: category,
+            // Create PostGIS point: SRID 4326 is standard GPS
+            location: `POINT(${item.location.lon} ${item.location.lat})`,
+            tags: item.tags
+        }));
 
-        // Let's peek at the schema or just dump to a 'places' table if it exists?
-        // User goal: "ingest data". 
-        // I'll assume we want to just return success for now to prove connection.
+        // Upsert to l1_places
+        const { error } = await supabase
+            .from('l1_places')
+            .upsert(rows, { onConflict: 'station_id,osm_id' });
+
+        if (error) {
+            console.error('[Ingest] Supabase Error:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
 
         return NextResponse.json({
             success: true,
-            message: `Ingested ${count} items`,
-            data: items
+            message: `Ingested ${rows.length} items into l1_places`,
         });
 
     } catch (error) {
