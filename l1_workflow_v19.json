@@ -1,0 +1,149 @@
+{
+    "name": "BambiGO L1: V19 (Ueno Consolidated)",
+    "nodes": [
+        {
+            "id": "node-start",
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "id": "node-get-stations",
+            "parameters": {
+                "url": "https://bambigo-mvp.vercel.app/api/context/list",
+                "options": {}
+            },
+            "name": "Get Station List",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "id": "node-build-query",
+            "parameters": {
+                "jsCode": "// V19 Strategy: Fetch ALL categories in ONE query for Ueno\nconst response = items[0].json;\nconst nodes = response.nodes || [];\n// Target Ueno specifically or take first\nconst station = nodes.find(n => n.id === 'tokyo.jr.ueno') || nodes[0];\n\nif (!station) throw new Error('Station not found');\n\nconst radius = 300;\nconst lat = station.location?.lat;\nconst lon = station.location?.lng;\n\n// Consolidated Overpass Query\nconst query = `[out:json][timeout:25];\n(\n  node[\"shop\"](around:${radius},${lat},${lon});\n  node[\"amenity\"~\"restaurant|cafe|fast_food|pharmacy|clinic|hospital|bank|atm|post_office|police\"](around:${radius},${lat},${lon});\n  node[\"leisure\"](around:${radius},${lat},${lon});\n  node[\"tourism\"](around:${radius},${lat},${lon});\n);\nout center body;`;\n\nreturn [{\n  json: {\n    stationId: station.id,\n    stationName: station.name?.en,\n    query: query,\n    query_encoded: encodeURIComponent(query)\n  }\n}];"
+            },
+            "name": "Build Consolidated Query",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "id": "node-osm-api",
+            "parameters": {
+                "method": "GET",
+                "url": "=https://overpass-api.de/api/interpreter?data={{$json.query_encoded}}",
+                "options": {}
+            },
+            "name": "OSM API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "id": "node-classify",
+            "parameters": {
+                "jsCode": "// Post-Processing: Classify Items based on Tags\nconst stationId = items[0].json.stationId || $('Build Consolidated Query').first().json.stationId;\nconst elements = items[0].json.elements || [];\n\nconst classified = elements.map(el => {\n  const tags = el.tags || {};\n  if (!tags.name) return null;\n\n  let category = 'other';\n  \n  // Classification Rules\n  if (tags.shop) {\n    category = tags.shop === 'convenience' ? 'convenience' : 'shopping';\n  }\n  else if (tags.amenity) {\n    if (/restaurant|cafe|fast_food/.test(tags.amenity)) category = 'dining';\n    else if (/pharmacy|clinic|hospital/.test(tags.amenity)) category = 'medical';\n    else if (/bank|atm/.test(tags.amenity)) category = 'finance';\n    else if (/post_office|police/.test(tags.amenity)) category = 'service';\n  }\n  else if (tags.leisure) {\n     if (/park|garden/.test(tags.leisure)) category = 'nature';\n     else category = 'leisure';\n  }\n  else if (tags.tourism) {\n    if (/hotel|hostel/.test(tags.tourism)) category = 'accommodation';\n    else if (/museum|art_gallery/.test(tags.tourism)) category = 'culture';\n  }\n\n  return {\n    osm_id: el.id,\n    name: tags.name,\n    category,\n    location: { lat: el.lat, lon: el.lon },\n    tags\n  };\n}).filter(Boolean);\n\nreturn [{\n  json: {\n    stationId,\n    category: 'mixed_batch',\n    count: classified.length,\n    items: classified\n  }\n}];"
+            },
+            "name": "Classify & Format",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "id": "node-backend",
+            "parameters": {
+                "method": "POST",
+                "url": "https://bambigo-mvp.vercel.app/api/l1/ingest",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": []
+                },
+                "specifyBody": "json",
+                "jsonBody": "={{JSON.stringify($json)}}",
+                "options": {}
+            },
+            "name": "Backend Ingest",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1100,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Get Station List",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Station List": {
+            "main": [
+                [
+                    {
+                        "node": "Build Consolidated Query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Consolidated Query": {
+            "main": [
+                [
+                    {
+                        "node": "OSM API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OSM API": {
+            "main": [
+                [
+                    {
+                        "node": "Classify & Format",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Classify & Format": {
+            "main": [
+                [
+                    {
+                        "node": "Backend Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
