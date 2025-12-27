@@ -38,7 +38,7 @@
         },
         {
             "parameters": {
-                "functionCode": "// Build Overpass Query\nconst item = items[0].json;\nconst radius = 1000;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n\n// FIX: Use item.lat and item.lon\nconst query = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\n\nreturn [{ json: { ...item, query } }];"
+                "functionCode": "// Build Overpass Query\nconst item = items[0].json;\nconst radius = 1000;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n\n// Correct variables and explicit encoding\nconst rawQuery = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\n\n// Manual encoding to prevent n8n parameter injection issues\nconst queryEncoded = encodeURIComponent(rawQuery);\n\nreturn [{ json: { ...item, query: rawQuery, query_encoded: queryEncoded } }];"
             },
             "name": "Build Query",
             "type": "n8n-nodes-base.function",
@@ -51,17 +51,9 @@
         {
             "parameters": {
                 "requestMethod": "GET",
-                "url": "https://overpass-api.de/api/interpreter",
-                "jsonParameters": true,
-                "options": {},
-                "queryParametersUi": {
-                    "parameter": [
-                        {
-                            "name": "data",
-                            "value": "={{$json.query}}"
-                        }
-                    ]
-                }
+                "url": "https://overpass-api.de/api/interpreter?data={{$json.query_encoded}}",
+                "jsonParameters": false,
+                "options": {}
             },
             "name": "OSM API",
             "type": "n8n-nodes-base.httpRequest",
