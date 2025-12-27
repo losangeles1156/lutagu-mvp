@@ -26,11 +26,11 @@
         },
         {
             "parameters": {
-                "functionCode": "// V10 Native Stream Logic\n// This node explodes 1 station into N category tasks\n// n8n will automatically run all downstream nodes N times (one per item)\n\nconst response = items[0].json;\nconst nodes = response.nodes || [];\n\nif (nodes.length === 0) {\n  return [{ json: { error: 'No stations found' } }];\n}\n\n// To keep V10 safe, we start with the first station found\nconst station = nodes[0];\n\nconst categories = [\n  { category: 'shopping', query_key: 'shop' },\n  { category: 'convenience', query_key: 'shop', query_val: 'convenience' },\n  { category: 'dining', query_key: 'amenity', query_val: 'restaurant|cafe|fast_food' },\n  { category: 'medical', query_key: 'amenity', query_val: 'pharmacy|clinic|hospital' },\n  { category: 'leisure', query_key: 'leisure' },\n  { category: 'finance', query_key: 'amenity', query_val: 'bank|atm' },\n  { category: 'accommodation', query_key: 'tourism', query_val: 'hotel|hostel' },\n  { category: 'culture', query_key: 'tourism', query_val: 'museum|art_gallery' },\n  { category: 'service', query_key: 'amenity', query_val: 'post_office|police' },\n  { category: 'nature', query_key: 'leisure', query_val: 'park|garden' }\n];\n\nreturn categories.map(cat => ({\n  json: {\n    stationId: station.id,\n    stationName: station.name?.en || station.id,\n    lat: station.location?.lat,\n    lon: station.location?.lng,\n    category: cat.category,\n    query_key: cat.query_key,\n    query_val: cat.query_val || ''\n  }\n}));"
+                "jsCode": "// V10 Native Stream Logic\n// This node explodes 1 station into N category tasks\n// n8n will automatically run all downstream nodes N times (one per item)\n\nconst response = items[0].json;\nconst nodes = response.nodes || [];\n\nif (nodes.length === 0) {\n  return [{ json: { error: 'No stations found' } }];\n}\n\n// To keep V10 safe, we start with the first station found\nconst station = nodes[0];\n\nconst categories = [\n  { category: 'shopping', query_key: 'shop' },\n  { category: 'convenience', query_key: 'shop', query_val: 'convenience' },\n  { category: 'dining', query_key: 'amenity', query_val: 'restaurant|cafe|fast_food' },\n  { category: 'medical', query_key: 'amenity', query_val: 'pharmacy|clinic|hospital' },\n  { category: 'leisure', query_key: 'leisure' },\n  { category: 'finance', query_key: 'amenity', query_val: 'bank|atm' },\n  { category: 'accommodation', query_key: 'tourism', query_val: 'hotel|hostel' },\n  { category: 'culture', query_key: 'tourism', query_val: 'museum|art_gallery' },\n  { category: 'service', query_key: 'amenity', query_val: 'post_office|police' },\n  { category: 'nature', query_key: 'leisure', query_val: 'park|garden' }\n];\n\nreturn categories.map(cat => ({\n  json: {\n    stationId: station.id,\n    stationName: station.name?.en || station.id,\n    lat: station.location?.lat,\n    lon: station.location?.lng,\n    category: cat.category,\n    query_key: cat.query_key,\n    query_val: cat.query_val || ''\n  }\n}));"
             },
             "name": "Explode Tasks",
-            "type": "n8n-nodes-base.function",
-            "typeVersion": 1,
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
             "position": [
                 500,
                 300
@@ -38,11 +38,11 @@
         },
         {
             "parameters": {
-                "functionCode": "// Build Overpass Query\nconst item = items[0].json;\nconst radius = 1000;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n\n// Correct variables and explicit encoding\nconst rawQuery = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\n\n// Manual encoding to prevent n8n parameter injection issues\nconst queryEncoded = encodeURIComponent(rawQuery);\n\nreturn [{ json: { ...item, query: rawQuery, query_encoded: queryEncoded } }];"
+                "jsCode": "// Build Overpass Query\nconst item = items[0].json;\nconst radius = 1000;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n\n// Correct variables and explicit encoding\nconst rawQuery = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\n\n// Manual encoding to prevent n8n parameter injection issues\nconst queryEncoded = encodeURIComponent(rawQuery);\n\nreturn [{ json: { ...item, query: rawQuery, query_encoded: queryEncoded } }];"
             },
             "name": "Build Query",
-            "type": "n8n-nodes-base.function",
-            "typeVersion": 1,
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
             "position": [
                 700,
                 300
@@ -77,11 +77,11 @@
         },
         {
             "parameters": {
-                "functionCode": "// Format data for Ingest\nconst item = items[0].json;\n// FIX: Read from root elements (GET response)\nconst elements = item.elements || [];\n\nconst processed = elements.map(el => {\n  const tags = el.tags || {};\n  if (!tags.name) return null;\n  return {\n    osm_id: el.id,\n    name: tags.name,\n    category: item.category,\n    location: { lat: el.lat || el.center?.lat, lon: el.lon || el.center?.lon },\n    tags\n  };\n}).filter(Boolean);\n\nreturn [{\n  json: {\n    stationId: item.stationId,\n    category: item.category,\n    count: processed.length,\n    items: processed\n  }\n}];"
+                "jsCode": "// Format data for Ingest\nconst item = items[0].json;\n// FIX: Read from root elements (GET response)\nconst elements = item.elements || [];\n\nconst processed = elements.map(el => {\n  const tags = el.tags || {};\n  if (!tags.name) return null;\n  return {\n    osm_id: el.id,\n    name: tags.name,\n    category: item.category,\n    location: { lat: el.lat || el.center?.lat, lon: el.lon || el.center?.lon },\n    tags\n  };\n}).filter(Boolean);\n\nreturn [{\n  json: {\n    stationId: item.stationId,\n    category: item.category,\n    count: processed.length,\n    items: processed\n  }\n}];"
             },
             "name": "Format Ingest",
-            "type": "n8n-nodes-base.function",
-            "typeVersion": 1,
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
             "position": [
                 1300,
                 300
