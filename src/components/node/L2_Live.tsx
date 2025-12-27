@@ -1,10 +1,51 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Zap, AlertTriangle, AlertOctagon, Cloud, Sun, Users, Wind } from 'lucide-react';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
+
+// Memoized Train Line Item to prevent re-renders when other state changes
+const TrainLineItem = memo(({ line, isDelay, tL2, locale }: { line: any, isDelay: boolean, tL2: any, locale: string }) => {
+    return (
+        <div className={`p-4 flex items-center gap-3 ${isDelay ? 'bg-rose-50/30' : ''}`}>
+            <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-lg text-white shadow-sm"
+                style={{ backgroundColor: line.color }}
+            >
+                🚇
+            </div>
+
+            <div className="flex-1">
+                <div className="flex justify-between items-center mb-0.5">
+                    <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                        {getLocaleString(line.name, locale)}
+                        <span className="text-[8px] font-black uppercase px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
+                            {line.operator}
+                        </span>
+                    </h4>
+
+                    {isDelay ? (
+                        <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded-full animate-pulse">DELAY</span>
+                    ) : (
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-black rounded-full">OK</span>
+                    )}
+                </div>
+                <div className="flex justify-between items-center">
+                    <p className="text-[10px] text-gray-500">
+                        {line.message
+                            ? getLocaleString(line.message, locale)
+                            : (isDelay ? tL2('status.delay') : tL2('status.normal'))
+                        }
+                    </p>
+                    <span className="text-[10px] font-mono font-bold text-gray-400">Next: 3m</span>
+                </div>
+            </div>
+        </div>
+    );
+});
+TrainLineItem.displayName = 'TrainLineItem';
 
 // Weather Alert Component (Internal)
 function WeatherAlertSection() {
@@ -98,7 +139,10 @@ export function L2_Live({ data }: L2_LiveProps) {
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">{tL2('operationTitle')}</h3>
-                    <span className="text-[10px] font-medium text-gray-400">{tL2('liveUpdates')}</span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[8px] font-bold text-gray-300 uppercase tracking-tight">Source: ODPT</span>
+                        <span className="text-[10px] font-medium text-gray-400">{tL2('liveUpdates')}</span>
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -108,47 +152,21 @@ export function L2_Live({ data }: L2_LiveProps) {
                         </div>
                     ) : (
                         <div className="divide-y divide-gray-50">
-                            {lines.map((line) => {
-                                const isDelay = line.status !== 'normal';
-                                return (
-                                    <div key={line.id} className={`p-4 flex items-center gap-3 ${isDelay ? 'bg-rose-50/30' : ''}`}>
-                                        <div
-                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg text-white shadow-sm"
-                                            style={{ backgroundColor: line.color }}
-                                        >
-                                            🚇
-                                        </div>
-
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-center mb-0.5">
-                                                <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                                                    {getLocaleString(line.name, locale)}
-                                                    <span className="text-[8px] font-black uppercase px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
-                                                        {line.operator}
-                                                    </span>
-                                                </h4>
-
-                                                {isDelay ? (
-                                                    <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded-full animate-pulse">DELAY</span>
-                                                ) : (
-                                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-black rounded-full">OK</span>
-                                                )}
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <p className="text-[10px] text-gray-500">
-                                                    {line.message
-                                                        ? getLocaleString(line.message, locale)
-                                                        : (isDelay ? tL2('status.delay') : tL2('status.normal'))
-                                                    }
-                                                </p>
-                                                <span className="text-[10px] font-mono font-bold text-gray-400">Next: 3m</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                            {lines.map((line) => (
+                                <TrainLineItem
+                                    key={line.id}
+                                    line={line}
+                                    isDelay={line.status !== 'normal'}
+                                    tL2={tL2}
+                                    locale={locale}
+                                />
+                            ))}
                         </div>
                     )}
+                    {/* Attribution Footer */}
+                    <div className="px-3 py-1 bg-gray-50 border-t border-gray-100 text-[8px] text-gray-400 text-center font-medium">
+                        Train Data Courtesy of Open Data Challenge for Public Transportation in Tokyo
+                    </div>
                 </div>
             </div>
 
