@@ -38,7 +38,7 @@
         },
         {
             "parameters": {
-                "functionCode": "// Build Overpass Query\nconst item = items[0].json;\nconst radius = 1000;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n\nconst query = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${lat},${lon}););out center body;`;\n\nreturn [{ json: { ...item, query } }];"
+                "functionCode": "// Build Overpass Query\nconst item = items[0].json;\nconst radius = 1000;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n\nconst query = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\n\nreturn [{ json: { ...item, query } }];"
             },
             "name": "Build Query",
             "type": "n8n-nodes-base.function",
