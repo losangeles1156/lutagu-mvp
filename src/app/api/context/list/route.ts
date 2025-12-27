@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// Lazy initialization
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/lib/supabase'; // Use shared lazy client
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +9,7 @@ export async function GET() {
 
         const { data, error } = await supabase
             .from('nodes')
-            .select('id, name, location, type')
+            .select('*')
             .limit(100); // Safety limit, increase if needed
 
         if (error) {
