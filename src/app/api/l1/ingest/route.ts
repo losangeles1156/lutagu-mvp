@@ -22,15 +22,27 @@ export async function POST(request: Request) {
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         // Transform items to DB schema
-        const rows = items.map((item: any) => ({
-            station_id: stationId,
-            osm_id: item.osm_id,
-            name: item.name,
-            category: category,
-            // Create PostGIS point: SRID 4326 is standard GPS
-            location: `POINT(${item.location.lon} ${item.location.lat})`,
-            tags: item.tags
-        }));
+        // Transform items to DB schema
+        const rows = items.map((item: any) => {
+            const tags = item.tags || {};
+            const nameI18n = {
+                ja: tags.name,
+                en: tags['name:en'] || tags['name:en_rm'] || tags.name,
+                'zh-TW': tags['name:zh-Hant'] || tags['name:zh'] || tags.name,
+                'zh-CN': tags['name:zh-Hans'] || tags['name:zh'] || tags.name,
+                ko: tags['name:ko'] || tags.name
+            };
+            return {
+                station_id: stationId,
+                osm_id: item.osm_id,
+                name: item.name,
+                name_i18n: nameI18n,
+                category: category,
+                // Create PostGIS point: SRID 4326 is standard GPS
+                location: `POINT(${item.location.lon} ${item.location.lat})`,
+                tags: item.tags
+            };
+        });
 
         // Upsert to l1_places
         const { error } = await supabase
