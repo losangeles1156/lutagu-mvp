@@ -1,0 +1,236 @@
+{
+    "name": "BambiGO L1: V23 (Universal Linear Queue)",
+    "nodes": [
+        {
+            "id": "node-start",
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "id": "node-get-stations",
+            "parameters": {
+                "url": "https://bambigo-mvp.vercel.app/api/context/list",
+                "options": {}
+            },
+            "name": "Get Station List",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "id": "node-explode-all",
+            "parameters": {
+                "jsCode": "const response = items[0].json;\nconst nodes = response.nodes || [];\n\nconst categories = [\n  { category: 'shopping', query_key: 'shop' },\n  { category: 'dining', query_key: 'amenity', query_val: 'restaurant|cafe|fast_food' },\n  { category: 'convenience', query_key: 'shop', query_val: 'convenience' },\n  { category: 'medical', query_key: 'amenity', query_val: 'pharmacy|clinic|hospital' },\n  { category: 'leisure', query_key: 'leisure' },\n  { category: 'finance', query_key: 'amenity', query_val: 'bank|atm' },\n  { category: 'accommodation', query_key: 'tourism', query_val: 'hotel|hostel' },\n  { category: 'culture', query_key: 'tourism', query_val: 'museum|art_gallery' },\n  { category: 'service', query_key: 'amenity', query_val: 'post_office|police' },\n  { category: 'nature', query_key: 'leisure', query_val: 'park|garden' }\n];\n\n// Flattened Task Generation\n// Create a task for every combination of Station + Category\nconst tasks = [];\n\nnodes.forEach(station => {\n  // Optional: Skip Ueno if we want to save time (since it's done)\n  // if (station.id === 'tokyo.jr.ueno') return;\n\n  categories.forEach(cat => {\n    tasks.push({\n      json: {\n        stationId: station.id,\n        stationName: station.name?.en || station.id,\n        lat: station.location?.lat,\n        lon: station.location?.lng,\n        category: cat.category,\n        query_key: cat.query_key,\n        query_val: cat.query_val || ''\n      }\n    });\n  });\n});\n\nreturn tasks;"
+            },
+            "name": "Explode All Tasks",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "id": "node-split",
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "SplitInBatches",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "id": "node-build-query",
+            "parameters": {
+                "jsCode": "// Radius 300m\nconst item = items[0].json;\n// Safety Check\nif (!item.lat || !item.lon) return [{ json: { skipped: true, reason: 'No Location' } }];\n\nconst radius = 300;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n// Timeout 25s\nconst rawQuery = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\nconst queryEncoded = encodeURIComponent(rawQuery);\nreturn [{ json: { ...item, query: rawQuery, query_encoded: queryEncoded } }];"
+            },
+            "name": "Build Query",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "id": "node-wait",
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "name": "Wait (5s)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                300
+            ]
+        },
+        {
+            "id": "node-osm-api",
+            "parameters": {
+                "method": "GET",
+                "url": "=https://overpass-api.de/api/interpreter?data={{$json.query_encoded}}",
+                "options": {}
+            },
+            "name": "OSM API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1300,
+                300
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "id": "node-format",
+            "parameters": {
+                "jsCode": "// Robust Context Lookup V23\n// Same logic as V22\n\ntry {\n  const context = $('SplitInBatches').first().json;\n  \n  if (!context || !context.stationId) {\n    return [{ json: { skipped: true, reason: 'Context Missing' } }];\n  }\n\n  // Check for previous skipped steps usage\n  if (items[0].json.skipped || items[0].json.error) {\n      return [{ json: { skipped: true, reason: 'Previous Step Skipped/Error' } }];\n  }\n\n  const apiResponse = items[0].json;\n  if (items[0].error || !apiResponse.elements) {\n     return [{ json: { skipped: true, reason: 'API Error or Empty' } }];\n  }\n  \n  const elements = apiResponse.elements || [];\n  \n  const processed = elements.map(el => {\n    const tags = el.tags || {};\n    if (!tags.name) return null;\n    return {\n      osm_id: el.id,\n      name: tags.name,\n      category: context.category,\n      location: { lat: el.lat || el.center?.lat, lon: el.lon || el.center?.lon },\n      tags\n    };\n  }).filter(Boolean);\n\n  return [{\n    json: {\n      stationId: context.stationId,\n      category: context.category,\n      count: processed.length,\n      items: processed\n    }\n  }];\n  \n} catch (e) {\n  return [{ json: { skipped: true, error: e.message } }];\n}"
+            },
+            "name": "Format Ingest",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1500,
+                300
+            ]
+        },
+        {
+            "id": "node-backend",
+            "parameters": {
+                "method": "POST",
+                "url": "https://bambigo-mvp.vercel.app/api/l1/ingest",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": []
+                },
+                "specifyBody": "json",
+                "jsonBody": "={{JSON.stringify($json)}}",
+                "options": {}
+            },
+            "name": "Backend Ingest",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1700,
+                300
+            ],
+            "onError": "continueErrorOutput"
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Get Station List",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Station List": {
+            "main": [
+                [
+                    {
+                        "node": "Explode All Tasks",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Explode All Tasks": {
+            "main": [
+                [
+                    {
+                        "node": "SplitInBatches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SplitInBatches": {
+            "main": [
+                [
+                    {
+                        "node": "Build Query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Query": {
+            "main": [
+                [
+                    {
+                        "node": "Wait (5s)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait (5s)": {
+            "main": [
+                [
+                    {
+                        "node": "OSM API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OSM API": {
+            "main": [
+                [
+                    {
+                        "node": "Format Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Ingest": {
+            "main": [
+                [
+                    {
+                        "node": "Backend Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Backend Ingest": {
+            "main": [
+                [
+                    {
+                        "node": "SplitInBatches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
