@@ -466,6 +466,24 @@ export async function fetchNodeConfig(nodeId: string) {
     enrichedProfile.l4_cards = l4_cards;
 
     // --- REAL-TIME STATUS INJECTION (Database First) ---
+
+    // [Fix] Initialize with Default "Normal" Status first to strictly prevent empty UI
+    const servedLines = STATION_LINES[nodeId] || [
+        { name: { ja: '交通', en: 'Transit', zh: '交通' }, operator: 'Private', color: '#9ca3af' }
+    ];
+
+    enrichedProfile.l2_status = {
+        congestion: 2,
+        line_status: servedLines.map(line => ({
+            line: line.name.en,
+            name: line.name,
+            operator: line.operator,
+            color: line.color,
+            status: 'normal'
+        })),
+        weather: { temp: 20, condition: 'Clear' }
+    };
+
     // Try to get L2 data from our internal API (which queries transit_dynamic_snapshot)
     try {
         if (typeof window !== 'undefined') {
@@ -488,11 +506,6 @@ export async function fetchNodeConfig(nodeId: string) {
                 .select('*')
                 .eq('station_id', nodeId) // Try Logical ID first
                 .maybeSingle();
-
-            // Resolve lines for this station
-            const servedLines = STATION_LINES[nodeId] || [
-                { name: { ja: '交通', en: 'Transit', zh: '交通' }, operator: 'Private', color: '#9ca3af' }
-            ];
 
             if (l2Data) {
                 // Map status to ALL lines (MVP Assumption: Station delay = All lines delay unless specified)
@@ -539,40 +552,12 @@ export async function fetchNodeConfig(nodeId: string) {
                             condition: l2DataPhy.weather_info?.condition || 'Unknown'
                         }
                     };
-                } else {
-                    // No data found -> Return Normal status for configured lines
-                    enrichedProfile.l2_status = {
-                        congestion: 2,
-                        line_status: servedLines.map(line => ({
-                            line: line.name.en,
-                            name: line.name,
-                            operator: line.operator,
-                            color: line.color,
-                            status: 'normal'
-                        })),
-                        weather: { temp: 20, condition: 'Clear' }
-                    };
                 }
-            } else {
-                // Last Resort -> Return Normal default
-                enrichedProfile.l2_status = {
-                    congestion: 2,
-                    line_status: servedLines.map(line => ({
-                        line: line.name.en,
-                        name: line.name,
-                        operator: line.operator,
-                        color: line.color,
-                        status: 'normal'
-                    })),
-                    weather: { temp: 20, condition: 'Clear' }
-                };
             }
         }
     } catch (e) {
         console.warn('Failed to inject real-time L2 data', e);
     }
-
-
     // --- END REAL-TIME INJECTION ---
 
     if (!finalNode) {

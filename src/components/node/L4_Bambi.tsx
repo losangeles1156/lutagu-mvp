@@ -51,7 +51,7 @@ export function L4_Bambi({ data }: L4_BambiProps) {
 
     // Hybrid UI State
     const [destination, setDestination] = useState('');
-    const [selectedDemand, setSelectedDemand] = useState<string | null>(null);
+    const [selectedDemands, setSelectedDemands] = useState<string[]>([]);
 
     // Scroll to bottom
     useEffect(() => {
@@ -95,7 +95,7 @@ export function L4_Bambi({ data }: L4_BambiProps) {
                     messages: [...messages, userMsg],
                     nodeId: stationId,
                     inputs: {
-                        user_context: `[SYSTEM: USER_LOCATION_ENFORCED] User is at ${displayName}. Use Traditional Chinese. Requirement: ${text}`
+                        user_context: `[SYSTEM: ROLE_DEFINITION] You are a station guide for ${displayName}. DO NOT ask for the user's starting location. Assume they are already at or near ${displayName}. Provide specific advice for this station directly. Requirement: ${text}`
                     }
                 })
             });
@@ -221,29 +221,42 @@ export function L4_Bambi({ data }: L4_BambiProps) {
                         />
                     </div>
 
-                    {/* Demand Chips */}
+                    {/* Demand Chips (Multi-select) */}
                     <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
-                        {demands.map(demand => (
-                            <button
-                                key={demand.id}
-                                onClick={() => setSelectedDemand(selectedDemand === demand.id ? null : demand.id)}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-black whitespace-nowrap transition-all ${selectedDemand === demand.id
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-md scale-105'
-                                    : 'bg-white border-slate-100 text-slate-500 hover:border-indigo-200'
-                                    }`}
-                            >
-                                <demand.icon size={14} />
-                                {demand.label}
-                                {selectedDemand === demand.id && <CheckCircle2 size={12} className="ml-1" />}
-                            </button>
-                        ))}
+                        {demands.map(demand => {
+                            const isSelected = selectedDemands.includes(demand.id);
+                            return (
+                                <button
+                                    key={demand.id}
+                                    onClick={() => {
+                                        if (isSelected) {
+                                            setSelectedDemands(prev => prev.filter(id => id !== demand.id));
+                                        } else {
+                                            setSelectedDemands(prev => [...prev, demand.id]);
+                                        }
+                                    }}
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-black whitespace-nowrap transition-all ${isSelected
+                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-md scale-105'
+                                        : 'bg-white border-slate-100 text-slate-500 hover:border-indigo-200'
+                                        }`}
+                                >
+                                    <demand.icon size={14} />
+                                    {demand.label}
+                                    {isSelected && <CheckCircle2 size={12} className="ml-1" />}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Action Button */}
                     <button
                         onClick={() => {
-                            const demandLabel = demands.find(d => d.id === selectedDemand)?.label || '';
-                            const combinedText = `我想去「${destination}」。我的需求是「${demandLabel}」。`;
+                            const demandLabels = demands
+                                .filter(d => selectedDemands.includes(d.id))
+                                .map(d => d.label)
+                                .join('、');
+
+                            const combinedText = `我想去「${destination}」。我的需求是「${demandLabels}」。`;
                             handleSend(combinedText, combinedText);
                         }}
                         disabled={!destination || isLoading}

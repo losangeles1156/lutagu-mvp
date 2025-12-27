@@ -36,3 +36,8 @@ next-env.d.ts
 bambigo-v3.0/*.json
 l1_workflow.json
 
+
+# Security / Debug Output
+dify_response.txt
+*_response.txt
+*.log
