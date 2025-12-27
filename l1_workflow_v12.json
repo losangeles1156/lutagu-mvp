@@ -57,7 +57,13 @@
             "parameters": {
                 "method": "GET",
                 "url": "=https://overpass-api.de/api/interpreter?data={{$json.query_encoded}}",
-                "options": {}
+                "options": {
+                    "response": {
+                        "response": {
+                            "responsePropertyName": "osm_response"
+                        }
+                    }
+                }
             },
             "name": "OSM API",
             "type": "n8n-nodes-base.httpRequest",
@@ -84,7 +90,7 @@
         {
             "id": "node-format",
             "parameters": {
-                "jsCode": "const item = items[0].json;\nconst elements = item.elements || [];\n\nconst processed = elements.map(el => {\n  const tags = el.tags || {};\n  if (!tags.name) return null;\n  return {\n    osm_id: el.id,\n    name: tags.name,\n    category: item.category,\n    location: { lat: el.lat, lon: el.lon },\n    tags\n  };\n}).filter(Boolean);\n\nreturn [{\n  json: {\n    stationId: item.stationId,\n    category: item.category,\n    count: processed.length,\n    items: processed\n  }\n}];"
+                "jsCode": "const item = items[0].json;\n// FIX: Read from reserved property to keep context\nconst elements = item.osm_response?.elements || [];\n\nconst processed = elements.map(el => {\n  const tags = el.tags || {};\n  if (!tags.name) return null;\n  return {\n    osm_id: el.id,\n    name: tags.name,\n    category: item.category,\n    location: { lat: el.lat, lon: el.lon },\n    tags\n  };\n}).filter(Boolean);\n\nreturn [{\n  json: {\n    stationId: item.stationId,\n    category: item.category,\n    count: processed.length,\n    items: processed\n  }\n}];"
             },
             "name": "Format Ingest",
             "type": "n8n-nodes-base.code",
