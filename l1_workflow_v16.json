@@ -1,0 +1,198 @@
+{
+    "name": "BambiGO L1: V16 (Context Lookup)",
+    "nodes": [
+        {
+            "id": "node-start",
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "id": "node-get-stations",
+            "parameters": {
+                "url": "https://bambigo-mvp.vercel.app/api/context/list",
+                "options": {}
+            },
+            "name": "Get Station List",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "id": "node-explode",
+            "parameters": {
+                "jsCode": "const response = items[0].json;\nconst nodes = response.nodes || [];\nif (nodes.length === 0) return [{ json: { error: 'No stations found' } }];\nconst station = nodes[0];\nconst categories = [\n  { category: 'shopping', query_key: 'shop' },\n  { category: 'convenience', query_key: 'shop', query_val: 'convenience' },\n  { category: 'dining', query_key: 'amenity', query_val: 'restaurant|cafe|fast_food' },\n  { category: 'medical', query_key: 'amenity', query_val: 'pharmacy|clinic|hospital' },\n  { category: 'leisure', query_key: 'leisure' },\n  { category: 'finance', query_key: 'amenity', query_val: 'bank|atm' },\n  { category: 'accommodation', query_key: 'tourism', query_val: 'hotel|hostel' },\n  { category: 'culture', query_key: 'tourism', query_val: 'museum|art_gallery' },\n  { category: 'service', query_key: 'amenity', query_val: 'post_office|police' },\n  { category: 'nature', query_key: 'leisure', query_val: 'park|garden' }\n];\nreturn categories.map(cat => ({\n  json: {\n    stationId: station.id,\n    stationName: station.name?.en || station.id,\n    lat: station.location?.lat,\n    lon: station.location?.lng,\n    category: cat.category,\n    query_key: cat.query_key,\n    query_val: cat.query_val || ''\n  }\n}));"
+            },
+            "name": "Explode Tasks",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "id": "node-build-query",
+            "parameters": {
+                "jsCode": "// Radius 300m for L1 Spec\nconst item = items[0].json;\nconst radius = 300;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\nconst rawQuery = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\nconst queryEncoded = encodeURIComponent(rawQuery);\nreturn [{ json: { ...item, query: rawQuery, query_encoded: queryEncoded } }];"
+            },
+            "name": "Build Query",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "id": "node-wait",
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "name": "Wait (Throttling)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "id": "node-osm-api",
+            "parameters": {
+                "method": "GET",
+                "url": "=https://overpass-api.de/api/interpreter?data={{$json.query_encoded}}",
+                "options": {}
+            },
+            "name": "OSM API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1100,
+                300
+            ]
+        },
+        {
+            "id": "node-format",
+            "parameters": {
+                "jsCode": "// Advanced Context Lookup Strategy\n// Current inputs 'items' are OSM Responses (Data)\n// We look back at 'Build Query' node to get the original Context (Station ID)\n// We assume order is preserved (n8n standard behavior for map/arrays)\n\nconst contextItems = $('Build Query').all();\n\nreturn items.map((item, index) => {\n  // Safety: Match by index\n  const context = contextItems[index] ? contextItems[index].json : {};\n  if (!context.stationId) throw new Error(`Context lost at index ${index}`);\n\n  const elements = item.json.elements || [];\n  \n  const processed = elements.map(el => {\n    const tags = el.tags || {};\n    if (!tags.name) return null;\n    return {\n      osm_id: el.id,\n      name: tags.name,\n      category: context.category,\n      location: { lat: el.lat || el.center?.lat, lon: el.lon || el.center?.lon },\n      tags\n    };\n  }).filter(Boolean);\n\n  return {\n    json: {\n      stationId: context.stationId,\n      category: context.category,\n      count: processed.length,\n      items: processed\n    }\n  };\n});"
+            },
+            "name": "Format Ingest",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1300,
+                300
+            ]
+        },
+        {
+            "id": "node-backend",
+            "parameters": {
+                "method": "POST",
+                "url": "https://bambigo-mvp.vercel.app/api/l1/ingest",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": []
+                },
+                "specifyBody": "json",
+                "jsonBody": "={{JSON.stringify($json)}}",
+                "options": {}
+            },
+            "name": "Backend Ingest",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1500,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Get Station List",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Station List": {
+            "main": [
+                [
+                    {
+                        "node": "Explode Tasks",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Explode Tasks": {
+            "main": [
+                [
+                    {
+                        "node": "Build Query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Query": {
+            "main": [
+                [
+                    {
+                        "node": "Wait (Throttling)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait (Throttling)": {
+            "main": [
+                [
+                    {
+                        "node": "OSM API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OSM API": {
+            "main": [
+                [
+                    {
+                        "node": "Format Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Ingest": {
+            "main": [
+                [
+                    {
+                        "node": "Backend Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
