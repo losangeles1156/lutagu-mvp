@@ -1,0 +1,230 @@
+{
+    "name": "BambiGO L1: V13 (Merge Context Fix)",
+    "nodes": [
+        {
+            "id": "node-start",
+            "parameters": {},
+            "name": "Start",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "id": "node-get-stations",
+            "parameters": {
+                "url": "https://bambigo-mvp.vercel.app/api/context/list",
+                "options": {}
+            },
+            "name": "Get Station List",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "id": "node-explode",
+            "parameters": {
+                "jsCode": "const response = items[0].json;\nconst nodes = response.nodes || [];\nif (nodes.length === 0) return [{ json: { error: 'No stations found' } }];\nconst station = nodes[0];\nconst categories = [\n  { category: 'shopping', query_key: 'shop' },\n  { category: 'convenience', query_key: 'shop', query_val: 'convenience' },\n  { category: 'dining', query_key: 'amenity', query_val: 'restaurant|cafe|fast_food' }\n];\nreturn categories.map(cat => ({\n  json: {\n    stationId: station.id,\n    stationName: station.name?.en || station.id,\n    lat: station.location?.lat,\n    lon: station.location?.lng,\n    category: cat.category,\n    query_key: cat.query_key,\n    query_val: cat.query_val || ''\n  }\n}));"
+            },
+            "name": "Explode Tasks",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "id": "node-build-query",
+            "parameters": {
+                "jsCode": "const item = items[0].json;\nconst radius = 1000;\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\nconst rawQuery = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon}););out body;`;\nconst queryEncoded = encodeURIComponent(rawQuery);\nreturn [{ json: { ...item, query: rawQuery, query_encoded: queryEncoded } }];"
+            },
+            "name": "Build Query",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "id": "node-osm-api",
+            "parameters": {
+                "method": "GET",
+                "url": "=https://overpass-api.de/api/interpreter?data={{$json.query_encoded}}",
+                "options": {}
+            },
+            "name": "OSM API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                900,
+                200
+            ]
+        },
+        {
+            "id": "node-wait",
+            "parameters": {
+                "amount": 2,
+                "unit": "seconds"
+            },
+            "name": "Wait",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                200
+            ]
+        },
+        {
+            "id": "node-merge",
+            "parameters": {
+                "mode": "combine",
+                "combinationMode": "mergeByPosition"
+            },
+            "name": "Merge Context",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 2,
+            "position": [
+                1300,
+                300
+            ]
+        },
+        {
+            "id": "node-format",
+            "parameters": {
+                "jsCode": "const item = items[0].json;\n// Merge node puts OSM data in root OR we get merged object\n// With 'mergeByPosition' and Input 1 (Context) + Input 2 (OSM),\n// The result should contain fields from both.\n// OSM API returns 'elements' at root.\nconst elements = item.elements || [];\n\nconst processed = elements.map(el => {\n  const tags = el.tags || {};\n  if (!tags.name) return null;\n  return {\n    osm_id: el.id,\n    name: tags.name,\n    category: item.category,\n    location: { lat: el.lat, lon: el.lon },\n    tags\n  };\n}).filter(Boolean);\n\nreturn [{\n  json: {\n    stationId: item.stationId,\n    category: item.category,\n    count: processed.length,\n    items: processed\n  }\n}];"
+            },
+            "name": "Format Ingest",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1500,
+                300
+            ]
+        },
+        {
+            "id": "node-backend",
+            "parameters": {
+                "method": "POST",
+                "url": "https://bambigo-mvp.vercel.app/api/l1/ingest",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": []
+                },
+                "specifyBody": "json",
+                "jsonBody": "={{JSON.stringify($json)}}",
+                "options": {}
+            },
+            "name": "Backend Ingest",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1700,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Start": {
+            "main": [
+                [
+                    {
+                        "node": "Get Station List",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Station List": {
+            "main": [
+                [
+                    {
+                        "node": "Explode Tasks",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Explode Tasks": {
+            "main": [
+                [
+                    {
+                        "node": "Build Query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Query": {
+            "main": [
+                [
+                    {
+                        "node": "OSM API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Merge Context",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OSM API": {
+            "main": [
+                [
+                    {
+                        "node": "Wait",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Context",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Merge Context": {
+            "main": [
+                [
+                    {
+                        "node": "Format Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Ingest": {
+            "main": [
+                [
+                    {
+                        "node": "Backend Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
