@@ -1,0 +1,300 @@
+{
+    "name": "BambiGO L3: Bike Share Import",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "weeks",
+                            "triggerAtDay": [
+                                0
+                            ],
+                            "triggerAtHour": 4
+                        }
+                    ]
+                }
+            },
+            "id": "e44d32e9-467d-419b-b5d3-8f6824987654",
+            "name": "Schedule (Weekly)",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [
+                380,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api-public.odpt.org/api/v4/gbfs/docomo-cycle-tokyo/station_information.json",
+                "options": {}
+            },
+            "id": "0ac92842-8c1d-444f-a892-234234234234",
+            "name": "Fetch Docomo",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                600,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api-public.odpt.org/api/v4/gbfs/hellocycling/station_information.json",
+                "options": {}
+            },
+            "id": "1bc92842-8c1d-444f-a892-234234234235",
+            "name": "Fetch HelloCycling",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                600,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const stations = items[0].json.data.stations || [];\nreturn stations.map(s => ({ json: s }));"
+            },
+            "id": "2cc92842-8c1d-444f-a892-234234234236",
+            "name": "Extract Docomo",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                800,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const stations = items[0].json.data.stations || [];\nreturn stations.map(s => ({ json: s }));"
+            },
+            "id": "3dc92842-8c1d-444f-a892-234234234237",
+            "name": "Extract Hello",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                800,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 200,
+                "options": {}
+            },
+            "id": "4ec92842-8c1d-444f-a892-234234234238",
+            "name": "Batch Docomo",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "batchSize": 200,
+                "options": {}
+            },
+            "id": "5fc92842-8c1d-444f-a892-234234234239",
+            "name": "Batch Hello",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://bambigo-mvp.vercel.app/api/l3/ingest-bikes",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"provider\": \"docomo\",\n  \"stations\": {{$json.items}}\n}",
+                "options": {}
+            },
+            "id": "6gc92842-8c1d-444f-a892-234234234240",
+            "name": "Ingest Docomo",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1200,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://bambigo-mvp.vercel.app/api/l3/ingest-bikes",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"provider\": \"hellocycling\",\n  \"stations\": {{$json.items}}\n}",
+                "options": {}
+            },
+            "id": "7hc92842-8c1d-444f-a892-234234234241",
+            "name": "Ingest Hello",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1200,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const allItems = items.map(item => item.json);\nreturn [{ json: { items: allItems } }];"
+            },
+            "id": "agg-docomo",
+            "name": "Aggregate Docomo",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1100,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const allItems = items.map(item => item.json);\nreturn [{ json: { items: allItems } }];"
+            },
+            "id": "agg-hello",
+            "name": "Aggregate Hello",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1100,
+                440
+            ]
+        }
+    ],
+    "connections": {
+        "Schedule (Weekly)": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Docomo",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Fetch HelloCycling",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Docomo": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Docomo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch HelloCycling": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Hello",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Docomo": {
+            "main": [
+                [
+                    {
+                        "node": "Batch Docomo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Hello": {
+            "main": [
+                [
+                    {
+                        "node": "Batch Hello",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Batch Docomo": {
+            "main": [
+                [
+                    {
+                        "node": "Aggregate Docomo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Aggregate Docomo": {
+            "main": [
+                [
+                    {
+                        "node": "Ingest Docomo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Ingest Docomo": {
+            "main": [
+                [
+                    {
+                        "node": "Batch Docomo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Batch Hello": {
+            "main": [
+                [
+                    {
+                        "node": "Aggregate Hello",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Aggregate Hello": {
+            "main": [
+                [
+                    {
+                        "node": "Ingest Hello",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Ingest Hello": {
+            "main": [
+                [
+                    {
+                        "node": "Batch Hello",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
