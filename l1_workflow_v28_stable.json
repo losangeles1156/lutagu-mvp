@@ -1,0 +1,330 @@
+{
+    "name": "BambiGO L1: V28 (Production Stable)",
+    "nodes": [
+        {
+            "id": "node-schedule",
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "minutesInterval": 10
+                        }
+                    ]
+                }
+            },
+            "name": "Schedule (Every 10m)",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "id": "node-get-todo",
+            "parameters": {
+                "url": "https://bambigo-mvp.vercel.app/api/l1/todo",
+                "options": {
+                    "timeout": 30000
+                }
+            },
+            "name": "Get Pending Stations",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                300,
+                300
+            ],
+            "onError": "continueErrorOutput",
+            "retryOnFail": true,
+            "maxTries": 3,
+            "waitBetweenTries": 2000
+        },
+        {
+            "id": "node-check-api-error",
+            "parameters": {
+                "jsCode": "// Robust API response check\nconst response = items[0];\n\n// Check for HTTP errors\nif (response.error || !response.json) {\n  console.log('API returned error or empty response');\n  return [];\n}\n\n// Check for application-level errors\nif (response.json.error) {\n  console.log('API error:', response.json.error);\n  return [];\n}\n\n// Check if nodes array exists\nif (!response.json.nodes || !Array.isArray(response.json.nodes)) {\n  console.log('Invalid response structure');\n  return [];\n}\n\nreturn items;"
+            },
+            "name": "Validate API Response",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "id": "node-check-complete",
+            "parameters": {
+                "jsCode": "// Check if all stations are completed\nconst pendingCount = items[0].json.pendingCount || 0;\nconst nodes = items[0].json.nodes || [];\n\nif (nodes.length === 0) {\n  console.log('✅ All stations completed! Workflow can be disabled.');\n  // Return empty to stop this execution\n  // The schedule will still trigger, but no work will be done\n  return [];\n}\n\nconsole.log(`Found ${pendingCount} pending stations, processing ${nodes.length}`);\nreturn items;"
+            },
+            "name": "Check If Complete",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "id": "node-explode",
+            "parameters": {
+                "jsCode": "const response = items[0].json;\nconst nodes = response.nodes || [];\n\n// 10 categories for comprehensive POI coverage\nconst categories = [\n  { category: 'shopping', query_key: 'shop' },\n  { category: 'dining', query_key: 'amenity', query_val: 'restaurant|cafe|fast_food' },\n  { category: 'convenience', query_key: 'shop', query_val: 'convenience' },\n  { category: 'medical', query_key: 'amenity', query_val: 'pharmacy|clinic|hospital' },\n  { category: 'leisure', query_key: 'leisure' },\n  { category: 'finance', query_key: 'amenity', query_val: 'bank|atm' },\n  { category: 'accommodation', query_key: 'tourism', query_val: 'hotel|hostel' },\n  { category: 'culture', query_key: 'tourism', query_val: 'museum|art_gallery' },\n  { category: 'service', query_key: 'amenity', query_val: 'post_office|police' },\n  { category: 'nature', query_key: 'leisure', query_val: 'park|garden' }\n];\n\nconst tasks = [];\n\nnodes.forEach(station => {\n  categories.forEach(cat => {\n    tasks.push({\n      json: {\n        stationId: station.id,\n        stationName: station.name?.en || station.id,\n        lat: station.location?.lat,\n        lon: station.location?.lng,\n        category: cat.category,\n        query_key: cat.query_key,\n        query_val: cat.query_val || ''\n      }\n    });\n  });\n});\n\nconsole.log(`Generated ${tasks.length} tasks for ${nodes.length} stations`);\nreturn tasks;"
+            },
+            "name": "Explode Tasks",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "id": "node-split",
+            "parameters": {
+                "batchSize": 1,
+                "options": {}
+            },
+            "name": "SplitInBatches",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                300
+            ]
+        },
+        {
+            "id": "node-build-query",
+            "parameters": {
+                "jsCode": "const item = items[0].json;\n\n// Skip if no location\nif (!item.lat || !item.lon) {\n  return [{ json: { skipped: true, reason: 'No location data' } }];\n}\n\nconst radius = 300; // 300m radius\nlet selector = `[\"${item.query_key}\"]`;\nif (item.query_val) {\n  selector = `[\"${item.query_key}\"~\"${item.query_val}\"]`;\n}\n\n// Timeout 25s for Overpass\nconst rawQuery = `[out:json][timeout:25];(node${selector}(around:${radius},${item.lat},${item.lon});way${selector}(around:${radius},${item.lat},${item.lon}););out center body;`;\nconst queryEncoded = encodeURIComponent(rawQuery);\n\nreturn [{ json: { ...item, query: rawQuery, query_encoded: queryEncoded } }];"
+            },
+            "name": "Build Query",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1300,
+                300
+            ]
+        },
+        {
+            "id": "node-wait",
+            "parameters": {
+                "amount": 12,
+                "unit": "seconds"
+            },
+            "name": "Wait (12s)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1500,
+                300
+            ]
+        },
+        {
+            "id": "node-osm-api",
+            "parameters": {
+                "method": "GET",
+                "url": "=https://overpass-api.de/api/interpreter?data={{$json.query_encoded}}",
+                "options": {
+                    "timeout": 30000
+                }
+            },
+            "name": "OSM API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1700,
+                300
+            ],
+            "onError": "continueErrorOutput",
+            "retryOnFail": true,
+            "maxTries": 3,
+            "waitBetweenTries": 2000
+        },
+        {
+            "id": "node-format",
+            "parameters": {
+                "jsCode": "try {\n  // Get context from the batch splitter\n  const context = $('SplitInBatches').first().json;\n  \n  // Validate context\n  if (!context || !context.stationId) {\n    return [{ json: { skipped: true, reason: 'No context' } }];\n  }\n\n  // Check if previous step was skipped\n  if (items[0].json.skipped) {\n    return [{ json: { skipped: true, reason: 'Previous step skipped' } }];\n  }\n\n  // Handle API errors gracefully\n  const apiResponse = items[0].json;\n  if (items[0].error || !apiResponse || !apiResponse.elements) {\n    console.log(`API error for ${context.stationId} - ${context.category}`);\n    return [{ json: { skipped: true, reason: 'API error' } }];\n  }\n  \n  const elements = apiResponse.elements || [];\n  \n  // Process POIs\n  const processed = elements.map(el => {\n    const tags = el.tags || {};\n    if (!tags.name) return null; // Skip unnamed POIs\n    return {\n      osm_id: el.id,\n      name: tags.name,\n      category: context.category,\n      location: { \n        lat: el.lat || el.center?.lat, \n        lon: el.lon || el.center?.lon \n      },\n      tags\n    };\n  }).filter(Boolean);\n\n  console.log(`${context.stationId} - ${context.category}: ${processed.length} POIs`);\n\n  return [{\n    json: {\n      stationId: context.stationId,\n      category: context.category,\n      count: processed.length,\n      items: processed\n    }\n  }];\n} catch (e) {\n  console.log('Format error:', e.message);\n  return [{ json: { skipped: true, error: e.message } }];\n}"
+            },
+            "name": "Format Ingest",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1900,
+                300
+            ]
+        },
+        {
+            "id": "node-skip-check",
+            "parameters": {
+                "jsCode": "// Skip sending to backend if no data\nif (items[0].json.skipped || !items[0].json.items || items[0].json.items.length === 0) {\n  return []; // Skip to next batch item\n}\nreturn items;"
+            },
+            "name": "Skip Empty",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2100,
+                300
+            ]
+        },
+        {
+            "id": "node-backend",
+            "parameters": {
+                "method": "POST",
+                "url": "https://bambigo-mvp.vercel.app/api/l1/ingest",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{JSON.stringify($json)}}",
+                "options": {
+                    "timeout": 30000
+                }
+            },
+            "name": "Backend Ingest",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                2300,
+                300
+            ],
+            "onError": "continueErrorOutput",
+            "retryOnFail": true,
+            "maxTries": 3,
+            "waitBetweenTries": 2000
+        }
+    ],
+    "connections": {
+        "Schedule (Every 10m)": {
+            "main": [
+                [
+                    {
+                        "node": "Get Pending Stations",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Pending Stations": {
+            "main": [
+                [
+                    {
+                        "node": "Validate API Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate API Response": {
+            "main": [
+                [
+                    {
+                        "node": "Check If Complete",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check If Complete": {
+            "main": [
+                [
+                    {
+                        "node": "Explode Tasks",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Explode Tasks": {
+            "main": [
+                [
+                    {
+                        "node": "SplitInBatches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SplitInBatches": {
+            "main": [
+                [
+                    {
+                        "node": "Build Query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Query": {
+            "main": [
+                [
+                    {
+                        "node": "Wait (12s)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait (12s)": {
+            "main": [
+                [
+                    {
+                        "node": "OSM API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OSM API": {
+            "main": [
+                [
+                    {
+                        "node": "Format Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Ingest": {
+            "main": [
+                [
+                    {
+                        "node": "Skip Empty",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Skip Empty": {
+            "main": [
+                [
+                    {
+                        "node": "Backend Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Backend Ingest": {
+            "main": [
+                [
+                    {
+                        "node": "SplitInBatches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

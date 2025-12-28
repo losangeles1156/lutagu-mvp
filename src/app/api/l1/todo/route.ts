@@ -11,7 +11,7 @@ export async function GET() {
         const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
         const supabase = createClient(supabaseUrl, supabaseKey);
 
-        const targetOperators = ['JR-East', 'TokyoMetro', 'Toei', 'Keisei', 'TsukubaExpress', 'jr'];
+
 
         // 1. Get All Target Stations
         // Note: For 125 items, fetching all IDs is cheap.
@@ -22,9 +22,10 @@ export async function GET() {
 
         if (nodesError) throw nodesError;
 
+        const targetOperators = ['TokyoMetro', 'Toei', 'JR-East', 'Keisei', 'TsukubaExpress'];
         // Filter by target operators
         const targetNodes = allNodes.filter((n: any) =>
-            targetOperators.some(op => n.id.toLowerCase().includes(op.toLowerCase()))
+            targetOperators.some(op => n.id.includes(op))
         );
 
         // 2. Get Completed Stations
@@ -63,8 +64,8 @@ export async function GET() {
             pending.unshift(ueno);
         }
 
-        // 5. Return Batch of 5
-        const batch = pending.slice(0, 5).map((n: any) => {
+        // 5. Return Batch of 2 (Stable for Overpass)
+        const batch = pending.slice(0, 2).map((n: any) => {
             let lat = 35.6812;
             let lng = 139.7671;
 
@@ -86,7 +87,7 @@ export async function GET() {
             };
         });
 
-        console.log(`[API] Found ${pending.length} pending stations. Returning ${batch.length} items.`);
+        console.log(`[API] Found ${pending.length} pending stations. Returning ${batch.length} items to n8n.`);
 
         return NextResponse.json({
             pendingCount: pending.length,
