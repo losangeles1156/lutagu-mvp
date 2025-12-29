@@ -41,3 +41,14 @@ l1_workflow.json
 dify_response.txt
 *_response.txt
 *.log
+key.txt
+*.rtf
+dump.sql
+.env
+.env.local
+
+# Legacy Folders (Ignored after removal)
+bambigo-web/
+bambigo-v2.1/
+bambigo-v3.0/
+bambigo-tokyo/
