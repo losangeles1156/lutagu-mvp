@@ -59,7 +59,7 @@ export function L4_Bambi({ data }: L4_BambiProps) {
     }, [messages, thinkingStep]);
 
     // Send Message Logic
-    const handleSend = async (text: string, contextOverride?: string) => {
+    const handleSend = async (text: string, userProfile: string = 'general') => {
         if (!text.trim() || isLoading) return;
 
         const userMsg = { role: 'user' as const, content: text };
@@ -85,9 +85,6 @@ export function L4_Bambi({ data }: L4_BambiProps) {
         }, 1500);
 
         try {
-            // Force Chinese response in instructions
-            const prompt = contextOverride || text;
-
             const response = await fetch('/api/agent/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -95,7 +92,7 @@ export function L4_Bambi({ data }: L4_BambiProps) {
                     messages: [...messages, userMsg],
                     nodeId: stationId,
                     inputs: {
-                        user_context: `[SYSTEM: ROLE_DEFINITION] You are a station guide for ${displayName}. DO NOT ask for the user's starting location. Assume they are already at or near ${displayName}. Provide specific advice for this station directly. Requirement: ${text}`
+                        user_profile: userProfile
                     }
                 })
             });
@@ -109,7 +106,6 @@ export function L4_Bambi({ data }: L4_BambiProps) {
             const decoder = new TextDecoder();
             let accumulatedResponse = '';
 
-            // Add an empty assistant message to stream into
             setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
             setThinkingStep('');
 
@@ -207,18 +203,31 @@ export function L4_Bambi({ data }: L4_BambiProps) {
             {/* Input Overlay (Hybrid Strategy) */}
             <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px]">
                 <div className="space-y-4 max-w-lg mx-auto">
-                    {/* Destination Input */}
-                    <div className="relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors">
-                            <MapPin size={18} />
+                    {/* Destination Input & Free Text */}
+                    <div className="relative group flex gap-2">
+                        <div className="relative flex-1">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                                <Send size={18} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder={tL4('chips.route') + ' (問路、聊天...)'}
+                                value={input || destination}
+                                onChange={(e) => {
+                                    setDestination(e.target.value);
+                                    setInput(e.target.value);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        let profile = 'general';
+                                        if (selectedDemands.includes('accessibility')) profile = 'wheelchair';
+                                        else if (selectedDemands.includes('family')) profile = 'stroller';
+                                        handleSend(input || destination, profile);
+                                    }
+                                }}
+                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600 transition-all"
+                            />
                         </div>
-                        <input
-                            type="text"
-                            placeholder={tL4('chips.route') + ' (e.g. 新宿)'}
-                            value={destination}
-                            onChange={(e) => setDestination(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600 transition-all"
-                        />
                     </div>
 
                     {/* Demand Chips (Multi-select) */}
@@ -251,16 +260,15 @@ export function L4_Bambi({ data }: L4_BambiProps) {
                     {/* Action Button */}
                     <button
                         onClick={() => {
-                            const demandLabels = demands
-                                .filter(d => selectedDemands.includes(d.id))
-                                .map(d => d.label)
-                                .join('、');
+                            let profile = 'general';
+                            if (selectedDemands.includes('accessibility')) profile = 'wheelchair';
+                            else if (selectedDemands.includes('family')) profile = 'stroller';
 
-                            const combinedText = `我想去「${destination}」。我的需求是「${demandLabels}」。`;
-                            handleSend(combinedText, combinedText);
+                            const textToSend = input || destination;
+                            if (textToSend) handleSend(textToSend, profile);
                         }}
-                        disabled={!destination || isLoading}
-                        className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-sm tracking-widest transition-all ${!destination || isLoading
+                        disabled={(!input && !destination) || isLoading}
+                        className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-sm tracking-widest transition-all ${(!input && !destination) || isLoading
                             ? 'bg-slate-100 text-slate-300'
                             : 'bg-indigo-600 text-white shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:scale-[1.02] active:scale-95'
                             }`}

@@ -55,3 +55,59 @@ paths:
                     type: integer
                   s_rank_paths:
                     type: integer
+  /api/station/{station_id}/facilities:
+    get:
+      operationId: get_station_facilities
+      summary: Get Station Facility Details (L3)
+      description: Returns a list of specific facilities (toilets, elevators, exits) and their locations within the station. Use this to find specific elevator exits.
+      parameters:
+        - name: station_id
+          in: path
+          required: true
+          description: The ODPT Station ID (e.g., odpt:Station:TokyoMetro.Ginza.Ueno)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stationId:
+                    type: string
+                  facilities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        location:
+                          type: object
+                        attributes:
+                          type: object
+  /api/util/time:
+    get:
+      operationId: get_japan_time
+      summary: Get Current Japan Time (JST)
+      description: Returns the current date, time, and period (e.g., morning_rush, late_night) in Tokyo. Use this to check if user is travelling during rush hour or if trains might be ending.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jst_time:
+                    type: string
+                    description: Human readable time string
+                  hour_jst:
+                    type: integer
+                  period:
+                    type: string
+                    description: Context (morning_rush, evening_rush, day, late_night)
+                  day_of_week:
+                    type: string

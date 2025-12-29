@@ -31,11 +31,17 @@ export async function POST(req: NextRequest) {
 
         console.log('[API] Node Profile Fetched:', { name: profile.name?.en || profile.name?.ja || profile.id, id: profile.id });
 
-        // 1.5 Fetch Static ODPT Knowledge (Timetables, Fares)
-        const odptWisdom = await getStationWisdom(nodeId);
+        // 2. Format Context for Dify Variables (V2 Architecture: Tool Calling)
+        // We only pass the station ID and user profile. The Agent fetches the rest.
 
-        // 2. Format Context for Dify Variables
-        const contextInputs = prepareContextInputs(profile, inputs, odptWisdom);
+        let currentStationId = profile.id;
+        // Ensure ID is fully qualified if possible, or trust profile.id
+        // profile.id from nodes table is usually 'odpt:Station:...'
+
+        const contextInputs = {
+            current_station: currentStationId,
+            user_profile: clientInputs.user_profile || 'general'
+        };
 
         // 3. Call Dify API
         const difyApiKey = process.env.DIFY_API_KEY;
@@ -54,10 +60,10 @@ export async function POST(req: NextRequest) {
             },
             body: JSON.stringify({
                 inputs: contextInputs,
-                query: messages[messages.length - 1].content, // Send the last user message
+                query: messages[messages.length - 1].content,
                 response_mode: 'streaming',
                 conversation_id: conversation_id || '',
-                user: 'bambi-user-v1', // Simple user ID for now
+                user: 'bambi-user-v1',
                 files: []
             })
         });
@@ -68,9 +74,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: `Dify Error: ${difyResponse.statusText}` }, { status: difyResponse.status });
         }
 
-        // 4. Stream the response back to frontend
         const stream = difyResponse.body;
-
         return new NextResponse(stream, {
             headers: { 'Content-Type': 'text/event-stream' }
         });
@@ -81,50 +85,3 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// Helper: Format Station Profile into Dify Variables
-function prepareContextInputs(profile: StationUIProfile, clientInputs: any, odptWisdom: string) {
-    // A. L2 Real-time (Constraints)
-    const lines = profile.l2?.lines || [];
-    let l2Status = "Status: ALL NORMAL\n";
-    const delayedLines = lines.filter(l => l.status !== 'normal');
-    if (delayedLines.length > 0) {
-        l2Status = "Status: ⚠️ DELAYS / ISSUES\n";
-        delayedLines.forEach(l => {
-            l2Status += ` - ${l.name.en}: ${l.status.toUpperCase()} (${l.message?.en || ''})\n`;
-        });
-    }
-
-    const w = profile.l2?.weather;
-    const l2Weather = w ? `Weather: ${w.condition}, ${w.temp}°C` : "Weather: Unknown";
-
-    // B. L3 Amenities (Structural Facts)
-    const l3Summary = (profile.l3_facilities || []).map((f: any) => `- ${f.type}: ${f.location?.en || f.location || 'N/A'}`).join('\n');
-
-    // C. Synthesis Construction
-    // effectively merging "route_info" into a single powerful context blob for the prompt
-
-    const synthesisContext = `
-[L2: Real-time Context]
-${l2Status}
-${l2Weather}
-
-[L3: Infrastructure & Amenities]
-${l3Summary || "No detailed facility data."}
-
-${odptWisdom}
-
-[User Intent / Priority]
-${clientInputs?.user_context || "General Inquiry"}
-    `.trim();
-
-    return {
-        // Map these to the variables defined in your Dify Prompt
-        current_station: profile.name?.en || profile.name?.ja || profile.id || 'Unknown Station',
-        // We pass the synthesized blob into 'route_info' (or whatever variable your prompt uses for context)
-        // If your Dify prompt expects separate 'realtime_status' / 'weather', we populate those too.
-        realtime_status: l2Status,
-        weather: l2Weather,
-        route_info: synthesisContext, // This is the heavy lifter
-        user_context: clientInputs?.user_context || "General Inquiry"
-    };
-}
