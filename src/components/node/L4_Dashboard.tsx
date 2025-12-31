@@ -8,7 +8,7 @@ import { useAppStore } from '@/stores/appStore';
 // Types for Card response (Mirroring API response)
 interface ActionCard {
     id: string;
-    type: 'primary' | 'warning' | 'info' | 'secondary';
+    type: 'primary' | 'warning' | 'info' | 'secondary' | 'ai_suggestion';
     icon: string;
     title: string;
     description: string;
@@ -155,6 +155,7 @@ function CardItem({ card }: { card: ActionCard }) {
         switch (type) {
             case 'warning': return 'border-l-4 border-l-red-500';
             case 'info': return 'border-l-4 border-l-blue-400';
+            case 'ai_suggestion': return 'border-l-4 border-l-purple-500 bg-purple-50/10';
             default: return 'border-l-4 border-l-green-500';
         }
     };

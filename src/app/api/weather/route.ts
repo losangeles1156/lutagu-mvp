@@ -25,31 +25,33 @@ export async function GET(request: Request) {
                 content.match(/<summary>([\s\S]*?)<\/summary>/)?.[1] || '';
             const updated = content.match(/<updated>(.*?)<\/updated>/)?.[1] || '';
 
+            // 0. Normalize full-width characters to half-width for consistent matching
+            const normalize = (s: string) => s.replace(/[！-～]/g, (m) => String.fromCharCode(m.charCodeAt(0) - 0xfee0));
+            const normTitle = normalize(title);
+            const normSummary = normalize(summary);
+
             // [Phase 1] Pre-filter: Only alerts mentioning relevant Prefectures
-            const isTokyo = title.includes('東京') || summary.includes('東京');
-            const isKanagawa = title.includes('神奈川') || summary.includes('神奈川');
-            const isChiba = title.includes('千葉') || summary.includes('千葉');
+            const isTokyo = normTitle.includes('東京') || normSummary.includes('東京');
+            const isKanagawa = normTitle.includes('神奈川') || normSummary.includes('神奈川');
+            const isChiba = normTitle.includes('千葉') || normSummary.includes('千葉');
 
             if (!isTokyo && !isKanagawa && !isChiba) {
                 continue;
             }
 
             // [Phase 2] Strict Region Filter: 
-            const text = (title + summary).replace(/\s/g, '');
+            const text = (normTitle + normSummary).replace(/\s/g, '');
 
-            // 1. Exclude islands completely
+            // 1. Exclude islands completely if no target region is mentioned
             const isIslandMentioned = text.includes('伊豆諸島') || text.includes('小笠原諸島');
             
-            // 2. Core Target Regions (Must match at least one)
+            // 2. Core Target Regions
             const isTargetRegion = 
                 text.includes('東京地方') || 
                 text.includes('23区') ||
                 text.includes('多摩') ||
-                text.includes('神奈川県東部') || 
-                text.includes('神奈川県西部') ||
-                text.includes('千葉県北西部') || 
-                text.includes('千葉県北東部') || 
-                text.includes('千葉県南部');
+                text.includes('神奈川県') || 
+                text.includes('千葉県');
 
             // Logic:
             // - If it's an island-only alert, skip.
@@ -64,8 +66,10 @@ export async function GET(request: Request) {
             // Extra safety: even if islands are mentioned alongside target regions, 
             // we should double check if the target region itself has a warning.
             // (JMA sometimes lists all regions in one report)
-            const hasWarningInTarget = text.match(/(東京地方|23区|多摩|神奈川県|千葉県)[^、]*では[^。]*(警報|注意|特別警報)/);
-            if (!hasWarningInTarget && !title.includes('震度')) {
+            const hasWarningInTarget = text.match(/(東京地方|23区|多摩|神奈川県|千葉県).*?では.*?(警報|注意|特別警報)/);
+            const isEarthquake = normTitle.includes('震度') || normTitle.includes('地震') || normSummary.includes('震度');
+            
+            if (!hasWarningInTarget && !isEarthquake) {
                 continue;
             }
 

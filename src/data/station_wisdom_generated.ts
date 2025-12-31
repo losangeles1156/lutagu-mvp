@@ -1,0 +1,1345 @@
+export const GENERATED_KNOWLEDGE = [
+  {
+    "id": "generated-東京車站-基本資訊-176718222960342mbw",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "東京車站: 基本資訊",
+      "ja": "東京車站: 基本資訊",
+      "en": "東京車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：東京駅\n- 站點編號：JR / 丸之內線 M-17\n- 性質：東京最大的交通樞紐，全日本新幹線網最大、最完整的聚集站",
+      "ja": "- 日文名稱：東京駅\n- 站點編號：JR / 丸之內線 M-17\n- 性質：東京最大的交通樞紐，全日本新幹線網最大、最完整的聚集站",
+      "en": "- 日文名稱：東京駅\n- 站點編號：JR / 丸之內線 M-17\n- 性質：東京最大的交通樞紐，全日本新幹線網最大、最完整的聚集站"
+    }
+  },
+  {
+    "id": "generated-東京車站-可搭乘路線-1767182229603wnbn1",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "東京車站: 可搭乘路線",
+      "ja": "東京車站: 可搭乘路線",
+      "en": "東京車站: 可搭乘路線"
+    },
+    "content": {
+      "zh-TW": "- **新幹線**：東海道新幹線、山陽新幹線、東北新幹線、山形新幹線、秋田新幹線、北海道新幹線、上越新幹線、北陸新幹線\n- **JR線**：中央線、京濱東北線、山手線、東海道線（上野東京線、宇都宮線、高崎線、常磐線）、京葉線、武藏野線、橫須賀線、總武線（含成田EXPRESS）\n- **地下鐵**：東京Metro丸之內線",
+      "ja": "- **新幹線**：東海道新幹線、山陽新幹線、東北新幹線、山形新幹線、秋田新幹線、北海道新幹線、上越新幹線、北陸新幹線\n- **JR線**：中央線、京濱東北線、山手線、東海道線（上野東京線、宇都宮線、高崎線、常磐線）、京葉線、武藏野線、橫須賀線、總武線（含成田EXPRESS）\n- **地下鐵**：東京Metro丸之內線",
+      "en": "- **新幹線**：東海道新幹線、山陽新幹線、東北新幹線、山形新幹線、秋田新幹線、北海道新幹線、上越新幹線、北陸新幹線\n- **JR線**：中央線、京濱東北線、山手線、東海道線（上野東京線、宇都宮線、高崎線、常磐線）、京葉線、武藏野線、橫須賀線、總武線（含成田EXPRESS）\n- **地下鐵**：東京Metro丸之內線"
+    }
+  },
+  {
+    "id": "generated-東京車站-月台分布-1767182229603cfb2r",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "東京車站: 月台分布",
+      "ja": "東京車站: 月台分布",
+      "en": "東京車站: 月台分布"
+    },
+    "content": {
+      "zh-TW": "- **地面上月台**：1-10號為JR月台，14-23號為新幹線月台\n- **地面下月台**：京葉線、橫須賀線、總武線（含N'EX）",
+      "ja": "- **地面上月台**：1-10號為JR月台，14-23號為新幹線月台\n- **地面下月台**：京葉線、橫須賀線、總武線（含N'EX）",
+      "en": "- **地面上月台**：1-10號為JR月台，14-23號為新幹線月台\n- **地面下月台**：京葉線、橫須賀線、總武線（含N'EX）"
+    }
+  },
+  {
+    "id": "generated-東京車站-轉乘注意事項-17671822296039kzbg",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "東京車站: 轉乘注意事項",
+      "ja": "東京車站: 轉乘注意事項",
+      "en": "東京車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- 車站分為「八重洲側」（東側）和「丸之內側」（西側）\n- 「北自由通路」可自由穿越八重洲、丸之內兩側，不需出站\n- 京葉線月台位於地下5樓，距離主要月台很遠，步行約14-20分鐘\n- 轉乘京葉線時，找到UNIQLO代表正經過GRANSTA東京地下街\n- 橫須賀線、總武線（含N'EX）在丸之內中央口直下處",
+      "ja": "- 車站分為「八重洲側」（東側）和「丸之內側」（西側）\n- 「北自由通路」可自由穿越八重洲、丸之內兩側，不需出站\n- 京葉線月台位於地下5樓，距離主要月台很遠，步行約14-20分鐘\n- 轉乘京葉線時，找到UNIQLO代表正經過GRANSTA東京地下街\n- 橫須賀線、總武線（含N'EX）在丸之內中央口直下處",
+      "en": "- 車站分為「八重洲側」（東側）和「丸之內側」（西側）\n- 「北自由通路」可自由穿越八重洲、丸之內兩側，不需出站\n- 京葉線月台位於地下5樓，距離主要月台很遠，步行約14-20分鐘\n- 轉乘京葉線時，找到UNIQLO代表正經過GRANSTA東京地下街\n- 橫須賀線、總武線（含N'EX）在丸之內中央口直下處"
+    }
+  },
+  {
+    "id": "generated-東京車站-京葉線替代進站方式（推薦）-1767182229603x6gnz",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "東京車站: 京葉線替代進站方式（推薦）",
+      "ja": "東京車站: 京葉線替代進站方式（推薦）",
+      "en": "東京車站: 京葉線替代進站方式（推薦）"
+    },
+    "content": {
+      "zh-TW": "- 京葉線月台雖然名義上在東京車站，實際位置在車站南側，離**有樂町站更近**\n- 從JR有樂町站下車，走「京橋口」或「國際フォーラム口」出站\n- 往東京國際論壇方向走（可定位「Tokyo International Forum Side Square」）\n- 此路線比從東京車站主體轉乘更短更省時",
+      "ja": "- 京葉線月台雖然名義上在東京車站，實際位置在車站南側，離**有樂町站更近**\n- 從JR有樂町站下車，走「京橋口」或「國際フォーラム口」出站\n- 往東京國際論壇方向走（可定位「Tokyo International Forum Side Square」）\n- 此路線比從東京車站主體轉乘更短更省時",
+      "en": "- 京葉線月台雖然名義上在東京車站，實際位置在車站南側，離**有樂町站更近**\n- 從JR有樂町站下車，走「京橋口」或「國際フォーラム口」出站\n- 往東京國際論壇方向走（可定位「Tokyo International Forum Side Square」）\n- 此路線比從東京車站主體轉乘更短更省時"
+    }
+  },
+  {
+    "id": "generated-東京車站-出口指南-1767182229603vdnry",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "🚪",
+    "title": {
+      "zh-TW": "東京車站: 出口指南",
+      "ja": "東京車站: 出口指南",
+      "en": "東京車站: 出口指南"
+    },
+    "content": {
+      "zh-TW": "| 出口 | 位置 | 附近設施 |\n|------|------|----------|\n| 八重洲北口 | 地面上 | 大丸百貨、TOKYO TORCH、京成巴士 |\n| 八重洲中央口 | 地面上 | 大丸百貨、JR高速巴士、日本橋高島屋 |\n| 八重洲南口 | 地面上 | JR高速巴士、GRANSTA東京 |\n| 八重洲地下中央口 | 地面下 | 東京車站一番街、東京拉麵街 |\n| 丸之內北口 | 地面上 | 新丸之內大廈、皇居、丸之內仲通 |\n| 丸之內中央口 | 地面上 | 皇居、東京車站大飯店、車站建築攝影點 |\n| 丸之內南口 | 地面上 | 丸之內大廈、KITTE丸之內、丸之內紅磚廣場 |",
+      "ja": "| 出口 | 位置 | 附近設施 |\n|------|------|----------|\n| 八重洲北口 | 地面上 | 大丸百貨、TOKYO TORCH、京成巴士 |\n| 八重洲中央口 | 地面上 | 大丸百貨、JR高速巴士、日本橋高島屋 |\n| 八重洲南口 | 地面上 | JR高速巴士、GRANSTA東京 |\n| 八重洲地下中央口 | 地面下 | 東京車站一番街、東京拉麵街 |\n| 丸之內北口 | 地面上 | 新丸之內大廈、皇居、丸之內仲通 |\n| 丸之內中央口 | 地面上 | 皇居、東京車站大飯店、車站建築攝影點 |\n| 丸之內南口 | 地面上 | 丸之內大廈、KITTE丸之內、丸之內紅磚廣場 |",
+      "en": "| 出口 | 位置 | 附近設施 |\n|------|------|----------|\n| 八重洲北口 | 地面上 | 大丸百貨、TOKYO TORCH、京成巴士 |\n| 八重洲中央口 | 地面上 | 大丸百貨、JR高速巴士、日本橋高島屋 |\n| 八重洲南口 | 地面上 | JR高速巴士、GRANSTA東京 |\n| 八重洲地下中央口 | 地面下 | 東京車站一番街、東京拉麵街 |\n| 丸之內北口 | 地面上 | 新丸之內大廈、皇居、丸之內仲通 |\n| 丸之內中央口 | 地面上 | 皇居、東京車站大飯店、車站建築攝影點 |\n| 丸之內南口 | 地面上 | 丸之內大廈、KITTE丸之內、丸之內紅磚廣場 |"
+    }
+  },
+  {
+    "id": "generated-東京車站-前往迪士尼-17671822296035mnr2",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "東京車站: 前往迪士尼",
+      "ja": "東京車站: 前往迪士尼",
+      "en": "東京車站: 前往迪士尼"
+    },
+    "content": {
+      "zh-TW": "- 搭乘京葉線至舞濱站，車程約15分鐘\n- 從JR驗票口到京葉線月台需步行約14-20分鐘，務必預留時間",
+      "ja": "- 搭乘京葉線至舞濱站，車程約15分鐘\n- 從JR驗票口到京葉線月台需步行約14-20分鐘，務必預留時間",
+      "en": "- 搭乘京葉線至舞濱站，車程約15分鐘\n- 從JR驗票口到京葉線月台需步行約14-20分鐘，務必預留時間"
+    }
+  },
+  {
+    "id": "generated-東京車站-前往成田機場-1767182229603qon9g",
+    "trigger": {
+      "station_names_hint": [
+        "東京車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Tokyo",
+        "odpt:Station:TokyoMetro.Tokyo"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "東京車站: 前往成田機場",
+      "ja": "東京車站: 前往成田機場",
+      "en": "東京車站: 前往成田機場"
+    },
+    "content": {
+      "zh-TW": "- 搭乘N'EX成田特快，不到1小時可抵達\n- 月台位置：丸之內中央口地下3、4號月台\n- 也可搭乘京成巴士「TYO-NRT」，1,300日圓直達",
+      "ja": "- 搭乘N'EX成田特快，不到1小時可抵達\n- 月台位置：丸之內中央口地下3、4號月台\n- 也可搭乘京成巴士「TYO-NRT」，1,300日圓直達",
+      "en": "- 搭乘N'EX成田特快，不到1小時可抵達\n- 月台位置：丸之內中央口地下3、4號月台\n- 也可搭乘京成巴士「TYO-NRT」，1,300日圓直達"
+    }
+  },
+  {
+    "id": "generated-上野車站-基本資訊-1767182229603s7odb",
+    "trigger": {
+      "station_names_hint": [
+        "上野車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ueno",
+        "odpt:Station:TokyoMetro.Ueno",
+        "odpt:Station:Keisei.KeiseiUeno"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "上野車站: 基本資訊",
+      "ja": "上野車站: 基本資訊",
+      "en": "上野車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：上野駅\n- 性質：東京北玄關，可搭乘新幹線及前往成田機場",
+      "ja": "- 日文名稱：上野駅\n- 性質：東京北玄關，可搭乘新幹線及前往成田機場",
+      "en": "- 日文名稱：上野駅\n- 性質：東京北玄關，可搭乘新幹線及前往成田機場"
+    }
+  },
+  {
+    "id": "generated-上野車站-上野地區共有4個「上野」站-1767182229603hsc27",
+    "trigger": {
+      "station_names_hint": [
+        "上野車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ueno",
+        "odpt:Station:TokyoMetro.Ueno",
+        "odpt:Station:Keisei.KeiseiUeno"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "上野車站: 上野地區共有4個「上野」站",
+      "ja": "上野車站: 上野地區共有4個「上野」站",
+      "en": "上野車站: 上野地區共有4個「上野」站"
+    },
+    "content": {
+      "zh-TW": "1. **JR上野站**：最主要的車站\n2. **東京Metro銀座線上野站**：往淺草、銀座、澀谷\n3. **東京Metro日比谷線上野站**：往秋葉原、築地、六本木\n4. **京成上野站**：往成田機場（獨立建築，步行5分鐘）",
+      "ja": "1. **JR上野站**：最主要的車站\n2. **東京Metro銀座線上野站**：往淺草、銀座、澀谷\n3. **東京Metro日比谷線上野站**：往秋葉原、築地、六本木\n4. **京成上野站**：往成田機場（獨立建築，步行5分鐘）",
+      "en": "1. **JR上野站**：最主要的車站\n2. **東京Metro銀座線上野站**：往淺草、銀座、澀谷\n3. **東京Metro日比谷線上野站**：往秋葉原、築地、六本木\n4. **京成上野站**：往成田機場（獨立建築，步行5分鐘）"
+    }
+  },
+  {
+    "id": "generated-上野車站-jr上野站可搭乘路線-1767182229603ocgay",
+    "trigger": {
+      "station_names_hint": [
+        "上野車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ueno",
+        "odpt:Station:TokyoMetro.Ueno",
+        "odpt:Station:Keisei.KeiseiUeno"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "上野車站: JR上野站可搭乘路線",
+      "ja": "上野車站: JR上野站可搭乘路線",
+      "en": "上野車站: JR上野站可搭乘路線"
+    },
+    "content": {
+      "zh-TW": "- 京濱東北線（往橫濱方向）\n- 山手線（往秋葉原、東京方向）\n- 常磐線（往茨城方向）\n- 新幹線：東北新幹線、山形新幹線、秋田新幹線、上越新幹線、北陸新幹線、北海道新幹線",
+      "ja": "- 京濱東北線（往橫濱方向）\n- 山手線（往秋葉原、東京方向）\n- 常磐線（往茨城方向）\n- 新幹線：東北新幹線、山形新幹線、秋田新幹線、上越新幹線、北陸新幹線、北海道新幹線",
+      "en": "- 京濱東北線（往橫濱方向）\n- 山手線（往秋葉原、東京方向）\n- 常磐線（往茨城方向）\n- 新幹線：東北新幹線、山形新幹線、秋田新幹線、上越新幹線、北陸新幹線、北海道新幹線"
+    }
+  },
+  {
+    "id": "generated-上野車站-轉乘注意事項-1767182229603450ik",
+    "trigger": {
+      "station_names_hint": [
+        "上野車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ueno",
+        "odpt:Station:TokyoMetro.Ueno",
+        "odpt:Station:Keisei.KeiseiUeno"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "上野車站: 轉乘注意事項",
+      "ja": "上野車站: 轉乘注意事項",
+      "en": "上野車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- JR上野站剪票口都在地上，地下鐵則在地下\n- 銀座線和日比谷線在地下相通\n- 京成上野站是獨立建築，需出站步行約5分鐘\n- 6個「上野」站實際上由地下巨大通道相連，雨天很便利",
+      "ja": "- JR上野站剪票口都在地上，地下鐵則在地下\n- 銀座線和日比谷線在地下相通\n- 京成上野站是獨立建築，需出站步行約5分鐘\n- 6個「上野」站實際上由地下巨大通道相連，雨天很便利",
+      "en": "- JR上野站剪票口都在地上，地下鐵則在地下\n- 銀座線和日比谷線在地下相通\n- 京成上野站是獨立建築，需出站步行約5分鐘\n- 6個「上野」站實際上由地下巨大通道相連，雨天很便利"
+    }
+  },
+  {
+    "id": "generated-上野車站-出口指南-1767182229603jlviu",
+    "trigger": {
+      "station_names_hint": [
+        "上野車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ueno",
+        "odpt:Station:TokyoMetro.Ueno",
+        "odpt:Station:Keisei.KeiseiUeno"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "🚪",
+    "title": {
+      "zh-TW": "上野車站: 出口指南",
+      "ja": "上野車站: 出口指南",
+      "en": "上野車站: 出口指南"
+    },
+    "content": {
+      "zh-TW": "- **中央剪票口**：主要出口\n- **不忍剪票口**：往阿美橫丁最近\n- **公園剪票口**：往上野公園、動物園最近\n- **淺草口**：往淺草方向",
+      "ja": "- **中央剪票口**：主要出口\n- **不忍剪票口**：往阿美橫丁最近\n- **公園剪票口**：往上野公園、動物園最近\n- **淺草口**：往淺草方向",
+      "en": "- **中央剪票口**：主要出口\n- **不忍剪票口**：往阿美橫丁最近\n- **公園剪票口**：往上野公園、動物園最近\n- **淺草口**：往淺草方向"
+    }
+  },
+  {
+    "id": "generated-上野車站-前往成田機場（從京成上野站）-1767182229603gapq7",
+    "trigger": {
+      "station_names_hint": [
+        "上野車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ueno",
+        "odpt:Station:TokyoMetro.Ueno",
+        "odpt:Station:Keisei.KeiseiUeno"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "上野車站: 前往成田機場（從京成上野站）",
+      "ja": "上野車站: 前往成田機場（從京成上野站）",
+      "en": "上野車站: 前往成田機場（從京成上野站）"
+    },
+    "content": {
+      "zh-TW": "| 交通方式 | 時間 | 費用 |\n|----------|------|------|\n| Skyliner | 約41分鐘 | 2,570日圓 |\n| ACCESS特急 | 約59分鐘 | 約1,270日圓 |\n| 京成本線特急 | 約70分鐘 | 1,060日圓 |",
+      "ja": "| 交通方式 | 時間 | 費用 |\n|----------|------|------|\n| Skyliner | 約41分鐘 | 2,570日圓 |\n| ACCESS特急 | 約59分鐘 | 約1,270日圓 |\n| 京成本線特急 | 約70分鐘 | 1,060日圓 |",
+      "en": "| 交通方式 | 時間 | 費用 |\n|----------|------|------|\n| Skyliner | 約41分鐘 | 2,570日圓 |\n| ACCESS特急 | 約59分鐘 | 約1,270日圓 |\n| 京成本線特急 | 約70分鐘 | 1,060日圓 |"
+    }
+  },
+  {
+    "id": "generated-上野車站-從jr上野站到京成上野站-176718222960352l59",
+    "trigger": {
+      "station_names_hint": [
+        "上野車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ueno",
+        "odpt:Station:TokyoMetro.Ueno",
+        "odpt:Station:Keisei.KeiseiUeno"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "上野車站: 從JR上野站到京成上野站",
+      "ja": "上野車站: 從JR上野站到京成上野站",
+      "en": "上野車站: 從JR上野站到京成上野站"
+    },
+    "content": {
+      "zh-TW": "1. 從JR中央剪票口出站\n2. 直走到八重洲側出口\n3. 過馬路後直走約5分鐘即達",
+      "ja": "1. 從JR中央剪票口出站\n2. 直走到八重洲側出口\n3. 過馬路後直走約5分鐘即達",
+      "en": "1. 從JR中央剪票口出站\n2. 直走到八重洲側出口\n3. 過馬路後直走約5分鐘即達"
+    }
+  },
+  {
+    "id": "generated-淺草車站-基本資訊-1767182229603vj4os",
+    "trigger": {
+      "station_names_hint": [
+        "淺草車站"
+      ],
+      "station_ids": [
+        "odpt:Station:TokyoMetro.Asakusa",
+        "odpt:Station:Toei.Asakusa",
+        "odpt:Station:Tobu.Asakusa",
+        "odpt:Station:MIR.Asakusa"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "淺草車站: 基本資訊",
+      "ja": "淺草車站: 基本資訊",
+      "en": "淺草車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：浅草駅\n- 性質：東京觀光重要景點，雷門、淺草寺所在地",
+      "ja": "- 日文名稱：浅草駅\n- 性質：東京觀光重要景點，雷門、淺草寺所在地",
+      "en": "- 日文名稱：浅草駅\n- 性質：東京觀光重要景點，雷門、淺草寺所在地"
+    }
+  },
+  {
+    "id": "generated-淺草車站-淺草共有4個車站-1767182229603rz1vu",
+    "trigger": {
+      "station_names_hint": [
+        "淺草車站"
+      ],
+      "station_ids": [
+        "odpt:Station:TokyoMetro.Asakusa",
+        "odpt:Station:Toei.Asakusa",
+        "odpt:Station:Tobu.Asakusa",
+        "odpt:Station:MIR.Asakusa"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "淺草車站: 淺草共有4個車站",
+      "ja": "淺草車站: 淺草共有4個車站",
+      "en": "淺草車站: 淺草共有4個車站"
+    },
+    "content": {
+      "zh-TW": "1. **東京Metro銀座線淺草站**：最便利，離雷門步行約3分鐘\n2. **都營淺草線淺草站**：可直達成田機場、羽田機場、押上（晴空塔）\n3. **東武淺草站**：往日光、鬼怒川溫泉\n4. **筑波快線淺草站**：往秋葉原、筑波（距離較遠，步行約10分鐘）",
+      "ja": "1. **東京Metro銀座線淺草站**：最便利，離雷門步行約3分鐘\n2. **都營淺草線淺草站**：可直達成田機場、羽田機場、押上（晴空塔）\n3. **東武淺草站**：往日光、鬼怒川溫泉\n4. **筑波快線淺草站**：往秋葉原、筑波（距離較遠，步行約10分鐘）",
+      "en": "1. **東京Metro銀座線淺草站**：最便利，離雷門步行約3分鐘\n2. **都營淺草線淺草站**：可直達成田機場、羽田機場、押上（晴空塔）\n3. **東武淺草站**：往日光、鬼怒川溫泉\n4. **筑波快線淺草站**：往秋葉原、筑波（距離較遠，步行約10分鐘）"
+    }
+  },
+  {
+    "id": "generated-淺草車站-各站往雷門的走法-1767182229603gzajm",
+    "trigger": {
+      "station_names_hint": [
+        "淺草車站"
+      ],
+      "station_ids": [
+        "odpt:Station:TokyoMetro.Asakusa",
+        "odpt:Station:Toei.Asakusa",
+        "odpt:Station:Tobu.Asakusa",
+        "odpt:Station:MIR.Asakusa"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "淺草車站: 各站往雷門的走法",
+      "ja": "淺草車站: 各站往雷門的走法",
+      "en": "淺草車站: 各站往雷門的走法"
+    },
+    "content": {
+      "zh-TW": "**銀座線**：\n- 從1號出口出站，往左前方直走約1分鐘\n**都營淺草線**：\n- 從A4出口出站，往右直走，遇大馬路左轉\n- 有大型行李請從A2-b出口（電梯）\n**東武線**：\n- 從2F剪票口出站，下樓梯後過馬路左轉\n- 位於EKIMISE商業大樓內\n**筑波快線**：\n- 從A1出口出站，沿國際通直走約5分鐘\n- 遇雷門通左轉，再走約5分鐘",
+      "ja": "**銀座線**：\n- 從1號出口出站，往左前方直走約1分鐘\n**都營淺草線**：\n- 從A4出口出站，往右直走，遇大馬路左轉\n- 有大型行李請從A2-b出口（電梯）\n**東武線**：\n- 從2F剪票口出站，下樓梯後過馬路左轉\n- 位於EKIMISE商業大樓內\n**筑波快線**：\n- 從A1出口出站，沿國際通直走約5分鐘\n- 遇雷門通左轉，再走約5分鐘",
+      "en": "**銀座線**：\n- 從1號出口出站，往左前方直走約1分鐘\n**都營淺草線**：\n- 從A4出口出站，往右直走，遇大馬路左轉\n- 有大型行李請從A2-b出口（電梯）\n**東武線**：\n- 從2F剪票口出站，下樓梯後過馬路左轉\n- 位於EKIMISE商業大樓內\n**筑波快線**：\n- 從A1出口出站，沿國際通直走約5分鐘\n- 遇雷門通左轉，再走約5分鐘"
+    }
+  },
+  {
+    "id": "generated-淺草車站-轉乘注意事項-1767182229603bx02v",
+    "trigger": {
+      "station_names_hint": [
+        "淺草車站"
+      ],
+      "station_ids": [
+        "odpt:Station:TokyoMetro.Asakusa",
+        "odpt:Station:Toei.Asakusa",
+        "odpt:Station:Tobu.Asakusa",
+        "odpt:Station:MIR.Asakusa"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "淺草車站: 轉乘注意事項",
+      "ja": "淺草車站: 轉乘注意事項",
+      "en": "淺草車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- 銀座線和都營淺草線在地下相通\n- 都營淺草線可直達晴空塔（押上站），僅3分鐘\n- 東武線往日光：特急約1小時20分鐘\n- 東武線往鬼怒川溫泉：特急約2小時10分鐘",
+      "ja": "- 銀座線和都營淺草線在地下相通\n- 都營淺草線可直達晴空塔（押上站），僅3分鐘\n- 東武線往日光：特急約1小時20分鐘\n- 東武線往鬼怒川溫泉：特急約2小時10分鐘",
+      "en": "- 銀座線和都營淺草線在地下相通\n- 都營淺草線可直達晴空塔（押上站），僅3分鐘\n- 東武線往日光：特急約1小時20分鐘\n- 東武線往鬼怒川溫泉：特急約2小時10分鐘"
+    }
+  },
+  {
+    "id": "generated-淺草車站-前往機場-1767182229603ivjr1",
+    "trigger": {
+      "station_names_hint": [
+        "淺草車站"
+      ],
+      "station_ids": [
+        "odpt:Station:TokyoMetro.Asakusa",
+        "odpt:Station:Toei.Asakusa",
+        "odpt:Station:Tobu.Asakusa",
+        "odpt:Station:MIR.Asakusa"
+      ]
+    },
+    "type": "tip",
+    "priority": 70,
+    "icon": "✈️",
+    "title": {
+      "zh-TW": "淺草車站: 前往機場",
+      "ja": "淺草車站: 前往機場",
+      "en": "淺草車站: 前往機場"
+    },
+    "content": {
+      "zh-TW": "| 目的地 | 路線 | 時間 | 費用 |\n|--------|------|------|------|\n| 成田機場 | 都營淺草線「機場快特」| 約1小時 | 1,290日圓 |\n| 羽田機場 | 都營淺草線「機場快特」| 約35分鐘 | 620日圓 |",
+      "ja": "| 目的地 | 路線 | 時間 | 費用 |\n|--------|------|------|------|\n| 成田機場 | 都營淺草線「機場快特」| 約1小時 | 1,290日圓 |\n| 羽田機場 | 都營淺草線「機場快特」| 約35分鐘 | 620日圓 |",
+      "en": "| 目的地 | 路線 | 時間 | 費用 |\n|--------|------|------|------|\n| 成田機場 | 都營淺草線「機場快特」| 約1小時 | 1,290日圓 |\n| 羽田機場 | 都營淺草線「機場快特」| 約35分鐘 | 620日圓 |"
+    }
+  },
+  {
+    "id": "generated-秋葉原車站-基本資訊-1767182229603w0po6",
+    "trigger": {
+      "station_names_hint": [
+        "秋葉原車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Akihabara",
+        "odpt:Station:TokyoMetro.Akihabara",
+        "odpt:Station:MIR.Akihabara"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "秋葉原車站: 基本資訊",
+      "ja": "秋葉原車站: 基本資訊",
+      "en": "秋葉原車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：秋葉原駅\n- 性質：電器街、動漫文化聖地",
+      "ja": "- 日文名稱：秋葉原駅\n- 性質：電器街、動漫文化聖地",
+      "en": "- 日文名稱：秋葉原駅\n- 性質：電器街、動漫文化聖地"
+    }
+  },
+  {
+    "id": "generated-秋葉原車站-秋葉原共有3個車站-1767182229603ma912",
+    "trigger": {
+      "station_names_hint": [
+        "秋葉原車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Akihabara",
+        "odpt:Station:TokyoMetro.Akihabara",
+        "odpt:Station:MIR.Akihabara"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "秋葉原車站: 秋葉原共有3個車站",
+      "ja": "秋葉原車站: 秋葉原共有3個車站",
+      "en": "秋葉原車站: 秋葉原共有3個車站"
+    },
+    "content": {
+      "zh-TW": "1. **JR秋葉原站**：山手線、京濱東北線、中央線/總武線\n2. **東京Metro日比谷線秋葉原站**：往六本木、銀座、築地\n3. **筑波快線秋葉原站**：往淺草（4分鐘）、筑波",
+      "ja": "1. **JR秋葉原站**：山手線、京濱東北線、中央線/總武線\n2. **東京Metro日比谷線秋葉原站**：往六本木、銀座、築地\n3. **筑波快線秋葉原站**：往淺草（4分鐘）、筑波",
+      "en": "1. **JR秋葉原站**：山手線、京濱東北線、中央線/總武線\n2. **東京Metro日比谷線秋葉原站**：往六本木、銀座、築地\n3. **筑波快線秋葉原站**：往淺草（4分鐘）、筑波"
+    }
+  },
+  {
+    "id": "generated-秋葉原車站-前往電器街的方法-1767182229603tbrhr",
+    "trigger": {
+      "station_names_hint": [
+        "秋葉原車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Akihabara",
+        "odpt:Station:TokyoMetro.Akihabara",
+        "odpt:Station:MIR.Akihabara"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "秋葉原車站: 前往電器街的方法",
+      "ja": "秋葉原車站: 前往電器街的方法",
+      "en": "秋葉原車站: 前往電器街的方法"
+    },
+    "content": {
+      "zh-TW": "**從JR（山手線/京濱東北線）**：\n1. 2F月台下樓梯到1F\n2. 找「電器街剪票口」標示\n3. 出剪票口後往「電器街北口」方向\n4. 以紅色Sega遊戲中心為目標直行\n**從JR（總武線）**：\n1. 3F月台找「電器街剪票口」標示\n2. 搭手扶梯下到1F\n3. 走法同上\n**從日比谷線**：\n1. 從3號出口出站\n2. 看到Yodobashi Akiba後，沿店鋪入口左側通道穿過\n3. 經JR中央剪票口前，往東西自由通道直行\n**從筑波快線**：\n1. 從A1出口出站後左轉\n2. 往東西自由通道直行",
+      "ja": "**從JR（山手線/京濱東北線）**：\n1. 2F月台下樓梯到1F\n2. 找「電器街剪票口」標示\n3. 出剪票口後往「電器街北口」方向\n4. 以紅色Sega遊戲中心為目標直行\n**從JR（總武線）**：\n1. 3F月台找「電器街剪票口」標示\n2. 搭手扶梯下到1F\n3. 走法同上\n**從日比谷線**：\n1. 從3號出口出站\n2. 看到Yodobashi Akiba後，沿店鋪入口左側通道穿過\n3. 經JR中央剪票口前，往東西自由通道直行\n**從筑波快線**：\n1. 從A1出口出站後左轉\n2. 往東西自由通道直行",
+      "en": "**從JR（山手線/京濱東北線）**：\n1. 2F月台下樓梯到1F\n2. 找「電器街剪票口」標示\n3. 出剪票口後往「電器街北口」方向\n4. 以紅色Sega遊戲中心為目標直行\n**從JR（總武線）**：\n1. 3F月台找「電器街剪票口」標示\n2. 搭手扶梯下到1F\n3. 走法同上\n**從日比谷線**：\n1. 從3號出口出站\n2. 看到Yodobashi Akiba後，沿店鋪入口左側通道穿過\n3. 經JR中央剪票口前，往東西自由通道直行\n**從筑波快線**：\n1. 從A1出口出站後左轉\n2. 往東西自由通道直行"
+    }
+  },
+  {
+    "id": "generated-秋葉原車站-轉乘注意事項-1767182229603nife8",
+    "trigger": {
+      "station_names_hint": [
+        "秋葉原車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Akihabara",
+        "odpt:Station:TokyoMetro.Akihabara",
+        "odpt:Station:MIR.Akihabara"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "秋葉原車站: 轉乘注意事項",
+      "ja": "秋葉原車站: 轉乘注意事項",
+      "en": "秋葉原車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- JR「電器街口」是最便利的出口\n- 日比谷線出口距離電器街稍遠，需步行約5-8分鐘\n- 從淺草搭筑波快線僅需4分鐘（210日圓）",
+      "ja": "- JR「電器街口」是最便利的出口\n- 日比谷線出口距離電器街稍遠，需步行約5-8分鐘\n- 從淺草搭筑波快線僅需4分鐘（210日圓）",
+      "en": "- JR「電器街口」是最便利的出口\n- 日比谷線出口距離電器街稍遠，需步行約5-8分鐘\n- 從淺草搭筑波快線僅需4分鐘（210日圓）"
+    }
+  },
+  {
+    "id": "generated-押上車站-基本資訊-1767182229603ata6g",
+    "trigger": {
+      "station_names_hint": [
+        "押上車站"
+      ],
+      "station_ids": [
+        "odpt:Station:Toei.Oshiage",
+        "odpt:Station:TokyoMetro.Oshiage",
+        "odpt:Station:Keisei.Oshiage",
+        "odpt:Station:Tobu.Oshiage"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "押上車站: 基本資訊",
+      "ja": "押上車站: 基本資訊",
+      "en": "押上車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：押上駅（スカイツリー前）\n- 站點編號：都營淺草線 A-20\n- 性質：東京晴空塔最近的車站",
+      "ja": "- 日文名稱：押上駅（スカイツリー前）\n- 站點編號：都營淺草線 A-20\n- 性質：東京晴空塔最近的車站",
+      "en": "- 日文名稱：押上駅（スカイツリー前）\n- 站點編號：都營淺草線 A-20\n- 性質：東京晴空塔最近的車站"
+    }
+  },
+  {
+    "id": "generated-押上車站-可搭乘路線-1767182229603jokcs",
+    "trigger": {
+      "station_names_hint": [
+        "押上車站"
+      ],
+      "station_ids": [
+        "odpt:Station:Toei.Oshiage",
+        "odpt:Station:TokyoMetro.Oshiage",
+        "odpt:Station:Keisei.Oshiage",
+        "odpt:Station:Tobu.Oshiage"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "押上車站: 可搭乘路線",
+      "ja": "押上車站: 可搭乘路線",
+      "en": "押上車站: 可搭乘路線"
+    },
+    "content": {
+      "zh-TW": "- 都營淺草線\n- 京成線（往成田機場）\n- 半藏門線\n- 東武線",
+      "ja": "- 都營淺草線\n- 京成線（往成田機場）\n- 半藏門線\n- 東武線",
+      "en": "- 都營淺草線\n- 京成線（往成田機場）\n- 半藏門線\n- 東武線"
+    }
+  },
+  {
+    "id": "generated-押上車站-轉乘注意事項-1767182229603kfp6n",
+    "trigger": {
+      "station_names_hint": [
+        "押上車站"
+      ],
+      "station_ids": [
+        "odpt:Station:Toei.Oshiage",
+        "odpt:Station:TokyoMetro.Oshiage",
+        "odpt:Station:Keisei.Oshiage",
+        "odpt:Station:Tobu.Oshiage"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "押上車站: 轉乘注意事項",
+      "ja": "押上車站: 轉乘注意事項",
+      "en": "押上車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- 直通東京晴空塔及Soramachi商場\n- 從淺草搭都營淺草線僅需3分鐘（180日圓）\n- 可直達成田機場（京成線）",
+      "ja": "- 直通東京晴空塔及Soramachi商場\n- 從淺草搭都營淺草線僅需3分鐘（180日圓）\n- 可直達成田機場（京成線）",
+      "en": "- 直通東京晴空塔及Soramachi商場\n- 從淺草搭都營淺草線僅需3分鐘（180日圓）\n- 可直達成田機場（京成線）"
+    }
+  },
+  {
+    "id": "generated-池袋車站-基本資訊-1767182229603vdl8p",
+    "trigger": {
+      "station_names_hint": [
+        "池袋車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ikebukuro",
+        "odpt:Station:TokyoMetro.Ikebukuro",
+        "odpt:Station:Seibu.Ikebukuro",
+        "odpt:Station:Tobu.Ikebukuro"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "池袋車站: 基本資訊",
+      "ja": "池袋車站: 基本資訊",
+      "en": "池袋車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：池袋駅\n- 性質：東京西北部重要交通樞紐",
+      "ja": "- 日文名稱：池袋駅\n- 性質：東京西北部重要交通樞紐",
+      "en": "- 日文名稱：池袋駅\n- 性質：東京西北部重要交通樞紐"
+    }
+  },
+  {
+    "id": "generated-池袋車站-可搭乘路線-17671822296033uni5",
+    "trigger": {
+      "station_names_hint": [
+        "池袋車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ikebukuro",
+        "odpt:Station:TokyoMetro.Ikebukuro",
+        "odpt:Station:Seibu.Ikebukuro",
+        "odpt:Station:Tobu.Ikebukuro"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "池袋車站: 可搭乘路線",
+      "ja": "池袋車站: 可搭乘路線",
+      "en": "池袋車站: 可搭乘路線"
+    },
+    "content": {
+      "zh-TW": "- JR：山手線、埼京線、湘南新宿線\n- 東京Metro：丸之內線、有樂町線、副都心線\n- 西武池袋線\n- 東武東上線",
+      "ja": "- JR：山手線、埼京線、湘南新宿線\n- 東京Metro：丸之內線、有樂町線、副都心線\n- 西武池袋線\n- 東武東上線",
+      "en": "- JR：山手線、埼京線、湘南新宿線\n- 東京Metro：丸之內線、有樂町線、副都心線\n- 西武池袋線\n- 東武東上線"
+    }
+  },
+  {
+    "id": "generated-池袋車站-轉乘注意事項-1767182229603n7qih",
+    "trigger": {
+      "station_names_hint": [
+        "池袋車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Ikebukuro",
+        "odpt:Station:TokyoMetro.Ikebukuro",
+        "odpt:Station:Seibu.Ikebukuro",
+        "odpt:Station:Tobu.Ikebukuro"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "池袋車站: 轉乘注意事項",
+      "ja": "池袋車站: 轉乘注意事項",
+      "en": "池袋車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- 車站東西出口商業設施不同，請先確認目的地\n- 西口：東武百貨、LUMINE\n- 東口：西武百貨、Sunshine City",
+      "ja": "- 車站東西出口商業設施不同，請先確認目的地\n- 西口：東武百貨、LUMINE\n- 東口：西武百貨、Sunshine City",
+      "en": "- 車站東西出口商業設施不同，請先確認目的地\n- 西口：東武百貨、LUMINE\n- 東口：西武百貨、Sunshine City"
+    }
+  },
+  {
+    "id": "generated-日暮里車站-基本資訊-1767182229603xxllp",
+    "trigger": {
+      "station_names_hint": [
+        "日暮里車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Nippori",
+        "odpt:Station:Keisei.Nippori",
+        "odpt:Station:Toei.NipporiToneri.Nippori"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "日暮里車站: 基本資訊",
+      "ja": "日暮里車站: 基本資訊",
+      "en": "日暮里車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：日暮里駅\n- 性質：往成田機場的重要轉乘站",
+      "ja": "- 日文名稱：日暮里駅\n- 性質：往成田機場的重要轉乘站",
+      "en": "- 日文名稱：日暮里駅\n- 性質：往成田機場的重要轉乘站"
+    }
+  },
+  {
+    "id": "generated-日暮里車站-可搭乘路線-1767182229603y7o3w",
+    "trigger": {
+      "station_names_hint": [
+        "日暮里車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Nippori",
+        "odpt:Station:Keisei.Nippori",
+        "odpt:Station:Toei.NipporiToneri.Nippori"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "日暮里車站: 可搭乘路線",
+      "ja": "日暮里車站: 可搭乘路線",
+      "en": "日暮里車站: 可搭乘路線"
+    },
+    "content": {
+      "zh-TW": "- JR：山手線、京濱東北線、常磐線\n- 京成線（往成田機場）\n- 舍人線",
+      "ja": "- JR：山手線、京濱東北線、常磐線\n- 京成線（往成田機場）\n- 舍人線",
+      "en": "- JR：山手線、京濱東北線、常磐線\n- 京成線（往成田機場）\n- 舍人線"
+    }
+  },
+  {
+    "id": "generated-日暮里車站-轉乘注意事項-1767182229603tfqq7",
+    "trigger": {
+      "station_names_hint": [
+        "日暮里車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Nippori",
+        "odpt:Station:Keisei.Nippori",
+        "odpt:Station:Toei.NipporiToneri.Nippori"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "日暮里車站: 轉乘注意事項",
+      "ja": "日暮里車站: 轉乘注意事項",
+      "en": "日暮里車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- Skyliner停靠站，前往成田機場僅36分鐘\n- 從JR轉乘京成線需要出站\n- 適合住在山手線沿線的旅客前往機場",
+      "ja": "- Skyliner停靠站，前往成田機場僅36分鐘\n- 從JR轉乘京成線需要出站\n- 適合住在山手線沿線的旅客前往機場",
+      "en": "- Skyliner停靠站，前往成田機場僅36分鐘\n- 從JR轉乘京成線需要出站\n- 適合住在山手線沿線的旅客前往機場"
+    }
+  },
+  {
+    "id": "generated-都營淺草線沿線重要車站-路線特色-1767182229603oqg4a",
+    "trigger": {
+      "station_names_hint": [
+        "都營淺草線沿線重要車站"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "都營淺草線沿線重要車站: 路線特色",
+      "ja": "都營淺草線沿線重要車站: 路線特色",
+      "en": "都營淺草線沿線重要車站: 路線特色"
+    },
+    "content": {
+      "zh-TW": "- 連接成田機場與羽田機場的「神路線」\n- 北端與京成線直通（往成田機場）\n- 南端與京急線直通（往羽田機場、橫濱）",
+      "ja": "- 連接成田機場與羽田機場的「神路線」\n- 北端與京成線直通（往成田機場）\n- 南端與京急線直通（往羽田機場、橫濱）",
+      "en": "- 連接成田機場與羽田機場的「神路線」\n- 北端與京成線直通（往成田機場）\n- 南端與京急線直通（往羽田機場、橫濱）"
+    }
+  },
+  {
+    "id": "generated-都營淺草線沿線重要車站-主要車站-1767182229603or7yh",
+    "trigger": {
+      "station_names_hint": [
+        "都營淺草線沿線重要車站"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "都營淺草線沿線重要車站: 主要車站",
+      "ja": "都營淺草線沿線重要車站: 主要車站",
+      "en": "都營淺草線沿線重要車站: 主要車站"
+    },
+    "content": {
+      "zh-TW": "| 車站 | 特色 | Airport快特停車 |\n|------|------|-----------------|\n| 押上 | 晴空塔 | ✓ |\n| 淺草 | 雷門、淺草寺 | ✓ |\n| 藏前 | 文青咖啡街區 | ✗ |\n| 淺草橋 | 可轉乘JR總武線 | ✗ |\n| 人形町 | 甘酒橫丁、小網神社 | ✗ |\n| 東銀座 | 歌舞伎座、銀座 | ✗ |\n| 新橋 | 可轉乘百合海鷗號往台場 | ✓ |\n| 大門 | 東京鐵塔 | ✓ |\n| 三田 | 可轉乘JR | ✓ |\n| 泉岳寺 | 與京急線分歧點 | ✓ |\n| 戶越 | 戶越銀座商店街 | ✗ |\n| 西馬込 | 終點站 | ✗ |",
+      "ja": "| 車站 | 特色 | Airport快特停車 |\n|------|------|-----------------|\n| 押上 | 晴空塔 | ✓ |\n| 淺草 | 雷門、淺草寺 | ✓ |\n| 藏前 | 文青咖啡街區 | ✗ |\n| 淺草橋 | 可轉乘JR總武線 | ✗ |\n| 人形町 | 甘酒橫丁、小網神社 | ✗ |\n| 東銀座 | 歌舞伎座、銀座 | ✗ |\n| 新橋 | 可轉乘百合海鷗號往台場 | ✓ |\n| 大門 | 東京鐵塔 | ✓ |\n| 三田 | 可轉乘JR | ✓ |\n| 泉岳寺 | 與京急線分歧點 | ✓ |\n| 戶越 | 戶越銀座商店街 | ✗ |\n| 西馬込 | 終點站 | ✗ |",
+      "en": "| 車站 | 特色 | Airport快特停車 |\n|------|------|-----------------|\n| 押上 | 晴空塔 | ✓ |\n| 淺草 | 雷門、淺草寺 | ✓ |\n| 藏前 | 文青咖啡街區 | ✗ |\n| 淺草橋 | 可轉乘JR總武線 | ✗ |\n| 人形町 | 甘酒橫丁、小網神社 | ✗ |\n| 東銀座 | 歌舞伎座、銀座 | ✗ |\n| 新橋 | 可轉乘百合海鷗號往台場 | ✓ |\n| 大門 | 東京鐵塔 | ✓ |\n| 三田 | 可轉乘JR | ✓ |\n| 泉岳寺 | 與京急線分歧點 | ✓ |\n| 戶越 | 戶越銀座商店街 | ✗ |\n| 西馬込 | 終點站 | ✗ |"
+    }
+  },
+  {
+    "id": "generated-都營淺草線沿線重要車站-搭車秘訣-1767182229603ivswe",
+    "trigger": {
+      "station_names_hint": [
+        "都營淺草線沿線重要車站"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "都營淺草線沿線重要車站: 搭車秘訣",
+      "ja": "都營淺草線沿線重要車站: 搭車秘訣",
+      "en": "都營淺草線沿線重要車站: 搭車秘訣"
+    },
+    "content": {
+      "zh-TW": "- **重要**：除了「Airport快特」之外，所有車種在淺草線內都是各站停車\n- 往西馬込方向的列車較少，可在泉岳寺站換車\n- 車種複雜但只需注意目的地，不需擔心車種",
+      "ja": "- **重要**：除了「Airport快特」之外，所有車種在淺草線內都是各站停車\n- 往西馬込方向的列車較少，可在泉岳寺站換車\n- 車種複雜但只需注意目的地，不需擔心車種",
+      "en": "- **重要**：除了「Airport快特」之外，所有車種在淺草線內都是各站停車\n- 往西馬込方向的列車較少，可在泉岳寺站換車\n- 車種複雜但只需注意目的地，不需擔心車種"
+    }
+  },
+  {
+    "id": "generated-舞濱車站-基本資訊-17671822296031d68q",
+    "trigger": {
+      "station_names_hint": [
+        "舞濱車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Maihama"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "舞濱車站: 基本資訊",
+      "ja": "舞濱車站: 基本資訊",
+      "en": "舞濱車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：舞浜駅\n- 性質：東京迪士尼度假區最近的車站",
+      "ja": "- 日文名稱：舞浜駅\n- 性質：東京迪士尼度假區最近的車站",
+      "en": "- 日文名稱：舞浜駅\n- 性質：東京迪士尼度假區最近的車站"
+    }
+  },
+  {
+    "id": "generated-舞濱車站-可搭乘路線-1767182229603pzkie",
+    "trigger": {
+      "station_names_hint": [
+        "舞濱車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Maihama"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "舞濱車站: 可搭乘路線",
+      "ja": "舞濱車站: 可搭乘路線",
+      "en": "舞濱車站: 可搭乘路線"
+    },
+    "content": {
+      "zh-TW": "- JR京葉線",
+      "ja": "- JR京葉線",
+      "en": "- JR京葉線"
+    }
+  },
+  {
+    "id": "generated-舞濱車站-轉乘注意事項-1767182229603yo0ap",
+    "trigger": {
+      "station_names_hint": [
+        "舞濱車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Maihama"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "舞濱車站: 轉乘注意事項",
+      "ja": "舞濱車站: 轉乘注意事項",
+      "en": "舞濱車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- 從東京車站搭京葉線約15分鐘\n- 東京車站京葉線月台在地下5樓，距離其他月台非常遠\n- 從東京車站其他月台走到京葉線月台約14-20分鐘\n- 找「京葉ストリート」看板，經過三段長手扶梯即達月台",
+      "ja": "- 從東京車站搭京葉線約15分鐘\n- 東京車站京葉線月台在地下5樓，距離其他月台非常遠\n- 從東京車站其他月台走到京葉線月台約14-20分鐘\n- 找「京葉ストリート」看板，經過三段長手扶梯即達月台",
+      "en": "- 從東京車站搭京葉線約15分鐘\n- 東京車站京葉線月台在地下5樓，距離其他月台非常遠\n- 從東京車站其他月台走到京葉線月台約14-20分鐘\n- 找「京葉ストリート」看板，經過三段長手扶梯即達月台"
+    }
+  },
+  {
+    "id": "generated-品川車站-基本資訊-1767182229603chdfo",
+    "trigger": {
+      "station_names_hint": [
+        "品川車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Shinagawa",
+        "odpt:Station:Keikyu.Shinagawa"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "品川車站: 基本資訊",
+      "ja": "品川車站: 基本資訊",
+      "en": "品川車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：品川駅\n- 性質：新幹線停靠站、往羽田機場便利",
+      "ja": "- 日文名稱：品川駅\n- 性質：新幹線停靠站、往羽田機場便利",
+      "en": "- 日文名稱：品川駅\n- 性質：新幹線停靠站、往羽田機場便利"
+    }
+  },
+  {
+    "id": "generated-品川車站-可搭乘路線-1767182229603q853w",
+    "trigger": {
+      "station_names_hint": [
+        "品川車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Shinagawa",
+        "odpt:Station:Keikyu.Shinagawa"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "品川車站: 可搭乘路線",
+      "ja": "品川車站: 可搭乘路線",
+      "en": "品川車站: 可搭乘路線"
+    },
+    "content": {
+      "zh-TW": "- JR：山手線、京濱東北線、東海道線、橫須賀線\n- 新幹線：東海道新幹線\n- 京急線（往羽田機場）",
+      "ja": "- JR：山手線、京濱東北線、東海道線、橫須賀線\n- 新幹線：東海道新幹線\n- 京急線（往羽田機場）",
+      "en": "- JR：山手線、京濱東北線、東海道線、橫須賀線\n- 新幹線：東海道新幹線\n- 京急線（往羽田機場）"
+    }
+  },
+  {
+    "id": "generated-品川車站-轉乘注意事項-1767182229603qrknc",
+    "trigger": {
+      "station_names_hint": [
+        "品川車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.Shinagawa",
+        "odpt:Station:Keikyu.Shinagawa"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "品川車站: 轉乘注意事項",
+      "ja": "品川車站: 轉乘注意事項",
+      "en": "品川車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- 從都營淺草線可直達（泉岳寺站轉乘）\n- 京急線直達羽田機場約15分鐘\n- 新幹線可前往名古屋、京都、大阪",
+      "ja": "- 從都營淺草線可直達（泉岳寺站轉乘）\n- 京急線直達羽田機場約15分鐘\n- 新幹線可前往名古屋、京都、大阪",
+      "en": "- 從都營淺草線可直達（泉岳寺站轉乘）\n- 京急線直達羽田機場約15分鐘\n- 新幹線可前往名古屋、京都、大阪"
+    }
+  },
+  {
+    "id": "generated-成田機場車站-基本資訊-1767182229603b5d9j",
+    "trigger": {
+      "station_names_hint": [
+        "成田機場車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.NaritaAirportTerminal1",
+        "odpt:Station:Keisei.NaritaAirportTerminal1"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "成田機場車站: 基本資訊",
+      "ja": "成田機場車站: 基本資訊",
+      "en": "成田機場車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：成田空港駅 / 空港第2ビル駅",
+      "ja": "- 日文名稱：成田空港駅 / 空港第2ビル駅",
+      "en": "- 日文名稱：成田空港駅 / 空港第2ビル駅"
+    }
+  },
+  {
+    "id": "generated-成田機場車站-前往東京市區的交通方式-1767182229603v3ls6",
+    "trigger": {
+      "station_names_hint": [
+        "成田機場車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.NaritaAirportTerminal1",
+        "odpt:Station:Keisei.NaritaAirportTerminal1"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "成田機場車站: 前往東京市區的交通方式",
+      "ja": "成田機場車站: 前往東京市區的交通方式",
+      "en": "成田機場車站: 前往東京市區的交通方式"
+    },
+    "content": {
+      "zh-TW": "| 交通方式 | 終點 | 時間 | 費用 |\n|----------|------|------|------|\n| Skyliner | 上野/日暮里 | 約36-41分鐘 | 2,570日圓 |\n| 成田特快N'EX | 東京車站 | 約53分鐘 | 3,070日圓 |\n| ACCESS特急 | 押上/淺草 | 約50-60分鐘 | 約1,290日圓 |\n| 京成本線特急 | 上野 | 約70分鐘 | 1,060日圓 |\n| 京成巴士TYO-NRT | 東京車站 | 約1小時 | 1,300日圓 |",
+      "ja": "| 交通方式 | 終點 | 時間 | 費用 |\n|----------|------|------|------|\n| Skyliner | 上野/日暮里 | 約36-41分鐘 | 2,570日圓 |\n| 成田特快N'EX | 東京車站 | 約53分鐘 | 3,070日圓 |\n| ACCESS特急 | 押上/淺草 | 約50-60分鐘 | 約1,290日圓 |\n| 京成本線特急 | 上野 | 約70分鐘 | 1,060日圓 |\n| 京成巴士TYO-NRT | 東京車站 | 約1小時 | 1,300日圓 |",
+      "en": "| 交通方式 | 終點 | 時間 | 費用 |\n|----------|------|------|------|\n| Skyliner | 上野/日暮里 | 約36-41分鐘 | 2,570日圓 |\n| 成田特快N'EX | 東京車站 | 約53分鐘 | 3,070日圓 |\n| ACCESS特急 | 押上/淺草 | 約50-60分鐘 | 約1,290日圓 |\n| 京成本線特急 | 上野 | 約70分鐘 | 1,060日圓 |\n| 京成巴士TYO-NRT | 東京車站 | 約1小時 | 1,300日圓 |"
+    }
+  },
+  {
+    "id": "generated-成田機場車站-轉乘注意事項-1767182229603e4kjl",
+    "trigger": {
+      "station_names_hint": [
+        "成田機場車站"
+      ],
+      "station_ids": [
+        "odpt:Station:JR-East.NaritaAirportTerminal1",
+        "odpt:Station:Keisei.NaritaAirportTerminal1"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "成田機場車站: 轉乘注意事項",
+      "ja": "成田機場車站: 轉乘注意事項",
+      "en": "成田機場車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- Skyliner需購買乘車票+特急券兩種票\n- N'EX在東京車站地下月台\n- 購買優惠來回票可省錢",
+      "ja": "- Skyliner需購買乘車票+特急券兩種票\n- N'EX在東京車站地下月台\n- 購買優惠來回票可省錢",
+      "en": "- Skyliner需購買乘車票+特急券兩種票\n- N'EX在東京車站地下月台\n- 購買優惠來回票可省錢"
+    }
+  },
+  {
+    "id": "generated-羽田機場車站-基本資訊-1767182229603qbk82",
+    "trigger": {
+      "station_names_hint": [
+        "羽田機場車站"
+      ],
+      "station_ids": [
+        "odpt:Station:Keikyu.HanedaAirportTerminal1and2",
+        "odpt:Station:Keikyu.HanedaAirportTerminal3",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal1",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal2",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal3"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "羽田機場車站: 基本資訊",
+      "ja": "羽田機場車站: 基本資訊",
+      "en": "羽田機場車站: 基本資訊"
+    },
+    "content": {
+      "zh-TW": "- 日文名稱：羽田空港駅",
+      "ja": "- 日文名稱：羽田空港駅",
+      "en": "- 日文名稱：羽田空港駅"
+    }
+  },
+  {
+    "id": "generated-羽田機場車站-前往東京市區的交通方式-1767182229603albeh",
+    "trigger": {
+      "station_names_hint": [
+        "羽田機場車站"
+      ],
+      "station_ids": [
+        "odpt:Station:Keikyu.HanedaAirportTerminal1and2",
+        "odpt:Station:Keikyu.HanedaAirportTerminal3",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal1",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal2",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal3"
+      ]
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "羽田機場車站: 前往東京市區的交通方式",
+      "ja": "羽田機場車站: 前往東京市區的交通方式",
+      "en": "羽田機場車站: 前往東京市區的交通方式"
+    },
+    "content": {
+      "zh-TW": "| 交通方式 | 終點 | 時間 | 費用 |\n|----------|------|------|------|\n| 京急線 | 品川 | 約15分鐘 | 約300日圓 |\n| 京急線Airport快特 | 淺草 | 約35分鐘 | 620日圓 |\n| 東京單軌電車 | 濱松町 | 約15分鐘 | 500日圓 |",
+      "ja": "| 交通方式 | 終點 | 時間 | 費用 |\n|----------|------|------|------|\n| 京急線 | 品川 | 約15分鐘 | 約300日圓 |\n| 京急線Airport快特 | 淺草 | 約35分鐘 | 620日圓 |\n| 東京單軌電車 | 濱松町 | 約15分鐘 | 500日圓 |",
+      "en": "| 交通方式 | 終點 | 時間 | 費用 |\n|----------|------|------|------|\n| 京急線 | 品川 | 約15分鐘 | 約300日圓 |\n| 京急線Airport快特 | 淺草 | 約35分鐘 | 620日圓 |\n| 東京單軌電車 | 濱松町 | 約15分鐘 | 500日圓 |"
+    }
+  },
+  {
+    "id": "generated-羽田機場車站-轉乘注意事項-17671822296039wfgq",
+    "trigger": {
+      "station_names_hint": [
+        "羽田機場車站"
+      ],
+      "station_ids": [
+        "odpt:Station:Keikyu.HanedaAirportTerminal1and2",
+        "odpt:Station:Keikyu.HanedaAirportTerminal3",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal1",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal2",
+        "odpt:Station:TokyoMonorail.HanedaAirportTerminal3"
+      ]
+    },
+    "type": "warning",
+    "priority": 80,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "羽田機場車站: 轉乘注意事項",
+      "ja": "羽田機場車站: 轉乘注意事項",
+      "en": "羽田機場車站: 轉乘注意事項"
+    },
+    "content": {
+      "zh-TW": "- 京急線可直通都營淺草線，不換車到淺草\n- 國際線與國內線航廈站不同，注意下車站\n- 單軌電車可在濱松町轉乘JR山手線",
+      "ja": "- 京急線可直通都營淺草線，不換車到淺草\n- 國際線與國內線航廈站不同，注意下車站\n- 單軌電車可在濱松町轉乘JR山手線",
+      "en": "- 京急線可直通都營淺草線，不換車到淺草\n- 國際線與國內線航廈站不同，注意下車站\n- 單軌電車可在濱松町轉乘JR山手線"
+    }
+  },
+  {
+    "id": "generated-轉乘小技巧總整理-顏色識別系統-17671822296039krfl",
+    "trigger": {
+      "station_names_hint": [
+        "轉乘小技巧總整理"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "轉乘小技巧總整理: 顏色識別系統",
+      "ja": "轉乘小技巧總整理: 顏色識別系統",
+      "en": "轉乘小技巧總整理: 顏色識別系統"
+    },
+    "content": {
+      "zh-TW": "- JR系列：長方形標示\n- 東京Metro：圓形標示\n- 都營地下鐵：三角形標示",
+      "ja": "- JR系列：長方形標示\n- 東京Metro：圓形標示\n- 都營地下鐵：三角形標示",
+      "en": "- JR系列：長方形標示\n- 東京Metro：圓形標示\n- 都營地下鐵：三角形標示"
+    }
+  },
+  {
+    "id": "generated-轉乘小技巧總整理-常見路線顏色-17671822296037pkvs",
+    "trigger": {
+      "station_names_hint": [
+        "轉乘小技巧總整理"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "轉乘小技巧總整理: 常見路線顏色",
+      "ja": "轉乘小技巧總整理: 常見路線顏色",
+      "en": "轉乘小技巧總整理: 常見路線顏色"
+    },
+    "content": {
+      "zh-TW": "| 路線 | 顏色 | 標示代號 |\n|------|------|----------|\n| 銀座線 | 橙色 | G |\n| 丸之內線 | 紅色 | M |\n| 日比谷線 | 銀色 | H |\n| 都營淺草線 | 朱紅色 | A |\n| 山手線 | 綠色 | JY |\n| 中央線 | 橙色 | JC |",
+      "ja": "| 路線 | 顏色 | 標示代號 |\n|------|------|----------|\n| 銀座線 | 橙色 | G |\n| 丸之內線 | 紅色 | M |\n| 日比谷線 | 銀色 | H |\n| 都營淺草線 | 朱紅色 | A |\n| 山手線 | 綠色 | JY |\n| 中央線 | 橙色 | JC |",
+      "en": "| 路線 | 顏色 | 標示代號 |\n|------|------|----------|\n| 銀座線 | 橙色 | G |\n| 丸之內線 | 紅色 | M |\n| 日比谷線 | 銀色 | H |\n| 都營淺草線 | 朱紅色 | A |\n| 山手線 | 綠色 | JY |\n| 中央線 | 橙色 | JC |"
+    }
+  },
+  {
+    "id": "generated-轉乘小技巧總整理-大型行李注意事項-1767182229603k35au",
+    "trigger": {
+      "station_names_hint": [
+        "轉乘小技巧總整理"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "轉乘小技巧總整理: 大型行李注意事項",
+      "ja": "轉乘小技巧總整理: 大型行李注意事項",
+      "en": "轉乘小技巧總整理: 大型行李注意事項"
+    },
+    "content": {
+      "zh-TW": "- 淺草站都營淺草線只有A2-b出口有電梯\n- 東京車站京葉線轉乘距離很長\n- 新幹線車廂有大型行李專用空間，需預約",
+      "ja": "- 淺草站都營淺草線只有A2-b出口有電梯\n- 東京車站京葉線轉乘距離很長\n- 新幹線車廂有大型行李專用空間，需預約",
+      "en": "- 淺草站都營淺草線只有A2-b出口有電梯\n- 東京車站京葉線轉乘距離很長\n- 新幹線車廂有大型行李專用空間，需預約"
+    }
+  },
+  {
+    "id": "generated-轉乘小技巧總整理-購票建議-17671822296030hh03",
+    "trigger": {
+      "station_names_hint": [
+        "轉乘小技巧總整理"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "轉乘小技巧總整理: 購票建議",
+      "ja": "轉乘小技巧總整理: 購票建議",
+      "en": "轉乘小技巧總整理: 購票建議"
+    },
+    "content": {
+      "zh-TW": "- 使用Suica/PASMO可搭乘所有路線\n- 觀光客推薦購買東京Metro一日券（900日圓）\n- JR山手線沿線推薦購買JR一日券",
+      "ja": "- 使用Suica/PASMO可搭乘所有路線\n- 觀光客推薦購買東京Metro一日券（900日圓）\n- JR山手線沿線推薦購買JR一日券",
+      "en": "- 使用Suica/PASMO可搭乘所有路線\n- 觀光客推薦購買東京Metro一日券（900日圓）\n- JR山手線沿線推薦購買JR一日券"
+    }
+  },
+  {
+    "id": "generated-轉乘小技巧總整理-購票建議-17671822296034fd2n",
+    "trigger": {
+      "station_names_hint": [
+        "轉乘小技巧總整理"
+      ],
+      "station_ids": []
+    },
+    "type": "tip",
+    "priority": 50,
+    "icon": "💡",
+    "title": {
+      "zh-TW": "轉乘小技巧總整理: 購票建議",
+      "ja": "轉乘小技巧總整理: 購票建議",
+      "en": "轉乘小技巧總整理: 購票建議"
+    },
+    "content": {
+      "zh-TW": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於BambiGO東京公共交通AI助手*",
+      "ja": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於BambiGO東京公共交通AI助手*",
+      "en": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於BambiGO東京公共交通AI助手*"
+    }
+  }
+];

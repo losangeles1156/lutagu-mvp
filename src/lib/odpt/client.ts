@@ -46,7 +46,7 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
 
     const res = await fetch(url, {
         next: { revalidate: 3600 }
-    });
+    } as any);
 
     if (!res.ok) {
         const text = await res.text();
@@ -67,6 +67,10 @@ export const odptClient = {
         const params: Record<string, string> = {};
         if (operator) params['odpt:operator'] = operator;
         return fetchOdpt<OdptStation>('odpt:Station', params);
+    },
+
+    getStation: (stationId: string) => {
+        return fetchOdpt<OdptStation>('odpt:Station', { 'owl:sameAs': stationId });
     },
 
     // Note: Timetables are often large, filtering by other params is recommended

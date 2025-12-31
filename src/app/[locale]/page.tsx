@@ -72,7 +72,6 @@ export default function Home() {
     const [sessionToken, setSessionToken] = useState<string | null>(null);
     const [sessionUserId, setSessionUserId] = useState<string | null>(null);
     const [favoriteNodeIds, setFavoriteNodeIds] = useState<Set<string>>(() => new Set());
-    const [profileSyncMessage, setProfileSyncMessage] = useState<string | null>(null);
 
     const ensuredProfileUserIdRef = useRef<string | null>(null);
 
@@ -169,35 +168,9 @@ export default function Home() {
         };
     }, [sessionToken, sessionUserId]);
 
-    async function syncProfileNow() {
-        setProfileSyncMessage(null);
-        if (!sessionToken) {
-            setProfileSyncMessage('尚未取得登入憑證，請重新登入後再試一次');
-            return;
-        }
 
-        try {
-            const res = await fetch('/api/me', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${sessionToken}`
-                }
-            });
-
-            if (!res.ok) {
-                const text = await res.text().catch(() => '');
-                setProfileSyncMessage(`同步失敗（${res.status}）${text ? `：${text}` : ''}`);
-                return;
-            }
-
-            setProfileSyncMessage('同步成功：member_profiles 已嘗試建立/讀取');
-        } catch (e: any) {
-            setProfileSyncMessage(e?.message || '同步失敗');
-        }
-    }
 
     async function handleLogout() {
-        setProfileSyncMessage(null);
         setOnboardingSeenVersion(ONBOARDING_VERSION);
         setIsOnboardingOpen(false);
         setChatOpen(false);
@@ -408,22 +381,6 @@ export default function Home() {
                                     <>
                                         <div className="mt-4 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-600">
                                             已登入：{sessionEmail}
-                                        </div>
-
-                                        <div className="mt-3 grid gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={syncProfileNow}
-                                                className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-xs hover:bg-slate-50 disabled:opacity-60"
-                                                disabled={!sessionToken}
-                                            >
-                                                同步會員資料（建立 member_profiles）
-                                            </button>
-                                            {profileSyncMessage && (
-                                                <div className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] font-bold text-slate-600 break-words">
-                                                    {profileSyncMessage}
-                                                </div>
-                                            )}
                                         </div>
 
                                         <div className="mt-3 px-4 py-3 rounded-2xl bg-white border border-slate-200">

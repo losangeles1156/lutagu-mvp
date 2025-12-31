@@ -1,4 +1,5 @@
 import { ExpertKnowledge } from '../types/lutagu_l4';
+import { GENERATED_KNOWLEDGE } from './station_wisdom_generated';
 
 /**
  * LUTAGU V3.0 Expert Knowledge Base
@@ -123,7 +124,8 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
             ja: '雷門前は出場専用になります。帰りの乗車はA4入口からがスムーズです。',
             en: 'Kaminarimon gate is exit-only during New Year. Use Exit A4 to enter the station and avoid queues.',
         },
-    }
+    },
+    ...(GENERATED_KNOWLEDGE as any as ExpertKnowledge[])
 ];
 
 // ==========================================
