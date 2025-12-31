@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/security/supabaseAuth';
 
+async function fetchMemberProfile(rls: any, userId: string) {
+    const withDisplayName = await rls
+        .from('member_profiles')
+        .select('user_id, display_name, role, created_at, updated_at, deleted_at')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (!withDisplayName.error) return withDisplayName;
+
+    const msg = (withDisplayName.error as any)?.message || String(withDisplayName.error);
+    const looksLikeMissingColumn = msg.includes("Could not find the 'display_name' column") || msg.includes('display_name');
+    if (!looksLikeMissingColumn) return withDisplayName;
+
+    const withoutDisplayName = await rls
+        .from('member_profiles')
+        .select('user_id, role, created_at, updated_at, deleted_at')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    return withoutDisplayName;
+}
+
 function pickDisplayName(params: { email: string | null; userMetadata: any }) {
     const { email, userMetadata } = params;
     const fromMeta =
@@ -19,25 +41,23 @@ export async function GET(req: NextRequest) {
     const auth = await requireUser(req);
     if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: auth.status });
 
-    const { data: profile, error } = await auth.rls
-        .from('member_profiles')
-        .select('user_id, display_name, role, created_at, updated_at, deleted_at')
-        .eq('user_id', auth.user.id)
-        .maybeSingle();
+    const { data: profile, error } = await fetchMemberProfile(auth.rls, auth.user.id);
 
     if (error) {
         console.error('[api/me] member_profiles select error', error);
         return NextResponse.json({ error: 'Database Error', details: error.message || String(error) }, { status: 500 });
     }
 
-    const safeProfile = profile && !profile.deleted_at ? profile : null;
+    const safeProfile = profile && !(profile as any).deleted_at ? profile : null;
+    const computedDisplayName = pickDisplayName({ email: auth.user.email || null, userMetadata: auth.user.user_metadata });
+    const withComputedName = safeProfile ? { ...safeProfile, display_name: (safeProfile as any).display_name ?? computedDisplayName } : null;
 
     return NextResponse.json({
         user: {
             id: auth.user.id,
             email: auth.user.email || null
         },
-        profile: safeProfile
+        profile: withComputedName
     });
 }
 
@@ -82,15 +102,15 @@ export async function POST(req: NextRequest) {
         }
     }
 
-    const { data: profile, error: profileError } = await auth.rls
-        .from('member_profiles')
-        .select('user_id, display_name, role, created_at, updated_at, deleted_at')
-        .eq('user_id', auth.user.id)
-        .maybeSingle();
+    const { data: profile, error: profileError } = await fetchMemberProfile(auth.rls, auth.user.id);
 
     if (profileError) {
         return NextResponse.json({ error: 'Database Error', details: profileError.message || String(profileError) }, { status: 500 });
     }
+
+    const safeProfile = profile && !(profile as any).deleted_at ? profile : null;
+    const computedDisplayName = pickDisplayName({ email: auth.user.email || null, userMetadata: auth.user.user_metadata });
+    const withComputedName = safeProfile ? { ...safeProfile, display_name: (safeProfile as any).display_name ?? computedDisplayName } : null;
 
     return NextResponse.json({
         ok: true,
@@ -98,6 +118,6 @@ export async function POST(req: NextRequest) {
             id: auth.user.id,
             email: auth.user.email || null
         },
-        profile: profile && !profile.deleted_at ? profile : null
+        profile: withComputedName
     });
 }
