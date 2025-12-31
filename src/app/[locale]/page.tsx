@@ -196,6 +196,22 @@ export default function Home() {
         }
     }
 
+    async function handleLogout() {
+        setProfileSyncMessage(null);
+        setOnboardingSeenVersion(ONBOARDING_VERSION);
+        setIsOnboardingOpen(false);
+        setChatOpen(false);
+        setPendingChat({ input: null });
+        setBottomSheetOpen(false);
+        setCurrentNode(null);
+        setActiveTab('explore');
+        ensuredProfileUserIdRef.current = null;
+        setFavoriteNodeIds(new Set());
+
+        if (!supabase) return;
+        await supabase.auth.signOut();
+    }
+
     useEffect(() => {
         if (!sessionToken) {
             setFavoriteNodeIds(new Set());
@@ -440,10 +456,7 @@ export default function Home() {
                                                 {tViews('me.cta')}
                                             </button>
                                             <button
-                                                onClick={async () => {
-                                                    if (!supabase) return;
-                                                    await supabase.auth.signOut();
-                                                }}
+                                                onClick={handleLogout}
                                                 className="py-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-colors active:scale-[0.99]"
                                             >
                                                 {tProfile('logout')}

@@ -1,26 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/security/supabaseAuth';
 
+function isSchemaCacheMissingColumnError(error: any) {
+    const msg = (error as any)?.message || String(error);
+    return msg.includes('Could not find the') && msg.includes('column') && msg.includes('schema cache');
+}
+
 async function fetchMemberProfile(rls: any, userId: string) {
-    const withDisplayName = await rls
-        .from('member_profiles')
-        .select('user_id, display_name, role, created_at, updated_at, deleted_at')
-        .eq('user_id', userId)
-        .maybeSingle();
+    const attempts: Array<{ key: 'user_id' | 'id'; select: string }> = [
+        { key: 'user_id', select: 'user_id, display_name, role, created_at, updated_at, deleted_at' },
+        { key: 'user_id', select: 'user_id, role, created_at, updated_at, deleted_at' },
+        { key: 'user_id', select: 'user_id, created_at, updated_at, deleted_at' },
+        { key: 'user_id', select: 'user_id' },
+        { key: 'id', select: 'id, display_name, role, created_at, updated_at, deleted_at' },
+        { key: 'id', select: 'id, role, created_at, updated_at, deleted_at' },
+        { key: 'id', select: 'id, created_at, updated_at, deleted_at' },
+        { key: 'id', select: 'id' }
+    ];
 
-    if (!withDisplayName.error) return withDisplayName;
+    let last: any = null;
+    for (const attempt of attempts) {
+        const res = await rls.from('member_profiles').select(attempt.select).eq(attempt.key, userId).maybeSingle();
+        if (!res.error) {
+            last = res;
+            if (res.data) return res;
+            continue;
+        }
 
-    const msg = (withDisplayName.error as any)?.message || String(withDisplayName.error);
-    const looksLikeMissingColumn = msg.includes("Could not find the 'display_name' column") || msg.includes('display_name');
-    if (!looksLikeMissingColumn) return withDisplayName;
+        if (!isSchemaCacheMissingColumnError(res.error)) return res;
+        last = res;
+    }
 
-    const withoutDisplayName = await rls
-        .from('member_profiles')
-        .select('user_id, role, created_at, updated_at, deleted_at')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-    return withoutDisplayName;
+    return last;
 }
 
 function pickDisplayName(params: { email: string | null; userMetadata: any }) {
@@ -67,22 +78,23 @@ export async function POST(req: NextRequest) {
 
     const displayName = pickDisplayName({ email: auth.user.email || null, userMetadata: auth.user.user_metadata });
 
-    const { data: existing, error: existingError } = await auth.rls
-        .from('member_profiles')
-        .select('user_id')
-        .eq('user_id', auth.user.id)
-        .limit(1);
-
+    const { data: existingProfile, error: existingError } = await fetchMemberProfile(auth.rls, auth.user.id);
     if (existingError) {
         console.error('[api/me] member_profiles select error', existingError);
         return NextResponse.json({ error: 'Database Error', details: existingError.message || String(existingError) }, { status: 500 });
     }
 
-    if (!existing || existing.length === 0) {
+    if (!existingProfile) {
         const insertAttempts: Array<Record<string, any>> = [
-            { user_id: auth.user.id, display_name: displayName, role: 'member' },
+            { user_id: auth.user.id },
+            { id: auth.user.id },
+            { id: auth.user.id, user_id: auth.user.id },
             { user_id: auth.user.id, role: 'member' },
+            { id: auth.user.id, role: 'member' },
             { id: auth.user.id, user_id: auth.user.id, role: 'member' },
+            { user_id: auth.user.id, display_name: displayName },
+            { id: auth.user.id, user_id: auth.user.id, display_name: displayName },
+            { user_id: auth.user.id, display_name: displayName, role: 'member' },
             { id: auth.user.id, user_id: auth.user.id, display_name: displayName, role: 'member' }
         ];
 
