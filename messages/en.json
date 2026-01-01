@@ -182,6 +182,7 @@
         "nearbyHighlights": "Highlights (300m)",
         "menuTitle": "Category Details",
         "navTo": "Nav",
+        "items": "Items",
         "categories": {
             "shopping": "Shopping",
             "dining": "Dining",
@@ -250,6 +251,7 @@
         "rent": "Rent",
         "available": "Available",
         "quickLinks": "Quick Links",
+        "items": "Items",
         "categories": {
             "toilet": "Restroom",
             "locker": "Lockers",

@@ -23,8 +23,8 @@ export class PedestrianAccessibilityTool implements ITool {
         try {
             // 1. Try Optimized RPC Call (Best Performance)
             const { data: rpcData, error: rpcError } = await supabase.rpc('get_nearby_accessibility_graph', {
-                lat,
-                lon,
+                query_lat: lat,
+                query_lon: lon,
                 radius_meters: radius
             });
 
