@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { UserPreferences } from '@/types/lutagu_l4';
-import { Info, AlertTriangle, Lightbulb, MapPin, ChevronRight, HelpCircle } from 'lucide-react';
+import { Info, AlertTriangle, Lightbulb, MapPin, ChevronRight, HelpCircle, Navigation, Train, Clock, Coins } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 
 // Types for Card response (Mirroring API response)
@@ -18,6 +18,35 @@ interface ActionCard {
     actionLabel?: string;
     actionUrl?: string;
     _debug_reason?: string;
+}
+
+// Route planning types
+interface RouteSegment {
+    from: string;
+    to: string;
+    line: string;
+    lineColor?: string;
+    duration: number;
+    transfer?: boolean;
+}
+
+interface RouteOption {
+    id: string;
+    type: 'primary' | 'alternative';
+    segments: RouteSegment[];
+    totalDuration: number;
+    totalFare: number;
+    transferCount: number;
+    priority: number;
+    tags: string[];
+    warnings: string[];
+    tips: string[];
+}
+
+interface RouteResponse {
+    routes: RouteOption[];
+    contextAlerts: string[];
+    expertTips: string[];
 }
 
 interface L4DashboardProps {
@@ -36,6 +65,13 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
 
     const [cards, setCards] = useState<ActionCard[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Route Planning State
+    const [destination, setDestination] = useState<string>('');
+    const [destinationId, setDestinationId] = useState<string>('');
+    const [routeData, setRouteData] = useState<RouteResponse | null>(null);
+    const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+    const [showRoutes, setShowRoutes] = useState(false);
 
     // 2. Fetch Logic
     const fetchRecommendations = useCallback(async () => {
@@ -66,6 +102,41 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
         fetchRecommendations();
     }, [fetchRecommendations]);
 
+    // Fetch route suggestions
+    const fetchRoute = useCallback(async () => {
+        if (!destinationId) return;
+
+        setIsLoadingRoute(true);
+        setShowRoutes(true);
+
+        try {
+            const res = await fetch('/api/l4/route', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    from: currentNodeId,
+                    to: destinationId,
+                    userPreferences: preferences,
+                    locale
+                })
+            });
+
+            const data: RouteResponse = await res.json();
+            setRouteData(data);
+        } catch (error) {
+            console.error('Failed to fetch route:', error);
+        } finally {
+            setIsLoadingRoute(false);
+        }
+    }, [currentNodeId, destinationId, preferences, locale]);
+
+    // Popular destinations (Quick access)
+    const popularDestinations = [
+        { name: locale === 'zh-TW' ? '淺草' : locale === 'ja' ? '浅草' : 'Asakusa', id: 'odpt:Station:TokyoMetro.Asakusa' },
+        { name: locale === 'zh-TW' ? '東京站' : locale === 'ja' ? '東京駅' : 'Tokyo Station', id: 'odpt:Station:JR-East.Tokyo' },
+        { name: locale === 'zh-TW' ? '新宿' : locale === 'ja' ? '新宿' : 'Shinjuku', id: 'odpt:Station:JR-East.Shinjuku' },
+        { name: locale === 'zh-TW' ? '涉谷' : locale === 'ja' ? '渋谷' : 'Shibuya', id: 'odpt:Station:JR-East.Shibuya' }
+    ];
 
     // 3. UI Helpers
     const togglePreference = <C extends keyof UserPreferences>(category: C, key: keyof UserPreferences[C]) => {
@@ -91,15 +162,145 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                 </div>
                 <div className="flex flex-wrap gap-2">
                     {/* Luggage Group */}
-                    <Chip label="🧳 大葉行李" active={preferences.luggage.large_luggage} onClick={() => togglePreference('luggage', 'large_luggage')} />
+                    <Chip label="🧳 大行李" active={preferences.luggage.large_luggage} onClick={() => togglePreference('luggage', 'large_luggage')} />
                     <Chip label="👶 嬰兒車" active={preferences.accessibility.stroller} onClick={() => togglePreference('accessibility', 'stroller')} />
                     <Chip label="🦽 輪椅" active={preferences.accessibility.wheelchair} onClick={() => togglePreference('accessibility', 'wheelchair')} />
                     <Chip label="⏰ 趕時間" active={preferences.travel_style.rushing} onClick={() => togglePreference('travel_style', 'rushing')} />
                     <Chip label="💰 省錢" active={preferences.travel_style.budget} onClick={() => togglePreference('travel_style', 'budget')} />
+                    <Chip label="🌧️ 避雨" active={preferences.travel_style.avoid_rain} onClick={() => togglePreference('travel_style', 'avoid_rain')} />
                 </div>
             </div>
 
-            {/* Block 2: Result Cards */}
+            {/* Block 2: Route Planning Input */}
+            <div className="bg-white px-4 py-5 shadow-sm border-b border-gray-100 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                    <Navigation size={14} className="text-purple-600" />
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">
+                        {locale === 'zh-TW' ? '前往目的地' : locale === 'ja' ? '目的地へ' : 'Destination'}
+                    </h3>
+                </div>
+
+                {/* Current Station (Read-only) */}
+                <div className="mb-3">
+                    <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                        {locale === 'zh-TW' ? '從' : locale === 'ja' ? 'から' : 'From'}
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="flex items-center gap-2">
+                            <MapPin size={16} className="text-indigo-600" />
+                            <span className="text-sm font-bold text-gray-900">
+                                {currentNodeId.split('.').pop()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Destination Input */}
+                <div className="mb-3">
+                    <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                        {locale === 'zh-TW' ? '到' : locale === 'ja' ? 'まで' : 'To'}
+                    </div>
+                    <input
+                        type="text"
+                        placeholder={locale === 'zh-TW' ? '搜尋車站、地標...' : locale === 'ja' ? '駅・ランドマークを検索' : 'Search station, landmark...'}
+                        value={destination}
+                        onChange={(e) => setDestination(e.target.value)}
+                        className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+                    />
+                </div>
+
+                {/* Popular Destinations */}
+                <div className="mb-3">
+                    <div className="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">
+                        {locale === 'zh-TW' ? '熱門' : locale === 'ja' ? '人気' : 'Popular'}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {popularDestinations.map((dest) => (
+                            <button
+                                key={dest.id}
+                                onClick={() => {
+                                    setDestination(dest.name);
+                                    setDestinationId(dest.id);
+                                }}
+                                className="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-bold text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-all"
+                            >
+                                {dest.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Get Route Button */}
+                <button
+                    onClick={fetchRoute}
+                    disabled={!destinationId || isLoadingRoute}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-sm tracking-wide hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                    🦌 {locale === 'zh-TW' ? '獲取建議' : locale === 'ja' ? 'おすすめを取得' : 'Get Suggestions'}
+                </button>
+            </div>
+
+            {/* Block 3: Context Alerts (if route is shown) */}
+            {showRoutes && routeData && routeData.contextAlerts.length > 0 && (
+                <div className="px-4 mb-4">
+                    <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <AlertTriangle size={16} className="text-rose-600" />
+                            <h4 className="text-xs font-black text-rose-700 uppercase tracking-wider">
+                                {locale === 'zh-TW' ? '即時提醒' : locale === 'ja' ? 'リアルタイム情報' : 'Live Alerts'}
+                            </h4>
+                        </div>
+                        <div className="space-y-1">
+                            {routeData.contextAlerts.map((alert, idx) => (
+                                <p key={idx} className="text-xs text-rose-700 font-medium">{alert}</p>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Block 4: Route Options */}
+            {showRoutes && (
+                <div className="px-4 mb-4">
+                    {isLoadingRoute ? (
+                        <div className="space-y-3">
+                            <div className="h-40 bg-white rounded-2xl animate-pulse" />
+                            <div className="h-32 bg-white rounded-2xl animate-pulse" />
+                        </div>
+                    ) : routeData && routeData.routes.length > 0 ? (
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Train size={14} className="text-indigo-600" />
+                                <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest">
+                                    {locale === 'zh-TW' ? '推薦路線' : locale === 'ja' ? 'おすすめルート' : 'Recommended Routes'}
+                                </h4>
+                            </div>
+                            {routeData.routes.map((route, idx) => (
+                                <RouteCard key={route.id} route={route} isPrimary={idx === 0} locale={locale} />
+                            ))}
+
+                            {/* Expert Tips */}
+                            {routeData.expertTips.length > 0 && (
+                                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mt-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Lightbulb size={16} className="text-amber-600" />
+                                        <h4 className="text-xs font-black text-amber-700 uppercase tracking-wider">
+                                            {locale === 'zh-TW' ? '專家知識' : locale === 'ja' ? 'エキスパート情報' : 'Expert Tips'}
+                                        </h4>
+                                    </div>
+                                    <div className="space-y-1">
+                                        {routeData.expertTips.map((tip, idx) => (
+                                            <p key={idx} className="text-xs text-amber-700 font-medium">{tip}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : null}
+                </div>
+            )}
+
+            {/* Block 5: General Recommendation Cards */}
             <div className="flex-1 px-4 py-2 space-y-4">
                 {isLoading ? (
                     <div className="space-y-4 pt-4">
@@ -133,6 +334,120 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
         >
             {label}
         </button>
+    );
+}
+
+// Route Card Component
+function RouteCard({ route, isPrimary, locale }: { route: RouteOption, isPrimary: boolean, locale: string }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <div className={`relative rounded-2xl border overflow-hidden transition-all ${
+            isPrimary
+                ? 'border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50'
+                : 'border-gray-100 bg-white'
+        }`}>
+            {/* Header */}
+            <div className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                            {isPrimary && (
+                                <span className="px-2 py-0.5 bg-indigo-600 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
+                                    {locale === 'zh-TW' ? '推薦' : locale === 'ja' ? 'おすすめ' : 'Recommended'}
+                                </span>
+                            )}
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500">
+                                <Clock size={12} />
+                                <span>{route.totalDuration} min</span>
+                                <span>•</span>
+                                <Coins size={12} />
+                                <span>¥{route.totalFare}</span>
+                            </div>
+                        </div>
+
+                        {/* Route Summary */}
+                        <div className="flex items-center gap-2 text-sm font-black text-gray-900">
+                            {route.segments.map((seg, idx) => (
+                                <React.Fragment key={idx}>
+                                    {idx > 0 && <ChevronRight size={14} className="text-gray-300" />}
+                                    <span>{seg.to}</span>
+                                </React.Fragment>
+                            ))}
+                        </div>
+
+                        {/* Tags */}
+                        {route.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                {route.tags.map((tag, idx) => (
+                                    <span key={idx} className="px-2 py-0.5 bg-white border border-indigo-100 text-indigo-700 text-[9px] font-bold rounded-md">
+                                        {tag === 'fastest' && (locale === 'zh-TW' ? '最快' : locale === 'ja' ? '最速' : 'Fastest')}
+                                        {tag === 'direct' && (locale === 'zh-TW' ? '直達' : locale === 'ja' ? '直通' : 'Direct')}
+                                        {tag === 'wheelchair_accessible' && '♿ ' + (locale === 'zh-TW' ? '無障礙' : locale === 'ja' ? 'バリアフリー' : 'Accessible')}
+                                        {tag === 'elevator_available' && '🛗'}
+                                        {tag === 'cheapest' && (locale === 'zh-TW' ? '最便宜' : locale === 'ja' ? '最安' : 'Cheapest')}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="ml-2 p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-all"
+                    >
+                        <ChevronRight
+                            size={16}
+                            className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                        />
+                    </button>
+                </div>
+
+                {/* Warnings */}
+                {route.warnings.length > 0 && (
+                    <div className="mb-2 p-2 bg-amber-50 border border-amber-100 rounded-lg">
+                        {route.warnings.map((warning, idx) => (
+                            <p key={idx} className="text-[10px] text-amber-700 font-medium">⚠️ {warning}</p>
+                        ))}
+                    </div>
+                )}
+
+                {/* Expanded Details */}
+                {isExpanded && (
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="space-y-3">
+                            {route.segments.map((seg, idx) => (
+                                <div key={idx} className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: seg.lineColor || '#999' }}>
+                                        <Train size={16} className="text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-black text-gray-900">{seg.line}</p>
+                                        <p className="text-[10px] text-gray-500 font-medium">
+                                            {seg.from} → {seg.to} ({seg.duration} min)
+                                        </p>
+                                        {seg.transfer && (
+                                            <span className="inline-block mt-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-[9px] font-bold rounded-md">
+                                                {locale === 'zh-TW' ? '轉乘' : locale === 'ja' ? '乗り換え' : 'Transfer'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Tips */}
+                        {route.tips.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                                {route.tips.map((tip, idx) => (
+                                    <p key={idx} className="text-[10px] text-indigo-700 font-medium mb-1">💡 {tip}</p>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }
 

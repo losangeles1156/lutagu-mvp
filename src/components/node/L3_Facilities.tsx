@@ -59,6 +59,53 @@ const FACILITY_COLORS: Record<FacilityType | string, string> = {
 
 import { FacilityDetailModal } from '@/components/ui/FacilityDetailModal';
 
+// Facility Priority Order (Accessibility First!)
+const FACILITY_PRIORITY: Record<string, number> = {
+    // 【無障礙設施】⭐ Highest Priority
+    'elevator': 1,
+    'Barrier_free_entrance': 2,
+    'Escalator': 3,
+
+    // 【親子設施】
+    'nursery': 10,
+    'Baby': 11,
+
+    // 【衛生設施】
+    'toilet': 20,
+    'Toilet': 20,
+
+    // 【服務設施】
+    'info': 30,
+    'Info': 30,
+    'Ticket_gate': 31,
+    'locker': 32,
+    'Locker': 32,
+    'atm': 33,
+    'ATM': 33,
+    'Waiting_area': 34,
+    'Shop': 35,
+    'shopping': 35,
+
+    // 【其他設施】
+    'charging': 40,
+    'wifi': 41,
+    'Wifi': 41,
+    'bike': 42,
+    'bikeshare': 42,
+    'Bike': 42,
+    'smoking': 43,
+    'Cigarette': 43,
+    'Stairs': 44,
+
+    // 【類別設施】
+    'dining': 50,
+    'leisure': 51,
+    'transport': 52,
+    'religion': 53,
+    'nature': 54,
+    'accommodation': 55,
+};
+
 interface L3_FacilitiesProps {
     data: StationUIProfile;
 }
@@ -102,14 +149,22 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
         }
     };
 
-    // Group facilities by type
+    // Group facilities by type with priority sorting
     const groupedFacilities = useMemo(() => {
         const groups: Record<string, L3Facility[]> = {};
         facilities.forEach(fac => {
             if (!groups[fac.type]) groups[fac.type] = [];
             groups[fac.type].push(fac);
         });
-        return groups;
+
+        // Sort groups by priority (Accessibility First!)
+        const sortedEntries = Object.entries(groups).sort(([typeA], [typeB]) => {
+            const priorityA = FACILITY_PRIORITY[typeA] ?? 999;
+            const priorityB = FACILITY_PRIORITY[typeB] ?? 999;
+            return priorityA - priorityB;
+        });
+
+        return Object.fromEntries(sortedEntries);
     }, [facilities]);
 
     // Set initial expanded category (first one)
@@ -294,6 +349,9 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                     const colorClass = FACILITY_COLORS[type] || 'bg-gray-100 text-gray-600';
                     const label = tL3(`categories.${type}`) !== `l3.categories.${type}` ? tL3(`categories.${type}`) : type;
 
+                    // Check if this is a high-priority accessibility facility
+                    const isAccessibility = (FACILITY_PRIORITY[type] ?? 999) <= 3;
+
                     return (
                         <div key={type} className="bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 shadow-sm">
 
@@ -307,7 +365,14 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                         <Icon size={24} aria-hidden="true" strokeWidth={2.5} />
                                     </div>
                                     <div className="text-left">
-                                        <h4 className="text-sm font-extrabold text-gray-900 capitalize tracking-tight">{label}</h4>
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="text-sm font-extrabold text-gray-900 capitalize tracking-tight">{label}</h4>
+                                            {isAccessibility && (
+                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-cyan-100 text-cyan-700 text-[9px] font-black uppercase tracking-wider">
+                                                    ♿ {locale === 'zh-TW' ? '優先' : locale === 'ja' ? '優先' : 'Priority'}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="flex items-center gap-2 mt-0.5">
                                             <span className="text-[10px] text-gray-500 font-bold bg-white px-1.5 py-0.5 rounded-md border border-gray-100 shadow-sm">
                                                 {items.length} {tL3('items', { defaultValue: 'Items' })}
