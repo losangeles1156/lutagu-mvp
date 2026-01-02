@@ -53,11 +53,11 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
         return {
             lines: (source.line_status || []).map((l: any, idx: number) => ({
                 id: `line-${idx}`,
-                name: getLocaleString(l.name, locale) || l.line || l.name,
+                name: l.name,  // Already a LocaleString object
                 operator: l.operator || 'Metro',
                 color: l.color || '#999999',
                 status: l.status || 'normal',
-                message: getLocaleString(l.message, locale)
+                message: l.message  // Already a LocaleString object or undefined
             })),
             weather: {
                 temp: source.weather?.temp || 0,

@@ -136,7 +136,6 @@ export async function GET(request: Request) {
                     : undefined;
 
                 return {
-                    line: lineDef.name.en,
                     name: lineDef.name,
                     operator: lineDef.operator,
                     color: lineDef.color,
@@ -155,7 +154,6 @@ export async function GET(request: Request) {
                 : undefined;
 
             return {
-                line: lineDef.name.en,
                 name: lineDef.name,
                 operator: lineDef.operator,
                 color: lineDef.color,

@@ -101,9 +101,11 @@ export interface CategoryCounts {
 export interface LiveStatus {
     congestion: number; // 1-5
     line_status: {
-        line: string;
+        name: LocaleString;
+        operator: 'Metro' | 'Toei' | 'JR' | 'Private' | 'Other';
+        color: string;
         status: 'normal' | 'delay' | 'suspended';
-        message?: string;
+        message?: LocaleString;
     }[];
     weather: {
         temp: number;
@@ -700,7 +702,6 @@ export async function fetchNodeConfig(nodeId: string) {
     enrichedProfile.l2_status = {
         congestion: 2,
         line_status: servedLines.map(line => ({
-            line: line.name.en,
             name: line.name,
             operator: line.operator,
             color: line.color,
@@ -751,12 +752,13 @@ export async function fetchNodeConfig(nodeId: string) {
                 enrichedProfile.l2_status = {
                     congestion: isStationDelay ? 4 : (l2Data.crowd_level || 2),
                     line_status: servedLines.map(line => ({
-                        line: line.name.en,
                         name: line.name,
                         operator: line.operator,
                         color: line.color,
                         status: isStationDelay ? 'delay' : 'normal',
-                        message: isStationDelay ? l2Data.reason_ja : undefined
+                        message: isStationDelay
+                            ? { ja: l2Data.reason_ja || '', en: l2Data.message || 'Delay', zh: l2Data.reason_zh_tw || '' }
+                            : undefined
                     })),
                     weather: {
                         temp: l2Data.weather_info?.temp || 0,
