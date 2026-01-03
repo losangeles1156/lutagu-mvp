@@ -163,8 +163,10 @@ export async function fetchNearbyNodes(lat: number, lon: number, radiusMeters: n
             return getFallbackNearbyNodes(lat, lon);
         }
 
-        // Enforce Multilingual Names & Polyfill is_hub
-        return (data || []).map((n: any) => enrichNodeData(normalizeNodeRow(n)));
+        // FIXED: Filter out child nodes - only return parent hubs and independent stations
+        return (data || [])
+            .filter((n: any) => !n.parent_hub_id)
+            .map((n: any) => enrichNodeData(normalizeNodeRow(n)));
     } catch (err) {
         console.warn('[fetchNearbyNodes] Using fallback due to error:', err);
         return getFallbackNearbyNodes(lat, lon);
@@ -172,12 +174,17 @@ export async function fetchNearbyNodes(lat: number, lon: number, radiusMeters: n
 }
 
 function getFallbackNearbyNodes(lat: number, lon: number) {
-    return CORE_STATIONS_FALLBACK.filter(node => {
-        const nodeLat = node.location.coordinates[1];
-        const nodeLon = node.location.coordinates[0];
-        // Simple rough distance check for fallback (approx 0.01 deg ~= 1km)
-        return Math.abs(nodeLat - lat) < 0.05 && Math.abs(nodeLon - lon) < 0.05;
-    }).map(n => enrichNodeData(n));
+    return CORE_STATIONS_FALLBACK
+        .filter(node => {
+            // FIXED: Filter out child nodes (nodes with parent_hub_id)
+            if ((node as any).parent_hub_id) return false;
+
+            const nodeLat = node.location.coordinates[1];
+            const nodeLon = node.location.coordinates[0];
+            // Simple rough distance check for fallback (approx 0.01 deg ~= 1km)
+            return Math.abs(nodeLat - lat) < 0.05 && Math.abs(nodeLon - lon) < 0.05;
+        })
+        .map(n => enrichNodeData(n));
 }
 
 function enrichNodeData(n: any) {
@@ -825,32 +832,35 @@ export async function fetchAllNodes() {
 
     if (error) {
         console.error('Error fetching nodes from RPC, using hardcoded fallback:', error);
-        return CORE_STATIONS_FALLBACK.map(n => {
-            let mapDesign = undefined;
-            let tier = undefined;
+        // FIXED: Filter out child nodes from fallback data
+        return CORE_STATIONS_FALLBACK
+            .filter(n => !(n as any).parent_hub_id) // Only parent hubs and independent stations
+            .map(n => {
+                let mapDesign = undefined;
+                let tier = undefined;
 
-            if (n.id.includes('Ueno')) {
-                tier = 'major';
-                mapDesign = { icon: 'park', color: '#F39700' };
-            } else if (n.id.includes('Tokyo')) {
-                tier = 'major';
-                mapDesign = { icon: 'red_brick', color: '#E25822' };
-            } else if (n.id.includes('Akihabara')) {
-                tier = 'major';
-                mapDesign = { icon: 'electric', color: '#FFE600' };
-            } else if (n.id.includes('Asakusa') && !n.id.includes('bashi')) {
-                tier = 'major';
-                mapDesign = { icon: 'lantern', color: '#D32F2F' };
-            }
+                if (n.id.includes('Ueno')) {
+                    tier = 'major';
+                    mapDesign = { icon: 'park', color: '#F39700' };
+                } else if (n.id.includes('Tokyo')) {
+                    tier = 'major';
+                    mapDesign = { icon: 'red_brick', color: '#E25822' };
+                } else if (n.id.includes('Akihabara')) {
+                    tier = 'major';
+                    mapDesign = { icon: 'electric', color: '#FFE600' };
+                } else if (n.id.includes('Asakusa') && !n.id.includes('bashi')) {
+                    tier = 'major';
+                    mapDesign = { icon: 'lantern', color: '#D32F2F' };
+                }
 
-            return {
-                ...n,
-                location: parseLocation(n.location),
-                tier,
-                mapDesign,
-                is_hub: !(n as any).parent_hub_id
-            };
-        }) as any[];
+                return {
+                    ...n,
+                    location: parseLocation(n.location),
+                    tier,
+                    mapDesign,
+                    is_hub: true // All remaining nodes are parents/independent
+                };
+            }) as any[];
     }
 
     // [New] Fetch Real-time L2 Data for ALL nodes efficiently
@@ -887,48 +897,51 @@ export async function fetchAllNodes() {
         ODPT_TO_NODE[odptId] = nodeId;
     });
 
-    return (data as any[] || []).filter(Boolean).map(n => {
-        const seed = SEED_NODES.find(s => s.id === n.id);
+    // FIXED: Filter out child nodes - only show parent hubs and independent stations
+    return (data as any[] || [])
+        .filter(n => Boolean(n) && !n.parent_hub_id)
+        .map(n => {
+            const seed = SEED_NODES.find(s => s.id === n.id);
 
-        // Try to find L2 data using:
-        // 1. Direct ID match (if n.id is the logical ID)
-        // 2. Reverse Mapped ID (if n.id is the physical ODPT ID)
-        const logicalId = (n?.id && ODPT_TO_NODE[n.id]) || n?.id;
-        const l2 = l2Map[logicalId];
+            // Try to find L2 data using:
+            // 1. Direct ID match (if n.id is the logical ID)
+            // 2. Reverse Mapped ID (if n.id is the physical ODPT ID)
+            const logicalId = (n?.id && ODPT_TO_NODE[n.id]) || n?.id;
+            const l2 = l2Map[logicalId];
 
-        // Custom Map Design Overrides (Hardcoded for UI Consistency)
-        let mapDesign = undefined;
-        let tier = undefined;
+            // Custom Map Design Overrides (Hardcoded for UI Consistency)
+            let mapDesign = undefined;
+            let tier = undefined;
 
-        if (n?.id?.includes('Ueno')) {
-            tier = 'major';
-            mapDesign = { icon: 'park', color: '#F39700' };
-        } else if (n?.id?.includes('Tokyo')) {
-            tier = 'major';
-            mapDesign = { icon: 'red_brick', color: '#E25822' }; // Marunouchi Red
-        } else if (n?.id?.includes('Akihabara')) {
-            tier = 'major';
-            mapDesign = { icon: 'electric', color: '#FFE600' }; // Electric Yellow
-        } else if (n?.id?.includes('Asakusa') && !n?.id?.includes('bashi')) { // Exclude Asakusabashi
-            tier = 'major';
-            mapDesign = { icon: 'lantern', color: '#D32F2F' }; // Lantern Red
-        }
-
-        return {
-            ...n,
-            name: seed ? seed.name : n?.name,
-            type: String(n?.type ?? n?.node_type ?? 'station'),
-            location: parseLocation(n?.location ?? n?.coordinates),
-            is_hub: !n.parent_hub_id, // Ensure is_hub is set (V3.0 Logic)
-            tier,
-            mapDesign,
-            // Inject L2 Status into the node object (or facility_profile)
-            facility_profile: {
-                ...(n.facility_profile || {}),
-                l2_status: l2 || null
+            if (n?.id?.includes('Ueno')) {
+                tier = 'major';
+                mapDesign = { icon: 'park', color: '#F39700' };
+            } else if (n?.id?.includes('Tokyo')) {
+                tier = 'major';
+                mapDesign = { icon: 'red_brick', color: '#E25822' }; // Marunouchi Red
+            } else if (n?.id?.includes('Akihabara')) {
+                tier = 'major';
+                mapDesign = { icon: 'electric', color: '#FFE600' }; // Electric Yellow
+            } else if (n?.id?.includes('Asakusa') && !n?.id?.includes('bashi')) { // Exclude Asakusabashi
+                tier = 'major';
+                mapDesign = { icon: 'lantern', color: '#D32F2F' }; // Lantern Red
             }
-        };
-    }) as NodeDatum[];
+
+            return {
+                ...n,
+                name: seed ? seed.name : n?.name,
+                type: String(n?.type ?? n?.node_type ?? 'station'),
+                location: parseLocation(n?.location ?? n?.coordinates),
+                is_hub: true, // All remaining nodes are parents/independent (V3.0 Logic)
+                tier,
+                mapDesign,
+                // Inject L2 Status into the node object (or facility_profile)
+                facility_profile: {
+                    ...(n.facility_profile || {}),
+                    l2_status: l2 || null
+                }
+            };
+        }) as NodeDatum[];
 }
 
 export interface ViewportNodesQuery {

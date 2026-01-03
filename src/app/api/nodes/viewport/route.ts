@@ -163,10 +163,14 @@ export async function GET(req: Request) {
             console.error('[api/nodes/viewport] Unexpected error fetching from Supabase:', err.message);
         }
     }
+    // NEW: Always filter out child nodes (nodes with parent_hub_id)
+    // Only show: 1) Hub nodes (is_hub=true), 2) Independent stations (parent_hub_id=null)
     const filtered = candidates
         .map(n => {
             const location = parseLocation((n as any).location ?? (n as any).coordinates);
-            const isHub = typeof (n as any).is_hub === 'boolean' ? (n as any).is_hub : !(n as any).parent_hub_id;
+            const parentHubId = (n as any).parent_hub_id ?? null;
+            // A node is a hub if: is_hub is explicitly true, OR it has no parent_hub_id
+            const isHub = typeof (n as any).is_hub === 'boolean' ? (n as any).is_hub : !parentHubId;
 
             return {
                 id: String((n as any).id ?? ''),
@@ -177,7 +181,7 @@ export async function GET(req: Request) {
                 geohash: String((n as any).geohash ?? ''),
                 vibe: (n as any).vibe ?? null,
                 is_hub: isHub,
-                parent_hub_id: (n as any).parent_hub_id ?? null,
+                parent_hub_id: parentHubId,
                 zone: String((n as any).zone ?? 'core')
             };
         })
@@ -186,7 +190,9 @@ export async function GET(req: Request) {
             if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
             if (lat === 0 && lon === 0) return false;
             if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
-            if (hubsOnly && !n.is_hub) return false;
+            // FIXED: Always filter out child nodes (nodes with parent_hub_id)
+            // This ensures only parent hubs and independent stations are shown on the map
+            if (n.parent_hub_id) return false;
             return true;
         })
         .sort((a, b) => {

@@ -79,6 +79,9 @@ function viewportStepForZoom(zoom: number) {
     return 0.2;
 }
 
+// Cache version - increment this to invalidate all cached data when node display logic changes
+const CACHE_VERSION = 'v2';
+
 function buildViewportKey(input: { swLat: number; swLon: number; neLat: number; neLon: number; zoom: number; hubsOnly: boolean }) {
     const step = viewportStepForZoom(input.zoom);
     const swLat = roundToStep(input.swLat, step);
@@ -86,7 +89,8 @@ function buildViewportKey(input: { swLat: number; swLon: number; neLat: number; 
     const neLat = roundToStep(input.neLat, step);
     const neLon = roundToStep(input.neLon, step);
     const zBucket = input.zoom < 11 ? 10 : input.zoom < 14 ? 13 : input.zoom;
-    return `${zBucket}:${input.hubsOnly ? 1 : 0}:${swLat},${swLon},${neLat},${neLon}`;
+    // Include cache version to invalidate old cache when display logic changes
+    return `${CACHE_VERSION}:${zBucket}:${input.hubsOnly ? 1 : 0}:${swLat},${swLon},${neLat},${neLon}`;
 }
 
 function dedupeNodesById(nodes: NodeDatum[]) {
@@ -343,38 +347,15 @@ function ClusteredNodeLayer({ nodes, zone, locale }: { nodes: NodeDatum[]; zone:
     const items = useMemo<ClusterItem[]>(() => {
         if (!groups || groups.length === 0) return [];
 
-        // High Zoom (16+): Show everything individually (no clustering)
-        if (clampedZoom >= 16) {
-            const allItems: ClusterItem[] = [];
-            groups.forEach(group => {
-                // Add the parent (hub)
-                allItems.push({ kind: 'node', node: { ...group, children: [] } }); // Render parent as standalone
-                // Add all children
-                if (group.children) {
-                    group.children.forEach(child => {
-                        allItems.push({ kind: 'node', node: child as GroupedNode });
-                    });
-                }
-            });
-            return allItems;
-        }
-
-        // Mid/Low Zoom (< 16): Show only Leaders (Hubs) with badges
+        // FIXED: Only show parent nodes (hubs) and independent stations at ALL zoom levels
+        // Children are never rendered as separate markers - only as badge counts
+        // This ensures clean map display with no overlapping child nodes
         return groups.map(group => {
-            // The group itself is the leader node (determined by groupNodesByProximity)
-            const count = 1 + (group.children?.length || 0);
-
-            // If it's a single node, just show it
-            if (count === 1) {
-                return { kind: 'node', node: group };
-            }
-
-            // If it has children, render it as a "Node with Badge"
-            // We do this by passing the FULL group (with children) to NodeMarker.
-            // NodeMarker needs to handle the badge rendering.
+            // Each group represents a parent hub or independent station
+            // Children are only used for the badge count display, not rendered separately
             return { kind: 'node', node: group };
         });
-    }, [groups, clampedZoom]);
+    }, [groups]);
 
     return (
         <>
