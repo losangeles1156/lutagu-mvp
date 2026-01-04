@@ -69,6 +69,95 @@ function getFallbackNodes() {
     }).filter(n => Boolean(n.id));
 }
 
+// Type definitions for hub metadata
+interface HubMetadata {
+    hub_id: string;
+    transfer_type: string;
+    walking_distance_meters: number | null;
+    indoor_connection_notes: string | null;
+    transfer_complexity: string;
+}
+
+interface HubMember {
+    member_id: string;
+    member_name: any;
+    operator: string;
+    line_name: string | null;
+    transfer_type: string;
+    walking_seconds: number | null;
+    sort_order: number;
+}
+
+interface HubDetails {
+    member_count: number;
+    transfer_type: string;
+    transfer_complexity: string;
+    walking_distance_meters: number | null;
+    indoor_connection_notes: string | null;
+    members: HubMember[];
+}
+
+// Fetch hub metadata from database
+async function fetchHubMetadata(supabase: any, hubIds: string[]): Promise<Map<string, HubMetadata>> {
+    if (hubIds.length === 0) return new Map();
+
+    const { data, error } = await supabase
+        .from('hub_metadata')
+        .select('*')
+        .in('hub_id', hubIds)
+        .eq('is_active', true);
+
+    if (error) {
+        console.warn('[api/nodes/viewport] Failed to fetch hub_metadata:', error.message);
+        return new Map();
+    }
+
+    const map = new Map<string, HubMetadata>();
+    for (const row of (data || [])) {
+        map.set(row.hub_id, {
+            hub_id: row.hub_id,
+            transfer_type: row.transfer_type,
+            walking_distance_meters: row.walking_distance_meters,
+            indoor_connection_notes: row.indoor_connection_notes,
+            transfer_complexity: row.transfer_complexity
+        });
+    }
+    return map;
+}
+
+// Fetch hub members from database
+async function fetchHubMembers(supabase: any, hubIds: string[]): Promise<Map<string, HubMember[]>> {
+    if (hubIds.length === 0) return new Map();
+
+    const { data, error } = await supabase
+        .from('hub_members')
+        .select('*')
+        .in('hub_id', hubIds)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+    if (error) {
+        console.warn('[api/nodes/viewport] Failed to fetch hub_members:', error.message);
+        return new Map();
+    }
+
+    const map = new Map<string, HubMember[]>();
+    for (const row of (data || [])) {
+        const members = map.get(row.hub_id) || [];
+        members.push({
+            member_id: row.member_id,
+            member_name: row.member_name,
+            operator: row.operator,
+            line_name: row.line_name,
+            transfer_type: row.transfer_type,
+            walking_seconds: row.walking_seconds,
+            sort_order: row.sort_order
+        });
+        map.set(row.hub_id, members);
+    }
+    return map;
+}
+
 export async function GET(req: Request) {
     const url = new URL(req.url);
 
@@ -92,7 +181,12 @@ export async function GET(req: Request) {
     const pageSize = clamp(requestedPageSize, 50, 1000);
 
     const hubsOnlyParam = url.searchParams.get('hubs_only');
-    const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 11;
+    // Always return hubs only for better performance (per station grouping design)
+    const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
+    
+    // [NEW] Ward-based query support
+    const wardId = url.searchParams.get('ward_id');
+    const showStationsOnly = url.searchParams.get('stations_only') === '1';
 
     const minLat = Math.min(swLat, neLat);
     const maxLat = Math.max(swLat, neLat);
@@ -115,6 +209,7 @@ export async function GET(req: Request) {
     let candidates: any[] = [];
     let degraded = false;
     let source: 'supabase' | 'fallback' = 'supabase';
+    let supabaseClient: any = null;
 
     if (useFallback) {
         degraded = true;
@@ -125,11 +220,11 @@ export async function GET(req: Request) {
         }
     } else {
         try {
-            const supabase = createClient(supabaseUrl, supabaseKey);
+            supabaseClient = createClient(supabaseUrl, supabaseKey);
             let data: any = null;
             let error: any = null;
 
-            ({ data, error } = await supabase.rpc('nearby_nodes_v2', {
+            ({ data, error } = await supabaseClient.rpc('nearby_nodes_v2', {
                 center_lat: center.lat,
                 center_lon: center.lon,
                 radius_meters: Math.round(radiusMeters),
@@ -137,7 +232,7 @@ export async function GET(req: Request) {
             }));
 
             if (error) {
-                ({ data, error } = await supabase.rpc('nearby_nodes', {
+                ({ data, error } = await supabaseClient.rpc('nearby_nodes', {
                     center_lat: center.lat,
                     center_lon: center.lon,
                     radius_meters: Math.round(radiusMeters)
@@ -163,10 +258,14 @@ export async function GET(req: Request) {
             console.error('[api/nodes/viewport] Unexpected error fetching from Supabase:', err.message);
         }
     }
+
+    // Filter to show only hub nodes and standalone stations (hide child nodes)
     const filtered = candidates
         .map(n => {
             const location = parseLocation((n as any).location ?? (n as any).coordinates);
-            const isHub = typeof (n as any).is_hub === 'boolean' ? (n as any).is_hub : !(n as any).parent_hub_id;
+            const parentHubId = (n as any).parent_hub_id;
+            const hasParentHub = parentHubId !== null && parentHubId !== undefined;
+            const isHub = !hasParentHub;
 
             return {
                 id: String((n as any).id ?? ''),
@@ -177,16 +276,28 @@ export async function GET(req: Request) {
                 geohash: String((n as any).geohash ?? ''),
                 vibe: (n as any).vibe ?? null,
                 is_hub: isHub,
-                parent_hub_id: (n as any).parent_hub_id ?? null,
-                zone: String((n as any).zone ?? 'core')
+                parent_hub_id: parentHubId ?? null,
+                zone: String((n as any).zone ?? 'core'),
+                ward_id: (n as any).ward_id ?? null
             };
         })
-        .filter(n => {
+        .filter((n, idx) => {
             const [lon, lat] = n.location.coordinates;
             if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
             if (lat === 0 && lon === 0) return false;
             if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
+            
+            // [NEW] Filter out non-station nodes (bus stops, POIs, etc.)
+            const nodeType = n.type?.toLowerCase() || '';
+            const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
+            if (excludedTypes.includes(nodeType)) {
+                return false;
+            }
+            
+            // [FIX] When hubsOnly is true, only show actual station hubs (not standalone non-hubs)
+            // Bus stops have is_hub=true but are not stations - already filtered above
             if (hubsOnly && !n.is_hub) return false;
+            
             return true;
         })
         .sort((a, b) => {
@@ -195,20 +306,13 @@ export async function GET(req: Request) {
             return da - db;
         });
 
-    // Deduplicate based on Hub Membership to prevent overlapping nodes
+    // Deduplicate nodes by ID
     const seenHubs = new Set<string>();
     const deduplicated = [];
 
     for (const node of filtered) {
-        const members = resolveHubStationMembers(node.id);
-        // Use the first member of the hub as the unique key for this group
-        const hubKey = (members && members.length > 0) ? members[0] : node.id;
-
-        if (seenHubs.has(hubKey)) {
-            continue;
-        }
-
-        seenHubs.add(hubKey);
+        if (seenHubs.has(node.id)) continue;
+        seenHubs.add(node.id);
         deduplicated.push(node);
     }
 
@@ -222,6 +326,37 @@ export async function GET(req: Request) {
     const limitedNodes = deduplicated.slice(start, Math.min(deduplicated.length, end, start + maxNodesAllowed));
     const hasMore = deduplicated.length > end;
 
+    // Fetch hub metadata and members for the returned nodes
+    const hubDetails: Record<string, HubDetails> = {};
+    
+    if (supabaseClient && limitedNodes.length > 0) {
+        const hubIds = limitedNodes.filter(n => n.is_hub).map(n => n.id);
+        
+        if (hubIds.length > 0) {
+            const [metadataMap, membersMap] = await Promise.all([
+                fetchHubMetadata(supabaseClient, hubIds),
+                fetchHubMembers(supabaseClient, hubIds)
+            ]);
+
+            for (const hubId of hubIds) {
+                const metadata = metadataMap.get(hubId);
+                const members = membersMap.get(hubId) || [];
+                const memberCount = members.length;
+
+                if (metadata || memberCount > 0) {
+                    hubDetails[hubId] = {
+                        member_count: memberCount,
+                        transfer_type: metadata?.transfer_type || 'indoor',
+                        transfer_complexity: metadata?.transfer_complexity || 'simple',
+                        walking_distance_meters: metadata?.walking_distance_meters || null,
+                        indoor_connection_notes: metadata?.indoor_connection_notes || null,
+                        members: members
+                    };
+                }
+            }
+        }
+    }
+
     return NextResponse.json({
         nodes: limitedNodes,
         page,
@@ -230,6 +365,7 @@ export async function GET(req: Request) {
         total_in_viewport: deduplicated.length,
         has_more: hasMore,
         degraded,
-        source
+        source,
+        hub_details: hubDetails
     });
 }

@@ -10,12 +10,33 @@ import { NodeMarker } from './NodeMarker';
 import { TrainLayer } from './TrainLayer';
 import { PedestrianLayer } from './PedestrianLayer';
 import { useLocale } from 'next-intl';
-import { groupNodesByProximity, GroupedNode } from '@/utils/nodeGroupUtils';
-import { getLocaleString } from '@/lib/utils/localeUtils';
 
-type ClusterItem =
-    | { kind: 'node'; node: GroupedNode }
-    | { kind: 'cluster'; id: string; count: number; lat: number; lon: number };
+// Type definitions for hub details from API
+interface HubMemberInfo {
+    member_id: string;
+    member_name: any;
+    operator: string;
+    line_name: string | null;
+    transfer_type: string;
+    walking_seconds: number | null;
+    sort_order: number;
+}
+
+interface HubDetails {
+    member_count: number;
+    transfer_type: string;
+    transfer_complexity: string;
+    walking_distance_meters: number | null;
+    indoor_connection_notes: string | null;
+    members?: HubMemberInfo[];
+}
+
+interface ViewportResponse {
+    nodes: NodeDatum[];
+    hub_details: Record<string, HubDetails>;
+    next_page: number | null;
+    page_size: number;
+}
 
 function clamp(value: number, min: number, max: number) {
     return Math.min(max, Math.max(min, value));
@@ -33,6 +54,9 @@ function viewportStepForZoom(zoom: number) {
     return 0.2;
 }
 
+// Cache version: Increment this to force refresh of stale cached data
+const CACHE_VERSION = 'v3';
+
 function buildViewportKey(input: { swLat: number; swLon: number; neLat: number; neLon: number; zoom: number; hubsOnly: boolean }) {
     const step = viewportStepForZoom(input.zoom);
     const swLat = roundToStep(input.swLat, step);
@@ -40,15 +64,55 @@ function buildViewportKey(input: { swLat: number; swLon: number; neLat: number; 
     const neLat = roundToStep(input.neLat, step);
     const neLon = roundToStep(input.neLon, step);
     const zBucket = input.zoom < 11 ? 10 : input.zoom < 14 ? 13 : input.zoom;
-    return `${zBucket}:${input.hubsOnly ? 1 : 0}:${swLat},${swLon},${neLat},${neLon}`;
+    return `${CACHE_VERSION}:${zBucket}:${input.hubsOnly ? 1 : 0}:${swLat},${swLon},${neLat},${neLon}`;
 }
 
+/**
+ * Deduplicate nodes by ID with version control
+ * Keeps the most recent version when duplicates exist
+ * 
+ * Version Control Logic:
+ * 1. If node doesn't exist in map, add it
+ * 2. If node exists, compare versions:
+ *    - Higher version wins
+ *    - Same version: newer updated_at wins
+ *    - Lower version: keep existing
+ */
 function dedupeNodesById(nodes: NodeDatum[]) {
     const map = new Map<string, NodeDatum>();
+    
     nodes.forEach(n => {
         if (!n?.id) return;
-        map.set(n.id, n);
+        
+        const existing = map.get(n.id);
+        
+        if (!existing) {
+            // First time seeing this ID, add to map
+            map.set(n.id, n);
+        } else {
+            // Compare versions
+            const existingVersion = existing.version ?? 0;
+            const newVersion = n.version ?? 0;
+            
+            if (newVersion > existingVersion) {
+                // Newer version, replace
+                console.log(`[VersionControl] ${n.id}: v${existingVersion} → v${newVersion}`);
+                map.set(n.id, n);
+            } else if (newVersion === existingVersion) {
+                // Same version, compare updated_at
+                const existingUpdated = existing.updated_at ?? 0;
+                const newUpdated = n.updated_at ?? 0;
+                
+                if (newUpdated > existingUpdated) {
+                    console.log(`[VersionControl] ${n.id}: same v${newVersion}, newer data (${existingUpdated} → ${newUpdated})`);
+                    map.set(n.id, n);
+                }
+                // else: older data, keep existing
+            }
+            // else: older version, keep existing
+        }
     });
+    
     return Array.from(map.values());
 }
 
@@ -159,19 +223,40 @@ function MapController({ center, isTooFar, fallback, nodes }: {
 }
 
 function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
-    onData: (nodes: NodeDatum[]) => void;
+    onData: (nodes: NodeDatum[], hubDetails: Record<string, HubDetails>) => void;
     onLoading: (loading: boolean) => void;
     onError: (message: string | null) => void;
     refreshKey: number;
 }) {
     const map = useMap();
     const abortRef = useRef<AbortController | null>(null);
-    const cacheRef = useRef(new Map<string, { ts: number; nodes: NodeDatum[] }>());
+    // Cache now includes version metadata for invalidation
+    const cacheRef = useRef(new Map<string, { 
+        ts: number; 
+        nodes: NodeDatum[]; 
+        hubDetails: Record<string, HubDetails>;
+        minVersion: number;  // Track minimum version in this cache
+        maxVersion: number;  // Track maximum version in this cache
+    }>());
     const inFlightKeyRef = useRef<string | null>(null);
     const debounceTimerRef = useRef<number | null>(null);
 
     const maxDailyCalls = 2000;
     const callKey = useMemo(() => getDailyKey('map_api_calls'), []);
+
+    /**
+     * Check if cached data is still valid based on version
+     * Returns true if cache is valid, false if stale
+     */
+    const isCacheValid = useCallback((cached: typeof cacheRef.current extends Map<string, infer V> ? V : never, currentMinVersion: number) => {
+        if (!cached) return false;
+        const now = Date.now();
+        // Cache expires after 60 seconds (standard TTL)
+        if (now - cached.ts > 60_000) return false;
+        // If current data has higher versions than cached, invalidate
+        if (currentMinVersion > cached.minVersion) return false;
+        return true;
+    }, []);
 
     const load = useCallback(async () => {
         const zoom = clamp(map.getZoom(), 1, 22);
@@ -179,14 +264,20 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
         const sw = padded.getSouthWest();
         const ne = padded.getNorthEast();
 
-        const hubsOnly = zoom < 11;
+        // [FIX] Always request hubs only for better performance (per station grouping design)
+        const hubsOnly = true;
         const key = buildViewportKey({ swLat: sw.lat, swLon: sw.lng, neLat: ne.lat, neLon: ne.lng, zoom, hubsOnly });
         const now = Date.now();
 
+        // [NEW] Check cache validity with version tracking
         const cached = cacheRef.current.get(key);
-        if (cached && now - cached.ts < 60_000) {
+        if (cached) {
+            console.log(`[VersionCache] Cache hit for ${key}, minVersion: ${cached.minVersion}, maxVersion: ${cached.maxVersion}`);
+        }
+        
+        if (cached && isCacheValid(cached, 0)) {
             onError(null);
-            onData(cached.nodes);
+            onData(cached.nodes, cached.hubDetails);
             return;
         }
 
@@ -206,13 +297,17 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
                 throw new Error('API calls limit reached');
             }
 
-            const basePageSize = zoom < 11 ? 180 : zoom < 14 ? 450 : 800;
-            const maxPages = zoom < 11 ? 1 : 2;
-            const targetNodes = zoom < 11 ? 180 : zoom < 14 ? 800 : 1200;
+            // [FIX] Reduced page size since we only fetch hubs
+            const basePageSize = zoom < 11 ? 150 : zoom < 14 ? 300 : 500;
+            const maxPages = 1; // Only need one page for hubs
+            const targetNodes = zoom < 11 ? 150 : zoom < 14 ? 300 : 500;
 
             let page = 0;
             let nextPage: number | null = 0;
             let combined: NodeDatum[] = [];
+            let allHubDetails: Record<string, HubDetails> = {};
+            let minVersion = Infinity;
+            let maxVersion = 0;
 
             while (nextPage !== null && page < maxPages && combined.length < targetNodes) {
                 if (page > 0) {
@@ -234,16 +329,39 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
                         hubsOnly
                     },
                     { signal: controller.signal }
-                );
+                ) as unknown as ViewportResponse;
+
+                // Track versions for cache invalidation
+                res.nodes.forEach(n => {
+                    const v = n.version ?? 0;
+                    if (v < minVersion) minVersion = v;
+                    if (v > maxVersion) maxVersion = v;
+                });
 
                 combined = dedupeNodesById([...combined, ...res.nodes]);
+
+                // Merge hub_details from API response
+                if (res.hub_details) {
+                    allHubDetails = { ...allHubDetails, ...res.hub_details };
+                }
+
                 nextPage = res.next_page;
                 page += 1;
                 if (res.nodes.length < res.page_size) break;
             }
 
-            cacheRef.current.set(key, { ts: now, nodes: combined });
-            onData(combined);
+            // [NEW] Store with version metadata
+            cacheRef.current.set(key, { 
+                ts: now, 
+                nodes: combined, 
+                hubDetails: allHubDetails,
+                minVersion,
+                maxVersion
+            });
+            
+            console.log(`[VersionCache] Stored cache for ${key} with versions [${minVersion}, ${maxVersion}]`);
+            
+            onData(combined, allHubDetails);
         } catch (e: any) {
             if (e?.name === 'AbortError') return;
             onError(String(e?.message || 'Failed to load nodes'));
@@ -251,7 +369,7 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
             onLoading(false);
             inFlightKeyRef.current = null;
         }
-    }, [callKey, map, onData, onError, onLoading]);
+    }, [callKey, map, onData, onError, onLoading, isCacheValid]);
 
     useEffect(() => {
         const onMove = () => {
@@ -277,7 +395,12 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
     return null;
 }
 
-function ClusteredNodeLayer({ nodes, zone, locale }: { nodes: NodeDatum[]; zone: any; locale: string }) {
+function HubNodeLayer({ nodes, hubDetails, zone, locale }: {
+    nodes: NodeDatum[];
+    hubDetails: Record<string, HubDetails>;
+    zone: any;
+    locale: string
+}) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
 
@@ -287,56 +410,32 @@ function ClusteredNodeLayer({ nodes, zone, locale }: { nodes: NodeDatum[]; zone:
 
     const clampedZoom = clamp(zoom, 1, 22);
 
-    // Group nodes logically once per nodes-update
-    const groups = useMemo(() => {
+    // [NEW] Filter to show:
+    // - Hub nodes (is_hub = true, parent_hub_id = null) - with transfer info
+    // - Standalone nodes (is_hub = false, parent_hub_id = null) - normal stations
+    // - Hide child nodes (parent_hub_id IS NOT NULL)
+    const visibleNodes = useMemo(() => {
         if (!nodes || nodes.length === 0) return [];
-        return groupNodesByProximity(nodes, 100); // Tighter grouping (100m)
+        return nodes.filter(n => n.parent_hub_id === null);
     }, [nodes]);
-
-    const items = useMemo<ClusterItem[]>(() => {
-        if (!groups || groups.length === 0) return [];
-
-        // High Zoom (16+): Show everything individually (no clustering)
-        if (clampedZoom >= 16) {
-            const allItems: ClusterItem[] = [];
-            groups.forEach(group => {
-                // Add the parent (hub)
-                allItems.push({ kind: 'node', node: { ...group, children: [] } }); // Render parent as standalone
-                // Add all children
-                if (group.children) {
-                    group.children.forEach(child => {
-                        allItems.push({ kind: 'node', node: child as GroupedNode });
-                    });
-                }
-            });
-            return allItems;
-        }
-
-        // Mid/Low Zoom (< 16): Show only Leaders (Hubs) with badges
-        return groups.map(group => {
-            // The group itself is the leader node (determined by groupNodesByProximity)
-            const count = 1 + (group.children?.length || 0);
-
-            // If it's a single node, just show it
-            if (count === 1) {
-                return { kind: 'node', node: group };
-            }
-
-            // If it has children, render it as a "Node with Badge"
-            // We do this by passing the FULL group (with children) to NodeMarker.
-            // NodeMarker needs to handle the badge rendering.
-            return { kind: 'node', node: group };
-        });
-    }, [groups, clampedZoom]);
 
     return (
         <>
-            {items.map((item) => {
-                if (item.kind === 'node') {
-                    // Ensure stable key using ID
-                    return <NodeMarker key={item.node.id} node={item.node} zone={zone} locale={locale} zoom={clampedZoom} />;
+            {visibleNodes.map((node) => {
+                const details = hubDetails[node.id];
+                if (!details) {
+                    console.log('[DEBUG] No hubDetails for node:', node.id);
                 }
-                return null;
+                return (
+                    <NodeMarker
+                        key={node.id}
+                        node={node}
+                        hubDetails={details}
+                        zone={zone}
+                        locale={locale}
+                        zoom={clampedZoom}
+                    />
+                );
             })}
         </>
     );
@@ -384,75 +483,31 @@ export default function AppMapWrapper() {
 function AppMap() {
     const { zone, userLocation, isTooFar, centerFallback } = useZoneAwareness();
     const [nodes, setNodes] = useState<NodeDatum[]>([]);
+    const [hubDetails, setHubDetails] = useState<Record<string, HubDetails>>({});
     const [loadingNodes, setLoadingNodes] = useState(false);
     const [nodesError, setNodesError] = useState<string | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
     const [gpsAlert, setGpsAlert] = useState<{ show: boolean, type: 'far' | 'denied' }>({ show: false, type: 'far' });
     const locale = useLocale();
-    const [isParentListOpen, setIsParentListOpen] = useState(false);
-    const [parentListQuery, setParentListQuery] = useState('');
 
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
     const { userProfile, setUserProfile } = useAppStore();
 
-    const groupedParents = useMemo(() => {
-        const groups = groupNodesByProximity(nodes, 150);
-        return groups
-            .filter(n => Array.isArray(n.children) && n.children.length > 0)
-            .sort((a, b) => (b.children?.length || 0) - (a.children?.length || 0));
-    }, [nodes]);
+    // [FIX] Calculate hub count from actual hubDetails
+    const hubCount = Object.values(hubDetails).reduce((acc, h) => acc + (h.member_count > 0 ? 1 : 0), 0);
 
-    const filteredParents = useMemo(() => {
-        const q = parentListQuery.trim().toLowerCase();
-        if (!q) return groupedParents;
-        return groupedParents.filter(p => {
-            const name = getLocaleString((p as any).name, locale) || '';
-            return name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q);
-        });
-    }, [groupedParents, parentListQuery, locale]);
-
-    const parentGroupLabel = locale.startsWith('ja')
-        ? '親子グループ'
+    const hubLabel = locale.startsWith('ja')
+        ? ' Hub Station'
         : locale.startsWith('en')
-            ? 'Parent Groups'
-            : '父子群組';
+            ? 'Hub Stations'
+            : '樞紐車站';
 
-    const parentSearchPlaceholder = locale.startsWith('ja')
-        ? '親ノード名 / ID を検索'
+    const showingText = locale.startsWith('ja')
+        ? `${hubCount} ${hubLabel}`
         : locale.startsWith('en')
-            ? 'Search parent name or ID'
-            : '搜尋父節點名稱或 ID';
-
-    const parentCloseLabel = locale.startsWith('ja')
-        ? '閉じる'
-        : locale.startsWith('en')
-            ? 'Close'
-            : '關閉';
-
-    const parentSortHint = locale.startsWith('ja')
-        ? '子ノード数で並び替え'
-        : locale.startsWith('en')
-            ? 'Sorted by child count'
-            : '按子節點數量排序';
-
-    const parentShowingText = locale.startsWith('ja')
-        ? `表示 ${Math.min(filteredParents.length, 30)} / ${filteredParents.length}`
-        : locale.startsWith('en')
-            ? `Showing ${Math.min(filteredParents.length, 30)} / ${filteredParents.length}`
-            : `顯示 ${Math.min(filteredParents.length, 30)} / ${filteredParents.length}`;
-
-    const parentNoResultTitle = locale.startsWith('ja')
-        ? '一致する親ノードがありません'
-        : locale.startsWith('en')
-            ? 'No matching parent nodes'
-            : '找不到符合的父節點';
-
-    const parentNoResultHint = locale.startsWith('ja')
-        ? '駅名やノードIDで検索してみてください'
-        : locale.startsWith('en')
-            ? 'Try a station name or node ID'
-            : '試試看輸入站名或節點 ID';
+            ? `${hubCount} ${hubLabel}`
+            : `${hubCount} 個樞紐車站`;
 
     // Default center is Ueno if user is far
     const defaultCenter: [number, number] = [centerFallback.lat, centerFallback.lon];
@@ -478,7 +533,10 @@ function AppMap() {
                 />
 
                 <ViewportNodeLoader
-                    onData={setNodes}
+                    onData={(newNodes, newHubDetails) => {
+                        setNodes(newNodes);
+                        setHubDetails(newHubDetails);
+                    }}
                     onLoading={setLoadingNodes}
                     onError={setNodesError}
                     refreshKey={refreshKey}
@@ -504,8 +562,8 @@ function AppMap() {
                     />
                 )}
 
-                {/* Render Nodes */}
-                <ClusteredNodeLayer nodes={nodes} zone={zone} locale={locale} />
+                {/* Render Hub Nodes Only - core of station grouping design */}
+                <HubNodeLayer nodes={nodes} hubDetails={hubDetails} zone={zone} locale={locale} />
 
                 {/* Real-time Train Layer */}
                 <TrainLayer />
@@ -554,94 +612,23 @@ function AppMap() {
                         <button
                             key={p}
                             onClick={() => setUserProfile(p)}
-                            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${
-                                userProfile === p 
-                                ? 'bg-indigo-600 text-white shadow-md' 
-                                : 'text-slate-600 hover:bg-slate-100'
-                            }`}
+                            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${userProfile === p
+                                    ? 'bg-indigo-600 text-white shadow-md'
+                                    : 'text-slate-600 hover:bg-slate-100'
+                                }`}
                         >
-                            {p === 'general' ? (locale === 'ja' ? '一般' : locale === 'en' ? 'Gen' : '一般') : 
-                             p === 'wheelchair' ? (locale === 'ja' ? '車椅子' : locale === 'en' ? 'Wheel' : '輪椅') : 
-                             (locale === 'ja' ? 'ベビーカー' : locale === 'en' ? 'Stroll' : '嬰兒車')}
+                            {p === 'general' ? (locale === 'ja' ? '一般' : locale === 'en' ? 'Gen' : '一般') :
+                                p === 'wheelchair' ? (locale === 'ja' ? '車椅子' : locale === 'en' ? 'Wheel' : '輪椅') :
+                                    (locale === 'ja' ? 'ベビーカー' : locale === 'en' ? 'Stroll' : '嬰兒車')}
                         </button>
                     ))}
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => setIsParentListOpen(v => !v)}
-                    className={`bg-white/90 backdrop-blur px-3 py-2 rounded-2xl shadow-lg text-[11px] font-black tracking-wide text-slate-900 hover:bg-white transition flex items-center gap-2 ${isParentListOpen ? 'ring-2 ring-indigo-400/40' : ''}`}
-                >
-                    <span className="w-5 h-5 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-[11px] font-black">G</span>
-                    <span className="whitespace-nowrap">{parentGroupLabel}</span>
-                    <span className="ml-auto text-indigo-700 bg-indigo-50 px-2 py-1 rounded-full">{groupedParents.length}</span>
-                </button>
-
-                {isParentListOpen && (
-                    <div className="bg-white/90 backdrop-blur rounded-[24px] shadow-lg border border-black/[0.04] overflow-hidden w-[320px] max-w-[calc(100vw-2rem)]">
-                        <div className="p-3 border-b border-black/[0.04]">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    value={parentListQuery}
-                                    onChange={(e) => setParentListQuery(e.target.value)}
-                                    placeholder={parentSearchPlaceholder}
-                                    className="flex-1 h-10 px-3 rounded-2xl bg-white/80 border border-black/[0.06] text-[12px] font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-indigo-400/40"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setParentListQuery('');
-                                        setIsParentListOpen(false);
-                                    }}
-                                    className="h-10 w-10 rounded-2xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors active:scale-[0.98]"
-                                    aria-label={parentCloseLabel}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                            <div className="mt-2 flex items-center justify-between">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">{parentSortHint}</div>
-                                <div className="text-[10px] font-black text-indigo-700 bg-indigo-50 px-2 py-1 rounded-full">{parentShowingText}</div>
-                            </div>
-                        </div>
-
-                        <div className="max-h-64 overflow-auto">
-                            {filteredParents.slice(0, 30).map(p => {
-                                const name = getLocaleString((p as any).name, locale) || p.id;
-                                const count = p.children?.length || 0;
-                                return (
-                                    <button
-                                        key={p.id}
-                                        type="button"
-                                        onClick={() => {
-                                            setCurrentNode(p.id);
-                                            setBottomSheetOpen(true);
-                                            setIsParentListOpen(false);
-                                        }}
-                                        className="w-full px-3 py-2.5 border-b border-black/[0.04] text-left hover:bg-slate-50 active:bg-slate-100 transition-colors"
-                                    >
-                                        <div className="flex items-center justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <div className="text-[12px] font-black text-slate-900 truncate">{name}</div>
-                                                <div className="text-[10px] font-bold text-slate-500 truncate">{p.id}</div>
-                                            </div>
-                                            <div className="shrink-0 h-7 px-2.5 rounded-full bg-slate-900 text-white text-[11px] font-black flex items-center justify-center shadow-sm">
-                                                +{count}
-                                            </div>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-
-                            {filteredParents.length === 0 && (
-                                <div className="px-4 py-6 text-center">
-                                    <div className="text-[12px] font-black text-slate-900">{parentNoResultTitle}</div>
-                                    <div className="text-[11px] font-bold text-slate-500 mt-1">{parentNoResultHint}</div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
+                <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-lg text-sm font-medium">
+                    <span className="text-indigo-600 font-bold">
+                        {showingText}
+                    </span>
+                </div>
 
                 {(loadingNodes || nodesError) && (
                     <button
