@@ -97,14 +97,15 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         }, 1500);
 
         try {
-            const response = await fetch('/api/agent/chat', {
+            // Use Dify Agent endpoint
+            const response = await fetch('/api/dify/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [...messages, userMsg],
-                    nodeId: stationId,
+                    query: text,
                     inputs: {
                         user_profile: userProfile,
+                        current_station: stationId || '',
                         locale
                     }
                 })
@@ -133,11 +134,9 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.slice(6));
-                            if (data.event === 'meta' && data.mode === 'offline') {
-                                setIsOffline(true);
-                            }
-                            if (data.event === 'message') {
-                                accumulatedResponse += data.answer;
+                            // Dify uses 'agent_message' for streaming responses
+                            if (data.event === 'agent_message' || data.event === 'message') {
+                                accumulatedResponse += (data.answer || '');
                                 setMessages(prev => {
                                     const newMsgs = [...prev];
                                     newMsgs[newMsgs.length - 1].content = accumulatedResponse;

@@ -1,4 +1,4 @@
-import { Navigation, MapPin, Utensils, ShoppingBag, Landmark, Coffee, TreePine, Hospital, Building2, Landmark as CultureIcon, Briefcase, Bed, Info } from 'lucide-react';
+import { Navigation, MapPin, Utensils, Store, Landmark, Coffee, TreePine, Hospital, Building2, Landmark as CultureIcon, Briefcase, Bed, Info } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { L1Place } from '@/hooks/useL1Places';
 import { useCategoryTranslation } from '@/hooks/useCategoryTranslation';
@@ -12,7 +12,7 @@ interface PlaceCardProps {
 // Enhanced Icon Map with Colors
 const CATEGORY_STYLE: Record<string, { icon: any; color: string; bgColor: string }> = {
     dining: { icon: Utensils, color: 'text-orange-600', bgColor: 'bg-orange-50' },
-    shopping: { icon: ShoppingBag, color: 'text-pink-600', bgColor: 'bg-pink-50' },
+    shopping: { icon: Store, color: 'text-pink-600', bgColor: 'bg-pink-50' },
     culture: { icon: CultureIcon, color: 'text-blue-700', bgColor: 'bg-blue-50' },
     leisure: { icon: Coffee, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
     nature: { icon: TreePine, color: 'text-green-700', bgColor: 'bg-green-50' },

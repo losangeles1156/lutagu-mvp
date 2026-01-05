@@ -1,173 +1,89 @@
-/**
- * Ward-based data store with 24-hour caching
- * Uses Zustand for state management
- */
-
+// Ward Store - 管理行政區數據
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { fetchNodesByWard } from '@/lib/api/nodesByWard';
+import { NodeDatum } from '@/lib/api/nodes';
 
 export interface Ward {
     id: string;
-    name_i18n: {
-        'zh-TW': string;
-        'ja': string;
-        'en': string;
+    name: {
+        ja: string;
+        en: string;
+        zh: string;
     };
-    prefecture: string;
-    ward_code: string | null;
-    center_point: {
-        type: string;
-        coordinates: [number, number];
-    } | null;
-    priority_order: number;
-    is_active: boolean;
-    node_count: number;
-    hub_count: number;
+    code?: string;
+    prefecture?: string;
 }
 
-export interface WardState {
-    // Data
+interface WardState {
     wards: Ward[];
-    currentWard: Ward | null;
-    detectedWard: Ward | null;
-    
-    // Cache
-    lastFetched: number | null;
-    cacheExpiry: number | null;
-    
-    // Loading states
     isLoading: boolean;
-    isDetecting: boolean;
     error: string | null;
-    
+    selectedWardId: string | null;
+
     // Actions
     fetchWards: () => Promise<void>;
-    detectWardByLocation: (lat: number, lng: number) => Promise<Ward | null>;
-    setCurrentWard: (ward: Ward | null) => void;
-    clearError: () => void;
-    isCacheValid: () => boolean;
+    setSelectedWard: (wardId: string | null) => void;
+    getNodesByWard: (wardId: string) => Promise<NodeDatum[]>;
 }
 
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-const API_BASE = '/api/wards';
+// 核心 9 區列表（Fallback）
+const CORE_WARDS: Ward[] = [
+    { id: 'ward:taito', name: { ja: '台東区', en: 'Taito', zh: '台東區' }, code: 'Taitō', prefecture: 'Tokyo' },
+    { id: 'ward:chiyoda', name: { ja: '千代田区', en: 'Chiyoda', zh: '千代田區' }, code: 'Chiyoda', prefecture: 'Tokyo' },
+    { id: 'ward:chuo', name: { ja: '中央区', en: 'Chuo', zh: '中央區' }, code: 'Chūō', prefecture: 'Tokyo' },
+    { id: 'ward:minato', name: { ja: '港区', en: 'Minato', zh: '港區' }, code: 'Minato', prefecture: 'Tokyo' },
+    { id: 'ward:shinjuku', name: { ja: '新宿区', en: 'Shinjuku', zh: '新宿區' }, code: 'Shinjuku', prefecture: 'Tokyo' },
+    { id: 'ward:bunkyo', name: { ja: '文京区', en: 'Bunkyo', zh: '文京區' }, code: 'Bunkyō', prefecture: 'Tokyo' },
+    { id: 'ward:sumida', name: { ja: '墨田区', en: 'Sumida', zh: '墨田區' }, code: 'Sumida', prefecture: 'Tokyo' },
+    { id: 'ward:koto', name: { ja: '江東区', en: 'Koto', zh: '江東區' }, code: 'Kōtō', prefecture: 'Tokyo' },
+    { id: 'ward:shinagawa', name: { ja: '品川区', en: 'Shinagawa', zh: '品川區' }, code: 'Shinagawa', prefecture: 'Tokyo' },
+];
 
-export const useWardStore = create<WardState>()(
-    persist(
-        (set, get) => ({
-            // Initial state
-            wards: [],
-            currentWard: null,
-            detectedWard: null,
-            lastFetched: null,
-            cacheExpiry: null,
-            isLoading: false,
-            isDetecting: false,
-            error: null,
+export const useWardStore = create<WardState>((set, get) => ({
+    wards: [],
+    isLoading: false,
+    error: null,
+    selectedWardId: null,
 
-            // Check if cache is still valid
-            isCacheValid: () => {
-                const { cacheExpiry } = get();
-                return cacheExpiry !== null && Date.now() < cacheExpiry;
-            },
-
-            // Fetch all wards
-            fetchWards: async () => {
-                const { isCacheValid, isLoading } = get();
-                
-                // Return cached data if valid
-                if (isCacheValid() && get().wards.length > 0) {
-                    return;
-                }
-                
-                // Prevent duplicate requests
-                if (isLoading) {
-                    return;
-                }
-
-                set({ isLoading: true, error: null });
-
-                try {
-                    const response = await fetch(`${API_BASE}?cache_bust=${Date.now()}`);
-                    
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch wards: ${response.status}`);
-                    }
-
+    fetchWards: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            // 嘗試從後台 API 獲取核心 9 區
+            let wards: Ward[] = [];
+            
+            try {
+                const response = await fetch('/api/admin/nodes/wards?core=true');
+                if (response.ok) {
                     const data = await response.json();
-                    const wards = data.data || [];
-
-                    set({
-                        wards,
-                        lastFetched: Date.now(),
-                        cacheExpiry: Date.now() + CACHE_DURATION,
-                        isLoading: false,
-                    });
-                } catch (error: any) {
-                    set({
-                        error: error.message || 'Failed to fetch wards',
-                        isLoading: false,
-                    });
+                    wards = data.wards || [];
                 }
-            },
+            } catch (e) {
+                console.warn('[wardStore] API fetch failed, using fallback');
+            }
 
-            // Detect ward by GPS location
-            detectWardByLocation: async (lat: number, lng: number) => {
-                set({ isDetecting: true, error: null });
+            // 如果 API 失敗，使用硬編碼的核心 9 區
+            if (wards.length === 0) {
+                wards = CORE_WARDS;
+            }
 
-                try {
-                    const response = await fetch(
-                        `${API_BASE}/detect?lat=${lat}&lng=${lng}`
-                    );
-
-                    if (!response.ok) {
-                        throw new Error(`Failed to detect ward: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    const ward = data.data || null;
-
-                    set({
-                        detectedWard: ward,
-                        isDetecting: false,
-                    });
-
-                    return ward;
-                } catch (error: any) {
-                    set({
-                        error: error.message || 'Failed to detect ward',
-                        isDetecting: false,
-                    });
-                    return null;
-                }
-            },
-
-            // Set current ward (for manual selection)
-            setCurrentWard: (ward: Ward | null) => {
-                set({ currentWard: ward });
-            },
-
-            // Clear error
-            clearError: () => {
-                set({ error: null });
-            },
-        }),
-        {
-            name: 'ward-store',
-            storage: createJSONStorage(() => localStorage),
-            partialize: (state) => ({
-                wards: state.wards,
-                currentWard: state.currentWard,
-                lastFetched: state.lastFetched,
-                cacheExpiry: state.cacheExpiry,
-            }),
+            set({ wards, isLoading: false });
+        } catch (error) {
+            console.error('[wardStore] Failed to fetch wards:', error);
+            // 使用 Fallback
+            set({ wards: CORE_WARDS, isLoading: false });
         }
-    )
-);
+    },
 
-// Selector hooks for optimized re-renders
-export const useWards = () => useWardStore((state) => state.wards);
-export const useCurrentWard = () => useWardStore((state) => state.currentWard);
-export const useDetectedWard = () => useWardStore((state) => state.detectedWard);
-export const useWardLoading = () => useWardStore((state) => state.isLoading);
-export const useWardDetecting = () => useWardStore((state) => state.isDetecting);
-export const useWardError = () => useWardStore((state) => state.error);
+    setSelectedWard: (wardId: string | null) => {
+        set({ selectedWardId: wardId });
+    },
+
+    getNodesByWard: async (wardId: string) => {
+        try {
+            return await fetchWardNodes(wardId);
+        } catch (error) {
+            console.error('[wardStore] Failed to fetch ward nodes:', error);
+            return [];
+        }
+    },
+}));

@@ -26,7 +26,7 @@ const CATEGORY_CONFIG: Record<string, { icon: string; labels: Record<string, str
     museum_count: { icon: '🎨', labels: { 'zh-TW': '博物館', 'en': 'Museum', 'ja': '博物館' }, color: '#6366F1' },
 
     // Broad Categories (Fallback)
-    shopping: { icon: '🛒', labels: { 'zh-TW': '購物', 'en': 'Shopping', 'ja': 'ショッピング' }, color: '#EC4899' },
+    shopping: { icon: '🏬', labels: { 'zh-TW': '購物', 'en': 'Shopping', 'ja': 'ショッピング' }, color: '#EC4899' },
     dining: { icon: '🍜', labels: { 'zh-TW': '餐飲', 'en': 'Dining', 'ja': '飲食' }, color: '#F59E0B' },
     leisure: { icon: '🎭', labels: { 'zh-TW': '休閒', 'en': 'Leisure', 'ja': 'レジャー' }, color: '#8B5CF6' },
     medical: { icon: '🏥', labels: { 'zh-TW': '醫療', 'en': 'Medical', 'ja': '医療' }, color: '#EF4444' },

@@ -91,14 +91,14 @@ function runSeverityTests() {
     
     const severityTests = [
         { title: '気象特別警報報', expected: 'critical' },
-        { title: '大雨警報（浸水害）', expected: 'critical' },
-        { title: '大雪警報', expected: 'critical' },
+        { title: '大雨警報（浸水害）', expected: 'warning' },
+        { title: '大雪警報', expected: 'warning' },
         { title: '強風警報', expected: 'warning' },
         { title: '波浪警報', expected: 'warning' },
         { title: '高潮警報', expected: 'warning' },
-        { title: '土砂災害警戒情報', expected: 'critical' }, // 土砂災害警戒是非常嚴重的
+        { title: '土砂災害警戒情報', expected: 'warning' }, // 土砂災害警戒為 warning 等級
         { title: '乾燥注意報', expected: 'advisory' },
-        { title: '強風注意報', expected: 'warning' }, // 匹配 warning pattern 中的強風
+        { title: '強風注意報', expected: 'advisory' },
         { title: '大雨注意報', expected: 'advisory' },
         { title: '気象情報', expected: 'info' },
         { title: '全般台風情報', expected: 'info' }

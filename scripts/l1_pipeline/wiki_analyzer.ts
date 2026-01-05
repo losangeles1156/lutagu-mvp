@@ -1,8 +1,12 @@
 import { CONFIG } from './config';
 import { StationProfile } from './hub_profiles';
 
+import { generateLLMResponse } from '../../src/lib/ai/llmClient';
+
 interface WikiAnalysisResult {
-    summary: string;
+    summary: { ja: string; en: string; zh: string };
+    title: { ja: string; en: string; zh: string };
+    tagline: { ja: string; en: string; zh: string };
     seasonalFlags: string[];
     keywords: string[];
     weightedKeywords: { word: string; weight: number }[];
@@ -11,13 +15,14 @@ interface WikiAnalysisResult {
 export async function analyzeWiki(title: string, profile?: StationProfile): Promise<WikiAnalysisResult> {
     console.log(`📘 Analyzing Wiki for: ${title} ${profile ? `(Profile: ${profile.name})` : ''}...`);
     
-    // 1. Fetch Wiki Content
+    // 1. Fetch Wiki Content (JA) + Langlinks
     const endpoint = 'https://ja.wikipedia.org/w/api.php';
     const params = new URLSearchParams({
         action: 'query',
-        prop: 'extracts',
+        prop: 'extracts|langlinks',
         titles: title,
-        explaintext: 'true', // Get plain text
+        explaintext: 'true',
+        lllimit: '500', // Get all langlinks
         format: 'json',
         origin: '*'
     });
@@ -32,17 +37,45 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
         const pageId = Object.keys(pages)[0];
         if (pageId === '-1') throw new Error('Page missing');
         
-        const content = pages[pageId].extract as string;
+        const page = pages[pageId];
+        const contentJa = page.extract as string;
+        const langlinks = page.langlinks || [];
+
+        // Find EN and ZH titles
+        const enLink = langlinks.find((l: any) => l.lang === 'en');
+        const zhLink = langlinks.find((l: any) => l.lang === 'zh');
+
+        // Fetch EN and ZH content if available
+        let contentEn = '';
+        let contentZh = '';
+
+        if (enLink) {
+            try {
+                const resEn = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(enLink['*'])}&explaintext=true&format=json&origin=*`);
+                const dataEn = await resEn.json();
+                const pageEn = Object.values(dataEn.query?.pages || {})[0] as any;
+                if (pageEn && pageEn.extract) contentEn = pageEn.extract;
+            } catch (e) { console.warn('Failed to fetch EN wiki', e); }
+        }
+
+        if (zhLink) {
+            try {
+                const resZh = await fetch(`https://zh.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(zhLink['*'])}&explaintext=true&format=json&origin=*`);
+                const dataZh = await resZh.json();
+                const pageZh = Object.values(dataZh.query?.pages || {})[0] as any;
+                if (pageZh && pageZh.extract) contentZh = pageZh.extract;
+            } catch (e) { console.warn('Failed to fetch ZH wiki', e); }
+        }
         
-        // 2. Analyze Seasonal Flags
+        // 2. Analyze Seasonal Flags (Use JA content)
         const seasonalFlags: string[] = [];
         
-        if (matchesAny(content, CONFIG.SEASONAL_KEYWORDS.SAKURA)) seasonalFlags.push('Sakura');
-        if (matchesAny(content, CONFIG.SEASONAL_KEYWORDS.AUTUMN)) seasonalFlags.push('Autumn Leaves');
-        if (matchesAny(content, CONFIG.SEASONAL_KEYWORDS.HYDRANGEA)) seasonalFlags.push('Hydrangea');
-        if (matchesAny(content, CONFIG.SEASONAL_KEYWORDS.PLUM)) seasonalFlags.push('Plum');
+        if (matchesAny(contentJa, CONFIG.SEASONAL_KEYWORDS.SAKURA)) seasonalFlags.push('Sakura');
+        if (matchesAny(contentJa, CONFIG.SEASONAL_KEYWORDS.AUTUMN)) seasonalFlags.push('Autumn Leaves');
+        if (matchesAny(contentJa, CONFIG.SEASONAL_KEYWORDS.HYDRANGEA)) seasonalFlags.push('Hydrangea');
+        if (matchesAny(contentJa, CONFIG.SEASONAL_KEYWORDS.PLUM)) seasonalFlags.push('Plum');
 
-        // 3. Keyword Extraction with Weights
+        // 3. Keyword Extraction with Weights (Use JA content)
         // If a profile exists, we force include its core vibes
         const weightedKeywords: { word: string; weight: number }[] = [];
         const rawKeywords: string[] = [];
@@ -56,7 +89,7 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
             
             // Validate Landmarks in Text
             profile.mandatory_landmarks.forEach(lm => {
-                if (content.includes(lm)) {
+                if (contentJa.includes(lm)) {
                     // Confirmed landmark presence
                     // weightedKeywords.push({ word: lm, weight: 5 }); // Optional: add specific landmark tag
                 }
@@ -91,7 +124,7 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
             let hits = 0;
             keywords.forEach(k => {
                 const regex = new RegExp(k, 'g');
-                const count = (content.match(regex) || []).length;
+                const count = (contentJa.match(regex) || []).length;
                 hits += count;
             });
 
@@ -110,15 +143,77 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
             }
         }
 
-        // 4. Extract Summary (First 150 chars)
+        // 4. Extract Summaries (First 150 chars)
         // If profile exists, prefer expert description + wiki excerpt
-        let summary = content.substring(0, 150).replace(/\n/g, ' ') + '...';
+        const cleanText = (text: string) => text.substring(0, 150).replace(/\n/g, ' ') + '...';
+        
+        let summaryJa = cleanText(contentJa);
+        let summaryEn = contentEn ? cleanText(contentEn) : 'Description available in Japanese.';
+        let summaryZh = contentZh ? cleanText(contentZh) : '詳細描述僅提供日文版本。';
+
         if (profile) {
-            summary = `【${profile.name}】${profile.description} (Wiki: ${summary})`;
+            summaryJa = `【${profile.name}】${profile.description} (Wiki: ${summaryJa})`;
         }
 
+        // 5. Generate Tagline & Title (AI)
+        let tagline = { ja: '', en: '', zh: '' };
+        let vibeTitle = { ja: '', en: '', zh: '' };
+
+        try {
+            const profileDesc = profile ? profile.description : '';
+            const coreVibes = profile ? profile.core_vibes.join(', ') : '';
+            const prompt = `
+You are a travel editor for a Tokyo guide app.
+Generate a short "Vibe Title" (max 15 chars) and a punchy "Tagline" (max 30-60 chars) for the station "${title}".
+
+Context from Wiki: "${contentJa.substring(0, 500)}..."
+${profileDesc ? `Expert Insight: "${profileDesc}"` : ''}
+${coreVibes ? `Core Vibes: "${coreVibes}"` : ''}
+
+Requirements:
+1. Title: A short, poetic or descriptive title (e.g., "Electric Town" for Akihabara, "Kitchen of Tokyo" for Tsukiji). NOT the station name itself.
+2. Tagline: A catchy phrase describing the personality.
+3. Format: JSON object {
+    "title": { "ja": "...", "en": "...", "zh": "..." },
+    "tagline": { "ja": "...", "en": "...", "zh": "..." }
+}
+4. Language: "zh" MUST be Traditional Chinese (繁體中文/台灣正體). Do NOT use Simplified Chinese.
+5. Example for Akihabara: { "title": { "ja": "電気とオタクの街", "en": "Electric Town", "zh": "電器動漫之街" }, "tagline": { "ja": "アニメと電気の聖地", "en": "The holy land of anime and electronics", "zh": "動漫與電器的聖地" } }
+`;
+            const jsonStr = await generateLLMResponse({
+                systemPrompt: 'Output raw JSON only. No markdown.',
+                userPrompt: prompt,
+                temperature: 0.7
+            });
+            if (jsonStr) {
+                const cleanJson = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+                const result = JSON.parse(cleanJson);
+                tagline = result.tagline || tagline;
+                vibeTitle = result.title || vibeTitle;
+            } else if (profile) {
+                tagline = { ja: profile.description, en: profile.description, zh: profile.description };
+                vibeTitle = { ja: profile.core_vibes[0] || 'Tokyo Spot', en: profile.core_vibes[0] || 'Tokyo Spot', zh: profile.core_vibes[0] || 'Tokyo Spot' };
+            }
+        } catch (e) {
+            console.warn('Tagline generation failed:', e);
+            if (profile) {
+                tagline = { ja: profile.description, en: profile.description, zh: profile.description };
+                vibeTitle = { ja: profile.core_vibes[0] || 'Tokyo Spot', en: profile.core_vibes[0] || 'Tokyo Spot', zh: profile.core_vibes[0] || 'Tokyo Spot' };
+            }
+        }
+
+        // Fill empty title/tagline if still empty
+        if (!vibeTitle.ja) vibeTitle = { ja: '人気のエリア', en: 'Popular Spot', zh: '熱門景點' };
+        if (!tagline.ja) tagline = { ja: '魅力的な東京の街', en: 'A charming Tokyo district', zh: '充滿魅力的東京街區' };
+
         return {
-            summary,
+            summary: {
+                ja: summaryJa,
+                en: summaryEn,
+                zh: summaryZh
+            },
+            title: vibeTitle,
+            tagline,
             seasonalFlags,
             keywords: rawKeywords,
             weightedKeywords
@@ -129,13 +224,34 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
         // Fallback to profile if available
         if (profile) {
             return {
-                summary: profile.description,
+                summary: {
+                    ja: profile.description,
+                    en: profile.description, // TODO: Translation
+                    zh: profile.description  // TODO: Translation
+                },
+                title: {
+                     ja: profile.core_vibes[0] || 'Popular Spot',
+                     en: profile.core_vibes[0] || 'Popular Spot',
+                     zh: profile.core_vibes[0] || 'Popular Spot'
+                },
+                tagline: {
+                    ja: profile.description,
+                    en: profile.description,
+                    zh: profile.description
+                },
                 seasonalFlags: [],
                 keywords: profile.core_vibes,
                 weightedKeywords: profile.core_vibes.map(v => ({ word: v, weight: 10 }))
             };
         }
-        return { summary: '', seasonalFlags: [], keywords: [], weightedKeywords: [] };
+        return { 
+            summary: { ja: '', en: '', zh: '' }, 
+            title: { ja: '', en: '', zh: '' },
+            tagline: { ja: '', en: '', zh: '' },
+            seasonalFlags: [], 
+            keywords: [], 
+            weightedKeywords: [] 
+        };
     }
 }
 

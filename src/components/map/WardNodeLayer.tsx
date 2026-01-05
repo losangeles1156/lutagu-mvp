@@ -1,14 +1,17 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useWardStore, Ward } from '@/lib/stores/wardStore';
 import { NodeMarker } from './NodeMarker';
+import { fetchNodesByWard } from '@/lib/api/nodesByWard';
+import { NodeDatum } from '@/lib/api/nodes';
 
 interface WardNodeLayerProps {
     wardId?: string | null;
     onNodeClick?: (node: any) => void;
     showHubBadge?: boolean;
     className?: string;
+    locale?: string;
 }
 
 export function WardNodeLayer({
@@ -16,6 +19,7 @@ export function WardNodeLayer({
     onNodeClick,
     showHubBadge = true,
     className,
+    locale = 'zh-TW',
 }: WardNodeLayerProps) {
     const { wards, fetchWards, isLoading, error } = useWardStore();
 
@@ -82,6 +86,7 @@ export function WardNodeLayer({
                     ward={ward}
                     onNodeClick={onNodeClick}
                     showHubBadge={showHubBadge}
+                    locale={locale}
                 />
             ))}
         </div>
@@ -119,13 +124,16 @@ function WardNodes({
     ward,
     onNodeClick,
     showHubBadge,
+    locale = 'zh-TW',
 }: {
     ward: Ward;
     onNodeClick?: (node: any) => void;
     showHubBadge: boolean;
+    locale?: string;
 }) {
-    // This would fetch actual nodes for the ward
-    // For now, render a placeholder ward indicator
+    // Fetch actual nodes for the ward
+    const { nodes, isLoading } = useWardNodes(ward.id);
+
     const name = ward.name_i18n['zh-TW'] || ward.name_i18n['ja'] || ward.id;
 
     return (
@@ -141,32 +149,67 @@ function WardNodes({
             >
                 <span className="ward-name">{name}</span>
                 <span className="ward-stats">
-                    {ward.node_count} 站點 / {ward.hub_count} 樞紐
+                    {isLoading ? '載入中...' : `${nodes.length} 站點`} / {ward.hub_count} 樞紐
                 </span>
             </div>
+
+            {/* Render Actual Nodes */}
+            {nodes.map((node) => (
+                <NodeMarker
+                    key={node.id}
+                    node={node}
+                    hubDetails={{
+                        member_count: 0,
+                        transfer_type: 'indoor',
+                        transfer_complexity: 'simple',
+                        walking_distance_meters: null,
+                        indoor_connection_notes: null
+                    }}
+                    zone="core"
+                    locale={locale}
+                    zoom={15} // Default zoom for ward view
+                />
+            ))}
         </div>
     );
 }
 
 // Hook for using ward-based node data
 export function useWardNodes(wardId: string | null) {
-    const { wards, fetchWards, isLoading } = useWardStore();
+    const { wards, fetchWards, isLoading: isWardsLoading } = useWardStore();
+    const [nodes, setNodes] = useState<NodeDatum[]>([]);
+    const [isLoadingNodes, setIsLoadingNodes] = useState(false);
 
     const ward = useMemo(() => {
         if (!wardId) return null;
         return wards.find((w) => w.id === wardId) || null;
     }, [wards, wardId]);
 
-    const nodes = useMemo(() => {
-        // In a real implementation, this would fetch from the API
-        // /api/wards/[wardId]/nodes
-        return [];
-    }, [ward]);
+    useEffect(() => {
+        if (!wardId) {
+            setNodes([]);
+            return;
+        }
+
+        let mounted = true;
+        setIsLoadingNodes(true);
+        
+        fetchNodesByWard(wardId)
+            .then(data => {
+                if (mounted) setNodes(data);
+            })
+            .catch(err => console.error(err))
+            .finally(() => {
+                if (mounted) setIsLoadingNodes(false);
+            });
+
+        return () => { mounted = false; };
+    }, [wardId]);
 
     return {
         ward,
         nodes,
-        isLoading: isLoading && wards.length === 0,
+        isLoading: isWardsLoading || isLoadingNodes,
         refetch: fetchWards,
     };
 }

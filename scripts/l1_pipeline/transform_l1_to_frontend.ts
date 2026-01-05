@@ -33,6 +33,8 @@ interface L1_VibeTag {
 interface L1_DNA_Data {
     categories: { [key: string]: L1_Category };
     vibe_tags: L1_VibeTag[];
+    tagline?: LocaleString;
+    title?: LocaleString;
     last_updated: string;
 }
 
@@ -58,7 +60,9 @@ interface L1_Result {
     ward: string;
     isHub: boolean;
     wikiAnalysis: {
-        summary: string;
+        summary: { ja: string; en: string; zh: string };
+        title?: { ja: string; en: string; zh: string };
+        tagline?: { ja: string; en: string; zh: string };
         seasonalFlags: string[];
         weightedKeywords: any[];
     };
@@ -96,6 +100,31 @@ function mapCategory(catId: string): LocaleString {
 }
 
 function mapVibeTag(tagStr: string): L1_VibeTag {
+    // Tokyo
+    if (tagStr.includes('Capital Gateway')) return { id: 'capital_gateway', label: { en: 'Capital Gateway', ja: '日本の玄関口', zh: '首都玄關' }, score: 5 };
+    if (tagStr.includes('Historical Architecture')) return { id: 'historical_arch', label: { en: 'Historical Architecture', ja: '歴史的建築', zh: '歷史建築' }, score: 4 };
+    
+    // Asakusa
+    if (tagStr.includes('Traditional Japan')) return { id: 'traditional_japan', label: { en: 'Traditional Japan', ja: '日本の伝統', zh: '傳統風情' }, score: 5 };
+    if (tagStr.includes('Sightseeing Hub')) return { id: 'sightseeing_hub', label: { en: 'Sightseeing Hub', ja: '観光拠点', zh: '觀光勝地' }, score: 5 };
+    if (tagStr.includes('Senso-ji')) return { id: 'sensoji', label: { en: 'Senso-ji Temple', ja: '浅草寺', zh: '淺草寺' }, score: 5 };
+
+    // Ueno
+    if (tagStr.includes('Museum Hub')) return { id: 'museum_hub', label: { en: 'Museum Hub', ja: '美術館・博物館', zh: '博物館群' }, score: 5 };
+    if (tagStr.includes('Ameyoko')) return { id: 'ameyoko', label: { en: 'Ameyoko Market', ja: 'アメ横', zh: '阿美橫町' }, score: 5 };
+    if (tagStr.includes('Transport Hub')) return { id: 'transport_hub', label: { en: 'Transport Hub', ja: '交通の要衝', zh: '交通樞紐' }, score: 4 };
+
+    // Akihabara
+    if (tagStr.includes('Electric Town')) return { id: 'electric_town', label: { en: 'Electric Town', ja: '電気街', zh: '電器街' }, score: 5 };
+    if (tagStr.includes('Maid Cafe')) return { id: 'maid_cafe', label: { en: 'Maid Cafe', ja: 'メイドカフェ', zh: '女僕咖啡廳' }, score: 4 };
+
+    // Shibuya / Harajuku
+    if (tagStr.includes('Youth Culture')) return { id: 'youth_culture', label: { en: 'Youth Culture', ja: '若者文化', zh: '年輕文化' }, score: 5 };
+    if (tagStr.includes('IT Hub')) return { id: 'it_hub', label: { en: 'IT Hub (Bit Valley)', ja: 'IT企業の集積地', zh: 'IT產業聚落' }, score: 4 };
+    if (tagStr.includes('Fashion')) return { id: 'fashion', label: { en: 'Fashion Center', ja: 'ファッションの中心', zh: '時尚中心' }, score: 5 };
+    if (tagStr.includes('Kawaii')) return { id: 'kawaii', label: { en: 'Kawaii Culture', ja: 'カワイイ文化', zh: '可愛文化' }, score: 5 };
+    
+    // General / Existing
     if (tagStr.includes('Gourmet Battleground')) {
         return { id: 'gourmet', label: { en: 'Gourmet Battleground', ja: 'グルメ激戦区', zh: '美食激戰區' }, score: 5 };
     }
@@ -204,6 +233,8 @@ async function main() {
         outputData[station.clusterId] = {
             categories,
             vibe_tags,
+            tagline: station.wikiAnalysis.tagline || station.wikiAnalysis.summary,
+            title: station.wikiAnalysis.title,
             last_updated: new Date().toISOString()
         };
     }

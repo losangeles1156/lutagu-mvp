@@ -48,9 +48,6 @@ const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { l
                         {line.operator}
                     </p>
                 </div>
-                <span className="px-1.5 py-0.5 bg-gray-200 text-gray-500 text-[9px] font-black rounded-md shrink-0">
-                    OK
-                </span>
             </div>
         );
     }
@@ -74,10 +71,8 @@ const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { l
                         </span>
                     </h4>
 
-                    {isDelay ? (
+                    {isDelay && (
                         <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded-full animate-pulse shrink-0">DELAY</span>
-                    ) : (
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-black rounded-full shrink-0">OK</span>
                     )}
                 </div>
                 <div className="flex justify-between items-center">
@@ -87,7 +82,6 @@ const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { l
                             : (isDelay ? tL2('status.delay') : tL2('status.normal'))
                         }
                     </p>
-                    {/* <span className="text-[10px] font-mono font-bold text-gray-400 shrink-0">Next: 3m</span> */}
                 </div>
             </div>
         </div>
@@ -238,10 +232,11 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                         <span className="text-[8px] font-bold text-gray-300 uppercase tracking-tight">Source: ODPT</span>
                         <span className="text-[10px] font-medium text-gray-400">
                             {updatedAt && <span className="ml-1 text-xs font-mono text-indigo-400">
-                                {new Date(updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Tokyo' })}
                             </span>}
                         </span>
                     </div>
+
                 </div>
 
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-1">

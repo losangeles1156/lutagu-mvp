@@ -1,7 +1,10 @@
 
 import { STATION_WISDOM, KNOWLEDGE_BASE } from '@/data/stationWisdom';
 import { supabaseAdmin } from '@/lib/supabase';
-import { WeatherTool, TrainStatusTool } from './tools/standardTools';
+import { WeatherTool, TrainStatusTool, FareTool, TimetableTool } from './tools/standardTools';
+import { odptClient } from '@/lib/odpt/client';
+import { getJSTTime } from '@/lib/utils/timeUtils';
+import { findSimpleRoutes, RailwayTopology, normalizeOdptStationId } from '@/lib/l4/assistantEngine';
 
 // Mistral Tool Schema Types
 export interface MistralToolSchema {
@@ -43,6 +46,51 @@ export const AGENT_TOOLS: MistralToolSchema[] = [
                     stationId: { type: 'string', description: 'The ID of the station' }
                 },
                 required: ['stationId']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_timetable',
+            description: 'Get train timetable for a station. Returns next 3 trains for each direction. Use for "schedule", "時刻表", "next train", "末班車".',
+            parameters: {
+                type: 'object',
+                properties: {
+                    stationId: { type: 'string', description: 'The ODPT station ID (e.g., odpt.Station:TokyoMetro.Ginza.Asakusa)' },
+                    operator: { type: 'string', description: 'Optional operator ID for filtering' }
+                },
+                required: ['stationId']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_fare',
+            description: 'Calculate fare between two stations. Returns IC card fare and ticket fare. Use for "票價", "fare", "ticket price", "多少錢".',
+            parameters: {
+                type: 'object',
+                properties: {
+                    fromStation: { type: 'string', description: 'Origin station ODPT ID' },
+                    toStation: { type: 'string', description: 'Destination station ODPT ID' }
+                },
+                required: ['fromStation', 'toStation']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_route',
+            description: 'Get route/transfer information between two stations. Returns step-by-step directions. Use for "怎麼去", "route", "transfer", "轉乘".',
+            parameters: {
+                type: 'object',
+                properties: {
+                    fromStation: { type: 'string', description: 'Origin station ODPT ID' },
+                    toStation: { type: 'string', description: 'Destination station ODPT ID' }
+                },
+                required: ['fromStation', 'toStation']
             }
         }
     },
@@ -93,6 +141,64 @@ export const AGENT_TOOLS: MistralToolSchema[] = [
 ];
 
 /**
+ * 輔助函數：獲取基本路線資訊（當無法計算時的回退）
+ */
+function getBasicRouteInfo(fromName: string, toName: string, locale: string): string {
+    const fromOp = fromName.includes('Toei') || fromName.includes('都営') ? '都営' 
+        : fromName.includes('JR') || fromName.includes('東日本') ? 'JR' 
+        : '東京Metro';
+    const toOp = toName.includes('Toei') || toName.includes('都営') ? '都営' 
+        : toName.includes('JR') || toName.includes('東日本') ? 'JR' 
+        : '東京Metro';
+    
+    if (locale === 'zh-TW') {
+        return `\n🗺️ ${fromName} → ${toName} 路徑規劃\n━━━━━━━━━━━━━━━━\n📍 起點: ${fromName} (${fromOp})\n📍 終點: ${toName} (${toOp})\n\n${fromOp === toOp ? '✅ 同一營運商，可直接轉乘' : '⚠️ 跨營運商轉乘，建議在主要轉乘站（如東京、新宿、池袋）轉乘'}\n\n💡 詳細路線請參考車站內的轉乘指南或使用 Google Maps。`;
+    } else if (locale === 'ja') {
+        return `\n🗺️ ${fromName} → ${toName} ルート案内\n━━━━━━━━━━━━━━━━\n📍 出発: ${fromName} (${fromOp})\n📍 到着: ${toName} (${toOp})\n\n${fromOp === toOp ? '✅ 同じ運営者ですぐに乗り継ぎできます' : '⚠️ 他の運営者への乗り継ぎが必要です'}\n\n💡 詳しいルートは駅内の案内標識をご覧ください。`;
+    } else {
+        return `\n🗺️ ${fromName} → ${toName} Route Planning\n━━━━━━━━━━━━━━━━\n📍 From: ${fromName} (${fromOp})\n📍 To: ${toName} (${toOp})\n\n${fromOp === toOp ? '✅ Same operator, easy transfer' : '⚠️ Cross-operator transfer required'}\n\n💡 Check station signs or use Google Maps for detailed directions.`;
+    }
+}
+
+/**
+ * 輔助函數：獲取路線專家建議
+ */
+function getExpertTipsForRoute(fromStation: string, toStation: string, locale: string): string | null {
+    // 常見路線的專家建議
+    const from = normalizeOdptStationId(fromStation);
+    const to = normalizeOdptStationId(toStation);
+    
+    // 淺草相關路線
+    if (from.includes('Asakusa') || to.includes('Asakusa')) {
+        if (locale === 'zh-TW') {
+            return '💡 淺草站與東武線轉乘需出站，請預留 5-10 分鐘。淺草站 1 號出口最靠近雷門。';
+        } else if (locale === 'ja') {
+            return '💡 浅草駅と東武線への乗り継ぎは改札外が必要です。5-10 分程度の余裕を持ってください。';
+        }
+    }
+    
+    // 上野相關路線
+    if (from.includes('Ueno') || to.includes('Ueno')) {
+        if (locale === 'zh-TW') {
+            return '💡 上野站 3 號出口有電梯，適合大行李與嬰兒車。轉乘日比谷線需經過較長地下通道。';
+        } else if (locale === 'ja') {
+            return '💡 上野駅 3 番出口にエレベーターがあります。日比谷線への乗り継ぎは地下通路が長いです。';
+        }
+    }
+    
+    // 新宿相關路線
+    if (from.includes('Shinjuku') || to.includes('Shinjuku')) {
+        if (locale === 'zh-TW') {
+            return '💡 新宿站是世界最繁忙車站，共有超過 200 個出口，請務必確認目標出口名稱。';
+        } else if (locale === 'ja') {
+            return '💡 新宿駅は世界で最も忙しい駅です。200 以上の出口があるので、目的地の出口を必ず確認してください。';
+        }
+    }
+    
+    return null;
+}
+
+/**
  * Execution Handlers for the tools
  */
 export const TOOL_HANDLERS = {
@@ -127,9 +233,9 @@ export const TOOL_HANDLERS = {
 
         // Humanize weather condition
         const conditionMap: Record<string, Record<string, string>> = {
-            'sunny': { 'zh-TW': '晴朗適合外出', 'ja': '晴れで外出日和', 'en': 'sunny and great for exploring' },
+            'sunny': { 'zh-TW': '天氣晴朗', 'ja': '晴れています', 'en': 'sunny' },
             'clear': { 'zh-TW': '天氣晴朗', 'ja': '晴れています', 'en': 'clear skies' },
-            'cloudy': { 'zh-TW': '多雲但舒適', 'ja': '曇りですが快適', 'en': 'cloudy but comfortable' },
+            'cloudy': { 'zh-TW': '多雲', 'ja': '曇り', 'en': 'cloudy' },
             'rainy': { 'zh-TW': '正在下雨，建議走地下通道', 'ja': '雨が降っています、地下通路がおすすめ', 'en': 'raining, recommend underground passages' },
             'unknown': { 'zh-TW': '天氣資訊更新中', 'ja': '天気情報更新中', 'en': 'weather data updating' }
         };
@@ -311,6 +417,205 @@ export const TOOL_HANDLERS = {
             return `${advice}${alertText}`;
         } catch (e: any) {
             return `擁擠度資料暫時無法取得。`;
+        }
+    },
+    
+    // ========== L4 新增工具 ==========
+    
+    /**
+     * 時刻表查詢工具
+     */
+    get_timetable: async (params: { stationId: string; operator?: string }, context: any) => {
+        try {
+            const locale = context.locale || 'zh-TW';
+            const stationName = params.stationId.split('.').pop() || params.stationId;
+            
+            // 使用 ODPT API 獲取時刻表
+            const timetables = await odptClient.getStationTimetable(params.stationId, params.operator);
+            
+            if (!timetables || timetables.length === 0) {
+                return locale === 'zh-TW' 
+                    ? `⚠️ 無法取得 ${stationName} 的時刻表資料`
+                    : locale === 'ja'
+                        ? `⚠️ ${stationName} の時刻表データを取得できません`
+                        : `⚠️ Unable to get timetable data for ${stationName}`;
+            }
+            
+            // 獲取 JST 時間用於過濾
+            const { hour, minute, isHoliday } = getJSTTime();
+            const currentMinutes = hour * 60 + minute;
+            const calendarType = isHoliday ? 'Holiday' : 'Weekday';
+            
+            // 過濾並處理時刻表
+            const result: Record<string, any[]> = {};
+            
+            timetables.forEach((table: any) => {
+                const cal = table['odpt:calendar']?.replace('odpt.Calendar:', '') || '';
+                // 只處理平日或假日類型匹配的時刻表
+                if (!cal.includes(calendarType) && !cal.includes('SaturdayHoliday') && !cal.includes('Holiday')) {
+                    if (calendarType === 'Weekday' && !cal.includes('Weekday')) return;
+                }
+                
+                const direction = table['odpt:railDirection']?.replace('odpt.RailDirection:', '') || 'Unknown';
+                const trips = table['odpt:stationTimetableObject'] || [];
+                
+                // 找出接下來的 3 班車
+                const upcoming = trips
+                    .map((trip: any) => {
+                        const [h, m] = (trip['odpt:departureTime'] || '00:00').split(':').map(Number);
+                        const tripMinutes = h * 60 + m;
+                        return { ...trip, minutes: tripMinutes };
+                    })
+                    .filter((trip: any) => trip.minutes >= currentMinutes)
+                    .sort((a: any, b: any) => a.minutes - b.minutes)
+                    .slice(0, 3)
+                    .map((trip: any) => ({
+                        time: trip['odpt:departureTime'],
+                        dest: trip['odpt:destinationStation']?.[0]?.split('.').pop() || 'Unknown',
+                        trainType: trip['odpt:trainType']?.split(':').pop() || ''
+                    }));
+                
+                if (upcoming.length > 0) {
+                    if (!result[direction]) result[direction] = [];
+                    result[direction].push(...upcoming);
+                }
+            });
+            
+            // 格式化輸出
+            let output = '';
+            const dirLabel = locale === 'zh-TW' ? '方向' : locale === 'ja' ? '方面' : 'Direction';
+            
+            for (const [direction, trains] of Object.entries(result)) {
+                output += `\n【${dirLabel}: ${direction}】\n`;
+                trains.forEach((t: any) => {
+                    const trainInfo = t.trainType ? ` (${t.trainType})` : '';
+                    output += `  ${t.time} → ${t.dest}${trainInfo}\n`;
+                });
+            }
+            
+            if (!output) {
+                return locale === 'zh-TW' 
+                    ? `⚠️ ${stationName} 目前沒有後續班次`
+                    : locale === 'ja'
+                        ? `⚠️ ${stationName} に後続の列車はありません`
+                        : `⚠️ No upcoming trains at ${stationName}`;
+            }
+            
+            return output.trim();
+        } catch (e: any) {
+            console.error('get_timetable error:', e);
+            return `⚠️ 時刻表查詢失敗: ${e.message}`;
+        }
+    },
+    
+    /**
+     * 票價查詢工具
+     */
+    get_fare: async (params: { fromStation: string; toStation: string }, context: any) => {
+        try {
+            const locale = context.locale || 'zh-TW';
+            const fromName = params.fromStation.split('.').pop() || params.fromStation;
+            const toName = params.toStation.split('.').pop() || params.toStation;
+            
+            // 使用 ODPT API 獲取票價
+            const fares = await odptClient.getFares(params.fromStation, params.toStation);
+            
+            if (!fares || fares.length === 0) {
+                return locale === 'zh-TW' 
+                    ? `⚠️ 無法取得 ${fromName} 到 ${toName} 的票價`
+                    : locale === 'ja'
+                        ? `⚠️ ${fromName} から ${toName} までの運賃を取得できません`
+                        : `⚠️ Unable to get fare from ${fromName} to ${toName}`;
+            }
+            
+            // 格式化輸出
+            const fare = fares[0];
+            const icFare = fare['odpt:icCardFare'];
+            const ticketFare = fare['odpt:ticketFare'];
+            
+            if (locale === 'zh-TW') {
+                return `\n💰 ${fromName} → ${toName} 票價\n━━━━━━━━━━━━━━━━\n🎫 車票 (Ticket): ¥${ticketFare}\n💳 IC 卡 (IC): ¥${icFare}\n━━━━━━━━━━━━━━━━\n💡 IC 卡通常比車票便宜 ¥1-2`;
+            } else if (locale === 'ja') {
+                return `\n💰 ${fromName} → ${toName} 運賃\n━━━━━━━━━━━━━━━━\n🎫 切符 (Ticket): ¥${ticketFare}\n💳 IC 卡 (IC): ¥${icFare}\n━━━━━━━━━━━━━━━━\n💡 IC 卡は切符より ¥1-2 安い`;
+            } else {
+                return `\n💰 ${fromName} → ${toName} Fare\n━━━━━━━━━━━━━━━━\n🎫 Ticket: ¥${ticketFare}\n💳 IC Card: ¥${icFare}\n━━━━━━━━━━━━━━━━\n💡 IC card is usually ¥1-2 cheaper than ticket`;
+            }
+        } catch (e: any) {
+            console.error('get_fare error:', e);
+            return `⚠️ 票價查詢失敗: ${e.message}`;
+        }
+    },
+    
+    /**
+     * 路徑查詢工具 - 使用 findSimpleRoutes 計算真實路線
+     */
+    get_route: async (params: { fromStation: string; toStation: string }, context: any) => {
+        try {
+            const locale = context.locale || 'zh-TW';
+            const fromName = params.fromStation.split('.').pop() || params.fromStation;
+            const toName = params.toStation.split('.').pop() || params.toStation;
+            
+            // 1. 獲取所有鐵路線數據用於計算路線
+            const railways = await odptClient.getRailways();
+            
+            if (!railways || railways.length === 0) {
+                // 如果無法獲取鐵路數據，回退到基本建議
+                return getBasicRouteInfo(fromName, toName, locale);
+            }
+            
+            // 2. 轉換為 RailwayTopology 格式
+            const railwayTopologies: RailwayTopology[] = railways.map((r: any) => ({
+                railwayId: r['owl:sameAs'],
+                operator: r['odpt:operator'],
+                title: r['odpt:title'],
+                stationOrder: (r['odpt:stationOrder'] || []).map((s: any, idx: number) => ({
+                    index: idx,
+                    station: s,
+                    title: {}
+                }))
+            }));
+            
+            // 3. 使用 findSimpleRoutes 計算路線
+            const routes = findSimpleRoutes({
+                originStationId: params.fromStation,
+                destinationStationId: params.toStation,
+                railways: railwayTopologies,
+                locale: locale
+            });
+            
+            if (routes.length === 0) {
+                return getBasicRouteInfo(fromName, toName, locale);
+            }
+            
+            // 4. 格式化輸出
+            let output = '';
+            const routeLabel = locale === 'zh-TW' ? '路線方案' : locale === 'ja' ? 'ルート案內' : 'Route Options';
+            
+            routes.forEach((route, idx) => {
+                output += `\n${routeLabel} ${idx + 1}: ${route.label}\n`;
+                output += '────────────────\n';
+                route.steps.forEach((step: string) => {
+                    output += `${step}\n`;
+                });
+                output += '\n';
+            });
+            
+            // 5. 添加專家建議
+            const expertTips = getExpertTipsForRoute(params.fromStation, params.toStation, locale);
+            if (expertTips) {
+                output += '────────────────\n';
+                output += expertTips;
+            }
+            
+            return output.trim();
+            
+        } catch (e: any) {
+            console.error('get_route error:', e);
+            return getBasicRouteInfo(
+                params.fromStation.split('.').pop() || params.fromStation,
+                params.toStation.split('.').pop() || params.toStation,
+                context.locale || 'zh-TW'
+            );
         }
     }
 };

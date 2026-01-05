@@ -34,6 +34,7 @@ export interface L1_VibeTag {
 export interface L1_DNA_Data {
     categories: { [key: string]: L1_Category };
     vibe_tags: L1_VibeTag[];
+    tagline?: LocaleString;
     last_updated: string;
 }
 

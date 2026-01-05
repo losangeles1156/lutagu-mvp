@@ -13,7 +13,9 @@ interface WeatherAlert {
     };
     original_summary: string;
     updated: string;
-    severity: 'info' | 'warning' | 'critical';
+    severity: 'info' | 'advisory' | 'warning' | 'critical';
+    alert_type?: string;
+    region?: string;
 }
 
 export function WeatherBanner() {
@@ -50,12 +52,14 @@ export function WeatherBanner() {
     const mainAlert = alerts[0];
     const severityStyles = {
         info: 'bg-blue-600 text-white',
+        advisory: 'bg-yellow-500 text-white',
         warning: 'bg-amber-500 text-white',
         critical: 'bg-rose-600 text-white'
     };
 
     const icons = {
         info: <Info size={16} />,
+        advisory: <AlertTriangle size={16} />,
         warning: <AlertTriangle size={16} />,
         critical: <ShieldAlert size={16} className="animate-pulse" />
     };
@@ -71,7 +75,9 @@ export function WeatherBanner() {
                 ? 'bg-gradient-to-r from-rose-600/90 to-rose-700/90 text-white'
                 : mainAlert.severity === 'warning'
                     ? 'bg-gradient-to-r from-amber-500/90 to-amber-600/90 text-white'
-                    : 'bg-gradient-to-r from-blue-600/90 to-blue-700/90 text-white'
+                    : mainAlert.severity === 'advisory'
+                        ? 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 text-white'
+                        : 'bg-gradient-to-r from-blue-600/90 to-blue-700/90 text-white'
             }`}>
             <div className={`absolute inset-0 bg-white/5 opacity-0 transition-opacity duration-300 ${isVisible ? 'opacity-100' : ''}`} />
 
@@ -81,7 +87,11 @@ export function WeatherBanner() {
                         {icons[mainAlert.severity]}
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-0.5">{tWeather('jmaAlert')}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest opacity-80 mb-0.5">
+                            {mainAlert.severity !== 'info' && mainAlert.region && mainAlert.alert_type
+                                ? `${mainAlert.region} ${mainAlert.alert_type}`
+                                : tWeather('jmaAlert')}
+                        </span>
                         <span className="text-xs font-bold truncate max-w-[200px] drop-shadow-sm">{mainAlert.title}</span>
                     </div>
                 </div>
@@ -110,7 +120,7 @@ export function WeatherBanner() {
                             Source: Japan Meteorological Agency (JMA)
                             <span className="px-1 py-0.5 bg-white/20 rounded text-[6px]">AI Translated</span>
                         </span>
-                        <span>Updated: {new Date(mainAlert.updated).toLocaleTimeString()}</span>
+                        <span>Updated: {new Date(mainAlert.updated).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Tokyo' })}</span>
                     </div>
                 </div>
             )}

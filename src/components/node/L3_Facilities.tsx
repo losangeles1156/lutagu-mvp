@@ -9,7 +9,7 @@ import { GLOBAL_SERVICES, ServiceCategory } from '@/data/externalServices';
 import {
     User, Briefcase, Zap, ArrowUpDown, CircleDollarSign, Baby, Bike, Wifi, Info,
     Cigarette, Boxes, ShoppingBag, Utensils, Ticket, TrainFront, Landmark, Trees, Bed, Loader2, ExternalLink,
-    ChevronDown, MapPin, Users, Luggage, BatteryCharging, HandMetal, X, ArrowRight
+    ChevronDown, MapPin, Users, Luggage, BatteryCharging, HandMetal, X, ArrowRight, Store
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -49,7 +49,7 @@ const HIDDEN_ATTRIBUTES = new Set([
 const FACILITY_ICONS: Record<string, any> = {
     toilet: User, locker: Briefcase, charging: Zap, elevator: ArrowUpDown,
     atm: CircleDollarSign, nursery: Baby, bike: Bike, bikeshare: Bike, wifi: Wifi, info: Info,
-    smoking: Cigarette, shopping: ShoppingBag, dining: Utensils, leisure: Ticket,
+    smoking: Cigarette, shopping: Store, dining: Utensils, leisure: Ticket,
     transport: TrainFront, religion: Landmark, nature: Trees, accommodation: Bed,
     // Additional mappings
     barrier_free_entrance: Users,

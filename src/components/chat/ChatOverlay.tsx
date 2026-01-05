@@ -111,19 +111,17 @@ export function ChatOverlay() {
         addMessage({ role: 'assistant', content: '', isLoading: true });
 
         try {
-            const response = await fetch('/api/agent/chat', {
+            // Use Dify Agent endpoint
+            const response = await fetch('/api/dify/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [...existingMessages, { role: 'user', content: text }],
-                    nodeId: currentNodeId, // Pass current node if available
+                    query: text,
                     inputs: {
-                        zone: zone || 'core',
-                        userLocation,
+                        user_profile: 'general',
+                        current_station: currentNodeId || '',
                         locale,
-                        // Add context from L2 status if available
-                        l2_delay: l2Status?.delay || 0,
-                        l2_congestion: l2Status?.congestion || 0
+                        zone: zone || 'core'
                     }
                 })
             });
@@ -148,9 +146,8 @@ export function ChatOverlay() {
                         try {
                             const data = JSON.parse(line.slice(6));
 
-                            if (data.event === 'meta') {
-                                if (data.mode === 'offline') setIsOffline(true);
-                            } else if (data.event === 'message') {
+                            // Dify uses 'agent_message' for streaming responses
+                            if (data.event === 'agent_message' || data.event === 'message') {
                                 accumulatedAnswer += (data.answer || '');
 
                                 // Update the last message (assistant) with new content
@@ -390,7 +387,7 @@ export function ChatOverlay() {
                             {l2Status.reason_zh_tw || l2Status.reason_ja}
                         </p>
                         <p className="text-[9px] text-rose-400 font-medium">
-                            {tL2('updatedAtPrefix')}: {new Date(l2Status.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {tL2('updatedAtPrefix')}: {new Date(l2Status.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}
                         </p>
                     </div>
                 </div>
@@ -471,8 +468,8 @@ export function ChatOverlay() {
                                         onClick={() => handleFeedback(idx, 1)}
                                         disabled={!!msg.feedback}
                                         className={`p-1.5 rounded-full transition-all active:scale-90 ${msg.feedback?.score === 1
-                                                ? 'bg-emerald-100 text-emerald-600'
-                                                : 'hover:bg-gray-100 text-gray-300 hover:text-emerald-500'
+                                            ? 'bg-emerald-100 text-emerald-600'
+                                            : 'hover:bg-gray-100 text-gray-300 hover:text-emerald-500'
                                             }`}
                                         title={tChat('feedbackLike')}
                                     >
@@ -482,8 +479,8 @@ export function ChatOverlay() {
                                         onClick={() => handleFeedback(idx, -1)}
                                         disabled={!!msg.feedback}
                                         className={`p-1.5 rounded-full transition-all active:scale-90 ${msg.feedback?.score === -1
-                                                ? 'bg-rose-100 text-rose-600'
-                                                : 'hover:bg-gray-100 text-gray-300 hover:text-rose-500'
+                                            ? 'bg-rose-100 text-rose-600'
+                                            : 'hover:bg-gray-100 text-gray-300 hover:text-rose-500'
                                             }`}
                                         title={tChat('feedbackDislike')}
                                     >

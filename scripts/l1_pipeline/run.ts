@@ -86,11 +86,18 @@ async function main() {
     }
 
     // 2. Process each cluster
+    const TARGETS = ['Akihabara', 'Jimbocho', 'Jinbocho', 'Tokyo', 'Shinjuku', 'Shibuya', 'Ueno', 'Ginza', 'Asakusa'];
+    
     for (const cluster of clusters) {
-        if (processedIds.has(cluster.primaryId) || staticIds.has(cluster.primaryId)) {
+        if (processedIds.has(cluster.primaryId)) { // || staticIds.has(cluster.primaryId)) {
             // console.log(`⏭️ Skipping ${cluster.primaryId} (Already processed)`);
             continue;
         }
+
+        const nameEn = typeof cluster.stations[0].name === 'string' ? cluster.stations[0].name : cluster.stations[0].name.en;
+        const isTarget = TARGETS.some(t => nameEn.includes(t));
+        
+        if (!isTarget) continue;
 
         console.log(`\n📍 Processing Cluster: ${cluster.primaryId} (${cluster.ward})...`);
 
@@ -110,13 +117,13 @@ async function main() {
         let wikiData;
         try {
             wikiData = await analyzeWiki(wikiTitle, profile);
-            console.log(`   📖 Wiki Summary: ${wikiData.summary.substring(0, 50)}...`);
+            console.log(`   📖 Wiki Summary: ${wikiData.summary.ja.substring(0, 50)}...`);
             if (wikiData.seasonalFlags.length > 0) {
                 console.log(`   🌸 Seasonal Flags: ${wikiData.seasonalFlags.join(', ')}`);
             }
         } catch (error) {
             console.error(`   ❌ Wiki Error: ${error}`);
-            wikiData = { summary: '', seasonalFlags: [] as string[], weightedKeywords: [] };
+            wikiData = { summary: { ja: '', en: '', zh: '' }, seasonalFlags: [] as string[], weightedKeywords: [] };
         }
 
         // C. OSM Fetching (with Profile overrides)

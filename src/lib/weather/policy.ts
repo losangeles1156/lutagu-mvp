@@ -101,13 +101,13 @@ export const WEATHER_REGION_POLICY = {
      */
     patterns: {
         // 紅色警報（Critical）- 極其嚴重，生命威脅
-        critical: /特別警報|大地震|巨大地震|津波警告|震度[6-7]|大火災警報|土砂災害特別警戒情報/,
+        critical: /特別警報|大地震|巨大地震|津波警報|大火災警報|土砂災害特別警戒情報|震度[5-9]/,
 
         // 橙色警報（Warning）- 重大影響，謹慎行動
-        warning: /警報|強風警報|波浪警報|高潮警報|大雨警報|洪水警報|大雪警報|土砂災害警戒情報|強風注意報/,
+        warning: /警報|波浪警報|高潮警報|大雨警報|大雪警報|洪水警報|土砂災害警戒情報|暴風警報/,
 
         // 黃色警報（Advisory）- 注意防範
-        advisory: /注意報/,
+        advisory: /注意報|強風注意報|大雨注意報|乾燥注意報|雷注意報|濃霧注意報|波浪注意報|高潮注意報|大雪注意報|洪水注意報/,
 
         // 藍色資訊（Info）- 一般資訊
         info: /気象情報|全般台風情報|天候情報/
@@ -135,28 +135,60 @@ export const WEATHER_REGION_POLICY = {
 
     /**
      * Determine severity level from alert title and content
+     * Uses sentence-level analysis to avoid false positives from cancellation messages and cross-region contamination.
      */
     getSeverity: (title: string, summary: string): 'info' | 'advisory' | 'warning' | 'critical' => {
-        const normalizedTitle = WEATHER_REGION_POLICY.normalize(title);
-        const normalizedSummary = WEATHER_REGION_POLICY.normalize(summary);
-        const combined = normalizedTitle + ' ' + normalizedSummary;
+        const normalize = WEATHER_REGION_POLICY.normalize;
+        const normTitle = normalize(title);
+        const normSummary = normalize(summary);
+        
+        // Prepare patterns
+        const targetRegionsPattern = new RegExp(WEATHER_REGION_POLICY.targetRegions.join('|'));
+        const clearStatementPattern = /は晴れています|は崩れ|は回復|解除|ielder|注意報解除|警報解除|解除しました|発表はありません/;
+        
+        // Split sentences (Summary + Title)
+        const sentences = normSummary.split(/[。\n]/).map(s => s.trim()).filter(s => s.length > 0);
+        sentences.push(normTitle);
+        
+        let maxSeverity: 'info' | 'advisory' | 'warning' | 'critical' = 'info';
+        const severityLevels = { info: 1, advisory: 2, warning: 3, critical: 4 };
 
-        // Check in order of priority (critical > warning > advisory > info)
-        if (WEATHER_REGION_POLICY.patterns.critical.test(combined)) {
-            return 'critical';
-        }
-        if (WEATHER_REGION_POLICY.patterns.warning.test(combined)) {
-            return 'warning';
-        }
-        if (WEATHER_REGION_POLICY.patterns.advisory.test(combined)) {
-            return 'advisory';
-        }
-        if (WEATHER_REGION_POLICY.patterns.info.test(combined)) {
-            return 'info';
-        }
+        for (const sentence of sentences) {
+            // 1. Skip clear statements / cancellations
+            if (clearStatementPattern.test(sentence)) continue;
+            
+            // 2. Region Scoping:
+            // Ensure the sentence applies to our target regions.
+            // We ignore sentences mentioning excluded regions (e.g. Izu Islands).
+            const mentionsExcluded = WEATHER_REGION_POLICY.excludedRegions.some(ex => sentence.includes(ex));
+            if (mentionsExcluded) continue;
 
-        // Default to info if no pattern matches
-        return 'info';
+            // We also require the sentence to explicitly mention a target region.
+            // This prevents "Saitama Warning" from polluting "Tokyo Advisory" in a combined feed.
+            // Exception: If the title is generic (e.g. "Weather Warning") and matches no region,
+            // we might miss it if we strictly require region match. 
+            // BUT, `isTargetRegion` filters out alerts that don't have (Target + Warning) in the same sentence.
+            // So we are safe to enforce this.
+            const mentionsTarget = targetRegionsPattern.test(sentence);
+            if (!mentionsTarget) continue;
+            
+            // 3. Determine Severity for this specific sentence
+            const sanitized = sentence.replace(/警報級の可能性/g, '');
+            
+            let currentSeverity: 'info' | 'advisory' | 'warning' | 'critical' = 'info';
+            
+            if (WEATHER_REGION_POLICY.patterns.critical.test(sanitized)) currentSeverity = 'critical';
+            else if (WEATHER_REGION_POLICY.patterns.warning.test(sanitized)) currentSeverity = 'warning';
+            else if (WEATHER_REGION_POLICY.patterns.advisory.test(sanitized)) currentSeverity = 'advisory';
+            else if (WEATHER_REGION_POLICY.patterns.info.test(sanitized)) currentSeverity = 'info';
+            
+            // Update max severity
+            if (severityLevels[currentSeverity] > severityLevels[maxSeverity]) {
+                maxSeverity = currentSeverity;
+            }
+        }
+        
+        return maxSeverity;
     },
 
     /**
@@ -173,32 +205,64 @@ export const WEATHER_REGION_POLICY = {
     },
 
     /**
-     * Adjust severity based on user profile
-     * Some profiles require higher caution levels
+     * Extract alert type from title (e.g., 強風, 大雨, 波浪)
      */
-    adjustSeverityForUser: (
-        severity: 'info' | 'advisory' | 'warning' | 'critical',
-        userProfile: 'general' | 'wheelchair' | 'stroller' | 'large_luggage'
-    ): 'info' | 'advisory' | 'warning' | 'critical' => {
-        // Wheelchair users should receive more cautious alerts
-        if (userProfile === 'wheelchair') {
-            if (severity === 'advisory') return 'warning';
-            if (severity === 'info') return 'advisory';
+    extractAlertType: (title: string): string => {
+        const normalize = WEATHER_REGION_POLICY.normalize;
+        const normTitle = normalize(title);
+        
+        const patterns = [
+            { regex: /強風/, label: '強風' },
+            { regex: /大雨/, label: '大雨' },
+            { regex: /波浪/, label: '波浪' },
+            { regex: /高潮/, label: '高潮' },
+            { regex: /大雪/, label: '大雪' },
+            { regex: /洪水/, label: '洪水' },
+            { regex: /土砂/, label: '土砂災害' },
+            { regex: /乾燥/, label: '乾燥' },
+            { regex: /雷/, label: '雷' },
+            { regex: /濃霧/, label: '濃霧' },
+            { regex: /特別警報/, label: '特別警報' },
+            { regex: /地震/, label: '地震' },
+            { regex: /震度/, label: '地震' },
+            { regex: /津波/, label: '海嘯' },
+        ];
+        for (const p of patterns) {
+            if (p.regex.test(normTitle)) return p.label;
         }
+        return '天氣';
+    },
 
-        // Stroller users also benefit from higher caution
-        if (userProfile === 'stroller') {
-            if (severity === 'info') return 'advisory';
+    /**
+     * Extract affected region from title and summary
+     */
+    extractRegion: (title: string, summary: string): string => {
+        const normalize = WEATHER_REGION_POLICY.normalize;
+        const text = normalize(title + summary);
+        
+        // Prioritize specific regions
+        const regionPatterns = [
+            { regex: /23区/, label: '東京23区' },
+            { regex: /多摩/, label: '多摩' },
+            { regex: /伊豆諸島/, label: '伊豆諸島' }, // Should be excluded usually, but if present
+            { regex: /小笠原/, label: '小笠原' },
+            { regex: /東京地方/, label: '東京' },
+            { regex: /神奈川県東部/, label: '神奈川東部' },
+            { regex: /神奈川県西部/, label: '神奈川西部' },
+            { regex: /神奈川県/, label: '神奈川' },
+            { regex: /千葉県北西部/, label: '千葉北西部' },
+            { regex: /千葉県北東部/, label: '千葉北東部' },
+            { regex: /千葉県南部/, label: '千葉南部' },
+            { regex: /千葉県/, label: '千葉' },
+            { regex: /埼玉県/, label: '埼玉' },
+            { regex: /群馬県/, label: '群馬' },
+            { regex: /茨城県/, label: '茨城' },
+            { regex: /栃木県/, label: '栃木' },
+            { regex: /山梨県/, label: '山梨' },
+        ];
+        for (const p of regionPatterns) {
+            if (p.regex.test(text)) return p.label;
         }
-
-        // Large luggage users - mainly affected by weather conditions
-        if (userProfile === 'large_luggage' && severity === 'advisory') {
-            // Heavy rain or snow advisory becomes warning for large luggage
-            if (WEATHER_REGION_POLICY.patterns.warning.test(severity)) {
-                return 'warning';
-            }
-        }
-
-        return severity;
+        return '東京'; // Default to Tokyo if vaguely matched or fallback
     }
 };

@@ -176,10 +176,11 @@ export async function POST(request: NextRequest) {
  * In production, this should call an embedding API like Google Gemini or OpenAI
  */
 async function generateQueryEmbedding(query: string): Promise<number[]> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Try GOOGLE_API_KEY first (for Gemini embedding), fallback to any available key
+  const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || process.env.MISTRAL_API_KEY;
   
   if (!apiKey) {
-    console.warn('GEMINI_API_KEY not set, using fallback');
+    console.warn('No embedding API key found (GOOGLE_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY), using fallback');
     return fallbackEmbedding(query);
   }
 

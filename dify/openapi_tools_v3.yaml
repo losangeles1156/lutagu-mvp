@@ -1,0 +1,153 @@
+openapi: 3.1.0
+info:
+  title: LUTAGU API Tools
+  description: BambiGO LUTAGU real-time transit data tools for Dify Agent
+  version: 3.0.0
+servers:
+  - url: https://lutagu.vercel.app
+paths:
+  /api/util/time:
+    get:
+      operationId: get_japan_time
+      summary: Get current Japan time
+      description: Returns current Japan Standard Time (JST) with period classification (morning_rush, evening_rush, late_night, day) and day of week.
+      responses:
+        "200":
+          description: Current Japan time data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jst_time:
+                    type: string
+                    description: Human-readable JST time
+                  hour_jst:
+                    type: integer
+                    description: Current hour in JST (0-23)
+                  period:
+                    type: string
+                    description: Time period for crowd estimation
+                  day_of_week:
+                    type: string
+                    description: Day of week in English
+
+  /api/station/context:
+    get:
+      operationId: get_station_context
+      summary: Get station information
+      description: Returns comprehensive station information including L1-L3 data (facilities, tranfers, surroundings).
+      parameters:
+        - name: stationId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Station ID like ueno, tokyo, asakusa
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ja
+          description: Response language ja, en, or zh-TW
+      responses:
+        "200":
+          description: Station context with L1-L3 data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/odpt/route:
+    get:
+      operationId: search_route
+      summary: Search transit route
+      description: Search for transit routes between two stations using ODPT API.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Origin station name in Japanese
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Destination station name in Japanese
+      responses:
+        "200":
+          description: Route search results
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/weather:
+    get:
+      operationId: get_jma_alerts
+      summary: Get JMA weather alerts
+      description: Returns current JMA weather alerts for Tokyo area including warnings and advisories.
+      responses:
+        "200":
+          description: Weather alerts from JMA
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/l4/knowledge:
+    get:
+      operationId: search_expert_knowledge
+      summary: Search transit expert knowledge
+      description: Search the expert knowledge base for transit tips, accessibility info, and local advice.
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query keywords
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ja
+          description: Response language ja, en, or zh-TW
+      responses:
+        "200":
+          description: Matching knowledge entries
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/tools/hub-info:
+    get:
+      operationId: get_hub_info
+      summary: Get Hub station info
+      description: Returns Hub node information including member stations and transfer complexity.
+      parameters:
+        - name: hubId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Hub node ID like hub:ueno or hub:shinjuku
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ja
+          description: Response language ja, en, or zh-TW
+      responses:
+        "200":
+          description: Hub node details
+          content:
+            application/json:
+              schema:
+                type: object

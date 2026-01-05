@@ -41,9 +41,9 @@ export const GLOBAL_SERVICES: Record<ServiceCategory, LocalizedService | null> =
         zh: { name: 'ChargeSPOT', url: 'https://web.charge-spot.com/home', desc: '行動電源租借' }
     },
     hands_free_tourism: {
-        ja: { name: '手ぶら観光', url: 'https://www.cloak.ecbo.io/', desc: '荷物を預けて身軽に観光' },
-        en: { name: 'Hands-Free Tourism', url: 'https://www.cloak.ecbo.io/en', desc: 'Store luggage, travel light' },
-        zh: { name: '空手觀光', url: 'https://www.cloak.ecbo.io/zh-TW', desc: '行李寄放，輕鬆觀光' }
+        ja: { name: '手ぶら観光', url: 'https://cloak.ecbo.io/', desc: '荷物を預けて身軽に観光' },
+        en: { name: 'Hands-Free Tourism', url: 'https://cloak.ecbo.io/en', desc: 'Store luggage, travel light' },
+        zh: { name: '空手觀光', url: 'https://cloak.ecbo.io/zh-TW', desc: '行李寄放，輕鬆觀光' }
     }
 };
 

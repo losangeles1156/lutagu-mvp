@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import {
     MapPin, X, Star, Lightbulb, ChevronRight,
     Coffee, ShoppingBag, Landmark, Utensils, Bed, TreePine,
-    Hospital, Building2, Briefcase, Search, Sparkles
+    Hospital, Building2, Briefcase, Search, Sparkles, Store
 } from 'lucide-react';
 import { getLocaleString, normalizeVibeTagsForDisplay } from '@/lib/utils/localeUtils';
 import { useStationDNA, L1CategorySummary, VibeTag, VIBE_RULES } from '@/hooks/useStationDNA';
@@ -18,7 +18,7 @@ import { StationUIProfile } from '@/lib/types/stationStandard';
 // Enhanced Icon Map with Colors
 const CATEGORY_STYLE: Record<string, { icon: any; color: string; bgColor: string; borderColor: string }> = {
     dining: { icon: Utensils, color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-100' },
-    shopping: { icon: ShoppingBag, color: 'text-pink-600', bgColor: 'bg-pink-50', borderColor: 'border-pink-100' },
+    shopping: { icon: Store, color: 'text-pink-600', bgColor: 'bg-pink-50', borderColor: 'border-pink-100' },
     culture: { icon: Landmark, color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-blue-100' },
     leisure: { icon: Coffee, color: 'text-emerald-600', bgColor: 'bg-emerald-50', borderColor: 'border-emerald-100' },
     nature: { icon: TreePine, color: 'text-green-700', bgColor: 'bg-green-50', borderColor: 'border-green-100' },
@@ -141,7 +141,12 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                     const topCats = filteredCategoryList.slice(0, 2);
                                     let content = '';
 
-                                    if (topCats.length >= 2) {
+                                    // Prioritize Wiki-derived Tagline
+                                    const wikiTagline = getLocaleString(tagline, locale);
+
+                                    if (wikiTagline) {
+                                        content = wikiTagline;
+                                    } else if (topCats.length >= 2) {
                                         if (locale === 'ja') content = `ここは${getCategoryLabel(topCats[0].id)}（${topCats[0].count}ヶ所）や${getCategoryLabel(topCats[1].id)}が充実したエリアです。`;
                                         else if (locale.startsWith('zh')) content = `這裡是以${getCategoryLabel(topCats[0].id)}（${topCats[0].count}處）與${getCategoryLabel(topCats[1].id)}聞名的區域。`;
                                         else content = `Known for ${getCategoryLabel(topCats[0].id)} (${topCats[0].count} spots) and ${getCategoryLabel(topCats[1].id)}.`;
@@ -150,6 +155,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                         else if (locale.startsWith('zh')) content = `以${getCategoryLabel(topCats[0].id)}（${topCats[0].count}處）為主的區域。`;
                                         else content = `Mainly featured by ${getCategoryLabel(topCats[0].id)} (${topCats[0].count} spots).`;
                                     } else {
+                                        // This fallback is now redundant but kept for safety
                                         content = getLocaleString(tagline, locale);
                                     }
 

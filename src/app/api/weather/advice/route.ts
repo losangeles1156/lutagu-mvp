@@ -205,7 +205,7 @@ export async function GET(request: Request) {
             critical: { 'zh-TW': '請關注官方警報，確保安全。', 'zh': '请关注官方警报，确保安全。', 'ja': '公式警報に注意してください。', 'en': 'Please follow official advisories.' },
             warning: { 'zh-TW': '請留意天氣變化。', 'zh': '请留意天气变化。', 'ja': '天候の変化に注意してください。', 'en': 'Please be aware of weather.' },
             advisory: { 'zh-TW': '祝您出行順利！', 'zh': '祝您出行顺利！', 'ja': '良い一日を！', 'en': 'Have a great day!' },
-            info: { 'zh-TW': '天氣不錯，祝您愉快！', 'zh': '天气不错，祝您愉快！', 'ja': '良い旅を！', 'en': 'Have a wonderful day!' }
+            info: { 'zh-TW': '祝您在東京度過愉快的一天！', 'zh': '祝您在东京度过愉快的一天！', 'ja': '東京で楽しい一日を！', 'en': 'Have a pleasant day in Tokyo!' }
         };
 
         const fallbackKey = isEmergency ? severity : 'info';

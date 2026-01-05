@@ -9,6 +9,8 @@ import { fetchNearbyNodes, fetchNodeConfig, fetchNodesByViewport, NodeDatum } fr
 import { NodeMarker } from './NodeMarker';
 import { TrainLayer } from './TrainLayer';
 import { PedestrianLayer } from './PedestrianLayer';
+import { WardNodeLoader } from './WardNodeLoader';
+import { WardSelector } from './WardSelector';
 import { useLocale } from 'next-intl';
 
 // Type definitions for hub details from API
@@ -80,12 +82,12 @@ function buildViewportKey(input: { swLat: number; swLon: number; neLat: number; 
  */
 function dedupeNodesById(nodes: NodeDatum[]) {
     const map = new Map<string, NodeDatum>();
-    
+
     nodes.forEach(n => {
         if (!n?.id) return;
-        
+
         const existing = map.get(n.id);
-        
+
         if (!existing) {
             // First time seeing this ID, add to map
             map.set(n.id, n);
@@ -93,7 +95,7 @@ function dedupeNodesById(nodes: NodeDatum[]) {
             // Compare versions
             const existingVersion = existing.version ?? 0;
             const newVersion = n.version ?? 0;
-            
+
             if (newVersion > existingVersion) {
                 // Newer version, replace
                 console.log(`[VersionControl] ${n.id}: v${existingVersion} → v${newVersion}`);
@@ -102,7 +104,7 @@ function dedupeNodesById(nodes: NodeDatum[]) {
                 // Same version, compare updated_at
                 const existingUpdated = existing.updated_at ?? 0;
                 const newUpdated = n.updated_at ?? 0;
-                
+
                 if (newUpdated > existingUpdated) {
                     console.log(`[VersionControl] ${n.id}: same v${newVersion}, newer data (${existingUpdated} → ${newUpdated})`);
                     map.set(n.id, n);
@@ -112,7 +114,7 @@ function dedupeNodesById(nodes: NodeDatum[]) {
             // else: older version, keep existing
         }
     });
-    
+
     return Array.from(map.values());
 }
 
@@ -231,9 +233,9 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
     const map = useMap();
     const abortRef = useRef<AbortController | null>(null);
     // Cache now includes version metadata for invalidation
-    const cacheRef = useRef(new Map<string, { 
-        ts: number; 
-        nodes: NodeDatum[]; 
+    const cacheRef = useRef(new Map<string, {
+        ts: number;
+        nodes: NodeDatum[];
         hubDetails: Record<string, HubDetails>;
         minVersion: number;  // Track minimum version in this cache
         maxVersion: number;  // Track maximum version in this cache
@@ -274,7 +276,7 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
         if (cached) {
             console.log(`[VersionCache] Cache hit for ${key}, minVersion: ${cached.minVersion}, maxVersion: ${cached.maxVersion}`);
         }
-        
+
         if (cached && isCacheValid(cached, 0)) {
             onError(null);
             onData(cached.nodes, cached.hubDetails);
@@ -351,16 +353,16 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
             }
 
             // [NEW] Store with version metadata
-            cacheRef.current.set(key, { 
-                ts: now, 
-                nodes: combined, 
+            cacheRef.current.set(key, {
+                ts: now,
+                nodes: combined,
                 hubDetails: allHubDetails,
                 minVersion,
                 maxVersion
             });
-            
+
             console.log(`[VersionCache] Stored cache for ${key} with versions [${minVersion}, ${maxVersion}]`);
-            
+
             onData(combined, allHubDetails);
         } catch (e: any) {
             if (e?.name === 'AbortError') return;
@@ -395,11 +397,12 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
     return null;
 }
 
-function HubNodeLayer({ nodes, hubDetails, zone, locale }: {
+function HubNodeLayer({ nodes, hubDetails, zone, locale, showAllNodes = false }: {
     nodes: NodeDatum[];
     hubDetails: Record<string, HubDetails>;
     zone: any;
-    locale: string
+    locale: string;
+    showAllNodes?: boolean;
 }) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
@@ -411,13 +414,16 @@ function HubNodeLayer({ nodes, hubDetails, zone, locale }: {
     const clampedZoom = clamp(zoom, 1, 22);
 
     // [NEW] Filter to show:
-    // - Hub nodes (is_hub = true, parent_hub_id = null) - with transfer info
-    // - Standalone nodes (is_hub = false, parent_hub_id = null) - normal stations
-    // - Hide child nodes (parent_hub_id IS NOT NULL)
+    // - If showAllNodes is true, show ALL nodes (Ward Mode)
+    // - Else:
+    //   - Hub nodes (is_hub = true, parent_hub_id = null) - with transfer info
+    //   - Standalone nodes (is_hub = false, parent_hub_id = null) - normal stations
+    //   - Hide child nodes (parent_hub_id IS NOT NULL)
     const visibleNodes = useMemo(() => {
         if (!nodes || nodes.length === 0) return [];
+        if (showAllNodes) return nodes;
         return nodes.filter(n => n.parent_hub_id === null);
-    }, [nodes]);
+    }, [nodes, showAllNodes]);
 
     return (
         <>
@@ -490,6 +496,37 @@ function AppMap() {
     const [gpsAlert, setGpsAlert] = useState<{ show: boolean, type: 'far' | 'denied' }>({ show: false, type: 'far' });
     const locale = useLocale();
 
+    // [New] Ward-Based State
+    const [activeWardId, setActiveWardId] = useState<string | null>('ward:taito'); // Default to Taito (Core)
+    const [isSwitchingWard, setIsSwitchingWard] = useState(false);
+
+    const handleWardSelect = useCallback((wardId: string) => {
+        setNodes([]); // Clear nodes to avoid confusion
+        setHubDetails({});
+        setActiveWardId(wardId);
+        setIsSwitchingWard(true);
+
+        // Optional: Fly to ward center (Hardcoded for MVP speed, or fetch from API)
+        const wardCenters: Record<string, [number, number]> = {
+            'ward:taito': [35.7141, 139.7774], // Ueno
+            'ward:chiyoda': [35.6812, 139.7671], // Tokyo Station
+            'ward:chuo': [35.6712, 139.7665], // Ginza
+            'ward:shinjuku': [35.6909, 139.7005], // Shinjuku
+            'ward:shibuya': [35.6580, 139.7016], // Shibuya
+            'ward:minato': [35.6586, 139.7454], // Tokyo Tower area
+            'ward:sumida': [35.7103, 139.8015], // Skytree area
+            'ward:koto': [35.6729, 139.8174], // Toyosu
+            'ward:shinagawa': [35.6095, 139.7300], // Shinagawa Station
+            'ward:bunkyo': [35.7081, 139.7516], // Tokyo Dome area
+            'ward:toshima': [35.7295, 139.7109], // Ikebukuro
+            'ward:arakawa': [35.7360, 139.7833], // Nippori
+        };
+        const center = wardCenters[wardId];
+        if (center) {
+            useAppStore.getState().setMapCenter({ lat: center[0], lon: center[1] });
+        }
+    }, []);
+
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
     const { userProfile, setUserProfile } = useAppStore();
@@ -532,15 +569,43 @@ function AppMap() {
                     nodes={nodes}
                 />
 
-                <ViewportNodeLoader
-                    onData={(newNodes, newHubDetails) => {
+                <WardNodeLoader
+                    wardId={activeWardId}
+                    onNodesLoaded={(newNodes: any[]) => {
                         setNodes(newNodes);
-                        setHubDetails(newHubDetails);
+                        // Hub details might need separate fetch if not in node data, 
+                        // or we can mock empty/basic details for now
+                        const simulatedDetails: Record<string, HubDetails> = {};
+                        newNodes.forEach((n: any) => {
+                            if (n.child_count !== undefined) {
+                                simulatedDetails[n.id] = {
+                                    member_count: n.child_count || 0,
+                                    transfer_type: 'interconnected',
+                                    transfer_complexity: 'medium',
+                                    walking_distance_meters: 100,
+                                    indoor_connection_notes: null
+                                };
+                            }
+                        });
+                        setHubDetails(simulatedDetails);
+                        setIsSwitchingWard(false);
+                        console.log(`[AppMap] Ward nodes updated: ${newNodes.length}`);
                     }}
-                    onLoading={setLoadingNodes}
-                    onError={setNodesError}
-                    refreshKey={refreshKey}
+                    onLoadingChange={setLoadingNodes}
                 />
+
+                {/* Viewport Loading (Fallback only if no active ward) */}
+                {!activeWardId && (
+                    <ViewportNodeLoader
+                        onData={(newNodes, newHubDetails) => {
+                            setNodes(newNodes);
+                            setHubDetails(newHubDetails);
+                        }}
+                        onLoading={setLoadingNodes}
+                        onError={setNodesError}
+                        refreshKey={refreshKey}
+                    />
+                )}
 
                 {/* User Location Marker */}
                 {userLocation && !isTooFar && (
@@ -563,7 +628,13 @@ function AppMap() {
                 )}
 
                 {/* Render Hub Nodes Only - core of station grouping design */}
-                <HubNodeLayer nodes={nodes} hubDetails={hubDetails} zone={zone} locale={locale} />
+                <HubNodeLayer
+                    nodes={nodes}
+                    hubDetails={hubDetails}
+                    zone={zone}
+                    locale={locale}
+                    showAllNodes={!!activeWardId} // Show all nodes when in Ward Mode
+                />
 
                 {/* Real-time Train Layer */}
                 <TrainLayer />
@@ -606,49 +677,59 @@ function AppMap() {
                     </span>
                 </div>
 
-                {/* Agent Profile Switcher */}
-                <div className="bg-white/90 backdrop-blur p-1 rounded-xl shadow-lg flex gap-1 pointer-events-auto">
-                    {(['general', 'wheelchair', 'stroller'] as const).map(p => (
-                        <button
-                            key={p}
-                            onClick={() => setUserProfile(p)}
-                            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${userProfile === p
-                                    ? 'bg-indigo-600 text-white shadow-md'
-                                    : 'text-slate-600 hover:bg-slate-100'
-                                }`}
-                        >
-                            {p === 'general' ? (locale === 'ja' ? '一般' : locale === 'en' ? 'Gen' : '一般') :
-                                p === 'wheelchair' ? (locale === 'ja' ? '車椅子' : locale === 'en' ? 'Wheel' : '輪椅') :
-                                    (locale === 'ja' ? 'ベビーカー' : locale === 'en' ? 'Stroll' : '嬰兒車')}
-                        </button>
-                    ))}
+                {/* Ward Selector */}
+                <div className="bg-white/90 backdrop-blur p-1 rounded-xl shadow-lg pointer-events-auto">
+                    <WardSelector
+                        currentWardId={activeWardId}
+                        onSelectWard={handleWardSelect}
+                        lang={locale as any}
+                    />
                 </div>
-
-                <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-lg text-sm font-medium">
-                    <span className="text-indigo-600 font-bold">
-                        {showingText}
-                    </span>
-                </div>
-
-                {(loadingNodes || nodesError) && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (nodesError) setRefreshKey(v => v + 1);
-                        }}
-                        className={`bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-lg text-[10px] font-black uppercase tracking-widest ${nodesError ? 'text-rose-600' : 'text-gray-700'} ${nodesError ? 'hover:bg-rose-50 active:scale-[0.98]' : ''} transition-all`}
-                    >
-                        {nodesError
-                            ? (locale.startsWith('ja') ? 'ノード取得失敗（再試行）' : locale.startsWith('en') ? 'Nodes load failed (retry)' : '節點載入失敗（重試）')
-                            : (locale.startsWith('ja') ? '読み込み中…' : locale.startsWith('en') ? 'Loading…' : '載入中…')}
-                    </button>
-                )}
-                {isTooFar && (
-                    <div className="bg-rose-500/90 text-white backdrop-blur px-3 py-1 rounded-full shadow-lg text-[10px] font-black uppercase tracking-widest animate-pulse">
-                        📍 距離過遠已回正 (UENO)
-                    </div>
-                )}
             </div>
+
+            {/* Agent Profile Switcher */}
+            <div className="bg-white/90 backdrop-blur p-1 rounded-xl shadow-lg flex gap-1 pointer-events-auto">
+                {(['general', 'wheelchair', 'stroller'] as const).map(p => (
+                    <button
+                        key={p}
+                        onClick={() => setUserProfile(p)}
+                        className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${userProfile === p
+                            ? 'bg-indigo-600 text-white shadow-md'
+                            : 'text-slate-600 hover:bg-slate-100'
+                            }`}
+                    >
+                        {p === 'general' ? (locale === 'ja' ? '一般' : locale === 'en' ? 'Gen' : '一般') :
+                            p === 'wheelchair' ? (locale === 'ja' ? '車椅子' : locale === 'en' ? 'Wheel' : '輪椅') :
+                                (locale === 'ja' ? 'ベビーカー' : locale === 'en' ? 'Stroll' : '嬰兒車')}
+                    </button>
+                ))}
+            </div>
+
+            <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-lg text-sm font-medium">
+                <span className="text-indigo-600 font-bold">
+                    {showingText}
+                </span>
+            </div>
+
+            {(loadingNodes || nodesError) && (
+                <button
+                    type="button"
+                    onClick={() => {
+                        if (nodesError) setRefreshKey(v => v + 1);
+                    }}
+                    className={`bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-lg text-[10px] font-black uppercase tracking-widest ${nodesError ? 'text-rose-600' : 'text-gray-700'} ${nodesError ? 'hover:bg-rose-50 active:scale-[0.98]' : ''} transition-all`}
+                >
+                    {nodesError
+                        ? (locale.startsWith('ja') ? 'ノード取得失敗（再試行）' : locale.startsWith('en') ? 'Nodes load failed (retry)' : '節點載入失敗（重試）')
+                        : (locale.startsWith('ja') ? '読み込み中…' : locale.startsWith('en') ? 'Loading…' : '載入中…')}
+                </button>
+            )}
+            {isTooFar && (
+                <div className="bg-rose-500/90 text-white backdrop-blur px-3 py-1 rounded-full shadow-lg text-[10px] font-black uppercase tracking-widest animate-pulse">
+                    📍 距離過遠已回正 (UENO)
+                </div>
+            )}
+
 
             {/* GPS & Navigation Controls */}
             <div className="absolute bottom-24 right-4 z-[1000] flex flex-col gap-3">
@@ -712,59 +793,61 @@ function AppMap() {
             </div>
 
             {/* GPS Alert Overlay */}
-            {gpsAlert.show && (
-                <div className="absolute inset-0 z-[2000] flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-xs rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="p-6 text-center">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ${gpsAlert.type === 'far' ? 'bg-amber-50 text-amber-500' : 'bg-rose-50 text-rose-500'}`}>
-                                {gpsAlert.type === 'far' ?
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> :
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
-                                }
-                            </div>
-                            <h3 className="text-lg font-black text-gray-900 mb-2">
-                                {gpsAlert.type === 'far' ? '距離核心區域過遠' : '定位授權失敗'}
-                            </h3>
-                            <p className="text-xs text-gray-500 font-medium leading-relaxed mb-6">
-                                {gpsAlert.type === 'far' ?
-                                    '偵測到您目前距離東京超過 50 公里。已為您預設至上野車站，您也可以手動選擇下方的門戶節點。' :
-                                    '請開啟瀏覽器定位授權，以便 LUTAGU 為您精準導航。'}
-                            </p>
-
-                            {gpsAlert.type === 'far' && (
-                                <div className="grid grid-cols-2 gap-2 mb-6 text-indigo-100">
-                                    {['上野', '淺草', '秋葉原', '東京'].map((name) => (
-                                        <button
-                                            key={name}
-                                            onClick={() => {
-                                                const nodesFallback = {
-                                                    '上野': { lat: 35.7138, lon: 139.7773 },
-                                                    '淺草': { lat: 35.7119, lon: 139.7976 },
-                                                    '秋葉原': { lat: 35.6984, lon: 139.7753 },
-                                                    '東京': { lat: 35.6812, lon: 139.7671 }
-                                                };
-                                                const target = (nodesFallback as any)[name];
-                                                useAppStore.getState().setMapCenter(target);
-                                                setGpsAlert({ show: false, type: 'far' });
-                                            }}
-                                            className="py-2.5 bg-indigo-50/50 hover:bg-indigo-600 hover:text-white text-xs font-black text-indigo-700 rounded-xl transition-all active:scale-95"
-                                        >
-                                            {name}
-                                        </button>
-                                    ))}
+            {
+                gpsAlert.show && (
+                    <div className="absolute inset-0 z-[2000] flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-xs rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                            <div className="p-6 text-center">
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ${gpsAlert.type === 'far' ? 'bg-amber-50 text-amber-500' : 'bg-rose-50 text-rose-500'}`}>
+                                    {gpsAlert.type === 'far' ?
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> :
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                                    }
                                 </div>
-                            )}
+                                <h3 className="text-lg font-black text-gray-900 mb-2">
+                                    {gpsAlert.type === 'far' ? '距離核心區域過遠' : '定位授權失敗'}
+                                </h3>
+                                <p className="text-xs text-gray-500 font-medium leading-relaxed mb-6">
+                                    {gpsAlert.type === 'far' ?
+                                        '偵測到您目前距離東京超過 50 公里。已為您預設至上野車站，您也可以手動選擇下方的門戶節點。' :
+                                        '請開啟瀏覽器定位授權，以便 LUTAGU 為您精準導航。'}
+                                </p>
 
-                            <button
-                                onClick={() => setGpsAlert({ show: false, type: 'far' })}
-                                className="w-full py-3.5 bg-gray-900 text-white rounded-2xl text-xs font-black hover:bg-gray-800 transition-colors shadow-lg active:scale-95"
-                            >
-                                好的，知道了
-                            </button>
+                                {gpsAlert.type === 'far' && (
+                                    <div className="grid grid-cols-2 gap-2 mb-6 text-indigo-100">
+                                        {['上野', '淺草', '秋葉原', '東京'].map((name) => (
+                                            <button
+                                                key={name}
+                                                onClick={() => {
+                                                    const nodesFallback = {
+                                                        '上野': { lat: 35.7138, lon: 139.7773 },
+                                                        '淺草': { lat: 35.7119, lon: 139.7976 },
+                                                        '秋葉原': { lat: 35.6984, lon: 139.7753 },
+                                                        '東京': { lat: 35.6812, lon: 139.7671 }
+                                                    };
+                                                    const target = (nodesFallback as any)[name];
+                                                    useAppStore.getState().setMapCenter(target);
+                                                    setGpsAlert({ show: false, type: 'far' });
+                                                }}
+                                                className="py-2.5 bg-indigo-50/50 hover:bg-indigo-600 hover:text-white text-xs font-black text-indigo-700 rounded-xl transition-all active:scale-95"
+                                            >
+                                                {name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={() => setGpsAlert({ show: false, type: 'far' })}
+                                    className="w-full py-3.5 bg-gray-900 text-white rounded-2xl text-xs font-black hover:bg-gray-800 transition-colors shadow-lg active:scale-95"
+                                >
+                                    好的，知道了
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

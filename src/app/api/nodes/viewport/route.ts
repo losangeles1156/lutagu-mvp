@@ -54,15 +54,22 @@ function parseLocation(loc: any): { coordinates: [number, number] } {
 function getFallbackNodes() {
     return SEED_NODES.map((n: any) => {
         const location = parseLocation(n.location);
+        
+        // Unified is_hub logic
+        const explicitIsHub = n.is_hub;
+        const isHub = typeof explicitIsHub === 'boolean' 
+            ? explicitIsHub 
+            : (n.parent_hub_id === null || n.parent_hub_id === undefined);
+            
         return {
             id: String(n.id ?? ''),
             city_id: String(n.city_id ?? ''),
             name: n.name ?? { 'zh-TW': '車站', ja: '駅', en: 'Station' },
-            type: String(n.type ?? 'station'),
+            type: String(n.node_type ?? n.type ?? 'station').toLowerCase(),
             location,
             geohash: String(n.geohash ?? ''),
             vibe: n.vibe ?? null,
-            is_hub: typeof n.is_hub === 'boolean' ? n.is_hub : !(n.parent_hub_id ?? null),
+            is_hub: isHub,
             parent_hub_id: n.parent_hub_id ?? null,
             zone: String(n.zone ?? 'core')
         };
@@ -249,7 +256,10 @@ export async function GET(req: Request) {
                     message: (error as any).message
                 });
             } else {
-                candidates = (data as any[] | null | undefined) || [];
+                // Filter out inactive nodes (Phase 4: only return approved data)
+                candidates = ((data as any[] | null | undefined) || []).filter(
+                    (n: any) => (n as any).is_active !== false
+                );
             }
         } catch (err: any) {
             degraded = true;
@@ -288,7 +298,7 @@ export async function GET(req: Request) {
             if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
             
             // [NEW] Filter out non-station nodes (bus stops, POIs, etc.)
-            const nodeType = n.type?.toLowerCase() || '';
+            const nodeType = n.type;
             const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
             if (excludedTypes.includes(nodeType)) {
                 return false;

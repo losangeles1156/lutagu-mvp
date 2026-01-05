@@ -64,9 +64,15 @@ export function parseLocation(loc: any): { coordinates: [number, number] } {
 }
 
 function normalizeNodeRow(n: any) {
-    const type = String(n?.type ?? n?.node_type ?? 'station');
+    // Standardize node type: Prioritize DB schema node_type, convert to lowercase
+    const type = String(n?.node_type ?? n?.type ?? 'station').toLowerCase();
     const location = parseLocation(n?.location ?? n?.coordinates);
-    const isHub = typeof n?.is_hub === 'boolean' ? n.is_hub : !n?.parent_hub_id;
+    
+    // Unified is_hub logic: Prioritize explicit value, otherwise check parent_hub_id
+    const explicitIsHub = n?.is_hub;
+    const isHub = typeof explicitIsHub === 'boolean' 
+        ? explicitIsHub 
+        : (n?.parent_hub_id === null || n?.parent_hub_id === undefined);
 
     // Parse version control fields
     // updated_at: Unix timestamp (milliseconds) from DB or ISO string
@@ -204,7 +210,12 @@ function getFallbackNearbyNodes(lat: number, lon: number) {
         const nodeLon = node.location.coordinates[0];
         // Simple rough distance check for fallback (approx 0.01 deg ~= 1km)
         return Math.abs(nodeLat - lat) < 0.05 && Math.abs(nodeLon - lon) < 0.05;
-    }).map(n => enrichNodeData(n));
+    }).map(n => {
+        // Apply normalization first
+        const normalized = normalizeNodeRow(n);
+        // Then enrich
+        return enrichNodeData(normalized);
+    });
 }
 
 function enrichNodeData(n: any) {
@@ -426,7 +437,15 @@ export async function fetchNodeConfig(nodeId: string) {
     }
 
     hubId = finalNode?.parent_hub_id || null;
+    let childNodes: any[] = [];
+
+    // Unified is_hub logic: Prioritize explicit value
+    const isNodeHub = typeof finalNode?.is_hub === 'boolean' 
+        ? finalNode.is_hub 
+        : !hubId;
+
     if (hubId) {
+        // Case 1: Child Node -> Fetch Parent
         try {
             const { data: parent } = await supabase
                 .from('nodes')
@@ -437,6 +456,18 @@ export async function fetchNodeConfig(nodeId: string) {
             if (parent) hubNode = parent;
         } catch {
             hubNode = null;
+        }
+    } else if (isNodeHub) {
+        // Case 2: Hub Node -> Fetch Children for Aggregation
+        try {
+            const { data: children } = await supabase
+                .from('nodes')
+                .select('*')
+                .eq('parent_hub_id', nodeId);
+            
+            if (children) childNodes = children;
+        } catch (err) {
+            console.warn('[fetchNodeConfig] Failed to fetch child nodes for hub aggregation:', err);
         }
     }
 
@@ -451,33 +482,54 @@ export async function fetchNodeConfig(nodeId: string) {
         l4_cards: []
     };
 
-    // 1. Populate L1 Data from Node (JSONB columns)
-    if (hubNode?.facility_profile?.category_counts) {
-        enrichedProfile.category_counts = {
-            ...enrichedProfile.category_counts,
-            ...hubNode.facility_profile.category_counts
-        };
-    }
+    // 1. Populate L1 Data
+    // Logic: 
+    // - If Child: Merge Self + Parent (Hub)
+    // - If Hub: Merge Self + All Children (Aggregation)
 
-    if (finalNode?.facility_profile?.category_counts) {
-        enrichedProfile.category_counts = {
-            ...enrichedProfile.category_counts,
-            ...finalNode.facility_profile.category_counts
-        };
-    }
+    const nodesToMerge = [hubNode, finalNode, ...childNodes].filter(Boolean);
 
-    const vibeTags = finalNode?.vibe_tags ?? hubNode?.vibe_tags;
-    if (vibeTags) {
-        enrichedProfile.vibe_tags = vibeTags;
-    }
+    nodesToMerge.forEach(n => {
+        // Merge Category Counts
+        if (n?.facility_profile?.category_counts) {
+            const counts = n.facility_profile.category_counts;
+            Object.keys(counts).forEach(k => {
+                const key = k as keyof CategoryCounts;
+                const val = counts[key] || 0;
+                if (typeof val === 'number') {
+                    // Initialize if undefined (for custom keys)
+                    if (typeof (enrichedProfile.category_counts as any)[key] === 'undefined') {
+                        (enrichedProfile.category_counts as any)[key] = 0;
+                    }
+                    (enrichedProfile.category_counts as any)[key] += val;
+                }
+            });
+        }
+
+        // Merge Vibe Tags
+        if (n?.vibe_tags) {
+            const tags = Array.isArray(n.vibe_tags) ? n.vibe_tags : [];
+            // Add unique tags
+            tags.forEach((t: string) => {
+                if (typeof t === 'string' && !(enrichedProfile.vibe_tags as string[]).includes(t)) {
+                    (enrichedProfile.vibe_tags as string[]).push(t);
+                }
+            });
+        }
+    });
 
     // 2. Fetch L3 Facilities from `l3_facilities` table
     try {
-        const stationIds = Array.from(new Set([nodeId, hubId].filter(Boolean))) as string[];
+        // Gather all relevant IDs: Self, Parent (if any), Children (if any)
+        const stationIds = new Set<string>();
+        if (nodeId) stationIds.add(nodeId);
+        if (hubId) stationIds.add(hubId);
+        childNodes.forEach(c => stationIds.add(c.id));
+
         const { data: facilities, error: facilityError } = await supabase
             .from('l3_facilities')
             .select('*')
-            .in('station_id', stationIds);
+            .in('station_id', Array.from(stationIds));
 
         if (facilityError) {
             console.warn('[fetchNodeConfig] L3 fetch failed:', facilityError);

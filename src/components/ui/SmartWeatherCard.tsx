@@ -17,7 +17,9 @@ interface WeatherData {
 interface JMAAlert {
     title: string;
     summary: string;
-    severity: 'info' | 'warning' | 'critical';
+    severity: 'info' | 'advisory' | 'warning' | 'critical';
+    alert_type?: string;
+    region?: string;
 }
 
 interface SmartWeatherCardProps {
@@ -51,6 +53,9 @@ export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
                         const alertData = await alertRes.json();
                         if (alertData.alerts && alertData.alerts.length > 0) {
                             currentAlert = alertData.alerts[0];
+
+                            // Only set alert if it's relevant (skip info/advisory for top banner purposes if desired, 
+                            // but we store it for display. However, ensure severity is correct).
                             setAlert(currentAlert);
                         }
                     }
@@ -98,7 +103,9 @@ export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
         ? isCritical
             ? 'from-rose-600 via-rose-500 to-amber-500'
             : 'from-amber-500 via-amber-400 to-yellow-400'
-        : 'from-sky-400 via-blue-500 to-indigo-600';
+        : alert?.severity === 'advisory'
+            ? 'from-yellow-400 via-yellow-500 to-orange-400'
+            : 'from-sky-400 via-blue-500 to-indigo-600';
 
     return (
         <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${bgGradient} text-white shadow-xl transition-all duration-500`}>
@@ -116,7 +123,13 @@ export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
                             <span className="text-2xl">{weather.emoji}</span>
                         )}
                         <span className="text-xs font-black uppercase tracking-widest opacity-80">
-                            {isCritical ? tL2('criticalAlert') : isEmergencyMode ? tL2('warningAlert') : 'TOKYO'}
+                            {/* Only show specific alert type if it's an actual warning/advisory.
+                                If it's just Info (e.g. Cancellation), don't show the scary type name. */}
+                            {alert && alert.severity !== 'info' && alert.alert_type && alert.region
+                                ? `${alert.region} ${alert.alert_type}`
+                                : isCritical ? tL2('criticalAlert')
+                                    : isEmergencyMode ? tL2('warningAlert')
+                                        : 'TOKYO'}
                         </span>
                     </div>
                     <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full">

@@ -102,14 +102,15 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
         }, 1500);
 
         try {
-            const response = await fetch('/api/agent/chat', {
+            // Use Dify Agent endpoint
+            const response = await fetch('/api/dify/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [...messages, userMsg],
-                    nodeId: stationId,
+                    query: text,
                     inputs: {
                         user_profile: userProfile,
+                        current_station: stationId || '',
                         locale
                     }
                 })
@@ -138,11 +139,9 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.slice(6));
-                            if (data.event === 'meta' && data.mode === 'offline') {
-                                setIsOffline(true);
-                            }
-                            if (data.event === 'message') {
-                                accumulatedResponse += data.answer;
+                            // Dify uses 'agent_message' for streaming responses
+                            if (data.event === 'agent_message' || data.event === 'message') {
+                                accumulatedResponse += (data.answer || '');
                                 setMessages(prev => {
                                     const newMsgs = [...prev];
                                     newMsgs[newMsgs.length - 1].content = accumulatedResponse;
@@ -238,9 +237,9 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                                     if (otherCards.length > 0) setIsOtherOpen(true);
                                 }}
                                 className="flex-1 py-3 rounded-2xl bg-white text-indigo-700 font-black text-xs tracking-widest hover:bg-indigo-50 transition-colors active:scale-[0.99]"
-                                >
-                                    {getLocaleString(bestCard.actionLabel, locale) || tCommon('view')}
-                                </button>
+                            >
+                                {getLocaleString(bestCard.actionLabel, locale) || tCommon('view')}
+                            </button>
 
                             {otherCards.length > 0 && (
                                 <button

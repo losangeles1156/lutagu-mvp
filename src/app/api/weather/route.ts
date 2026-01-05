@@ -156,7 +156,9 @@ export async function GET(request: Request) {
                 severity,
                 severity_label: severityLabel, // Human-readable label
                 urgency: WEATHER_REGION_POLICY.severityToUrgency[severity],
-                color: WEATHER_REGION_POLICY.severityToColor[severity]
+                color: WEATHER_REGION_POLICY.severityToColor[severity],
+                alert_type: WEATHER_REGION_POLICY.extractAlertType(title),
+                region: WEATHER_REGION_POLICY.extractRegion(title, cleanSummary)
             });
         }
 

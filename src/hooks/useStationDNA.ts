@@ -207,10 +207,76 @@ export function useStationDNA(initialData?: any, locale?: string) {
                 })
                 : [];
 
+            // 3. Generate Smart Title/Tagline based on Vibe Tags & Categories
+            let title = { ja: '都市の拠点', en: 'Urban Hub', zh: '城市樞紐' };
+            
+            // Prioritize Wiki-derived tagline if available in initialData
+            let tagline = (initialData && initialData.tagline && (initialData.tagline.ja || initialData.tagline.en || initialData.tagline.zh))
+                ? initialData.tagline
+                : { ja: '多くの人々が行き交う場所', en: 'A bustling transit point', zh: '人來人往的熱鬧據點' };
+
+            // Helper to check if a specific vibe tag exists (case insensitive)
+            const hasVibe = (keyword: string) => vibe_tags.some(v => v.label.en.toLowerCase().includes(keyword.toLowerCase()) || v.id.toLowerCase().includes(keyword.toLowerCase()));
+            const cCounts = (id: string) => categories[id]?.count || 0;
+
+            // Strategy Flags
+            const isCulture = hasVibe('Museum') || hasVibe('Culture') || hasVibe('Art') || cCounts('culture') >= 3;
+            const isMarket = hasVibe('Market') || hasVibe('Ameyoko') || hasVibe('Shopping') || cCounts('shopping') > 20;
+            const isPark = hasVibe('Nature') || hasVibe('Park') || hasVibe('Garden') || hasVibe('Zoo') || cCounts('nature') > 3;
+            const isFood = hasVibe('Food') || hasVibe('Dining') || hasVibe('Izakaya') || hasVibe('Ramen') || cCounts('dining') > 40;
+            const isNight = hasVibe('Night') || hasVibe('Bar') || hasVibe('Club');
+            const isBusiness = hasVibe('Business') || hasVibe('Office') || cCounts('business') > 10;
+            const isRetro = hasVibe('Retro') || hasVibe('Shitamachi') || hasVibe('Old');
+
+            // Complex Scenarios (Mixed Vibes)
+            if (initialData?.title) {
+                title = initialData.title;
+                if (initialData?.tagline) tagline = initialData.tagline;
+            } else if (isCulture && isMarket) {
+                // E.g. Ueno (Museums + Ameyoko)
+                title = { ja: '文化と活気の融合', en: 'Culture & Market Hub', zh: '文化與市集的交匯' };
+                if (!initialData?.tagline) tagline = { ja: '芸術、歴史、そして活気ある商店街が共存する街', en: 'A unique blend of museums, history, and bustling markets', zh: '融合美術館的優雅與阿美橫町的熱鬧活力' };
+            } else if (isCulture && isPark) {
+                // E.g. Ueno Park area (without market focus)
+                title = { ja: '芸術と自然の調和', en: 'Art & Nature', zh: '藝文與自然的協奏' };
+                if (!initialData?.tagline) tagline = { ja: '豊かな緑の中に美術館が点在するエリア', en: 'Museums and galleries set amidst lush greenery', zh: '綠意盎然的公園中散落著美術館與博物館' };
+            } else if (isMarket && isFood) {
+                // E.g. Ameyoko / Tsukiji
+                title = { ja: '食と買い物の天国', en: 'Gourmet & Shopping', zh: '美食與購物天堂' };
+                if (!initialData?.tagline) tagline = { ja: '活気ある市場と絶品グルメが楽しめる', en: 'Endless shopping options and delicious local food', zh: '讓人流連忘返的熱鬧市集與道地美食' };
+            } else if (isBusiness && isFood) {
+                // E.g. Shimbashi / Tokyo Station
+                title = { ja: 'ビジネスと美食の拠点', en: 'Business & Dining', zh: '商務與美食重鎮' };
+                if (!initialData?.tagline) tagline = { ja: '働く人々の胃袋を満たす名店が多い', en: 'A business hub with excellent dining options', zh: '匯聚商務菁英與絕佳美食的繁華街區' };
+            } 
+            // Single Dominant Vibes
+            else if (isCulture) {
+                title = { ja: '芸術と文化の街', en: 'Art & Culture Hub', zh: '藝文與歷史重鎮' };
+                if (!initialData?.tagline) tagline = { ja: '美術館や歴史的名所が集まる文化的エリア', en: 'Home to museums, galleries, and historical sites', zh: '匯聚美術館、博物館與歷史古蹟的文化中心' };
+            } else if (isMarket) {
+                 title = { ja: '買い物の天国', en: 'Shopping Paradise', zh: '購物天堂' };
+                 if (!initialData?.tagline) tagline = { ja: 'あらゆるものが揃うショッピングエリア', en: 'A vibrant district for all your shopping needs', zh: '應有盡有的繁華購物商圈' };
+            } else if (isPark) {
+                title = { ja: '都会のオアシス', en: 'Urban Oasis', zh: '城市綠洲' };
+                if (!initialData?.tagline) tagline = { ja: '都会の喧騒を忘れる自然空間', en: 'Relax in the vast greenery within the city', zh: '在都市叢林中享受片刻寧靜的自然空間' };
+            } else if (isBusiness) {
+                title = { ja: 'ビジネスの中心地', en: 'Business District', zh: '商務中心' };
+                if (!initialData?.tagline) tagline = { ja: '高層ビルが立ち並ぶオフィス街', en: 'A major hub for business and commerce', zh: '摩天大樓林立的現代化商業區' };
+            } else if (isNight) {
+                title = { ja: '眠らない街', en: 'Nightlife Hub', zh: '不夜城' };
+                if (!initialData?.tagline) tagline = { ja: '夜遅くまで賑わうエンターテインメント', en: 'Exciting nightlife and entertainment', zh: '越夜越美麗的娛樂與夜生活中心' };
+            } else if (isRetro) {
+                 title = { ja: '下町情緒あふれる街', en: 'Retro Vibes', zh: '懷舊下町風情' };
+                 if (!initialData?.tagline) tagline = { ja: '昔ながらの雰囲気が残るエリア', en: 'Experience the nostalgic atmosphere of old Tokyo', zh: '保留濃厚昭和風情與人情味的傳統街區' };
+            } else if (isFood) {
+                title = { ja: '美食の迷宮', en: 'Gourmet Labyrinth', zh: '美食迷宮' };
+                if (!initialData?.tagline) tagline = { ja: 'あらゆる料理が楽しめる激戦区', en: 'Culinary adventures await', zh: '各式料理雲集的味蕾挑戰區' };
+            }
+
             return {
                 loading: false,
-                title: { ja: '都市の拠点', en: 'Urban Hub', zh: '城市樞紐' },
-                tagline: { ja: '多くの人々が行き交う場所', en: 'A bustling transit point', zh: '人來人往的熱鬧據點' },
+                title,
+                tagline,
                 categories,
                 vibe_tags,
                 signature_spots: places.length > 0 ? places.slice(0, 3) : []
@@ -255,7 +321,7 @@ export function useStationDNA(initialData?: any, locale?: string) {
             });
         });
 
-        const vibe_tags: VibeTag[] = VIBE_RULES
+        const dynamicVibes = VIBE_RULES
             .filter(r => (vibeCounts[r.id] || 0) > 0)
             .map(r => ({
                 id: r.id,
@@ -263,8 +329,31 @@ export function useStationDNA(initialData?: any, locale?: string) {
                 count: vibeCounts[r.id],
                 description: r.desc,
                 spots: vibeMatches[r.id]
-            }))
-            .sort((a, b) => b.count - a.count)
+            }));
+
+        const staticVibes = (initialData?.vibe_tags || []).map((v: any) => ({
+             id: v.id,
+             label: v.label,
+             count: (v.score || 3) * 10, // Weight static vibes higher
+             description: v.description || { ja: '', en: '', zh: '' },
+             spots: []
+        }));
+
+        // Merge, prioritizing static
+        const mergedVibesMap = new Map();
+        [...staticVibes, ...dynamicVibes].forEach(v => {
+            if (!mergedVibesMap.has(v.id)) {
+                mergedVibesMap.set(v.id, v);
+            } else {
+                 // If dynamic matches static, keep static label/desc but add dynamic spots/count
+                 const existing = mergedVibesMap.get(v.id);
+                 existing.count += v.count;
+                 if (v.spots && v.spots.length > 0) existing.spots = v.spots;
+            }
+        });
+
+        const vibe_tags: VibeTag[] = Array.from(mergedVibesMap.values())
+            .sort((a: any, b: any) => b.count - a.count)
             .slice(0, 4);
 
         // 4. Generate Station Title/Tagline (Heuristics)
