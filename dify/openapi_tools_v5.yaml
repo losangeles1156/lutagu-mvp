@@ -30,7 +30,7 @@ paths:
 
   /api/weather:
     get:
-      operationId: get_weather_alerts
+      operationId: get_jma_alerts
       summary: Get weather alerts
       description: Returns JMA weather alerts for Tokyo
       responses:
@@ -43,7 +43,7 @@ paths:
 
   /api/station/context:
     get:
-      operationId: get_station_info
+      operationId: get_station_context
       summary: Get station info
       description: Get station facilities and transfers
       parameters:
@@ -63,7 +63,7 @@ paths:
 
   /api/odpt/route:
     get:
-      operationId: search_transit_route
+      operationId: search_route
       summary: Search route
       description: Find route between stations
       parameters:
@@ -79,6 +79,13 @@ paths:
           description: Destination station
           schema:
             type: string
+        - name: locale
+          in: query
+          required: false
+          description: Response language
+          schema:
+            type: string
+            enum: [ja, en, zh-TW]
       responses:
         200:
           description: OK
@@ -89,7 +96,7 @@ paths:
 
   /api/l4/knowledge:
     get:
-      operationId: get_expert_tips
+      operationId: search_expert_knowledge
       summary: Get expert tips
       description: Get transit tips and advice
       parameters:
@@ -122,7 +129,7 @@ paths:
 
   /api/tools/hub-info:
     get:
-      operationId: get_hub_stations
+      operationId: get_hub_info
       summary: Get hub info
       description: Get major station hub info
       parameters:

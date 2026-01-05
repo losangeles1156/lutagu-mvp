@@ -8,10 +8,10 @@ export async function GET(request: NextRequest) {
         const supabase = getSupabaseAdmin();
 
         const wardId = searchParams.get('ward_id') || undefined;
-        const isHub = searchParams.get('is_hub') === 'true' ? true : 
-                      searchParams.get('is_hub') === 'false' ? false : undefined;
+        const isHub = searchParams.get('is_hub') === 'true' ? true :
+            searchParams.get('is_hub') === 'false' ? false : undefined;
         const isActive = searchParams.get('is_active') === 'true' ? true :
-                        searchParams.get('is_active') === 'false' ? false : undefined;
+            searchParams.get('is_active') === 'false' ? false : undefined;
         const parentHubId = searchParams.get('parent_hub_id') || undefined;
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '50');
@@ -20,8 +20,7 @@ export async function GET(request: NextRequest) {
         let query = supabase
             .from('nodes')
             .select(`
-                *,
-                hierarchy:node_hierarchy(id, hub_id, is_active, display_order)
+                *
             `, { count: 'exact' });
 
         if (wardId) {

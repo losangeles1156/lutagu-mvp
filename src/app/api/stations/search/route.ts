@@ -57,7 +57,8 @@ async function getStationList(): Promise<StationSearchResult[]> {
             'odpt.Operator:Odakyu',
             'odpt.Operator:Keio',
             'odpt.Operator:Seibu',
-            'odpt.Operator:Keisei'
+            'odpt.Operator:Keisei',
+            'odpt.Operator:Keikyu', // Added for Haneda Airport access
         ];
         // const allStations was here
 

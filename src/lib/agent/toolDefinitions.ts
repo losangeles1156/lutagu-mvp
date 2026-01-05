@@ -594,8 +594,8 @@ export const TOOL_HANDLERS = {
             routes.forEach((route, idx) => {
                 output += `\n${routeLabel} ${idx + 1}: ${route.label}\n`;
                 output += '────────────────\n';
-                route.steps.forEach((step: string) => {
-                    output += `${step}\n`;
+                route.steps.forEach((step: any) => {
+                    output += `${step.text}\n`;
                 });
                 output += '\n';
             });

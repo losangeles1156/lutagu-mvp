@@ -55,7 +55,7 @@ export function L1Layer() {
         <>
             {places.map(place => {
                 const color = (CATEGORY_COLOR as any)[place.category] || CATEGORY_COLOR.default;
-                
+
                 // 合作店家使用特殊標識
                 const isPartner = place.isPartner || place.isCustom;
                 const icon = isPartner ? PARTNER_ICON : L.divIcon({
@@ -82,12 +82,19 @@ export function L1Layer() {
                             <div className="min-w-[200px] p-1">
                                 {/* 店名 */}
                                 <div className="font-bold text-sm mb-1">{place.name}</div>
-                                
+
                                 {/* 分類標籤 */}
                                 <div className="text-[10px] text-gray-500 capitalize mb-2">
                                     {getCategoryLabel(place.category)}
                                 </div>
-                                
+
+                                {/* 短評 (Review) */}
+                                {place.description && (
+                                    <div className="text-xs text-gray-600 mb-2 leading-relaxed bg-gray-50 p-1.5 rounded border border-gray-100 italic">
+                                        &ldquo;{place.description}&rdquo;
+                                    </div>
+                                )}
+
                                 {/* 合作店家標識 */}
                                 {isPartner && (
                                     <div className="flex items-center gap-1 mb-2 px-2 py-1 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
@@ -95,16 +102,16 @@ export function L1Layer() {
                                         <span className="text-xs font-medium text-amber-700">合作店家</span>
                                     </div>
                                 )}
-                                
+
                                 {/* 優惠資訊 */}
                                 {place.discountInfo && (
                                     <div className="mb-2 px-2 py-1 bg-green-50 rounded-lg border border-green-200">
                                         <div className="text-xs font-medium text-green-700">
-                                            {place.discountInfo.type === 'percent' 
+                                            {place.discountInfo.type === 'percent'
                                                 ? `🎉 ${place.discountInfo.value}% OFF`
                                                 : place.discountInfo.type === 'fixed'
-                                                ? `💰 ¥${place.discountInfo.value} OFF`
-                                                : `🎁 ${place.discountInfo.value}`}
+                                                    ? `💰 ¥${place.discountInfo.value} OFF`
+                                                    : `🎁 ${place.discountInfo.value}`}
                                         </div>
                                         {place.discountInfo.description && (
                                             <div className="text-[10px] text-green-600 mt-0.5">
@@ -113,10 +120,10 @@ export function L1Layer() {
                                         )}
                                     </div>
                                 )}
-                                
+
                                 {/* 導流連結 */}
                                 {place.affiliateUrl && (
-                                    <a 
+                                    <a
                                         href={place.affiliateUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -126,10 +133,10 @@ export function L1Layer() {
                                         <ExternalLink size={10} />
                                     </a>
                                 )}
-                                
+
                                 {/* 導航連結 */}
                                 {place.navigation_url && !place.affiliateUrl && (
-                                    <a 
+                                    <a
                                         href={place.navigation_url}
                                         target="_blank"
                                         rel="noopener noreferrer"

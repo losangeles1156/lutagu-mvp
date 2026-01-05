@@ -1,16 +1,22 @@
 import useSWR from 'swr';
 import { OdptStationTimetable, OdptRailwayFare } from '@/lib/odpt/types';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+async function fetchJson(url: string) {
+    const res = await fetch(url);
+    if (!res.ok) {
+        const detail = await res.text().catch(() => '');
+        throw new Error(detail || `HTTP ${res.status}`);
+    }
+    return res.json();
+}
 
 export function useStationTimetable(operator: string, stationId: string) {
-    // Determine type based on ID or passed operator
-    // Using the proxy route
+    // Keep the signature for compatibility; operator is no longer required here.
     const { data, error, isLoading } = useSWR<OdptStationTimetable[]>(
-        stationId && operator
-            ? `/api/odpt/proxy?type=odpt:StationTimetable&odpt:station=${stationId}&odpt:operator=${operator}`
+        stationId
+            ? `/api/odpt/timetable?station=${encodeURIComponent(stationId)}&raw=1`
             : null,
-        fetcher
+        fetchJson
     );
 
     return {
@@ -22,10 +28,26 @@ export function useStationTimetable(operator: string, stationId: string) {
 
 export function useRailwayFare(operator: string, fromStationId: string) {
     const { data, error, isLoading } = useSWR<OdptRailwayFare[]>(
-        fromStationId && operator
-            ? `/api/odpt/proxy?type=odpt:RailwayFare&odpt:fromStation=${fromStationId}&odpt:operator=${operator}`
+        fromStationId
+            ? `/api/odpt/fare?from=${encodeURIComponent(fromStationId)}`
             : null,
-        fetcher
+        async (url: string) => {
+            const json = (await fetchJson(url)) as any;
+            const fares = Array.isArray(json?.fares) ? json.fares : [];
+            return fares.map((f: any, idx: number): OdptRailwayFare => {
+                const operatorId = String(f?.operator || '');
+                const normalizedOperator = operatorId.startsWith('odpt.Operator:') ? operatorId : `odpt.Operator:${operatorId}`;
+                return {
+                    '@id': `swr:fare:${json?.source || 'unknown'}:${normalizedOperator}:${String(f?.from || '')}:${String(f?.to || '')}:${idx}`,
+                    '@type': 'odpt:RailwayFare',
+                    'odpt:operator': normalizedOperator,
+                    'odpt:fromStation': String(f?.from || ''),
+                    'odpt:toStation': String(f?.to || ''),
+                    'odpt:ticketFare': Number(f?.ticket || 0),
+                    'odpt:icCardFare': Number(f?.ic || 0),
+                };
+            });
+        }
     );
 
     return {

@@ -1,0 +1,216 @@
+# 車站搭乘知識收集計劃
+
+## 任務概述
+
+### 目標
+為指定的 20 個車站區域收集搭乘知識，解決外國旅客常搞混車站服務的問題，建置於 L4 功能介面。
+
+### 指定車站區域（20個）
+淺草、押上、上野、新宿、澀谷、池袋、秋葉原、目黑、銀座、飯田橋、大手町、北千住、中目黑、中野、泉岳寺、白金高輪、品川、大門、日暮里、東京。
+
+---
+
+## 搭乘知識結構定義
+
+### 知識類型
+
+#### 1. Traps（陷阱/警告）
+解決旅客常見的困惑和錯誤：
+- 🚫 **站名混淆** - 多個同名車站（如淺草站有4個不同公司）
+- 🚧 **轉乘距離** - 需要步行的距離和時間
+- ⚡ **快特停靠站** - 某些列車類型不停靠
+- 🏃 **人潮時段** - 尖峰/散場時間
+- 🎫 **閘門分隔** - 不同公司需要出站轉乘
+
+#### 2. Hacks（技巧/捷徑）
+實用的搭乘建議：
+- 🎯 **最近出口** - 前往特定景點的最佳出口
+- ⏱️ **時間優化** - 避開人潮的時段
+- 🚶 **替代路線** - 更近的車站或換乘方案
+- 🌧️ **雨天方案** - 地下連通道和室內路線
+- 🛒 **購物/美食** - 直結商場和美食區
+
+#### 3. Facilities（設施資訊）
+無障礙和便利設施：
+- 🚻 **廁所位置** - 改札內外
+- 🛗 **電梯/電扶梯** - 出口對應
+- ♿ **無障礙設施** - 輪椅友善
+- 👶 **育嬰室** - 哺乳和換尿布
+- 📶 **WiFi熱點** - 網路服務
+
+---
+
+## 車站分組
+
+### 分組1：淺草・押上區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 淺草（都營） | Toei.Asakusa | odpt.Station:Toei.Asakusa.Asakusa |
+| 淺草（東京Metro） | TokyoMetro.Ginza | odpt.Station:TokyoMetro.Ginza.Asakusa |
+| 淺草（東武） | Tobu.TobuSkytree | odpt.Station:Tobu.TobuSkytree.Asakusa |
+| 淺草（筑波快線） | Metropolitan.Intercity | odpt.Station:Metropolitan.Intercity.Asakusa |
+| 押上 | Toei.Asakusa | odpt.Station:Toei.Asakusa.Oshiage |
+
+**關鍵問題**：4個不同公司的「淺草站」距離不同，旅客容易搞混
+
+### 分組2：上野・日暮里區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 上野（JR） | JR-East | odpt.Station:JR-East.Ueno |
+| 上野（東京Metro） | TokyoMetro.Ginza | odpt.Station:TokyoMetro.Ginza.Ueno |
+| 上野（東京Metro） | TokyoMetro.Hibiya | odpt.Station:TokyoMetro.Hibiya.Ueno |
+| 上野（京成） | Keisei | odpt.Station:Keisei.KeiseiUeno |
+| 日暮里 | JR-East | odpt.Station:JR-East.Nippori |
+
+**關鍵問題**：京成 Skyliner 轉乘、春日通地下連通、阿美橫町入口
+
+### 分組3：新宿區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 新宿（JR） | JR-East | odpt.Station:JR-East.Shinjuku |
+| 新宿（東京Metro） | TokyoMetro.Marunouchi | odpt.Station:TokyoMetro.Marunouchi.Shinjuku |
+| 新宿（東京Metro） | TokyoMetro.Tozai | odpt.Station:TokyoMetro.Tozai.Shinjuku |
+| 新宿（都營） | Toei.Shinjuku | odpt.Station:Toei.Shinjuku.Shinjuku |
+| 新宿（都營） | Toei.Oedo | odpt.Station:Toei.Oedo.Shinjuku |
+| 新宿（京王） | Keio | odpt.Station:Keio.Shinjuku |
+| 新宿（小田急） | Odakyu | odpt.Station:Odakyu.Shinjuku |
+
+**關鍵問題**：7條路線交會，出口迷宮，Busta 新宿轉乘
+
+### 分組4：澀谷・目黑區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 澀谷（JR） | JR-East | odpt.Station:JR-East.Shibuya |
+| 澀谷（東京Metro） | TokyoMetro.Ginza | odpt.Station:TokyoMetro.Ginza.Shibuya |
+| 澀谷（東京Metro） | TokyoMetro.Hanzomon | odpt.Station:TokyoMetro.Hanzomon.Shibuya |
+| 澀谷（東京Metro） | TokyoMetro.Fukutoshin | odpt.Station:TokyoMetro.Fukutoshin.Shibuya |
+| 澀谷（東橫線） | Tokyu.Toyoko | odpt.Station:Tokyu.Toyoko.Shibuya |
+| 澀谷（田園都市線） | Tokyu.DenEnToshi | odpt.Station:Tokyu.DenEnToshi.Shibuya |
+| 目黑（JR） | JR-East | odpt.Station:JR-East.Meguro |
+| 目黑（東京Metro） | TokyoMetro.Namboku | odpt.Station:TokyoMetro.Namboku.Meguro |
+| 目黑（都營） | Toei.Mita | odpt.Station:Toei.Mita.Meguro |
+| 目黑（東急） | Tokyu.Meguro | odpt.Station:Tokyu.Meguro.Meguro |
+| 中目黑 | Tokyu.TokyuTamagawa | odpt.Station:Tokyu.TokyuTamagawa.Nakameguro |
+
+**關鍵問題**：4層樓深度、正在施工、八公口真理
+
+### 分組5：池袋區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 池袋（JR） | JR-East | odpt.Station:JR-East.Ikebukuro |
+| 池袋（東京Metro） | TokyoMetro.Marunouchi | odpt.Station:TokyoMetro.Marunouchi.Ikebukuro |
+| 池袋（東京Metro） | TokyoMetro.Fukutoshin | odpt.Station:TokyoMetro.Fukutoshin.Ikebukuro |
+| 池袋（西武） | Seibu | odpt.Station:Seibu.Ikebukuro |
+| 池袋（東武） | Tobu.Tojo | odpt.Station:Tobu.Tojo.Ikebukuro |
+
+**關鍵問題**：東武/西武百货方向搞混、東西口複雜
+
+### 分組6：秋葉原・飯田橋・大手町區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 秋葉原（JR） | JR-East | odpt.Station:JR-East.Akihabara |
+| 秋葉原（東京Metro） | TokyoMetro.Hibiya | odpt.Station:TokyoMetro.Hibiya.Akihabara |
+| 飯田橋（東京Metro） | TokyoMetro.Tozai | odpt.Station:TokyoMetro.Tozai.Iidabashi |
+| 飯田橋（東京Metro） | TokyoMetro.Namboku | odpt.Station:TokyoMetro.Namboku.Iidabashi |
+| 飯田橋（都營） | Toei.Oedo | odpt.Station:Toei.Oedo.Iidabashi |
+| 飯田橋（JR） | JR-East | odpt.Station:JR-East.Iidabashi |
+| 大手町（東京Metro） | TokyoMetro.Marunouchi | odpt.Station:TokyoMetro.Marunouchi.Otemachi |
+| 大手町（東京Metro） | TokyoMetro.Tozai | odpt.Station:TokyoMetro.Tozai.Otemachi |
+| 大手町（東京Metro） | TokyoMetro.Chiyoda | odpt.Station:TokyoMetro.Chiyoda.Otemachi |
+| 大手町（東京Metro） | TokyoMetro.Hanzomon | odpt.Station:TokyoMetro.Hanzomon.Otemachi |
+| 大手町（都營） | Toei.Mita | odpt.Station:Toei.Mita.Otemachi |
+
+**關鍵問題**：東京最大地下迷宮、轉乘距離長
+
+### 分組7：北千住區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 北千住（JR） | JR-East | odpt.Station:JR-East.KitaSenju |
+| 北千住（東京Metro） | TokyoMetro.Hibiya | odpt.Station:TokyoMetro.Hibiya.KitaSenju |
+| 北千住（東武） | Tobu.TobuSkytree | odpt.Station:Tobu.TobuSkytree.KitaSenju |
+| 北千住（筑波快線） | Metropolitan.Intercity | odpt.Station:Metropolitan.Intercity.KitaSenju |
+
+**關鍵問題**：4條路線匯集、與東京市中心連接
+
+### 分組8：泉岳寺・白金高輪・品川・大門區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 泉岳寺 | Toei.Asakusa | odpt.Station:Toei.Asakusa.Sengakuji |
+| 白金高輪 | Toei.Mita | odpt.Station:Toei.Mita.ShirokaneTakanawa |
+| 品川（JR） | JR-East | odpt.Station:JR-East.Shinagawa |
+| 品川（京急） | Keikyu.Main | odpt.Station:Keikyu.Main.Shinagawa |
+| 品川（東京Metro） | TokyoMetro.Yamanote | odpt.Station:TokyoMetro.Yamanote.Shinagawa |
+| 大門 | Toei.Asakusa | odpt.Station:Toei.Asakusa.Daimon |
+| 大門（都營） | Toei.Oedo | odpt.Station:Toei.Oedo.Daimon |
+
+**關鍵問題**：京急往機場方向、泉岳寺分歧點
+
+### 分組9：銀座區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 銀座（東京Metro） | TokyoMetro.Ginza | odpt.Station:TokyoMetro.Ginza.Ginza |
+| 銀座（都營） | Toei.Asakusa | odpt.Station:Toei.Asakusa.Higashiginza |
+| 東銀座 | Toei.Asakusa | odpt.Station:Toei.Asakusa.Higashiginza |
+
+**關鍵問題**：地下連通複雜、歌舞伎座散場
+
+### 分組10：東京站區域
+| 車站 | 運營商 | ODPT ID |
+|------|--------|---------|
+| 東京（JR） | JR-East | odpt.Station:JR-East.Tokyo |
+| 東京（東京Metro） | TokyoMetro.Marunouchi | odpt.Station:TokyoMetro.Marunouchi.Tokyo |
+| 東京（東京Metro） | TokyoMetro.Tozai | odpt.Station:TokyoMetro.Tozai.Tokyo |
+
+**關鍵問題**：京葉線轉乘地獄、丸之內/八重洲分隔
+
+---
+
+## 輸出格式
+
+### Dify RAG 知識庫格式
+
+```
+### Station Context: [ODPT ID]
+
+**Traps (Warnings & Pitfalls):**
+- [Trap] [emoji] [標題]: [說明] (Advice: [建議])
+
+**Hacks (Tips & Shortcuts):**
+- [Hack] [emoji] **標題**: 說明
+
+**Facilities (L3 Services):**
+- [toilet] 位置 [Wheelchair] [BabyRoom]
+- [elevator] 出口 [Wheelchair]
+- [wifi] 全站
+```
+
+---
+
+## 工作流程
+
+### Phase 1: 資料收集
+1. 使用 ODPT API 獲取車站基本資訊
+2. 收集車站構造和出口配置
+3. 整理轉乘關係和時間距離
+4. 記錄無障礙設施位置
+
+### Phase 2: 知識編寫
+1. 為每個車站編寫 Traps
+2. 為每個車站編寫 Hacks
+3. 為每個車站編寫 Facilities
+4. 標註語言需求（JA/EN/ZH-TW）
+
+### Phase 3: 整合測試
+1. 整合到 dify_import/station_wisdom_rag.txt
+2. 測試 L4 功能介面問答
+3. 驗證知識覆蓋度
+4. 優化問答品質
+
+---
+
+## 參考資源
+
+- ODPT API 文檔：`src/lib/odpt/client.ts`
+- 現有知識庫模板：`dify_import/station_wisdom_rag.txt`
+- L4 Prompt 模板：`dify/lutagu_agent_prompt.md`
+- 車站樞紐設計：`plans/station-node-grouping-design.md`

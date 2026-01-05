@@ -53,6 +53,8 @@ export default function Home() {
         onboardingSeenVersion,
         setOnboardingSeenVersion,
         setChatOpen,
+        isOnboardingOpen,
+        setIsOnboardingOpen,
         setPendingChat,
         isTripGuardActive,
         tripGuardSummary,
@@ -83,7 +85,6 @@ export default function Home() {
     const ensuredProfileUserIdRef = useRef<string | null>(null);
 
     const ONBOARDING_VERSION = 1;
-    const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
     useEffect(() => {
         if (isBottomSheetOpen) return;

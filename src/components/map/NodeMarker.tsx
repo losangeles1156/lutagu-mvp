@@ -42,9 +42,10 @@ interface NodeMarkerProps {
     zone: 'core' | 'buffer' | 'outer';
     locale?: string;
     zoom?: number;
+    onClick?: (node: any) => void;
 }
 
-export function NodeMarker({ node, hubDetails, locale = 'zh-TW', zoom = 22 }: NodeMarkerProps) {
+export function NodeMarker({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClick }: NodeMarkerProps) {
     const { setCurrentNode, setBottomSheetOpen, currentNodeId } = useAppStore();
 
     // Coordinate Parsing
@@ -87,8 +88,12 @@ export function NodeMarker({ node, hubDetails, locale = 'zh-TW', zoom = 22 }: No
     const transferBadge = transferLabels[transferType] || transferLabels.indoor;
 
     const handleClick = () => {
-        setCurrentNode(node.id);
-        setBottomSheetOpen(true);
+        if (onClick) {
+            onClick(node);
+        } else {
+            setCurrentNode(node.id);
+            setBottomSheetOpen(true);
+        }
     };
 
     const iconMarkup = renderToStaticMarkup(

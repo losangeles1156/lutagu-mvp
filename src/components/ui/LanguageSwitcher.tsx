@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'; // Keep this for query params
 import { Globe } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { useAppStore } from '@/stores/appStore';
 
 interface LanguageSwitcherProps {
     className?: string;
@@ -19,6 +20,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
     const searchParams = useSearchParams();
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const { setLocale } = useAppStore();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -37,6 +39,9 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             return;
         }
 
+        // Update zustand store immediately for in-place UI updates
+        setLocale(newLocale as 'zh-TW' | 'ja' | 'en');
+
         // Construct query string
         const queryString = searchParams.toString();
         const url = queryString ? `${pathname}?${queryString}` : pathname;
@@ -49,6 +54,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 
     const labels: Record<string, string> = {
         'zh': '繁體中文',
+        'zh-TW': '繁體中文',
         'en': 'English',
         'ja': '日本語'
     };

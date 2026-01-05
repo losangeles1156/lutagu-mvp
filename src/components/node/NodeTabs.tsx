@@ -56,8 +56,9 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
     const tL4 = useTranslations('l4');
     const locale = useLocale();
 
-    // Use real profile data or fallback to basic node structure
-    const rawData = profile || nodeData || {};
+    const node = nodeData && typeof nodeData === 'object' ? nodeData : {};
+    const prof = profile && typeof profile === 'object' ? profile : {};
+    const rawData = { ...node, ...prof };
 
     // [Adapter] Transform Backend L2 Status to UI L2 Structure
     const l2Adapter = (() => {
@@ -90,24 +91,24 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
     })();
 
     const standardData: StationUIProfile = {
-        id: rawData.id || rawData.node_id || 'unknown',
-        tier: rawData.tier || 'minor',
+        id: node.id || node.node_id || prof.node_id || rawData.id || rawData.node_id || 'unknown',
+        tier: node.tier || rawData.tier || 'minor',
         name: {
-            ja: rawData.name?.ja || rawData.title || 'Station',
-            en: rawData.name?.en || rawData.title || 'Station',
-            zh: rawData.name?.zh || rawData.name?.['zh-TW'] || rawData.title || '車站'
+            ja: node.name?.ja || rawData.name?.ja || node.title || rawData.title || 'Station',
+            en: node.name?.en || rawData.name?.en || node.title || rawData.title || 'Station',
+            zh: node.name?.zh || node.name?.['zh-TW'] || rawData.name?.zh || rawData.name?.['zh-TW'] || node.title || rawData.title || '車站'
         },
         description: { ja: '', en: '', zh: '' }, // Default description
-        mapDesign: rawData.mapDesign,
-        l1_dna: rawData.l1_dna || {
+        mapDesign: node.mapDesign || rawData.mapDesign,
+        l1_dna: rawData.l1_dna || node.l1_dna || {
             categories: {}, // Populate if possible from category_counts
-            vibe_tags: rawData.vibe_tags || [],
+            vibe_tags: rawData.vibe_tags || node.vibe_tags || [],
             last_updated: new Date().toISOString()
         },
         l2: l2Adapter,
-        l3_facilities: rawData.l3_facilities || [],
-        l4_cards: rawData.l4_cards || [],
-        external_links: rawData.external_links
+        l3_facilities: rawData.l3_facilities || node.l3_facilities || [],
+        l4_cards: rawData.l4_cards || node.l4_cards || [],
+        external_links: rawData.external_links || node.external_links
     };
 
     return (

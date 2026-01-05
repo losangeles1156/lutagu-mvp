@@ -64,6 +64,11 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const lastSeedQuestionRef = useRef<string>('');
+    const difyUserIdRef = useRef<string>(
+        globalThis.crypto?.randomUUID?.() ||
+        `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+    );
+    const difyConversationIdRef = useRef<string | null>(null);
 
     // Hybrid UI State
     const [destination, setDestination] = useState('');
@@ -108,10 +113,12 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     query: text,
+                    conversation_id: difyConversationIdRef.current,
                     inputs: {
                         user_profile: userProfile,
                         current_station: stationId || '',
-                        locale
+                        locale,
+                        user_id: difyUserIdRef.current
                     }
                 })
             });
@@ -124,6 +131,7 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let accumulatedResponse = '';
+            let sseBuffer = '';
 
             setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
             setThinkingStep('');
@@ -132,25 +140,34 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n');
+                sseBuffer += decoder.decode(value, { stream: true });
+                while (true) {
+                    const newlineIndex = sseBuffer.indexOf('\n');
+                    if (newlineIndex === -1) break;
 
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.slice(6));
-                            // Dify uses 'agent_message' for streaming responses
-                            if (data.event === 'agent_message' || data.event === 'message') {
-                                accumulatedResponse += (data.answer || '');
-                                setMessages(prev => {
-                                    const newMsgs = [...prev];
-                                    newMsgs[newMsgs.length - 1].content = accumulatedResponse;
-                                    return newMsgs;
-                                });
-                            }
-                        } catch (e) {
-                            // Partials or heartbeat
+                    const rawLine = sseBuffer.slice(0, newlineIndex);
+                    sseBuffer = sseBuffer.slice(newlineIndex + 1);
+
+                    const line = rawLine.trimEnd();
+                    if (!line.startsWith('data:')) continue;
+
+                    const payload = line.slice(5).trimStart();
+                    if (!payload || payload === '[DONE]') continue;
+
+                    try {
+                        const data = JSON.parse(payload);
+                        if (data.conversation_id && typeof data.conversation_id === 'string') {
+                            difyConversationIdRef.current = data.conversation_id;
                         }
+                        if (data.event === 'agent_message' || data.event === 'message') {
+                            accumulatedResponse += (data.answer || '');
+                            setMessages(prev => {
+                                const newMsgs = [...prev];
+                                newMsgs[newMsgs.length - 1].content = accumulatedResponse;
+                                return newMsgs;
+                            });
+                        }
+                    } catch {
                     }
                 }
             }

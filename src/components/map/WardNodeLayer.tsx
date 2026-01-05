@@ -123,23 +123,26 @@ function WardNodes({
                 </span>
             </div>
 
-            {/* Render Actual Nodes */}
-            {nodes.map((node) => (
-                <NodeMarker
-                    key={node.id}
-                    node={node}
-                    hubDetails={{
-                        member_count: 0,
-                        transfer_type: 'indoor',
-                        transfer_complexity: 'simple',
-                        walking_distance_meters: null,
-                        indoor_connection_notes: null
-                    }}
-                    zone="core"
-                    locale={locale}
-                    zoom={15} // Default zoom for ward view
-                />
-            ))}
+            {/* Render Actual Nodes (Hide children) */}
+            {nodes
+                .filter(n => !n.parent_hub_id) // Only show independent nodes or hubs
+                .map((node) => (
+                    <NodeMarker
+                        key={node.id}
+                        node={node}
+                        hubDetails={{
+                            member_count: 0,
+                            transfer_type: 'indoor',
+                            transfer_complexity: 'simple',
+                            walking_distance_meters: null,
+                            indoor_connection_notes: null
+                        }}
+                        zone="core"
+                        locale={locale}
+                        zoom={15} // Default zoom for ward view
+                        onClick={onNodeClick}
+                    />
+                ))}
         </div>
     );
 }

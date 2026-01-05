@@ -421,7 +421,8 @@ function HubNodeLayer({ nodes, hubDetails, zone, locale, showAllNodes = false }:
     //   - Hide child nodes (parent_hub_id IS NOT NULL)
     const visibleNodes = useMemo(() => {
         if (!nodes || nodes.length === 0) return [];
-        if (showAllNodes) return nodes;
+        // [FIX] Always hide children (nodes with a parent_hub_id)
+        // Even in "showAllNodes" (Ward Mode), we only want to see the Hub representative, not the children.
         return nodes.filter(n => n.parent_hub_id === null);
     }, [nodes, showAllNodes]);
 
@@ -520,6 +521,11 @@ function AppMap() {
             'ward:bunkyo': [35.7081, 139.7516], // Tokyo Dome area
             'ward:toshima': [35.7295, 139.7109], // Ikebukuro
             'ward:arakawa': [35.7360, 139.7833], // Nippori
+            // New wards
+            'ward:nakano': [35.7057, 139.6658], // Nakano Station
+            'ward:kita': [35.7536, 139.7346], // Oji area
+            'ward:ota': [35.5616, 139.7161], // Haneda Airport area
+            'ward:setagaya': [35.6461, 139.6532], // Sangenjaya area
         };
         const center = wardCenters[wardId];
         if (center) {
@@ -577,9 +583,14 @@ function AppMap() {
                         // or we can mock empty/basic details for now
                         const simulatedDetails: Record<string, HubDetails> = {};
                         newNodes.forEach((n: any) => {
-                            if (n.child_count !== undefined) {
+                            // Support various API shapes for child_count
+                            // hub_data might be object (single) or array (if Supabase returns array)
+                            const hubData = Array.isArray(n.hub_data) ? n.hub_data[0] : n.hub_data;
+                            const childCount = n.child_count ?? hubData?.child_count;
+
+                            if (childCount !== undefined && childCount > 0) {
                                 simulatedDetails[n.id] = {
-                                    member_count: n.child_count || 0,
+                                    member_count: childCount,
                                     transfer_type: 'interconnected',
                                     transfer_complexity: 'medium',
                                     walking_distance_meters: 100,

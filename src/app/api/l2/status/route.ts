@@ -45,12 +45,14 @@ async function getNodeTransitLines(stationId: string): Promise<StationLineDef[]>
                 operator = 'Toei';
             } else if (lineName.includes('JR') || ['Yamanote', 'Keihin', 'Chuo', 'Sobu', 'Joban', 'Keiyo'].some(l => lineName.includes(l))) {
                 operator = 'JR';
+            } else if (lineName.includes('Keikyu') || ['Keikyu', 'Airport'].some(l => lineName.includes(l))) {
+                operator = 'Private'; // or 'Keikyu' if we want specific
             }
 
             return {
                 name: { ja: lineName, en: lineName, zh: lineName },
                 operator,
-                color: operator === 'Metro' ? '#00A7DB' : operator === 'Toei' ? '#E73387' : operator === 'JR' ? '#008A3C' : '#666666'
+                color: operator === 'Metro' ? '#00A7DB' : operator === 'Toei' ? '#E73387' : operator === 'JR' ? '#008A3C' : '#00C3E3'
             } as StationLineDef;
         });
     } catch (e) {
@@ -89,7 +91,7 @@ function matchDisruptionToLine(lineDef: any, disruption: any) {
         // Construct approximate ODPT ID from lineDef (e.g. "Ginza" + "Metro" -> "TokyoMetro.Ginza")
         // This is fuzzy but robust enough for the major lines
         const lineSlug = lineDef.name.en.replace(' Line', '').replace('-', '');
-        const opPrefix = lineDef.operator === 'Metro' ? 'TokyoMetro' : lineDef.operator === 'Toei' ? 'Toei' : 'JR-East';
+        const opPrefix = lineDef.operator === 'Metro' ? 'TokyoMetro' : lineDef.operator === 'Toei' ? 'Toei' : lineDef.operator === 'JR' ? 'JR-East' : 'Keikyu';
         // Check if disruption.railway_id contains these tokens
         if (disruption.railway_id.includes(opPrefix) && disruption.railway_id.includes(lineSlug)) {
             return true;
@@ -473,8 +475,8 @@ export async function GET(request: Request) {
                 condition: weatherInfo?.condition || 'Unknown',
                 wind: weatherInfo?.wind || 0
             },
-            updated_at: baseData.updated_at,
-            is_stale: (Date.now() - new Date(baseData.updated_at).getTime()) > 30 * 60 * 1000,
+            updated_at: new Date().toISOString(),
+            is_stale: false,
             disruption_history: Array.isArray(historyRows) ? historyRows : []
         };
 

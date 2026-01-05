@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const DIFY_API_BASE = process.env.DIFY_API_BASE || 'https://api.dify.ai/v1';
+const DIFY_API_BASE = process.env.DIFY_API_BASE || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
 const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
 
 interface DifyMessage {
@@ -52,17 +52,27 @@ export async function POST(req: NextRequest) {
             user: inputs.user_id || 'anonymous'
         };
 
-        console.log('[Dify] Request:', { query, conversation_id, inputs: difyPayload.inputs });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-        // Call Dify API
-        const difyResponse = await fetch(`${DIFY_API_BASE}/chat-messages`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${DIFY_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(difyPayload)
-        });
+        let difyResponse: Response;
+        try {
+            difyResponse = await fetch(`${DIFY_API_BASE}/chat-messages`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${DIFY_API_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Accept': response_mode === 'streaming' ? 'text/event-stream' : 'application/json'
+                },
+                body: JSON.stringify({
+                    ...difyPayload,
+                    files: body.files || []
+                }),
+                signal: controller.signal
+            });
+        } finally {
+            clearTimeout(timeoutId);
+        }
 
         if (!difyResponse.ok) {
             const errorText = await difyResponse.text();
@@ -79,7 +89,8 @@ export async function POST(req: NextRequest) {
                 headers: {
                     'Content-Type': 'text/event-stream',
                     'Cache-Control': 'no-cache, no-transform',
-                    'Connection': 'keep-alive'
+                    'Connection': 'keep-alive',
+                    'X-Accel-Buffering': 'no'
                 }
             });
         }

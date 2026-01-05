@@ -6,17 +6,22 @@ export async function GET(req: NextRequest) {
     const fromStation = searchParams.get('from');
     const toStation = searchParams.get('to');
 
-    if (!fromStation || !toStation) {
-        return NextResponse.json({ error: 'Missing from/to station' }, { status: 400 });
+    if (!fromStation) {
+        return NextResponse.json({ error: 'Missing from station' }, { status: 400 });
     }
 
     try {
         // 1. Try fetching from our local fares table first (much faster)
-        const { data: localFares, error: dbError } = await supabaseAdmin
+        let query = supabaseAdmin
             .from('fares')
             .select('*')
-            .eq('from_station_id', fromStation)
-            .eq('to_station_id', toStation);
+            .eq('from_station_id', fromStation);
+
+        if (toStation) {
+            query = query.eq('to_station_id', toStation);
+        }
+
+        const { data: localFares, error: dbError } = await query.limit(toStation ? 20 : 500);
 
         if (dbError) {
             console.warn('Database error fetching fares, falling back to ODPT API:', dbError.message);
@@ -45,9 +50,12 @@ export async function GET(req: NextRequest) {
         const BASE_URL = 'https://api.odpt.org/api/v4/odpt:RailwayFare';
         const odptSearchParams = new URLSearchParams({
             'odpt:fromStation': fromStation,
-            'odpt:toStation': toStation,
             'acl:consumerKey': ODPT_API_KEY
         });
+
+        if (toStation) {
+            odptSearchParams.append('odpt:toStation', toStation);
+        }
         const apiUrl = `${BASE_URL}?${odptSearchParams.toString()}`;
 
         const res = await fetch(apiUrl, { next: { revalidate: 3600 } });
@@ -55,11 +63,11 @@ export async function GET(req: NextRequest) {
 
         const data = await res.json();
 
-        if (data.length === 0) {
-            return NextResponse.json({ found: false, message: 'No direct fare found. Transfer might be required.' });
+        if (!Array.isArray(data) || data.length === 0) {
+            return NextResponse.json({ found: false, message: 'No fare data found.' });
         }
 
-        const fares = data.map((entry: any) => ({
+        const fares = (toStation ? data : data.slice(0, 500)).map((entry: any) => ({
             ticket: entry['odpt:ticketFare'],
             ic: entry['odpt:icCardFare'],
             operator: entry['odpt:operator'],

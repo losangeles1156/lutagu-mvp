@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 async function testDifyConnection() {
     const apiKey = process.env.DIFY_API_KEY;
-    const apiUrl = process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
+    const apiUrl = process.env.DIFY_API_BASE || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
 
     console.log('--- Dify Connection Diagnostics ---');
     console.log(`API URL: ${apiUrl}`);

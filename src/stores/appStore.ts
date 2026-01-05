@@ -5,6 +5,9 @@ interface AppState {
     currentNodeId: string | null;
     currentZone: 'core' | 'buffer' | 'outer';
 
+    difyUserId: string;
+    difyConversationId: string | null;
+
     isBottomSheetOpen: boolean;
     isChatOpen: boolean;
     messages: Array<{ 
@@ -27,13 +30,17 @@ interface AppState {
     activeTab: 'explore' | 'trips' | 'me';
 
     onboardingSeenVersion: number;
+    isOnboardingOpen: boolean;
     pendingChatInput: string | null;
     pendingChatAutoSend: boolean;
 
     setCurrentNode: (id: string | null) => void;
     setZone: (zone: 'core' | 'buffer' | 'outer') => void;
     setBottomSheetOpen: (isOpen: boolean) => void;
+    setIsOnboardingOpen: (isOpen: boolean) => void;
     setChatOpen: (isOpen: boolean) => void;
+    setDifyConversationId: (id: string | null) => void;
+    resetDifyConversation: () => void;
     addMessage: (message: { 
         role: 'user' | 'assistant'; 
         content: string; 
@@ -62,6 +69,12 @@ export const useAppStore = create<AppState>()(
         (set) => ({
             currentNodeId: null,
             currentZone: 'outer',
+
+            difyUserId:
+                globalThis.crypto?.randomUUID?.() ||
+                `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
+            difyConversationId: null,
+
             isBottomSheetOpen: false,
             isChatOpen: false,
             messages: [],
@@ -78,13 +91,17 @@ export const useAppStore = create<AppState>()(
             userContext: [],
 
             onboardingSeenVersion: 0,
+            isOnboardingOpen: false,
             pendingChatInput: null,
             pendingChatAutoSend: false,
 
             setCurrentNode: (id) => set({ currentNodeId: id }),
             setZone: (zone) => set({ currentZone: zone }),
             setBottomSheetOpen: (isOpen) => set({ isBottomSheetOpen: isOpen }),
+            setIsOnboardingOpen: (isOpen) => set({ isOnboardingOpen: isOpen }),
             setChatOpen: (isOpen) => set({ isChatOpen: isOpen }),
+            setDifyConversationId: (id) => set({ difyConversationId: id }),
+            resetDifyConversation: () => set({ difyConversationId: null }),
             addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
             setMapCenter: (center) => set({ mapCenter: center }),
             setTripGuardActive: (isActive) => set({ isTripGuardActive: isActive }),
@@ -108,6 +125,7 @@ export const useAppStore = create<AppState>()(
         {
             name: 'lutagu-storage',
             partialize: (state) => ({
+                difyUserId: state.difyUserId,
                 locale: state.locale,
                 accessibilityMode: state.accessibilityMode,
                 userContext: state.userContext,

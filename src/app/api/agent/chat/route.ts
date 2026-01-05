@@ -81,6 +81,10 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Build System Prompt (Dynamic & Concise)
+        // [NEW] Inject L1 Custom Places
+        const { getApprovedL1PlacesContext } = await import('@/lib/l1/queries');
+        const l1Context = await getApprovedL1PlacesContext(nodeId, locale);
+
         const systemPrompt = `You are "Lutagu", a professional DIGITAL STATION STAFF at ${nodeName}.
 Tone: Helpful, warm, and natural.
 Locale: ${locale}.
@@ -91,6 +95,7 @@ GOALS:
 1. Answer questions about station facilities, train status, and local tips using TOOLS. 
 2. CRITICAL: For specific needs (wheelchair, lockers, crowd), you MUST call the relevant tool before answering. Do not guess.
 3. If tool data is found, synthesize it into a helpful answer. If empty, suggest Google Maps.
+4. RECOMMENDATIONS: If asked for food, coffee, or spots, prioritize the VERIFIED LOCAL SPOTS provided below.
 
 STRICT TOOL RULES:
 - "Timetable", "Schedule", "Next train", "時刻表", "末班車" -> Call 'get_timetable'.
@@ -107,7 +112,7 @@ CONSTRAINTS:
 - Do NOT say "Tokyo Subway Ticket" unless asked about fares.
 - Do NOT give generic advice like "check the website" if you can check via tools.
 - NEVER use ** symbols to bold text. Use natural language and emojis for emphasis.
-- ${personaPrompt}`;
+- ${personaPrompt}${l1Context}`;
 
         // 3. Prepare Message History
         const messages: AgentMessage[] = [

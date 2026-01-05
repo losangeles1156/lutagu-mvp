@@ -36,7 +36,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
     const { getCategoryLabel, getSubcategoryLabel } = useCategoryTranslation();
     const locale = useLocale();
 
-    const { title, tagline, categories, vibe_tags, loading } = useStationDNA(data.l1_dna, locale);
+    const { title, tagline, categories, vibe_tags, loading } = useStationDNA({ ...data.l1_dna, name: data.name, id: data.id }, locale);
 
     const displayVibeTags = useMemo(() => {
         if (vibe_tags && vibe_tags.length > 0) {

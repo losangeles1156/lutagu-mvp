@@ -50,6 +50,10 @@ export const LINES = {
     Yurikamome: { name: { ja: 'ゆりかもめ', en: 'Yurikamome', zh: '百合海鷗號' }, operator: 'Private', color: '#1B94C2' } as StationLineDef, // Cyan
     Monorail: { name: { ja: '東京モノレール', en: 'Tokyo Monorail', zh: '東京單軌電車' }, operator: 'Private', color: '#10529F' } as StationLineDef, // Blue
     Keisei: { name: { ja: '京成線', en: 'Keisei Line', zh: '京成線' }, operator: 'Private', color: '#00539B' } as StationLineDef,
+    SeibuIkebukuro: { name: { ja: '西武池袋線', en: 'Seibu Ikebukuro Line', zh: '西武池袋線' }, operator: 'Private', color: '#F58220' } as StationLineDef,
+    // Keikyu
+    KeikyuMain: { name: { ja: '京急本線', en: 'Keikyu Main Line', zh: '京急本線' }, operator: 'Private', color: '#00C3E3' } as StationLineDef, // Cyan/Blue
+    KeikyuAirport: { name: { ja: '京急空港線', en: 'Keikyu Airport Line', zh: '京急機場線' }, operator: 'Private', color: '#00C3E3' } as StationLineDef,
 };
 
 // Operator Colors for Map Icons
@@ -203,6 +207,29 @@ export const STATION_LINES: Record<string, StationLineDef[]> = {
     'odpt:Station:Toei.Uchisaiwaicho': [LINES.Mita],
     'odpt:Station:Toei.Ichigaya': [LINES.Shinjuku, LINES.Namboku, LINES.Yurakucho],
     'odpt:Station:JR-East.Iidabashi': [LINES.Chuo, LINES.Sobu, LINES.Tozai, LINES.Yurakucho, LINES.Namboku, LINES.Oedo],
+
+    // --- Nakano Ward ---
+    'odpt:Station:JR-East.Nakano': [LINES.Chuo, LINES.Tozai],
+    'odpt:Station:TokyoMetro.Nakano': [LINES.Tozai, LINES.Chuo],
+
+    // --- Nerima Ward ---
+    'odpt:Station:Seibu.Nerima': [LINES.SeibuIkebukuro, LINES.Oedo], // Using newly added Seibu line
+    'odpt:Station:Toei.Nerima': [LINES.Oedo, LINES.SeibuIkebukuro],
+
+    // --- Kita Ward ---
+    'odpt:Station:JR-East.Oji': [LINES.KeihinTohoku, LINES.Namboku],
+    'odpt:Station:TokyoMetro.Oji': [LINES.Namboku, LINES.KeihinTohoku],
+
+    // --- JR Hub: Shinagawa ---
+    'odpt:Station:JR-East.Shinagawa': [LINES.Yamanote, LINES.KeihinTohoku, LINES.Tokaido, LINES.Yokosuka, LINES.UenoTokyo, LINES.KeikyuMain],
+
+    // --- JR Hub: Akabane ---
+    'odpt:Station:JR-East.Akabane': [LINES.KeihinTohoku, LINES.Saikyo, LINES.ShonanShinjuku, LINES.UenoTokyo], // + Takasaki/Utsunomiya (using UenoTokyo/Shonan as proxies)
+
+    // --- JR Yamanote South (Osaki, Gotanda, Meguro) ---
+    'odpt:Station:JR-East.Osaki': [LINES.Yamanote, LINES.Saikyo, LINES.ShonanShinjuku],
+    'odpt:Station:JR-East.Gotanda': [LINES.Yamanote, LINES.Asakusa, LINES.SeibuIkebukuro], // Note: Gotanda is actually Toei Asakusa + Tokyu Ikegami (Tokyu not fully def yet) - using Asakusa
+    'odpt:Station:JR-East.Meguro': [LINES.Yamanote, LINES.Namboku, LINES.Mita], // + Tokyu Meguro
 };
 
 export const HUB_STATION_MEMBERS: Record<string, string[]> = {

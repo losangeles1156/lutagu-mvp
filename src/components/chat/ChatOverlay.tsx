@@ -1,11 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useLocale, useTranslations } from 'next-intl';
-import { findDemoScenario } from '@/lib/l4/assistantEngine';
-import { DEMO_SCENARIOS } from '@/lib/l4/demoScenarios';
 
 import { ActionCard, Action as ChatAction } from './ActionCard';
 import { ContextSelector } from './ContextSelector';
@@ -14,8 +12,6 @@ export function ChatOverlay() {
     const locale = useLocale();
     const tChat = useTranslations('chat');
     const tHome = useTranslations('Home');
-    const tOnboarding = useTranslations('onboarding');
-    const tTripGuard = useTranslations('tripGuard');
     const tL2 = useTranslations('l2');
     const {
         isChatOpen,
@@ -25,103 +21,87 @@ export function ChatOverlay() {
         currentNodeId,
         setCurrentNode,
         setBottomSheetOpen,
+        difyUserId,
+        difyConversationId,
+        setDifyConversationId,
+        userContext,
+        userProfile,
         pendingChatInput,
         pendingChatAutoSend,
         setPendingChat
     } = useAppStore();
-    const { zone, userLocation } = useZoneAwareness();
+    const { zone } = useZoneAwareness();
     const [input, setInput] = useState('');
     const [l2Status, setL2Status] = useState<any>(null);
     const [isOffline, setIsOffline] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const sendMessage = useCallback(async (text: string) => {
-        if (!text.trim()) return;
+    const hasBootstrappedRef = useRef(false);
 
-        const existingMessages = useAppStore.getState().messages;
-        addMessage({ role: 'user', content: text });
+    const openingQuickReplies = useMemo(() => {
+        if (locale === 'ja') {
+            return [
+                '今、銀座線は遅延していますか？',
+                '浅草から秋葉原まで一番早い行き方は？',
+                '神田駅の出口にはエレベーターがありますか？'
+            ];
+        }
+        if (locale === 'en') {
+            return [
+                'Is the Ginza Line delayed right now?',
+                'Fastest way from Asakusa to Akihabara?',
+                'Do Kanda Station exits have elevators?'
+            ];
+        }
+        return [
+            '現在銀座線有延誤嗎？',
+            '從淺草到秋葉原怎麼去最快？',
+            '神田站的出口都有電梯嗎？'
+        ];
+    }, [locale]);
 
-        // Check for Demo Scenario Bypass
-        let demoMatch = findDemoScenario(text);
-        let stepIndex = 0;
+    const openingQuery = useMemo(() => {
+        if (locale === 'ja') {
+            return '日本語で短い挨拶をして、できることを3つ（運行情報・バリアフリー・代替ルート）箇条書きで示し、最後に「今どこにいるか／どこへ行きたいか」を質問してください。';
+        }
+        if (locale === 'en') {
+            return 'Give a short greeting in English, list 3 things you can help with (live status, accessibility, alternative routes), and end by asking where I am or where I want to go.';
+        }
+        return '請用繁體中文做開場自我介紹，列出你能幫忙的 3 件事（即時列車狀態、無障礙、替代路線），最後問我現在在哪裡或想去哪裡。';
+    }, [locale]);
 
-        // If not a direct trigger, check if it's a follow-up step
-        if (!demoMatch) {
-            for (const d of DEMO_SCENARIOS) {
-                const foundIdx = d.steps.findIndex(s => s.user === text);
-                if (foundIdx !== -1) {
-                    demoMatch = d;
-                    stepIndex = foundIdx;
-                    break;
-                }
-            }
+    const streamFromDify = useCallback(async (payload: {
+        query: string;
+        includeUserMessage: boolean;
+        assistantActions?: ChatAction[];
+    }) => {
+        if (!payload.query.trim()) return;
+
+        if (payload.includeUserMessage) {
+            addMessage({ role: 'user', content: payload.query });
         }
 
-        if (demoMatch) {
-            addMessage({ role: 'assistant', content: '', isLoading: true });
-
-            // Simulate thinking time
-            await new Promise(resolve => setTimeout(resolve, 1200));
-
-            const currentStep = demoMatch.steps[stepIndex];
-            let responseText = currentStep.agent;
-
-            // Append tools if present
-            if (currentStep.tools && currentStep.tools.length > 0) {
-                responseText += `\n\n🛠️ ${tChat('activeBadge')}: ${currentStep.tools.join(', ')}`;
-            }
-
-            useAppStore.setState(state => {
-                const newMessages = [...state.messages];
-                const lastMsg = { ...newMessages[newMessages.length - 1] };
-                if (lastMsg.role === 'assistant') {
-                    lastMsg.content = responseText;
-                    lastMsg.isLoading = false;
-
-                    // Reset actions to avoid duplicates if state update runs twice
-                    lastMsg.actions = [];
-
-                    // Add actions from links
-                    if (currentStep.links && currentStep.links.length > 0) {
-                        lastMsg.actions = currentStep.links.map(l => ({
-                            type: 'discovery',
-                            label: l.label,
-                            target: l.url
-                        }));
-                    }
-
-                    // Add action for next demo step if available
-                    if (demoMatch && stepIndex < demoMatch.steps.length - 1) {
-                        const nextStep = demoMatch.steps[stepIndex + 1];
-                        lastMsg.actions.push({
-                            type: 'discovery',
-                            label: `✨ ${nextStep.user} (演示下一步)`,
-                            target: `demo_step_${stepIndex + 1}_${demoMatch.id}`
-                        });
-                    }
-
-                    newMessages[newMessages.length - 1] = lastMsg;
-                }
-                return { messages: newMessages };
-            });
-            return;
-        }
-
-        // Create a placeholder for the assistant's response
-        addMessage({ role: 'assistant', content: '', isLoading: true });
+        addMessage({
+            role: 'assistant',
+            content: '',
+            isLoading: true,
+            actions: payload.assistantActions
+        });
 
         try {
-            // Use Dify Agent endpoint
             const response = await fetch('/api/dify/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    query: text,
+                    query: payload.query,
+                    conversation_id: difyConversationId,
                     inputs: {
-                        user_profile: 'general',
+                        user_profile: userProfile || 'general',
+                        user_context: userContext || [],
                         current_station: currentNodeId || '',
                         locale,
-                        zone: zone || 'core'
+                        zone: zone || 'core',
+                        user_id: difyUserId
                     }
                 })
             });
@@ -129,52 +109,58 @@ export function ChatOverlay() {
             if (!response.ok) throw new Error('API Error');
             if (!response.body) throw new Error('No response body');
 
+            setIsOffline(false);
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let accumulatedAnswer = '';
-            let isFirstChunk = true;
+            let sseBuffer = '';
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n');
+                sseBuffer += decoder.decode(value, { stream: true });
+                while (true) {
+                    const newlineIndex = sseBuffer.indexOf('\n');
+                    if (newlineIndex === -1) break;
 
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.slice(6));
+                    const rawLine = sseBuffer.slice(0, newlineIndex);
+                    sseBuffer = sseBuffer.slice(newlineIndex + 1);
 
-                            // Dify uses 'agent_message' for streaming responses
-                            if (data.event === 'agent_message' || data.event === 'message') {
-                                accumulatedAnswer += (data.answer || '');
+                    const line = rawLine.trimEnd();
+                    if (!line.startsWith('data:')) continue;
 
-                                // Update the last message (assistant) with new content
-                                useAppStore.setState(state => {
-                                    const newMessages = [...state.messages];
-                                    const lastMsg = newMessages[newMessages.length - 1];
-                                    if (lastMsg.role === 'assistant') {
-                                        lastMsg.content = accumulatedAnswer;
-                                        lastMsg.isLoading = false;
-                                        // If this is the first chunk, ensure we clear any loading state
-                                        if (isFirstChunk) {
-                                            isFirstChunk = false;
-                                        }
-                                    }
-                                    return { messages: newMessages };
-                                });
-                            }
-                        } catch (e) {
-                            console.error('SSE Parse Error', e);
+                    const ssePayload = line.slice(5).trimStart();
+                    if (!ssePayload || ssePayload === '[DONE]') continue;
+
+                    try {
+                        const data = JSON.parse(ssePayload);
+                        if (data.conversation_id && typeof data.conversation_id === 'string') {
+                            setDifyConversationId(data.conversation_id);
                         }
+
+                        if (data.event === 'agent_message' || data.event === 'message') {
+                            accumulatedAnswer += (data.answer || '');
+
+                            useAppStore.setState(state => {
+                                const newMessages = [...state.messages];
+                                const lastMsg = newMessages[newMessages.length - 1];
+                                if (lastMsg.role === 'assistant') {
+                                    lastMsg.content = accumulatedAnswer;
+                                    lastMsg.isLoading = false;
+                                }
+                                return { messages: newMessages };
+                            });
+                        }
+                    } catch (e) {
+                        console.error('SSE Parse Error', e);
                     }
                 }
             }
-
         } catch (error) {
             console.error('Chat Error', error);
-            // Update last message to show error
+            setIsOffline(true);
             useAppStore.setState(state => {
                 const newMessages = [...state.messages];
                 const lastMsg = newMessages[newMessages.length - 1];
@@ -185,7 +171,35 @@ export function ChatOverlay() {
                 return { messages: newMessages };
             });
         }
-    }, [addMessage, locale, tChat, userLocation, zone, currentNodeId, l2Status]);
+    }, [addMessage, currentNodeId, difyConversationId, difyUserId, locale, tChat, setDifyConversationId, zone, userContext, userProfile]);
+
+    const sendMessage = useCallback(async (text: string) => {
+        await streamFromDify({ query: text, includeUserMessage: true });
+    }, [streamFromDify]);
+
+    useEffect(() => {
+        if (!isChatOpen) {
+            hasBootstrappedRef.current = false;
+            return;
+        }
+        if (messages.length > 0) return;
+        if (pendingChatInput) return;
+        if (hasBootstrappedRef.current) return;
+
+        hasBootstrappedRef.current = true;
+
+        const actions = openingQuickReplies.map(q => ({
+            type: 'discovery' as const,
+            label: q,
+            target: `chat:${encodeURIComponent(q)}`
+        }));
+
+        streamFromDify({
+            query: openingQuery,
+            includeUserMessage: false,
+            assistantActions: actions
+        });
+    }, [isChatOpen, messages.length, openingQuery, openingQuickReplies, pendingChatInput, streamFromDify]);
 
     useEffect(() => {
         const fetchL2 = async () => {
@@ -259,16 +273,9 @@ export function ChatOverlay() {
         } else if (action.type === 'taxi') {
             window.open(`https://go.mo-t.com/`, '_blank');
         } else if (action.type === 'discovery') {
-            if (action.target?.startsWith('demo_step_')) {
-                // Handle Demo Next Steps
-                const parts = action.target.split('_');
-                const stepIndex = parseInt(parts[2]);
-                const demoId = parts.slice(3).join('_');
-
-                const demo = DEMO_SCENARIOS.find(s => s.id === demoId);
-                if (demo && demo.steps[stepIndex]) {
-                    sendMessage(demo.steps[stepIndex].user);
-                }
+            if (action.target?.startsWith('chat:')) {
+                const q = decodeURIComponent(action.target.slice('chat:'.length));
+                sendMessage(q);
             } else if (action.target?.startsWith('http')) {
                 window.open(action.target, '_blank');
             } else {
@@ -395,40 +402,6 @@ export function ChatOverlay() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth scrollbar-hide">
-                {messages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-full text-center space-y-10 px-8 animate-in fade-in zoom-in-95 duration-1000">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-indigo-500 blur-[80px] opacity-20 rounded-full animate-pulse" />
-                            <div className="w-28 h-28 bg-white rounded-[40px] flex items-center justify-center text-6xl shadow-2xl shadow-indigo-100 border border-white/50 relative z-10 glass-effect">
-                                ✨
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-3xl font-black text-gray-900 tracking-tighter">{tOnboarding('tagline')}</h3>
-                            <p className="text-gray-500 font-bold leading-relaxed max-w-[240px] mx-auto text-sm opacity-60">
-                                {tOnboarding('askTitle')}
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3 w-full max-w-sm">
-                            {[
-                                tOnboarding('tips.overtourism'),
-                                tOnboarding('tips.disruption'),
-                                tOnboarding('tips.handsfree'),
-                                tOnboarding('tips.accessibility')
-                            ].map((tip, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setInput(tip)}
-                                    className="px-5 py-4 bg-white/40 hover:bg-white border border-white/60 hover:border-indigo-100 rounded-2xl text-sm font-black text-gray-700 hover:text-indigo-600 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all text-left flex justify-between items-center group backdrop-blur-sm"
-                                >
-                                    <span className="line-clamp-2">{tip}</span>
-                                    <span className="opacity-0 group-hover:opacity-100 transition-all text-indigo-400 group-hover:translate-x-1 duration-300 ml-2">→</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
                 {messages.map((msg: any, idx: number) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-4 fade-in duration-700`}>
                         <div className={`max-w-[88%] p-5 rounded-[28px] shadow-sm ${msg.role === 'user'

@@ -37,6 +37,8 @@ export function StationAutocomplete({
     const dropdownRef = useRef<HTMLDivElement>(null);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+    const abortControllerRef = useRef<AbortController | null>(null);
+
     // Debounced search
     const searchStations = useCallback(async (query: string) => {
         if (query.length < 1) {
@@ -44,17 +46,34 @@ export function StationAutocomplete({
             return;
         }
 
+        // Cancel previous request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
         setIsLoading(true);
         try {
-            const res = await fetch(`/api/stations/search?q=${encodeURIComponent(query)}`);
+            const res = await fetch(`/api/stations/search?q=${encodeURIComponent(query)}`, {
+                signal: controller.signal
+            });
             if (res.ok) {
                 const data = await res.json();
                 setSuggestions(data.stations || []);
             }
         } catch (e) {
+            if (e instanceof Error && e.name === 'AbortError') {
+                // Ignore abort errors
+                return;
+            }
             console.error('Station search failed:', e);
         } finally {
-            setIsLoading(false);
+            // Only clear loading if this is the active request
+            if (abortControllerRef.current === controller) {
+                setIsLoading(false);
+                abortControllerRef.current = null;
+            }
         }
     }, []);
 
@@ -128,8 +147,7 @@ export function StationAutocomplete({
 
     // Handle selection
     const handleSelect = (station: Station) => {
-        const displayName = station.name.ja || station.name.en || station.id;
-        onChange(station.id);
+        onChange(getDisplayName(station));
         onSelect(station);
         setShowDropdown(false);
         setHighlightedIndex(-1);

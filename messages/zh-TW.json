@@ -399,7 +399,8 @@
         "offlineBadge": "離線模式",
         "tripAdded": "已將「{label}」加入行程！",
         "openingTimetable": "正在為您開啟「{label}」的詳細時刻表...",
-        "activeBadge": "即時策略啟用中"
+        "activeBadge": "即時策略啟用中",
+        "demoNextStep": "演示下一步"
     },
     "ui": {
         "items": "項目"

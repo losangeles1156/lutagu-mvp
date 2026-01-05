@@ -1,12 +1,15 @@
 
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
 import { TOOL_HANDLERS } from '../toolDefinitions';
 import { odptClient } from '@/lib/odpt/client';
+import type { OdptRailwayFare } from '@/lib/odpt/types';
 
 // Save original methods
 const originalGetFares = odptClient.getFares;
 const originalGetStationTimetable = odptClient.getStationTimetable;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
 
 describe('L4 Tool Handlers', () => {
   const mockContext = {
@@ -18,13 +21,23 @@ describe('L4 Tool Handlers', () => {
     // Reset mocks
     odptClient.getFares = originalGetFares;
     odptClient.getStationTimetable = originalGetStationTimetable;
+    console.error = () => {};
+    console.warn = () => {};
+  });
+
+  afterEach(() => {
+    console.error = originalConsoleError;
+    console.warn = originalConsoleWarn;
   });
 
   describe('get_fare', () => {
     it('should return fare information for valid stations', async () => {
       // Mock implementation
-      odptClient.getFares = async () => ([
+      odptClient.getFares = async () : Promise<OdptRailwayFare[]> => ([
         {
+          '@id': 'test:fare:1',
+          '@type': 'odpt:RailwayFare',
+          'odpt:operator': 'odpt.Operator:TokyoMetro',
           'odpt:fromStation': 'odpt.Station:TokyoMetro.Ginza.Ueno',
           'odpt:toStation': 'odpt.Station:TokyoMetro.Ginza.Asakusa',
           'odpt:ticketFare': 170,
@@ -56,7 +69,7 @@ describe('L4 Tool Handlers', () => {
   describe('get_timetable', () => {
     it('should return timetable for a station', async () => {
       // Create trips for all hours to ensure coverage regardless of current time
-      const trips = [];
+      const trips: { 'odpt:departureTime': string; 'odpt:destinationStation': string[] }[] = [];
       for (let h = 0; h < 24; h++) {
           trips.push({ 
               'odpt:departureTime': `${h.toString().padStart(2, '0')}:00`, 

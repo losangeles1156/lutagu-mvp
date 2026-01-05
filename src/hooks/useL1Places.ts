@@ -12,8 +12,8 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 }
@@ -45,6 +45,7 @@ export interface L1Place {
     businessHours?: Record<string, any>;
     logoUrl?: string;
     priority?: number;
+    description?: string;
 }
 
 export function useL1Places() {
@@ -67,13 +68,13 @@ export function useL1Places() {
                 // Check if supabase is available before using it
                 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
                 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-                
+
                 if (!supabaseUrl || !supabaseKey) {
                     console.warn('[useL1Places] Supabase credentials missing, using local fallback');
-                    
+
                     const stationIds = buildStationIdSearchCandidates(nodeId);
                     const fallbackPlaces: L1Place[] = [];
-                    
+
                     for (const sId of stationIds) {
                         const staticData = STATIC_L1_DATA[sId];
                         if (staticData && staticData.categories) {
@@ -89,14 +90,15 @@ export function useL1Places() {
                                             subcategory: spot.subcategory || '',
                                             distance_meters: spot.distance_meters || 100,
                                             location: { coordinates: [139.77, 35.71] }, // Dummy but safe
-                                            tags: {}
+                                            tags: {},
+                                            description: getLocaleString(spot.description_i18n || {}, locale)
                                         } as L1Place);
                                     });
                                 }
                             });
                         }
                     }
-                    
+
                     setPlaces(fallbackPlaces);
                     setLoading(false);
                     return;
@@ -130,7 +132,7 @@ export function useL1Places() {
                         .in('station_id', stationIds)
                         .eq('is_active', true)
                         .eq('status', 'approved');
-                    
+
                     if (customError) {
                         console.warn('[useL1Places] Error fetching custom places:', customError);
                     } else if (customData && customData.length > 0) {
@@ -144,7 +146,7 @@ export function useL1Places() {
                             } else if (row.location?.coordinates) {
                                 coords = row.location.coordinates;
                             }
-                            
+
                             customPlaces.push({
                                 id: row.id,
                                 osm_id: 0, // 自定義景點沒有 OSM ID
@@ -164,7 +166,8 @@ export function useL1Places() {
                                 discountInfo: row.discount_info,
                                 businessHours: row.business_hours,
                                 logoUrl: row.logo_url,
-                                priority: row.priority || 100
+                                priority: row.priority || 100,
+                                description: getLocaleString(row.description_i18n || {}, locale)
                             });
                         }
                     }
@@ -213,10 +216,10 @@ export function useL1Places() {
                 // [NEW] 去重：自定義景點優先於 OSM 景點
                 // 使用位置接近度來判斷是否為同一個景點（距離 < 50m）
                 const allPlaces: L1Place[] = [];
-                
+
                 // 先加入所有 OSM 景點
                 allPlaces.push(...parsed);
-                
+
                 // 檢查自定義景點是否與現有 OSM 景點重複（位置接近）
                 for (const custom of customPlaces) {
                     let isDuplicate = false;

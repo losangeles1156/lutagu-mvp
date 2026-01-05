@@ -402,8 +402,9 @@
         "connectionError": "通信エラーが発生しました。時間をおいて再試行してください。",
         "offlineBadge": "オフライン",
         "tripAdded": "「{label}」を旅程に追加しました！",
-        "openingTimetable": "「{label}」の時刻表詳細を開いています...",
-        "activeBadge": "アクティブモード"
+        "openingTimetable": "「{label}」の詳細時刻表を開いています...",
+        "activeBadge": "リアルタイム戦略有効中",
+        "demoNextStep": "デモの次のステップ"
     },
     "ui": {
         "items": "項目"

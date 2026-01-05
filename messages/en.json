@@ -400,7 +400,8 @@
         "offlineBadge": "OFFLINE",
         "tripAdded": "Added \"{label}\" to your trip!",
         "openingTimetable": "Opening detailed timetable for \"{label}\"...",
-        "activeBadge": "Active Strategy"
+        "activeBadge": "Active Strategy Enabled",
+        "demoNextStep": "Demo Next Step"
     },
     "ui": {
         "items": "Items"

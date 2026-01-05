@@ -327,7 +327,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                                 return (
                                     <button
                                         key={idx}
-                                        className={`flex flex-col items-center p-1.5 rounded-xl border transition-all relative ${isSelected
+                                        className={`flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all relative min-h-[50px] ${isSelected
                                             ? 'bg-indigo-600 border-indigo-600 text-white scale-110 shadow-md z-10'
                                             : isMostPopular
                                                 ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100'
@@ -335,7 +335,11 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                                             }`}
                                         onClick={() => handleVote(idx)}
                                     >
-                                        <span className="text-base">{opt.emoji}</span>
+                                        <span className="text-base leading-none mb-1">{opt.emoji}</span>
+                                        <span className={`text-[9px] font-bold leading-none ${isSelected ? 'text-indigo-100' : 'text-gray-500'}`}>
+                                            {opt.label}
+                                        </span>
+                                        
                                         {/* Show Count if clicked (Simulated logic) */}
                                         {clickedCrowd !== null && (
                                             <span className={`text-[8px] font-bold mt-0.5 ${isSelected ? 'text-indigo-100' : 'text-gray-400'}`}>

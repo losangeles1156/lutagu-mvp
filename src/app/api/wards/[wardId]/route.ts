@@ -67,40 +67,27 @@ export async function GET(
             }
         };
 
-        // Fetch Hubs in this ward (via hub_members -> hub_metadata)
-        if (!includeHubs) {
+        // Fetch Hubs in this ward (via hub_metadata table)
+        if (includeHubs) {
             // First get node IDs in this ward
             const { data: wardNodeIds } = await supabase
                 .from('nodes')
                 .select('id')
-                .eq('ward_id', wardId);
+                .eq('ward_id', wardId)
+                .is('parent_hub_id', null); // Only hub nodes
 
             const nodeIds = wardNodeIds?.map(n => n.id) || [];
 
             if (nodeIds.length > 0) {
-                const { data: hubs } = await supabase
-                    .from('hub_members')
-                    .select(`
-                        hub_id,
-                        hub_metadata:hubs!inner (
-                            id,
-                            name,
-                            primary_operator,
-                            hub_category,
-                            child_count
-                        )
-                    `)
-                    .in('node_id', nodeIds);
+                // Get hub metadata for these nodes
+                const { data: hubMetadata } = await supabase
+                    .from('hub_metadata')
+                    .select('*')
+                    .in('hub_id', nodeIds)
+                    .eq('is_active', true);
 
-                if (hubs) {
-                    // Deduplicate hubs
-                    const hubMap = new Map();
-                    for (const h of hubs) {
-                        if (h.hub_metadata && !hubMap.has(h.hub_id)) {
-                            hubMap.set(h.hub_id, h.hub_metadata);
-                        }
-                    }
-                    response.hubs = Array.from(hubMap.values());
+                if (hubMetadata) {
+                    response.hubs = hubMetadata;
                 }
             }
         }
@@ -114,18 +101,18 @@ export async function GET(
                     name,
                     city_id,
                     coordinates,
-                    is_hub,
                     parent_hub_id,
                     ward_id,
                     node_type,
                     transit_lines,
-                    is_active
+                    is_active,
+                    child_count
                 `)
                 .eq('ward_id', wardId)
                 .not('node_type', 'eq', 'bus_stop')
                 .not('node_type', 'eq', 'poi')
                 .not('node_type', 'eq', 'place')
-                .order('is_hub', { ascending: false })
+                .order('parent_hub_id', { ascending: true, nullsFirst: true })
                 .limit(nodeLimit);
 
             if (onlyHubs) {

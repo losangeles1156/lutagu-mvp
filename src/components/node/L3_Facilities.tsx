@@ -212,7 +212,9 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                         }
 
                         let locObj: LocaleString;
-                        const rawLoc = f.location || nameObj;
+                        // [Fix] Prioritize distinct location description from attributes
+                        const rawLoc = f.attributes?.location_description || f.attributes?.location || f.location || nameObj;
+
                         if (typeof rawLoc === 'object' && rawLoc !== null) {
                             locObj = {
                                 ja: rawLoc.ja || rawLoc.en || rawLoc.zh,
@@ -387,9 +389,17 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                                         <MapPin size={14} aria-hidden="true" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-900">
+                                                        <p className="text-sm font-medium text-gray-900 leading-tight">
                                                             {getLocaleString(fac.name, locale)}
                                                         </p>
+                                                        {/* Relative Location Display - Only show if different from name */}
+                                                        {fac.location &&
+                                                            getLocaleString(fac.location, locale) !== getLocaleString(fac.name, locale) && (
+                                                                <div className="flex items-center gap-1 mt-1 text-xs text-indigo-600 font-medium bg-indigo-50 px-1.5 py-0.5 rounded w-fit max-w-full truncate">
+                                                                    <MapPin size={10} className="shrink-0" />
+                                                                    <span>{getLocaleString(fac.location, locale)}</span>
+                                                                </div>
+                                                            )}
                                                         {fac.details && fac.details.length > 0 && (
                                                             <div className="flex flex-wrap gap-1 mt-2">
                                                                 {fac.details.map((detail, idx) => (
@@ -412,10 +422,46 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
             </div>
 
             {/* Quick Links / Actions (e.g. Toilet Vacancy) */}
-            {data.external_links && data.external_links.length > 0 && (
+            {(data.external_links && data.external_links.length > 0 || data.id === 'odpt.Station:JR-East.Tokyo' || data.id === 'odpt.Station:JR-East.Yamanote.Tokyo' || data.name?.en?.includes('Tokyo Station')) && (
                 <div className="space-y-2">
                     <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">{tL3('quickLinks')}</h3>
-                    {data.external_links.map((link, idx) => (
+
+                    {/* Tokyo Station VACAN Link (Hardcoded for MVP) */}
+                    {(data.id === 'odpt.Station:JR-East.Tokyo' || data.id === 'odpt.Station:JR-East.Yamanote.Tokyo' || data.name?.en?.includes('Tokyo')) && (
+                        <a
+                            href="https://tokyo-station-toilet.pages.vacan.com/marunouchi-area"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() =>
+                                trackEvent({
+                                    activityType: 'external_link_click',
+                                    nodeId: data.id,
+                                    url: 'https://tokyo-station-toilet.pages.vacan.com/marunouchi-area',
+                                    title: 'Tokyo Station Toilet Vacancy',
+                                    facilityType: 'toilet'
+                                })
+                            }
+                            className="flex items-center justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] bg-cyan-600 text-white"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white/20 rounded-xl relative">
+                                    <User size={20} aria-hidden="true" />
+                                    <span className="absolute top-1 right-1 w-2 h-2 bg-green-400 border-2 border-cyan-600 rounded-full animate-pulse"></span>
+                                </div>
+                                <div>
+                                    <span className="font-bold text-sm block">
+                                        {locale === 'ja' ? 'トイレ空室状況' : locale === 'en' ? 'Toilet Vacancy' : '廁所即時空缺'}
+                                    </span>
+                                    <span className="text-[10px] opacity-90 block">
+                                        {locale === 'ja' ? 'リアルタイム確認 (VACAN)' : locale === 'en' ? 'Live Status (VACAN)' : 'VACAN 即時狀態確認'}
+                                    </span>
+                                </div>
+                            </div>
+                            <ExternalLink size={16} className="opacity-80" aria-hidden="true" />
+                        </a>
+                    )}
+
+                    {data.external_links?.map((link, idx) => (
                         <a
                             key={idx}
                             href={link.url}

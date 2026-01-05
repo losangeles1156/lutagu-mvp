@@ -8,6 +8,8 @@ import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
 import { getSupabase } from '@/lib/supabase';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { useAppStore } from '@/stores/appStore';
+import { DEMO_SCENARIOS } from '@/lib/l4/demoScenarios';
 
 function normalizeNextPath(nextPath: string | null, locale: string) {
     if (!nextPath) return `/${locale}`;
@@ -21,6 +23,7 @@ function normalizeNextPath(nextPath: string | null, locale: string) {
 
 export default function LoginPage() {
     const locale = useLocale();
+    const storeLocale = useAppStore(s => s.locale);
     const router = useRouter();
     const t = useTranslations('login');
     const tOnboarding = useTranslations('onboarding');
@@ -28,6 +31,21 @@ export default function LoginPage() {
 
     const nextPathRaw = searchParams.get('next');
     const nextPath = normalizeNextPath(nextPathRaw, locale);
+
+    const getDemoQuestion = (key: string) => {
+        const scenario = DEMO_SCENARIOS.find(s => s.id.includes(key));
+        if (!scenario) return t(`tips.${key}`);
+        
+        const firstStep = scenario.steps[0];
+        if (storeLocale === 'ja' && firstStep.user_ja) return firstStep.user_ja;
+        if (storeLocale === 'en' && firstStep.user_en) return firstStep.user_en;
+        return firstStep.user;
+    };
+
+    const getIssueLabel = (key: string) => {
+        // Since labels are short, we can still use translations or just hardcode for these 4
+        return t(`issues.${key}`);
+    };
 
     const supabase = useMemo<SupabaseClient | null>(() => {
         try {
@@ -327,28 +345,31 @@ export default function LoginPage() {
                             { key: 'disruption', node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo' },
                             { key: 'handsfree', node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
                             { key: 'accessibility', node: 'odpt.Station:JR-East.Yamanote.Ueno' }
-                        ].map((item) => (
-                            <button
-                                key={item.key}
-                                onClick={() => {
-                                    const text = t(`tips.${item.key}`);
-                                    router.push(`/${locale}/?node=${item.node}&sheet=1&tab=lutagu&q=${encodeURIComponent(text)}`);
-                                }}
-                                className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98]"
-                            >
-                                <div className="flex items-center gap-2 mb-1.5">
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white border border-slate-100 text-indigo-500 font-black uppercase tracking-wider shadow-sm">
-                                        {t(`issues.${item.key}`)}
-                                    </span>
-                                </div>
-                                <div className="text-xs font-bold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors">
-                                    {t(`tips.${item.key}`)}
-                                </div>
-                                <div className="mt-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                    {tOnboarding('askSubtitle')}
-                                </div>
-                            </button>
-                        ))}
+                        ].map((item) => {
+                            const questionText = getDemoQuestion(item.key);
+                            const issueLabel = getIssueLabel(item.key);
+                            return (
+                                <button
+                                    key={item.key}
+                                    onClick={() => {
+                                        router.push(`/${locale}/?node=${item.node}&sheet=1&tab=lutagu&q=${encodeURIComponent(questionText)}`);
+                                    }}
+                                    className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98]"
+                                >
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white border border-slate-100 text-indigo-500 font-black uppercase tracking-wider shadow-sm">
+                                            {issueLabel}
+                                        </span>
+                                    </div>
+                                    <div className="text-xs font-bold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors">
+                                        {questionText}
+                                    </div>
+                                    <div className="mt-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                         {tOnboarding('askSubtitle')}
+                                     </div>
+                                 </button>
+                             );
+                         })}
                     </div>
 
                     {/* Hubs */}

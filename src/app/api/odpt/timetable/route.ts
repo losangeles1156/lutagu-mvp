@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ODPT_API_KEY = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN || process.env.ODPT_API_TOKEN_BACKUP;
 const BASE_URL = 'https://api.odpt.org/api/v4/odpt:StationTimetable';
 
 import { getJSTTime } from '@/lib/utils/timeUtils';
@@ -18,12 +17,14 @@ function getJSTContext() {
 }
 
 export async function GET(req: NextRequest) {
-    if (!ODPT_API_KEY) return NextResponse.json({ error: 'Missing API Key' }, { status: 500 });
-
     const { searchParams } = new URL(req.url);
     const station = searchParams.get('station');
+    const raw = (searchParams.get('raw') || '').toLowerCase();
 
     if (!station) return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
+
+    const ODPT_API_KEY = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN || process.env.ODPT_API_TOKEN_BACKUP;
+    if (!ODPT_API_KEY) return NextResponse.json({ error: 'Missing API Key' }, { status: 500 });
 
     const { currentMinutes, calendarSelector } = getJSTContext();
 
@@ -44,6 +45,14 @@ export async function GET(req: NextRequest) {
             const cal = t['odpt:calendar'].replace('odpt.Calendar:', '');
             return calendarSelector.some(c => cal.includes(c));
         });
+
+        if (raw === '1' || raw === 'true') {
+            return NextResponse.json(relevantTables, {
+                headers: {
+                    'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
+                }
+            });
+        }
 
         // Process Departures
         const directions: Record<string, any[]> = {};

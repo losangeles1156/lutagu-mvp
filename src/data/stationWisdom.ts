@@ -228,7 +228,14 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
         }
     },
 
-    ...(GENERATED_KNOWLEDGE as any as ExpertKnowledge[]),
+    ...(GENERATED_KNOWLEDGE as any as ExpertKnowledge[]).filter(k => {
+        // Filter out corrupted generated knowledge that has empty triggers
+        const hasStations = k.trigger.station_ids && k.trigger.station_ids.length > 0;
+        const hasKeywords = k.trigger.keywords && k.trigger.keywords.length > 0;
+        const hasLines = k.trigger.line_ids && k.trigger.line_ids.length > 0;
+        const hasTime = k.trigger.time_patterns && k.trigger.time_patterns.length > 0;
+        return hasStations || hasKeywords || hasLines || hasTime;
+    }),
     // Seasonal: Golden Week
     {
         id: 'seasonal-golden-week',

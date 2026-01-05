@@ -54,13 +54,13 @@ function parseLocation(loc: any): { coordinates: [number, number] } {
 function getFallbackNodes() {
     return SEED_NODES.map((n: any) => {
         const location = parseLocation(n.location);
-        
+
         // Unified is_hub logic
         const explicitIsHub = n.is_hub;
-        const isHub = typeof explicitIsHub === 'boolean' 
-            ? explicitIsHub 
+        const isHub = typeof explicitIsHub === 'boolean'
+            ? explicitIsHub
             : (n.parent_hub_id === null || n.parent_hub_id === undefined);
-            
+
         return {
             id: String(n.id ?? ''),
             city_id: String(n.city_id ?? ''),
@@ -190,7 +190,7 @@ export async function GET(req: Request) {
     const hubsOnlyParam = url.searchParams.get('hubs_only');
     // Always return hubs only for better performance (per station grouping design)
     const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
-    
+
     // [NEW] Ward-based query support
     const wardId = url.searchParams.get('ward_id');
     const showStationsOnly = url.searchParams.get('stations_only') === '1';
@@ -209,10 +209,10 @@ export async function GET(req: Request) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
+
     // Check if we should use fallback due to missing config or explicit request
     const useFallback = !supabaseUrl || !supabaseKey || url.searchParams.get('fallback') === '1';
-    
+
     let candidates: any[] = [];
     let degraded = false;
     let source: 'supabase' | 'fallback' = 'supabase';
@@ -296,18 +296,18 @@ export async function GET(req: Request) {
             if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
             if (lat === 0 && lon === 0) return false;
             if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
-            
+
             // [NEW] Filter out non-station nodes (bus stops, POIs, etc.)
             const nodeType = n.type;
             const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
             if (excludedTypes.includes(nodeType)) {
                 return false;
             }
-            
+
             // [FIX] When hubsOnly is true, only show actual station hubs (not standalone non-hubs)
             // Bus stops have is_hub=true but are not stations - already filtered above
             if (hubsOnly && !n.is_hub) return false;
-            
+
             return true;
         })
         .sort((a, b) => {
@@ -330,7 +330,7 @@ export async function GET(req: Request) {
     // A rough estimation: each node is about 0.4KB to 0.6KB in JSON
     const estimatedNodeSizeKb = 0.5;
     const maxNodesAllowed = Math.floor(maxDataSizeKb / estimatedNodeSizeKb);
-    
+
     const start = page * pageSize;
     const end = start + pageSize;
     const limitedNodes = deduplicated.slice(start, Math.min(deduplicated.length, end, start + maxNodesAllowed));
@@ -338,10 +338,10 @@ export async function GET(req: Request) {
 
     // Fetch hub metadata and members for the returned nodes
     const hubDetails: Record<string, HubDetails> = {};
-    
+
     if (supabaseClient && limitedNodes.length > 0) {
         const hubIds = limitedNodes.filter(n => n.is_hub).map(n => n.id);
-        
+
         if (hubIds.length > 0) {
             const [metadataMap, membersMap] = await Promise.all([
                 fetchHubMetadata(supabaseClient, hubIds),
@@ -353,16 +353,16 @@ export async function GET(req: Request) {
                 const members = membersMap.get(hubId) || [];
                 const memberCount = members.length;
 
-                if (metadata || memberCount > 0) {
-                    hubDetails[hubId] = {
-                        member_count: memberCount,
-                        transfer_type: metadata?.transfer_type || 'indoor',
-                        transfer_complexity: metadata?.transfer_complexity || 'simple',
-                        walking_distance_meters: metadata?.walking_distance_meters || null,
-                        indoor_connection_notes: metadata?.indoor_connection_notes || null,
-                        members: members
-                    };
-                }
+                // [FIX] Always generate hubDetails for all hub nodes
+                // This ensures all stations display properly with labels on the map
+                hubDetails[hubId] = {
+                    member_count: memberCount,
+                    transfer_type: metadata?.transfer_type || 'indoor',
+                    transfer_complexity: metadata?.transfer_complexity || 'simple',
+                    walking_distance_meters: metadata?.walking_distance_meters || null,
+                    indoor_connection_notes: metadata?.indoor_connection_notes || null,
+                    members: members
+                };
             }
         }
     }

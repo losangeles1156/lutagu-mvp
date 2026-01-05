@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { L4_Bambi } from '../L4_Bambi';
+import type { StationUIProfile } from '@/lib/types/stationStandard';
 
 // Mock dependencies
 jest.mock('next-intl', () => ({
@@ -27,11 +28,22 @@ global.fetch = jest.fn(() =>
 ) as jest.Mock;
 
 describe('L4_Bambi Component', () => {
-  const mockData = {
+  const mockData: StationUIProfile = {
     id: 'test-station',
-    name: { en: 'Test Station' },
-    lines: [],
-    location: { lat: 0, lng: 0 },
+    tier: 'minor',
+    name: { ja: 'テスト駅', en: 'Test Station', zh: '測試車站' },
+    description: { ja: '', en: '', zh: '' },
+    l1_dna: {
+      categories: {},
+      vibe_tags: [],
+      last_updated: new Date().toISOString()
+    },
+    l2: {
+      lines: [],
+      weather: { temp: 0, condition: 'clear', windSpeed: 0 },
+      crowd: { level: 1, trend: 'stable', userVotes: { total: 0, distribution: [0, 0, 0, 0, 0] } }
+    },
+    l3_facilities: [],
     l4_cards: []
   };
 
@@ -39,8 +51,8 @@ describe('L4_Bambi Component', () => {
     render(<L4_Bambi data={mockData} />);
     
     // Check for static elements (keys from translation mock)
-    expect(screen.getByText('bambiStrategy')).toBeInTheDocument();
-    expect(screen.getByText('subtitle')).toBeInTheDocument();
+    expect(screen.getByText('bambiStrategy')).toBeTruthy();
+    expect(screen.getByText('subtitle')).toBeTruthy();
   });
 
   it('handles input submission', () => {

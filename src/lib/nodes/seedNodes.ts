@@ -1027,6 +1027,192 @@ export const SEED_NODES = [
         zone: 'core',
         source_dataset: 'odpt_seed',
         vibe: 'moat'
+    },
+    // --- Nakano Ward ---
+    {
+        id: 'odpt:Station:JR-East.Nakano',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '中野', 'ja': '中野', 'en': 'Nakano' },
+        type: 'station',
+        location: 'POINT(139.6658 35.7058)',
+        geohash: 'xn77h',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'subculture',
+        address: { 'ja': '東京都中野区中野五丁目31-1', 'zh-TW': '東京都中野區中野五丁目31-1', 'en': '5-31-1 Nakano, Nakano-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'shopping', subCategory: 'specialty', name: 'Nakano Broadway', distanceMeters: 200, direction: 'North Exit', note: 'Otaku Culture' },
+            { mainCategory: 'dining', subCategory: 'bar', name: 'Nakano Sun Mall', distanceMeters: 50, direction: 'North Exit' }
+        ]
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Nakano',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '中野', 'ja': '中野', 'en': 'Nakano' },
+        type: 'station',
+        location: 'POINT(139.6658 35.7058)',
+        geohash: 'xn77h',
+        is_hub: false,
+        parent_hub_id: 'odpt:Station:JR-East.Nakano',
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'subculture'
+    },
+
+    // --- Nerima Ward ---
+    {
+        id: 'odpt:Station:Seibu.Nerima',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '練馬', 'ja': '練馬', 'en': 'Nerima' },
+        type: 'station',
+        location: 'POINT(139.6517 35.7373)',
+        geohash: 'xn77k',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'residential',
+        address: { 'ja': '東京都練馬区練馬一丁目3-5', 'zh-TW': '東京都練馬區練馬一丁目3-5', 'en': '1-3-5 Nerima, Nerima-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'leisure', subCategory: 'culture', detailCategory: 'hall', name: 'Nerima Culture Center', distanceMeters: 100, direction: 'North Exit' },
+            { mainCategory: 'leisure', subCategory: 'nature', detailCategory: 'park', name: 'Heisei Tsutsuji Park', distanceMeters: 150, direction: 'North Exit' }
+        ]
+    },
+    {
+        id: 'odpt:Station:Toei.Nerima',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '練馬', 'ja': '練馬', 'en': 'Nerima' },
+        type: 'station',
+        location: 'POINT(139.6517 35.7373)',
+        geohash: 'xn77k',
+        is_hub: false,
+        parent_hub_id: 'odpt:Station:Seibu.Nerima',
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'residential'
+    },
+
+    // --- Kita Ward ---
+    {
+        id: 'odpt:Station:JR-East.Oji',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '王子', 'ja': '王子', 'en': 'Oji' },
+        type: 'station',
+        location: 'POINT(139.7370 35.7553)',
+        geohash: 'xn77s',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'nature',
+        address: { 'ja': '東京都北区王子一丁目3-1', 'zh-TW': '東京都北區王子一丁目3-1', 'en': '1-3-1 Oji, Kita-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'leisure', subCategory: 'nature', detailCategory: 'park', name: 'Asukayama Park', distanceMeters: 100, direction: 'Central Exit', note: 'Cherry Blossoms' },
+            { mainCategory: 'leisure', subCategory: 'culture', detailCategory: 'museum', name: 'Paper Museum', distanceMeters: 300, direction: 'South Exit' }
+        ]
+    },
+    {
+        id: 'odpt:Station:TokyoMetro.Oji',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '王子', 'ja': '王子', 'en': 'Oji' },
+        type: 'station',
+        location: 'POINT(139.7370 35.7553)',
+        geohash: 'xn77s',
+        is_hub: false,
+        parent_hub_id: 'odpt:Station:JR-East.Oji',
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'nature'
+    },
+
+    // --- JR Hub: Shinagawa ---
+    {
+        id: 'odpt:Station:JR-East.Shinagawa',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '品川', 'ja': '品川', 'en': 'Shinagawa' },
+        type: 'station',
+        location: 'POINT(139.7387 35.6284)',
+        geohash: 'xn76g',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'gateway',
+        address: { 'ja': '東京都港区高輪三丁目26-27', 'zh-TW': '東京都港區高輪三丁目26-27', 'en': '3-26-27 Takanawa, Minato-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'transport', subCategory: 'railway', name: 'Shinkansen Gates', distanceMeters: 50, direction: 'Central', note: 'Bullet Train' },
+            { mainCategory: 'dining', subCategory: 'restaurant', name: 'Shinatatsu Ramen Street', distanceMeters: 200, direction: 'Takanawa Exit', note: 'Ramen' },
+            { mainCategory: 'accommodation', subCategory: 'hotel', name: 'Shinagawa Prince Hotel', distanceMeters: 100, direction: 'Takanawa Exit', note: 'Major Hotel' }
+        ]
+    },
+
+    // --- JR Hub: Akabane (Kita Ward) ---
+    {
+        id: 'odpt:Station:JR-East.Akabane',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '赤羽', 'ja': '赤羽', 'en': 'Akabane' },
+        type: 'station',
+        location: 'POINT(139.7208 35.7776)',
+        geohash: 'xn77k', // Approx
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'izakaya',
+        address: { 'ja': '東京都北区赤羽一丁目1-1', 'zh-TW': '東京都北區赤羽一丁目1-1', 'en': '1-1-1 Akabane, Kita-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'dining', subCategory: 'izakaya', name: 'OK Yokocho', distanceMeters: 100, direction: 'East Exit', note: 'Drinking Alley' },
+            { mainCategory: 'dining', subCategory: 'izakaya', name: 'Ichibangai', distanceMeters: 50, direction: 'East Exit', note: 'Morning Drinking' }
+        ]
+    },
+
+    // --- JR Yamanote South: Osaki, Gotanda, Meguro ---
+    {
+        id: 'odpt:Station:JR-East.Osaki',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '大崎', 'ja': '大崎', 'en': 'Osaki' },
+        type: 'station',
+        location: 'POINT(139.7285 35.6197)',
+        geohash: 'xn76g',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'business_tech',
+        address: { 'ja': '東京都品川区大崎一丁目21-4', 'zh-TW': '東京都品川區大崎一丁目21-4', 'en': '1-21-4 Osaki, Shinagawa-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'service', subCategory: 'office', name: 'Gate City Osaki', distanceMeters: 100, direction: 'East Exit' },
+            { mainCategory: 'service', subCategory: 'office', name: 'ThinkPark Tower', distanceMeters: 100, direction: 'West Exit' }
+        ]
+    },
+    {
+        id: 'odpt:Station:JR-East.Gotanda',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '五反田', 'ja': '五反田', 'en': 'Gotanda' },
+        type: 'station',
+        location: 'POINT(139.7237 35.6264)',
+        geohash: 'xn76g',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'nightlife_business',
+        address: { 'ja': '東京都品川区東五反田一丁目26-2', 'zh-TW': '東京都品川區東五反田一丁目26-2', 'en': '1-26-2 Higashi-Gotanda, Shinagawa-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'dining', subCategory: 'restaurant', name: 'Gotanda Hills', distanceMeters: 200, direction: 'West Exit', note: 'Standing Bars' }
+        ]
+    },
+    {
+        id: 'odpt:Station:JR-East.Meguro',
+        city_id: 'tokyo_core',
+        name: { 'zh-TW': '目黑', 'ja': '目黒', 'en': 'Meguro' },
+        type: 'station',
+        location: 'POINT(139.7157 35.6339)',
+        geohash: 'xn76g',
+        is_hub: true,
+        zone: 'core',
+        source_dataset: 'odpt_seed',
+        vibe: 'fashion',
+        address: { 'ja': '東京都品川区上大崎二丁目16-9', 'zh-TW': '東京都品川區上大崎二丁目16-9', 'en': '2-16-9 Kami-Osaki, Shinagawa-ku, Tokyo' },
+        facilityTags: [
+            { mainCategory: 'leisure', subCategory: 'nature', detailCategory: 'park', name: 'Meguro River', distanceMeters: 400, direction: 'West Exit', note: 'Cherry Blossoms' },
+            { mainCategory: 'leisure', subCategory: 'culture', detailCategory: 'museum', name: 'Meguro Parasitological Museum', distanceMeters: 800, direction: 'West Exit', note: 'Unique' }
+        ]
     }
 ];
 

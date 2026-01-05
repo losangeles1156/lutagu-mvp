@@ -8,7 +8,7 @@ app:
 
 model_config:
   agent_mode:
-    enabled: false
+    enabled: true
     max_iteration: 5
     strategy: react
     tools: []

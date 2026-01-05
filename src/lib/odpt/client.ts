@@ -5,8 +5,12 @@ const API_PUBLIC = 'https://api-public.odpt.org/api/v4';
 const API_DEV = 'https://api.odpt.org/api/v4';
 const API_CHALLENGE = 'https://api-challenge.odpt.org/api/v4';
 
-const TOKEN_DEV = process.env.ODPT_API_TOKEN || process.env.ODPT_API_KEY || process.env.ODPT_API_KEY_PUBLIC;  // For Metro, MIR
-const TOKEN_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP || process.env.ODPT_API_KEY_CHALLENGE2025;                  // For JR East
+// Updated Token Mapping for clear separation
+const TOKENS = {
+    METRO: process.env.ODPT_API_KEY_METRO || process.env.ODPT_API_TOKEN_STANDARD || process.env.ODPT_API_KEY,
+    JR_EAST: process.env.ODPT_API_KEY_JR_EAST || process.env.ODPT_API_TOKEN_CHALLENGE || process.env.ODPT_CHALLENGE_KEY || process.env.ODPT_API_TOKEN_BACKUP,
+    PUBLIC: process.env.ODPT_API_KEY_PUBLIC || process.env.ODPT_API_KEY_PUBLIC_DEV
+};
 
 /**
  * ODPT API retry configuration
@@ -36,27 +40,38 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
             if (id.includes('Toei')) { operator = 'Toei'; break; }
             if (id.includes('JR-East')) { operator = 'JR-East'; break; }
             if (id.includes('TokyoMetro')) { operator = 'TokyoMetro'; break; }
+            if (id.includes('MIR')) { operator = 'MIR'; break; }
+            if (id.includes('Keio')) { operator = 'Keio'; break; }
+            if (id.includes('Keikyu')) { operator = 'Keikyu'; break; }
+            if (id.includes('Keisei')) { operator = 'Keisei'; break; }
+            if (id.includes('Odakyu')) { operator = 'Odakyu'; break; }
+            if (id.includes('Seibu')) { operator = 'Seibu'; break; }
+            if (id.includes('Tobu')) { operator = 'Tobu'; break; }
+            if (id.includes('Tokyu')) { operator = 'Tokyu'; break; }
+            if (id.includes('Yurikamome')) { operator = 'Yurikamome'; break; }
         }
     }
 
     // Strategy Selection
     let baseUrl = API_DEV;
-    let token = TOKEN_DEV;
+    let token = TOKENS.METRO;
 
     if (operator.includes('Toei')) {
-        // Strategy A: Toei -> Public API, No Token
+        // Strategy A: Toei -> Public API, Optional Public Token
         baseUrl = API_PUBLIC;
-        token = undefined;
-    } else if (operator.includes('JR-East')) {
-        // Strategy B: JR East -> Challenge API, Challenge Token
+        token = TOKENS.PUBLIC;
+    } else if (operator.includes('JR-East') || operator.includes('Keio') || operator.includes('Keikyu') || 
+               operator.includes('Keisei') || operator.includes('Odakyu') || operator.includes('Seibu') || 
+               operator.includes('Tobu') || operator.includes('Tokyu') || operator.includes('Yurikamome')) {
+        // Strategy B: JR East & Private Railways -> Challenge API, JR East/Challenge Token
         baseUrl = API_CHALLENGE;
-        token = TOKEN_CHALLENGE;
-        if (!token) throw new Error('ODPT_API_TOKEN_BACKUP missing for JR-East');
+        token = TOKENS.JR_EAST;
+        if (!token) throw new Error(`ODPT_API_KEY_JR_EAST missing for ${operator} (Challenge API)`);
     } else {
-        // Strategy C: Metro, MIR -> Developer API, Standard Token
+        // Strategy C: Metro, MIR -> Developer API, Metro Token
         baseUrl = API_DEV;
-        token = TOKEN_DEV;
-        if (!token) throw new Error('ODPT_API_TOKEN missing for Metro/MIR');
+        token = TOKENS.METRO;
+        if (!token) throw new Error('ODPT_API_KEY_METRO missing for Metro/MIR (Developer API)');
     }
 
     const searchParams = new URLSearchParams(params);
@@ -80,9 +95,25 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
         }, ODPT_RETRY_CONFIG);
         return res;
     } catch (error) {
-        // Log and re-throw with context
         const err = error instanceof Error ? error : new Error(String(error));
         console.error(`[ODPT Client] Failed after retries: ${err.message}`);
+
+        const msg = String(err.message || '');
+        const isAuthError = msg.includes('Invalid acl:consumerKey') || msg.includes('HTTP 403') || msg.includes('403');
+        const canFallbackToPublic = baseUrl !== API_PUBLIC;
+
+        if (isAuthError && canFallbackToPublic) {
+            try {
+                const fallbackParams = new URLSearchParams(params);
+                const fallbackUrl = `${API_PUBLIC}/${type}?${fallbackParams.toString()}`;
+                const res = await fetchWithRetry<any>(fallbackUrl, {
+                    next: { revalidate: 3600 }
+                }, ODPT_RETRY_CONFIG);
+                return res;
+            } catch {
+            }
+        }
+
         throw new Error(`ODPT API Error: ${err.message}`);
     }
 }

@@ -31,7 +31,7 @@ export class L4HardCalculationEngine {
 
     private async checkTrainStatus(lineIds: string[], locale: string, cards: MatchedStrategyCard[]) {
         try {
-            const railways = lineIds.filter(id => id.startsWith('odpt:Railway:'));
+            const railways = lineIds.filter(id => id.startsWith('odpt.Railway:') || id.startsWith('odpt:Railway:'));
             if (railways.length > 0) {
                 const targetRailway = railways[0];
                 const operator = this.guessOperator(targetRailway);

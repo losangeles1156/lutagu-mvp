@@ -1,4 +1,25 @@
 import { DEMO_SCENARIOS, DemoScenario } from './demoScenarios';
+import CORE_TOPOLOGY from './generated/coreTopology.json';
+
+const STATION_INDEX = new Map<string, string[]>();
+
+(CORE_TOPOLOGY as any[]).forEach(railway => {
+    railway.stationOrder.forEach((s: any) => {
+        const id = s.station;
+        const nameEn = s.title?.en?.toLowerCase();
+        const nameJa = s.title?.ja;
+        const nameZh = s.title?.['zh-TW'] || nameJa;
+        const base = id.split('.').pop()?.toLowerCase();
+
+        const terms = [nameEn, nameJa, nameZh, base].filter(Boolean);
+        terms.forEach(term => {
+            if (!STATION_INDEX.has(term)) STATION_INDEX.set(term, []);
+            if (!STATION_INDEX.get(term)!.includes(id)) {
+                STATION_INDEX.get(term)!.push(id);
+            }
+        });
+    });
+});
 
 export type SupportedLocale = 'zh' | 'zh-TW' | 'ja' | 'en';
 
@@ -54,13 +75,73 @@ export function normalizeOdptStationId(input: string): string {
     return input.replace(/^odpt:Station:/, 'odpt.Station:').trim();
 }
 
+function normalizeStationName(name: string): string {
+    return name
+        .trim()
+        .toLowerCase()
+        .replace(/藏/g, '蔵')
+        .replace(/澀/g, '渋')
+        .replace(/涩/g, '渋')
+        .replace(/澁/g, '渋')
+        .replace(/廣/g, '広')
+        .replace(/广/g, '広')
+        .replace(/邊/g, '辺')
+        .replace(/樂/g, '楽')
+        .replace(/澤/g, '沢')
+        .replace(/濱/g, '浜')
+        .replace(/關/g, '関')
+        .replace(/鐵/g, '鉄')
+        .replace(/驛/g, '駅')
+        .replace(/區/g, '区')
+        .replace(/圖/g, '図')
+        .replace(/淺/g, '浅')
+        .replace(/線/g, '') // Remove 'Line' or '線' suffix
+        .replace(/站/g, '') // Remove 'Station' or '站' suffix
+        .replace(/駅/g, '')
+        .replace(/jr/g, '')
+        .replace(/都營/g, '')
+        .replace(/都営/g, '')
+        .replace(/東京地下鐵/g, '')
+        .replace(/東京メトロ/g, '')
+        .replace(/地下鐵/g, '')
+        .replace(/地下鉄/g, '')
+        .replace(/大江戸/g, '')
+        .replace(/大江戶/g, '');
+}
+
+export function findStationIdsByName(name: string): string[] {
+    const term = normalizeStationName(name);
+    if (term.length === 0) return [];
+
+    if (STATION_INDEX.has(term)) return STATION_INDEX.get(term)!;
+
+    // Fuzzy match
+    for (const [key, ids] of STATION_INDEX.entries()) {
+        const normalizedKey = normalizeStationName(key);
+        if (normalizedKey.length > 0 && (normalizedKey === term || normalizedKey.includes(term) || term.includes(normalizedKey))) {
+            return ids;
+        }
+    }
+    return [];
+}
+
 export function extractOdptStationIds(text: string): string[] {
     const ids = new Set<string>();
+
     const re = /(odpt[.:]Station:[A-Za-z0-9_.-]+)/g;
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
         ids.add(normalizeOdptStationId(m[1]));
     }
+
+    if (ids.size === 0) {
+        for (const [name, stationIds] of STATION_INDEX.entries()) {
+            if (name.length > 1 && text.includes(name)) {
+                stationIds.forEach(id => ids.add(id));
+            }
+        }
+    }
+
     return Array.from(ids);
 }
 
@@ -75,8 +156,8 @@ export function inferOdptOperatorFromStationId(stationId: string): string | null
 
 export function findDemoScenario(text: string): DemoScenario | undefined {
     const trimmed = text.trim();
-    return DEMO_SCENARIOS.find(s => 
-        s.triggerQuestion === trimmed || 
+    return DEMO_SCENARIOS.find(s =>
+        s.triggerQuestion === trimmed ||
         s.title === trimmed ||
         s.triggerQuestions?.some(q => q === trimmed)
     );
@@ -144,7 +225,17 @@ export function classifyQuestion(text: string, locale: SupportedLocale): { kind:
     if (hasAmenity) return { kind: 'amenity', toStationId };
     if (hasTimetable) return { kind: 'timetable' };
     if (hasFare) return { kind: 'fare', toStationId };
-    if (hasRoute) return { kind: 'route', toStationId };
+    if (hasRoute) {
+        const zhMatch = text.match(/從\s*([^到\s]+)\s*到\s*([^?\s]+)/) || text.match(/([^从\s]+)\s*到\s*([^?\s]+)/);
+        if (zhMatch) {
+            const destCandidates = findStationIdsByName(zhMatch[2]);
+            if (destCandidates.length > 0) {
+                return { kind: 'route', toStationId: destCandidates[0] };
+            }
+        }
+
+        return { kind: 'route', toStationId };
+    }
 
     if (locale?.startsWith('zh')) {
         if (trimmed.includes('票') || trimmed.includes('價')) return { kind: 'fare', toStationId };
@@ -322,13 +413,23 @@ export function buildL4DefaultQuestionTemplates(params: {
 export type RailwayTopology = {
     railwayId: string;
     operator: string;
-    title?: { en?: string; ja?: string };
-    stationOrder: Array<{ index: number; station: string; title?: { en?: string; ja?: string } }>;
+    title?: { en?: string; ja?: string;[key: string]: string | undefined };
+    stationOrder: Array<{ index: number; station: string; title?: { en?: string; ja?: string;[key: string]: string | undefined } }>;
+};
+
+export type RouteStepKind = 'origin' | 'destination' | 'train' | 'walk' | 'transfer' | 'info';
+
+export type RouteStep = {
+    kind: RouteStepKind;
+    text: string;
+    railwayId?: string;
+    icon?: string;
+    note?: string;
 };
 
 export type RouteOption = {
     label: string;
-    steps: string[];
+    steps: RouteStep[];
     sources: L4DataSource[];
     railways?: string[]; // Added to track railways in the route
     fare?: { ic: number; ticket: number };
@@ -359,7 +460,8 @@ const EXPERT_KNOWLEDGE: Record<string, string[]> = {
     'odpt.Railway:JR-East.Yamanote': [
         '💡 山手線為環狀線，轉乘其他 JR 線路通常不需出站。',
         '💡 尖峰時段（08:00-09:30）建議避開新宿、澀谷等大站。',
-        '🎫 適合使用「JR 都區內巴士地鐵一日券」或單純 Suica。'
+        '🎫 適合使用「JR 都區內巴士地鐵一日券」或單純 Suica。',
+        '💡 山手線雖是環狀運轉，但部分列車會以「大崎」或「池袋」為終點站（回庫車），並非所有列車都會一直繞圈行駛。'
     ],
     'odpt.Railway:TokyoMetro.Fukutoshin': [
         '💡 副都心線與東急東橫線、西武有樂町線直通運轉，需注意終點站。',
@@ -399,6 +501,10 @@ const EXPERT_KNOWLEDGE: Record<string, string[]> = {
         '💡 池袋站動線複雜，主要分為東口（西武百貨）與西口（東武百貨），容易搞混。',
         '💡 轉乘有樂町線或副都心線需步行一段距離。'
     ],
+    'odpt.Station:JR-East.Yamanote.Osaki': [
+        '💡 大崎站是山手線的主要始發與終點站之一，若遇到列車回庫（不再載客），請在同月台等候下一班。',
+        '💡 與臨海線（前往台場）直通運轉的列車會在此經過，無需轉乘。'
+    ],
     // --- Special Locations & Lines ---
     'odpt.Railway:JR-East.Chuo': [
         '⚠️ 中央線（快速）班次密集但容易受人身事故影響導致延誤。',
@@ -418,28 +524,28 @@ const PASS_KNOWLEDGE: Array<{
     rule: string;
     advice: string;
 }> = [
-    {
-        id: 'tokyo-subway-ticket',
-        name: 'Tokyo Subway Ticket (24/48/72h)',
-        price: '¥800 / ¥1200 / ¥1500',
-        rule: '可無限次搭乘全線東京地鐵 (Tokyo Metro) 與都營地鐵。',
-        advice: '平均一天搭乘 3 次以上即划算，不含 JR 線路。'
-    },
-    {
-        id: 'tokunai-pass',
-        name: 'JR 都區內一日券 (Tokunai Pass)',
-        price: '¥760',
-        rule: '可無限次搭乘東京 23 區內的 JR 普通與快速列車。',
-        advice: '適合整天都在山手線或中央線周邊活動的旅客。'
-    },
-    {
-        id: 'greater-tokyo-pass',
-        name: 'Greater Tokyo Pass (3 Days)',
-        price: '¥7200',
-        rule: '涵蓋 13 家私鐵公司與都營巴士，但不含 JR。',
-        advice: '適合前往鎌倉、秩父等郊區且不搭乘 JR 的深度旅遊。'
-    }
-];
+        {
+            id: 'tokyo-subway-ticket',
+            name: 'Tokyo Subway Ticket (24/48/72h)',
+            price: '¥800 / ¥1200 / ¥1500',
+            rule: '可無限次搭乘全線東京地鐵 (Tokyo Metro) 與都營地鐵。',
+            advice: '平均一天搭乘 3 次以上即划算，不含 JR 線路。'
+        },
+        {
+            id: 'tokunai-pass',
+            name: 'JR 都區內一日券 (Tokunai Pass)',
+            price: '¥760',
+            rule: '可無限次搭乘東京 23 區內的 JR 普通與快速列車。',
+            advice: '適合整天都在山手線或中央線周邊活動的旅客。'
+        },
+        {
+            id: 'greater-tokyo-pass',
+            name: 'Greater Tokyo Pass (3 Days)',
+            price: '¥7200',
+            rule: '涵蓋 13 家私鐵公司與都營巴士，但不含 JR。',
+            advice: '適合前往鎌倉、秩父等郊區且不搭乘 JR 的深度旅遊。'
+        }
+    ];
 
 // Accessibility Advice Repository
 const ACCESSIBILITY_ADVICE: Record<string, Record<string, string>> = {
@@ -465,6 +571,33 @@ const ACCESSIBILITY_ADVICE: Record<string, Record<string, string>> = {
     }
 };
 
+const SAME_STATION_MAP: Record<string, string> = {
+    'hamamatsucho': 'daimon',
+    'daimon': 'hamamatsucho',
+    'kasuga': 'korakuen',
+    'korakuen': 'kasuga',
+    'tameikesanno': 'kokkaigijidomae',
+    'kokkaigijidomae': 'tameikesanno',
+    'ueno okachimachi': 'ueno',
+    'ueno': 'ueno okachimachi',
+    'shin okachimachi': 'okachimachi',
+    'okachimachi': 'shin okachimachi',
+    'naka okachimachi': 'ueno okachimachi',
+    'awajicho': 'ogawamachi',
+    'ogawamachi': 'awajicho',
+    'mitsukoshimae': 'nihombashi',
+    'nihombashi': 'mitsukoshimae',
+    'shimbashi': 'shiodome',
+    'shiodome': 'shimbashi',
+    'yurakucho': 'hibiya',
+    'hibiya': 'yurakucho',
+    'meiji jingumae': 'harajuku',
+    'harajuku': 'meiji jingumae',
+    'suidobashi': 'kasuga',
+    'roppongi itchome': 'roppongi',
+    'sanjugonme': 'tokyo' // This is a bit far but sometimes mapped
+};
+
 function buildAdjacency(railways: RailwayTopology[]) {
     const adj = new Map<string, Array<{ to: string; railwayId: string }>>();
     const addEdge = (a: string, b: string, railwayId: string) => {
@@ -472,132 +605,510 @@ function buildAdjacency(railways: RailwayTopology[]) {
         adj.get(a)!.push({ to: b, railwayId });
     };
 
+    const stationGroups = new Map<string, string[]>();
+
     for (const r of railways) {
         const stations = r.stationOrder
             .slice()
             .sort((x, y) => x.index - y.index)
             .map(s => normalizeOdptStationId(s.station));
-        for (let i = 0; i < stations.length - 1; i++) {
-            const a = stations[i];
-            const b = stations[i + 1];
-            addEdge(a, b, r.railwayId);
-            addEdge(b, a, r.railwayId);
+
+        for (let i = 0; i < stations.length; i++) {
+            const s = stations[i];
+            const baseName = normalizeStationName(s.split('.').pop()!);
+
+            // Grouping by base name
+            if (!stationGroups.has(baseName)) stationGroups.set(baseName, []);
+            if (!stationGroups.get(baseName)!.includes(s)) {
+                stationGroups.get(baseName)!.push(s);
+            }
+
+            // Grouping by SAME_STATION_MAP
+            if (SAME_STATION_MAP[baseName]) {
+                const targetBase = SAME_STATION_MAP[baseName];
+                if (!stationGroups.has(targetBase)) stationGroups.set(targetBase, []);
+                if (!stationGroups.get(targetBase)!.includes(s)) {
+                    stationGroups.get(targetBase)!.push(s);
+                }
+            }
+
+            if (i < stations.length - 1) {
+                const next = stations[i + 1];
+                addEdge(s, next, r.railwayId);
+                addEdge(next, s, r.railwayId);
+            }
+        }
+    }
+
+    for (const [_, group] of stationGroups) {
+        for (let i = 0; i < group.length; i++) {
+            for (let j = i + 1; j < group.length; j++) {
+                addEdge(group[i], group[j], 'transfer');
+                addEdge(group[j], group[i], 'transfer');
+            }
         }
     }
 
     return adj;
 }
 
-export function findSimpleRoutes(params: {
-    originStationId: string;
-    destinationStationId: string;
-    railways: RailwayTopology[];
-    maxHops?: number;
-    locale?: SupportedLocale;
-}): RouteOption[] {
-    const origin = normalizeOdptStationId(params.originStationId);
-    const dest = normalizeOdptStationId(params.destinationStationId);
-    const maxHops = Math.max(4, params.maxHops ?? 22);
-    const railways = params.railways || [];
-    const locale = params.locale || 'zh-TW';
+const ADJACENCY_CACHE = new WeakMap<object, Map<string, Array<{ to: string; railwayId: string }>>>();
 
-    const t = (zh: string, ja: string, en: string) => (locale === 'ja' ? ja : locale === 'en' ? en : zh);
-
+function getAdjacency(railways: RailwayTopology[]) {
+    const key = railways as unknown as object;
+    const cached = ADJACENCY_CACHE.get(key);
+    if (cached) return cached;
     const adj = buildAdjacency(railways);
-    const queue: Array<{ station: string; path: string[]; usedRailways: string[] }> = [{
-        station: origin,
-        path: [origin],
-        usedRailways: []
-    }];
-    const visited = new Set<string>([origin]);
+    ADJACENCY_CACHE.set(key, adj);
+    return adj;
+}
 
-    const results: Array<{ path: string[]; railways: string[] }> = [];
-    while (queue.length > 0 && results.length < 3) {
-        const current = queue.shift()!;
-        if (current.path.length > maxHops) continue;
-        if (current.station === dest) {
-            results.push({ path: current.path, railways: current.usedRailways });
-            continue;
+class MinHeap<T> {
+    private readonly items: Array<{ value: T; priority: number }> = [];
+
+    get size() {
+        return this.items.length;
+    }
+
+    push(value: T, priority: number) {
+        const node = { value, priority };
+        this.items.push(node);
+        this.bubbleUp(this.items.length - 1);
+    }
+
+    pop(): { value: T; priority: number } | undefined {
+        if (this.items.length === 0) return undefined;
+        const top = this.items[0];
+        const last = this.items.pop()!;
+        if (this.items.length > 0) {
+            this.items[0] = last;
+            this.bubbleDown(0);
         }
-        const edges = adj.get(current.station) || [];
-        for (const e of edges) {
-            const key = `${current.station}->${e.to}`;
-            if (visited.has(key)) continue;
-            visited.add(key);
-            queue.push({
-                station: e.to,
-                path: [...current.path, e.to],
-                usedRailways: [...current.usedRailways, e.railwayId]
+        return top;
+    }
+
+    private bubbleUp(index: number) {
+        while (index > 0) {
+            const parent = Math.floor((index - 1) / 2);
+            if (this.items[parent].priority <= this.items[index].priority) break;
+            const tmp = this.items[parent];
+            this.items[parent] = this.items[index];
+            this.items[index] = tmp;
+            index = parent;
+        }
+    }
+
+    private bubbleDown(index: number) {
+        const len = this.items.length;
+        while (true) {
+            const left = index * 2 + 1;
+            const right = left + 1;
+            let smallest = index;
+            if (left < len && this.items[left].priority < this.items[smallest].priority) {
+                smallest = left;
+            }
+            if (right < len && this.items[right].priority < this.items[smallest].priority) {
+                smallest = right;
+            }
+            if (smallest === index) break;
+            const tmp = this.items[smallest];
+            this.items[smallest] = this.items[index];
+            this.items[index] = tmp;
+            index = smallest;
+        }
+    }
+}
+
+type RouteCosts = {
+    time: number;
+    fare: number;
+    transfers: number;
+    hops: number;
+};
+
+function operatorKeyFromRailwayId(railwayId: string): string {
+    if (railwayId.includes('TokyoMetro')) return 'TokyoMetro';
+    if (railwayId.includes('JR-East')) return 'JR-East';
+    if (railwayId.includes('Toei')) return 'Toei';
+    return 'Other';
+}
+
+function baseFareForOperator(operatorKey: string): number {
+    if (operatorKey === 'JR-East') return 150;
+    if (operatorKey === 'TokyoMetro') return 180;
+    if (operatorKey === 'Toei') return 180;
+    return 180;
+}
+
+function perHopFareForOperator(operatorKey: string): number {
+    if (operatorKey === 'JR-East') return 10;
+    if (operatorKey === 'TokyoMetro') return 12;
+    if (operatorKey === 'Toei') return 12;
+    return 12;
+}
+
+function edgeTimeMinutes(railwayId: string): number {
+    if (railwayId === 'transfer') return 5;
+    if (railwayId.includes('TokyoMetro') || railwayId.includes('Toei')) return 2.2;
+    if (railwayId.includes('JR-East')) return 2.5; // Decreased from 3.0
+    return 2.5;
+}
+
+function buildLabelHelpers(params: { railways: RailwayTopology[]; locale: SupportedLocale }) {
+    const { railways, locale } = params;
+    const stationTitleMap = new Map<string, string>();
+    const railwayTitleMap = new Map<string, string>();
+
+    railways.forEach(r => {
+        const rTitle =
+            locale === 'ja'
+                ? r.title?.ja
+                : locale === 'en'
+                    ? r.title?.en
+                    : (r.title?.['zh-TW'] || r.title?.ja || r.title?.en);
+        if (rTitle) railwayTitleMap.set(normalizeOdptStationId(r.railwayId), rTitle);
+
+        r.stationOrder.forEach(s => {
+            const sTitle =
+                locale === 'ja'
+                    ? s.title?.ja
+                    : locale === 'en'
+                        ? s.title?.en
+                        : (s.title?.['zh-TW'] || s.title?.ja || s.title?.en);
+            if (sTitle) stationTitleMap.set(normalizeOdptStationId(s.station), sTitle);
+        });
+    });
+
+    const stationLabel = (stationId: string) => {
+        const normalized = normalizeOdptStationId(stationId);
+        if (stationTitleMap.has(normalized)) return stationTitleMap.get(normalized)!;
+        const raw = normalized.split(':').pop() || normalized;
+        const parts = raw.split('.');
+        return parts[parts.length - 1] || raw;
+    };
+
+    const railwayLabel = (railwayId: string) => {
+        const normalized = normalizeOdptStationId(railwayId);
+        if (railwayTitleMap.has(normalized)) return railwayTitleMap.get(normalized)!;
+        const raw = String(railwayId || '').split(':').pop() || String(railwayId || '');
+        const parts = raw.split('.');
+        return parts[parts.length - 1] || raw;
+    };
+
+    return { stationLabel, railwayLabel };
+}
+
+function encodeStateKey(station: string, lastRailway: string | null, lastOperator: string | null): string {
+    return `${station}\u0001${lastRailway || ''}\u0001${lastOperator || ''}`;
+}
+
+function decodeStateKey(key: string): { station: string; lastRailway: string | null; lastOperator: string | null } {
+    const [station, lastRailway, lastOperator] = key.split('\u0001');
+    return {
+        station,
+        lastRailway: lastRailway ? lastRailway : null,
+        lastOperator: lastOperator ? lastOperator : null,
+    };
+}
+
+function buildRouteOptionFromPath(params: {
+    path: string[];
+    edgeRailways: string[];
+    railways: RailwayTopology[];
+    locale: SupportedLocale;
+    label: string;
+    costs: RouteCosts;
+}): RouteOption {
+    const { path, edgeRailways, railways, locale, label, costs } = params;
+    const t = (zh: string, ja: string, en: string) => (locale === 'ja' ? ja : locale === 'en' ? en : zh);
+    const { stationLabel, railwayLabel } = buildLabelHelpers({ railways, locale });
+
+    const origin = path[0];
+    const dest = path[path.length - 1];
+    const steps: RouteStep[] = [
+        {
+            kind: 'origin',
+            text: `${t('出發', '出発', 'Origin')}: ${stationLabel(origin)}`,
+            icon: '🏠',
+        },
+    ];
+
+    let currentRailway = edgeRailways.length > 0 ? edgeRailways[0] : '';
+    let segmentStart = origin;
+
+    for (let i = 0; i < edgeRailways.length; i++) {
+        const rw = edgeRailways[i];
+        if (rw !== currentRailway) {
+            const segmentEnd = path[i];
+            if (currentRailway === 'transfer') {
+                steps.push({ kind: 'transfer', text: `${t('站內轉乘', '乗換', 'Transfer')}`, icon: '🚶' });
+            } else {
+                steps.push({
+                    kind: 'train',
+                    text: `${t('乘坐', '乗車', 'Take')} ${railwayLabel(currentRailway)}: ${stationLabel(segmentStart)} → ${stationLabel(segmentEnd)}`,
+                    railwayId: currentRailway,
+                    icon: '🚃',
+                });
+            }
+            currentRailway = rw;
+            segmentStart = segmentEnd;
+        }
+    }
+
+    if (currentRailway !== '') {
+        const lastEnd = dest;
+        if (currentRailway === 'transfer') {
+            steps.push({ kind: 'transfer', text: `${t('站內轉乘', '乗換', 'Transfer')}`, icon: '🚶' });
+        } else {
+            steps.push({
+                kind: 'train',
+                text: `${t('乘坐', '乗車', 'Take')} ${railwayLabel(currentRailway)}: ${stationLabel(segmentStart)} → ${stationLabel(lastEnd)}`,
+                railwayId: currentRailway,
+                icon: '🚃',
             });
         }
     }
 
-    return results.map((res, idx) => {
-        const label = t(`方案 ${String.fromCharCode(65 + idx)}`, `ルート ${String.fromCharCode(65 + idx)}`, `Option ${String.fromCharCode(65 + idx)}`);
-        
-        // Generate more descriptive steps
-        const steps: string[] = [];
-        steps.push(`${t('🏠 出發', '🏠 出発', '🏠 Origin')}: ${origin.split(':').pop()}`);
-        
-        // Group by railway to show line changes
-        let currentRailway = '';
-        let segmentStart = res.path[0];
-        
-        for (let i = 0; i < res.railways.length; i++) {
-            const rw = res.railways[i];
-            if (rw !== currentRailway) {
-                if (currentRailway !== '') {
-                    const prevStation = res.path[i];
-                    steps.push(`${t('🚃 乘坐', '🚃 乗車', '🚃 Take')} ${currentRailway.split(':').pop()}: ${segmentStart.split(':').pop()} → ${prevStation.split(':').pop()}`);
+    steps.push({ kind: 'destination', text: `${t('到達', '到着', 'Destination')}: ${stationLabel(dest)}`, icon: '📍' });
+
+    const uniqueRailways = Array.from(new Set(edgeRailways.filter(rw => rw !== 'transfer')));
+    const transfers = edgeRailways.filter(rw => rw === 'transfer').length;
+
+    return {
+        label,
+        steps,
+        sources: [{ type: 'odpt:Railway', verified: true }],
+        railways: uniqueRailways,
+        transfers,
+        duration: Math.max(1, Math.round(costs.time)),
+        fare: { ic: Math.max(0, Math.round(costs.fare)), ticket: Math.max(0, Math.round(costs.fare)) },
+    };
+}
+
+function dijkstraBestPath(params: {
+    origins: string[];
+    dests: string[];
+    adj: Map<string, Array<{ to: string; railwayId: string }>>;
+    maxHops: number;
+    score: (c: RouteCosts) => number;
+}): { path: string[]; edgeRailways: string[]; costs: RouteCosts } | null {
+    const { origins, dests, adj, maxHops, score } = params;
+
+    const dist = new Map<string, number>();
+    const costsByKey = new Map<string, RouteCosts>();
+    const prev = new Map<string, { prevKey: string; fromStation: string; viaRailwayId: string }>();
+    const heap = new MinHeap<{ key: string }>();
+
+    const destSet = new Set(dests);
+
+    for (const origin of origins) {
+        const startKey = encodeStateKey(origin, null, null);
+        dist.set(startKey, 0);
+        costsByKey.set(startKey, { time: 0, fare: 0, transfers: 0, hops: 0 });
+        heap.push({ key: startKey }, 0);
+    }
+
+    while (heap.size > 0) {
+        const current = heap.pop()!;
+        const currentKey = current.value.key;
+        const currentCosts = costsByKey.get(currentKey);
+        if (!currentCosts) continue;
+        const currentDist = dist.get(currentKey);
+        if (typeof currentDist === 'number' && current.priority > currentDist) continue;
+
+        const decoded = decodeStateKey(currentKey);
+        if (destSet.has(decoded.station)) {
+            const path: string[] = [decoded.station];
+            const edgeRailways: string[] = [];
+            let k = currentKey;
+            while (costsByKey.get(k)?.hops! > 0) {
+                const p = prev.get(k);
+                if (!p) break;
+                edgeRailways.unshift(p.viaRailwayId);
+                path.unshift(p.fromStation);
+                k = p.prevKey;
+            }
+            return { path, edgeRailways, costs: currentCosts };
+        }
+
+        if (currentCosts.hops >= maxHops) continue;
+        const edges = adj.get(decoded.station) || [];
+
+        for (const e of edges) {
+            const nextStation = e.to;
+            const viaRailwayId = e.railwayId;
+
+            const nextCosts: RouteCosts = {
+                time: currentCosts.time,
+                fare: currentCosts.fare,
+                transfers: currentCosts.transfers,
+                hops: currentCosts.hops + 1,
+            };
+
+            if (viaRailwayId === 'transfer') {
+                const decoded = decodeStateKey(currentKey);
+                const fromStationId = decoded.station;
+                const toStationId = nextStation;
+                const fromOp = inferOdptOperatorFromStationId(fromStationId);
+                const toOp = inferOdptOperatorFromStationId(toStationId);
+
+                let transferTime = edgeTimeMinutes(viaRailwayId);
+                if (fromOp && toOp && fromOp !== toOp) {
+                    transferTime += 5; // Reduced from 10
                 }
-                currentRailway = rw;
-                segmentStart = res.path[i];
+
+                nextCosts.time += transferTime;
+                nextCosts.transfers += 1;
+            } else {
+                const operatorKey = operatorKeyFromRailwayId(viaRailwayId);
+                const isTransfer = decoded.lastRailway && decoded.lastRailway !== viaRailwayId;
+                const boardingPenalty = isTransfer ? 3 : 0; // Reduced from 5
+
+                nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty;
+
+                if (decoded.lastOperator && decoded.lastOperator !== operatorKey) {
+                    nextCosts.fare += baseFareForOperator(operatorKey);
+                    nextCosts.time += 3; // Reduced from 5
+                }
+                nextCosts.fare += perHopFareForOperator(operatorKey);
+            }
+
+            const nextLastRailway = viaRailwayId === 'transfer' ? decoded.lastRailway : viaRailwayId;
+            const nextLastOperator =
+                viaRailwayId === 'transfer' ? decoded.lastOperator : operatorKeyFromRailwayId(viaRailwayId);
+
+            const nextKey = encodeStateKey(nextStation, nextLastRailway, nextLastOperator);
+            const nextPriority = score(nextCosts);
+
+            const prevBest = dist.get(nextKey);
+            if (prevBest === undefined || nextPriority < prevBest) {
+                dist.set(nextKey, nextPriority);
+                costsByKey.set(nextKey, nextCosts);
+                prev.set(nextKey, { prevKey: currentKey, fromStation: decoded.station, viaRailwayId });
+                heap.push({ key: nextKey }, nextPriority);
             }
         }
-        // Last segment
-        steps.push(`${t('🚃 乘坐', '🚃 乗車', '🚃 Take')} ${currentRailway.split(':').pop()}: ${segmentStart.split(':').pop()} → ${res.path[res.path.length - 1].split(':').pop()}`);
-        
-        steps.push(`${t('📍 到達', '📍 到着', '📍 Destination')}: ${dest.split(':').pop()}`);
+    }
 
-        return {
-            label,
-            steps,
-            sources: [{ type: 'odpt:Railway', verified: true }],
-            railways: Array.from(new Set(res.railways))
-        };
-    });
+    return null;
+}
+
+export function findRankedRoutes(params: {
+    originStationId: string | string[];
+    destinationStationId: string | string[];
+    railways: RailwayTopology[];
+    maxHops?: number;
+    locale?: SupportedLocale;
+}): RouteOption[] {
+    const originIds = Array.isArray(params.originStationId)
+        ? params.originStationId.map(normalizeOdptStationId)
+        : [normalizeOdptStationId(params.originStationId)];
+    const destIds = Array.isArray(params.destinationStationId)
+        ? params.destinationStationId.map(normalizeOdptStationId)
+        : [normalizeOdptStationId(params.destinationStationId)];
+
+    const railways = params.railways || [];
+    const maxHops = Math.max(4, params.maxHops ?? 30);
+    const locale = params.locale || 'zh-TW';
+    const t = (zh: string, ja: string, en: string) => (locale === 'ja' ? ja : locale === 'en' ? en : zh);
+
+    const candidates: Array<{ key: string; label: string; score: (c: RouteCosts) => number }> = [
+        {
+            key: 'fastest',
+            label: t('最快', '最短時間', 'Fastest'),
+            score: (c) => c.time + c.transfers * 8 + c.hops * 0.1,
+        },
+        {
+            key: 'cheapest',
+            label: t('最便宜', '最安', 'Cheapest'),
+            score: (c) => c.fare + c.time * 0.5 + c.transfers * 15,
+        },
+        {
+            key: 'fewestTransfers',
+            label: t('轉乘最少', '乗換最少', 'Fewest transfers'),
+            score: (c) => c.transfers * 1000 + c.time,
+        },
+    ];
+
+    const results: RouteOption[] = [];
+    const seen = new Set<string>();
+    const adj = getAdjacency(railways);
+
+    for (const cand of candidates) {
+        const found = dijkstraBestPath({
+            origins: originIds,
+            dests: destIds,
+            adj,
+            maxHops,
+            score: cand.score
+        });
+        if (!found) continue;
+        const signature = `${found.path.join('>')}|${found.edgeRailways.join(',')}`;
+        if (seen.has(signature)) continue;
+        seen.add(signature);
+        results.push(
+            buildRouteOptionFromPath({
+                path: found.path,
+                edgeRailways: found.edgeRailways,
+                railways,
+                locale,
+                label: cand.label,
+                costs: found.costs,
+            })
+        );
+    }
+
+    if (results.length === 0) {
+        return [];
+    }
+
+    return results;
+}
+
+export function findSimpleRoutes(params: {
+    originStationId: string | string[];
+    destinationStationId: string | string[];
+    railways: RailwayTopology[];
+    maxHops?: number;
+    locale?: SupportedLocale;
+}): RouteOption[] {
+    return findRankedRoutes(params);
 }
 
 export function buildAmenitySuggestion(params: {
     stationId: string;
+    stationName?: string; // Optional localized name
     text: string;
     demand: L4DemandState;
     verified: boolean;
 }): L4Suggestion {
     const text = params.text.toLowerCase();
     const stationId = normalizeOdptStationId(params.stationId);
-    const expertTips: string[] = [];
+    const expertTips: RouteStep[] = [];
 
     // 1. Generic Amenity Knowledge
     if (text.includes('置物櫃') || text.includes('locker')) {
-        expertTips.push('💡 提示：車站內的置物櫃通常在上午 10 點前就會客滿，建議利用站外的行李寄放服務。');
+        expertTips.push({ kind: 'info', text: '提示：車站內的置物櫃通常在上午 10 點前就會客滿，建議利用站外的行李寄放服務。', icon: '💡' });
     }
     if (text.includes('電梯') || text.includes('elevator') || text.includes('輪椅') || text.includes('嬰兒車')) {
-        expertTips.push('💡 提示：日本車站電梯通常位於月台中段或特定車廂位置，請留意月台上的標示。');
+        expertTips.push({ kind: 'info', text: '提示：日本車站電梯通常位於月台中段或特定車廂位置，請留意月台上的標示。', icon: '💡' });
     }
 
     // 2. Station Specific Amenity Knowledge
     if (EXPERT_KNOWLEDGE[stationId]) {
-        expertTips.push(...EXPERT_KNOWLEDGE[stationId].filter(tip => 
+        EXPERT_KNOWLEDGE[stationId].filter(tip =>
             tip.includes('置物櫃') || tip.includes('🦽') || tip.includes('電梯') || tip.includes('📦')
-        ));
+        ).forEach(tip => {
+            const icon = tip.match(/^[💡⚠️🦽📦]/)?.[0] || '💡';
+            expertTips.push({ kind: 'info', text: tip.replace(/^[💡⚠️🦽📦]\s*/, ''), icon });
+        });
     }
 
     // 3. Accessibility Advice based on demand
     const advice = ACCESSIBILITY_ADVICE[stationId];
     if (advice) {
-        if (params.demand.wheelchair && advice.wheelchair) expertTips.push(advice.wheelchair);
-        if (params.demand.stroller && advice.stroller) expertTips.push(advice.stroller);
+        if (params.demand.wheelchair && advice.wheelchair) expertTips.push({ kind: 'info', text: advice.wheelchair.replace(/^[🛗]\s*/, ''), icon: '🛗' });
+        if (params.demand.stroller && advice.stroller) expertTips.push({ kind: 'info', text: advice.stroller.replace(/^[🛗]\s*/, ''), icon: '🛗' });
     }
 
     return {
@@ -605,7 +1116,7 @@ export function buildAmenitySuggestion(params: {
         options: [
             {
                 label: '查詢結果',
-                steps: expertTips.length > 0 ? expertTips : ['目前無特定設施建議，請參考車站平面圖。'],
+                steps: expertTips.length > 0 ? expertTips : [{ kind: 'info', text: '目前無特定設施建議，請參考車站平面圖。', icon: 'ℹ️' }],
                 sources: [{ type: 'odpt:Railway', verified: params.verified }]
             }
         ]
@@ -614,16 +1125,21 @@ export function buildAmenitySuggestion(params: {
 
 export function buildStatusSuggestion(params: {
     stationId: string;
+    stationName?: string; // Optional localized name
     text: string;
     verified: boolean;
 }): L4Suggestion {
     const text = params.text.toLowerCase();
     const stationId = normalizeOdptStationId(params.stationId);
-    const expertTips: string[] = [];
+    const expertTips: RouteStep[] = [];
 
     // 1. Line specific status knowledge
     if (text.includes('中央線') || text.includes('chuo')) {
-        expertTips.push(...(EXPERT_KNOWLEDGE['odpt.Railway:JR-East.Chuo'] || []));
+        const tips = EXPERT_KNOWLEDGE['odpt.Railway:JR-East.Chuo'] || [];
+        tips.forEach(tip => {
+            const icon = tip.match(/^[💡⚠️]/)?.[0] || '💡';
+            expertTips.push({ kind: 'info', text: tip.replace(/^[💡⚠️]\s*/, ''), icon });
+        });
     }
 
     return {
@@ -632,7 +1148,7 @@ export function buildStatusSuggestion(params: {
             {
                 label: '實時提醒',
                 steps: [
-                    '🔍 正在調用 L2 實時 API 獲取最新運行狀態...',
+                    { kind: 'info', text: '正在調用 L2 實時 API 獲取最新運行狀態...', icon: '🔍' },
                     ...expertTips
                 ],
                 sources: [{ type: 'odpt:Railway', verified: params.verified }]
@@ -643,25 +1159,39 @@ export function buildStatusSuggestion(params: {
 
 export function buildFareSuggestion(params: {
     originStationId: string;
+    originStationName?: string;
     destinationStationId?: string;
+    destinationStationName?: string;
     demand: L4DemandState;
     verified: boolean;
 }): L4Suggestion {
     const sources: L4DataSource[] = [{ type: 'odpt:RailwayFare', verified: params.verified }];
-    const notes: string[] = [];
-    if (params.demand.budget) notes.push('以車票/IC 價差為優先比較基準。');
+    const notes: RouteStep[] = [];
+    if (params.demand.budget) notes.push({ kind: 'info', text: '以車票/IC 價差為優先比較基準。', icon: '💰' });
     if (params.demand.largeLuggage || params.demand.stroller || params.demand.wheelchair) {
-        notes.push('若需無障礙/大行李，票價相同時優先「少轉乘」。');
+        notes.push({ kind: 'info', text: '若需無障礙/大行李，票價相同時優先「少轉乘」。', icon: '🧳' });
     }
-    if (params.demand.rushing) notes.push('趕時間時優先「直達或少轉乘」方案。');
+    if (params.demand.rushing) notes.push({ kind: 'info', text: '趕時間時優先「直達或少轉乘」方案。', icon: '🏃' });
 
-    const dest = params.destinationStationId ? normalizeOdptStationId(params.destinationStationId) : '（未指定）';
+    const labelStation = (id: string, name?: string) => {
+        if (name) return name;
+        const normalized = normalizeOdptStationId(id);
+        const raw = normalized.split(':').pop() || normalized;
+        const parts = raw.split('.');
+        return parts[parts.length - 1] || raw;
+    };
+
+    const dest = params.destinationStationId ? labelStation(params.destinationStationId, params.destinationStationName) : '（未指定）';
     return {
         title: '票價建議',
         options: [
             {
                 label: '查詢條件',
-                steps: [`from: ${normalizeOdptStationId(params.originStationId)}`, `to: ${dest}`, ...notes],
+                steps: [
+                    { kind: 'info', text: `from: ${labelStation(params.originStationId, params.originStationName)}`, icon: '🏠' },
+                    { kind: 'info', text: `to: ${dest}`, icon: '📍' },
+                    ...notes
+                ],
                 sources
             }
         ]
@@ -670,21 +1200,33 @@ export function buildFareSuggestion(params: {
 
 export function buildTimetableSuggestion(params: {
     stationId: string;
+    stationName?: string;
     demand: L4DemandState;
     verified: boolean;
 }): L4Suggestion {
     const sources: L4DataSource[] = [{ type: 'odpt:StationTimetable', verified: params.verified }];
-    const notes: string[] = [];
-    if (params.demand.rushing) notes.push('趕時間：以「最近 1–3 班」為主。');
+    const labelStation = (id: string, name?: string) => {
+        if (name) return name;
+        const normalized = normalizeOdptStationId(id);
+        const raw = normalized.split(':').pop() || normalized;
+        const parts = raw.split('.');
+        return parts[parts.length - 1] || raw;
+    };
+    const notes: RouteStep[] = [];
+    if (params.demand.rushing) notes.push({ kind: 'info', text: '趕時間：以「最近 1–3 班」為主。', icon: '🏃' });
     if (params.demand.largeLuggage || params.demand.stroller || params.demand.wheelchair) {
-        notes.push('行李/無障礙：可搭配「電梯動線」優先選擇出口與月台。');
+        notes.push({ kind: 'info', text: '行李/無障礙：可搭配「電梯動線」優先選擇出口與月台。', icon: '🛗' });
     }
     return {
         title: '時刻表建議',
         options: [
             {
                 label: '查詢條件',
-                steps: [`station: ${normalizeOdptStationId(params.stationId)}`, '顯示平日/假日兩套班次', ...notes],
+                steps: [
+                    { kind: 'info', text: `station: ${labelStation(params.stationId, params.stationName)}`, icon: '🚉' },
+                    { kind: 'info', text: '顯示平日/假日兩套班次', icon: '📅' },
+                    ...notes
+                ],
                 sources
             }
         ]
@@ -705,13 +1247,17 @@ export function buildRouteSuggestion(params: {
     return {
         title: '轉乘/路線建議',
         options: params.options.map(o => {
-            const notes: string[] = [];
-            const expertTips: string[] = [];
-            const accessibilityTips: string[] = [];
+            const notes: RouteStep[] = [];
+            const expertTips: RouteStep[] = [];
+            const accessibilityTips: RouteStep[] = [];
 
             // 0. Special Location Recognition (e.g. Airport)
             if (text.includes('機場') || text.includes('airport') || text.includes('narita')) {
-                expertTips.push(...(EXPERT_KNOWLEDGE['Narita-Airport'] || []));
+                const tips = EXPERT_KNOWLEDGE['Narita-Airport'] || [];
+                tips.forEach(tip => {
+                    const icon = tip.match(/^[💡⚠️✈️]/)?.[0] || '💡';
+                    expertTips.push({ kind: 'info', text: tip.replace(/^[💡⚠️✈️]\s*/, ''), icon });
+                });
             }
 
             // 1. Collect Expert Knowledge based on railways and stations
@@ -720,13 +1266,19 @@ export function buildRouteSuggestion(params: {
 
             railways.forEach(rw => {
                 if (EXPERT_KNOWLEDGE[rw]) {
-                    expertTips.push(...EXPERT_KNOWLEDGE[rw]);
+                    EXPERT_KNOWLEDGE[rw].forEach(tip => {
+                        const icon = tip.match(/^[💡⚠️🎫]/)?.[0] || '💡';
+                        expertTips.push({ kind: 'info', text: tip.replace(/^[💡⚠️🎫]\s*/, ''), icon });
+                    });
                 }
             });
 
             stations.forEach(st => {
                 if (EXPERT_KNOWLEDGE[st]) {
-                    expertTips.push(...EXPERT_KNOWLEDGE[st]);
+                    EXPERT_KNOWLEDGE[st].forEach(tip => {
+                        const icon = tip.match(/^[💡⚠️📦🦽]/)?.[0] || '💡';
+                        expertTips.push({ kind: 'info', text: tip.replace(/^[💡⚠️📦🦽]\s*/, ''), icon });
+                    });
                 }
             });
 
@@ -734,9 +1286,9 @@ export function buildRouteSuggestion(params: {
             stations.forEach(st => {
                 const advice = ACCESSIBILITY_ADVICE[st];
                 if (advice) {
-                    if (params.demand.wheelchair && advice.wheelchair) accessibilityTips.push(advice.wheelchair);
-                    if (params.demand.stroller && advice.stroller) accessibilityTips.push(advice.stroller);
-                    if (params.demand.largeLuggage && advice.largeLuggage) accessibilityTips.push(advice.largeLuggage);
+                    if (params.demand.wheelchair && advice.wheelchair) accessibilityTips.push({ kind: 'info', text: advice.wheelchair.replace(/^[🛗]\s*/, ''), icon: '🛗' });
+                    if (params.demand.stroller && advice.stroller) accessibilityTips.push({ kind: 'info', text: advice.stroller.replace(/^[🛗]\s*/, ''), icon: '🛗' });
+                    if (params.demand.largeLuggage && advice.largeLuggage) accessibilityTips.push({ kind: 'info', text: advice.largeLuggage.replace(/^[🛗]\s*/, ''), icon: '🛗' });
                 }
             });
 
@@ -745,41 +1297,47 @@ export function buildRouteSuggestion(params: {
             const hour = now.getHours();
             const isPeak = (hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19);
             if (isPeak && (params.demand.avoidCrowds || params.demand.largeLuggage || params.demand.stroller)) {
-                accessibilityTips.push('⏰ 目前正值通勤尖峰時段，車廂內會非常擁擠，建議避開或多加留意。');
+                accessibilityTips.push({ kind: 'info', text: '目前正值通勤尖峰時段，車廂內會非常擁擠，建議避開或多加留意。', icon: '⏰' });
             } else if (params.demand.avoidCrowds) {
-                accessibilityTips.push('⏰ 建議避開 07:30-09:30 與 17:30-19:30 的尖峰時段。');
+                accessibilityTips.push({ kind: 'info', text: '建議避開 07:30-09:30 與 17:30-19:30 的尖峰時段。', icon: '⏰' });
             }
 
             // 4. General demand notes
             if (params.demand.largeLuggage || params.demand.stroller || params.demand.wheelchair) {
-                notes.push('🧳 行李/無障礙：優先建議「少轉乘」與「設有電梯」的路線。');
+                notes.push({ kind: 'info', text: '行李/無障礙：優先建議「少轉乘」與「設有電梯」的路線。', icon: '🧳' });
             }
             if (params.demand.budget) {
-                notes.push('💰 省錢：跨公司轉乘（如 JR 轉地鐵）票價較高，建議優先選擇同一公司的路線。');
-                
+                notes.push({ kind: 'info', text: '省錢：跨公司轉乘（如 JR 轉地鐵）票價較高，建議優先選擇同一公司的路線。', icon: '💰' });
+
                 // Add ticket suggestions based on budget demand
                 PASS_KNOWLEDGE.forEach(pass => {
-                    notes.push(`🎫 推薦票券：${pass.name} (${pass.price}) - ${pass.advice}`);
+                    notes.push({ kind: 'info', text: `推薦票券：${pass.name} (${pass.price}) - ${pass.advice}`, icon: '🎫' });
                 });
             }
 
             // Combine all steps
             const finalSteps = [...o.steps];
-            
+
             if (expertTips.length > 0) {
-                finalSteps.push('────────────────');
-                finalSteps.push(...Array.from(new Set(expertTips)));
+                finalSteps.push({ kind: 'info', text: '────────────────', icon: '' });
+                finalSteps.push(...expertTips);
             }
 
             if (accessibilityTips.length > 0 || notes.length > 0) {
-                finalSteps.push('────────────────');
-                finalSteps.push(...Array.from(new Set([...accessibilityTips, ...notes])));
+                finalSteps.push({ kind: 'info', text: '────────────────', icon: '' });
+                finalSteps.push(...accessibilityTips, ...notes);
             }
 
             return {
                 label: o.label,
                 steps: finalSteps,
-                sources: o.sources.length > 0 ? o.sources : baseSources
+                sources: o.sources.length > 0 ? o.sources : baseSources,
+                // Preserve numeric fields for display
+                duration: o.duration,
+                fare: o.fare,
+                transfers: o.transfers,
+                railways: o.railways,
+                nextDeparture: o.nextDeparture,
             };
         })
     };

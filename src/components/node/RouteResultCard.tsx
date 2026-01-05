@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { EnrichedRouteOption, SupportedLocale } from '@/lib/l4/assistantEngine';
+import type { EnrichedRouteOption, SupportedLocale, RouteStep } from '@/lib/l4/assistantEngine';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 type RouteResultCardProps = {
@@ -35,19 +35,8 @@ function getRailwayColorClasses(railwayId?: string) {
     return { dot: 'bg-slate-400', badge: 'bg-slate-50 text-slate-700 border-slate-100' };
 }
 
-function parseRailwayIdFromStep(step: string): string | undefined {
-    const m = String(step || '').match(/(odpt\.Railway:[A-Za-z0-9_.-]+)/);
-    return m?.[1];
-}
-
-function parseStepKind(step: string) {
-    const s = String(step || '').trim();
-    if (s.startsWith('🚶')) return { kind: 'walk' as const, icon: '🚶' };
-    if (s.startsWith('🔄')) return { kind: 'transfer' as const, icon: '🔄' };
-    if (s.startsWith('🚃')) return { kind: 'train' as const, icon: '🚃' };
-    if (s.startsWith('🏠')) return { kind: 'origin' as const, icon: '🏠' };
-    if (s.startsWith('📍')) return { kind: 'destination' as const, icon: '📍' };
-    return { kind: 'info' as const, icon: '•' };
+function parseStepKind(step: RouteStep) {
+    return { kind: step.kind, icon: step.icon || '•' };
 }
 
 function computeCountdownMinutes(hhmm?: string) {
@@ -64,7 +53,7 @@ function computeCountdownMinutes(hhmm?: string) {
 }
 
 export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) {
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(rank === 0); // Auto-expand first result
     const [tick, setTick] = useState(0);
 
     useEffect(() => {
@@ -203,10 +192,10 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                             <div className="mt-3 space-y-3">
                                 {option.steps.map((step, i) => {
                                     const meta = parseStepKind(step);
-                                    const railwayId = meta.kind === 'train' ? parseRailwayIdFromStep(step) : undefined;
+                                    const railwayId = meta.kind === 'train' ? step.railwayId : undefined;
                                     const c = getRailwayColorClasses(railwayId);
                                     return (
-                                        <div key={`${step}-${i}`} className="relative pl-10">
+                                        <div key={i} className="relative pl-10">
                                             <div className="absolute left-4 top-0 bottom-0 w-px bg-slate-200" />
                                             <div className="absolute left-0 top-0 w-8 h-8 rounded-2xl border border-slate-100 bg-white flex items-center justify-center">
                                                 {meta.kind === 'train' ? (
@@ -216,7 +205,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                                 )}
                                             </div>
                                             <div className="px-3 py-2 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-800 break-words">
-                                                {step}
+                                                {step.text}
                                             </div>
                                         </div>
                                     );
