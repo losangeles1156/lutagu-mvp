@@ -42,7 +42,8 @@ export function WardNodeLayer({
             const ward = wards.find((w) => w.id === wardId);
             return ward ? [ward] : [];
         }
-        return wards.filter((w) => w.is_active);
+        // Return all wards when no specific wardId is selected
+        return wards;
     }, [wards, wardId]);
 
     // Loading state
@@ -74,11 +75,6 @@ export function WardNodeLayer({
     // Render ward boundaries and nodes
     return (
         <div className={`ward-node-layer ${className || ''}`}>
-            {/* Ward boundaries (optional - for debugging) */}
-            {process.env.NODE_ENV === 'development' && displayWards.map((ward) => (
-                <WardBoundary key={ward.id} ward={ward} />
-            ))}
-
             {/* Ward nodes */}
             {displayWards.map((ward) => (
                 <WardNodes
@@ -93,30 +89,11 @@ export function WardNodeLayer({
     );
 }
 
-// Ward boundary visualization (for debugging)
-function WardBoundary({ ward }: { ward: Ward }) {
-    const boundary = ward.center_point;
-    
-    if (!boundary?.coordinates) return null;
-
-    const [lng, lat] = boundary.coordinates;
-
-    return (
-        <div
-            className="ward-boundary-marker"
-            style={{
-                position: 'absolute',
-                left: `${((lng - 139.6) / 0.4) * 100}%`,
-                top: `${((35.75 - lat) / 0.15) * 100}%`,
-                width: '20px',
-                height: '20px',
-                border: '2px dashed rgba(255, 255, 255, 0.3)',
-                borderRadius: '50%',
-                pointerEvents: 'none',
-            }}
-            title={`${ward.name_i18n['zh-TW']} - ${ward.node_count} nodes, ${ward.hub_count} hubs`}
-        />
-    );
+// Helper function to get ward name by locale
+function getWardName(ward: Ward, locale: string = 'zh-TW'): string {
+    if (locale === 'zh-TW' || locale === 'zh') return ward.name.zh || ward.name.ja || ward.id;
+    if (locale === 'en') return ward.name.en || ward.name.ja || ward.id;
+    return ward.name.ja || ward.name.en || ward.id;
 }
 
 // Render nodes for a specific ward
@@ -134,22 +111,15 @@ function WardNodes({
     // Fetch actual nodes for the ward
     const { nodes, isLoading } = useWardNodes(ward.id);
 
-    const name = ward.name_i18n['zh-TW'] || ward.name_i18n['ja'] || ward.id;
+    const name = getWardName(ward, locale);
 
     return (
         <div className="ward-nodes" data-ward-id={ward.id}>
             {/* Ward label */}
-            <div
-                className="ward-label"
-                style={{
-                    position: 'absolute',
-                    left: `${((ward.center_point?.coordinates?.[0] || 139.7) - 139.6) / 0.4 * 100}%`,
-                    top: `${((35.75 - (ward.center_point?.coordinates?.[1] || 35.7)) / 0.15) * 100}%`,
-                }}
-            >
+            <div className="ward-label">
                 <span className="ward-name">{name}</span>
                 <span className="ward-stats">
-                    {isLoading ? '載入中...' : `${nodes.length} 站點`} / {ward.hub_count} 樞紐
+                    {isLoading ? '載入中...' : `${nodes.length} 站點`}
                 </span>
             </div>
 
@@ -193,7 +163,7 @@ export function useWardNodes(wardId: string | null) {
 
         let mounted = true;
         setIsLoadingNodes(true);
-        
+
         fetchNodesByWard(wardId)
             .then(data => {
                 if (mounted) setNodes(data);
@@ -217,7 +187,7 @@ export function useWardNodes(wardId: string | null) {
 // Component for displaying all ward info
 export function WardInfoPanel({ wardId }: { wardId: string | null }) {
     const { wards, fetchWards } = useWardStore();
-    
+
     const ward = useMemo(() => {
         if (!wardId) return null;
         return wards.find((w) => w.id === wardId) || null;
@@ -231,27 +201,12 @@ export function WardInfoPanel({ wardId }: { wardId: string | null }) {
         );
     }
 
-    const name = ward.name_i18n['zh-TW'] || ward.name_i18n['ja'] || ward.id;
+    const name = getWardName(ward);
 
     return (
         <div className="ward-info-panel">
             <h3 className="ward-info-title">{name}</h3>
-            
-            <div className="ward-info-stats">
-                <div className="stat">
-                    <span className="stat-value">{ward.node_count}</span>
-                    <span className="stat-label">站點</span>
-                </div>
-                <div className="stat">
-                    <span className="stat-value">{ward.hub_count}</span>
-                    <span className="stat-label">樞紐</span>
-                </div>
-                <div className="stat">
-                    <span className="stat-value">{ward.priority_order}</span>
-                    <span className="stat-label">優先級</span>
-                </div>
-            </div>
-            
+
             <div className="ward-info-actions">
                 <button
                     className="action-button"

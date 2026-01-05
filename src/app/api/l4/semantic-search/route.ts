@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Lazy initialization to avoid build-time errors
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 /**
  * L4 Semantic Search API
@@ -43,7 +50,7 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     const body = await request.json();
     const {
@@ -67,9 +74,9 @@ export async function POST(request: NextRequest) {
     // Note: In production, this should use a proper embedding API
     // For now, we'll use the RPC function with a placeholder approach
     // or implement a simple embedding generation
-    
+
     const embedding = await generateQueryEmbedding(query);
-    
+
     if (!embedding || embedding.length === 0) {
       return NextResponse.json(
         { error: 'Failed to generate query embedding' },
@@ -78,6 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 2: Build the database query with filters
+    const supabase = getSupabaseClient();
     let dbQuery = supabase
       .rpc('match_l4_knowledge', {
         query_embedding: embedding,
@@ -102,34 +110,34 @@ export async function POST(request: NextRequest) {
 
     // Step 3: Apply contextual scoring if user_context or time_context provided
     let scoredResults = results || [];
-    
+
     if (user_context.length > 0 || time_context) {
       scoredResults = scoredResults.map((item: any) => {
         let relevanceScore = item.similarity || 0;
-        
+
         // Boost for matching user context
         if (user_context.length > 0) {
-          const userContextMatch = item.user_context?.some((ctx: string) => 
+          const userContextMatch = item.user_context?.some((ctx: string) =>
             user_context.includes(ctx)
           );
           if (userContextMatch) {
             relevanceScore += 0.15;
           }
         }
-        
+
         // Boost for matching time context
         if (time_context && item.time_context?.includes(time_context)) {
           relevanceScore += 0.1;
         }
-        
+
         return {
           ...item,
           relevance_score: Math.min(relevanceScore, 1.0)
         };
       });
-      
+
       // Re-sort by relevance score
-      scoredResults.sort((a: any, b: any) => 
+      scoredResults.sort((a: any, b: any) =>
         (b.relevance_score || 0) - (a.relevance_score || 0)
       );
     }
@@ -178,7 +186,7 @@ export async function POST(request: NextRequest) {
 async function generateQueryEmbedding(query: string): Promise<number[]> {
   // Try GOOGLE_API_KEY first (for Gemini embedding), fallback to any available key
   const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || process.env.MISTRAL_API_KEY;
-  
+
   if (!apiKey) {
     console.warn('No embedding API key found (GOOGLE_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY), using fallback');
     return fallbackEmbedding(query);
@@ -214,7 +222,7 @@ async function generateQueryEmbedding(query: string): Promise<number[]> {
  */
 function fallbackEmbedding(query: string): number[] {
   const embedding = new Array(768).fill(0);
-  
+
   // Simple keyword-based scoring (for demo purposes)
   const keywords: Record<string, number[]> = {
     '電梯': Array(768).fill(0).map((_, i) => (i % 10 === 0 ? 0.5 : 0)),
@@ -251,7 +259,7 @@ function fallbackEmbedding(query: string): number[] {
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  
+
   const query = searchParams.get('q');
   const station_id = searchParams.get('station_id');
   const knowledge_type = searchParams.get('type');

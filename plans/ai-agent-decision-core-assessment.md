@@ -476,7 +476,7 @@ export async function chatWithAgent(
 | 項目 | 連線資訊 |
 |------|----------|
 | **Base URL** | `https://dify-k7m9.zeabur.app/v1` |
-| **API 金鑰** | `app-xOD4ApsSDuHRPKWMw4JaqtxR` |
+| **API 金鑰** | `<YOUR_DIFY_API_KEY>` ⚠️ 請至 .env.local 設定 |
 | **部署日期** | 2026-01-05 |
 
 ### 7.1 整合實施工案

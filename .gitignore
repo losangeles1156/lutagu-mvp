@@ -59,3 +59,8 @@ supabase/.temp/
 # next-pwa generated files
 public/sw*.js
 public/workbox-*.js
+
+# Secret files (never commit)
+.secrets.baseline
+*.key
+**/secrets/**
