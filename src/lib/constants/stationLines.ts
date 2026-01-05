@@ -192,8 +192,8 @@ export const STATION_LINES: Record<string, StationLineDef[]> = {
     // Additional stations from SEED_NODES
     'odpt:Station:Toei.Ningyocho': [LINES.Asakusa, LINES.Hibiya],
     'odpt:Station:TokyoMetro.Akasakamitsuke': [LINES.Ginza, LINES.Marunouchi],
-    'odpt:Station:TokyoMetro.Hiroo': [LINES.Hibiya],
-    'odpt:Station:TokyoMetro.NakaMeguro': [LINES.Hibiya],
+    // 'odpt:Station:TokyoMetro.Hiroo': [LINES.Hibiya], // Already defined above
+    // 'odpt:Station:TokyoMetro.NakaMeguro': [LINES.Hibiya], // Already defined above
     'odpt:Station:Toei.Hamacho': [LINES.Shinjuku],
     'odpt:Station:Toei.Jimbocho': [LINES.Shinjuku, LINES.Hanzomon, LINES.Mita],
     'odpt:Station:Toei.Ogawamachi': [LINES.Shinjuku],
