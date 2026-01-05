@@ -12,7 +12,7 @@ export interface StationLineDef {
 }
 
 // Line Metadata Registry (Single Source of Truth)
-const LINES = {
+export const LINES = {
     // Metro
     Ginza: { name: { ja: '銀座線', en: 'Ginza Line', zh: '銀座線' }, operator: 'Metro', color: '#FF9500' } as StationLineDef,
     Marunouchi: { name: { ja: '丸ノ内線', en: 'Marunouchi Line', zh: '丸之內線' }, operator: 'Metro', color: '#F62E36' } as StationLineDef,
@@ -188,6 +188,21 @@ export const STATION_LINES: Record<string, StationLineDef[]> = {
     'odpt:Station:TokyoMetro.Iidabashi': [LINES.Tozai, LINES.Yurakucho, LINES.Namboku, LINES.Oedo, LINES.Chuo, LINES.Sobu],
     'odpt:Station:TokyoMetro.Kudanshita': [LINES.Tozai, LINES.Hanzomon, LINES.Shinjuku],
     'odpt:Station:TokyoMetro.Yushima': [LINES.Chiyoda],
+
+    // Additional stations from SEED_NODES
+    'odpt:Station:Toei.Ningyocho': [LINES.Asakusa, LINES.Hibiya],
+    'odpt:Station:TokyoMetro.Akasakamitsuke': [LINES.Ginza, LINES.Marunouchi],
+    'odpt:Station:TokyoMetro.Hiroo': [LINES.Hibiya],
+    'odpt:Station:TokyoMetro.NakaMeguro': [LINES.Hibiya],
+    'odpt:Station:Toei.Hamacho': [LINES.Shinjuku],
+    'odpt:Station:Toei.Jimbocho': [LINES.Shinjuku, LINES.Hanzomon, LINES.Mita],
+    'odpt:Station:Toei.Ogawamachi': [LINES.Shinjuku],
+    'odpt:Station:Toei.Kudanshita': [LINES.Shinjuku, LINES.Tozai, LINES.Hanzomon],
+    'odpt:Station:Toei.Iwamotocho': [LINES.Shinjuku],
+    'odpt:Station:Toei.Hibiya': [LINES.Mita, LINES.Hibiya, LINES.Chiyoda],
+    'odpt:Station:Toei.Uchisaiwaicho': [LINES.Mita],
+    'odpt:Station:Toei.Ichigaya': [LINES.Shinjuku, LINES.Namboku, LINES.Yurakucho],
+    'odpt:Station:JR-East.Iidabashi': [LINES.Chuo, LINES.Sobu, LINES.Tozai, LINES.Yurakucho, LINES.Namboku, LINES.Oedo],
 };
 
 export const HUB_STATION_MEMBERS: Record<string, string[]> = {

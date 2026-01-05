@@ -12,6 +12,13 @@ export type L4QuestionTemplate = {
     kind: Exclude<L4IntentKind, 'unknown'>;
     title: string;
     text: string;
+    description?: string;
+    preset?: {
+        originStationId?: string;
+        destinationStationId?: string;
+        demand?: Partial<L4DemandState>;
+        run?: boolean;
+    };
 };
 
 export type L4DemandState = {
@@ -194,7 +201,9 @@ export function buildL4DefaultQuestionTemplates(params: {
                 '淺草寺這裡人潮多到有點不舒服，附近有沒有人少一點，但也能感受江戶風情的地方？',
                 '浅草寺は混雑していて少し疲れます。近くで混雑が少なく、江戸情緒を感じられる場所はありますか？',
                 'Senso-ji is so crowded it feels a bit uncomfortable. Is there somewhere nearby that is less crowded but still has that Edo period atmosphere?'
-            )
+            ),
+            description: t('避開人潮也能感受江戶風情', '混雑回避で江戸情緒', 'Avoid crowds, keep Edo vibes'),
+            preset: { demand: { avoidCrowds: true, comfort: true } }
         },
         {
             id: 'demo-02',
@@ -205,7 +214,8 @@ export function buildL4DefaultQuestionTemplates(params: {
                 '我要從東京車站去東京都廳看夜景，但聽說中央線現在大誤點，該怎麼辦？',
                 '東京駅から東京都庁へ夜景を見に行きたいのですが、中央線が大幅に遅れていると聞きました。どうすればいいですか？',
                 'I want to go from Tokyo Station to the Tokyo Metropolitan Government Building for the night view, but I heard the Chuo Line is heavily delayed. What should I do?'
-            )
+            ),
+            description: t('遇到誤點時的替代方案', '遅延時の代替案', 'Alternatives during delays')
         },
         {
             id: 'demo-03',
@@ -216,7 +226,9 @@ export function buildL4DefaultQuestionTemplates(params: {
                 '我剛從成田機場到淺草，但飯店下午才能進房，淺草站的置物櫃還有位子嗎？',
                 '成田空港から浅草に着いたばかりですが、ホテルへのチェックインは午後からです。浅草駅のコインロッカーに空きはありますか？',
                 'I just arrived in Asakusa from Narita Airport, but I can\'t check into my hotel until this afternoon. Are there any lockers available at Asakusa Station?'
-            )
+            ),
+            description: t('先寄放行李再逛街', '荷物を預けて観光', 'Store luggage and explore'),
+            preset: { demand: { largeLuggage: true } }
         },
         {
             id: 'demo-04',
@@ -227,7 +239,9 @@ export function buildL4DefaultQuestionTemplates(params: {
                 '我推著嬰兒車要去上野動物園，請問搭到上野站要從哪個出口出來最方便？',
                 'ベビーカーで上野動物園に行きたいのですが、上野駅のどの出口から出るのが一番便利ですか？',
                 'I\'m going to Ueno Zoo with a stroller. Which exit at Ueno Station is the most convenient?'
-            )
+            ),
+            description: t('推嬰兒車的友善路線', 'ベビーカー向け', 'Stroller-friendly route'),
+            preset: { demand: { stroller: true, comfort: true } }
         }
     ];
 
@@ -238,21 +252,27 @@ export function buildL4DefaultQuestionTemplates(params: {
             category: 'basic',
             kind: 'fare',
             title: t('查票價（本站 → 東京）', '運賃（この駅 → 東京）', 'Fare (this station → Tokyo)'),
-            text: fareText
+            text: fareText,
+            description: t('選好目的地就能直接計算', '目的地を選べばすぐ計算', 'Pick a destination and calculate'),
+            preset: { originStationId: origin, destinationStationId: dest }
         },
         {
             id: 'basic-timetable',
             category: 'basic',
             kind: 'timetable',
             title: t('查時刻表（本站）', '時刻表（この駅）', 'Timetable (this station)'),
-            text: timetableText
+            text: timetableText,
+            description: t('查看下一班車與方向', '次の電車と方面', 'Next trains and directions'),
+            preset: { originStationId: origin }
         },
         {
             id: 'basic-route',
             category: 'basic',
             kind: 'route',
             title: t('查路線（本站 → 東京）', '経路（この駅 → 東京）', 'Route (this station → Tokyo)'),
-            text: routeText
+            text: routeText,
+            description: t('少轉乘、可依需求調整', '乗換少なめ、条件で調整', 'Fewer transfers; adjust by needs'),
+            preset: { originStationId: origin, destinationStationId: dest, demand: { comfort: true } }
         },
         {
             id: 'adv-fare-ic',

@@ -1,6 +1,6 @@
 
-const TOKEN_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN;
-const TOKEN_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP || process.env.ODPT_API_KEY;
+const TOKEN_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN || process.env.ODPT_API_KEY_PUBLIC;
+const TOKEN_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP || process.env.ODPT_API_KEY || process.env.ODPT_API_KEY_CHALLENGE2025;
 
 // Base URLs
 const BASE_URL_STANDARD = 'https://api.odpt.org/api/v4';

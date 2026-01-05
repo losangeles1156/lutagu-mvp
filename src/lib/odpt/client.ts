@@ -5,8 +5,8 @@ const API_PUBLIC = 'https://api-public.odpt.org/api/v4';
 const API_DEV = 'https://api.odpt.org/api/v4';
 const API_CHALLENGE = 'https://api-challenge.odpt.org/api/v4';
 
-const TOKEN_DEV = process.env.ODPT_API_TOKEN || process.env.ODPT_API_KEY;  // For Metro, MIR
-const TOKEN_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP;                  // For JR East
+const TOKEN_DEV = process.env.ODPT_API_TOKEN || process.env.ODPT_API_KEY || process.env.ODPT_API_KEY_PUBLIC;  // For Metro, MIR
+const TOKEN_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP || process.env.ODPT_API_KEY_CHALLENGE2025;                  // For JR East
 
 /**
  * ODPT API retry configuration

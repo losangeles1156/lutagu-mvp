@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../supabase';
 import { Translator } from '../utils/translator';
+import { STATION_LINES } from '@/lib/constants/stationLines';
 
 export const SEED_NODES = [
     {
@@ -1045,7 +1046,8 @@ export async function seedNodes() {
             // If not defined in rawNode, default to standalone station (is_hub = false, parent_hub_id = null)
             is_hub: rawNode.is_hub === true,
             parent_hub_id: rawNode.parent_hub_id || null,
-            transit_lines: (rawNode as any).lines || [],
+            // Derive transit_lines from STATION_LINES constant (line names for display and fallback)
+            transit_lines: (STATION_LINES[rawNode.id] || []).map(line => line.name.en),
             updated_at: new Date().toISOString()
         };
 
