@@ -98,52 +98,59 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
             en: node.name?.en || rawData.name?.en || node.title || rawData.title || 'Station',
             zh: node.name?.zh || node.name?.['zh-TW'] || rawData.name?.zh || rawData.name?.['zh-TW'] || node.title || rawData.title || '車站'
         },
-        description: { ja: '', en: '', zh: '' }, // Default description
-        mapDesign: node.mapDesign || rawData.mapDesign,
-        l1_dna: rawData.l1_dna || node.l1_dna || {
-            categories: {}, // Populate if possible from category_counts
-            vibe_tags: rawData.vibe_tags || node.vibe_tags || [],
+        description: {
+            ja: node.description?.ja || rawData.description?.ja || '',
+            en: node.description?.en || rawData.description?.en || '',
+            zh: node.description?.zh || node.description?.['zh-TW'] || rawData.description?.zh || rawData.description?.['zh-TW'] || ''
+        },
+        l1_dna: {
+            categories: rawData.l1_dna?.categories || {},
+            vibe_tags: (node.vibe_tags || rawData.vibe_tags || []).map((t: string) => ({ id: t, label: { ja: t, en: t, zh: t }, score: 5 })),
+            tagline: rawData.l1_dna?.tagline,
+            title: rawData.l1_dna?.title,
             last_updated: new Date().toISOString()
         },
         l2: l2Adapter,
-        l3_facilities: rawData.l3_facilities || node.l3_facilities || [],
-        l4_cards: rawData.l4_cards || node.l4_cards || [],
-        external_links: rawData.external_links || node.external_links
+        l3_facilities: rawData.l3_facilities || [],
+        l4_cards: rawData.l4_cards || [],
+        l4_knowledge: node.riding_knowledge || rawData.riding_knowledge || undefined
     };
 
-    return (
-        <div className="w-full h-full bg-white flex flex-col">
+    // Debug: Log L4 Knowledge data flow
 
-            {/* Tab Navigation (Sticky Header) */}
-            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
-                <div className="flex justify-between items-center px-3 py-2" role="tablist" aria-label={tCommon('tabMenu')}>
+
+    return (
+        <div className="flex flex-col h-full bg-slate-50 relative">
+            {/* Tab Navigation */}
+            <div className="flex-none px-4 pb-2 pt-2 bg-white border-b border-slate-100 shadow-sm z-20">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
                     {TABS.map((tab) => {
                         const isActive = activeTab === tab.id;
+                        const styles = TAB_STYLES[tab.id];
                         const Icon = tab.icon;
-                        const iconClassName = isActive ? TAB_STYLES[tab.id].active : TAB_STYLES[tab.id].inactive;
+
+                        // Custom Label Logic
+                        let label = tTabs(tab.id);
+                        if (tab.id === 'lutagu') {
+                            // Override label for LUTAGU to be more descriptive about the new capabilities
+                            label = locale.startsWith('zh') ? '智能嚮導' : locale === 'ja' ? 'スマートガイド' : 'Smart Guide';
+                        }
 
                         return (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                role="tab"
-                                aria-selected={isActive}
-                                aria-controls={`panel-${tab.id}`}
-                                id={`tab-${tab.id}`}
-                                className={`relative flex flex-col items-center justify-center gap-1 min-w-[72px] min-h-[56px] px-3 py-2 rounded-2xl transition-transform duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/15 focus-visible:ring-offset-2 ${isActive ? 'text-slate-900' : 'text-slate-600 hover:text-slate-900'}`}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap
+                                    ${isActive ? styles.active : styles.inactive}
+                                `}
                             >
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-2xl transition-colors ${iconClassName}`}>
-                                    <Icon size={20} strokeWidth={2} aria-hidden="true" />
-                                </div>
-                                <span className={`text-[10px] font-semibold leading-none ${isActive ? 'opacity-100' : 'opacity-75'}`}>
-                                    {tTabs(tab.id)}
-                                </span>
-
-                                {/* Active Indicator Dot */}
+                                <Icon size={16} className={isActive ? 'stroke-[3px]' : ''} />
+                                <span>{label}</span>
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeTabDot"
-                                        className={`absolute -bottom-1.5 w-1.5 h-1.5 rounded-full ${TAB_STYLES[tab.id].dot}`}
+                                        className="w-1.5 h-1.5 rounded-full bg-white ml-0.5"
                                     />
                                 )}
                             </button>
@@ -153,94 +160,40 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 p-4 pb-24 overflow-y-auto">
+            <div className="flex-1 overflow-hidden relative">
                 <AnimatePresence mode="wait">
-
-                    {activeTab === 'dna' && (
-                        <motion.div
-                            key="dna"
-                            id="panel-dna"
-                            role="tabpanel"
-                            aria-labelledby="tab-dna"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <div className="mb-4 px-1">
-                                <h2 className="text-sm font-semibold text-slate-900">{tTabs('dna')}</h2>
-                            </div>
-                            <ErrorBoundary>
-                                <L1_DNA data={standardData} />
-                            </ErrorBoundary>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'live' && (
-                        <motion.div
-                            key="live"
-                            id="panel-live"
-                            role="tabpanel"
-                            aria-labelledby="tab-live"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <div className="mb-4 px-1">
-                                <h2 className="text-sm font-semibold text-slate-900">{tTabs('live')}</h2>
-                            </div>
-                            <ErrorBoundary>
-                                <L2_Live data={standardData} />
-                            </ErrorBoundary>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'facility' && (
-                        <motion.div
-                            key="facility"
-                            id="panel-facility"
-                            role="tabpanel"
-                            aria-labelledby="tab-facility"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <div className="mb-4 px-1">
-                                <h2 className="text-sm font-semibold text-slate-900">{tTabs('facility')}</h2>
-                            </div>
-                            <ErrorBoundary>
-                                <L3_Facilities data={standardData} />
-                            </ErrorBoundary>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'lutagu' && (
-                        <motion.div
-                            key="lutagu"
-                            id="panel-lutagu"
-                            role="tabpanel"
-                            aria-labelledby="tab-lutagu"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="h-full"
-                        >
-                            <div className="mb-4 px-1">
-                                <h2 className="text-sm font-semibold text-slate-900">{tTabs('lutagu')}</h2>
-                                <p className="text-xs text-slate-500">{tL4('strategyTitle')}</p>
-                            </div>
-                            <ErrorBoundary>
+                    <motion.div
+                        key={activeTab}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="h-full w-full absolute inset-0"
+                    >
+                        <ErrorBoundary>
+                            {activeTab === 'dna' && (
+                                <L1_DNA
+                                    data={standardData}
+                                />
+                            )}
+                            {activeTab === 'live' && (
+                                <L2_Live
+                                    data={standardData}
+                                />
+                            )}
+                            {activeTab === 'facility' && (
+                                <L3_Facilities
+                                    data={standardData}
+                                />
+                            )}
+                            {activeTab === 'lutagu' && (
                                 <L4_Dashboard
                                     currentNodeId={standardData.id}
-                                    locale={locale as any}
+                                    l4Knowledge={standardData.l4_knowledge}
                                 />
-                            </ErrorBoundary>
-                        </motion.div>
-                    )}
-
+                            )}
+                        </ErrorBoundary>
+                    </motion.div>
                 </AnimatePresence>
             </div>
         </div>

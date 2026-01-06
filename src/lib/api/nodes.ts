@@ -67,11 +67,11 @@ function normalizeNodeRow(n: any) {
     // Standardize node type: Prioritize DB schema node_type, convert to lowercase
     const type = String(n?.node_type ?? n?.type ?? 'station').toLowerCase();
     const location = parseLocation(n?.location ?? n?.coordinates);
-    
+
     // Unified is_hub logic: Prioritize explicit value, otherwise check parent_hub_id
     const explicitIsHub = n?.is_hub;
-    const isHub = typeof explicitIsHub === 'boolean' 
-        ? explicitIsHub 
+    const isHub = typeof explicitIsHub === 'boolean'
+        ? explicitIsHub
         : (n?.parent_hub_id === null || n?.parent_hub_id === undefined);
 
     // Parse version control fields
@@ -440,9 +440,11 @@ export async function fetchNodeConfig(nodeId: string) {
     let childNodes: any[] = [];
 
     // Unified is_hub logic: Prioritize explicit value
-    const isNodeHub = typeof finalNode?.is_hub === 'boolean' 
-        ? finalNode.is_hub 
+    const isNodeHub = typeof finalNode?.is_hub === 'boolean'
+        ? finalNode.is_hub
         : !hubId;
+
+
 
     if (hubId) {
         // Case 1: Child Node -> Fetch Parent
@@ -459,13 +461,20 @@ export async function fetchNodeConfig(nodeId: string) {
         }
     } else if (isNodeHub) {
         // Case 2: Hub Node -> Fetch Children for Aggregation
+
         try {
-            const { data: children } = await supabase
+            const { data: children, error } = await supabase
                 .from('nodes')
                 .select('*')
                 .eq('parent_hub_id', nodeId);
-            
-            if (children) childNodes = children;
+
+
+            if (children) {
+                childNodes = children;
+                children.forEach((c: any) => {
+
+                });
+            }
         } catch (err) {
             console.warn('[fetchNodeConfig] Failed to fetch child nodes for hub aggregation:', err);
         }
@@ -740,6 +749,109 @@ export async function fetchNodeConfig(nodeId: string) {
 
     // Inject L4 Cards
     enrichedProfile.l4_cards = l4_cards;
+
+    // --- L4 RIDING KNOWLEDGE AGGREGATION FROM HUB MEMBERS ---
+    // If the current node doesn't have riding_knowledge, check hub members
+    let aggregatedRidingKnowledge: any = null;
+
+    // First check the already-fetched nodes
+    const ridingKnowledgeSourceNodes = [finalNode, hubNode, ...childNodes].filter(Boolean);
+
+    for (const n of ridingKnowledgeSourceNodes) {
+        if (n?.riding_knowledge) {
+            const rk = n.riding_knowledge;
+            // Check if it has actual content (not just empty arrays)
+            const hasTraps = Array.isArray(rk.traps) && rk.traps.length > 0;
+            const hasHacks = Array.isArray(rk.hacks) && rk.hacks.length > 0;
+
+            if (hasTraps || hasHacks) {
+                // Merge if we already have some, otherwise use this one
+                if (!aggregatedRidingKnowledge) {
+                    aggregatedRidingKnowledge = { traps: [], hacks: [] };
+                }
+                if (hasTraps) {
+                    aggregatedRidingKnowledge.traps = [
+                        ...(aggregatedRidingKnowledge.traps || []),
+                        ...rk.traps
+                    ];
+                }
+                if (hasHacks) {
+                    aggregatedRidingKnowledge.hacks = [
+                        ...(aggregatedRidingKnowledge.hacks || []),
+                        ...rk.hacks
+                    ];
+                }
+            }
+        }
+    }
+
+    // If still no riding_knowledge, check peer station members using resolveHubStationMembers
+    // This handles cases like JR-East.Ueno where riding_knowledge is on TokyoMetro.Ginza.Ueno
+    if (!aggregatedRidingKnowledge && nodeId) {
+        try {
+            const hubMemberIds = resolveHubStationMembers(nodeId);
+
+
+            // Filter out the current nodeId and already-checked nodes
+            const checkedIds = new Set([nodeId, hubId, ...childNodes.map(c => c.id)].filter(Boolean));
+            const uncheckedMemberIds = hubMemberIds.filter(id => !checkedIds.has(id));
+
+            if (uncheckedMemberIds.length > 0) {
+                // Generate all possible ID variants for each member (odpt.Station: vs odpt:Station:)
+                const allVariantIds = new Set<string>();
+                uncheckedMemberIds.forEach(id => {
+                    getStationIdVariants(id).forEach(v => allVariantIds.add(v));
+                });
+                const variantIdArray = Array.from(allVariantIds);
+
+
+                // Query Supabase for these member nodes
+                const { data: memberNodes, error: memberError } = await supabase
+                    .from('nodes')
+                    .select('id, riding_knowledge')
+                    .in('id', variantIdArray);
+
+                if (!memberError && memberNodes) {
+                    console.log(`[fetchNodeConfig] Found ${memberNodes.length} hub member nodes`);
+                    for (const m of memberNodes) {
+                        if (m.riding_knowledge) {
+                            const rk = m.riding_knowledge as any;
+                            const hasTraps = Array.isArray(rk.traps) && rk.traps.length > 0;
+                            const hasHacks = Array.isArray(rk.hacks) && rk.hacks.length > 0;
+
+                            console.log(`[fetchNodeConfig] Member ${m.id} has traps: ${hasTraps}, hacks: ${hasHacks}`);
+
+                            if (hasTraps || hasHacks) {
+                                if (!aggregatedRidingKnowledge) {
+                                    aggregatedRidingKnowledge = { traps: [], hacks: [] };
+                                }
+                                if (hasTraps) {
+                                    aggregatedRidingKnowledge.traps = [
+                                        ...(aggregatedRidingKnowledge.traps || []),
+                                        ...rk.traps
+                                    ];
+                                }
+                                if (hasHacks) {
+                                    aggregatedRidingKnowledge.hacks = [
+                                        ...(aggregatedRidingKnowledge.hacks || []),
+                                        ...rk.hacks
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('[fetchNodeConfig] Failed to fetch hub member riding_knowledge:', err);
+        }
+    }
+
+    // Attach aggregated riding_knowledge to finalNode for downstream use
+    if (aggregatedRidingKnowledge && finalNode) {
+        finalNode.riding_knowledge = aggregatedRidingKnowledge;
+        console.log('[fetchNodeConfig] Aggregated riding_knowledge for', nodeId, ':', aggregatedRidingKnowledge);
+    }
 
     // --- REAL-TIME STATUS INJECTION (Database First) ---
 

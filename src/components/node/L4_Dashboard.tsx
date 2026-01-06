@@ -1,10 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRightLeft, ChevronDown, ChevronRight, Clock, Loader2, Map as MapIcon, Settings, Sparkles, Ticket } from 'lucide-react';
+import { AlertTriangle, ArrowRightLeft, ChevronDown, ChevronRight, Clock, Loader2, Map as MapIcon, Settings, Sparkles, Ticket, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StationAutocomplete, type Station } from '@/components/ui/StationAutocomplete';
+import { resolveHubStationMembers } from '@/lib/constants/stationLines';
 import type { OdptRailwayFare, OdptStationTimetable } from '@/lib/odpt/types';
+import type { L4Knowledge } from '@/lib/types/stationStandard';
 import {
     buildAmenitySuggestion,
     buildL4DefaultQuestionTemplates,
@@ -36,6 +38,7 @@ import type { MatchedStrategyCard, UserPreferences, RecommendRequest } from '@/t
 interface L4DashboardProps {
     currentNodeId: string;
     locale?: SupportedLocale;
+    l4Knowledge?: L4Knowledge;
 }
 
 class HttpError extends Error {
@@ -49,9 +52,12 @@ class HttpError extends Error {
     }
 }
 
-export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4DashboardProps) {
+export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowledge }: L4DashboardProps) {
     const stationId = useMemo(() => normalizeOdptStationId(String(currentNodeId || '').trim()), [currentNodeId]);
     const uiLocale = locale;
+
+    // Debug: Log L4 Knowledge data
+
 
     const [recommendations, setRecommendations] = useState<MatchedStrategyCard[]>([]);
     const [isRecommending, setIsRecommending] = useState(false);
@@ -106,7 +112,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>('');
 
-    type L4Task = 'route' | 'fare' | 'timetable' | 'all';
+    type L4Task = 'route' | 'knowledge' | 'timetable';
     const [task, setTask] = useState<L4Task>('route');
     const [isTemplatesOpen, setIsTemplatesOpen] = useState(false); // Default closed in new design
     const [templateCategory, setTemplateCategory] = useState<L4TemplateCategory>('basic');
@@ -233,7 +239,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
     }, [stationId, uiLocale, selectedOrigin]);
 
     const visibleTemplates = useMemo(() => {
-        return templates.filter(t => t.category === templateCategory && (task === 'all' || t.kind === task));
+        return templates.filter(t => t.category === templateCategory && (t.kind === task));
     }, [templates, templateCategory, task]);
 
     const getStationDisplayName = useCallback((s: Station) => {
@@ -335,7 +341,8 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
         if (!originOk) return false;
 
         if (task === 'timetable') return true;
-        if (task === 'route' || task === 'fare') return Boolean(selectedDestination?.id);
+        if (task === 'route') return Boolean(selectedDestination?.id);
+        if (task === 'knowledge') return true;
         return true;
     }, [isLoading, selectedOrigin, selectedDestination, stationId, task]);
 
@@ -344,9 +351,8 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
         const destId = selectedDestination?.id ? normalizeOdptStationId(selectedDestination.id) : '';
         const note = String(question || '').trim();
 
-        if (task === 'fare') return `fare from: ${originId} to: ${destId}${note ? `\n${note}` : ''}`;
         if (task === 'timetable') return `timetable station: ${originId}${note ? `\n${note}` : ''}`;
-        if (task === 'route') return `route from: ${originId} to: ${destId}${note ? `\n${note}` : ''}`;
+        if (task === 'knowledge') return `knowledge station: ${originId}${note ? `\n${note}` : ''}`;
         return `route from: ${originId} to: ${destId}${note ? `\n${note}` : ''}`;
     }, [question, selectedDestination, selectedOrigin, stationId, task]);
 
@@ -407,6 +413,58 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
 
     const visibleChips = demandChips.slice(0, 3);
     const hiddenChips = demandChips.slice(3);
+
+    // [New] Fetch Transfer Knowledge
+    const [knowledgeData, setKnowledgeData] = useState<any>(null);
+    useEffect(() => {
+        // [Existing Knowledge Effect]
+        if (task === 'knowledge' && stationId) {
+            // Placeholder: currently generic info is hardcoded in render
+        }
+    }, [task, stationId]);
+
+    // [New] Fetch Timetable when switching to tab
+    useEffect(() => {
+        if (task === 'timetable' && stationId) {
+            if (timetableData) return; // Already have data
+
+            setIsLoading(true);
+
+            // Use resolveHubStationMembers to get all physical stations (like in askWithText)
+            const allMembers = resolveHubStationMembers(stationId);
+            // Prioritize Metro/Toei (ODPT has better data) over JR-East
+            const prioritized = [
+                ...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')),
+                ...allMembers.filter(id => id.includes('JR-East'))
+            ];
+            const uniqueIds = [...new Set(prioritized)];
+
+
+
+            // Fetch timetables from all member stations
+            Promise.all(
+                uniqueIds.map(memberId =>
+                    fetchJsonCached<OdptStationTimetable[]>(
+                        `/api/odpt/timetable?station=${encodeURIComponent(memberId)}&raw=1`,
+                        { ttlMs: 5 * 60_000 }
+                    ).catch(() => [] as OdptStationTimetable[])
+                )
+            )
+                .then(results => {
+                    const allTimetables = results.flat();
+
+                    if (allTimetables.length > 0) {
+                        const filtered = filterTimetablesForStation(allTimetables, stationId);
+                        setTimetableData(filtered.length > 0 ? filtered : allTimetables);
+                    } else {
+                        setTimetableData([]);
+                    }
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
+        }
+    }, [task, stationId]);
 
     const askWithText = async (rawText: string) => {
         const text = String(rawText || '').trim();
@@ -583,43 +641,58 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
             }
 
             if (kind === 'timetable') {
-                const url = `/api/odpt/timetable?station=${encodeURIComponent(currentOriginId)}&raw=1`;
-                try {
-                    const json = await fetchJsonCached<OdptStationTimetable[]>(url, { ttlMs: 30_000, signal: controller.signal });
-                    if (mySeq !== requestSeqRef.current) return;
+                // Resolve hub station to all physical members for comprehensive timetable
+                const allMembers = resolveHubStationMembers(currentOriginId);
+                // Prioritize Metro/Toei (ODPT has better data) over JR-East
+                const prioritized = [
+                    ...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')),
+                    ...allMembers.filter(id => id.includes('JR-East'))
+                ];
+                const uniqueIds = [...new Set(prioritized)];
 
-                    const filtered = filterTimetablesForStation(json, currentOriginId);
-                    setTimetableData(filtered);
+                let allTimetables: OdptStationTimetable[] = [];
+                let fetchedAny = false;
+
+                // Query each member station for timetables
+                for (const memberId of uniqueIds) {
+                    const url = `/api/odpt/timetable?station=${encodeURIComponent(memberId)}&raw=1`;
+                    try {
+                        const json = await fetchJsonCached<OdptStationTimetable[]>(url, { ttlMs: 30_000, signal: controller.signal });
+                        if (mySeq !== requestSeqRef.current) return;
+                        if (json && json.length > 0) {
+                            allTimetables = [...allTimetables, ...json];
+                            fetchedAny = true;
+                        }
+                    } catch (e: any) {
+                        if (e?.name === 'AbortError') return;
+                        // Continue to next station if one fails
+                        console.warn(`[Timetable] Failed for ${memberId}:`, e);
+                    }
+                }
+
+                if (fetchedAny) {
+                    const filtered = filterTimetablesForStation(allTimetables, currentOriginId);
+                    setTimetableData(filtered.length > 0 ? filtered : allTimetables);
                     setSuggestion(buildTimetableSuggestion({ stationId: currentOriginId, demand, verified: true }));
                     return;
-                } catch (e: any) {
-                    if (e?.name === 'AbortError') return;
-                    const detail = e instanceof HttpError ? e.body : String(e?.message || e || '');
-                    // Check for authentication errors
-                    if (detail.includes('403') || detail.includes('Invalid acl:consumerKey')) {
-                        setError(uiLocale.startsWith('zh')
-                            ? '🔧 系統維護中：時刻表數據暫時無法使用，請稍後再試。'
-                            : uiLocale === 'ja'
-                                ? '🔧 システムメンテナンス中：時刻表データは一時的に利用できません。'
-                                : '🔧 Timetable data temporarily unavailable.');
-                    } else {
-                        setError(detail || 'Timetable request failed.');
-                    }
-                    setSuggestion(buildTimetableSuggestion({ stationId: currentOriginId, demand, verified: false }));
-                    return;
                 }
+
+                // If no data fetched at all, show empty state (will trigger JR link if applicable)
+                setTimetableData([]);
+                setSuggestion(buildTimetableSuggestion({ stationId: currentOriginId, demand, verified: false }));
+                return;
             }
 
             if (kind === 'route') {
                 let destinationStationId = (selectedDestination?.id ? normalizeOdptStationId(selectedDestination.id) : '');
-                
+
                 if (!destinationStationId && intent.toStationId) {
                     destinationStationId = normalizeOdptStationId(intent.toStationId);
                 }
 
                 if (!destinationStationId) {
-                     const ids = extractOdptStationIds(text).map(normalizeOdptStationId);
-                     destinationStationId = ids.find(id => id !== currentOriginId) || '';
+                    const ids = extractOdptStationIds(text).map(normalizeOdptStationId);
+                    destinationStationId = ids.find(id => id !== currentOriginId) || '';
                 }
 
                 if (!destinationStationId) {
@@ -727,7 +800,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                     options: baseOptions,
                     text: text
                 });
-                
+
                 // Initial suggestion build (useEffect will handle updates, but we set it here for immediate feedback)
                 setSuggestion(buildRouteSuggestion({
                     originStationId: currentOriginId,
@@ -737,7 +810,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                     options: baseOptions,
                     text: text
                 }));
-                
+
                 return;
             }
         } catch (e: any) {
@@ -790,10 +863,10 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                             {/* Station Inputs */}
                             <div className="relative">
                                 {/* Connector Line */}
-                                {task !== 'timetable' && (
+                                {task === 'route' && (
                                     <div className="absolute left-3.5 top-8 bottom-8 w-0.5 bg-slate-100 rounded-full" />
                                 )}
-                                
+
                                 <div className="space-y-4">
                                     <div className="relative">
                                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 flex justify-center z-10">
@@ -820,8 +893,8 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                                         />
                                     </div>
 
-                                    {task !== 'timetable' && (
-                                        <motion.div 
+                                    {task === 'route' && (
+                                        <motion.div
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
@@ -850,8 +923,8 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                                 </div>
 
                                 {/* Swap Button */}
-                                {task !== 'timetable' && (
-                                    <button 
+                                {task === 'route' && (
+                                    <button
                                         onClick={swapStations}
                                         className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors z-20"
                                     >
@@ -867,7 +940,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                                         {uiLocale.startsWith('zh') ? '偏好設定' : uiLocale === 'ja' ? '設定' : 'Preferences'}
                                     </label>
                                     {hiddenChips.length > 0 && (
-                                        <button 
+                                        <button
                                             onClick={() => setIsDemandOpen(!isDemandOpen)}
                                             className="text-[10px] font-bold text-indigo-600 flex items-center gap-1 hover:underline"
                                         >
@@ -876,7 +949,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                                         </button>
                                     )}
                                 </div>
-                                
+
                                 <div className="grid grid-cols-3 gap-2">
                                     {visibleChips.map(chip => (
                                         <SimplifiedDemandChip
@@ -891,7 +964,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
 
                                 <AnimatePresence>
                                     {isDemandOpen && hiddenChips.length > 0 && (
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
@@ -921,8 +994,8 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                             >
                                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
                                 <span className="text-sm">
-                                    {uiLocale.startsWith('zh') 
-                                        ? '開始規劃' 
+                                    {uiLocale.startsWith('zh')
+                                        ? '開始規劃'
                                         : uiLocale === 'ja' ? '検索する' : 'Plan Trip'}
                                 </span>
                             </button>
@@ -978,10 +1051,111 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                             </motion.div>
                         )}
                     </AnimatePresence>
-                    
+
                     {/* BambiGO Strategy Recommendations (Proactive) */}
-                    {!isLoading && recommendations.length > 0 && (
-                        <StrategyCards cards={recommendations} locale={uiLocale} />
+                    {!isLoading && recommendations.length > 0 && task === 'knowledge' && (
+                        <div className="mb-6">
+                            <StrategyCards cards={recommendations} locale={uiLocale} />
+                        </div>
+                    )}
+
+                    {/* Knowledge / Ticket Info (Fallback or Main) */}
+                    {task === 'knowledge' && !isLoading && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4"
+                        >
+                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <Ticket className="text-indigo-500" size={20} />
+                                {uiLocale.startsWith('zh') ? '乘車與票務指南' : uiLocale === 'ja' ? '乗車・切符ガイド' : 'Riding & Tickets'}
+                            </h3>
+
+                            {/* Dynamic L4 Knowledge */}
+                            {l4Knowledge && (
+                                <div className="space-y-4">
+                                    {l4Knowledge.traps?.length > 0 && (
+                                        <div className="space-y-2">
+                                            <div className="text-xs font-black text-orange-400 uppercase tracking-widest px-1">
+                                                {uiLocale.startsWith('zh') ? '⚠️ 注意事項' : 'Caution'}
+                                            </div>
+                                            {l4Knowledge.traps.map((item, i) => (
+                                                <div key={i} className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex gap-3">
+                                                    <div className="text-2xl">{item.icon}</div>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-orange-900 text-sm">{item.title}</div>
+                                                        <div className="text-xs text-orange-800 mt-1 leading-relaxed">{item.description}</div>
+                                                        {item.advice && (
+                                                            <div className="mt-2 p-2 bg-white/60 rounded-lg text-xs font-bold text-orange-700 flex gap-2">
+                                                                <span>💡</span>
+                                                                <span>{item.advice}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {l4Knowledge.hacks?.length > 0 && (
+                                        <div className="space-y-2">
+                                            <div className="text-xs font-black text-emerald-500 uppercase tracking-widest px-1">
+                                                {uiLocale.startsWith('zh') ? '✨ 達人密技' : 'Pro Tips'}
+                                            </div>
+                                            {l4Knowledge.hacks.map((item, i) => (
+                                                <div key={i} className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex gap-3">
+                                                    <div className="text-2xl">{item.icon}</div>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-emerald-900 text-sm">{item.title}</div>
+                                                        <div className="text-xs text-emerald-800 mt-1 leading-relaxed">{item.description}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <h4 className="font-bold text-slate-700 mb-2 text-sm">
+                                    {uiLocale.startsWith('zh') ? '交通IC卡 (Suica/PASMO)' : 'IC Cards (Suica/PASMO)'}
+                                </h4>
+                                <p className="text-xs text-slate-600 leading-relaxed">
+                                    {uiLocale.startsWith('zh')
+                                        ? '東京絕大多數車站皆可使用 Suica、PASMO 或 ICOCA 等 10 種全日本通用的交通 IC 卡。進出站時請輕觸閘機感應區。'
+                                        : 'Most stations in Tokyo accept Suica, PASMO, and other major IC cards. Touch the card to the reader at the ticket gate.'}
+                                </p>
+                            </div>
+
+                            <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                                <h4 className="font-bold text-indigo-900 mb-2 text-sm">
+                                    {uiLocale.startsWith('zh') ? '地鐵通票 (Tokyo Subway Ticket)' : 'Tokyo Subway Ticket'}
+                                </h4>
+                                <p className="text-xs text-indigo-800 leading-relaxed">
+                                    {uiLocale.startsWith('zh')
+                                        ? '外國遊客專用的 24/48/72 小時券，可無限次搭乘東京 Metro 地鐵與都營地鐵全線。'
+                                        : 'Unlimited rides on all Tokyo Metro and Toei Subway lines for 24, 48, or 72 hours. Recommended for tourists.'}
+                                </p>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Timetable Tab Content */}
+                    {task === 'timetable' && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="space-y-4"
+                        >
+                            {/* Show loading state explicitly if fetching */}
+                            {isLoading && !timetableData ? (
+                                <div className="p-8 flex justify-center">
+                                    <Loader2 className="animate-spin text-slate-400" />
+                                </div>
+                            ) : (
+                                <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} />
+                            )}
+                        </motion.div>
                     )}
 
                     {/* Results Area */}
@@ -999,18 +1173,18 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                                     <div className="p-4 rounded-3xl bg-indigo-50 border border-indigo-100">
                                         <div className="flex items-center gap-2 mb-3 text-indigo-900 font-black">
                                             <Sparkles size={16} />
-                                            {uiLocale === 'ja' && activeDemo.title_ja ? activeDemo.title_ja : 
-                                             uiLocale === 'en' && activeDemo.title_en ? activeDemo.title_en : 
-                                             activeDemo.title}
+                                            {uiLocale === 'ja' && activeDemo.title_ja ? activeDemo.title_ja :
+                                                uiLocale === 'en' && activeDemo.title_en ? activeDemo.title_en :
+                                                    activeDemo.title}
                                         </div>
                                         <div className="space-y-4">
                                             {activeDemo.steps.slice(0, demoStepIndex + 1).map((step, i) => (
                                                 <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-bottom-2">
                                                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-lg shadow-sm">🤖</div>
                                                     <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm font-bold text-slate-700">
-                                                        {uiLocale === 'ja' && step.agent_ja ? step.agent_ja : 
-                                                         uiLocale === 'en' && step.agent_en ? step.agent_en : 
-                                                         step.agent}
+                                                        {uiLocale === 'ja' && step.agent_ja ? step.agent_ja :
+                                                            uiLocale === 'en' && step.agent_en ? step.agent_en :
+                                                                step.agent}
                                                     </div>
                                                 </div>
                                             ))}
@@ -1036,7 +1210,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                                             {uiLocale.startsWith('zh') ? '詳細數據' : 'Details'}
                                         </div>
                                         {activeKind === 'fare' && <FareModule fares={fareData} destinationId={selectedDestination?.id} />}
-                                        {activeKind === 'timetable' && <TimetableModule timetables={timetableData} />}
+                                        {activeKind === 'timetable' && <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} />}
                                     </div>
                                 )}
 
@@ -1070,9 +1244,9 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
 
 function TabSelector({ activeTask, onSelect, locale }: { activeTask: string; onSelect: (t: any) => void; locale: string }) {
     const tabs = [
-        { id: 'route', label: locale.startsWith('zh') ? '路線' : 'Route', icon: MapIcon },
-        { id: 'fare', label: locale.startsWith('zh') ? '票價' : 'Fare', icon: Ticket },
-        { id: 'timetable', label: locale.startsWith('zh') ? '時刻' : 'Time', icon: Clock },
+        { id: 'route', label: locale.startsWith('zh') ? '路線' : locale === 'ja' ? 'ルート' : 'Route', icon: MapIcon },
+        { id: 'knowledge', label: locale.startsWith('zh') ? '知識' : locale === 'ja' ? '知識' : 'Knowledge', icon: Ticket },
+        { id: 'timetable', label: locale.startsWith('zh') ? '時刻' : locale === 'ja' ? '時刻表' : 'Time', icon: Clock },
     ];
 
     return (
@@ -1084,11 +1258,10 @@ function TabSelector({ activeTask, onSelect, locale }: { activeTask: string; onS
                     <button
                         key={tab.id}
                         onClick={() => onSelect(tab.id)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black transition-all ${
-                            isActive 
-                            ? 'bg-white text-indigo-600 shadow-sm scale-[1.02]' 
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black transition-all ${isActive
+                            ? 'bg-white text-indigo-600 shadow-sm scale-[1.02]'
                             : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                            }`}
                     >
                         <Icon size={14} className={isActive ? 'stroke-[3px]' : ''} />
                         {tab.label}
@@ -1108,11 +1281,10 @@ function SimplifiedDemandChip({ icon, label, active, onClick }: {
     return (
         <button
             onClick={onClick}
-            className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all ${
-                active
+            className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all ${active
                 ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
                 : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-white'
-            }`}
+                }`}
         >
             <span className="text-base">{icon}</span>
             <span className="text-xs font-bold">{label}</span>
@@ -1153,31 +1325,82 @@ function FareModule({ fares, destinationId }: { fares: OdptRailwayFare[] | null;
     );
 }
 
-function TimetableModule({ timetables }: { timetables: OdptStationTimetable[] | null }) {
+function TimetableModule({ timetables, stationId, locale }: { timetables: OdptStationTimetable[] | null; stationId: string; locale: string }) {
     const now = new Date();
     const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
     const nowHHMM = `${String(jstNow.getHours()).padStart(2, '0')}:${String(jstNow.getMinutes()).padStart(2, '0')}`;
     const items = (timetables || []);
+    // Group by direction
     const directions = Array.from(new Set(items.map(t => t['odpt:railDirection']).filter(Boolean)));
 
+    if (!items.length) {
+        const isJR = stationId?.includes('JR-East');
+        return (
+            <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-3xl border border-dashed border-slate-200 text-center space-y-4">
+                <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-2xl">
+                    🕰️
+                </div>
+                <div>
+                    <p className="text-sm font-bold text-slate-600">
+                        {locale.startsWith('zh') ? '暫無時刻表資料' : locale === 'ja' ? '時刻表データがありません' : 'No timetable data available'}
+                    </p>
+                    {isJR && (
+                        <p className="text-xs text-slate-400 mt-1">
+                            {locale.startsWith('zh') ? 'JR 東日本車站請參閱官方網站。' : locale === 'ja' ? 'JR東日本の駅は公式サイトをご覧ください。' : 'Please check JR East official website.'}
+                        </p>
+                    )}
+                </div>
+                {isJR && (
+                    <a
+                        href="https://www.jreast.co.jp/estation/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-xl hover:bg-green-700 transition-colors shadow-sm flex items-center gap-2"
+                    >
+                        <span>JR East Timetable</span>
+                        <ExternalLink size={12} />
+                    </a>
+                )}
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-4">
-            {directions.length === 0 && <div className="text-slate-400 text-sm font-bold">No data.</div>}
+        <div className="space-y-6">
             {directions.map((dir) => {
                 const tables = items.filter(t => t['odpt:railDirection'] === dir);
+                // Try to get a human readable direction name
+                // Usually railDirection is like "odpt.RailDirection:TokyoMetro.Marunouchi.Ogikubo"
+                const dirName = String(dir).split('.').pop() || 'Unknown';
+
                 return (
-                    <div key={dir} className="space-y-2">
-                        <div className="text-xs font-black text-slate-500 uppercase">To {String(dir).split('.').pop()}</div>
-                        <div className="grid grid-cols-1 gap-2">
+                    <div key={dir} className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                        <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex justify-between items-center">
+                            <span className="text-xs font-black text-slate-600 uppercase tracking-wider">To {dirName}</span>
+                            <span className="text-[10px] font-bold text-slate-400">Next Departures</span>
+                        </div>
+                        <div className="p-3 grid grid-cols-1 gap-3">
                             {tables.map(table => {
-                                const objs = (table['odpt:stationTimetableObject'] || []).map(o => String(o['odpt:departureTime'] || ''));
-                                const next = objs.filter(t => t >= nowHHMM).slice(0, 5);
+                                const objs = (table['odpt:stationTimetableObject'] || []).map(o => ({
+                                    time: String(o['odpt:departureTime'] || ''),
+                                    dest: String(o['odpt:destinationStation'] || '').split('.').pop(),
+                                    isExpress: (String(o['odpt:trainType'] || '').toLowerCase().includes('express'))
+                                }));
+                                // Filter future trains
+                                const next = objs.filter(o => o.time >= nowHHMM).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 8);
+                                const calendar = String(table['odpt:calendar']).split(':').pop();
+
                                 return (
-                                    <div key={table['@id']} className="bg-slate-50 rounded-xl p-3 flex gap-3 items-center">
-                                        <div className="text-xs font-black text-indigo-600 w-12">{String(table['odpt:calendar']).split(':').pop()}</div>
-                                        <div className="flex flex-wrap gap-1">
-                                            {next.map(t => <span key={t} className="px-1.5 py-0.5 bg-white rounded text-xs font-bold text-slate-700 shadow-sm">{t}</span>)}
-                                            {next.length === 0 && <span className="text-slate-400 text-xs">End of service</span>}
+                                    <div key={table['@id']} className="flex flex-col gap-2">
+                                        <div className="text-xs font-bold text-indigo-600 border-b border-indigo-50 pb-1 mb-1">{calendar}</div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {next.map((t, idx) => (
+                                                <div key={`${t.time}-${idx}`} className="flex flex-col items-center p-2 bg-slate-50 rounded-lg min-w-[3rem]">
+                                                    <span className="text-sm font-black text-slate-800">{t.time}</span>
+                                                    {t.dest && <span className="text-[9px] text-slate-400 truncate max-w-[4rem]">{t.dest}</span>}
+                                                </div>
+                                            ))}
+                                            {next.length === 0 && <span className="text-slate-400 text-xs italic">Service ended for today</span>}
                                         </div>
                                     </div>
                                 );
@@ -1193,19 +1416,19 @@ function TimetableModule({ timetables }: { timetables: OdptStationTimetable[] | 
 function SuggestionModule({ suggestion }: { suggestion: L4Suggestion }) {
     return (
         <div className="space-y-3">
-             {suggestion.options.map((opt, i) => (
-                 <div key={i} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
-                     <div className="font-black text-slate-900 mb-2">{opt.label}</div>
-                     <div className="space-y-2">
-                         {opt.steps.map((step, j) => (
-                             <div key={j} className="flex gap-3 text-sm font-bold text-slate-600">
-                                 <div className="w-6 text-center">{step.icon || '•'}</div>
-                                 <div className="flex-1">{step.text}</div>
-                             </div>
-                         ))}
-                     </div>
-                 </div>
-             ))}
+            {suggestion.options.map((opt, i) => (
+                <div key={i} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
+                    <div className="font-black text-slate-900 mb-2">{opt.label}</div>
+                    <div className="space-y-2">
+                        {opt.steps.map((step, j) => (
+                            <div key={j} className="flex gap-3 text-sm font-bold text-slate-600">
+                                <div className="w-6 text-center">{step.icon || '•'}</div>
+                                <div className="flex-1">{step.text}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }

@@ -31,7 +31,7 @@ WHERE id = 'odpt:Station:JR-East.Ueno';
 UPDATE nodes
 SET riding_knowledge = '{
   "traps": [
-    {"icon": "🌀", "title": "東西出口迷宮", "description": "新宿站的 JR 系統，東口與西口在地下不互通（除非走特定通道）。一旦出錯閘門，要繞外圍一大圈才能到對面。", "advice": "出閘門前請確認目標是「東口」還是「西口」。若走錯，建議不走樓，直接走地面層的「大ガード」繞過去。"},
+    {"icon": "🌀", "title": "東西出口迷宮", "description": "新宿站雖已有「東西自由通路」可不出閘往返，但站內層級多、指標複雜，仍很容易走到錯的改札或出口。", "advice": "以「東改札／西改札」為目標走主通路。若要去地面東口或西口，出站前先確認出口名稱（東口/西口/南口/新南口）。"},
     {"icon": "🚇", "title": "大江戶線轉乘地獄", "description": "大江戶線的「新宿站」位於地下七層，距離 JR 改札口極遠。", "advice": "若要轉乘大江戶線，請改去「新宿西口站」而非「新宿站」，兩者其實更近且沒那麼深。"},
     {"icon": "🎫", "title": "南口與新南口", "description": "南口和新南口是不同的出口！南口靠近 JR 線，新南口則是通往「Busta 新宿」巴士轉運站的方向。", "advice": "要去 Busta 新宿，請務必找「新南改札」。"}
   ],
@@ -167,7 +167,7 @@ WHERE id = 'odpt:Station:TokyoMetro.Ginza';
 UPDATE nodes
 SET riding_knowledge = '{
   "traps": [
-    {"icon": "🚇", "title": "淺草站大迷宮", "description": "淺草站有都營淺草線、東京Metro銀座線、東武線三條路線交會，但彼此並非直結。", "advice": "使用「連絡乘車券」可免費出站轉乘，請在售票窗口索取。"},
+    {"icon": "🚇", "title": "淺草站大迷宮", "description": "淺草一帶同名車站很多（銀座線／都營淺草線／東武／TX），站體分散且通路不一，轉乘常需要走改札外通道或地面。", "advice": "把目的地改札口與出口號（例如 A4、1 號出口）一起記下來。遇到需要出站步行時，用 IC 卡通行最省事。"},
     {"icon": "🧳", "title": "電梯陷阱", "description": "淺草站出口雖多，但直通地面的電梯只有一座！", "advice": "攜帶大型行李的旅客，請務必尋找「駒形橋方面」的 A2b 出口或 1 號出口（雷門旁）。"},
     {"icon": "🚧", "title": "四個淺草站混淆", "description": "地鐵銀座線、都營淺草線、東武鐵道、筑波快線都有「淺草站」。", "advice": "筑波快線的淺草站距離其他三站約 600 公尺，請勿安排在此站轉乘 TX。"}
   ],
@@ -246,7 +246,7 @@ SET riding_knowledge = '{
   "hacks": [
     {"icon": "🏪", "title": "中野百老匯", "description": "從北口出站步行約 3 分鐘可達，是東京著名的動漫、模型、收藏品聖地。"},
     {"icon": "🎮", "title": "古玩市場", "description": "中野百老匯內有許多稀有動漫商品和收藏品，是收藏愛好者的天堂。"},
-    {"icon": "🍜", "title": "蘸麵", "description": "附近有著名的蘸麵店「三ツ矢堂」，是東京知名的蘸麵發祥地。"}
+    {"icon": "🍜", "title": "蘸麵", "description": "蘸麵的「元祖」常被認為是東池袋大勝軒（山岸一雄）系譜；中野一帶也有許多拉麵與蘸麵名店，適合排入美食散步。"}
   ],
   "facilities": [
     {"type": "toilet", "location": "南口、北口改札內", "tags": ["Wheelchair"]},
@@ -259,11 +259,11 @@ WHERE id = 'odpt:Station:JR-East.Nakano';
 UPDATE nodes
 SET riding_knowledge = '{
   "traps": [
-    {"icon": "🎯", "title": "四個目黑站", "description": "JR 目黑站、東京Metro 目黑站、都營 目黑站、東急 目黑站是四個不同的車站。", "advice": "這四個車站都在步行範圍內（約 5-10 分鐘），但指標有時不太清楚。"}
+    {"icon": "🎯", "title": "四線同站轉乘", "description": "目黑站同一站體內匯集 JR 山手線、東京Metro南北線、都營三田線、東急目黑線，轉乘方向容易走反。", "advice": "先確認要去的路線與方向（例如南北線＝白金高輪／麻布十番方向），再選擇對應的樓層與月台。"}
   ],
   "hacks": [
     {"icon": "🏪", "title": "目黑川", "description": "從 JR 目黑站步行約 10 分鐘可達目黑川，是東京著名的賞櫻景點。"},
-    {"icon": "🍵", "title": "星巴克臻選", "description": "目黑站附近有日本最大的星巴克臻選旗艦店。"},
+    {"icon": "🍵", "title": "星巴克臻選", "description": "想去「STARBUCKS RESERVE(R) ROASTERY TOKYO」建議改從中目黑一帶前往，步行更順。"},
     {"icon": "🏪", "title": "atre 目黑", "description": "車站直結的購物中心，有超市和餐廳。"}
   ],
   "facilities": [
@@ -282,7 +282,7 @@ SET riding_knowledge = '{
   "hacks": [
     {"icon": "🏪", "title": "目黑川沿岸", "description": "沿著目黑川散步，兩岸有許多精品店、咖啡廳和餐廳。"},
     {"icon": "☕", "title": "咖啡廳激戰區", "description": "中目黑是東京咖啡廳密度最高的地區之一。"},
-    {"icon": "🏪", "title": "蔦屋書店", "description": "中目黑站附近有著名的「蔦屋書店」，被譽為世界最美的書店之一。"}
+    {"icon": "🏪", "title": "代官山散步", "description": "想看蔦屋書店風格街區，可從中目黑沿目黑川散步到代官山一帶，行程很順。"}
   ],
   "facilities": [
     {"type": "toilet", "location": "改札內", "tags": ["Wheelchair", "BabyRoom"]},
@@ -290,7 +290,11 @@ SET riding_knowledge = '{
     {"type": "wifi", "location": "全站", "tags": []}
   ]
 }'
-WHERE id = 'odpt:Station:Tokyu.TokyuTamagawa.Nakameguro';
+WHERE id IN (
+  'odpt:Station:Tokyu.TokyuTamagawa.Nakameguro',
+  'odpt:Station:Tokyu.Toyoko.NakaMeguro',
+  'odpt:Station:TokyoMetro.NakaMeguro'
+);
 
 -- 16. 北千住站（JR）
 UPDATE nodes
@@ -313,7 +317,7 @@ WHERE id = 'odpt:Station:JR-East.KitaSenju';
 UPDATE nodes
 SET riding_knowledge = '{
   "traps": [
-    {"icon": "🔀", "title": "命運的分歧點", "description": "泉岳寺站是淺草線往「西馬込」與「京急線（羽田機場）」的分歧點。", "advice": "若要往五反田、西馬込方向，無論何種列車都可先上車，只需在泉岳寺站下山換乘即可。"}
+    {"icon": "🔀", "title": "直通系統分歧", "description": "泉岳寺是都營淺草線與京急線的直通關鍵點，列車去向（羽田／成田／西馬込等）很多，目的地看錯很常見。", "advice": "上車前看清楚車頭顯示與站內案內：目的地與種別比路線名更重要。若顯示「泉岳寺止まり」或目的地不符，務必在泉岳寺改乘。"}
   ],
   "hacks": [
     {"icon": "⛩️", "title": "泉岳寺", "description": "車站附近的「泉岳寺」是著名的佛寺。"},
@@ -368,7 +372,7 @@ UPDATE nodes
 SET riding_knowledge = '{
   "traps": [
     {"icon": "🗼", "title": "晴空塔人潮", "description": "押上站是前往晴空塔的主要車站，假日與連假期間人潮非常洶湧。", "advice": "若要前往晴空塔，建議平日上午前往或預先購買晴空塔門票。"},
-    {"icon": "🔀", "title": "京急線分歧點", "description": "押上站是都營淺草線和京急線的分歧點。", "advice": "前往機場的旅客，請確認搭乘的是「京急機場線」或「機場快特」。"}
+    {"icon": "🔀", "title": "直通列車看錯", "description": "押上是京成押上線與都營淺草線的接點，且與京急／京成（含成田方面）直通列車很多，行先容易看錯。", "advice": "要去羽田或成田，先確認車頭顯示的目的地與種別，再上車；不確定就先搭到大站（例如押上→泉岳寺／日本橋）再換乘。"}
   ],
   "hacks": [
     {"icon": "✈️", "title": "直通成田", "description": "此站直通京成線往成田機場。"},
