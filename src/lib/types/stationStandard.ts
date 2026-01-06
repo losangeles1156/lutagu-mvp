@@ -97,6 +97,25 @@ export interface ActionCard {
     icon?: string;
 }
 
+export interface L4Item {
+    icon: string;
+    title: string;
+    description: string;
+    advice?: string;
+}
+
+export interface L4FacilityHighlight {
+    type: string;
+    location: string;
+    tags: string[];
+}
+
+export interface L4Knowledge {
+    traps: L4Item[];
+    hacks: L4Item[];
+    facilities: L4FacilityHighlight[];
+}
+
 // --- ROOT PROFILE ---
 export interface StationUIProfile {
     // Identity
@@ -130,4 +149,5 @@ export interface StationUIProfile {
 
     // L4: Strategy
     l4_cards: ActionCard[];
+    l4_knowledge?: L4Knowledge;
 }
