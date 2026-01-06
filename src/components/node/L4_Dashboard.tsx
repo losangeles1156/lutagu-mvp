@@ -122,6 +122,20 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
         text: string;
     } | null>(null);
 
+    // POI 資訊和專家建議
+    const [poiInfo, setPoiInfo] = useState<{
+        name: string;
+        category: string;
+        recommendedStation: string;
+        walkMinutes: number;
+        advice?: string;
+    } | null>(null);
+    const [expertAdvice, setExpertAdvice] = useState<Array<{
+        icon: string;
+        text: string;
+        priority: number;
+    }>>([]);
+
     const [activeDemo, setActiveDemo] = useState<DemoScenario | null>(null);
     const [demoStepIndex, setDemoStepIndex] = useState(0);
 
@@ -422,6 +436,8 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
         setFareData(null);
         setTimetableData(null);
         setSuggestion(null);
+        setPoiInfo(null);
+        setExpertAdvice([]);
 
         // Check for Demo Scenario
         const demo = findDemoScenario(text);
@@ -656,7 +672,16 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                     return;
                 }
 
-                const url = `/api/odpt/route?from=${encodeURIComponent(currentOriginId)}&to=${encodeURIComponent(destinationStationId)}&locale=${uiLocale}`;
+                // 建構用戶需求參數
+                const userNeeds: string[] = [];
+                if (demand.comfort) userNeeds.push('comfort');
+                if (demand.rushing) userNeeds.push('rushing');
+                if (demand.largeLuggage) userNeeds.push('luggage');
+                if (demand.wheelchair) userNeeds.push('wheelchair');
+                if (demand.stroller) userNeeds.push('stroller');
+
+                const needsParam = userNeeds.length > 0 ? `&needs=${userNeeds.join(',')}` : '';
+                const url = `/api/odpt/route?from=${encodeURIComponent(currentOriginId)}&to=${encodeURIComponent(destinationStationId)}&locale=${uiLocale}${needsParam}`;
                 let json: any;
                 try {
                     json = await fetchJsonCached<any>(url, { ttlMs: 5 * 60_000, signal: controller.signal });
@@ -684,6 +709,18 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                 }
 
                 const apiRoutes = json.routes || [];
+
+                // 儲存 POI 資訊和專家建議
+                if (json.poiInfo) {
+                    setPoiInfo(json.poiInfo);
+                } else {
+                    setPoiInfo(null);
+                }
+                if (json.expertAdvice && json.expertAdvice.length > 0) {
+                    setExpertAdvice(json.expertAdvice);
+                } else {
+                    setExpertAdvice([]);
+                }
 
                 // Check for API-level errors
                 if (json.error && (json.error.includes('403') || json.error.includes('Invalid'))) {
@@ -1037,6 +1074,42 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW' }: L4Dash
                                         </div>
                                         {activeKind === 'fare' && <FareModule fares={fareData} destinationId={selectedDestination?.id} />}
                                         {activeKind === 'timetable' && <TimetableModule timetables={timetableData} />}
+                                    </div>
+                                )}
+
+                                {/* POI 資訊和專家建議 */}
+                                {(poiInfo || expertAdvice.length > 0) && activeKind === 'route' && (
+                                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-5 border border-amber-100 shadow-sm">
+                                        {poiInfo && (
+                                            <div className="flex items-start gap-3 mb-4">
+                                                <div className="p-2 bg-amber-100 rounded-full text-amber-600 text-lg">
+                                                    📍
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-black text-amber-900">{poiInfo.name}</div>
+                                                    <div className="text-xs text-amber-700 mt-1">
+                                                        {uiLocale.startsWith('zh')
+                                                            ? `建議車站：${poiInfo.recommendedStation}（步行 ${poiInfo.walkMinutes} 分鐘）`
+                                                            : uiLocale === 'ja'
+                                                                ? `推奨駅：${poiInfo.recommendedStation}（徒歩 ${poiInfo.walkMinutes} 分）`
+                                                                : `Recommended: ${poiInfo.recommendedStation} (${poiInfo.walkMinutes} min walk)`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {expertAdvice.length > 0 && (
+                                            <div className="space-y-2">
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-amber-600">
+                                                    {uiLocale.startsWith('zh') ? '交通專家建議' : uiLocale === 'ja' ? '交通エキスパートのアドバイス' : 'Expert Tips'}
+                                                </div>
+                                                {expertAdvice.map((advice, idx) => (
+                                                    <div key={idx} className="flex items-start gap-2 bg-white/60 rounded-xl p-3">
+                                                        <span className="text-base">{advice.icon}</span>
+                                                        <span className="text-sm font-bold text-amber-900">{advice.text}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
