@@ -1,0 +1,21 @@
+[
+  {
+    "issue_id": "UENO_STATION_MISPLACED_20260107",
+    "title": "上野站位置偏移與節點遺失問題",
+    "description": "用戶回饋上野站（Ueno Station）在某些縮放級別下顯示在錯誤位置或完全消失。經查為 Supabase RPC (nearby_nodes_v2) 回傳資料不完整，且前端坐標解析邏輯對某些 ID 格式不相容導致。",
+    "environment": "Production / Staging / Local-dev",
+    "occurred_at": "2026-01-06T00:00:00.000Z",
+    "operation_steps": "1. 縮放地圖至上野站區域\n2. 觀察站點圖示位置\n3. 切換不同路線過濾器",
+    "error_messages": [
+      "Viewport API returned empty nodes for Ueno bounding box",
+      "Station ID mismatch: odpt.Station:JR-East.Ueno vs odpt:Station:JR-East.Ueno"
+    ],
+    "temporary_solution": "在 /api/nodes/viewport 中實作 seed node 補償機制，確保核心樞紐站點（如上野、東京等）在 RPC 失效時仍能正確注入地圖。",
+    "root_cause_analysis": "1. Supabase 內的 nodes 資料表資料不完整或 RPC 篩選邏輯過於嚴格。\n2. 坐標解析邏輯（geoUtils.ts）在處理經緯度順序時存在潛在歧義。\n3. 不同來源的 Station ID 格式（點號 vs 冒號）導致匹配失效。",
+    "preventive_measures": "1. 建立 scripts/check_ueno_viewport.ts 定期檢查腳本。\n2. 強化 ID 正規化邏輯，統一使用 getStationIdVariants。\n3. 在 API 層增加關鍵站點的強制補償邏輯。",
+    "status": "resolved",
+    "resolved_at": "2026-01-06T13:30:00.000Z",
+    "created_at": "2026-01-06T13:30:00.000Z",
+    "updated_at": "2026-01-06T13:30:00.000Z"
+  }
+]

@@ -1,10 +1,12 @@
 
 import { STATION_WISDOM, KNOWLEDGE_BASE } from '@/data/stationWisdom';
 import { supabaseAdmin } from '@/lib/supabase';
+import { buildStationIdSearchCandidates } from '@/lib/api/nodes';
 import { WeatherTool, TrainStatusTool, FareTool, TimetableTool } from './tools/standardTools';
 import { odptClient } from '@/lib/odpt/client';
 import { getJSTTime } from '@/lib/utils/timeUtils';
 import { findSimpleRoutes, RailwayTopology, normalizeOdptStationId } from '@/lib/l4/assistantEngine';
+import { NavigationService } from '@/lib/navigation/NavigationService';
 
 // Mistral Tool Schema Types
 export interface MistralToolSchema {
@@ -91,6 +93,46 @@ export const AGENT_TOOLS: MistralToolSchema[] = [
                     toStation: { type: 'string', description: 'Destination station ODPT ID' }
                 },
                 required: ['fromStation', 'toStation']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_navigation_graph',
+            description: 'Get pedestrian navigation graph (nodes & edges) near coordinates. Use for barrier-free routing, elevator-only paths, or station indoor navigation.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    lat: { type: 'number', description: 'Latitude' },
+                    lon: { type: 'number', description: 'Longitude' },
+                    radius: { type: 'number', description: 'Search radius in meters (default 500)' },
+                    userProfile: { type: 'string', enum: ['general', 'wheelchair', 'stroller'], description: 'Filter logic by user profile' },
+                    weather: { type: 'string', enum: ['clear', 'rain', 'snow'], description: 'Weather condition' }
+                },
+                required: ['lat', 'lon']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_pedestrian_route',
+            description: 'Compute a pedestrian route between two nodes or coordinates. Returns ordered nodes and edges for map rendering.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    startNodeId: { type: 'string', description: 'Start pedestrian node_id' },
+                    endNodeId: { type: 'string', description: 'End pedestrian node_id' },
+                    startLat: { type: 'number', description: 'Start latitude (if node_id unknown)' },
+                    startLon: { type: 'number', description: 'Start longitude (if node_id unknown)' },
+                    endLat: { type: 'number', description: 'End latitude (if node_id unknown)' },
+                    endLon: { type: 'number', description: 'End longitude (if node_id unknown)' },
+                    userProfile: { type: 'string', enum: ['general', 'wheelchair', 'stroller'], description: 'Routing preferences by user profile' },
+                    weather: { type: 'string', enum: ['clear', 'rain', 'snow'], description: 'Weather condition' },
+                    searchRadiusMeters: { type: 'number', description: 'Graph search radius in meters (default 700)' }
+                },
+                required: []
             }
         }
     },
@@ -279,10 +321,102 @@ export const TOOL_HANDLERS = {
 
         return summary.trim();
     },
+    get_navigation_graph: async (params: { lat: number; lon: number; radius?: number; userProfile?: string; weather?: string }, context: any) => {
+        const radius = params.radius || 500;
+        const userProfile = params.userProfile || context.userProfile || 'general';
+        const weather = params.weather || 'clear';
+
+        const result = await NavigationService.getPedestrianGraph(params.lat, params.lon, radius, userProfile, weather);
+        return result;
+    },
+    get_pedestrian_route: async (params: {
+        startNodeId?: string;
+        endNodeId?: string;
+        startLat?: number;
+        startLon?: number;
+        endLat?: number;
+        endLon?: number;
+        userProfile?: string;
+        weather?: string;
+        searchRadiusMeters?: number;
+    }, context: any) => {
+        const userProfile = params.userProfile || context.userProfile || 'general';
+        const weather = params.weather || 'clear';
+
+        const result = await NavigationService.getPedestrianRoute({
+            startNodeId: params.startNodeId,
+            endNodeId: params.endNodeId,
+            startLat: params.startLat,
+            startLon: params.startLon,
+            endLat: params.endLat,
+            endLon: params.endLon,
+            userProfile,
+            weather,
+            searchRadiusMeters: params.searchRadiusMeters,
+        });
+        return result;
+    },
     retrieve_station_knowledge: async (params: { stationId: string, query?: string }, context: any) => {
         let summary = '';
         const locale = context.locale || 'zh-TW';
-        const wisdom = (STATION_WISDOM as any)[params.stationId];
+
+        const candidateStationIds = buildStationIdSearchCandidates(params.stationId);
+
+        try {
+            const { data } = await supabaseAdmin
+                .from('nodes')
+                .select('id, riding_knowledge')
+                .in('id', candidateStationIds);
+
+            const rows = (data || []) as any[];
+            const score = (rk: any) => {
+                if (!rk || typeof rk !== 'object') return 0;
+                const traps = Array.isArray(rk.traps) ? rk.traps.length : 0;
+                const hacks = Array.isArray(rk.hacks) ? rk.hacks.length : 0;
+                return traps * 10 + hacks;
+            };
+
+            const best = rows
+                .filter(r => score(r?.riding_knowledge) > 0)
+                .sort((a, b) => {
+                    const d = score(b.riding_knowledge) - score(a.riding_knowledge);
+                    if (d !== 0) return d;
+                    if (a.id === params.stationId) return -1;
+                    if (b.id === params.stationId) return 1;
+                    return 0;
+                })[0];
+
+            const rk = best?.riding_knowledge;
+            if (rk) {
+                if (Array.isArray(rk.traps)) {
+                    rk.traps.forEach((t: any) => {
+                        const title = t?.title ? String(t.title) : '';
+                        const desc = t?.description ? String(t.description) : '';
+                        const advice = t?.advice ? String(t.advice) : '';
+                        const label = title && desc ? `${title}: ${desc}` : (title || desc);
+                        summary += `[WARNING] ${label}${advice ? ` Advice: ${advice}` : ''}\n`;
+                    });
+                }
+                if (Array.isArray(rk.hacks)) {
+                    rk.hacks.forEach((h: any) => {
+                        const title = h?.title ? String(h.title) : '';
+                        const desc = h?.description ? String(h.description) : (h?.content ? String(h.content) : '');
+                        const text = title && desc ? `${title}: ${desc}` : (title || desc);
+                        if (text) summary += `[LOCAL TRICK] ${text}\n`;
+                    });
+                }
+            }
+        } catch {
+        }
+
+        const wisdom = (() => {
+            for (const id of candidateStationIds) {
+                const hit = (STATION_WISDOM as any)[id];
+                if (hit) return hit;
+            }
+            return null;
+        })();
+
         if (wisdom) {
             if (wisdom.traps) {
                 wisdom.traps.forEach((t: any) => {
@@ -299,7 +433,9 @@ export const TOOL_HANDLERS = {
 
         // Filter Knowledge Base
         const relevantKnowledge = KNOWLEDGE_BASE.filter(rule => {
-            const stationMatch = !rule.trigger.station_ids || rule.trigger.station_ids.includes(params.stationId);
+            const stationMatch =
+                !rule.trigger.station_ids ||
+                rule.trigger.station_ids.some((id: string) => candidateStationIds.includes(id));
             if (!stationMatch) return false;
 
             if (params.query && rule.trigger.keywords) {

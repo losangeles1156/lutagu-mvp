@@ -249,7 +249,11 @@
             "full": "Full"
         },
         "emergencyAlert": "Emergency Alert",
-        "viewJmaDetails": "View JMA Details"
+        "viewJmaDetails": "View JMA Details",
+        "vacanTitle": "Crowd Map",
+        "vacanDesc": "Check real-time availability of nearby shops & restaurants",
+        "vacanCta": "Open VACAN Map",
+        "vacanSub": "Find Empty Seats"
     },
     "l3": {
         "servicesTitle": "Station Services",
@@ -393,7 +397,10 @@
         "error": "Error occurred",
         "station": "Station",
         "close": "Close",
-        "languageSwitcherLabel": "Change language"
+        "languageSwitcherLabel": "Change language",
+        "back": "Back",
+        "select": "Select",
+        "clear": "Clear"
     },
     "chat": {
         "connectionError": "Connection error. Please try again.",
@@ -401,7 +408,32 @@
         "tripAdded": "Added \"{label}\" to your trip!",
         "openingTimetable": "Opening detailed timetable for \"{label}\"...",
         "activeBadge": "Active Strategy Enabled",
-        "demoNextStep": "Demo Next Step"
+        "demoNextStep": "Demo Next Step",
+        "restart": "Restart conversation",
+        "minimize": "Minimize",
+        "maximize": "Maximize",
+        "placeholder": "Type a message...",
+        "feedbackLike": "Helpful",
+        "feedbackDislike": "Not helpful",
+        "intent": {
+            "route": "Route",
+            "status": "Status",
+            "facility": "Facility",
+            "ticket": "Ticket",
+            "weather": "Weather",
+            "time": "Time"
+        }
+    },
+    "systemMenu": {
+        "language": "Language",
+        "account": "Account",
+        "login": "Login",
+        "me": "Me",
+        "myConversations": "My Conversations",
+        "myFavorites": "My Favorites",
+        "myTrips": "My Trips",
+        "settings": "Settings",
+        "logout": "Log out"
     },
     "ui": {
         "items": "Items"

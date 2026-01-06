@@ -252,7 +252,11 @@
             "full": "満員"
         },
         "emergencyAlert": "緊急警報",
-        "viewJmaDetails": "気象庁の詳細を見る"
+        "viewJmaDetails": "気象庁の詳細を見る",
+        "vacanTitle": "混雑マップ",
+        "vacanDesc": "周辺のお店や施設の空き状況をリアルタイムで確認",
+        "vacanCta": "VACANマップを開く",
+        "vacanSub": "空きを探す"
     },
     "l3": {
         "servicesTitle": "サービス施設",
@@ -396,7 +400,10 @@
         "error": "エラーが発生しました",
         "station": "駅",
         "close": "閉じる",
-        "languageSwitcherLabel": "言語を切り替える"
+        "languageSwitcherLabel": "言語を切り替える",
+        "back": "戻る",
+        "select": "選択",
+        "clear": "クリア"
     },
     "chat": {
         "connectionError": "通信エラーが発生しました。時間をおいて再試行してください。",
@@ -404,7 +411,32 @@
         "tripAdded": "「{label}」を旅程に追加しました！",
         "openingTimetable": "「{label}」の詳細時刻表を開いています...",
         "activeBadge": "リアルタイム戦略有効中",
-        "demoNextStep": "デモの次のステップ"
+        "demoNextStep": "デモの次のステップ",
+        "restart": "チャットを再開",
+        "minimize": "最小化",
+        "maximize": "最大化",
+        "placeholder": "メッセージを入力...",
+        "feedbackLike": "参考になる",
+        "feedbackDislike": "参考にならない",
+        "intent": {
+            "route": "ルート",
+            "status": "運行",
+            "facility": "設備",
+            "ticket": "チケット",
+            "weather": "天気",
+            "time": "時間"
+        }
+    },
+    "systemMenu": {
+        "language": "言語",
+        "account": "アカウント",
+        "login": "ログイン",
+        "me": "マイ",
+        "myConversations": "マイチャット",
+        "myFavorites": "お気に入り",
+        "myTrips": "マイ旅程",
+        "settings": "設定",
+        "logout": "ログアウト"
     },
     "ui": {
         "items": "項目"

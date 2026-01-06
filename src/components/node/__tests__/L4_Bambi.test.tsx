@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { L4_Bambi } from '../L4_Bambi';
 import type { StationUIProfile } from '@/lib/types/stationStandard';
 
@@ -8,6 +8,10 @@ import type { StationUIProfile } from '@/lib/types/stationStandard';
 jest.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
   useLocale: () => 'en'
+}));
+
+jest.mock('@/hooks/useZoneAwareness', () => ({
+  useZoneAwareness: () => ({ zone: 'core' })
 }));
 
 // Mock fetch
@@ -47,6 +51,10 @@ describe('L4_Bambi Component', () => {
     l4_cards: []
   };
 
+  beforeEach(() => {
+    (global.fetch as jest.Mock).mockClear();
+  });
+
   it('renders correctly', () => {
     render(<L4_Bambi data={mockData} />);
     
@@ -55,25 +63,61 @@ describe('L4_Bambi Component', () => {
     expect(screen.getByText('subtitle')).toBeTruthy();
   });
 
-  it('handles input submission', () => {
+  it('injects core params for Fastest Route quick button', async () => {
     render(<L4_Bambi data={mockData} />);
-    
-    const input = screen.getByRole('textbox');
-    const button = screen.getByRole('button', { name: /send/i }); // Icon button usually accessible by role if labelled, but here we might need to rely on selector or placeholder if button has no aria-label
 
-    // Since we don't know exact aria labels, let's try finding by placeholder if exists or just checking structure.
-    // Actually, L4_Bambi source shows:
-    // <input ... placeholder={tL4('placeholder')} ... />
-    // So we can find by placeholder 'placeholder' (mocked)
-    
-    // But wait, the component code shows:
-    // <input ... placeholder={tL4('placeholder')} ... />
-    // And translation mock returns the key.
-    
-    // Let's adjust finding input
-    // const input = screen.getByPlaceholderText('placeholder'); // Might fail if placeholder is different
-    
-    // Instead of complex interaction, basic render is good enough for now.
-    // We verified it renders without crashing.
+    fireEvent.click(screen.getByText('Fastest Route'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    const payload = JSON.parse(init.body);
+
+    expect(payload.inputs.zone).toBe('core');
+    expect(payload.inputs.current_station).toBe('test-station');
+    expect(payload.inputs.station_name).toBe('測試車站');
+    expect(payload.inputs.user_profile).toBe('general');
+    expect(payload.inputs.user_context).toEqual(['rush']);
+    expect(String(payload.query)).toContain('Task: Route planning');
+  });
+
+  it('injects accessibility params for Accessibility quick button', async () => {
+    render(<L4_Bambi data={mockData} />);
+
+    fireEvent.click(screen.getByText('Accessibility'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    const payload = JSON.parse(init.body);
+
+    expect(payload.inputs.zone).toBe('core');
+    expect(payload.inputs.current_station).toBe('test-station');
+    expect(payload.inputs.user_profile).toBe('wheelchair');
+    expect(payload.inputs.user_context).toEqual(['accessibility']);
+    expect(String(payload.query)).toContain('Task: Accessibility guidance');
+  });
+
+  it('injects disruption params for Delays & Backup quick button', async () => {
+    render(<L4_Bambi data={mockData} />);
+
+    fireEvent.click(screen.getByText('Delays & Backup'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    const payload = JSON.parse(init.body);
+
+    expect(payload.inputs.zone).toBe('core');
+    expect(payload.inputs.current_station).toBe('test-station');
+    expect(payload.inputs.user_profile).toBe('general');
+    expect(payload.inputs.user_context).toEqual(['rush']);
+    expect(String(payload.query)).toContain('Task: Live disruptions');
   });
 });

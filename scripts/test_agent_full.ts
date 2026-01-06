@@ -276,7 +276,7 @@ async function testPressureAndEdge() {
 }
 
 async function run() {
-    log('INIT', 'BambiGO Agent Test Suite v1.0');
+    log('INIT', 'Lutagu Agent Test Suite v1.0');
     log('INIT', `Time: ${new Date().toISOString()}`);
     
     await testSystemHealth();
@@ -284,7 +284,7 @@ async function run() {
     await testPressureAndEdge();
 
     const reportContent = `
-# BambiGO Agent Test Report
+# Lutagu Agent Test Report
 **Date:** ${new Date().toLocaleString()}
 **Environment:** Local / MacOS
 

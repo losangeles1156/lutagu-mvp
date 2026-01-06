@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Cloud, Sun, CloudRain, CloudSnow, Wind, Droplets, AlertTriangle, ShieldAlert, ExternalLink, Umbrella } from 'lucide-react';
 
+import { StationUIProfile, WeatherInfo } from '@/lib/types/stationStandard';
+
 interface WeatherData {
     temp: number;
     condition: string;
@@ -24,26 +26,58 @@ interface JMAAlert {
 
 interface SmartWeatherCardProps {
     onAdviceUpdate?: (advice: string) => void;
+    initialData?: WeatherInfo;
 }
 
-export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
+export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCardProps) {
     const tL2 = useTranslations('l2');
     const locale = useLocale();
-    const [weather, setWeather] = useState<WeatherData | null>(null);
+
+    // Initialize with prop data if available to avoid loading state
+    const [weather, setWeather] = useState<WeatherData | null>(() => {
+        if (initialData) {
+            // Map simple WeatherInfo to rich WeatherData
+            // Note: We won't have humidity/precip initially, so default them
+            const code = initialData.iconCode ? parseInt(initialData.iconCode) : 0;
+            let emoji = '☁️';
+            if (code <= 1) emoji = '☀️';
+            else if (code >= 51) emoji = '🌧️';
+
+            return {
+                temp: initialData.temp,
+                condition: initialData.condition,
+                label: initialData.condition, // Simple label init
+                emoji: emoji,
+                wind: initialData.windSpeed,
+                humidity: 0, // Hidden until hydrated
+                precipitationProbability: null
+            };
+        }
+        return null;
+    });
+
     const [advice, setAdvice] = useState<string | null>(null);
     const [alert, setAlert] = useState<JMAAlert | null>(null);
     const [jmaLink, setJmaLink] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!initialData); // Only load if no initial data
 
     useEffect(() => {
+        let isMounted = true;
+
         async function fetchAll() {
-            setLoading(true);
+            // If we didn't have initial data, we show loading. 
+            // If we did, we still fetch in background to update/hydrate details.
+            if (!weather) setLoading(true);
+
             try {
-                // 1. Fetch Live Weather
+                // 1. Fetch Live Weather (Full Data)
                 const liveRes = await fetch('/api/weather/live');
                 if (!liveRes.ok) throw new Error('Live fetch failed');
                 const liveData = await liveRes.json();
-                setWeather(liveData);
+
+                if (isMounted) {
+                    setWeather(liveData);
+                }
 
                 // 2. Fetch JMA Alerts
                 let currentAlert: JMAAlert | null = null;
@@ -53,15 +87,12 @@ export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
                         const alertData = await alertRes.json();
                         if (alertData.alerts && alertData.alerts.length > 0) {
                             currentAlert = alertData.alerts[0];
-
-                            // Only set alert if it's relevant (skip info/advisory for top banner purposes if desired, 
-                            // but we store it for display. However, ensure severity is correct).
-                            setAlert(currentAlert);
+                            if (isMounted) setAlert(currentAlert);
                         }
                     }
                 } catch (e) { }
 
-                // 3. Fetch AI Advice (with emergency mode if alert exists)
+                // 3. Fetch AI Advice
                 const isEmergency = currentAlert && (currentAlert.severity === 'warning' || currentAlert.severity === 'critical');
                 const adviceParams = new URLSearchParams({
                     temp: String(liveData.temp),
@@ -76,18 +107,21 @@ export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
                 const adviceRes = await fetch(`/api/weather/advice?${adviceParams}`);
                 if (adviceRes.ok) {
                     const adviceData = await adviceRes.json();
-                    setAdvice(adviceData.advice);
-                    if (adviceData.jma_link) setJmaLink(adviceData.jma_link);
-                    onAdviceUpdate?.(adviceData.advice);
+                    if (isMounted) {
+                        setAdvice(adviceData.advice);
+                        if (adviceData.jma_link) setJmaLink(adviceData.jma_link);
+                        onAdviceUpdate?.(adviceData.advice);
+                    }
                 }
             } catch (e) {
                 console.warn('[SmartWeatherCard] Error:', e);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         }
         fetchAll();
-    }, [locale, onAdviceUpdate]);
+        return () => { isMounted = false; };
+    }, [locale, onAdviceUpdate, weather]);
 
     if (loading || !weather) {
         return (

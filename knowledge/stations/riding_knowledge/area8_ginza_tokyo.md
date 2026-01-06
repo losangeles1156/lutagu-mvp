@@ -75,28 +75,6 @@
 
 ---
 
-## Toei.Asakusa.Higashiginza（都營淺草線銀座站）
-
-### Traps（陷阱/警告）
-
-- [Trap] 🚅 **快特過站**: 都營淺草線的「Airport快特」不停靠銀座站，請搭乘普通或各站停車。(Advice: 💡 確認看板上的列車種類和目的地。)
-
-- [Trap] 🔄 **與東京Metro銀座線**: 都營銀座站（東銀座）和東京Metro銀座站是兩個不同的車站。(Advice: 💡 兩站步行約 5 分鐘，有地下通道連通。)
-
-### Hacks（技巧/捷徑）
-
-- [Hack] 🛍️ **購物推薦**: 銀座站周邊有許多高級商店和精品店，是購物的首選地點。
-
-- [Hack] 🍜 **美食探索**: 附近有許多高級餐廳和傳統日本料理店，適合商務用餐和特殊場合。
-
-### Facilities（設施資訊）
-
-- [toilet] 改札內 [Wheelchair]
-- [elevator] 主要出入口 [Wheelchair]
-- [wifi] 全站
-
----
-
 ## JR-East.Tokyo（JR東京站）
 
 ### Traps（陷阱/警告）

@@ -1,33 +1,63 @@
 
 import React, { useEffect, useRef } from 'react';
-import useSWR from 'swr';
 import { fetchNodesByWard } from '@/lib/api/nodesByWard';
 import { NodeDatum } from '@/lib/api/nodes';
-// import { L } from 'leaflet'; // Leaflet types not needed for this component logic
+import { isNodeAllowed } from '@/lib/constants/allowedOperators';
+import { getNodeCoordinates, isWithinTokyo23Wards } from '@/lib/utils/geoUtils';
 
 interface WardNodeLoaderProps {
-    wardId: string | null;
+    wardIds: string[];
     onNodesLoaded: (nodes: NodeDatum[]) => void;
     onLoadingChange: (isLoading: boolean) => void;
 }
 
-export function WardNodeLoader({ wardId, onNodesLoaded, onLoadingChange }: WardNodeLoaderProps) {
-    const loadedWardRef = useRef<string | null>(null);
+export function WardNodeLoader({ wardIds, onNodesLoaded, onLoadingChange }: WardNodeLoaderProps) {
+    const loadedWardsRef = useRef<string>('');
 
     useEffect(() => {
         let isMounted = true;
 
         async function load() {
-            if (!wardId) return;
-            if (loadedWardRef.current === wardId) return; // Prevent duplicate logical loads
+            if (wardIds.length === 0) {
+                onNodesLoaded([]);
+                return;
+            }
+
+            const wardsKey = wardIds.sort().join(',');
+            if (loadedWardsRef.current === wardsKey) return; // Prevent duplicate loads
 
             onLoadingChange(true);
             try {
-                const nodes = await fetchNodesByWard(wardId);
+                // Fetch nodes from all selected wards in parallel
+                const results = await Promise.all(
+                    wardIds.map(wardId => fetchNodesByWard(wardId))
+                );
+
+                // Flatten and deduplicate by node ID
+                const allNodes = results.flat();
+                const uniqueNodesMap = new Map<string, NodeDatum>();
+                allNodes.forEach(node => {
+                    if (node?.id && !uniqueNodesMap.has(node.id)) {
+                        uniqueNodesMap.set(node.id, node);
+                    }
+                });
+
+                // Apply railway operator filter
+                const operatorFiltered = Array.from(uniqueNodesMap.values()).filter(node =>
+                    isNodeAllowed(node.id)
+                );
+
+                // Apply Tokyo 23 wards geographic bounds filter
+                const filteredNodes = operatorFiltered.filter(node => {
+                    const coords = getNodeCoordinates(node);
+                    if (!coords) return false;
+                    return isWithinTokyo23Wards(coords[0], coords[1]);
+                });
+
                 if (isMounted) {
-                    console.log(`[WardNodeLoader] Loaded ${nodes.length} nodes for ward: ${wardId}`);
-                    onNodesLoaded(nodes);
-                    loadedWardRef.current = wardId;
+                    console.log(`[WardNodeLoader] Loaded ${allNodes.length} total, ${operatorFiltered.length} after operator filter, ${filteredNodes.length} after bounds filter, from ${wardIds.length} wards`);
+                    onNodesLoaded(filteredNodes);
+                    loadedWardsRef.current = wardsKey;
                 }
             } catch (err) {
                 console.error('[WardNodeLoader] Error loading ward nodes:', err);
@@ -41,7 +71,7 @@ export function WardNodeLoader({ wardId, onNodesLoaded, onLoadingChange }: WardN
         return () => {
             isMounted = false;
         };
-    }, [wardId, onNodesLoaded, onLoadingChange]);
+    }, [wardIds, onNodesLoaded, onLoadingChange]);
 
     return null; // Logic only component
 }

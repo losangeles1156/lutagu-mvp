@@ -1337,9 +1337,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "轉乘小技巧總整理: 購票建議"
     },
     "content": {
-      "zh-TW": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於BambiGO東京公共交通AI助手*",
-      "ja": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於BambiGO東京公共交通AI助手*",
-      "en": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於BambiGO東京公共交通AI助手*"
+      "zh-TW": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於Lutagu東京公共交通AI助手*",
+      "ja": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於Lutagu東京公共交通AI助手*",
+      "en": "*本知識庫資料整理自日本旅遊網站 letsgojp.com 及 matcha-jp.com，適用於Lutagu東京公共交通AI助手*"
     }
   }
 ];

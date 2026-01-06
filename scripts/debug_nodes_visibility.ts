@@ -13,7 +13,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_
 
 async function main() {
     console.log('='.repeat(60));
-    console.log('BambiGO Nodes Visibility Debug Report');
+    console.log('Lutagu Nodes Visibility Debug Report');
     console.log('='.repeat(60));
 
     // 1. Check Supabase connection

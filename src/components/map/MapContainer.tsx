@@ -9,6 +9,8 @@ import { fetchNearbyNodes, fetchNodeConfig, fetchNodesByViewport, NodeDatum } fr
 import { NodeMarker } from './NodeMarker';
 import { TrainLayer } from './TrainLayer';
 import { PedestrianLayer } from './PedestrianLayer';
+import { RouteLayer } from './RouteLayer';
+import { RouteInfoCard } from '@/components/route/RouteInfoCard';
 import { WardNodeLoader } from './WardNodeLoader';
 import { WardSelector } from './WardSelector';
 import { useLocale } from 'next-intl';
@@ -497,40 +499,65 @@ function AppMap() {
     const [gpsAlert, setGpsAlert] = useState<{ show: boolean, type: 'far' | 'denied' }>({ show: false, type: 'far' });
     const locale = useLocale();
 
-    // [New] Ward-Based State
-    const [activeWardId, setActiveWardId] = useState<string | null>('ward:taito'); // Default to Taito (Core)
+    // [UPDATED] Multi-Ward Selection State
+    const [activeWardIds, setActiveWardIds] = useState<string[]>(['ward:taito']); // Default to Taito
     const [isSwitchingWard, setIsSwitchingWard] = useState(false);
 
-    const handleWardSelect = useCallback((wardId: string) => {
-        setNodes([]); // Clear nodes to avoid confusion
-        setHubDetails({});
-        setActiveWardId(wardId);
-        setIsSwitchingWard(true);
+    // Ward center coordinates for map panning
+    const wardCenters: Record<string, [number, number]> = {
+        'ward:taito': [35.7141, 139.7774], // Ueno
+        'ward:chiyoda': [35.6812, 139.7671], // Tokyo Station
+        'ward:chuo': [35.6712, 139.7665], // Ginza
+        'ward:shinjuku': [35.6909, 139.7005], // Shinjuku
+        'ward:shibuya': [35.6580, 139.7016], // Shibuya
+        'ward:minato': [35.6586, 139.7454], // Tokyo Tower area
+        'ward:sumida': [35.7103, 139.8015], // Skytree area
+        'ward:koto': [35.6729, 139.8174], // Toyosu
+        'ward:shinagawa': [35.6095, 139.7300], // Shinagawa Station
+        'ward:bunkyo': [35.7081, 139.7516], // Tokyo Dome area
+        'ward:toshima': [35.7295, 139.7109], // Ikebukuro
+        'ward:arakawa': [35.7360, 139.7833], // Nippori
+        'ward:nakano': [35.7057, 139.6658], // Nakano Station
+        'ward:kita': [35.7536, 139.7346], // Oji area
+        'ward:ota': [35.5616, 139.7161], // Haneda Airport area
+        'ward:setagaya': [35.6461, 139.6532], // Sangenjaya area
+    };
 
-        // Optional: Fly to ward center (Hardcoded for MVP speed, or fetch from API)
-        const wardCenters: Record<string, [number, number]> = {
-            'ward:taito': [35.7141, 139.7774], // Ueno
-            'ward:chiyoda': [35.6812, 139.7671], // Tokyo Station
-            'ward:chuo': [35.6712, 139.7665], // Ginza
-            'ward:shinjuku': [35.6909, 139.7005], // Shinjuku
-            'ward:shibuya': [35.6580, 139.7016], // Shibuya
-            'ward:minato': [35.6586, 139.7454], // Tokyo Tower area
-            'ward:sumida': [35.7103, 139.8015], // Skytree area
-            'ward:koto': [35.6729, 139.8174], // Toyosu
-            'ward:shinagawa': [35.6095, 139.7300], // Shinagawa Station
-            'ward:bunkyo': [35.7081, 139.7516], // Tokyo Dome area
-            'ward:toshima': [35.7295, 139.7109], // Ikebukuro
-            'ward:arakawa': [35.7360, 139.7833], // Nippori
-            // New wards
-            'ward:nakano': [35.7057, 139.6658], // Nakano Station
-            'ward:kita': [35.7536, 139.7346], // Oji area
-            'ward:ota': [35.5616, 139.7161], // Haneda Airport area
-            'ward:setagaya': [35.6461, 139.6532], // Sangenjaya area
-        };
-        const center = wardCenters[wardId];
-        if (center) {
-            useAppStore.getState().setMapCenter({ lat: center[0], lon: center[1] });
-        }
+    // Handle ward toggle (multi-select)
+    const handleWardSelect = useCallback((wardId: string, isFirstSelection: boolean) => {
+        setActiveWardIds(prev => {
+            const isSelected = prev.includes(wardId);
+            if (isSelected) {
+                // Deselect
+                return prev.filter(id => id !== wardId);
+            } else {
+                // Select (add)
+                const newSelection = [...prev, wardId];
+                // Fly to this ward's center if it's the first selection or newly added
+                if (isFirstSelection || prev.length === 0) {
+                    const center = wardCenters[wardId];
+                    if (center) {
+                        useAppStore.getState().setMapCenter({ lat: center[0], lon: center[1] });
+                    }
+                }
+                return newSelection;
+            }
+        });
+        setIsSwitchingWard(true);
+    }, []);
+
+    // Handle Select All
+    const handleSelectAll = useCallback(() => {
+        const allWardIds = Object.keys(wardCenters);
+        setActiveWardIds(allWardIds);
+        setIsSwitchingWard(true);
+    }, []);
+
+    // Handle Clear All
+    const handleClearAll = useCallback(() => {
+        setActiveWardIds([]);
+        setNodes([]);
+        setHubDetails({});
     }, []);
 
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
@@ -576,15 +603,12 @@ function AppMap() {
                 />
 
                 <WardNodeLoader
-                    wardId={activeWardId}
+                    wardIds={activeWardIds}
                     onNodesLoaded={(newNodes: any[]) => {
                         setNodes(newNodes);
-                        // Hub details might need separate fetch if not in node data, 
-                        // or we can mock empty/basic details for now
+                        // Build hub details from node data
                         const simulatedDetails: Record<string, HubDetails> = {};
                         newNodes.forEach((n: any) => {
-                            // Support various API shapes for child_count
-                            // hub_data might be object (single) or array (if Supabase returns array)
                             const hubData = Array.isArray(n.hub_data) ? n.hub_data[0] : n.hub_data;
                             const childCount = n.child_count ?? hubData?.child_count;
 
@@ -600,13 +624,13 @@ function AppMap() {
                         });
                         setHubDetails(simulatedDetails);
                         setIsSwitchingWard(false);
-                        console.log(`[AppMap] Ward nodes updated: ${newNodes.length}`);
+                        console.log(`[AppMap] Ward nodes updated: ${newNodes.length} from ${activeWardIds.length} wards`);
                     }}
                     onLoadingChange={setLoadingNodes}
                 />
 
-                {/* Viewport Loading (Fallback only if no active ward) */}
-                {!activeWardId && (
+                {/* Viewport Loading (Fallback only if no wards selected) */}
+                {activeWardIds.length === 0 && (
                     <ViewportNodeLoader
                         onData={(newNodes, newHubDetails) => {
                             setNodes(newNodes);
@@ -644,7 +668,7 @@ function AppMap() {
                     hubDetails={hubDetails}
                     zone={zone}
                     locale={locale}
-                    showAllNodes={!!activeWardId} // Show all nodes when in Ward Mode
+                    showAllNodes={activeWardIds.length > 0} // Show all nodes when in Ward Mode
                 />
 
                 {/* Real-time Train Layer */}
@@ -652,6 +676,7 @@ function AppMap() {
 
                 {/* Pedestrian Graph Layer (Agent-driven) */}
                 <PedestrianLayer />
+                <RouteLayer />
             </MapContainer>
 
             {loadingNodes && nodes.length === 0 && (
@@ -691,8 +716,10 @@ function AppMap() {
                 {/* Ward Selector */}
                 <div className="bg-white/90 backdrop-blur p-1 rounded-xl shadow-lg pointer-events-auto">
                     <WardSelector
-                        currentWardId={activeWardId}
+                        currentWardIds={activeWardIds}
                         onSelectWard={handleWardSelect}
+                        onSelectAll={handleSelectAll}
+                        onClearAll={handleClearAll}
                         lang={locale as any}
                     />
                 </div>
@@ -859,6 +886,8 @@ function AppMap() {
                     </div>
                 )
             }
+            
+            <RouteInfoCard />
         </div >
     );
 }

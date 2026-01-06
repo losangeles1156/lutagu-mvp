@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: LUTAGU API Tools
-  description: BambiGO LUTAGU transit data tools for Dify Agent
+  description: Lutagu transit data tools for Dify Agent
   version: 4.0.0
 servers:
   - url: https://lutagu.vercel.app

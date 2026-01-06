@@ -18,7 +18,8 @@ interface WardState {
     wards: Ward[];
     isLoading: boolean;
     error: string | null;
-    selectedWardId: string | null;
+    // [UPDATED] Multi-selection support
+    selectedWardIds: string[];
 
     // Detection state
     isDetecting: boolean;
@@ -26,6 +27,12 @@ interface WardState {
 
     // Actions
     fetchWards: () => Promise<void>;
+    // [UPDATED] Multi-selection actions
+    toggleWardSelection: (wardId: string) => void;
+    selectAllWards: () => void;
+    clearWardSelection: () => void;
+    setSelectedWards: (wardIds: string[]) => void;
+    // Legacy single selection (for compatibility)
     setSelectedWard: (wardId: string | null) => void;
     getNodesByWard: (wardId: string) => Promise<NodeDatum[]>;
     detectWardByLocation: (lat: number, lng: number) => Promise<Ward | null>;
@@ -54,7 +61,7 @@ export const useWardStore = create<WardState>((set, get) => ({
     wards: [],
     isLoading: false,
     error: null,
-    selectedWardId: null,
+    selectedWardIds: [], // [UPDATED] Array for multi-selection
     isDetecting: false,
     detectedWard: null,
 
@@ -74,7 +81,7 @@ export const useWardStore = create<WardState>((set, get) => ({
                 console.warn('[wardStore] API fetch failed, using fallback');
             }
 
-            // 如果 API 失敗，使用硬編碼的核心 9 區
+            // 如果 API 失敗，使用硬編碼的核心區
             if (wards.length === 0) {
                 wards = CORE_WARDS;
             }
@@ -87,8 +94,41 @@ export const useWardStore = create<WardState>((set, get) => ({
         }
     },
 
+    // [NEW] Toggle ward selection (for multi-select)
+    toggleWardSelection: (wardId: string) => {
+        const current = get().selectedWardIds;
+        if (current.includes(wardId)) {
+            // Deselect
+            set({ selectedWardIds: current.filter(id => id !== wardId) });
+        } else {
+            // Select (add to array)
+            set({ selectedWardIds: [...current, wardId] });
+        }
+    },
+
+    // [NEW] Select all wards
+    selectAllWards: () => {
+        const allIds = get().wards.map(w => w.id);
+        set({ selectedWardIds: allIds });
+    },
+
+    // [NEW] Clear all selections
+    clearWardSelection: () => {
+        set({ selectedWardIds: [] });
+    },
+
+    // [NEW] Set specific wards (bulk update)
+    setSelectedWards: (wardIds: string[]) => {
+        set({ selectedWardIds: wardIds });
+    },
+
+    // Legacy single selection (for backward compatibility)
     setSelectedWard: (wardId: string | null) => {
-        set({ selectedWardId: wardId });
+        if (wardId) {
+            set({ selectedWardIds: [wardId] });
+        } else {
+            set({ selectedWardIds: [] });
+        }
     },
 
     getNodesByWard: async (wardId: string) => {

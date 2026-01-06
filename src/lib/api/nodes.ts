@@ -741,11 +741,59 @@ export async function fetchNodeConfig(nodeId: string) {
     }
 
     // --- L4: LUTAGU STRATEGY CARDS (V5 PASSIVE) ---
-    // Cards are now PASSIVE – only shown after user query in L4_Bambi.
-    // Pre-population from wisdom.traps/hacks disabled.
-    const l4_cards: any[] = [];
+    // Cards are now derived from riding_knowledge
+    const l4_cards: ActionCard[] = [];
 
-    // Fallback Accessibility Card disabled for passive KB.
+    // Pre-process riding knowledge to generate cards
+    const sourceRidingKnowledge = finalNode?.riding_knowledge || (hubNode?.riding_knowledge) || null;
+
+    if (sourceRidingKnowledge && Array.isArray(sourceRidingKnowledge.traps) && sourceRidingKnowledge.traps.length > 0) {
+        // Create a Primary Card for the first Trap/Tip
+        const mainTrap = sourceRidingKnowledge.traps[0];
+        // Append advice to description since ActionCard doesn't have an advice field
+        const adviceText = mainTrap.advice ? `\n\n💡 ${mainTrap.advice}` : '';
+        const fullDesc = (mainTrap.description || '') + adviceText;
+
+        l4_cards.push({
+            id: `trap-${nodeId}-0`,
+            type: 'primary',
+            title: {
+                ja: mainTrap.title,
+                en: mainTrap.title,
+                zh: mainTrap.title
+            },
+            description: {
+                ja: fullDesc,
+                en: fullDesc,
+                zh: fullDesc
+            },
+            actionLabel: { ja: '詳細を見る', en: 'See Details', zh: '查看詳情' }
+        });
+    }
+
+    if (sourceRidingKnowledge && Array.isArray(sourceRidingKnowledge.hacks) && sourceRidingKnowledge.hacks.length > 0) {
+        // Add hacks as secondary cards
+        sourceRidingKnowledge.hacks.forEach((hack: any, idx: number) => {
+            const hackAdvice = hack.advice ? `\n\n💡 ${hack.advice}` : '';
+            const hackDesc = (hack.description || '') + hackAdvice;
+
+            l4_cards.push({
+                id: `hack-${nodeId}-${idx}`,
+                type: 'secondary',
+                title: {
+                    ja: hack.title,
+                    en: hack.title,
+                    zh: hack.title
+                },
+                description: {
+                    ja: hackDesc,
+                    en: hackDesc,
+                    zh: hackDesc
+                },
+                actionLabel: { ja: '詳細', en: 'Details', zh: '詳情' }
+            });
+        });
+    }
 
     // Inject L4 Cards
     enrichedProfile.l4_cards = l4_cards;

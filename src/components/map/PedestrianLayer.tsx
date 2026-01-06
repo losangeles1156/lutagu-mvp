@@ -4,6 +4,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useMap, Polyline, CircleMarker, Popup } from 'react-leaflet';
 import { useAppStore } from '@/stores/appStore';
+import { toast } from 'sonner';
+import { getDistanceKm } from '@/lib/utils/geoUtils';
 import L from 'leaflet';
 
 interface GraphNode {
@@ -24,17 +26,125 @@ interface GraphLink {
     distance_meters: number;
 }
 
+function roundToStep(value: number, step: number) {
+    return Math.round(value / step) * step;
+}
+
+function centerStepForZoom(zoom: number) {
+    if (zoom >= 19) return 0.0003;
+    if (zoom >= 18) return 0.0006;
+    if (zoom >= 17) return 0.001;
+    return 0.002;
+}
+
+function zoomBucket(zoom: number) {
+    if (zoom >= 19) return 19;
+    if (zoom >= 18) return 18;
+    if (zoom >= 16) return 16;
+    return 0;
+}
+
 export function PedestrianLayer() {
     const map = useMap();
-    const { userProfile } = useAppStore();
+    const { 
+        userProfile, 
+        setRouteEnd, 
+        setRouteStart, 
+        routeStart, 
+        setIsRouteCalculating, 
+        setRoutePath, 
+        setRouteSummary,
+        mapCenter
+    } = useAppStore();
     const [nodes, setNodes] = useState<GraphNode[]>([]);
     const [links, setLinks] = useState<GraphLink[]>([]);
     const [loading, setLoading] = useState(false);
     
     const abortControllerRef = useRef<AbortController | null>(null);
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const lastQueryKeyRef = useRef<string | null>(null);
+    const cacheRef = useRef<Map<string, { nodes: GraphNode[]; links: GraphLink[]; ts: number }>>(new Map());
+
+    const handleSetDestination = async (node: GraphNode) => {
+        let startPoint = routeStart;
+        
+        if (!startPoint) {
+            if (mapCenter) {
+                 startPoint = { lat: mapCenter.lat, lon: mapCenter.lon, name: 'Current Location' };
+                 setRouteStart(startPoint);
+            } else {
+                toast.error('Cannot determine start location');
+                return;
+            }
+        }
+        
+        const endPoint = { lat: node.coordinates.coordinates[1], lon: node.coordinates.coordinates[0], name: node.description, id: node.id };
+
+        const dist = getDistanceKm(startPoint.lat, startPoint.lon, endPoint.lat, endPoint.lon);
+        if (dist < 0.05) {
+             toast.warning('Destination is very close (< 50m)');
+        }
+
+        setRouteEnd(endPoint);
+        setIsRouteCalculating(true);
+        map.closePopup();
+
+        try {
+            const res = await fetch('/api/navigation/route', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    startLat: startPoint.lat,
+                    startLon: startPoint.lon,
+                    endNodeId: node.id,
+                    userProfile,
+                    weather: 'clear'
+                })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Failed to calculate route');
+            }
+
+            const data = await res.json();
+            const path = data.nodes.map((n: any) => [n.lat, n.lon]);
+            setRoutePath(path);
+            setRouteSummary(data.summary);
+            toast.success(`Route found: ${data.summary.estimated_duration_minutes} min`);
+
+        } catch (err: any) {
+            console.error(err);
+            toast.error(err.message);
+            setRoutePath(null);
+            setRouteSummary(null);
+        } finally {
+            setIsRouteCalculating(false);
+        }
+    };
+
+    const handleSetStart = (node: GraphNode) => {
+        setRouteStart({ 
+            lat: node.coordinates.coordinates[1], 
+            lon: node.coordinates.coordinates[0], 
+            name: node.description, 
+            id: node.id 
+        });
+        toast.success('Start point set');
+        map.closePopup();
+    };
 
     const fetchData = useCallback(async () => {
+        const zoom = map.getZoom();
+        const MIN_ZOOM = 16;
+
+        if (zoom < MIN_ZOOM) {
+            lastQueryKeyRef.current = null;
+            setNodes([]);
+            setLinks([]);
+            return;
+        }
+
         // Cancel previous pending request
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
@@ -45,11 +155,29 @@ export function PedestrianLayer() {
 
         setLoading(true);
         const center = map.getCenter();
-        const radius = 500; 
+        const zBucket = zoomBucket(zoom);
+        const step = centerStepForZoom(zoom);
+        const qLat = roundToStep(center.lat, step);
+        const qLon = roundToStep(center.lng, step);
+        const radius = zoom >= 18 ? 400 : 650;
 
         try {
             const profile = userProfile || 'general';
-            const res = await fetch(`/api/navigation/graph?lat=${center.lat}&lon=${center.lng}&radius=${radius}&user_profile=${profile}`, {
+            const key = `${zBucket}:${qLat},${qLon}:${radius}:${profile}`;
+
+            if (lastQueryKeyRef.current === key) {
+                return;
+            }
+
+            const cached = cacheRef.current.get(key);
+            if (cached && Date.now() - cached.ts < 30_000) {
+                lastQueryKeyRef.current = key;
+                setNodes(cached.nodes);
+                setLinks(cached.links);
+                return;
+            }
+
+            const res = await fetch(`/api/navigation/graph?lat=${qLat}&lon=${qLon}&radius=${radius}&user_profile=${profile}`, {
                 signal: controller.signal
             });
             
@@ -60,8 +188,13 @@ export function PedestrianLayer() {
 
             const json = await res.json();
             
-            if (json.nodes) setNodes(json.nodes);
-            if (json.edges) setLinks(json.edges);
+            const nextNodes: GraphNode[] = json.nodes || [];
+            const nextLinks: GraphLink[] = json.edges || [];
+
+            lastQueryKeyRef.current = key;
+            cacheRef.current.set(key, { nodes: nextNodes, links: nextLinks, ts: Date.now() });
+            setNodes(nextNodes);
+            setLinks(nextLinks);
         } catch (e: any) {
             if (e.name === 'AbortError') {
                 // Ignore intentional aborts
@@ -150,10 +283,33 @@ export function PedestrianLayer() {
                      <CircleMarker 
                         key={node.id} 
                         center={[lat, lon]} 
-                        radius={3} 
-                        pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 1 }}
+                        radius={5} 
+                        pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.8 }}
+                        eventHandlers={{
+                            click: (e) => {
+                                 L.DomEvent.stopPropagation(e);
+                            }
+                        }}
                     >
-                        <Popup>{node.description}</Popup>
+                        <Popup>
+                            <div className="p-2 min-w-[200px]">
+                                <h3 className="font-bold mb-2 text-sm">{node.description || 'Pedestrian Node'}</h3>
+                                <div className="flex flex-col gap-2">
+                                     <button
+                                        className="bg-blue-600 text-white px-3 py-2 rounded-md text-xs font-bold hover:bg-blue-700 transition-colors w-full shadow-sm"
+                                        onClick={() => handleSetDestination(node)}
+                                    >
+                                        NAVIGATE HERE
+                                    </button>
+                                    <button
+                                        className="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-xs font-bold hover:bg-gray-200 transition-colors w-full border border-gray-200"
+                                        onClick={() => handleSetStart(node)}
+                                    >
+                                        SET AS START
+                                    </button>
+                                </div>
+                            </div>
+                        </Popup>
                     </CircleMarker>
                  );
             })}

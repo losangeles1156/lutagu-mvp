@@ -70,6 +70,39 @@ export function ChatOverlay() {
         return '請用繁體中文做開場自我介紹，列出你能幫忙的 3 件事（即時列車狀態、無障礙、替代路線），最後問我現在在哪裡或想去哪裡。';
     }, [locale]);
 
+    const [statusMessage, setStatusMessage] = useState<string | null>(null);
+    const prevContextRef = useRef<string[]>(userContext);
+
+    // Monitor context changes for UI feedback
+    useEffect(() => {
+        if (!isChatOpen) return;
+        
+        const prev = prevContextRef.current;
+        if (JSON.stringify(prev) === JSON.stringify(userContext)) return;
+
+        // Find what changed
+        const added = userContext.filter(x => !prev.includes(x));
+        const removed = prev.filter(x => !userContext.includes(x));
+        
+        const contextLabels: Record<string, string> = {
+            'luggage': tChat('contextLuggage', { defaultValue: '大型行李' }),
+            'stroller': tChat('contextStroller', { defaultValue: '推嬰兒車' }),
+            'accessibility': tChat('contextAccessibility', { defaultValue: '行動不便' }),
+            'rush': tChat('contextRush', { defaultValue: '趕時間' })
+        };
+
+        if (added.length > 0) {
+            setStatusMessage(`✨ AI 已同步您的需求：${added.map(id => contextLabels[id] || id).join(', ')}`);
+        } else if (removed.length > 0) {
+            setStatusMessage(`🔄 AI 已更新您的需求`);
+        }
+
+        prevContextRef.current = userContext;
+
+        const timer = setTimeout(() => setStatusMessage(null), 3000);
+        return () => clearTimeout(timer);
+    }, [userContext, isChatOpen, tChat]);
+
     const streamFromDify = useCallback(async (payload: {
         query: string;
         includeUserMessage: boolean;
@@ -469,6 +502,15 @@ export function ChatOverlay() {
 
             {/* Input Overlay */}
             <div className="p-6 bg-white/40 backdrop-blur-2xl border-t border-black/[0.03] pb-10 shadow-[0_-15px_40px_rgba(0,0,0,0.02)]">
+                {/* Status Message Overlay */}
+                {statusMessage && (
+                    <div className="max-w-2xl mx-auto mb-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="bg-indigo-600/90 backdrop-blur-md text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg shadow-indigo-200/50 w-fit mx-auto border border-white/20">
+                            {statusMessage}
+                        </div>
+                    </div>
+                )}
+                
                 {/* User Context Selector (Prompt 3) */}
                 <div className="mb-4 max-w-2xl mx-auto">
                     <ContextSelector />

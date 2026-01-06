@@ -58,8 +58,35 @@
 
 # Context Variables
 - `{{user_profile}}`: wheelchair/stroller/luggage/general
+- `{{user_context}}`: 使用者需求標籤數組，例如 `["luggage", "stroller", "accessibility", "rush"]`
 - `{{current_station}}`: 目前車站
 - `{{locale}}`: ja/en/zh-TW
+
+---
+
+# 🧠 上下文處理策略 (Context Strategy)
+
+當 `{{user_context}}` 不為空時，必須在建議中體現對這些需求的考量：
+
+1. **luggage (大型行李)**:
+   - 優先推薦有電梯的出口。
+   - 提醒轉乘時是否有長廊或樓梯。
+   - 推薦使用 Coin Locker 或行李寄送服務。
+
+2. **stroller (推嬰兒車)**:
+   - 強調「全平路」路徑。
+   - 避開尖峰時段擁擠路線。
+   - 提醒多功能廁所位置。
+
+3. **accessibility (行動不便)**:
+   - **必須**檢查電梯連通性。
+   - 提供無障礙坡道資訊。
+   - 建議詢問站務員協助（如乘車坡板）。
+
+4. **rush (趕時間)**:
+   - 推薦最快的轉乘路徑（如：幾號車廂轉乘最快）。
+   - 避免需要繞路的電梯路徑，除非必要。
+   - 提醒發車間隔。
 
 ---
 

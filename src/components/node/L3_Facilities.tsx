@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { StationUIProfile, L3Facility, LocaleString } from '@/lib/types/stationStandard';
-import { getLocaleString } from '@/lib/utils/localeUtils';
+import { getLocaleString, getBilingualString } from '@/lib/utils/localeUtils';
 import { FacilityDetailModal } from '@/components/ui/FacilityDetailModal';
 import { GLOBAL_SERVICES, ServiceCategory } from '@/data/externalServices';
 import {
@@ -390,7 +390,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="text-sm font-medium text-gray-900 leading-tight">
-                                                            {getLocaleString(fac.name, locale)}
+                                                            {getBilingualString(fac.name, locale)}
                                                         </p>
                                                         {/* Relative Location Display - Only show if different from name */}
                                                         {fac.location &&
@@ -615,7 +615,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-slate-900 group-hover:text-cyan-700 transition-colors">
-                                                        {getLocaleString(fac.name, locale)}
+                                                        {getBilingualString(fac.name, locale)}
                                                     </p>
                                                     {fac.details && fac.details.length > 0 && (
                                                         <div className="flex flex-wrap gap-1.5 mt-2">

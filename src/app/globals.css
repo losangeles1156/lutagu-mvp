@@ -73,6 +73,15 @@ body {
 
 
 
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.animate-dash {
+  animation: dash 1s linear infinite;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

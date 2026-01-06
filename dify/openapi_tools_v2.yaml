@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: BambiGO Dify Tools API
-  description: Real-time data APIs for BambiGO Dify Agent - Top 5 Core Tools
+  title: Lutagu Dify Tools API
+  description: Real-time data APIs for Lutagu Dify Agent - Top 5 Core Tools
   version: 2.0.0
 servers:
   - url: https://lutagu.vercel.app

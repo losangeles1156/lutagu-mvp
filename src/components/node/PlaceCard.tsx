@@ -2,7 +2,7 @@ import { Navigation, MapPin, Utensils, Store, Landmark, Coffee, TreePine, Hospit
 import { useTranslations, useLocale } from 'next-intl';
 import { L1Place } from '@/hooks/useL1Places';
 import { useCategoryTranslation } from '@/hooks/useCategoryTranslation';
-import { getLocaleString } from '@/lib/utils/localeUtils';
+import { getLocaleString, getBilingualString } from '@/lib/utils/localeUtils';
 
 interface PlaceCardProps {
     place: L1Place;
@@ -29,7 +29,9 @@ export function PlaceCard({ place, isFeatured = false }: PlaceCardProps) {
     const { getCategoryLabel, getSubcategoryLabel } = useCategoryTranslation();
     const style = CATEGORY_STYLE[place.category] || CATEGORY_STYLE.default;
     const Icon = style.icon;
-    const name = getLocaleString(place.name_i18n as any, locale) || place.name;
+
+    // Bilingual Name: "Translated Name (Original Name)"
+    const name = getBilingualString(place.name_i18n as any, locale) || place.name;
 
     // Walking time calculation (Standard: 80m/min)
     const walkMinutes = place.distance_meters ? Math.ceil(place.distance_meters / 80) : null;

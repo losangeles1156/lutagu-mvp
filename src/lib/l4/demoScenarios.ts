@@ -77,9 +77,9 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         user: '為什麼是去西新宿站，而不是新宿站？',
         user_ja: 'なぜ新宿駅ではなく西新宿駅なのですか？',
         user_en: 'Why Nishi-shinjuku Station instead of Shinjuku Station?',
-        agent: '這正是 BambiGO 的專家建議精髓：\n\n*   避免複雜結構：JR 新宿站是著名的「迷宮」，出口極其複雜，推著行李或不熟路況的人極易走錯方向。\n*   距離優勢：西新宿站 的結構簡單許多。從該站出口步行前往東京都廳的實際距離，其實比從新宿站出來還要更短、更順暢。\n\n選擇西新宿站，預計能幫您節省至少 10-15 分鐘 的找路與步行時間。',
-        agent_ja: 'これこそがBambiGOのエキスパートアドバイスの真髄です：\n\n* 複雑な構造を回避：JR新宿駅は有名な「迷宮」であり、出口が非常に複雑です。大きな荷物を持っていたり、不慣れな方は道に迷いやすいです。\n* 距離のメリット：西新宿駅の構造はずっとシンプルです。この駅の出口から東京都庁までの実際の距離は、実は新宿駅から行くよりも短く、スムーズです。\n\n西新宿駅を選ぶことで、道に迷う時間や歩行時間を少なくとも10〜15分短縮できる見込みです。',
-        agent_en: 'This is the essence of BambiGO\'s expert advice:\n\n* Avoid Complexity: JR Shinjuku Station is a famous "labyrinth" with extremely complex exits. Travelers with luggage or those unfamiliar with the area can easily get lost.\n* Distance Advantage: Nishi-shinjuku Station has a much simpler layout. The actual walking distance from its exit to the Tokyo Metropolitan Government Building is shorter and more direct than from Shinjuku Station.\n\nChoosing Nishi-shinjuku is expected to save you at least 10-15 minutes of navigation and walking time.',
+        agent: '這正是 Lutagu 的專家建議精髓：\n\n*   避免複雜結構：JR 新宿站是著名的「迷宮」，出口極其複雜，推著行李或不熟路況的人極易走錯方向。\n*   距離優勢：西新宿站 的結構簡單許多。從該站出口步行前往東京都廳的實際距離，其實比從新宿站出來還要更短、更順暢。\n\n選擇西新宿站，預計能幫您節省至少 10-15 分鐘 的找路與步行時間。',
+        agent_ja: 'これこそがLutaguのエキスパートアドバイスの真髄です：\n\n* 複雑な構造を回避：JR新宿駅は有名な「迷宮」であり、出口が非常に複雑です。大きな荷物を持っていたり、不慣れな方は道に迷いやすいです。\n* 距離のメリット：西新宿駅の構造はずっとシンプルです。この駅の出口から東京都庁までの実際の距離は、実は新宿駅から行くよりも短く、スムーズです。\n\n西新宿駅を選ぶことで、道に迷う時間や歩行時間を少なくとも10〜15分短縮できる見込みです。',
+        agent_en: 'This is the essence of Lutagu\'s expert advice:\n\n* Avoid Complexity: JR Shinjuku Station is a famous "labyrinth" with extremely complex exits. Travelers with luggage or those unfamiliar with the area can easily get lost.\n* Distance Advantage: Nishi-shinjuku Station has a much simpler layout. The actual walking distance from its exit to the Tokyo Metropolitan Government Building is shorter and more direct than from Shinjuku Station.\n\nChoosing Nishi-shinjuku is expected to save you at least 10-15 minutes of navigation and walking time.',
         action: '顯示西新宿站最佳出口地圖'
       }
     ]
@@ -108,8 +108,8 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         user: '天啊，網頁顯示站內全部客滿了，我不想拖著大行李逛街。',
         user_ja: 'うわあ、ウェブサイトでは駅内がすべて満杯だと表示されています。大きな荷物を引きずって観光したくないです。',
         user_en: 'Oh no, the website shows all lockers in the station are full. I don\'t want to drag my heavy luggage around.',
-        agent: '請別擔心！這正是發揮 BambiGO 空手觀光 (Hands-free Travel) 精神的時候。針對淺草站滿櫃的情況，我為您提供兩個最佳備案：\n\n### 🎒 備案一：Ecbo Cloak 在地寄放\n預約附近的合作咖啡廳或商店空間寄放行李，費用與置物櫃相仿，但空間更充裕。\n\n### 🚚 備案二：LUGGAGENT 行李當日配送\n直接由專業團隊在車站收件，將行李直送您的飯店。您可以直接開始輕鬆逛街，行李會準時出現在飯店大廳。\n\n您想嘗試預約哪一種服務？',
-        agent_ja: 'ご安心ください！これこそがBambiGOの「空手観光 (Hands-free Travel)」の精神を発揮する時です。浅草駅が満杯の場合、2つの最適な代替案をご提案します：\n\n### 🎒 代替案 1：Ecbo Cloak（エクボクローク）\n近くの提携カフェや店舗のスペースを予約して荷物を預けられます。料金はロッカーと同程度ですが、スペースには余裕があります。\n\n### 🚚 代替案 2：LUGGAGENT 当日配送サービス\n駅で専門スタッフが荷物を受け取り、ホテルへ直送します。そのまま手ぶらで観光を始められ、荷物はホテルのロビーに時間通りに届きます。\n\nどちらのサービスを予約してみたいですか？',
+        agent: '請別擔心！這正是發揮 Lutagu 空手觀光 (Hands-free Travel) 精神的時候。針對淺草站滿櫃的情況，我為您提供兩個最佳備案：\n\n### 🎒 備案一：Ecbo Cloak 在地寄放\n預約附近的合作咖啡廳或商店空間寄放行李，費用與置物櫃相仿，但空間更充裕。\n\n### 🚚 備案二：LUGGAGENT 行李當日配送\n直接由專業團隊在車站收件，將行李直送您的飯店。您可以直接開始輕鬆逛街，行李會準時出現在飯店大廳。\n\n您想嘗試預約哪一種服務？',
+        agent_ja: 'ご安心ください！これこそがLutaguの「空手観光 (Hands-free Travel)」の精神を発揮する時です。浅草駅が満杯の場合、2つの最適な代替案をご提案します：\n\n### 🎒 代替案 1：Ecbo Cloak（エクボクローク）\n近くの提携カフェや店舗のスペースを予約して荷物を預けられます。料金はロッカーと同程度ですが、スペースには余裕があります。\n\n### 🚚 代替案 2：LUGGAGENT 当日配送サービス\n駅で専門スタッフが荷物を受け取り、ホテルへ直送します。そのまま手ぶらで観光を始められ、荷物はホテルのロビーに時間通りに届きます。\n\nどちらのサービスを予約してみたいですか？',
         agent_en: 'Don\'t worry! This is the perfect time to embrace the "Hands-free Travel" spirit. Given that the station lockers are full, I offer two excellent alternatives:\n\n### 🎒 Option 1: Ecbo Cloak\nBook a space in nearby partner cafes or shops to store your luggage. The cost is similar to a locker, but there\'s more space available.\n\n### 🚚 Option 2: LUGGAGENT Same-Day Delivery\nHave a professional team collect your luggage at the station and deliver it directly to your hotel. You can start sightseeing immediately, and your luggage will be waiting for you in the hotel lobby.\n\nWhich service would you like to try?',
         links: [
           { label: 'Ecbo Cloak 預約連結', url: 'https://cloak.ecbo.io/zh-TW' },

@@ -249,7 +249,11 @@
             "full": "爆滿"
         },
         "emergencyAlert": "緊急警報",
-        "viewJmaDetails": "查看 JMA 詳情"
+        "viewJmaDetails": "查看 JMA 詳情",
+        "vacanTitle": "人潮地圖",
+        "vacanDesc": "即時查看周邊餐廳與設施的空位狀況",
+        "vacanCta": "開啟 VACAN 地圖",
+        "vacanSub": "探索周邊空位"
     },
     "l3": {
         "servicesTitle": "服務設施",
@@ -392,7 +396,10 @@
         "error": "發生錯誤",
         "station": "車站",
         "close": "關閉",
-        "languageSwitcherLabel": "切換語言"
+        "languageSwitcherLabel": "切換語言",
+        "back": "返回",
+        "select": "選擇",
+        "clear": "清除"
     },
     "chat": {
         "connectionError": "連線錯誤，請稍後再試。",
@@ -400,7 +407,32 @@
         "tripAdded": "已將「{label}」加入行程！",
         "openingTimetable": "正在為您開啟「{label}」的詳細時刻表...",
         "activeBadge": "即時策略啟用中",
-        "demoNextStep": "演示下一步"
+        "demoNextStep": "演示下一步",
+        "restart": "重新開始對話",
+        "minimize": "最小化",
+        "maximize": "最大化",
+        "placeholder": "輸入訊息...",
+        "feedbackLike": "有幫助",
+        "feedbackDislike": "沒幫助",
+        "intent": {
+            "route": "路線",
+            "status": "狀態",
+            "facility": "設施",
+            "ticket": "票券",
+            "weather": "天氣",
+            "time": "時間"
+        }
+    },
+    "systemMenu": {
+        "language": "語言",
+        "account": "帳號",
+        "login": "登入",
+        "me": "我的",
+        "myConversations": "我的對話",
+        "myFavorites": "我的收藏",
+        "myTrips": "我的行程",
+        "settings": "設定",
+        "logout": "登出"
     },
     "ui": {
         "items": "項目"

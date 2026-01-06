@@ -62,6 +62,24 @@ interface AppState {
 
     setOnboardingSeenVersion: (version: number) => void;
     setPendingChat: (payload: { input: string | null; autoSend?: boolean }) => void;
+
+    // Intent Selector State (for Dify selected_need)
+    selectedNeed: string | null;
+    setSelectedNeed: (need: string | null) => void;
+
+    // Route State
+    routeStart: { lat: number; lon: number; name?: string; id?: string } | null;
+    routeEnd: { lat: number; lon: number; name?: string; id?: string } | null;
+    routePath: [number, number][] | null;
+    routeSummary: { total_distance_meters: number; estimated_duration_minutes: number } | null;
+    isRouteCalculating: boolean;
+
+    setRouteStart: (point: { lat: number; lon: number; name?: string; id?: string } | null) => void;
+    setRouteEnd: (point: { lat: number; lon: number; name?: string; id?: string } | null) => void;
+    setRoutePath: (path: [number, number][] | null) => void;
+    setRouteSummary: (summary: { total_distance_meters: number; estimated_duration_minutes: number } | null) => void;
+    setIsRouteCalculating: (isCalculating: boolean) => void;
+    clearRoute: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -95,6 +113,16 @@ export const useAppStore = create<AppState>()(
             pendingChatInput: null,
             pendingChatAutoSend: false,
 
+            // Intent Selector State
+            selectedNeed: null,
+
+            // Route State Initial Values
+            routeStart: null,
+            routeEnd: null,
+            routePath: null,
+            routeSummary: null,
+            isRouteCalculating: false,
+
             setCurrentNode: (id) => set({ currentNodeId: id }),
             setZone: (zone) => set({ currentZone: zone }),
             setBottomSheetOpen: (isOpen) => set({ isBottomSheetOpen: isOpen }),
@@ -121,6 +149,23 @@ export const useAppStore = create<AppState>()(
                     pendingChatInput: input,
                     pendingChatAutoSend: autoSend ?? false
                 }),
+
+            // Intent Selector Action
+            setSelectedNeed: (need) => set({ selectedNeed: need }),
+
+            // Route Actions
+            setRouteStart: (point) => set({ routeStart: point }),
+            setRouteEnd: (point) => set({ routeEnd: point }),
+            setRoutePath: (path) => set({ routePath: path }),
+            setRouteSummary: (summary) => set({ routeSummary: summary }),
+            setIsRouteCalculating: (isCalculating) => set({ isRouteCalculating: isCalculating }),
+            clearRoute: () => set({ 
+                routeStart: null, 
+                routeEnd: null, 
+                routePath: null, 
+                routeSummary: null, 
+                isRouteCalculating: false 
+            }),
         }),
         {
             name: 'lutagu-storage',

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { SEED_NODES } from '@/lib/nodes/seedNodes';
-import { resolveHubStationMembers } from '@/lib/constants/stationLines';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -270,7 +270,7 @@ export async function GET(req: Request) {
     }
 
     // Filter to show only hub nodes and standalone stations (hide child nodes)
-    const filtered = candidates
+    const filteredBase = candidates
         .map(n => {
             const location = parseLocation((n as any).location ?? (n as any).coordinates);
             const parentHubId = (n as any).parent_hub_id;
@@ -291,7 +291,7 @@ export async function GET(req: Request) {
                 ward_id: (n as any).ward_id ?? null
             };
         })
-        .filter((n, idx) => {
+        .filter((n) => {
             const [lon, lat] = n.location.coordinates;
             if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
             if (lat === 0 && lon === 0) return false;
@@ -310,21 +310,46 @@ export async function GET(req: Request) {
 
             return true;
         })
+
+    const supplementalSeed = getFallbackNodes()
+        .map((n) => ({
+            ...n,
+            ward_id: (n as any).ward_id ?? null
+        }))
+        .filter((n) => {
+            const [lon, lat] = n.location.coordinates;
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+            if (lat === 0 && lon === 0) return false;
+            if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
+
+            const nodeType = String((n as any).type ?? '').toLowerCase();
+            const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
+            if (excludedTypes.includes(nodeType)) return false;
+            if (showStationsOnly && nodeType !== 'station') return false;
+            if (hubsOnly && !(n as any).is_hub) return false;
+            return true;
+        });
+
+    const filtered = dedupeById([...filteredBase, ...supplementalSeed])
         .sort((a, b) => {
             const da = (a.location.coordinates[1] - center.lat) ** 2 + (a.location.coordinates[0] - center.lon) ** 2;
             const db = (b.location.coordinates[1] - center.lat) ** 2 + (b.location.coordinates[0] - center.lon) ** 2;
             return da - db;
         });
 
-    // Deduplicate nodes by ID
-    const seenHubs = new Set<string>();
-    const deduplicated = [];
-
-    for (const node of filtered) {
-        if (seenHubs.has(node.id)) continue;
-        seenHubs.add(node.id);
-        deduplicated.push(node);
+    function dedupeById<T extends { id: string }>(arr: T[]): T[] {
+        const seen = new Set<string>();
+        const out: T[] = [];
+        for (const item of arr) {
+            if (!item?.id) continue;
+            if (seen.has(item.id)) continue;
+            seen.add(item.id);
+            out.push(item);
+        }
+        return out;
     }
+
+    const deduplicated = filtered;
 
     // Implement truncation to respect maxDataSizeKb
     // A rough estimation: each node is about 0.4KB to 0.6KB in JSON

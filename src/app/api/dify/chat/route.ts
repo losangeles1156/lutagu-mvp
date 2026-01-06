@@ -38,18 +38,27 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        const rawInputs = (inputs && typeof inputs === 'object') ? inputs : {};
+        const normalizedUserContext = Array.isArray((rawInputs as any).user_context) ? (rawInputs as any).user_context : [];
+
         // Prepare Dify request
         const difyPayload = {
             inputs: {
-                user_profile: inputs.user_profile || 'general',
-                current_station: inputs.current_station || '',
-                locale: inputs.locale || 'zh-TW',
-                ...inputs
+                ...rawInputs,
+                user_profile: (rawInputs as any).user_profile || 'general',
+                user_context: normalizedUserContext,
+                current_station: (rawInputs as any).current_station || '',
+                station_name: (rawInputs as any).station_name || '',
+                lat: (rawInputs as any).lat ?? null,
+                lng: (rawInputs as any).lng ?? null,
+                selected_need: (rawInputs as any).selected_need || null,
+                locale: (rawInputs as any).locale || 'zh-TW',
+                zone: (rawInputs as any).zone || 'core'
             },
             query,
             response_mode,
             conversation_id: conversation_id || undefined,
-            user: inputs.user_id || 'anonymous'
+            user: (rawInputs as any).user_id || 'anonymous'
         };
 
         const controller = new AbortController();

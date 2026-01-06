@@ -2,7 +2,7 @@
 
 import { useState, useEffect, memo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Zap, AlertTriangle, AlertOctagon, Cloud, Sun, Users, Wind } from 'lucide-react';
+import { Zap, AlertTriangle, AlertOctagon, Cloud, Sun, Users, Wind, ArrowRight } from 'lucide-react';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { SmartWeatherCard } from '@/components/ui/SmartWeatherCard';
@@ -97,13 +97,16 @@ interface L2_LiveProps {
 export function L2_Live({ data, hubDetails }: L2_LiveProps) {
     const tL2 = useTranslations('l2');
     const locale = useLocale();
-    const { lines, weather: initialWeather, crowd, updatedAt } = (data.l2 || {
+    const { lines, crowd, updatedAt } = (data.l2 || {
         lines: [],
         weather: { temp: 0, condition: 'Clear', windSpeed: 0 },
         crowd: { level: 1, trend: 'stable', userVotes: { total: 0, distribution: [0, 0, 0, 0, 0] } },
         updatedAt: undefined
     });
-    const [weather, setWeather] = useState(initialWeather);
+
+    // [Removed] Duplicated weather state and fetch. SmartWeatherCard now handles hydration.
+    // const [weather, setWeather] = useState(initialWeather); // Removed
+
     const [weatherAdvice, setWeatherAdvice] = useState<string | null>(null);
     const [clickedCrowd, setClickedCrowd] = useState<number | null>(null);
 
@@ -125,52 +128,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
         }
     };
 
-    // [New] Fetch Live Weather from Open Meteo
-    useEffect(() => {
-        async function fetchLiveWeather() {
-            try {
-                const res = await fetch('/api/weather/live');
-                if (res.ok) {
-                    const liveData = await res.json();
-
-                    // Simple WMO Code Mapping
-                    // 0-1: Clear, 2-3: Cloud, 51+: Rain
-                    let condition = 'Cloud';
-                    const code = liveData.code;
-                    if (code <= 1) condition = 'Clear';
-                    else if (code <= 3) condition = 'Cloud';
-                    else if (code >= 51) condition = 'Rain';
-
-                    const newWeather = {
-                        temp: liveData.temp,
-                        condition: condition,
-                        windSpeed: liveData.wind,
-                        iconCode: String(code)
-                    };
-                    setWeather(newWeather);
-
-                    // [New] Fetch AI Advice based on live weather
-                    try {
-                        const adviceRes = await fetch(
-                            `/api/weather/advice?temp=${liveData.temp}&condition=${condition}&wind=${liveData.wind}&locale=${locale}`
-                        );
-                        if (adviceRes.ok) {
-                            const adviceData = await adviceRes.json();
-                            setWeatherAdvice(adviceData.advice);
-                        }
-                    } catch (adviceErr) {
-                        console.warn('Weather advice fetch failed', adviceErr);
-                    }
-                }
-            } catch (e) {
-                console.warn('Live weather fetch failed', e);
-            }
-        }
-        fetchLiveWeather();
-    }, [locale]);
-
-
-    // Derived State for Layout
+    // [Derived State for Layout]
     const delayedLines = lines.filter((l: any) => l.status !== 'normal');
     const normalLines = lines.filter((l: any) => l.status === 'normal');
     const isBusyHub = lines.length > 4; // Trigger compact mode if more than 4 lines
@@ -296,9 +254,45 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                         <div className="absolute -top-2 left-2 z-20 px-1.5 py-0.5 bg-gray-900/90 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-sm border border-white/10">
                             TOKYO WIDE
                         </div>
-                        <SmartWeatherCard />
+                        <SmartWeatherCard initialData={data.l2?.weather} />
                     </div>
 
+
+                    {/* VACAN Real-time Map Card */}
+                    <a
+                        href="https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&areaName=chiyoda-ku"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block relative bg-white rounded-2xl border border-gray-100 p-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] group overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-orange-100 via-transparent to-transparent opacity-50 rounded-tr-2xl"></div>
+
+                        <div className="flex items-center gap-2 mb-2 relative z-10">
+                            <div className="p-1.5 bg-orange-100 rounded-lg text-orange-600">
+                                <Users size={14} />
+                            </div>
+                            <div>
+                                <h4 className="text-xs font-black text-gray-900 leading-none">
+                                    {tL2('vacanTitle', { defaultValue: 'Crowd Map' })}
+                                </h4>
+                                <span className="text-[9px] text-orange-600 font-bold bg-orange-50 px-1 py-0.5 rounded mt-0.5 inline-block border border-orange-100">
+                                    {tL2('vacanSub', { defaultValue: 'Live Availability' })}
+                                </span>
+                            </div>
+                        </div>
+
+                        <p className="text-[10px] text-gray-500 font-medium leading-tight mb-3 relative z-10">
+                            {tL2('vacanDesc', { defaultValue: 'Check real-time availability of nearby shops & restaurants' })}
+                        </p>
+
+                        <div className="flex items-center justify-between mt-auto">
+                            <span className="text-[10px] font-bold text-gray-400 group-hover:text-orange-500 transition-colors flex items-center gap-1">
+                                {tL2('vacanCta', { defaultValue: 'Open Map' })}
+                                <ArrowRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                            </span>
+                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shadow-sm"></div>
+                        </div>
+                    </a>
 
                     {/* User Crowd Report Section */}
                     <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-3 shadow-sm flex flex-col justify-center">
@@ -339,7 +333,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                                         <span className={`text-[9px] font-bold leading-none ${isSelected ? 'text-indigo-100' : 'text-gray-500'}`}>
                                             {opt.label}
                                         </span>
-                                        
+
                                         {/* Show Count if clicked (Simulated logic) */}
                                         {clickedCrowd !== null && (
                                             <span className={`text-[8px] font-bold mt-0.5 ${isSelected ? 'text-indigo-100' : 'text-gray-400'}`}>

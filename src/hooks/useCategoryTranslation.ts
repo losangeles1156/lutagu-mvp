@@ -27,9 +27,14 @@ export function useCategoryTranslation() {
         const l3Translation = tL3(key);
         if (l3Translation !== key) return l3Translation;
 
-        // 3. Fallback: Formatted Raw String
+        // 3. Fallback: Try Tag Subcategories (for granular categories like 'cafe', 'fast_food')
+        const tagKey = `sub.${normalized}`;
+        const tagTranslation = tTag(tagKey);
+        if (tagTranslation !== tagKey) return tagTranslation;
+
+        // 4. Final Fallback: Formatted Raw String
         return category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' ');
-    }, [tL1, tL3]);
+    }, [tL1, tL3, tTag]);
 
     /**
      * Translates a subcategory (e.g., "fast_food", "convenience").

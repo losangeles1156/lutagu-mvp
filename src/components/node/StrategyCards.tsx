@@ -3,6 +3,7 @@
 import { MatchedStrategyCard } from '@/types/lutagu_l4';
 import { ExternalLink, Info, AlertTriangle, Lightbulb, Ticket, Clock, Snowflake } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getLocaleString } from '@/lib/utils/localeUtils';
 
 interface StrategyCardsProps {
     cards: MatchedStrategyCard[];
@@ -65,7 +66,7 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
             <div className="flex items-center gap-2 px-1 mb-2">
                 <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
                 <h3 className="text-lg font-black text-slate-800">
-                    {locale.startsWith('zh') ? 'BambiGO 智能建議' : locale === 'ja' ? 'BambiGO スマート提案' : 'BambiGO Smart Tips'}
+                    {locale.startsWith('zh') ? 'Lutagu 智能建議' : locale === 'ja' ? 'Lutagu スマート提案' : 'Lutagu Smart Tips'}
                 </h3>
                 <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full ml-auto">
                     L4 Layer Active
@@ -90,7 +91,7 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2 mb-1">
                                 <div className={`text-sm font-black truncate ${getTitleColor(card.type)}`}>
-                                    {card.title}
+                                    {typeof card.title === 'object' ? getLocaleString(card.title, locale) : card.title}
                                 </div>
                                 {card.priority >= 80 && (
                                     <span className="shrink-0 text-[9px] font-black uppercase tracking-wider bg-white/60 px-1.5 py-0.5 rounded border border-white/40 text-red-500">
@@ -98,9 +99,9 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
                                     </span>
                                 )}
                             </div>
-                            
+
                             <p className="text-xs font-bold text-slate-600 leading-relaxed mb-3">
-                                {card.description}
+                                {typeof card.description === 'object' ? getLocaleString(card.description, locale) : card.description}
                             </p>
 
                             {/* Action Button */}

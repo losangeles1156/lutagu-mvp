@@ -26,6 +26,42 @@ export function getLocaleString(obj: LocaleString | string | undefined, locale: 
     return obj.en || obj.ja || obj.zh || '';
 }
 
+/**
+ * Returns a bilingual string in the format "Primary (Secondary)".
+ * - For EN users: "English (Native/Japanese)"
+ * - For JA users: "Japanese (English)"
+ * - For ZH users: "Chinese (Original/English)"
+ */
+export function getBilingualString(obj: LocaleString | string | undefined, locale: string): string {
+    if (!obj) return '';
+    if (typeof obj === 'string') return obj;
+
+    const primary = getLocaleString(obj, locale);
+    let secondary = '';
+
+    const lang = locale.startsWith('zh') ? 'zh' : locale.split('-')[0];
+
+    // Determine secondary language
+    if (lang === 'en') {
+        // For English users, show Japanese (Native) if available
+        secondary = obj.ja || '';
+    } else {
+        // For CJK users, show English as universal secondary
+        secondary = obj.en || '';
+        // If English is missing, try Japanese (for Chinese users) or fallback
+        if (!secondary && lang === 'zh') {
+            secondary = obj.ja || '';
+        }
+    }
+
+    // Avoid duplication (e.g. if en == ja or primary == secondary)
+    if (secondary && secondary.toLowerCase() !== primary.toLowerCase()) {
+        return `${primary} (${secondary})`;
+    }
+
+    return primary;
+}
+
 export function toLocaleString(value: any): LocaleString {
     if (!value) return { ja: '', en: '', zh: '' };
     if (typeof value === 'string') return { ja: value, en: value, zh: value };

@@ -26,12 +26,17 @@ export function ContextSelector() {
 
     const toggleContext = (id: string) => {
         const current = userContext || [];
+        const isAdding = !current.includes(id);
+        
         if (current.includes(id)) {
-            // Remove if exists
             setUserContext(current.filter(c => c !== id));
         } else {
-            // Add if not exists
             setUserContext([...current, id]);
+        }
+
+        // Haptic feedback (if available)
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate(10);
         }
     };
 

@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Sidebar */}
             <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 fixed h-full z-10">
                 <div className="p-6 border-b border-gray-100">
-                    <h1 className="text-xl font-bold text-gray-800">BambiGO Admin</h1>
+                    <h1 className="text-xl font-bold text-gray-800">Lutagu Admin</h1>
                     <p className="text-xs text-gray-500 mt-1">Management Console</p>
                 </div>
                 <nav className="p-4 space-y-1">

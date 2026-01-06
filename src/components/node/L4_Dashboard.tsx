@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRightLeft, ChevronDown, ChevronRight, Clock, Loader2, Map as MapIcon, Settings, Sparkles, Ticket, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ArrowRightLeft, ChevronDown, ChevronRight, Clock, Loader2, Map as MapIcon, MessageSquare, Settings, Sparkles, Ticket, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StationAutocomplete, type Station } from '@/components/ui/StationAutocomplete';
 import { resolveHubStationMembers } from '@/lib/constants/stationLines';
@@ -33,6 +33,7 @@ import { RouteResultCard } from '@/components/node/RouteResultCard';
 import { InsightCards } from '@/components/node/InsightCards';
 import { StrategyCards } from '@/components/node/StrategyCards';
 import type { MatchedStrategyCard, UserPreferences, RecommendRequest } from '@/types/lutagu_l4';
+import { useAppStore } from '@/stores/appStore';
 
 // Types for Card response (Mirroring API response)
 interface L4DashboardProps {
@@ -55,6 +56,8 @@ class HttpError extends Error {
 export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowledge }: L4DashboardProps) {
     const stationId = useMemo(() => normalizeOdptStationId(String(currentNodeId || '').trim()), [currentNodeId]);
     const uiLocale = locale;
+
+    const setChatOpen = useAppStore(state => state.setChatOpen);
 
     // Debug: Log L4 Knowledge data
 
@@ -397,22 +400,62 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
 
     const demandChips = useMemo(() => {
         const all: { key: SimplifiedDemand; icon: string; label: string }[] = [
-            { key: 'fastTrack', icon: '⚡', label: uiLocale.startsWith('zh') ? '快速' : uiLocale === 'ja' ? '最速' : 'Fast' },
-            { key: 'saveMoney', icon: '💰', label: uiLocale.startsWith('zh') ? '省錢' : uiLocale === 'ja' ? '安い' : 'Cheap' },
-            { key: 'accessibility', icon: '🛗', label: uiLocale.startsWith('zh') ? '輕鬆' : uiLocale === 'ja' ? '楽々' : 'Easy' },
-            { key: 'expertTips', icon: '💡', label: uiLocale.startsWith('zh') ? '專家' : uiLocale === 'ja' ? 'プロ' : 'Tips' },
-            { key: 'avoidCrowds', icon: '🚶', label: uiLocale.startsWith('zh') ? '避人潮' : uiLocale === 'ja' ? '空き' : 'Quiet' },
-            { key: 'optimalRoute', icon: '✨', label: uiLocale.startsWith('zh') ? '優化' : uiLocale === 'ja' ? '最適' : 'Optimal' },
+            {
+                key: 'accessibility',
+                icon: '🛗',
+                label: uiLocale.startsWith('zh')
+                    ? '無障礙/親子'
+                    : uiLocale === 'ja'
+                        ? 'バリアフリー/子連れ'
+                        : 'Accessibility & Kids'
+            },
+            {
+                key: 'fastTrack',
+                icon: '⚡',
+                label: uiLocale.startsWith('zh')
+                    ? '趕時間'
+                    : uiLocale === 'ja'
+                        ? '時間優先'
+                        : 'In a Hurry'
+            },
+            {
+                key: 'saveMoney',
+                icon: '💰',
+                label: uiLocale.startsWith('zh')
+                    ? '省錢優先'
+                    : uiLocale === 'ja'
+                        ? '料金重視'
+                        : 'Save Money'
+            },
+            {
+                key: 'avoidCrowds',
+                icon: '🚶',
+                label: uiLocale.startsWith('zh')
+                    ? '避開人潮'
+                    : uiLocale === 'ja'
+                        ? '混雑回避'
+                        : 'Avoid Crowds'
+            },
+            {
+                key: 'optimalRoute',
+                icon: '✨',
+                label: uiLocale.startsWith('zh') ? '優化' : uiLocale === 'ja' ? '最適' : 'Optimal'
+            },
+            {
+                key: 'expertTips',
+                icon: '💡',
+                label: uiLocale.startsWith('zh') ? '專家建議' : uiLocale === 'ja' ? 'プロのコツ' : 'Expert Tips'
+            }
         ];
 
         if (task === 'timetable') {
-            return all.filter(c => ['accessibility', 'expertTips', 'avoidCrowds'].includes(c.key));
+            return all.filter(c => ['accessibility', 'avoidCrowds', 'expertTips'].includes(c.key));
         }
         return all;
     }, [task, uiLocale]);
 
-    const visibleChips = demandChips.slice(0, 3);
-    const hiddenChips = demandChips.slice(3);
+    const visibleChips = demandChips.slice(0, 4);
+    const hiddenChips = demandChips.slice(4);
 
     // [New] Fetch Transfer Knowledge
     const [knowledgeData, setKnowledgeData] = useState<any>(null);
@@ -464,7 +507,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                     setIsLoading(false);
                 });
         }
-    }, [task, stationId]);
+    }, [task, stationId, timetableData, fetchJsonCached]);
 
     const askWithText = async (rawText: string) => {
         const text = String(rawText || '').trim();
@@ -840,16 +883,25 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
         <div className="h-full bg-slate-50 overflow-y-auto pb-32">
             <div className="max-w-xl mx-auto min-h-full flex flex-col">
                 {/* Header / Tabs */}
-                <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm pt-4 px-4 pb-2">
-                    <TabSelector
-                        activeTask={task}
-                        onSelect={(t) => {
-                            setTask(t);
-                            const tpl = templates.find(temp => temp.category === 'basic' && temp.kind === t);
-                            if (tpl) void applyTemplate(tpl);
-                        }}
-                        locale={uiLocale}
-                    />
+                <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm pt-4 px-4 pb-2 flex items-center gap-3">
+                    <div className="flex-1">
+                        <TabSelector
+                            activeTask={task}
+                            onSelect={(t) => {
+                                setTask(t);
+                                const tpl = templates.find(temp => temp.category === 'basic' && temp.kind === t);
+                                if (tpl) void applyTemplate(tpl);
+                            }}
+                            locale={uiLocale}
+                        />
+                    </div>
+                    <button
+                        onClick={() => setChatOpen(true)}
+                        className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 text-white text-[11px] font-black shadow-sm shadow-indigo-200 active:scale-95 transition-all"
+                    >
+                        <MessageSquare size={14} />
+                        <span>{uiLocale.startsWith('zh') ? '問 LUTAGU' : uiLocale === 'ja' ? 'LUTAGU に聞く' : 'Ask LUTAGU'}</span>
+                    </button>
                 </div>
 
                 {/* Main Content */}

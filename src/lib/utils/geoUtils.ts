@@ -1,5 +1,34 @@
 
 /**
+ * Tokyo 23 Wards bounding box (with buffer for edge stations)
+ * 東京23區邊界座標（含緩衝區以涵蓋邊緣車站）
+ */
+export const TOKYO_23_WARDS_BOUNDS = {
+    minLat: 35.52,  // 南端（大田區）
+    maxLat: 35.82,  // 北端（北區、足立區）
+    minLng: 139.56, // 西端（世田谷區）
+    maxLng: 139.93  // 東端（江東區、江戸川區）
+};
+
+/**
+ * Check if coordinates are within Tokyo 23 wards area
+ * @param lat - Latitude
+ * @param lng - Longitude
+ * @returns true if coordinates are within Tokyo 23 wards bounds
+ */
+export function isWithinTokyo23Wards(lat: number, lng: number): boolean {
+    if (typeof lat !== 'number' || typeof lng !== 'number') return false;
+    if (isNaN(lat) || isNaN(lng)) return false;
+
+    return (
+        lat >= TOKYO_23_WARDS_BOUNDS.minLat &&
+        lat <= TOKYO_23_WARDS_BOUNDS.maxLat &&
+        lng >= TOKYO_23_WARDS_BOUNDS.minLng &&
+        lng <= TOKYO_23_WARDS_BOUNDS.maxLng
+    );
+}
+
+/**
  * Calculate distance between two points in kilometers using Haversine formula
  */
 export function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {

@@ -10,7 +10,7 @@ import {
 import { getLocaleString, normalizeVibeTagsForDisplay } from '@/lib/utils/localeUtils';
 import { useStationDNA, L1CategorySummary, VibeTag, VIBE_RULES } from '@/hooks/useStationDNA';
 import { PlaceCard } from './PlaceCard';
-import { L1Place } from '@/hooks/useL1Places';
+import { useL1Places, L1Place } from '@/hooks/useL1Places';
 import { useCategoryTranslation } from '@/hooks/useCategoryTranslation';
 
 import { StationUIProfile } from '@/lib/types/stationStandard';
@@ -30,13 +30,55 @@ const CATEGORY_STYLE: Record<string, { icon: any; color: string; bgColor: string
     default: { icon: MapPin, color: 'text-gray-500', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' }
 };
 
+// 從景點資料動態計算類別統計
+function calculateCategoryStats(places: L1Place[]): Record<string, number> {
+    const stats: Record<string, number> = {};
+    places.forEach(place => {
+        const cat = place.category || 'default';
+        stats[cat] = (stats[cat] || 0) + 1;
+    });
+    return stats;
+}
+
+type CategorySummary = {
+    id: string;
+    count: number;
+    representative_spots: L1Place[];
+};
+
+// 將統計資料轉換為 L1CategorySummary 陣列
+function statsToCategorySummaries(
+    stats: Record<string, number>,
+    places: L1Place[]
+): CategorySummary[] {
+    return Object.entries(stats).map(([id, count]) => ({
+        id,
+        count,
+        representative_spots: places.filter(p => p.category === id)
+    })).sort((a, b) => b.count - a.count);
+}
+
 export function L1_DNA({ data }: { data: StationUIProfile }) {
     const tL1 = useTranslations('l1');
     const tTag = useTranslations('tag');
     const { getCategoryLabel, getSubcategoryLabel } = useCategoryTranslation();
     const locale = useLocale();
 
-    const { title, tagline, categories, vibe_tags, loading } = useStationDNA({ ...data.l1_dna, name: data.name, id: data.id }, locale);
+    // 使用 useL1Places 獲取實際景點資料
+    const { places: l1Places, loading: placesLoading } = useL1Places();
+    
+    // 靜態 DNA 資料（用於 title、tagline、vibe_tags）
+    const { title, tagline, vibe_tags } = useStationDNA({ ...data.l1_dna, name: data.name, id: data.id }, locale);
+
+    // 動態計算類別統計
+    const dynamicCategoryStats = useMemo(() => {
+        return calculateCategoryStats(l1Places);
+    }, [l1Places]);
+
+    // 動態類別列表
+    const dynamicCategories = useMemo(() => {
+        return statsToCategorySummaries(dynamicCategoryStats, l1Places);
+    }, [dynamicCategoryStats, l1Places]);
 
     const displayVibeTags = useMemo(() => {
         if (vibe_tags && vibe_tags.length > 0) {
@@ -50,21 +92,31 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
     const [activeVibeFilter, setActiveVibeFilter] = useState<string | null>(null);
 
     const filteredCategoryList = useMemo(() => {
-        let list = Object.values(categories) as L1CategorySummary[];
+        let list: CategorySummary[] = [];
+
+        if (l1Places.length > 0) {
+            list = dynamicCategories;
+        } else {
+            const raw = (data.l1_dna?.categories || {}) as Record<string, any>;
+            list = Object.values(raw).map(cat => ({
+                id: String(cat?.id || ''),
+                count: Number(cat?.count || 0),
+                representative_spots: []
+            })).filter(cat => cat.id);
+        }
+
         if (activeVibeFilter) {
             const rule = VIBE_RULES.find(r => r.id === activeVibeFilter);
             if (rule && rule.relatedCategories) {
-                // Filter categories that are related to the vibe
-                // We keep categories that match the related list
                 const related = list.filter(cat => rule.relatedCategories?.includes(cat.id));
-                // If related categories are found, show them. Otherwise show all (fallback).
                 if (related.length > 0) {
                     list = related;
                 }
             }
         }
-        return list.sort((a, b) => b.count - a.count);
-    }, [categories, activeVibeFilter]);
+
+        return list;
+    }, [data.l1_dna?.categories, dynamicCategories, l1Places.length, activeVibeFilter]);
 
     const handleVibeClick = (vibeId: string) => {
         setActiveVibeFilter(prev => prev === vibeId ? null : vibeId);
@@ -72,12 +124,13 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
 
     // Drawer State
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [activeCategory, setActiveCategory] = useState<L1CategorySummary | null>(null);
+    const [activeCategory, setActiveCategory] = useState<CategorySummary | null>(null);
     const [activeSubcategory, setActiveSubcategory] = useState<string>('all');
 
     const toggleDrawer = (categoryId: string | null) => {
         if (categoryId) {
-            const cat = categories[categoryId];
+            // 從動態類別列表中查找
+            const cat = filteredCategoryList.find(c => c.id === categoryId);
             if (cat) {
                 setActiveCategory(cat);
                 setDrawerOpen(true);
@@ -209,7 +262,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                     </span>
                 </div>
 
-                {loading ? (
+                {placesLoading ? (
                     <div className="grid grid-cols-2 gap-3">
                         {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-gray-50 animate-pulse rounded-3xl" />)}
                     </div>
@@ -222,7 +275,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 gap-4">
-                        {categoryList.map((cat: L1CategorySummary) => {
+                        {categoryList.map((cat) => {
                             const style = CATEGORY_STYLE[cat.id] || CATEGORY_STYLE.default;
                             const Icon = style.icon;
                             return (

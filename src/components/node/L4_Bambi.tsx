@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2 } from 'lucide-react';
+import { useAppStore } from '@/stores/appStore';
+import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 
 interface L4_BambiProps {
     data: StationUIProfile;
@@ -23,7 +25,11 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     const tL4 = useTranslations('l4');
     const tCommon = useTranslations('common');
     const locale = useLocale();
+    const { zone } = useZoneAwareness();
     const { id: stationId, name } = data || {};
+    const setCurrentNode = useAppStore(s => s.setCurrentNode);
+    const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
+    const setUserProfileStore = useAppStore(s => s.setUserProfile);
 
     // Robust Name Resolution
     const displayName = (name?.zh && name?.zh !== '車站' && name?.zh !== 'Station')
@@ -69,6 +75,91 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     const [destination, setDestination] = useState('');
     const [selectedDemands, setSelectedDemands] = useState<string[]>([]);
 
+    const userContext = useMemo(() => {
+        const ctx: string[] = [];
+        if (selectedDemands.includes('speed')) ctx.push('rush');
+        if (selectedDemands.includes('luggage')) ctx.push('luggage');
+        if (selectedDemands.includes('family')) ctx.push('stroller');
+        if (selectedDemands.includes('accessibility')) ctx.push('accessibility');
+        return ctx;
+    }, [selectedDemands]);
+
+    const quickButtons = useMemo(() => {
+        if (locale === 'ja') {
+            return [
+                {
+                    id: 'route',
+                    label: '最短ルート',
+                    demands: ['speed'],
+                    profile: 'general',
+                    prompt: `タスク：ルート案内\n出発：${displayName}（${stationId || ''}）\n目的地：先に「どこへ行きたいか（駅名/観光地）」を聞いてください\n要望：最速/乗換少なめ（どちらか）\n出力：2案、各案にルート・所要時間・乗換のコツを含める`
+                },
+                {
+                    id: 'access',
+                    label: 'バリアフリー',
+                    demands: ['accessibility'],
+                    profile: 'wheelchair',
+                    prompt: `タスク：バリアフリー案内\n現在地：${displayName}（${stationId || ''}）\n要望：エレベーターで移動できる出口/動線を優先\n不足情報：必要なら「どの出口/どの路線/どの方向か」を先に質問\n出力：結論→確認質問（必要時）の順で短く`
+                },
+                {
+                    id: 'status',
+                    label: '遅延・代替',
+                    demands: ['speed'],
+                    profile: 'general',
+                    prompt: `タスク：運行状況\n影響駅：${displayName}（${stationId || ''}）\nやること：この駅に影響する遅延/運休があるか確認し、あるなら代替案を1つ\n出力：要点だけ（1-2行）`
+                }
+            ];
+        }
+        if (locale === 'en') {
+            return [
+                {
+                    id: 'route',
+                    label: 'Fastest Route',
+                    demands: ['speed'],
+                    profile: 'general',
+                    prompt: `Task: Route planning\nFrom: ${displayName} (${stationId || ''})\nTo: Ask me where I want to go first (station/POI)\nPreference: fastest vs fewer transfers (pick one)\nOutput: 2 options, each with route, ETA, and key transfer tips`
+                },
+                {
+                    id: 'access',
+                    label: 'Accessibility',
+                    demands: ['accessibility'],
+                    profile: 'wheelchair',
+                    prompt: `Task: Accessibility guidance\nLocation: ${displayName} (${stationId || ''})\nPriority: elevator-only path and accessible exits\nIf missing info: ask which exit/line/direction\nOutput: direct recommendation first, then questions if needed`
+                },
+                {
+                    id: 'status',
+                    label: 'Delays & Backup',
+                    demands: ['speed'],
+                    profile: 'general',
+                    prompt: `Task: Live disruptions\nAffected station: ${displayName} (${stationId || ''})\nDo: check any delays/disruptions impacting this station and give 1 backup suggestion\nOutput: concise bullets`
+                }
+            ];
+        }
+        return [
+            {
+                id: 'route',
+                label: '最快路線',
+                demands: ['speed'],
+                profile: 'general',
+                prompt: `任務：路線規劃\n出發：${displayName}（${stationId || ''}）\n目的地：請先問我想去哪一站/景點\n需求：最快 / 少轉乘（二選一）\n輸出：給 2 個選項，各含：路線、預估時間、轉乘關鍵點`
+            },
+            {
+                id: 'access',
+                label: '無障礙',
+                demands: ['accessibility'],
+                profile: 'wheelchair',
+                prompt: `任務：無障礙動線\n目前：${displayName}（${stationId || ''}）\n需求：優先電梯可達的出口/動線\n不足資訊：需要時先問我「哪個出口 / 哪條線 / 方向」\n輸出：先給結論，再補必要追問`
+            },
+            {
+                id: 'status',
+                label: '延誤/替代',
+                demands: ['speed'],
+                profile: 'general',
+                prompt: `任務：即時運行狀態\n影響車站：${displayName}（${stationId || ''}）\n要做：確認是否有延誤/停駛，若有給 1 個替代建議\n輸出：重點 1-2 行`
+            }
+        ];
+    }, [displayName, locale, stationId]);
+
     // Scroll to bottom
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,8 +202,11 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                     conversation_id: difyConversationIdRef.current,
                     inputs: {
                         user_profile: userProfile,
+                        user_context: userContext,
                         current_station: stationId || '',
+                        station_name: displayName,
                         locale,
+                        zone: zone || 'core',
                         user_id: difyUserIdRef.current
                     }
                 })
@@ -169,13 +263,14 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
 
         } catch (error) {
             console.error('Chat Error:', error);
+            setIsOffline(true);
             setMessages(prev => [...prev, { role: 'assistant', content: tL4('chatError') }]);
             clearInterval(stepInterval);
         } finally {
             setIsLoading(false);
             setThinkingStep('');
         }
-    }, [isLoading, locale, messages, stationId, tL4]);
+    }, [displayName, isLoading, locale, stationId, tL4, userContext, zone]);
 
     useEffect(() => {
         const text = String(seedQuestion || '').trim();
@@ -230,37 +325,50 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                     {getLocaleString(bestCard.title, locale)}
                                 </div>
                             </div>
-                            <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
-                                <MapPin size={18} className="text-white" />
-                            </div>
-                        </div>
-                        <div className="mt-3 text-sm font-bold text-white/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
-                            {getLocaleString(bestCard.description, locale)}
-                        </div>
+                    <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+                        <MapPin size={18} className="text-white" />
+                    </div>
+                </div>
+                <div className="mt-3 text-sm font-bold text-white/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
+                    {getLocaleString(bestCard.description, locale)}
+                </div>
 
-                        <div className="mt-4 flex gap-2">
-                            <button
-                                onClick={() => {
-                                    if (bestCard.actionUrl) {
-                                        window.open(bestCard.actionUrl, '_blank', 'noopener,noreferrer');
-                                        return;
-                                    }
-                                    if (otherCards.length > 0) setIsOtherOpen(true);
-                                }}
-                                className="flex-1 py-3 rounded-2xl bg-white text-indigo-700 font-black text-xs tracking-widest hover:bg-indigo-50 transition-colors active:scale-[0.99]"
-                            >
-                                {getLocaleString(bestCard.actionLabel, locale) || tCommon('view')}
-                            </button>
+                <div className="mt-4 flex gap-2">
+                    <button
+                        onClick={() => {
+                            if (bestCard.actionUrl) {
+                                window.open(bestCard.actionUrl, '_blank', 'noopener,noreferrer');
+                                return;
+                            }
+                            if (otherCards.length > 0) setIsOtherOpen(true);
+                        }}
+                        className="flex-1 py-3 rounded-2xl bg-white text-indigo-700 font-black text-xs tracking-widest hover:bg-indigo-50 transition-colors active:scale-[0.99]"
+                    >
+                        {getLocaleString(bestCard.actionLabel, locale) || tCommon('view')}
+                    </button>
 
-                            {otherCards.length > 0 && (
-                                <button
-                                    onClick={() => setIsOtherOpen(v => !v)}
-                                    className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
-                                >
-                                    {tL4('alternatives')}
-                                </button>
-                            )}
-                        </div>
+                    {/* Apply on Map: focus current station and reveal map context */}
+                    <button
+                        onClick={() => {
+                            if (stationId) {
+                                setCurrentNode(stationId);
+                                setBottomSheetOpen(false);
+                            }
+                        }}
+                        className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
+                    >
+                        {locale.startsWith('ja') ? '地図に反映' : locale.startsWith('en') ? 'Apply to Map' : '套用到地圖'}
+                    </button>
+
+                    {otherCards.length > 0 && (
+                        <button
+                            onClick={() => setIsOtherOpen(v => !v)}
+                            className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
+                        >
+                            {tL4('alternatives')}
+                        </button>
+                    )}
+                </div>
                     </div>
                 )}
 
@@ -320,6 +428,23 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
             {/* Input Overlay (Hybrid Strategy) */}
             <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px]">
                 <div className="space-y-4 max-w-lg mx-auto">
+                    <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
+                        {quickButtons.map(b => (
+                            <button
+                                key={b.id}
+                                onClick={() => {
+                                    setSelectedDemands(b.demands);
+                                    const text = String(b.prompt || '').trim();
+                                    if (!text) return;
+                                    handleSend(text, b.profile);
+                                }}
+                                disabled={isLoading}
+                                className="px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-black whitespace-nowrap text-slate-700 hover:border-indigo-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                {b.label}
+                            </button>
+                        ))}
+                    </div>
                     {/* Destination Input & Free Text */}
                     <div className="relative group flex gap-2">
                         <div className="relative flex-1">
@@ -359,11 +484,15 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                 <button
                                     key={demand.id}
                                     onClick={() => {
-                                        if (isSelected) {
-                                            setSelectedDemands(prev => prev.filter(id => id !== demand.id));
-                                        } else {
-                                            setSelectedDemands(prev => [...prev, demand.id]);
-                                        }
+                                    if (isSelected) {
+                                        setSelectedDemands(prev => prev.filter(id => id !== demand.id));
+                                    } else {
+                                        setSelectedDemands(prev => [...prev, demand.id]);
+                                    }
+
+                                    // Sync user profile for map & agent
+                                    if (demand.id === 'accessibility') setUserProfileStore('wheelchair');
+                                    if (demand.id === 'family') setUserProfileStore('stroller');
                                     }}
                                     disabled={isLoading}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-black whitespace-nowrap transition-all ${isSelected
