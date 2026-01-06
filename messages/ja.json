@@ -252,7 +252,8 @@
             "full": "満員"
         },
         "emergencyAlert": "緊急警報",
-        "viewJmaDetails": "気象庁の詳細を見る"
+        "viewJmaDetails": "気象庁の詳細を見る",
+        "loadingAdvice": "アドバイスを読み込み中..."
     },
     "l3": {
         "servicesTitle": "サービス施設",

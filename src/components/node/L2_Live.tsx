@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, memo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Zap, AlertTriangle, AlertOctagon, Cloud, Sun, Users, Wind } from 'lucide-react';
+import { Zap, AlertTriangle, Users } from 'lucide-react';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { SmartWeatherCard } from '@/components/ui/SmartWeatherCard';
@@ -97,17 +97,14 @@ interface L2_LiveProps {
 export function L2_Live({ data, hubDetails }: L2_LiveProps) {
     const tL2 = useTranslations('l2');
     const locale = useLocale();
-    const { lines, weather: initialWeather, crowd, updatedAt } = (data.l2 || {
+    const { lines, crowd, updatedAt } = (data.l2 || {
         lines: [],
-        weather: { temp: 0, condition: 'Clear', windSpeed: 0 },
         crowd: { level: 1, trend: 'stable', userVotes: { total: 0, distribution: [0, 0, 0, 0, 0] } },
         updatedAt: undefined
     });
-    const [weather, setWeather] = useState(initialWeather);
-    const [weatherAdvice, setWeatherAdvice] = useState<string | null>(null);
     const [clickedCrowd, setClickedCrowd] = useState<number | null>(null);
 
-    // [New] Handle Crowd Vote
+    // Handle Crowd Vote with optimistic UI
     const handleVote = async (idx: number) => {
         setClickedCrowd(idx); // Optimistic UI update
 
@@ -125,49 +122,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
         }
     };
 
-    // [New] Fetch Live Weather from Open Meteo
-    useEffect(() => {
-        async function fetchLiveWeather() {
-            try {
-                const res = await fetch('/api/weather/live');
-                if (res.ok) {
-                    const liveData = await res.json();
-
-                    // Simple WMO Code Mapping
-                    // 0-1: Clear, 2-3: Cloud, 51+: Rain
-                    let condition = 'Cloud';
-                    const code = liveData.code;
-                    if (code <= 1) condition = 'Clear';
-                    else if (code <= 3) condition = 'Cloud';
-                    else if (code >= 51) condition = 'Rain';
-
-                    const newWeather = {
-                        temp: liveData.temp,
-                        condition: condition,
-                        windSpeed: liveData.wind,
-                        iconCode: String(code)
-                    };
-                    setWeather(newWeather);
-
-                    // [New] Fetch AI Advice based on live weather
-                    try {
-                        const adviceRes = await fetch(
-                            `/api/weather/advice?temp=${liveData.temp}&condition=${condition}&wind=${liveData.wind}&locale=${locale}`
-                        );
-                        if (adviceRes.ok) {
-                            const adviceData = await adviceRes.json();
-                            setWeatherAdvice(adviceData.advice);
-                        }
-                    } catch (adviceErr) {
-                        console.warn('Weather advice fetch failed', adviceErr);
-                    }
-                }
-            } catch (e) {
-                console.warn('Live weather fetch failed', e);
-            }
-        }
-        fetchLiveWeather();
-    }, [locale]);
+    // Weather is now handled entirely by SmartWeatherCard - no duplicate API calls
 
 
     // Derived State for Layout

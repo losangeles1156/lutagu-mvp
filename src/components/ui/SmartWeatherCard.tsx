@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Cloud, Sun, CloudRain, CloudSnow, Wind, Droplets, AlertTriangle, ShieldAlert, ExternalLink, Umbrella } from 'lucide-react';
+import { Cloud, Sun, CloudRain, CloudSnow, Wind, Droplets, AlertTriangle, ShieldAlert, ExternalLink, Umbrella, Loader2 } from 'lucide-react';
 
 interface WeatherData {
     temp: number;
@@ -33,63 +33,94 @@ export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
     const [advice, setAdvice] = useState<string | null>(null);
     const [alert, setAlert] = useState<JMAAlert | null>(null);
     const [jmaLink, setJmaLink] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    // Progressive loading states
+    const [weatherLoading, setWeatherLoading] = useState(true);
+    const [adviceLoading, setAdviceLoading] = useState(false);
+
+    // Refs to prevent stale closure issues
+    const onAdviceUpdateRef = useRef(onAdviceUpdate);
+    onAdviceUpdateRef.current = onAdviceUpdate;
+
+    // Memoized advice fetcher (non-blocking)
+    const fetchAdvice = useCallback(async (weatherData: WeatherData, currentAlert: JMAAlert | null) => {
+        setAdviceLoading(true);
+        try {
+            const isEmergency = currentAlert && (currentAlert.severity === 'warning' || currentAlert.severity === 'critical');
+            const adviceParams = new URLSearchParams({
+                temp: String(weatherData.temp),
+                condition: weatherData.condition || weatherData.label,
+                wind: String(weatherData.wind),
+                humidity: String(weatherData.humidity),
+                precipProb: String(weatherData.precipitationProbability ?? ''),
+                locale: locale,
+                ...(isEmergency && { emergency: 'true', jmaSummary: currentAlert?.summary || '' })
+            });
+
+            const adviceRes = await fetch(`/api/weather/advice?${adviceParams}`);
+            if (adviceRes.ok) {
+                const adviceData = await adviceRes.json();
+                setAdvice(adviceData.advice);
+                if (adviceData.jma_link) setJmaLink(adviceData.jma_link);
+                onAdviceUpdateRef.current?.(adviceData.advice);
+            }
+        } catch (e) {
+            console.warn('[SmartWeatherCard] Advice fetch error:', e);
+        } finally {
+            setAdviceLoading(false);
+        }
+    }, [locale]);
 
     useEffect(() => {
-        async function fetchAll() {
-            setLoading(true);
+        let isMounted = true;
+
+        async function fetchWeatherAndAlerts() {
+            setWeatherLoading(true);
             try {
-                // 1. Fetch Live Weather
-                const liveRes = await fetch('/api/weather/live');
+                // Parallel fetch: Weather + Alerts at the same time
+                const [liveRes, alertRes] = await Promise.all([
+                    fetch('/api/weather/live'),
+                    fetch('/api/weather').catch(() => null) // Don't fail if alerts fail
+                ]);
+
+                if (!isMounted) return;
+
                 if (!liveRes.ok) throw new Error('Live fetch failed');
                 const liveData = await liveRes.json();
                 setWeather(liveData);
 
-                // 2. Fetch JMA Alerts
+                // Process alerts
                 let currentAlert: JMAAlert | null = null;
-                try {
-                    const alertRes = await fetch('/api/weather');
-                    if (alertRes.ok) {
+                if (alertRes?.ok) {
+                    try {
                         const alertData = await alertRes.json();
                         if (alertData.alerts && alertData.alerts.length > 0) {
                             currentAlert = alertData.alerts[0];
-
-                            // Only set alert if it's relevant (skip info/advisory for top banner purposes if desired, 
-                            // but we store it for display. However, ensure severity is correct).
                             setAlert(currentAlert);
                         }
+                    } catch (e) {
+                        // Ignore alert parsing errors
                     }
-                } catch (e) { }
+                }
 
-                // 3. Fetch AI Advice (with emergency mode if alert exists)
-                const isEmergency = currentAlert && (currentAlert.severity === 'warning' || currentAlert.severity === 'critical');
-                const adviceParams = new URLSearchParams({
-                    temp: String(liveData.temp),
-                    condition: liveData.condition || liveData.label,
-                    wind: String(liveData.wind),
-                    humidity: String(liveData.humidity),
-                    precipProb: String(liveData.precipitationProbability ?? ''),
-                    locale: locale,
-                    ...(isEmergency && { emergency: 'true', jmaSummary: currentAlert?.summary || '' })
-                });
+                // Weather is loaded - show UI immediately
+                setWeatherLoading(false);
 
-                const adviceRes = await fetch(`/api/weather/advice?${adviceParams}`);
-                if (adviceRes.ok) {
-                    const adviceData = await adviceRes.json();
-                    setAdvice(adviceData.advice);
-                    if (adviceData.jma_link) setJmaLink(adviceData.jma_link);
-                    onAdviceUpdate?.(adviceData.advice);
+                // Then fetch AI advice asynchronously (non-blocking)
+                if (isMounted) {
+                    fetchAdvice(liveData, currentAlert);
                 }
             } catch (e) {
-                console.warn('[SmartWeatherCard] Error:', e);
-            } finally {
-                setLoading(false);
+                console.warn('[SmartWeatherCard] Weather fetch error:', e);
+                if (isMounted) setWeatherLoading(false);
             }
         }
-        fetchAll();
-    }, [locale, onAdviceUpdate]);
 
-    if (loading || !weather) {
+        fetchWeatherAndAlerts();
+
+        return () => { isMounted = false; };
+    }, [locale, fetchAdvice]);
+
+    if (weatherLoading || !weather) {
         return (
             <div className="bg-gradient-to-br from-sky-400 to-indigo-500 rounded-3xl p-5 animate-pulse h-40" />
         );
@@ -152,24 +183,31 @@ export function SmartWeatherCard({ onAdviceUpdate }: SmartWeatherCardProps) {
                     </div>
                 </div>
 
-                {/* AI Advice */}
-                {advice && (
-                    <div className="pt-3 border-t border-white/20">
-                        <p className={`text-sm font-medium leading-relaxed ${isEmergencyMode ? '' : 'italic'}`}>
-                            {isEmergencyMode ? '⚠️' : '💡'} {advice}
-                        </p>
-                        {jmaLink && (
-                            <a
-                                href={jmaLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold bg-white/20 hover:bg-white/30 px-2 py-1 rounded-full transition-colors"
-                            >
-                                <ExternalLink size={10} /> {tL2('viewJmaDetails')}
-                            </a>
-                        )}
-                    </div>
-                )}
+                {/* AI Advice - Progressive Loading */}
+                <div className="pt-3 border-t border-white/20 min-h-[60px]">
+                    {adviceLoading ? (
+                        <div className="flex items-center gap-2 text-sm text-white/70">
+                            <Loader2 size={14} className="animate-spin" />
+                            <span className="italic">{tL2('loadingAdvice') || 'Loading advice...'}</span>
+                        </div>
+                    ) : advice ? (
+                        <>
+                            <p className={`text-sm font-medium leading-relaxed ${isEmergencyMode ? '' : 'italic'}`}>
+                                {isEmergencyMode ? '⚠️' : '💡'} {advice}
+                            </p>
+                            {jmaLink && (
+                                <a
+                                    href={jmaLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold bg-white/20 hover:bg-white/30 px-2 py-1 rounded-full transition-colors"
+                                >
+                                    <ExternalLink size={10} /> {tL2('viewJmaDetails')}
+                                </a>
+                            )}
+                        </>
+                    ) : null}
+                </div>
 
                 {/* Source Attribution */}
                 <div className="pt-2 border-t border-white/10 text-[8px] font-bold opacity-50 flex justify-between uppercase">

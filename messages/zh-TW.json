@@ -249,7 +249,8 @@
             "full": "爆滿"
         },
         "emergencyAlert": "緊急警報",
-        "viewJmaDetails": "查看 JMA 詳情"
+        "viewJmaDetails": "查看 JMA 詳情",
+        "loadingAdvice": "正在載入建議..."
     },
     "l3": {
         "servicesTitle": "服務設施",

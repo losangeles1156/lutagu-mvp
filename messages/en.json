@@ -249,7 +249,8 @@
             "full": "Full"
         },
         "emergencyAlert": "Emergency Alert",
-        "viewJmaDetails": "View JMA Details"
+        "viewJmaDetails": "View JMA Details",
+        "loadingAdvice": "Loading advice..."
     },
     "l3": {
         "servicesTitle": "Station Services",
