@@ -509,7 +509,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                     return;
                 } catch (e: any) {
                     if (e?.name === 'AbortError') return;
-                    const detail = e instanceof HttpError ? e.body : String(e?.message || e || '');
+                    const detail = (e as any)?.body || String(e?.message || e || '');
                     if (detail.includes('403') || detail.includes('Invalid acl:consumerKey')) {
                         setError(uiLocale.startsWith('zh')
                             ? '🔧 系統維護中：票價數據暫時無法使用，請稍後再試。'
