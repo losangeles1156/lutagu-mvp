@@ -4,15 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useLocale, useTranslations } from 'next-intl';
-import { 
-    MessageSquare, 
-    Minus, 
-    Maximize2, 
-    X, 
-    MapPin, 
-    RotateCcw, 
-    Copy, 
-    ThumbsUp, 
+import {
+    MessageSquare,
+    Minus,
+    Maximize2,
+    X,
+    MapPin,
+    RotateCcw,
+    Copy,
+    ThumbsUp,
     ThumbsDown,
     Send,
     ChevronDown
@@ -43,7 +43,7 @@ export function ChatPanel() {
     const locale = useLocale();
     const tChat = useTranslations('chat');
     const tCommon = useTranslations('common');
-    
+
     const {
         isChatOpen,
         setChatOpen,
@@ -63,9 +63,23 @@ export function ChatPanel() {
         mapCenter,
         selectedNeed,
     } = useAppStore();
-    
+
+    // [FIX] Lazy initialize difyUserId on client-side to avoid hydration mismatch
+    const effectiveDifyUserId = useMemo(() => {
+        if (difyUserId) return difyUserId;
+        // Generate on client-side only
+        if (typeof window !== 'undefined') {
+            const newId = globalThis.crypto?.randomUUID?.() ||
+                `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+            // Store it for future use (this is safe since we're on client)
+            useAppStore.setState({ difyUserId: newId });
+            return newId;
+        }
+        return 'ssr-placeholder';
+    }, [difyUserId]);
+
     const { zone } = useZoneAwareness();
-    
+
     const [input, setInput] = useState('');
     const [l2Status, setL2Status] = useState<any>(null);
     const [isOffline, setIsOffline] = useState(false);
@@ -74,7 +88,7 @@ export function ChatPanel() {
     const [height, setHeight] = useState(DEFAULT_HEIGHT);
     const [isResizing, setIsResizing] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
-    
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const resizeStartY = useRef(0);
@@ -148,7 +162,7 @@ export function ChatPanel() {
                         selected_need: selectedNeed || null,
                         locale,
                         zone: zone || 'core',
-                        user_id: difyUserId
+                        user_id: effectiveDifyUserId
                     }
                 })
             });
@@ -193,15 +207,17 @@ export function ChatPanel() {
                             useAppStore.setState(state => {
                                 const newMessages = [...state.messages];
                                 const lastMsg = newMessages[newMessages.length - 1];
-                                if (lastMsg.role === 'assistant') {
+                                if (lastMsg && lastMsg.role === 'assistant') {
                                     lastMsg.content = accumulatedAnswer;
                                     lastMsg.isLoading = false;
                                 }
                                 return { messages: newMessages };
                             });
                         }
-                    } catch (e) {
-                        console.error('SSE Parse Error', e);
+                    } catch (parseError) {
+                        // [FIX] Log but don't crash - malformed SSE chunks are common during network issues
+                        console.warn('[ChatPanel] SSE parse error (non-fatal):', parseError);
+                        // Don't update state here - let the stream continue
                     }
                 }
             }
@@ -218,7 +234,7 @@ export function ChatPanel() {
                 return { messages: newMessages };
             });
         }
-    }, [addMessage, currentNodeId, difyConversationId, difyUserId, locale, tChat, setDifyConversationId, zone, userContext, userProfile, mapCenter, selectedNeed]);
+    }, [addMessage, currentNodeId, difyConversationId, effectiveDifyUserId, locale, tChat, setDifyConversationId, zone, userContext, userProfile, mapCenter, selectedNeed]);
 
     const sendMessage = useCallback(async (text: string) => {
         await streamFromDify({ query: text, includeUserMessage: true });
@@ -403,7 +419,7 @@ export function ChatPanel() {
     if (!isChatOpen) return null;
 
     return (
-        <div 
+        <div
             ref={containerRef}
             className={`
                 flex flex-col bg-white border-l border-slate-200
@@ -498,8 +514,8 @@ export function ChatPanel() {
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
                         {messages.map((msg, idx) => (
-                            <div 
-                                key={idx} 
+                            <div
+                                key={idx}
                                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div className={`

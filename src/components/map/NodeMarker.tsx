@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Crown, MapPin, Train, Link2 } from 'lucide-react';
 import { OPERATOR_COLORS, getPrimaryOperator } from '@/lib/constants/stationLines';
 import { getLocaleString } from '@/lib/utils/localeUtils';
+import { memo, useMemo, useCallback } from 'react';
 
 interface HubMemberInfo {
     member_id: string;
@@ -45,146 +46,173 @@ interface NodeMarkerProps {
     onClick?: (node: any) => void;
 }
 
-export function NodeMarker({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClick }: NodeMarkerProps) {
-    const { setCurrentNode, setBottomSheetOpen, currentNodeId } = useAppStore();
+// [PERF] Static icon cache to avoid recreating identical icons
+const iconCache = new Map<string, L.DivIcon>();
 
-    // Coordinate Parsing
-    let lon = 0, lat = 0;
-    if (Array.isArray((node as any).coordinates?.coordinates)) {
-        [lon, lat] = (node as any).coordinates.coordinates;
-    } else if (Array.isArray(node.location?.coordinates)) {
-        [lon, lat] = node.location.coordinates;
-    }
+function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClick }: NodeMarkerProps) {
+    const setCurrentNode = useAppStore(s => s.setCurrentNode);
+    const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
+    const currentNodeId = useAppStore(s => s.currentNodeId);
 
-    if (!lat || !lon) return null;
-
+    // Derive all values BEFORE any hooks to avoid conditional hook calls
     const isSelected = currentNodeId === node.id;
     const isMajor = node.tier === 'major' || node.is_hub;
     const hasMembers = hubDetails && hubDetails.member_count > 0;
     const memberCount = hubDetails?.member_count || 0;
 
-    // [NEW] Operator-Based Color System
-    const primaryOperator = getPrimaryOperator(node.id);
-    const operatorColor = OPERATOR_COLORS[primaryOperator] || OPERATOR_COLORS['Metro'];
+    // Coordinate Parsing - memoized (MUST be before early return)
+    const coords = useMemo(() => {
+        let lon = 0, lat = 0;
+        if (Array.isArray((node as any).coordinates?.coordinates)) {
+            [lon, lat] = (node as any).coordinates.coordinates;
+        } else if (Array.isArray(node.location?.coordinates)) {
+            [lon, lat] = node.location.coordinates;
+        }
+        return { lat, lon };
+    }, [node]);
 
-    // Icon: Hub stations use Train, others use MapPin
-    const DisplayIcon = isMajor ? Train : MapPin;
+    // [PERF] Memoize operator color lookup (MUST be before early return)
+    const baseColor = useMemo(() => {
+        const primaryOperator = getPrimaryOperator(node.id);
+        const operatorColor = OPERATOR_COLORS[primaryOperator] || OPERATOR_COLORS['Metro'];
+        return isSelected ? '#111827' : operatorColor;
+    }, [node.id, isSelected]);
 
-    // Final color is operator-based (overriding old mapDesign system)
-    const finalColor = operatorColor;
-
-    const baseColor = isSelected ? '#111827' : finalColor;
-    const label = getLocaleString(node.name, locale) || node.id;
-    const ringRadiusClass = hasMembers ? 'rounded-[22px]' : 'rounded-full';
+    const label = useMemo(() => getLocaleString(node.name, locale) || node.id, [node.name, node.id, locale]);
     const showLabel = isSelected || hasMembers || isMajor || (zoom >= 15);
 
-    // Transfer type badge styling
-    const transferType = hubDetails?.transfer_type || 'indoor';
-    const transferLabels: Record<string, { label: string; bgColor: string }> = {
-        indoor: { label: '🔗', bgColor: '#10B981' },
-        outdoor: { label: '📍', bgColor: '#F59E0B' },
-        adjacent: { label: '🚶', bgColor: '#3B82F6' }
-    };
-    const transferBadge = transferLabels[transferType] || transferLabels.indoor;
+    // Transfer type badge styling (MUST be before early return)
+    const transferBadge = useMemo(() => {
+        const transferType = hubDetails?.transfer_type || 'indoor';
+        const transferLabels: Record<string, { label: string; bgColor: string }> = {
+            indoor: { label: '🔗', bgColor: '#10B981' },
+            outdoor: { label: '📍', bgColor: '#F59E0B' },
+            adjacent: { label: '🚶', bgColor: '#3B82F6' }
+        };
+        return transferLabels[transferType] || transferLabels.indoor;
+    }, [hubDetails?.transfer_type]);
 
-    const handleClick = () => {
+    // [PERF] Memoize click handler (MUST be before early return)
+    const handleClick = useCallback(() => {
         if (onClick) {
             onClick(node);
         } else {
             setCurrentNode(node.id);
             setBottomSheetOpen(true);
         }
-    };
+    }, [onClick, node, setCurrentNode, setBottomSheetOpen]);
 
-    const iconMarkup = renderToStaticMarkup(
-        <div
-            title={label}
-            className={`relative flex items-center justify-center select-none transition-transform duration-300 group ${isSelected ? 'z-50 scale-110' : 'z-10 hover:scale-[1.04] hover:z-40'}`}
-        >
-            {(isSelected || isMajor) && (
-                <div className="absolute inset-0 rounded-full animate-ping opacity-15 bg-indigo-600" style={{ animationDuration: '3s' }} />
-            )}
+    // [PERF] Generate cache key for icon (MUST be before early return)
+    const iconCacheKey = useMemo(() => {
+        return `${node.id}:${isSelected}:${isMajor}:${hasMembers}:${memberCount}:${baseColor}:${showLabel}:${label}`;
+    }, [node.id, isSelected, isMajor, hasMembers, memberCount, baseColor, showLabel, label]);
 
-            {hasMembers && (
-                <div className="absolute inset-0 rounded-[22px] bg-indigo-600/15 blur-md" />
-            )}
+    // [PERF] Memoize entire icon creation with caching (MUST be before early return)
+    const leafletIcon = useMemo(() => {
+        // Check cache first
+        const cached = iconCache.get(iconCacheKey);
+        if (cached) return cached;
 
-            <div className="relative">
+        const DisplayIcon = isMajor ? Train : MapPin;
+        const ringRadiusClass = hasMembers ? 'rounded-[22px]' : 'rounded-full';
+        const markerSize = isMajor || hasMembers ? 56 : 48;
+        const iconSize = isMajor ? 24 : 22;
+
+        // [PERF] Simplified markup for mobile - removed heavy animations
+        const iconMarkup = renderToStaticMarkup(
+            <div
+                title={label}
+                className={`relative flex items-center justify-center select-none ${isSelected ? 'z-50' : 'z-10'}`}
+            >
+                {/* [PERF] Removed animate-ping for mobile performance */}
                 {hasMembers && (
-                    <>
-                        <div className="absolute inset-0 translate-x-[6px] translate-y-[6px] rounded-[18px] bg-slate-900/15" />
+                    <div className="absolute inset-0 rounded-[22px] bg-indigo-600/10" />
+                )}
+
+                <div className="relative">
+                    {/* [PERF] Simplified shadow layers - reduced from 2 to 1 */}
+                    {hasMembers && (
                         <div className="absolute inset-0 translate-x-[3px] translate-y-[3px] rounded-[18px] bg-slate-900/10" />
-                    </>
-                )}
-
-                <div
-                    className={`relative flex items-center justify-center border-[3px] border-white text-white shadow-[0_18px_50px_rgba(0,0,0,0.25)] transition-transform group-active:scale-[0.98] ${hasMembers ? 'rounded-[18px]' : 'rounded-full'}`}
-                    style={{ width: isMajor || hasMembers ? 56 : 48, height: isMajor || hasMembers ? 56 : 48, backgroundColor: baseColor }}
-                >
-                    <div className="drop-shadow-md">
-                        <DisplayIcon size={isMajor ? 24 : 22} strokeWidth={2.6} />
-                    </div>
-
-                    {isSelected && (
-                        <div className={`absolute inset-[-6px] ${ringRadiusClass} ring-2 ring-indigo-400/80`} />
                     )}
+
+                    <div
+                        className={`relative flex items-center justify-center border-[3px] border-white text-white shadow-lg ${hasMembers ? 'rounded-[18px]' : 'rounded-full'}`}
+                        style={{ width: markerSize, height: markerSize, backgroundColor: baseColor }}
+                    >
+                        <DisplayIcon size={iconSize} strokeWidth={2.6} />
+
+                        {isSelected && (
+                            <div className={`absolute inset-[-6px] ${ringRadiusClass} ring-2 ring-indigo-400/80`} />
+                        )}
+                    </div>
+
+                    {isMajor && (
+                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                            <Crown size={22} className="text-amber-400 fill-amber-400" />
+                        </div>
+                    )}
+
+                    {hasMembers && (
+                        <>
+                            {/* Member count badge */}
+                            <div className="absolute -top-2.5 -right-2.5 z-30">
+                                <div
+                                    className="h-6 min-w-6 px-2 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow-md border border-white/30"
+                                    style={{ backgroundColor: baseColor }}
+                                >
+                                    +{memberCount}
+                                </div>
+                            </div>
+
+                            {/* Transfer type indicator */}
+                            <div
+                                className="absolute -bottom-1.5 -left-1.5 z-30 w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-white"
+                                style={{ backgroundColor: transferBadge.bgColor }}
+                            >
+                                <Link2 size={10} className="text-white" />
+                            </div>
+                        </>
+                    )}
+
+                    <div
+                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-r-[3px] border-b-[3px] border-white rounded-br-sm -z-10"
+                        style={{ backgroundColor: baseColor }}
+                    />
                 </div>
 
-                {isMajor && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                        <Crown size={22} className="text-amber-400 fill-amber-400 drop-shadow-[0_3px_8px_rgba(0,0,0,0.30)]" />
+                {showLabel && (
+                    <div
+                        className={`absolute -bottom-12 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-2xl whitespace-nowrap shadow-lg border border-white/60 ${isSelected ? 'bg-slate-900/90 text-white' : 'bg-white/90 text-slate-900'}`}
+                    >
+                        <span className="text-xs font-black tracking-tight">{label}</span>
                     </div>
                 )}
-
-                {hasMembers && (
-                    <>
-                        {/* Member count badge */}
-                        <div className="absolute -top-2.5 -right-2.5 z-30">
-                            <div 
-                                className="h-6 min-w-6 px-2 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow-lg border border-white/30"
-                                style={{ backgroundColor: baseColor }}
-                            >
-                                +{memberCount}
-                            </div>
-                        </div>
-                        
-                        {/* Transfer type indicator */}
-                        <div 
-                            className="absolute -bottom-1.5 -left-1.5 z-30 w-5 h-5 rounded-full flex items-center justify-center shadow-md border border-white"
-                            style={{ backgroundColor: transferBadge.bgColor }}
-                            title={hubDetails?.indoor_connection_notes || transferType}
-                        >
-                            <Link2 size={10} className="text-white" />
-                        </div>
-                    </>
-                )}
-
-                <div
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-r-[3px] border-b-[3px] border-white rounded-br-sm -z-10"
-                    style={{ backgroundColor: baseColor }}
-                />
             </div>
+        );
 
-            {showLabel && (
-                <div
-                    className={`absolute -bottom-12 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-2xl whitespace-nowrap shadow-2xl border border-white/60 backdrop-blur-md transition-all duration-200 ${isSelected ? 'bg-slate-900/90 text-white scale-105' : 'bg-white/90 text-slate-900'}`}
-                >
-                    <span className="text-xs font-black tracking-tight">{label}</span>
-                </div>
-            )}
-        </div>
-    );
+        const icon = L.divIcon({
+            html: iconMarkup,
+            className: 'custom-node-icon',
+            iconSize: [72, 72],
+            iconAnchor: [36, 72],
+        });
 
-    const leafletIcon = L.divIcon({
-        html: iconMarkup,
-        className: 'custom-node-icon',
-        iconSize: [72, 72],
-        iconAnchor: [36, 72],
-    });
+        // Store in cache (limit cache size to prevent memory issues)
+        if (iconCache.size > 500) {
+            const firstKey = iconCache.keys().next().value;
+            if (firstKey) iconCache.delete(firstKey);
+        }
+        iconCache.set(iconCacheKey, icon);
+
+        return icon;
+    }, [iconCacheKey, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge]);
+
+    // NOW we can do early return - after all hooks
+    if (!coords.lat || !coords.lon) return null;
 
     return (
         <Marker
-            position={[lat, lon]}
+            position={[coords.lat, coords.lon]}
             icon={leafletIcon}
             eventHandlers={{
                 click: handleClick,
@@ -192,3 +220,14 @@ export function NodeMarker({ node, hubDetails, locale = 'zh-TW', zoom = 22, onCl
         />
     );
 }
+
+// [PERF] Export memoized component to prevent unnecessary re-renders
+export const NodeMarker = memo(NodeMarkerInner, (prevProps, nextProps) => {
+    // Custom comparison: only re-render if important props changed
+    return (
+        prevProps.node.id === nextProps.node.id &&
+        prevProps.hubDetails?.member_count === nextProps.hubDetails?.member_count &&
+        prevProps.locale === nextProps.locale &&
+        prevProps.zoom === nextProps.zoom
+    );
+});

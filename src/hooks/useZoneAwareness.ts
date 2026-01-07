@@ -22,44 +22,75 @@ export function useZoneAwareness() {
     const [isTooFar, setIsTooFar] = useState(false);
 
     useEffect(() => {
-        if (!navigator.geolocation) {
-            setZone('outer');
+        // [PERF] Check for geolocation API availability
+        if (typeof navigator === 'undefined' || !navigator.geolocation) {
+            setZone('core'); // Fallback to Virtual Core
+            setIsTooFar(true);
             return;
         }
 
+        let isSubscribed = true;
+
         const watchId = navigator.geolocation.watchPosition(
             async (position) => {
-                const { latitude, longitude } = position.coords;
+                if (!isSubscribed) return;
 
-                // Calculate distance to Ueno
-                const dist = calculateDistance(latitude, longitude, UENO_CENTER.lat, UENO_CENTER.lon);
+                try {
+                    const { latitude, longitude } = position.coords;
 
-                if (dist > MAX_DISTANCE_KM) {
-                    setIsTooFar(true);
-                    setUserLocation(null); // Don't track real location if too far
-                    setZone('core'); // Fallback to "Virtual Core"
-                } else {
-                    setIsTooFar(false);
-                    setUserLocation({ lat: latitude, lon: longitude });
+                    // Calculate distance to Ueno
+                    const dist = calculateDistance(latitude, longitude, UENO_CENTER.lat, UENO_CENTER.lon);
 
-                    // Use the modular detector
-                    const detectedZone = await detector.detectZone(latitude, longitude);
+                    if (dist > MAX_DISTANCE_KM) {
+                        setIsTooFar(true);
+                        setUserLocation(null); // Don't track real location if too far
+                        setZone('core'); // Fallback to "Virtual Core"
+                    } else {
+                        setIsTooFar(false);
+                        setUserLocation({ lat: latitude, lon: longitude });
 
-                    // Only update store if changed to avoid renders
-                    if (detectedZone !== currentZone) {
-                        setZone(detectedZone);
+                        // [FIX] Wrap async detector call in try/catch
+                        try {
+                            const detectedZone = await detector.detectZone(latitude, longitude);
+
+                            // Only update store if component still mounted and zone changed
+                            if (isSubscribed && detectedZone !== currentZone) {
+                                setZone(detectedZone);
+                            }
+                        } catch (zoneError) {
+                            console.warn('[useZoneAwareness] Zone detection error:', zoneError);
+                            // Fallback to core zone on detection error
+                            if (isSubscribed) setZone('core');
+                        }
+                    }
+                } catch (positionError) {
+                    console.error('[useZoneAwareness] Position processing error:', positionError);
+                    if (isSubscribed) {
+                        setZone('core');
+                        setIsTooFar(true);
                     }
                 }
             },
             (error) => {
-                console.error('Geolocation error:', error);
-                setZone('core'); // Fallback to "Virtual Core"
-                setIsTooFar(true);
+                // Handle geolocation errors gracefully
+                console.warn('[useZoneAwareness] Geolocation error:', error.code, error.message);
+                if (isSubscribed) {
+                    setZone('core'); // Fallback to "Virtual Core"
+                    setIsTooFar(true);
+                }
             },
-            { enableHighAccuracy: true }
+            {
+                // [PERF] Optimized settings for mobile
+                enableHighAccuracy: false, // Reduces battery usage and timeout risk on mobile
+                timeout: 15000,            // 15 second timeout
+                maximumAge: 60000          // Accept cached position up to 1 minute old
+            }
         );
 
-        return () => navigator.geolocation.clearWatch(watchId);
+        return () => {
+            isSubscribed = false;
+            navigator.geolocation.clearWatch(watchId);
+        };
     }, [currentZone, setZone]);
 
     return { zone: currentZone, userLocation, isTooFar, centerFallback: UENO_CENTER };

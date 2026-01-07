@@ -10,9 +10,9 @@ interface AppState {
 
     isBottomSheetOpen: boolean;
     isChatOpen: boolean;
-    messages: Array<{ 
-        role: 'user' | 'assistant'; 
-        content: string; 
+    messages: Array<{
+        role: 'user' | 'assistant';
+        content: string;
         actions?: any[];
         isLoading?: boolean;
         feedback?: { score: number; reason?: string };
@@ -41,10 +41,10 @@ interface AppState {
     setChatOpen: (isOpen: boolean) => void;
     setDifyConversationId: (id: string | null) => void;
     resetDifyConversation: () => void;
-    addMessage: (message: { 
-        role: 'user' | 'assistant'; 
-        content: string; 
-        actions?: any[]; 
+    addMessage: (message: {
+        role: 'user' | 'assistant';
+        content: string;
+        actions?: any[];
         isLoading?: boolean;
     }) => void;
     setMapCenter: (center: { lat: number; lon: number } | null) => void;
@@ -88,9 +88,9 @@ export const useAppStore = create<AppState>()(
             currentNodeId: null,
             currentZone: 'outer',
 
-            difyUserId:
-                globalThis.crypto?.randomUUID?.() ||
-                `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
+            // [FIX] Initialize with empty string to avoid hydration mismatch
+            // The actual UUID will be generated on first client-side access
+            difyUserId: '',
             difyConversationId: null,
 
             isBottomSheetOpen: false,
@@ -159,12 +159,12 @@ export const useAppStore = create<AppState>()(
             setRoutePath: (path) => set({ routePath: path }),
             setRouteSummary: (summary) => set({ routeSummary: summary }),
             setIsRouteCalculating: (isCalculating) => set({ isRouteCalculating: isCalculating }),
-            clearRoute: () => set({ 
-                routeStart: null, 
-                routeEnd: null, 
-                routePath: null, 
-                routeSummary: null, 
-                isRouteCalculating: false 
+            clearRoute: () => set({
+                routeStart: null,
+                routeEnd: null,
+                routePath: null,
+                routeSummary: null,
+                isRouteCalculating: false
             }),
         }),
         {

@@ -22,9 +22,9 @@ interface SystemMenuProps {
 }
 
 const LANGUAGES = [
-    { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
-    { code: 'ja', name: '日本語', flag: '🇯🇵' },
-    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'zh-TW', name: '繁體中文', iso: 'ZH' },
+    { code: 'ja', name: '日本語', iso: 'JA' },
+    { code: 'en', name: 'English', iso: 'EN' },
 ] as const;
 
 export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
@@ -128,7 +128,7 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
                         title={t('language')}
                     >
                         <Globe size={20} />
-                        <span className="text-xs font-bold hidden sm:inline">{currentLang.flag}</span>
+                        <span className="text-xs font-bold hidden sm:inline bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{currentLang.iso}</span>
                         <ChevronDown size={14} className={`transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
                     </button>
 
@@ -146,7 +146,7 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
                                         min-h-[44px]
                                     `}
                                 >
-                                    <span className="text-lg">{lang.flag}</span>
+                                    <span className="text-xs font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 w-8 h-6 flex items-center justify-center">{lang.iso}</span>
                                     <span className="text-sm font-bold">{lang.name}</span>
                                     {locale === lang.code && (
                                         <span className="ml-auto w-2 h-2 bg-indigo-600 rounded-full" />
