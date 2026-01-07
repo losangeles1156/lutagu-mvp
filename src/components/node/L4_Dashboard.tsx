@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Loader2, Map as MapIcon, MessageSquare, Sparkles, Ticket, ExternalLink } from 'lucide-react';
+import { useApiFetch } from '@/hooks/useApiFetch';
+import { AlertTriangle, Clock, Loader2, Map as MapIcon, MessageSquare, Sparkles, Ticket, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveHubStationMembers } from '@/lib/constants/stationLines';
+import type { Station } from '@/types/station';
 import type { OdptRailwayFare, OdptStationTimetable } from '@/lib/odpt/types';
 import type { L4Knowledge } from '@/lib/types/stationStandard';
 import {
@@ -61,8 +62,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
 
     const setChatOpen = useAppStore(state => state.setChatOpen);
 
-    // Debug: Log L4 Knowledge data
-
+    const { fetchJson: fetchJsonCached } = useApiFetch();
 
     const [recommendations, setRecommendations] = useState<MatchedStrategyCard[]>([]);
     const [isRecommending, setIsRecommending] = useState(false);
@@ -116,13 +116,12 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
 
     type L4Task = 'route' | 'knowledge' | 'timetable';
     const [task, setTask] = useState<L4Task>('route');
-    const [isTemplatesOpen, setIsTemplatesOpen] = useState(false); // Default closed in new design
+    const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
     const [templateCategory, setTemplateCategory] = useState<L4TemplateCategory>('basic');
 
     const [fareData, setFareData] = useState<OdptRailwayFare[] | null>(null);
     const [timetableData, setTimetableData] = useState<OdptStationTimetable[] | null>(null);
     const [suggestion, setSuggestion] = useState<L4Suggestion | null>(null);
-    // Cache for raw route results to allow re-filtering when demand changes
     const [cachedRouteResult, setCachedRouteResult] = useState<{
         origin: string;
         destination: string;
@@ -145,41 +144,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
     const requestAbortRef = useRef<AbortController | null>(null);
     const requestSeqRef = useRef(0);
 
-    const jsonCacheRef = useRef(new Map<string, { expiresAt: number; value: unknown }>());
-    const inFlightRef = useRef(new Map<string, Promise<unknown>>());
-
-    const fetchJsonCached = useCallback(
-        async function fetchJsonCached<T>(
-            url: string,
-            opts: { ttlMs: number; signal?: AbortSignal }
-        ): Promise<T> {
-            const now = Date.now();
-            const cached = jsonCacheRef.current.get(url);
-            if (cached && cached.expiresAt > now) return cached.value as T;
-
-            const inFlight = inFlightRef.current.get(url);
-            if (inFlight) return (await inFlight) as T;
-
-            const p: Promise<T> = (async () => {
-                const res = await fetch(url, { cache: 'no-store', signal: opts.signal });
-                if (!res.ok) {
-                    const body = await res.text().catch(() => '');
-                    throw new HttpError(res.status, body);
-                }
-                const json = (await res.json()) as T;
-                jsonCacheRef.current.set(url, { expiresAt: now + opts.ttlMs, value: json as unknown });
-                return json;
-            })();
-
-            inFlightRef.current.set(url, p as unknown as Promise<unknown>);
-            try {
-                return await p;
-            } finally {
-                inFlightRef.current.delete(url);
-            }
-        },
-        []
-    );
+    const { fetchJson: fetchJsonCached } = useApiFetch();
 
     useEffect(() => {
         const fetchRecommendations = async () => {
@@ -361,7 +326,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
     // [New] Fetch Transfer Knowledge
     const [knowledgeData, setKnowledgeData] = useState<any>(null);
     useEffect(() => {
-        // [Existing Knowledge Effect]
         if (task === 'knowledge' && stationId) {
             // Placeholder: currently generic info is hardcoded in render
         }
@@ -370,22 +334,17 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
     // [New] Fetch Timetable when switching to tab
     useEffect(() => {
         if (task === 'timetable' && stationId) {
-            if (timetableData) return; // Already have data
+            if (timetableData) return;
 
             setIsLoading(true);
 
-            // Use resolveHubStationMembers to get all physical stations (like in askWithText)
             const allMembers = resolveHubStationMembers(stationId);
-            // Prioritize Metro/Toei (ODPT has better data) over JR-East
             const prioritized = [
                 ...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')),
                 ...allMembers.filter(id => id.includes('JR-East'))
             ];
             const uniqueIds = [...new Set(prioritized)];
 
-
-
-            // Fetch timetables from all member stations
             Promise.all(
                 uniqueIds.map(memberId =>
                     fetchJsonCached<OdptStationTimetable[]>(
@@ -562,7 +521,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                 } catch (e: any) {
                     if (e?.name === 'AbortError') return;
                     const detail = e instanceof HttpError ? e.body : String(e?.message || e || '');
-                    // Check for authentication errors
                     if (detail.includes('403') || detail.includes('Invalid acl:consumerKey')) {
                         setError(uiLocale.startsWith('zh')
                             ? '🔧 系統維護中：票價數據暫時無法使用，請稍後再試。'
@@ -585,9 +543,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
             }
 
             if (kind === 'timetable') {
-                // Resolve hub station to all physical members for comprehensive timetable
                 const allMembers = resolveHubStationMembers(currentOriginId);
-                // Prioritize Metro/Toei (ODPT has better data) over JR-East
                 const prioritized = [
                     ...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')),
                     ...allMembers.filter(id => id.includes('JR-East'))
@@ -597,7 +553,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                 let allTimetables: OdptStationTimetable[] = [];
                 let fetchedAny = false;
 
-                // Query each member station for timetables
                 for (const memberId of uniqueIds) {
                     const url = `/api/odpt/timetable?station=${encodeURIComponent(memberId)}&raw=1`;
                     try {
@@ -609,7 +564,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                         }
                     } catch (e: any) {
                         if (e?.name === 'AbortError') return;
-                        // Continue to next station if one fails
                         console.warn(`[Timetable] Failed for ${memberId}:`, e);
                     }
                 }
@@ -621,7 +575,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                     return;
                 }
 
-                // If no data fetched at all, show empty state (will trigger JR link if applicable)
                 setTimetableData([]);
                 setSuggestion(buildTimetableSuggestion({ stationId: currentOriginId, demand, verified: false }));
                 return;
@@ -647,7 +600,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                             : 'Route suggestions need a destination station.');
                     setSuggestion(buildRouteSuggestion({
                         originStationId: currentOriginId,
-                        // originStationName: currentOriginName, // buildRouteSuggestion uses findSimpleRoutes logic for steps
                         destinationStationId: currentOriginId,
                         demand,
                         verified: false,
@@ -680,7 +632,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                 } catch (e: any) {
                     if (e?.name === 'AbortError') return;
                     const detail = e instanceof HttpError ? e.body : String(e?.message || e || '');
-                    // Check for authentication errors
                     if (detail.includes('403') || detail.includes('Invalid acl:consumerKey')) {
                         setError(uiLocale.startsWith('zh')
                             ? '🔧 系統維護中：部分路線數據暫時無法使用（認證過期），請聯絡管理員更新 API 金鑰。'
@@ -702,7 +653,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
 
                 const apiRoutes = json.routes || [];
 
-                // Check for API-level errors
                 if (json.error && (json.error.includes('403') || json.error.includes('Invalid'))) {
                     setError(uiLocale.startsWith('zh')
                         ? '🔧 系統維護中：路線查詢服務暫時不可用，請稍後再試。'
@@ -745,7 +695,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                     text: text
                 });
 
-                // Initial suggestion build (useEffect will handle updates, but we set it here for immediate feedback)
                 setSuggestion(buildRouteSuggestion({
                     originStationId: currentOriginId,
                     destinationStationId: destinationStationId,
@@ -983,7 +932,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                             animate={{ opacity: 1, y: 0 }}
                             className="space-y-4"
                         >
-                            {/* Show loading state explicitly if fetching */}
                             {isLoading && !timetableData ? (
                                 <div className="p-8 flex justify-center">
                                     <Loader2 className="animate-spin text-slate-400" />
@@ -1108,7 +1056,7 @@ function TabSelector({ activeTask, onSelect, locale }: { activeTask: string; onS
     );
 }
 
-// Legacy modules (Fare, Timetable, Suggestion) kept for compatibility but styled cleaner
+// Legacy modules (Fare, Timetable, Suggestion) kept for compatibility
 
 function FareModule({ fares, destinationId }: { fares: OdptRailwayFare[] | null; destinationId?: string }) {
     const rows = (fares || []).filter(f => {
@@ -1146,7 +1094,6 @@ function TimetableModule({ timetables, stationId, locale }: { timetables: OdptSt
     const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
     const nowHHMM = `${String(jstNow.getHours()).padStart(2, '0')}:${String(jstNow.getMinutes()).padStart(2, '0')}`;
     const items = (timetables || []);
-    // Group by direction
     const directions = Array.from(new Set(items.map(t => t['odpt:railDirection']).filter(Boolean)));
 
     if (!items.length) {
@@ -1185,8 +1132,6 @@ function TimetableModule({ timetables, stationId, locale }: { timetables: OdptSt
         <div className="space-y-6">
             {directions.map((dir) => {
                 const tables = items.filter(t => t['odpt:railDirection'] === dir);
-                // Try to get a human readable direction name
-                // Usually railDirection is like "odpt.RailDirection:TokyoMetro.Marunouchi.Ogikubo"
                 const dirName = String(dir).split('.').pop() || 'Unknown';
 
                 return (
@@ -1202,7 +1147,6 @@ function TimetableModule({ timetables, stationId, locale }: { timetables: OdptSt
                                     dest: String(o['odpt:destinationStation'] || '').split('.').pop(),
                                     isExpress: (String(o['odpt:trainType'] || '').toLowerCase().includes('express'))
                                 }));
-                                // Filter future trains
                                 const next = objs.filter(o => o.time >= nowHHMM).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 8);
                                 const calendar = String(table['odpt:calendar']).split(':').pop();
 

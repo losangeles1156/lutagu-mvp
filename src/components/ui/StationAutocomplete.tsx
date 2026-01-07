@@ -2,13 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Loader2, MapPin } from 'lucide-react';
-
-export interface Station {
-    id: string;
-    name: { ja?: string; en?: string; 'zh-TW'?: string };
-    operator: string;
-    railway?: string;
-}
+import type { Station } from '@/types/station';
 
 interface StationAutocompleteProps {
     value: string;
@@ -213,8 +207,8 @@ export function StationAutocomplete({
                             key={station.id}
                             onClick={() => handleSelect(station)}
                             className={`w-full px-4 py-3 text-left flex items-start gap-3 transition-colors ${idx === highlightedIndex
-                                    ? 'bg-indigo-50'
-                                    : 'hover:bg-slate-50'
+                                ? 'bg-indigo-50'
+                                : 'hover:bg-slate-50'
                                 }`}
                         >
                             <MapPin size={16} className="text-indigo-600 mt-0.5 shrink-0" />

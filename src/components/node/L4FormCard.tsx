@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react';
 import { useLocale } from 'next-intl';
-import { Station, StationAutocomplete } from '@/components/ui/StationAutocomplete';
+import { StationAutocomplete } from '@/components/ui/StationAutocomplete';
+import type { Station } from '@/types/station';
 import { ArrowRightLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -37,12 +38,12 @@ export function L4FormCard({
     getStationDisplayName,
     locale
 }: L4FormCardProps) {
-    
+
     return (
         <motion.div layout className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
             {/* Decorative background blob */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-3xl opacity-60 pointer-events-none" />
-            
+
             <div className="relative z-10 space-y-5">
                 {/* Station Inputs */}
                 <div className="relative">
@@ -50,7 +51,7 @@ export function L4FormCard({
                     {task === 'route' && (
                         <div className="absolute left-3.5 top-8 bottom-8 w-0.5 bg-slate-100 rounded-full" />
                     )}
-                    
+
                     <div className="space-y-4">
                         <div className="relative">
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 flex justify-center z-10">
@@ -76,7 +77,7 @@ export function L4FormCard({
                                 disabled={isLoading}
                             />
                         </div>
-                        
+
                         {task === 'route' && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
@@ -105,7 +106,7 @@ export function L4FormCard({
                             </motion.div>
                         )}
                     </div>
-                    
+
                     {/* Swap Button */}
                     {task === 'route' && (
                         <button
