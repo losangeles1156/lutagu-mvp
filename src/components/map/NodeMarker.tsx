@@ -64,9 +64,15 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClic
     const coords = useMemo(() => {
         let lon = 0, lat = 0;
         if (Array.isArray((node as any).coordinates?.coordinates)) {
+            // PostGIS GeoJSON format: [lon, lat]
             [lon, lat] = (node as any).coordinates.coordinates;
         } else if (Array.isArray(node.location?.coordinates)) {
+            // Alternative GeoJSON location: [lon, lat]
             [lon, lat] = node.location.coordinates;
+        } else if (typeof (node as any).coordinates?.lat === 'number') {
+            // API v2 flattened format: { lat, lng }
+            lat = (node as any).coordinates.lat;
+            lon = (node as any).coordinates.lng || (node as any).coordinates.lon;
         }
         return { lat, lon };
     }, [node]);
