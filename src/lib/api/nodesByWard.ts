@@ -5,7 +5,8 @@ export async function fetchNodesByWard(wardId: string): Promise<NodeDatum[]> {
     if (!wardId) return [];
 
     try {
-        const res = await fetch(`/api/wards/${wardId}?include_nodes=1&include_hubs=1&limit=200`, {
+        // Add timestamp to force bypass any PWA/Browser/CDN cache
+        const res = await fetch(`/api/wards/${wardId}?include_nodes=1&include_hubs=1&limit=200&_t=${Date.now()}`, {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
         });

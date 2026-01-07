@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRightLeft, ChevronDown, ChevronRight, Clock, Loader2, Map as MapIcon, MessageSquare, Settings, Sparkles, Ticket, ExternalLink } from 'lucide-react';
+import { AlertTriangle, Loader2, Map as MapIcon, MessageSquare, Sparkles, Ticket, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { StationAutocomplete, type Station } from '@/components/ui/StationAutocomplete';
 import { resolveHubStationMembers } from '@/lib/constants/stationLines';
 import type { OdptRailwayFare, OdptStationTimetable } from '@/lib/odpt/types';
 import type { L4Knowledge } from '@/lib/types/stationStandard';
@@ -34,6 +33,9 @@ import { InsightCards } from '@/components/node/InsightCards';
 import { StrategyCards } from '@/components/node/StrategyCards';
 import type { MatchedStrategyCard, UserPreferences, RecommendRequest } from '@/types/lutagu_l4';
 import { useAppStore } from '@/stores/appStore';
+import { L4FormCard } from '@/components/node/L4FormCard';
+import { L4DemandChips } from '@/components/node/L4DemandChips';
+import { L4TemplateSelector, L4TemplateList } from '@/components/node/L4TemplateSelector';
 
 // Types for Card response (Mirroring API response)
 interface L4DashboardProps {
@@ -91,7 +93,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
         };
     }, []);
 
-    const [isDemandOpen, setIsDemandOpen] = useState(false);
     // Simplified 6-demand state (new design)
     const [demand, setDemand] = useState<L4DemandState>({
         wheelchair: false,
@@ -107,8 +108,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
         avoidRain: false,
     });
 
-    // New simplified demand types for the 6-chip design
-    type SimplifiedDemand = 'optimalRoute' | 'saveMoney' | 'accessibility' | 'expertTips' | 'avoidCrowds' | 'fastTrack';
     const [wantsExpertTips, setWantsExpertTips] = useState(false);
 
     const [activeKind, setActiveKind] = useState<L4IntentKind | null>(null);
@@ -358,104 +357,6 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
         if (task === 'knowledge') return `knowledge station: ${originId}${note ? `\n${note}` : ''}`;
         return `route from: ${originId} to: ${destId}${note ? `\n${note}` : ''}`;
     }, [question, selectedDestination, selectedOrigin, stationId, task]);
-
-    const toggleSimplifiedDemand = (key: SimplifiedDemand) => {
-        if (key === 'expertTips') {
-            setWantsExpertTips(v => !v);
-            return;
-        }
-
-        const mapping: Record<Exclude<SimplifiedDemand, 'expertTips'>, (keyof L4DemandState)[]> = {
-            optimalRoute: ['comfort'],
-            saveMoney: ['budget'],
-            accessibility: ['wheelchair', 'stroller', 'senior'],
-            avoidCrowds: ['avoidCrowds'],
-            fastTrack: ['rushing'],
-        };
-
-        const keys = mapping[key];
-        const isActive = keys.every(k => demand[k]);
-        setDemand(prev => {
-            const next = { ...prev };
-            keys.forEach(k => {
-                next[k] = !isActive;
-            });
-            return next;
-        });
-    };
-
-    const isSimplifiedDemandActive = (key: SimplifiedDemand) => {
-        if (key === 'expertTips') return wantsExpertTips;
-
-        const mapping: Record<Exclude<SimplifiedDemand, 'expertTips'>, (keyof L4DemandState)[]> = {
-            optimalRoute: ['comfort'],
-            saveMoney: ['budget'],
-            accessibility: ['wheelchair', 'stroller', 'senior'],
-            avoidCrowds: ['avoidCrowds'],
-            fastTrack: ['rushing'],
-        };
-        const keys = mapping[key];
-        return keys.every(k => demand[k]);
-    };
-
-    const demandChips = useMemo(() => {
-        const all: { key: SimplifiedDemand; icon: string; label: string }[] = [
-            {
-                key: 'accessibility',
-                icon: '🛗',
-                label: uiLocale.startsWith('zh')
-                    ? '無障礙/親子'
-                    : uiLocale === 'ja'
-                        ? 'バリアフリー/子連れ'
-                        : 'Accessibility & Kids'
-            },
-            {
-                key: 'fastTrack',
-                icon: '⚡',
-                label: uiLocale.startsWith('zh')
-                    ? '趕時間'
-                    : uiLocale === 'ja'
-                        ? '時間優先'
-                        : 'In a Hurry'
-            },
-            {
-                key: 'saveMoney',
-                icon: '💰',
-                label: uiLocale.startsWith('zh')
-                    ? '省錢優先'
-                    : uiLocale === 'ja'
-                        ? '料金重視'
-                        : 'Save Money'
-            },
-            {
-                key: 'avoidCrowds',
-                icon: '🚶',
-                label: uiLocale.startsWith('zh')
-                    ? '避開人潮'
-                    : uiLocale === 'ja'
-                        ? '混雑回避'
-                        : 'Avoid Crowds'
-            },
-            {
-                key: 'optimalRoute',
-                icon: '✨',
-                label: uiLocale.startsWith('zh') ? '優化' : uiLocale === 'ja' ? '最適' : 'Optimal'
-            },
-            {
-                key: 'expertTips',
-                icon: '💡',
-                label: uiLocale.startsWith('zh') ? '專家建議' : uiLocale === 'ja' ? 'プロのコツ' : 'Expert Tips'
-            }
-        ];
-
-        if (task === 'timetable') {
-            return all.filter(c => ['accessibility', 'avoidCrowds', 'expertTips'].includes(c.key));
-        }
-        return all;
-    }, [task, uiLocale]);
-
-    const visibleChips = demandChips.slice(0, 4);
-    const hiddenChips = demandChips.slice(4);
 
     // [New] Fetch Transfer Knowledge
     const [knowledgeData, setKnowledgeData] = useState<any>(null);
@@ -906,186 +807,69 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
 
                 {/* Main Content */}
                 <div className="flex-1 px-4 space-y-4">
-                    {/* Form Card */}
-                    <motion.div layout className="bg-white rounded-3xl shadow-sm border border-slate-100 p-5 relative overflow-hidden">
-                        {/* Decorative background blob */}
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-3xl opacity-60 pointer-events-none" />
+                    {/* Form Card using L4FormCard */}
+                    <L4FormCard
+                        originInput={originInput}
+                        setOriginInput={setOriginInput}
+                        selectedOrigin={selectedOrigin}
+                        setSelectedOrigin={(s) => {
+                            setSelectedOrigin(s);
+                            if (s) setOriginInput(getStationDisplayName(s));
+                        }}
+                        destinationInput={destinationInput}
+                        setDestinationInput={setDestinationInput}
+                        selectedDestination={selectedDestination}
+                        setSelectedDestination={(s) => {
+                            setSelectedDestination(s);
+                            if (s) setDestinationInput(getStationDisplayName(s));
+                        }}
+                        swapStations={swapStations}
+                        task={task}
+                        isLoading={isLoading}
+                        getStationDisplayName={getStationDisplayName}
+                        locale={uiLocale as 'zh-TW' | 'ja' | 'en'}
+                    />
 
-                        <div className="relative z-10 space-y-5">
-                            {/* Station Inputs */}
-                            <div className="relative">
-                                {/* Connector Line */}
-                                {task === 'route' && (
-                                    <div className="absolute left-3.5 top-8 bottom-8 w-0.5 bg-slate-100 rounded-full" />
-                                )}
+                    {/* Demand Chips using L4DemandChips */}
+                    <L4DemandChips
+                        demand={demand}
+                        setDemand={setDemand}
+                        wantsExpertTips={wantsExpertTips}
+                        setWantsExpertTips={setWantsExpertTips}
+                        task={task}
+                        locale={uiLocale as 'zh-TW' | 'ja' | 'en'}
+                    />
 
-                                <div className="space-y-4">
-                                    <div className="relative">
-                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 flex justify-center z-10">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-white shadow-sm" />
-                                        </div>
-                                        <StationAutocomplete
-                                            value={originInput}
-                                            onChange={(v) => {
-                                                setOriginInput(v);
-                                                setSelectedOrigin(null);
-                                            }}
-                                            onSelect={(s) => {
-                                                setSelectedOrigin(s);
-                                                setOriginInput(getStationDisplayName(s));
-                                            }}
-                                            placeholder={
-                                                task === 'timetable'
-                                                    ? (uiLocale.startsWith('zh') ? '選擇車站' : uiLocale === 'ja' ? '駅を選択' : 'Select Station')
-                                                    : (uiLocale.startsWith('zh') ? '從哪裡出發？' : uiLocale === 'ja' ? 'どこから出発？' : 'Origin')
-                                            }
-                                            className="pl-9 h-12 text-base font-bold bg-slate-50/50 border-slate-100 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-xl transition-all"
-                                            locale={uiLocale}
-                                            disabled={isLoading}
-                                        />
-                                    </div>
-
-                                    {task === 'route' && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            className="relative"
-                                        >
-                                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 flex justify-center z-10">
-                                                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-4 ring-white shadow-sm" />
-                                            </div>
-                                            <StationAutocomplete
-                                                value={destinationInput}
-                                                onChange={(v) => {
-                                                    setDestinationInput(v);
-                                                    setSelectedDestination(null);
-                                                }}
-                                                onSelect={(s) => {
-                                                    setSelectedDestination(s);
-                                                    setDestinationInput(getStationDisplayName(s));
-                                                }}
-                                                placeholder={uiLocale.startsWith('zh') ? '想去哪裡？' : uiLocale === 'ja' ? 'どこへ行く？' : 'Destination'}
-                                                className="pl-9 h-12 text-base font-bold bg-slate-50/50 border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 rounded-xl transition-all"
-                                                locale={uiLocale}
-                                                disabled={isLoading}
-                                            />
-                                        </motion.div>
-                                    )}
-                                </div>
-
-                                {/* Swap Button */}
-                                {task === 'route' && (
-                                    <button
-                                        onClick={swapStations}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors z-20"
-                                    >
-                                        <ArrowRightLeft size={16} className="rotate-90" />
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Demands */}
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                        {uiLocale.startsWith('zh') ? '偏好設定' : uiLocale === 'ja' ? '設定' : 'Preferences'}
-                                    </label>
-                                    {hiddenChips.length > 0 && (
-                                        <button
-                                            onClick={() => setIsDemandOpen(!isDemandOpen)}
-                                            className="text-[10px] font-bold text-indigo-600 flex items-center gap-1 hover:underline"
-                                        >
-                                            {uiLocale.startsWith('zh') ? '更多選項' : uiLocale === 'ja' ? '詳細' : 'More'}
-                                            <Settings size={12} />
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="grid grid-cols-3 gap-2">
-                                    {visibleChips.map(chip => (
-                                        <SimplifiedDemandChip
-                                            key={chip.key}
-                                            icon={chip.icon}
-                                            label={chip.label}
-                                            active={isSimplifiedDemandActive(chip.key)}
-                                            onClick={() => toggleSimplifiedDemand(chip.key)}
-                                        />
-                                    ))}
-                                </div>
-
-                                <AnimatePresence>
-                                    {isDemandOpen && hiddenChips.length > 0 && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="pt-3 grid grid-cols-3 gap-2 border-t border-slate-50 mt-3">
-                                                {hiddenChips.map(chip => (
-                                                    <SimplifiedDemandChip
-                                                        key={chip.key}
-                                                        icon={chip.icon}
-                                                        label={chip.label}
-                                                        active={isSimplifiedDemandActive(chip.key)}
-                                                        onClick={() => toggleSimplifiedDemand(chip.key)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            {/* Submit Button */}
-                            <button
-                                onClick={ask}
-                                disabled={!canAsk}
-                                className="w-full h-12 rounded-xl bg-indigo-600 text-white font-black shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-                            >
-                                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-                                <span className="text-sm">
-                                    {uiLocale.startsWith('zh')
-                                        ? '開始規劃'
-                                        : uiLocale === 'ja' ? '検索する' : 'Plan Trip'}
-                                </span>
-                            </button>
-                        </div>
-                    </motion.div>
+                    {/* Submit Button */}
+                    <button
+                        onClick={ask}
+                        disabled={!canAsk}
+                        className="w-full h-12 rounded-xl bg-indigo-600 text-white font-black shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                    >
+                        {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                        <span className="text-sm">
+                            {uiLocale.startsWith('zh')
+                                ? '開始規劃'
+                                : uiLocale === 'ja' ? '検索する' : 'Plan Trip'}
+                        </span>
+                    </button>
 
                     {/* Quick Templates Toggle */}
-                    <div className="flex justify-center">
-                        <button
-                            onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
-                            className="text-xs font-bold text-slate-400 flex items-center gap-1 hover:text-indigo-600 transition-colors"
-                        >
-                            {isTemplatesOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                            {uiLocale.startsWith('zh') ? '常用問句模板' : uiLocale === 'ja' ? 'テンプレート' : 'Templates'}
-                        </button>
-                    </div>
+                    <L4TemplateSelector
+                        templates={templates}
+                        visibleTemplates={visibleTemplates}
+                        isOpen={isTemplatesOpen}
+                        setIsOpen={setIsTemplatesOpen}
+                        onSelect={applyTemplate}
+                        locale={uiLocale as 'zh-TW' | 'ja' | 'en'}
+                    />
 
-                    <AnimatePresence>
-                        {isTemplatesOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="grid grid-cols-1 sm:grid-cols-2 gap-2"
-                            >
-                                {visibleTemplates.slice(0, 4).map((tpl) => (
-                                    <button
-                                        key={tpl.id}
-                                        onClick={() => void applyTemplate(tpl)}
-                                        className="text-left rounded-2xl bg-white border border-slate-100 p-3 hover:border-indigo-200 hover:shadow-sm transition-all"
-                                    >
-                                        <div className="text-xs font-black text-slate-700">{tpl.title}</div>
-                                        <div className="mt-0.5 text-[10px] text-slate-400 line-clamp-1">{tpl.description}</div>
-                                    </button>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    <L4TemplateList
+                        templates={visibleTemplates}
+                        isOpen={isTemplatesOpen}
+                        onSelect={(tpl) => void applyTemplate(tpl)}
+                        locale={uiLocale as 'zh-TW' | 'ja' | 'en'}
+                    />
 
                     {/* Error Message */}
                     <AnimatePresence>
@@ -1321,26 +1105,6 @@ function TabSelector({ activeTask, onSelect, locale }: { activeTask: string; onS
                 );
             })}
         </div>
-    );
-}
-
-function SimplifiedDemandChip({ icon, label, active, onClick }: {
-    icon: string;
-    label: string;
-    active: boolean;
-    onClick: () => void
-}) {
-    return (
-        <button
-            onClick={onClick}
-            className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all ${active
-                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
-                : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-white'
-                }`}
-        >
-            <span className="text-base">{icon}</span>
-            <span className="text-xs font-bold">{label}</span>
-        </button>
     );
 }
 
