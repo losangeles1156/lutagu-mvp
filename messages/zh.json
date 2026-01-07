@@ -401,7 +401,25 @@
         "tripAdded": "已將「{label}」加入行程！",
         "openingTimetable": "正在為您開啟「{label}」的詳細時刻表...",
         "activeBadge": "即時策略啟用中",
-        "demoNextStep": "演示下一步"
+        "demoNextStep": "演示下一步",
+        "restart": "重新開始對話",
+        "minimize": "最小化",
+        "maximize": "最大化",
+        "placeholder": "輸入訊息...",
+        "feedbackLike": "有幫助",
+        "feedbackDislike": "沒幫助",
+        "retrySend": "重試傳送",
+        "emptyTitle": "有什麼可以幫您？",
+        "emptyDescription": "詢問路線、即時狀態或無障礙設施",
+        "quickQuestions": "快速問題",
+        "intent": {
+            "route": "路線",
+            "status": "狀態",
+            "facility": "設施",
+            "ticket": "票券",
+            "weather": "天氣",
+            "time": "時間"
+        }
     },
     "ui": {
         "items": "項目"

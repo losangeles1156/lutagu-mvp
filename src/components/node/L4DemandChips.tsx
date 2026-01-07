@@ -137,7 +137,7 @@ export function L4DemandChips({
                 {hiddenChips.length > 0 && (
                     <button
                         onClick={() => {}} // Toggle logic handled by parent
-                        className="text-[10px] font-bold text-indigo-600 flex items-center gap-1 hover:underline"
+                        className="text-[10px] font-bold text-indigo-600 flex items-center gap-1 hover:underline touch-manipulation px-2 py-1"
                     >
                         {locale.startsWith('zh') ? '更多選項' : locale === 'ja' ? '詳細' : 'More'}
                         <Settings size={12} />
@@ -145,7 +145,7 @@ export function L4DemandChips({
                 )}
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2.5">
                 {visibleChips.map(chip => (
                     <SimplifiedDemandChip
                         key={chip.key}
@@ -165,7 +165,7 @@ export function L4DemandChips({
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                     >
-                        <div className="pt-3 grid grid-cols-3 gap-2 border-t border-slate-50 mt-3">
+                        <div className="pt-3 grid grid-cols-3 gap-2.5 border-t border-slate-50 mt-3">
                             {hiddenChips.map(chip => (
                                 <SimplifiedDemandChip
                                     key={chip.key}
@@ -194,12 +194,12 @@ function SimplifiedDemandChip({ icon, label, active, onClick }: SimplifiedDemand
     return (
         <button
             onClick={onClick}
-            className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all ${active
+            className={`flex items-center justify-center gap-1.5 p-3 min-h-[52px] rounded-xl border transition-all active:scale-[0.96] touch-manipulation ${active
                 ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
                 : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-white'
                 }`}
         >
-            <span className="text-base">{icon}</span>
+            <span className="text-lg">{icon}</span>
             <span className="text-xs font-bold">{label}</span>
         </button>
     );

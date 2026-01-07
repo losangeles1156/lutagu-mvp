@@ -415,6 +415,10 @@
         "placeholder": "Type a message...",
         "feedbackLike": "Helpful",
         "feedbackDislike": "Not helpful",
+        "retrySend": "Retry",
+        "emptyTitle": "How can I help you?",
+        "emptyDescription": "Ask about routes, live status, or accessibility",
+        "quickQuestions": "Quick questions",
         "intent": {
             "route": "Route",
             "status": "Status",

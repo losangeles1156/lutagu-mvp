@@ -207,7 +207,11 @@ export function classifyQuestion(text: string, locale: SupportedLocale): { kind:
         trimmed.includes('延誤') ||
         trimmed.includes('誤點') ||
         trimmed.includes('狀態') ||
-        trimmed.includes('運行');
+        trimmed.includes('運行') ||
+        lower.includes('flight') ||
+        lower.includes('airline') ||
+        trimmed.includes('航班') ||
+        trimmed.includes('班機');
 
     const hasAmenity =
         lower.includes('locker') ||
@@ -335,6 +339,54 @@ export function buildL4DefaultQuestionTemplates(params: {
             preset: { demand: { stroller: true, comfort: true } }
         }
     ];
+
+    // [New] Airport Specific Templates
+    const isHaneda = origin.includes('Haneda') || origin.includes('Airport.Haneda');
+    const isNarita = origin.includes('Narita') || origin.includes('Airport.Narita');
+
+    if (isHaneda) {
+        featureTemplates.unshift(
+            {
+                id: 'haneda-to-shinjuku',
+                category: 'feature',
+                kind: 'route',
+                title: t('去新宿（市中心）', '新宿へ（都心アクセス）', 'To Shinjuku (City Center)'),
+                text: t('怎麼去新宿站？', '新宿駅への行き方は？', 'How to get to Shinjuku Station?'),
+                description: t('推薦單軌或京急轉乘', 'モノレール/京急乗り換え', 'Monorail/Keikyu transfer'),
+                preset: { originStationId: origin, destinationStationId: 'odpt.Station:JR-East.Yamanote.Shinjuku', demand: { comfort: true } }
+            },
+            {
+                id: 'haneda-to-asakusa',
+                category: 'feature',
+                kind: 'route',
+                title: t('去淺草（直達車？）', '浅草へ（直通？）', 'To Asakusa (Direct?)'),
+                text: t('怎麼去淺草站？推薦直達車嗎？', '浅草駅への行き方は？直通はありますか？', 'How to get to Asakusa Station? Is there a direct train?'),
+                description: t('京急線有直達班次', '京急線で直通あり', 'Direct train via Keikyu Line'),
+                preset: { originStationId: origin, destinationStationId: 'odpt.Station:TokyoMetro.Ginza.Asakusa' }
+            }
+        );
+    } else if (isNarita) {
+        featureTemplates.unshift(
+            {
+                id: 'narita-to-tokyo',
+                category: 'feature',
+                kind: 'route',
+                title: t('去東京站（N\'EX）', '東京駅へ（N\'EX）', 'To Tokyo Station (N\'EX)'),
+                text: t('怎麼去東京站？比較 N\'EX 和巴士。', '東京駅への行き方は？N\'EXとバスを比較。', 'How to get to Tokyo Station? Compare N\'EX and bus.'),
+                description: t('成田特快直達最舒適', '成田エクスプレスが快適', 'Narita Express is comfortable'),
+                preset: { originStationId: origin, destinationStationId: 'odpt.Station:JR-East.Yamanote.Tokyo', demand: { comfort: true, largeLuggage: true } }
+            },
+            {
+                id: 'narita-to-ueno',
+                category: 'feature',
+                kind: 'route',
+                title: t('去上野（Skyliner）', '上野へ（スカイライナー）', 'To Ueno (Skyliner)'),
+                text: t('搭 Skyliner 去上野要多久？', 'スカイライナーで上野までどのくらい？', 'How long to Ueno via Skyliner?'),
+                description: t('最快 40 分鐘進市區', '最速40分で都心へ', 'Fastest 40min to city'),
+                preset: { originStationId: origin, destinationStationId: 'odpt.Station:TokyoMetro.Ginza.Ueno', demand: { rushing: true } }
+            }
+        );
+    }
 
     return [
         ...featureTemplates,

@@ -21,31 +21,31 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
     const tCommon = useTranslations('common');
     const locale = useLocale();
     const { id: stationId, name } = data || {};
-    
+
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
     const setUserProfileStore = useAppStore(s => s.setUserProfile);
-    
+
     // Robust Name Resolution
     const displayName = (name?.zh && name?.zh !== '車站' && name?.zh !== 'Station')
         ? name.zh
         : (name?.en || name?.ja || (stationId?.split(':').pop()?.split('.').pop()) || tCommon('station'));
-    
+
     // Card data from L4 cards
     const bestCard = useMemo(() => {
         const cards = data?.l4_cards || [];
         return cards.find(c => c.type === 'primary') || cards[0] || null;
     }, [data?.l4_cards]);
-    
+
     const otherCards = useMemo(() => {
         const cards = data?.l4_cards || [];
         if (!bestCard) return [];
         return cards.filter(c => c.id !== bestCard.id);
     }, [data?.l4_cards, bestCard]);
-    
+
     const [isOtherOpen, setIsOtherOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
-    
+
     // Initialize greeting
     useEffect(() => {
         if (displayName && !hasGreeted && variant === 'strategy') {
@@ -53,12 +53,12 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
             setHasGreeted(true);
         }
     }, [displayName, hasGreeted, variant, tL4]);
-    
+
     // Input state
     const [input, setInput] = useState('');
     const [destination, setDestination] = useState('');
     const [selectedDemands, setSelectedDemands] = useState<string[]>([]);
-    
+
     // useDifyChat hook
     const {
         messages,
@@ -84,7 +84,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
             console.error('Chat error:', error);
         }
     });
-    
+
     // Handle seed question
     const lastSeedQuestionRef = useRef<string>('');
     useEffect(() => {
@@ -93,12 +93,12 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         if (!hasGreeted && variant === 'strategy') return;
         if (isLoading) return;
         if (lastSeedQuestionRef.current === text) return;
-        
+
         lastSeedQuestionRef.current = text;
         sendMessage(text, seedUserProfile || 'general');
         onSeedConsumed?.();
     }, [seedQuestion, seedUserProfile, hasGreeted, isLoading, sendMessage, variant, onSeedConsumed]);
-    
+
     // Demand chips configuration
     const demands = [
         { id: 'speed', icon: Clock, label: tL4('demands.speed') },
@@ -108,11 +108,11 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         { id: 'family', icon: Baby, label: tL4('demands.family') },
         { id: 'accessibility', icon: Compass, label: tL4('demands.accessibility') }
     ];
-    
+
     const handleSend = useCallback((text: string, profile: string) => {
         sendMessage(text, profile);
     }, [sendMessage]);
-    
+
     return (
         <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
             {/* Header Area */}
@@ -138,7 +138,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                     </div>
                 </div>
             </div>
-            
+
             {/* Message Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
                 {bestCard && (
@@ -159,7 +159,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                         <div className="mt-3 text-sm font-bold text-white/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
                             {getLocaleString(bestCard.description, locale)}
                         </div>
-                        
+
                         <div className="mt-4 flex gap-2">
                             <button
                                 onClick={() => {
@@ -173,7 +173,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                             >
                                 {getLocaleString(bestCard.actionLabel, locale) || tCommon('view')}
                             </button>
-                            
+
                             {/* Apply on Map - only for bambi variant */}
                             {variant === 'bambi' && (
                                 <button
@@ -188,7 +188,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                                     {locale.startsWith('ja') ? '地図に反映' : locale.startsWith('en') ? 'Apply to Map' : '套用到地圖'}
                                 </button>
                             )}
-                            
+
                             {otherCards.length > 0 && (
                                 <button
                                     onClick={() => setIsOtherOpen(v => !v)}
@@ -200,7 +200,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                         </div>
                     </div>
                 )}
-                
+
                 {isOtherOpen && otherCards.length > 0 && (
                     <div className="space-y-3">
                         {otherCards.map((card) => (
@@ -224,7 +224,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                         ))}
                     </div>
                 )}
-                
+
                 {messages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${msg.role === 'user'
@@ -241,7 +241,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                         </div>
                     </div>
                 ))}
-                
+
                 {/* Thinking Indicator */}
                 {thinkingStep && (
                     <div className="flex justify-start animate-in fade-in slide-in-from-left-2 duration-300">
@@ -253,9 +253,9 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            
+
             {/* Input Overlay */}
-            <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px]">
+            <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px] pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <div className="space-y-4 max-w-lg mx-auto">
                     {/* Quick Buttons */}
                     <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
@@ -275,7 +275,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                             </button>
                         ))}
                     </div>
-                    
+
                     {/* Destination Input & Free Text */}
                     <div className="relative group flex gap-2">
                         <div className="relative flex-1">
@@ -302,11 +302,11 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                                     }
                                 }}
                                 aria-label={tL4('inputPlaceholder')}
-                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-base font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                             />
                         </div>
                     </div>
-                    
+
                     {/* Demand Chips (Multi-select) */}
                     <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
                         {demands.map(demand => {
@@ -320,7 +320,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                                         } else {
                                             setSelectedDemands(prev => [...prev, demand.id]);
                                         }
-                                        
+
                                         // Sync user profile for map & agent
                                         if (demand.id === 'accessibility') setUserProfileStore('wheelchair');
                                         if (demand.id === 'family') setUserProfileStore('stroller');
@@ -338,14 +338,14 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                             );
                         })}
                     </div>
-                    
+
                     {/* Action Button */}
                     <button
                         onClick={() => {
                             let profile = 'general';
                             if (selectedDemands.includes('accessibility')) profile = 'wheelchair';
                             else if (selectedDemands.includes('family')) profile = 'stroller';
-                            
+
                             const textToSend = input || destination;
                             if (textToSend) handleSend(textToSend, profile);
                         }}

@@ -341,7 +341,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                             {/* Category Header */}
                             <button
                                 onClick={() => toggleCategory(type, items, label)}
-                                className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 transition-colors group"
+                                className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 transition-colors group touch-manipulation min-h-[64px]"
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${colorClass} shadow-sm group-hover:scale-105 transition-transform`}>
@@ -374,7 +374,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                             {items.map((fac) => (
                                                 <div
                                                     key={fac.id}
-                                                    className="bg-white p-3 rounded-xl border border-gray-100 flex items-start gap-3 cursor-pointer hover:border-indigo-200 hover:shadow-sm transition-all active:scale-[0.99]"
+                                                    className="bg-white p-3 rounded-xl border border-gray-100 flex items-start gap-3 cursor-pointer hover:border-indigo-200 hover:shadow-sm transition-all active:scale-[0.99] touch-manipulation min-h-[64px]"
                                                     onClick={() => {
                                                         trackEvent({
                                                             activityType: 'facility_open',
@@ -441,7 +441,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                     facilityType: 'toilet'
                                 })
                             }
-                            className="flex items-center justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] bg-cyan-600 text-white"
+                            className="flex items-center justify-between p-4 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] bg-cyan-600 text-white touch-manipulation"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white/20 rounded-xl relative">
@@ -582,7 +582,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                 </div>
                                 <button
                                     onClick={() => setDrawerCategory(null)}
-                                    className="p-2 bg-slate-200/50 hover:bg-slate-200 text-slate-500 rounded-full transition-colors"
+                                    className="w-11 h-11 p-2.5 bg-slate-200/50 hover:bg-slate-200 text-slate-500 rounded-full transition-colors flex items-center justify-center"
                                 >
                                     <X size={20} />
                                 </button>

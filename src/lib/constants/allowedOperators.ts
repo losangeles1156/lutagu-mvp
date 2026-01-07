@@ -9,6 +9,8 @@ export const ALLOWED_OPERATORS = [
     'Toei',
     'JR-East',
     'Keikyu',
+    'TokyoMonorail',
+    'Airport', // Custom operator for Airport Hubs
 ] as const;
 
 /**
@@ -18,7 +20,7 @@ export const ALLOWED_OPERATORS = [
  */
 export const STATION_WHITELIST: Record<string, string[]> = {
     'Tobu': ['Asakusa'],
-    'Keisei': ['Ueno', 'Nippori', 'Oshiage'], // Includes "Keisei-Ueno"
+    'Keisei': ['Ueno', 'Nippori', 'Oshiage', 'Narita', 'Haneda'], // Whitelist airport stations
 };
 
 /**

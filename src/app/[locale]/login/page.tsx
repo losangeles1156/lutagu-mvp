@@ -10,6 +10,7 @@ import { getSupabase } from '@/lib/supabase';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useAppStore } from '@/stores/appStore';
 import { DEMO_SCENARIOS } from '@/lib/l4/demoScenarios';
+import { LoginChatPanel } from '@/components/chat/LoginChatPanel';
 
 function normalizeNextPath(nextPath: string | null, locale: string) {
     if (!nextPath) return `/${locale}`;
@@ -43,7 +44,6 @@ export default function LoginPage() {
     };
 
     const getIssueLabel = (key: string) => {
-        // Since labels are short, we can still use translations or just hardcode for these 4
         return t(`issues.${key}`);
     };
 
@@ -220,38 +220,37 @@ export default function LoginPage() {
         }
     }
 
-
-
     return (
-        <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-[480px] bg-white rounded-[48px] shadow-2xl shadow-indigo-100/50 overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
-                <div className="p-8 pb-4 border-b border-gray-50 flex items-center justify-between">
+        <main className="min-h-screen bg-slate-50 p-4 pb-0 pt-[env(safe-area-inset-top,0px)]" role="main">
+            {/* Main Content Card */}
+            <div className="w-full max-w-[480px] mx-auto bg-white rounded-[48px] shadow-2xl shadow-indigo-100/50 overflow-hidden border border-slate-100 flex flex-col max-h-[calc(100dvh-180px)] lg:max-h-[calc(100dvh-240px)] sm:max-h-[calc(100dvh-160px)]">
+                <header className="p-8 pb-4 border-b border-gray-50 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200" aria-hidden="true">
                             <span className="text-2xl text-white">🦌</span>
                         </div>
                         <div>
-                            <div className="text-xl font-black text-slate-900 tracking-tight leading-none">LUTAGU</div>
-                            <div className="text-xs font-bold text-slate-400 mt-1">{tOnboarding('tagline')}</div>
+                            <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">LUTAGU</h1>
+                            <p className="text-xs font-bold text-slate-400 mt-1">{tOnboarding('tagline')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <LanguageSwitcher />
                         <button 
                             onClick={() => router.replace(nextPath)}
-                            className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"
+                            className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             aria-label={tOnboarding('skip')}
                         >
                             <X className="w-5 h-5" />
                         </button>
                     </div>
-                </div>
+                </header>
 
                 {/* Content - Scrollable */}
                 <div className="flex-1 overflow-y-auto px-8 py-2 custom-scrollbar">
                     {/* Login Section */}
-                    <div className="mt-4 mb-8 space-y-4">
-                        <div className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{t('title')}</div>
+                    <section className="mt-4 mb-8 space-y-4" aria-labelledby="login-title">
+                        <h2 id="login-title" className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{t('title')}</h2>
                         
                         {session ? (
                             <div className="space-y-3">
@@ -264,14 +263,14 @@ export default function LoginPage() {
                                 <button
                                     onClick={() => router.replace(nextPath)}
                                     disabled={busy || !readyToContinue}
-                                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-sm font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 active:scale-[0.98]"
+                                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-sm font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >
                                     {busy ? '...' : t('continue')}
                                 </button>
                                 <button
                                     onClick={signOut}
                                     disabled={busy}
-                                    className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl text-xs font-bold hover:bg-slate-100 transition-all"
+                                    className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl text-xs font-bold hover:bg-slate-100 transition-all focus:outline-none focus:ring-2 focus:ring-slate-300"
                                 >
                                     {t('logout')}
                                 </button>
@@ -281,7 +280,8 @@ export default function LoginPage() {
                                 <button
                                     onClick={signInWithGoogle}
                                     disabled={busy}
-                                    className="w-full py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl text-sm font-black hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3 active:scale-[0.98]"
+                                    aria-label={t('googleLogin')}
+                                    className="w-full py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl text-sm font-black hover:bg-slate-50 hover:border-indigo-200 transition-all shadow-sm flex items-center justify-center gap-3 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >
                                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -299,47 +299,47 @@ export default function LoginPage() {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                                            {t('emailLabel')}
-                                        </label>
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder={t('emailPlaceholder')}
-                                            className="w-full px-5 py-4 bg-slate-50 border border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none"
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={sendMagicLink}
-                                        disabled={busy || !email.trim()}
-                                        className="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all disabled:opacity-50 active:scale-[0.98]"
-                                    >
-                                        {busy ? '...' : t('sendMagicLink')}
-                                    </button>
-                                    {sentMagicLink && (
-                                        <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs font-bold text-indigo-600 animate-in fade-in slide-in-from-top-2">
-                                            {t('magicLinkSent')}
-                                        </div>
-                                    )}
+                                    <label htmlFor="email-input" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">
+                                        {t('emailLabel')}
+                                    </label>
+                                    <input
+                                        id="email-input"
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder={t('emailPlaceholder')}
+                                        autoComplete="email"
+                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-2xl text-sm font-bold transition-all outline-none"
+                                    />
                                 </div>
+                                <button
+                                    onClick={sendMagicLink}
+                                    disabled={busy || !email.trim()}
+                                    className="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all disabled:opacity-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                                >
+                                    {busy ? '...' : t('sendMagicLink')}
+                                </button>
+                                {sentMagicLink && (
+                                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs font-bold text-indigo-600 animate-in fade-in slide-in-from-top-2" role="status">
+                                        {t('magicLinkSent')}
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {error && (
-                            <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100 text-xs font-bold text-rose-600 animate-in shake-1">
+                            <div role="alert" aria-live="polite" className="p-4 bg-rose-50 rounded-2xl border border-rose-100 text-xs font-bold text-rose-600 animate-in shake-1">
                                 {error}
                             </div>
                         )}
-                    </div>
+                    </section>
 
                     {/* Questions */}
-                    <div className="space-y-3 mt-4">
-                        <div className="text-[11px] font-black text-indigo-600 mb-2 uppercase tracking-wider flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse" />
+                    <section className="space-y-3 mt-4" aria-labelledby="questions-title">
+                        <h2 id="questions-title" className="text-[11px] font-black text-indigo-600 mb-2 uppercase tracking-wider flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse" aria-hidden="true" />
                             {t('tryAsking')}
-                        </div>
+                        </h2>
                         {[
                             { key: 'overtourism', node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
                             { key: 'disruption', node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo' },
@@ -354,7 +354,7 @@ export default function LoginPage() {
                                     onClick={() => {
                                         router.push(`/${locale}/?node=${item.node}&sheet=1&tab=lutagu&q=${encodeURIComponent(questionText)}`);
                                     }}
-                                    className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98]"
+                                    className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >
                                     <div className="flex items-center gap-2 mb-1.5">
                                         <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white border border-slate-100 text-indigo-500 font-black uppercase tracking-wider shadow-sm">
@@ -370,11 +370,11 @@ export default function LoginPage() {
                                  </button>
                              );
                          })}
-                    </div>
+                    </section>
 
                     {/* Hubs */}
-                    <div className="mt-6 mb-8">
-                        <div className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{tOnboarding('hubTitle')}</div>
+                    <section className="mt-6 mb-8" aria-labelledby="hubs-title">
+                        <h2 id="hubs-title" className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{tOnboarding('hubTitle')}</h2>
                         <div className="grid grid-cols-4 gap-2">
                             {[
                                 { key: 'ueno', node: 'odpt.Station:TokyoMetro.Ginza.Ueno' },
@@ -385,31 +385,34 @@ export default function LoginPage() {
                                 <button
                                     key={hub.key}
                                     onClick={() => router.push(`/${locale}/?node=${hub.node}&sheet=1`)}
-                                    className="py-2.5 bg-slate-50 rounded-xl text-[11px] font-black text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100"
+                                    className="py-2.5 bg-slate-50 rounded-xl text-[11px] font-black text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     {tOnboarding(`hubs.${hub.key}`)}
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    </section>
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-8 pt-4 pb-6 grid grid-cols-2 gap-4 bg-white border-t border-slate-50">
+                <footer className="p-8 pt-4 pb-6 grid grid-cols-2 gap-4 bg-white border-t border-slate-50">
                     <button
                         onClick={() => router.replace(nextPath)}
-                        className="py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-[0.98]"
+                        className="py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                     >
                         {tOnboarding('enableLocation')}
                     </button>
                     <button
                         onClick={() => router.replace(nextPath)}
-                        className="py-4 bg-slate-50 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-100 transition-all active:scale-[0.98]"
+                        className="py-4 bg-slate-50 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-100 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300"
                     >
                         {tOnboarding('browseFirst')}
                     </button>
-                </div>
+                </footer>
             </div>
+
+            {/* AI Chat Panel at Bottom */}
+            <LoginChatPanel />
         </main>
     );
 }

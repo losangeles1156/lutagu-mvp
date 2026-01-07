@@ -28,9 +28,13 @@ export function WardNodeLoader({ wardIds, onNodesLoaded, onLoadingChange }: Ward
 
             onLoadingChange(true);
             try {
+                // [FIX] Always include 'ward:airport' to ensure global airport visibility
+                const idsToFetch = new Set(wardIds);
+                idsToFetch.add('ward:airport');
+
                 // Fetch nodes from all selected wards in parallel
                 const results = await Promise.all(
-                    wardIds.map(wardId => fetchNodesByWard(wardId))
+                    Array.from(idsToFetch).map(wardId => fetchNodesByWard(wardId))
                 );
 
                 // Flatten and deduplicate by node ID
@@ -49,13 +53,16 @@ export function WardNodeLoader({ wardIds, onNodesLoaded, onLoadingChange }: Ward
 
                 // Apply Tokyo 23 wards geographic bounds filter
                 const filteredNodes = operatorFiltered.filter(node => {
+                    // [FIX] Always allow Airport nodes regardless of geography (e.g. Narita is in Chiba)
+                    if (node.ward_id === 'airport') return true;
+
                     const coords = getNodeCoordinates(node);
                     if (!coords) return false;
                     return isWithinTokyo23Wards(coords[0], coords[1]);
                 });
 
                 if (isMounted) {
-                    console.log(`[WardNodeLoader] Loaded ${allNodes.length} total, ${operatorFiltered.length} after operator filter, ${filteredNodes.length} after bounds filter, from ${wardIds.length} wards`);
+                    console.log(`[WardNodeLoader] Loaded ${allNodes.length} total, ${operatorFiltered.length} after operator filter, ${filteredNodes.length} after bounds filter, from ${idsToFetch.size} wards`);
                     onNodesLoaded(filteredNodes);
                     loadedWardsRef.current = wardsKey;
                 }

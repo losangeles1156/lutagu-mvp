@@ -313,6 +313,77 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
             en: 'This line supports Contactless Payment. Skip the ticket machine and tap your credit card (Visa/Master etc.) at the gate.'
         }
     },
+    // --- AIRPORT SURVIVAL TIPS (Phase 6) ---
+
+    // 1. Haneda: Monorail vs Keikyu
+    {
+        id: 'hnd-transport-compare',
+        trigger: {
+            station_ids: ['odpt.Station:Keikyu.Main.HanedaAirportTerminal1_2', 'odpt.Station:Keikyu.Main.HanedaAirportTerminal3', 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal1', 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal2', 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal3'],
+            keywords: ['monorail', 'keikyu', 'shinjuku', 'tokyo', 'ueno', 'comparison']
+        },
+        type: 'tip',
+        priority: 92,
+        icon: '⚖️',
+        title: { 'zh-TW': '羽田交通選擇指南', ja: 'モノレール vs 京急', en: 'Haneda Transport Guide' },
+        content: {
+            'zh-TW': '【比較】\n🚇 京急線：直通「淺草、品川」，轉乘 JR 山手線方便。去新宿/澀谷選這條。\n🚝 單軌電車：直達「濱松町」，轉乘 JR 山手線去東京/上野較順。',
+            ja: '【比較】\n🚇 京急線：浅草・品川直通。新宿・渋谷方面へは品川乗り換えが便利。\n🚝 モノレール：浜松町直結。東京・上野方面へスムーズ。',
+            en: '【Compare】\n🚇 Keikyu: Direct to Asakusa/Shinagawa. Best for Shinjuku/Shibuya (transfer at Shinagawa).\n🚝 Monorail: Direct to Hamamatsucho. Best for Tokyo/Ueno.'
+        }
+    },
+    // 2. Haneda: Late Night Access
+    {
+        id: 'hnd-late-night',
+        trigger: {
+            station_ids: ['odpt.Station:Keikyu.Main.HanedaAirportTerminal3', 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal3'],
+            time_patterns: ['23:00-05:00'],
+            keywords: ['late', 'night', 'taxi', 'hotel']
+        },
+        type: 'warning',
+        priority: 95,
+        icon: '🌙',
+        title: { 'zh-TW': '羽田深夜交通注意', ja: '羽田深夜アクセス', en: 'Haneda Late Night' },
+        content: {
+            'zh-TW': '【23:30 後】電車大多收班。\n1. 深夜巴士：需事先預約。\n2. 計程車：至新宿約 8,000-10,000 日圓。\n3. 住宿：T3 直結飯店或機場內膠囊旅館 (First Cabin)。',
+            ja: '【23:30以降】電車はほぼ終了です。\n1. 深夜バス（要予約）\n2. タクシー（新宿まで約1万円）\n3. 宿泊（第3ターミナル直結ホテル/カプセルホテル）',
+            en: '【After 23:30】Trains stop.\n1. Night Bus (Book ahead).\n2. Taxi (~10k JPY to Shinjuku).\n3. Stay: T3 Hotel or First Cabin inside airport.'
+        }
+    },
+    // 3. Narita: Skyliner vs N'EX
+    {
+        id: 'nrt-transport-compare',
+        trigger: {
+            station_ids: ['odpt.Station:Keisei.KeiseiMain.NaritaAirport', 'odpt.Station:JR-East.NaritaLine.NaritaAirportTerminal1', 'odpt.Station:JR-East.NaritaLine.NaritaAirportTerminal2_3'],
+            keywords: ['skyliner', 'nex', 'express', 'shinjuku', 'ueno', 'comparison']
+        },
+        type: 'tip',
+        priority: 92,
+        icon: '🚄',
+        title: { 'zh-TW': '成田特急選擇指南', ja: 'Skyliner vs N\'EX', en: 'Narita Express Guide' },
+        content: {
+            'zh-TW': '【比較】\n🦅 Skyliner：最快 (40分)，直達「上野/日暮里」。去淺草/銀座方便。\n🔴 N\'EX：直達「東京/新宿/澀谷」，不用轉車但較慢 (60-90分)。',
+            ja: '【比較】\n🦅 Skyliner：最速 (40分)。上野・日暮里直結。\n🔴 N\'EX：東京・新宿・渋谷へ乗換なし (60-90分)。',
+            en: '【Compare】\n🦅 Skyliner: Fastest (40m) to Ueno/Nippori.\n🔴 N\'EX: Direct to Tokyo/Shinjuku/Shibuya (No transfer, 60-90m).'
+        }
+    },
+    // 4. Narita: Terminal 3 "Trap"
+    {
+        id: 'nrt-t3-access',
+        trigger: {
+            station_ids: ['odpt.Station:Keisei.KeiseiMain.NaritaAirport', 'odpt.Station:JR-East.NaritaLine.NaritaAirportTerminal2_3'],
+            keywords: ['terminal_3', 'beacon', 'lcc', 'jetstar', 'spring']
+        },
+        type: 'warning',
+        priority: 90,
+        icon: '🏃',
+        title: { 'zh-TW': 'T3 (廉航) 步行警示', ja: '第3ターミナル移動注意', en: 'T3 Access Warning' },
+        content: {
+            'zh-TW': '電車只停 T2！前往 T3 (Jetstar/Spring/Jeju) 需從 T2 出站後：\n1. 步行：約 600m (15分鐘)，沿著藍色跑道走。\n2. 接駁巴士：約 5-10 分鐘一班。請預留額外時間。',
+            ja: '電車はT2止まりです！T3 (LCC) へはT2下車後：\n1. 徒歩：約15分 (600m)\n2. 連絡バス：5-10分間隔。時間に余裕を！',
+            en: 'Trains stop at T2 Only! For T3 (LCC):\n1. Walk: ~15 mins (600m) follow blue track.\n2. Shuttle Bus: Every 5-10 mins. Allow extra time!'
+        }
+    },
     // Payment: JR East Trap
     {
         id: 'payment-cc-jr-trap',

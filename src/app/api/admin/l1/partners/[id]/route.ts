@@ -7,11 +7,14 @@ export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const { id } = await params;
-        const supabase = getSupabaseAdmin();
+        try {
+            const { id } = await params;
+            const supabase = getSupabaseAdmin();
+            if (!supabase) {
+                return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+            }
 
-        const { data: partner, error } = await supabase
+            const { data: partner, error } = await supabase
             .from('l1_partners')
             .select('*')
             .eq('id', id)
@@ -49,6 +52,9 @@ export async function PUT(
         const { id } = await params;
         const body: UpdatePartnerRequest = await request.json();
         const supabase = getSupabaseAdmin();
+        if (!supabase) {
+            return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+        }
 
         // Prepare data for update
         const updateData: any = { ...body };
@@ -100,6 +106,9 @@ export async function DELETE(
     try {
         const { id } = await params;
         const supabase = getSupabaseAdmin();
+        if (!supabase) {
+            return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
+        }
 
         const { error } = await supabase
             .from('l1_partners')

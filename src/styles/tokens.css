@@ -1,0 +1,272 @@
+/* 
+ * LUTAGU Design Tokens
+ * 統一管理視覺設計系統
+ * 
+ * 使用方式：
+ * - CSS: var(--color-primary-600)
+ * - Tailwind: @apply text-primary-600
+ * - JS: colors.primary[600]
+ */
+
+/* ===========================================
+   COLOR SYSTEM - 色彩系統
+   =========================================== */
+
+/* Primary - 主要品牌色 */
+:root {
+    --color-primary-50: #eef2ff;
+    --color-primary-100: #e0e7ff;
+    --color-primary-200: #c7d2fe;
+    --color-primary-300: #a5b4fc;
+    --color-primary-400: #818cf8;
+    --color-primary-500: #6366f1;
+    --color-primary-600: #4f46e5;
+    --color-primary-700: #4338ca;
+    --color-primary-800: #3730a3;
+    --color-primary-900: #312e81;
+
+    /* Semantic color aliases */
+    --color-brand: var(--color-primary-600);
+    --color-brand-hover: var(--color-primary-700);
+    --color-brand-light: var(--color-primary-100);
+}
+
+/* Slate - 中性灰階 */
+:root {
+    --color-slate-50: #f8fafc;
+    --color-slate-100: #f1f5f9;
+    --color-slate-200: #e2e8f0;
+    --color-slate-300: #cbd5e1;
+    --color-slate-400: #94a3b8;
+    --color-slate-500: #64748b;
+    --color-slate-600: #475569;
+    --color-slate-700: #334155;
+    --color-slate-800: #1e293b;
+    --color-slate-900: #0f172a;
+    --color-slate-950: #020617;
+
+    /* Semantic color aliases */
+    --color-text-primary: var(--color-slate-900);
+    --color-text-secondary: var(--color-slate-500);
+    --color-text-muted: var(--color-slate-400);
+    --color-border: var(--color-slate-200);
+    --color-bg-page: var(--color-slate-50);
+    --color-bg-card: #ffffff;
+}
+
+/* Status Colors - 狀態色 */
+:root {
+    /* Success - 成功 */
+    --color-emerald-50: #ecfdf5;
+    --color-emerald-100: #d1fae5;
+    --color-emerald-500: #10b981;
+    --color-emerald-600: #059669;
+    --color-emerald-700: #047857;
+
+    /* Warning - 警告 */
+    --color-amber-50: #fffbeb;
+    --color-amber-100: #fef3c7;
+    --color-amber-500: #f59e0b;
+    --color-amber-600: #d97706;
+
+    /* Error - 錯誤 */
+    --color-rose-50: #fff1f2;
+    --color-rose-100: #ffe4e6;
+    --color-rose-500: #f43f5e;
+    --color-rose-600: #e11d48;
+
+    /* Info - 資訊 */
+    --color-blue-50: #eff6ff;
+    --color-blue-100: #dbeafe;
+    --color-blue-500: #3b82f6;
+    --color-blue-600: #2563eb;
+}
+
+/* ===========================================
+   TYPOGRAPHY - 字體系統
+   =========================================== */
+
+:root {
+    /* Font families */
+    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+    /* Font sizes - Tailwind scale */
+    --font-size-xs: 0.75rem;      /* 12px */
+    --font-size-sm: 0.875rem;     /* 14px */
+    --font-size-base: 1rem;       /* 16px */
+    --font-size-lg: 1.125rem;     /* 18px */
+    --font-size-xl: 1.25rem;      /* 20px */
+    --font-size-2xl: 1.5rem;      /* 24px */
+    --font-size-3xl: 1.875rem;    /* 30px */
+
+    /* Font weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+    --font-weight-black: 900;
+
+    /* Line heights */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+}
+
+/* ===========================================
+   SPACING - 間距系統
+   =========================================== */
+
+:root {
+    /* Spacing scale - based on 4px unit */
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 0.75rem;   /* 12px */
+    --space-4: 1rem;      /* 16px */
+    --space-5: 1.25rem;   /* 20px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-8: 2rem;      /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+}
+
+/* ===========================================
+   BORDER RADIUS - 圓角系統
+   =========================================== */
+
+:root {
+    --radius-none: 0;
+    --radius-sm: 0.25rem;     /* 4px */
+    --radius-md: 0.5rem;      /* 8px */
+    --radius-lg: 0.75rem;     /* 12px */
+    --radius-xl: 1rem;        /* 16px */
+    --radius-2xl: 1.5rem;     /* 24px */
+    --radius-3xl: 2rem;       /* 32px */
+    --radius-full: 9999px;
+    --radius-pill: 9999px;
+
+    /* Semantic aliases */
+    --radius-button: var(--radius-xl);
+    --radius-card: var(--radius-2xl);
+    --radius-input: var(--radius-lg);
+    --radius-badge: var(--radius-md);
+}
+
+/* ===========================================
+   SHADOWS - 陰影系統
+   =========================================== */
+
+:root {
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+    /* Semantic aliases */
+    --shadow-card: var(--shadow-xl);
+    --shadow-button: var(--shadow-lg);
+    --shadow-float: var(--shadow-2xl);
+    --shadow-indigo: 0 4px 14px 0 rgb(79 70 229 / 0.15);
+}
+
+/* ===========================================
+   TRANSITIONS - 過渡動畫
+   =========================================== */
+
+:root {
+    --duration-75: 75ms;
+    --duration-100: 100ms;
+    --duration-150: 150ms;
+    --duration-200: 200ms;
+    --duration-300: 300ms;
+    --duration-500: 500ms;
+
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Semantic aliases */
+    --transition-fast: var(--duration-150) var(--ease-out);
+    --transition-normal: var(--duration-300) var(--ease-in-out);
+    --transition-slow: var(--duration-500) var(--ease-out);
+}
+
+/* ===========================================
+   TOUCH & INTERACTION - 觸控與互動
+   =========================================== */
+
+:root {
+    /* Minimum touch target size - WCAG 2.1 */
+    --touch-min-size: 44px;
+    --touch-ideal-size: 48px;
+
+    /* Focus ring */
+    --focus-ring-color: var(--color-primary-500);
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+}
+
+/* ===========================================
+   Z-INDEX 層級
+   =========================================== */
+
+:root {
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-toast: 1080;
+}
+
+/* ===========================================
+   RESPONSIVE BREAKPOINTS - 響應式斷點
+   =========================================== */
+
+:root {
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+}
+
+/* ===========================================
+   CSS CLASS MAPPINGS - 供 Tailwind @apply 使用
+   =========================================== */
+
+/*
+ * 在 Tailwind 配置中可以這樣使用：
+ * 
+ * theme: {
+ *   extend: {
+ *     colors: {
+ *       primary: {
+ *         50: 'var(--color-primary-50)',
+ *         100: 'var(--color-primary-100)',
+ *         600: 'var(--color-primary-600)',
+ *         700: 'var(--color-primary-700)',
+ *       },
+ *       slate: {
+ *         50: 'var(--color-slate-50)',
+ *         900: 'var(--color-slate-900)',
+ *       }
+ *     },
+ *     borderRadius: {
+ *       card: 'var(--radius-card)',
+ *       button: 'var(--radius-button)',
+ *     },
+ *     boxShadow: {
+ *       card: 'var(--shadow-card)',
+ *       indigo: 'var(--shadow-indigo)',
+ *     },
+ *     transitionDuration: {
+ *       fast: 'var(--duration-150)',
+ *       normal: 'var(--duration-300)',
+ *     }
+ *   }
+ * }
+ */

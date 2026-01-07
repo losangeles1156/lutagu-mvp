@@ -20,6 +20,7 @@ import {
 import { ActionCard, Action as ChatAction } from './ActionCard';
 import { ContextSelector } from './ContextSelector';
 import { IntentSelector } from './IntentSelector';
+import { EmptyState } from './EmptyState';
 
 const MIN_HEIGHT = 200;
 const MAX_HEIGHT = 600;
@@ -67,15 +68,16 @@ export function ChatPanel() {
     // [FIX] Lazy initialize difyUserId on client-side to avoid hydration mismatch
     const effectiveDifyUserId = useMemo(() => {
         if (difyUserId) return difyUserId;
-        // Generate on client-side only
-        if (typeof window !== 'undefined') {
+        return 'ssr-placeholder';
+    }, [difyUserId]);
+
+    // Side effect to initialize difyUserId if missing
+    useEffect(() => {
+        if (typeof window !== 'undefined' && !difyUserId) {
             const newId = globalThis.crypto?.randomUUID?.() ||
                 `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-            // Store it for future use (this is safe since we're on client)
             useAppStore.setState({ difyUserId: newId });
-            return newId;
         }
-        return 'ssr-placeholder';
     }, [difyUserId]);
 
     const { zone } = useZoneAwareness();
@@ -146,9 +148,14 @@ export function ChatPanel() {
         });
 
         try {
+            // [Safety] Add timeout to fetch to prevent infinite hanging on mobile data
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
             const response = await fetch('/api/dify/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
                 body: JSON.stringify({
                     query: payload.query,
                     conversation_id: difyConversationId,
@@ -167,7 +174,12 @@ export function ChatPanel() {
                 })
             });
 
-            if (!response.ok) throw new Error('API Error');
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+            }
             if (!response.body) throw new Error('No response body');
 
             setIsOffline(false);
@@ -176,10 +188,16 @@ export function ChatPanel() {
             const decoder = new TextDecoder();
             let accumulatedAnswer = '';
             let sseBuffer = '';
+            let isFirstChunk = true;
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
+
+                if (isFirstChunk) {
+                    isFirstChunk = false;
+                    // Optional: handle first response logic
+                }
 
                 sseBuffer += decoder.decode(value, { stream: true });
                 while (true) {
@@ -424,7 +442,7 @@ export function ChatPanel() {
             className={`
                 flex flex-col bg-white border-l border-slate-200
                 transition-all duration-300 ease-out
-                ${isMaximized ? 'fixed inset-0 z-50' : ''}
+                ${isMaximized ? 'fixed inset-0 z-50 h-[100dvh]' : ''}
             `}
             style={isMaximized ? {} : { height }}
         >
@@ -512,8 +530,11 @@ export function ChatPanel() {
                     )}
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-                        {messages.map((msg, idx) => (
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide" role="log" aria-live="polite">
+                        {messages.length === 0 ? (
+                            <EmptyState onSend={sendMessage} />
+                        ) : (
+                            messages.map((msg, idx) => (
                             <div
                                 key={idx}
                                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -592,7 +613,7 @@ export function ChatPanel() {
                     </div>
 
                     {/* Input Area */}
-                    <div className="shrink-0 p-4 border-t border-slate-100 bg-white/95 backdrop-blur-sm">
+                    <div className="shrink-0 p-4 border-t border-slate-100 bg-white/95 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]">
                         <form onSubmit={handleSubmit} className="flex gap-2">
                             <input
                                 value={input}
@@ -600,7 +621,7 @@ export function ChatPanel() {
                                 placeholder={tChat('placeholder')}
                                 className="flex-1 px-4 py-3 bg-slate-50 border-0 rounded-xl 
                                     focus:ring-2 focus:ring-indigo-500 focus:bg-white
-                                    text-sm font-bold placeholder:text-slate-400
+                                    text-base font-bold placeholder:text-slate-400
                                     min-h-[48px]"
                                 autoFocus
                             />

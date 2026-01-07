@@ -9,7 +9,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchNodeConfig, NodeProfile } from '@/lib/api/nodes';
-import { X, MessageSquare, Compass, CalendarDays, User2, Star } from 'lucide-react';
+import { X, MessageSquare, Compass, CalendarDays, User2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { getSupabase } from '@/lib/supabase';
@@ -108,16 +108,16 @@ export default function Home() {
 
     // Header
     const header = (
-        <div className="px-4 py-3 flex items-center justify-between bg-white/95 backdrop-blur-sm">
+        <header className="px-4 py-3 flex items-center justify-between bg-white/95 backdrop-blur-sm" role="banner">
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-200">🦌</div>
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-200" aria-hidden="true">🦌</div>
                 <div className="hidden sm:block">
-                    <div className="text-lg font-black text-slate-900 tracking-tight">LUTAGU</div>
-                    <div className="text-[10px] font-bold text-slate-400">東京交通 AI 助手</div>
+                    <h1 className="text-lg font-black text-slate-900 tracking-tight">LUTAGU</h1>
+                    <p className="text-[10px] font-bold text-slate-400">東京交通 AI 助手</p>
                 </div>
             </div>
             <SystemMenu />
-        </div>
+        </header>
     );
 
     // Map panel
@@ -128,8 +128,8 @@ export default function Home() {
 
     // Bottom bar
     const bottomBar = (
-        <div className="mx-auto max-w-md px-4 pb-[env(safe-area-inset-bottom)]">
-            <div className="h-[76px] bg-white/95 backdrop-blur-xl border border-black/[0.05] shadow-[0_18px_60px_rgba(0,0,0,0.10)] rounded-[28px] flex items-center justify-between px-4">
+        <nav className="mx-auto max-w-md px-4 pb-[env(safe-area-inset-bottom)]" aria-label={tNav('navigation')}>
+            <div className="h-[76px] bg-white/95 backdrop-blur-xl border border-black/[0.05] shadow-[0_18px_60px_rgba(0,0,0,0.10)] rounded-[28px] flex items-center justify-between px-4" role="tablist">
                 {[
                     { id: 'explore' as const, label: tNav('explore'), Icon: Compass },
                     { id: 'trips' as const, label: tNav('trips'), Icon: CalendarDays },
@@ -143,10 +143,13 @@ export default function Home() {
                                 if (id !== 'explore') { setBottomSheetOpen(false); setCurrentNode(null); }
                                 setActiveTab(id);
                             }}
-                            className={`flex-1 h-full flex flex-col items-center justify-center gap-1.5 rounded-[22px] transition-colors ${isActive ? 'text-indigo-700' : 'text-slate-400 hover:text-slate-600'}`}
+                            role="tab"
+                            aria-selected={isActive}
+                            aria-controls={`${id}-panel`}
+                            className={`flex-1 h-full flex flex-col items-center justify-center gap-1.5 rounded-[22px] transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isActive ? 'text-indigo-700' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${isActive ? 'bg-indigo-50' : 'bg-transparent'}`}>
-                                <Icon size={20} />
+                                <Icon size={20} aria-hidden="true" />
                             </div>
                             <div className={`text-[10px] font-black tracking-wider ${isActive ? 'text-indigo-700' : 'text-slate-400'}`}>{label}</div>
                         </button>
@@ -154,13 +157,13 @@ export default function Home() {
                 })}
                 <button
                     onClick={() => setChatOpen(true)}
-                    className="ml-2 w-14 h-14 rounded-[22px] bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center shadow-[0_12px_30px_rgba(79,70,229,0.35)] active:scale-95 transition-transform"
+                    className="ml-2 w-14 h-14 rounded-[22px] bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center shadow-[0_12px_30px_rgba(79,70,229,0.35)] active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     aria-label={tCommon('openChat')}
                 >
-                    <MessageSquare size={22} />
+                    <MessageSquare size={22} aria-hidden="true" />
                 </button>
             </div>
-        </div>
+        </nav>
     );
 
     return (
@@ -169,8 +172,8 @@ export default function Home() {
 
             {/* Node Details Overlay */}
             {isBottomSheetOpen && (
-                <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="w-full h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-white/80 backdrop-blur-xl sticky top-0 z-[60]">
+                <section className="fixed inset-0 z-[100] bg-white flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300" aria-label={tNode('details')} role="dialog" aria-modal="true">
+                    <header className="w-full h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-white/80 backdrop-blur-xl sticky top-0 z-[60]">
                         <div className="flex flex-col">
                             <h2 className="text-xl font-black text-gray-900 leading-none">
                                 {getLocaleString(nodeData?.name, locale) || nodeData?.title || (currentNodeId?.split('.').pop()) || tCommon('station')}
@@ -179,47 +182,47 @@ export default function Home() {
                         </div>
                         <button
                             onClick={() => { setBottomSheetOpen(false); setCurrentNode(null); }}
-                            className="p-3 bg-gray-100 rounded-2xl text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-90"
+                            className="p-3 bg-gray-100 rounded-2xl text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-90 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                             aria-label={tCommon('close')}
                         >
-                            <X size={24} />
+                            <X size={24} aria-hidden="true" />
                         </button>
-                    </div>
+                    </header>
                     <div className="flex-1 overflow-hidden">
                         <NodeTabs nodeData={nodeData} profile={profile} />
                     </div>
-                </div>
+                </section>
             )}
 
             {/* Onboarding Modal */}
             {isOnboardingOpen && (
-                <div className="fixed inset-0 z-[150] bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
+                <section className="fixed inset-0 z-[150] bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300" aria-labelledby="onboarding-title" role="dialog" aria-modal="true">
                     <div className="w-full max-w-[480px] bg-white rounded-[48px] shadow-2xl shadow-indigo-100/50 overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
-                        <div className="p-8 pb-4 border-b border-gray-50 flex items-center justify-between">
+                        <header className="p-8 pb-4 border-b border-gray-50 flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                                <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200" aria-hidden="true">
                                     <span className="text-2xl text-white">🦌</span>
                                 </div>
                                 <div>
-                                    <div className="text-xl font-black text-slate-900 tracking-tight leading-none">LUTAGU</div>
-                                    <div className="text-xs font-bold text-slate-400 mt-1">{tOnboarding('tagline')}</div>
+                                    <h2 id="onboarding-title" className="text-xl font-black text-slate-900 tracking-tight leading-none">LUTAGU</h2>
+                                    <p className="text-xs font-bold text-slate-400 mt-1">{tOnboarding('tagline')}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); }}
-                                className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"
+                                className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 aria-label={tOnboarding('skip')}
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-5 h-5" aria-hidden="true" />
                             </button>
-                        </div>
+                        </header>
 
                         <div className="flex-1 overflow-y-auto px-8 py-2 custom-scrollbar">
-                            <div className="space-y-3 mt-4">
-                                <div className="text-[11px] font-black text-indigo-600 mb-2 uppercase tracking-wider flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse" />
+                            <section className="space-y-3 mt-4" aria-labelledby="onboarding-tips-title">
+                                <h3 id="onboarding-tips-title" className="text-[11px] font-black text-indigo-600 mb-2 uppercase tracking-wider flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse" aria-hidden="true" />
                                     {tOnboarding('askTitle')}
-                                </div>
+                                </h3>
                                 <div className="grid grid-cols-1 gap-3">
                                     {[
                                         { id: 'overtourism', text: tOnboarding('tips.overtourism'), node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
@@ -234,7 +237,7 @@ export default function Home() {
                                                 setOnboardingSeenVersion(ONBOARDING_VERSION);
                                                 setIsOnboardingOpen(false);
                                             }}
-                                            className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98]"
+                                            className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                         >
                                             <div className="flex items-center gap-2 mb-1.5">
                                                 <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white border border-slate-100 text-indigo-500 font-black uppercase tracking-wider shadow-sm">
@@ -246,10 +249,10 @@ export default function Home() {
                                         </button>
                                     ))}
                                 </div>
-                            </div>
+                            </section>
 
-                            <div className="mt-6 mb-8">
-                                <div className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{tOnboarding('hubTitle')}</div>
+                            <section className="mt-6 mb-8" aria-labelledby="onboarding-hubs-title">
+                                <h3 id="onboarding-hubs-title" className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{tOnboarding('hubTitle')}</h3>
                                 <div className="grid grid-cols-4 gap-2">
                                     {[
                                         { label: tOnboarding('hubs.ueno'), center: { lat: 35.7141, lon: 139.7774 } },
@@ -261,21 +264,21 @@ export default function Home() {
                                             key={hub.label}
                                             onClick={() => {
                                                 setMapCenter(hub.center);
-                                                setCurrentNode('odpt.Station:TokyoMetro.Ginza.Ueno'); // Placeholder
+                                                setCurrentNode('odpt.Station:TokyoMetro.Ginza.Ueno');
                                                 setBottomSheetOpen(true);
                                                 setOnboardingSeenVersion(ONBOARDING_VERSION);
                                                 setIsOnboardingOpen(false);
                                             }}
-                                            className="py-2.5 bg-slate-50 rounded-xl text-[11px] font-black text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100"
+                                            className="py-2.5 bg-slate-50 rounded-xl text-[11px] font-black text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         >
                                             {hub.label}
                                         </button>
                                     ))}
                                 </div>
-                            </div>
+                            </section>
                         </div>
 
-                        <div className="p-8 pt-4 pb-6 grid grid-cols-2 gap-4 bg-white border-t border-slate-50">
+                        <footer className="p-8 pt-4 pb-6 grid grid-cols-2 gap-4 bg-white border-t border-slate-50">
                             <button
                                 onClick={() => {
                                     if (!navigator.geolocation) { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); return; }
@@ -284,19 +287,19 @@ export default function Home() {
                                         () => { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); }
                                     );
                                 }}
-                                className="py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-[0.98]"
+                                className="py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                             >
                                 {tOnboarding('enableLocation')}
                             </button>
                             <button
                                 onClick={() => { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); }}
-                                className="py-4 bg-slate-50 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-100 transition-all active:scale-[0.98]"
+                                className="py-4 bg-slate-50 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-100 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300"
                             >
                                 {tOnboarding('browseFirst')}
                             </button>
-                        </div>
+                        </footer>
                     </div>
-                </div>
+                </section>
             )}
 
             <SubscriptionModal />

@@ -66,7 +66,7 @@ async function fetchStationsStaticFacilities(stationId: string) {
             const { data } = await supabaseAdmin
                 .from('stations_static')
                 .select('l3_services')
-                .eq('station_id', id)
+                .eq('id', id)
                 .maybeSingle();
 
             if (data && Array.isArray((data as any).l3_services) && (data as any).l3_services.length > 0) {

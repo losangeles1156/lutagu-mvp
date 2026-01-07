@@ -414,6 +414,10 @@
         "placeholder": "輸入訊息...",
         "feedbackLike": "有幫助",
         "feedbackDislike": "沒幫助",
+        "retrySend": "重試傳送",
+        "emptyTitle": "有什麼可以幫您？",
+        "emptyDescription": "詢問路線、即時狀態或無障礙設施",
+        "quickQuestions": "快速問題",
         "intent": {
             "route": "路線",
             "status": "狀態",

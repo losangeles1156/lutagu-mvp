@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Zap, AlertTriangle, AlertOctagon, Cloud, Sun, Users, Wind, ArrowRight } from 'lucide-react';
+import { Zap, AlertTriangle, AlertOctagon, Cloud, Sun, Users, Wind, ArrowRight, Plane, ExternalLink } from 'lucide-react';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { SmartWeatherCard } from '@/components/ui/SmartWeatherCard';
 import { HubInfoHeader, HubMembersList } from '@/components/map/HubMembersList';
+import { LiveFlightBoard } from '@/components/node/LiveFlightBoard';
 
 // Types for Hub information
 interface HubMemberInfo {
@@ -33,7 +34,7 @@ const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { l
     // Compact Layout (for Normal status in busy hubs)
     if (compact) {
         return (
-            <div className="p-2.5 flex items-center gap-2.5 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-white hover:shadow-sm transition-all">
+            <div className="p-2.5 flex items-center gap-2.5 bg-gray-50/50 rounded-xl border border-gray-100 hover:bg-white hover:shadow-sm transition-all touch-manipulation min-h-[52px]">
                 <div
                     className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] text-white shadow-sm shrink-0"
                     style={{ backgroundColor: line.color }}
@@ -54,7 +55,7 @@ const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { l
 
     // Full Layout (Existing style for Delays or sparse lists)
     return (
-        <div className={`p-4 flex items-center gap-3 ${isDelay ? 'bg-rose-50/30' : ''}`}>
+        <div className={`p-4 flex items-center gap-3 touch-manipulation min-h-[64px] ${isDelay ? 'bg-rose-50/30' : ''}`}>
             <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-lg text-white shadow-sm shrink-0"
                 style={{ backgroundColor: line.color }}
@@ -104,10 +105,6 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
         updatedAt: undefined
     });
 
-    // [Removed] Duplicated weather state and fetch. SmartWeatherCard now handles hydration.
-    // const [weather, setWeather] = useState(initialWeather); // Removed
-
-    const [weatherAdvice, setWeatherAdvice] = useState<string | null>(null);
     const [clickedCrowd, setClickedCrowd] = useState<number | null>(null);
 
     // [New] Handle Crowd Vote
@@ -128,17 +125,56 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
         }
     };
 
-    // [Derived State for Layout]
-    const delayedLines = lines.filter((l: any) => l.status !== 'normal');
-    const normalLines = lines.filter((l: any) => l.status === 'normal');
-    const isBusyHub = lines.length > 4; // Trigger compact mode if more than 4 lines
+    import { LiveFlightBoard } from '@/components/node/LiveFlightBoard';
+
+    // ... (existing imports)
+
+    // ... inside L2_Live component
+
+
+    import { LiveFlightBoard } from '@/components/node/LiveFlightBoard';
+
+    // ... (existing imports)
+
+    // ... inside L2_Live component
+
+    // [New] Airport Logic
+    const isHaneda = data.id === 'odpt:Station:Airport.Haneda' || data.name?.en?.includes('Haneda');
+    const isNarita = data.id === 'odpt:Station:Airport.Narita' || data.name?.en?.includes('Narita');
+    const isAirport = isHaneda || isNarita;
+    const airportCode = isHaneda ? 'HND' : 'NRT';
+
+    // Filter Lines for Airport (Show express preferentially)
+    const displayLines = useMemo(() => {
+        if (!isAirport) return lines;
+        // Prioritize express
+        return lines.sort((a: any, b: any) => {
+            const isExpressA = a.name?.en?.includes('Express') || a.name?.en?.includes('Liner') || a.name?.en?.includes('Monorail');
+            const isExpressB = b.name?.en?.includes('Express') || b.name?.en?.includes('Liner') || b.name?.en?.includes('Monorail');
+            return (isExpressB ? 1 : 0) - (isExpressA ? 1 : 0);
+        });
+    }, [lines, isAirport]);
+
+    // Re-derive for layout with sorted lines
+    const delayedLines = displayLines.filter((l: any) => l.status !== 'normal');
+    const normalLines = displayLines.filter((l: any) => l.status === 'normal');
+    const isBusyHub = displayLines.length > 4;
 
     // Derived State for Crowd
     const maxVoteIdx = crowd.userVotes.distribution.indexOf(Math.max(...crowd.userVotes.distribution));
 
     return (
-
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom duration-500">
+            {/* [New] Realtime Flight Board (Airport Only) */}
+            {isAirport && (
+                <div className="space-y-2">
+                    <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest px-1">
+                        {locale.startsWith('zh') ? '即時航班資訊' : locale === 'ja' ? 'リアルタイムフライト情報' : 'Live Flight Status'}
+                    </h3>
+                    <LiveFlightBoard airportCode={airportCode} />
+                </div>
+            )}
+
             {/* 0. Hub Information Section - Only show if hubDetails is provided */}
             {hubDetails && hubDetails.member_count > 0 && (
                 <div className="space-y-3">
@@ -263,7 +299,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                         href="https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&areaName=chiyoda-ku"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block relative bg-white rounded-2xl border border-gray-100 p-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] group overflow-hidden"
+                        className="block relative bg-white rounded-2xl border border-gray-100 p-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] group overflow-hidden touch-manipulation min-h-[100px]"
                     >
                         <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-orange-100 via-transparent to-transparent opacity-50 rounded-tr-2xl"></div>
 
@@ -321,7 +357,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                                 return (
                                     <button
                                         key={idx}
-                                        className={`flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all relative min-h-[50px] ${isSelected
+                                        className={`flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all relative min-h-[52px] touch-manipulation ${isSelected
                                             ? 'bg-indigo-600 border-indigo-600 text-white scale-110 shadow-md z-10'
                                             : isMostPopular
                                                 ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100'

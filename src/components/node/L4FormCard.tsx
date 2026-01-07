@@ -72,7 +72,7 @@ export function L4FormCard({
                                         ? (locale.startsWith('zh') ? '選擇車站' : locale === 'ja' ? '駅を選択' : 'Select Station')
                                         : (locale.startsWith('zh') ? '從哪裡出發？' : locale === 'ja' ? 'どこから出発？' : 'Origin')
                                 }
-                                className="pl-9 h-12 text-base font-bold bg-slate-50/50 border-slate-100 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-xl transition-all"
+                                className="pl-9 h-14 text-base font-bold bg-slate-50/50 border-slate-100 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-xl transition-all touch-manipulation"
                                 locale={locale as 'zh-TW' | 'ja' | 'en'}
                                 disabled={isLoading}
                             />
@@ -99,7 +99,7 @@ export function L4FormCard({
                                         setDestinationInput(getStationDisplayName(s));
                                     }}
                                     placeholder={locale.startsWith('zh') ? '想去哪裡？' : locale === 'ja' ? 'どこへ行く？' : 'Destination'}
-                                    className="pl-9 h-12 text-base font-bold bg-slate-50/50 border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 rounded-xl transition-all"
+                                    className="pl-9 h-14 text-base font-bold bg-slate-50/50 border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 rounded-xl transition-all touch-manipulation"
                                     locale={locale as 'zh-TW' | 'ja' | 'en'}
                                     disabled={isLoading}
                                 />
@@ -111,7 +111,7 @@ export function L4FormCard({
                     {task === 'route' && (
                         <button
                             onClick={swapStations}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors z-20"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 active:scale-90 transition-all z-20 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
                         >
                             <ArrowRightLeft size={16} className="rotate-90" />
                         </button>

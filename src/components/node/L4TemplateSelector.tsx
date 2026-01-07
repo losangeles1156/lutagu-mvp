@@ -26,7 +26,7 @@ export function L4TemplateSelector({
         <div className="flex justify-center">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="text-xs font-bold text-slate-400 flex items-center gap-1 hover:text-indigo-600 transition-colors"
+                className="text-xs font-bold text-slate-400 flex items-center gap-1 hover:text-indigo-600 transition-colors touch-manipulation px-4 py-2 rounded-lg"
             >
                 {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 {locale.startsWith('zh') ? '常用問句模板' : locale === 'ja' ? 'テンプレート' : 'Templates'}
@@ -50,13 +50,13 @@ export function L4TemplateList({ templates, isOpen, onSelect, locale }: L4Templa
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
                 >
                     {templates.slice(0, 4).map((tpl) => (
                         <button
                             key={tpl.id}
                             onClick={() => onSelect(tpl)}
-                            className="text-left rounded-2xl bg-white border border-slate-100 p-3 hover:border-indigo-200 hover:shadow-sm transition-all"
+                            className="text-left rounded-2xl bg-white border border-slate-100 p-4 hover:border-indigo-200 hover:shadow-sm transition-all active:scale-[0.98] touch-manipulation min-h-[60px]"
                         >
                             <div className="text-xs font-black text-slate-700">{tpl.title}</div>
                             <div className="mt-0.5 text-[10px] text-slate-400 line-clamp-1">{tpl.description}</div>

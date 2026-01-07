@@ -232,7 +232,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                                 key={tag.id}
                                                 onClick={() => handleVibeClick(tag.id)}
                                                 className={`
-                                                    shrink-0 group/tag relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all duration-300
+                                                    shrink-0 group/tag relative inline-flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all duration-300 touch-manipulation min-h-[36px]
                                                     ${isActive
                                                         ? 'bg-indigo-500 text-white border-indigo-400 shadow-lg shadow-indigo-500/30'
                                                         : 'bg-white/10 border-white/10 text-indigo-100 hover:bg-white/20'
@@ -282,7 +282,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                 <button
                                     key={cat.id}
                                     onClick={() => toggleDrawer(cat.id)}
-                                    className={`group relative flex flex-col items-start p-5 rounded-[2rem] bg-white border ${style.borderColor} hover:shadow-xl hover:shadow-indigo-500/5 transition-all active:scale-[0.98] overflow-hidden`}
+                                    className={`group relative flex flex-col items-start p-5 rounded-[2rem] bg-white border ${style.borderColor} hover:shadow-xl hover:shadow-indigo-500/5 transition-all active:scale-[0.97] overflow-hidden touch-manipulation min-h-[120px]`}
                                 >
                                     {/* Subtle Bg Icon */}
                                     <div className={`absolute -right-2 -bottom-2 opacity-[0.03] ${style.color}`}>
@@ -359,7 +359,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar">
                                     <button
                                         onClick={() => setActiveSubcategory('all')}
-                                        className={`shrink-0 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeSubcategory === 'all' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                        className={`shrink-0 px-4 py-2.5 rounded-xl text-xs font-black transition-all touch-manipulation min-h-[40px] ${activeSubcategory === 'all' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                                     >
                                         {tL1('menuTitle')}
                                     </button>
@@ -367,7 +367,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                         <button
                                             key={sub}
                                             onClick={() => setActiveSubcategory(sub)}
-                                            className={`shrink-0 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeSubcategory === sub ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                            className={`shrink-0 px-4 py-2.5 rounded-xl text-xs font-black transition-all touch-manipulation min-h-[40px] ${activeSubcategory === sub ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                                         >
                                             {getSubcategoryLabel(sub)}
                                         </button>
