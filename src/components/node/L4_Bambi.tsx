@@ -427,7 +427,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
 
             {/* Input Overlay (Hybrid Strategy) */}
             <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px]">
-                <div className="space-y-4 max-w-lg mx-auto">
+                <div className="space-y-4 max-w-3xl mx-auto">
                     <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
                         {quickButtons.map(b => (
                             <button

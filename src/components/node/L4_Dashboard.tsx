@@ -881,7 +881,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
 
     return (
         <div className="h-full bg-slate-50 overflow-y-auto pb-32">
-            <div className="max-w-xl mx-auto min-h-full flex flex-col">
+            <div className="max-w-4xl mx-auto min-h-full flex flex-col px-2">
                 {/* Header / Tabs */}
                 <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm pt-4 px-4 pb-2 flex items-center gap-3">
                     <div className="flex-1">
