@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApiFetch } from '@/hooks/useApiFetch';
 import { AlertTriangle, Clock, Loader2, Map as MapIcon, MessageSquare, Sparkles, Ticket, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,16 +46,7 @@ interface L4DashboardProps {
     l4Knowledge?: L4Knowledge;
 }
 
-class HttpError extends Error {
-    status: number;
-    body: string;
 
-    constructor(status: number, body: string) {
-        super(body || `HTTP ${status}`);
-        this.status = status;
-        this.body = body;
-    }
-}
 
 export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowledge }: L4DashboardProps) {
     const stationId = useMemo(() => normalizeOdptStationId(String(currentNodeId || '').trim()), [currentNodeId]);
@@ -140,11 +132,8 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
 
     const [question, setQuestion] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
-
     const requestAbortRef = useRef<AbortController | null>(null);
     const requestSeqRef = useRef(0);
-
-    const { fetchJson: fetchJsonCached } = useApiFetch();
 
     useEffect(() => {
         const fetchRecommendations = async () => {
@@ -631,7 +620,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                     json = await fetchJsonCached<any>(url, { ttlMs: 5 * 60_000, signal: controller.signal });
                 } catch (e: any) {
                     if (e?.name === 'AbortError') return;
-                    const detail = e instanceof HttpError ? e.body : String(e?.message || e || '');
+                    const detail = (e as any)?.body || String(e?.message || e || '');
                     if (detail.includes('403') || detail.includes('Invalid acl:consumerKey')) {
                         setError(uiLocale.startsWith('zh')
                             ? '🔧 系統維護中：部分路線數據暫時無法使用（認證過期），請聯絡管理員更新 API 金鑰。'
