@@ -61,7 +61,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
         }
     }, [leftRatio, isDragging]);
 
-    // Handle drag for resizing
+    // Handle drag for resizing (mouse)
     const handleDragStart = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         setIsDragging(true);
@@ -69,14 +69,22 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
         dragStartRatio.current = leftRatio;
     }, [leftRatio]);
 
+    // Handle drag for resizing (touch)
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        if (e.touches.length !== 1) return;
+        setIsDragging(true);
+        dragStartX.current = e.touches[0].clientX;
+        dragStartRatio.current = leftRatio;
+    }, [leftRatio]);
+
     useEffect(() => {
         if (!isDragging) return;
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handleMove = (clientX: number) => {
             if (!containerRef.current) return;
 
             const containerWidth = containerRef.current.offsetWidth;
-            const deltaX = e.clientX - dragStartX.current;
+            const deltaX = clientX - dragStartX.current;
             const deltaRatio = deltaX / containerWidth;
             const newRatio = dragStartRatio.current + deltaRatio;
 
@@ -86,16 +94,27 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
             setLeftRatio(Math.max(minRatio, Math.min(maxRatio, newRatio)));
         };
 
-        const handleMouseUp = () => {
+        const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX);
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length === 1) handleMove(e.touches[0].clientX);
+        };
+
+        const handleEnd = () => {
             setIsDragging(false);
         };
 
         document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('mouseup', handleEnd);
+        document.addEventListener('touchmove', handleTouchMove, { passive: true });
+        document.addEventListener('touchend', handleEnd);
+        document.addEventListener('touchcancel', handleEnd);
 
         return () => {
             document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('mouseup', handleEnd);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleEnd);
+            document.removeEventListener('touchcancel', handleEnd);
         };
     }, [isDragging]);
 
@@ -177,9 +196,10 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
                 {/* Resizable Divider */}
                 <div
                     onMouseDown={handleDragStart}
+                    onTouchStart={handleTouchStart}
                     className={`
-                        w-1.5 h-full cursor-col-resize flex items-center justify-center 
-                        group hover:bg-indigo-100 transition-colors
+                        w-1.5 h-full cursor-col-resize flex items-center justify-center
+                        group hover:bg-indigo-100 transition-colors touch-none
                         ${isDragging ? 'bg-indigo-200' : 'bg-slate-100'}
                     `}
                 >

@@ -42,9 +42,17 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null);
     const langRef = useRef<HTMLDivElement>(null);
 
+    // Safe supabase client initialization (prevents crash if not configured)
+    const supabase = useMemo<SupabaseClient | null>(() => {
+        try {
+            return getSupabase();
+        } catch {
+            return null;
+        }
+    }, []);
+
     // Load session
     useEffect(() => {
-        const supabase = getSupabase();
         if (!supabase) return;
 
         const client = supabase;
@@ -67,7 +75,7 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
                 data.subscription.unsubscribe();
             }
         };
-    }, []);
+    }, [supabase]);
 
     // Close menus on click outside
     useEffect(() => {
@@ -95,13 +103,12 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
     }, [pathname, router]);
 
     const handleLogout = useCallback(async () => {
-        const supabase = getSupabase();
         if (supabase) {
             await supabase.auth.signOut();
         }
         setSession(null);
         setIsMenuOpen(false);
-    }, []);
+    }, [supabase]);
 
     const handleMenuItemClick = useCallback((action: () => void) => {
         action();

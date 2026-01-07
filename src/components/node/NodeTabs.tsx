@@ -123,7 +123,7 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
         <div className="flex flex-col h-full bg-slate-50 relative">
             {/* Tab Navigation */}
             <div className="flex-none px-4 pb-2 pt-2 bg-white border-b border-slate-100 shadow-sm z-20">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1" role="tablist" aria-label={tCommon('stationInfo')}>
                     {TABS.map((tab) => {
                         const isActive = activeTab === tab.id;
                         const styles = TAB_STYLES[tab.id];
@@ -140,17 +140,21 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
+                                role="tab"
+                                aria-selected={isActive}
+                                aria-label={label}
                                 className={`
                                     flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap
                                     ${isActive ? styles.active : styles.inactive}
                                 `}
                             >
-                                <Icon size={16} className={isActive ? 'stroke-[3px]' : ''} />
+                                <Icon size={16} className={isActive ? 'stroke-[3px]' : ''} aria-hidden="true" />
                                 <span>{label}</span>
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeTabDot"
                                         className="w-1.5 h-1.5 rounded-full bg-white ml-0.5"
+                                        aria-hidden="true"
                                     />
                                 )}
                             </button>
@@ -160,7 +164,7 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden relative" role="tabpanel" aria-label={tTabs(activeTab)}>
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
