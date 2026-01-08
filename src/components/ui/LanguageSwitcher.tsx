@@ -42,8 +42,20 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
         // Update zustand store immediately for in-place UI updates
         setLocale(newLocale as 'zh-TW' | 'ja' | 'en');
 
-        // Construct query string
-        const queryString = searchParams.toString();
+        // Build new search params, updating any locale-prefixed paths in 'next' parameter
+        const newParams = new URLSearchParams(searchParams.toString());
+        const nextParam = newParams.get('next');
+        if (nextParam) {
+            // Update locale prefix in the 'next' path if it exists
+            // Matches paths like /zh/..., /en/..., /ja/..., /zh-TW/...
+            const updatedNext = nextParam.replace(
+                /^\/(?:zh-TW|zh|en|ja|ar)(\/|$)/,
+                `/${newLocale}$1`
+            );
+            newParams.set('next', updatedNext);
+        }
+
+        const queryString = newParams.toString();
         const url = queryString ? `${pathname}?${queryString}` : pathname;
 
         // "replace" to switch language in-place (no history push usually preferred for lang switch, or push is fine)

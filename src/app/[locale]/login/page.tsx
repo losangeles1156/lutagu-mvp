@@ -12,14 +12,29 @@ import { useAppStore } from '@/stores/appStore';
 import { DEMO_SCENARIOS } from '@/lib/l4/demoScenarios';
 import { LoginChatPanel } from '@/components/chat/LoginChatPanel';
 
+const SUPPORTED_LOCALES = ['zh', 'en', 'ja', 'zh-TW', 'ar'];
+
 function normalizeNextPath(nextPath: string | null, locale: string) {
     if (!nextPath) return `/${locale}`;
     if (!nextPath.startsWith('/')) return `/${locale}`;
     if (nextPath.startsWith('//')) return `/${locale}`;
     if (nextPath.includes('://')) return `/${locale}`;
     if (nextPath.includes('\\')) return `/${locale}`;
-    if (nextPath === `/${locale}/login` || nextPath.startsWith(`/${locale}/login?`)) return `/${locale}`;
-    return nextPath;
+
+    // Check if path is a login page in any locale - redirect to home instead
+    const loginPathPattern = new RegExp(`^/(${SUPPORTED_LOCALES.join('|')})/login(?:\\?|$)`);
+    if (loginPathPattern.test(nextPath)) return `/${locale}`;
+
+    // Update locale prefix in the path to match current locale
+    const localePattern = new RegExp(`^/(${SUPPORTED_LOCALES.join('|')})(/|$)`);
+    const match = nextPath.match(localePattern);
+    if (match) {
+        // Replace old locale with current locale
+        return nextPath.replace(localePattern, `/${locale}$2`);
+    }
+
+    // Path without locale prefix - add current locale
+    return `/${locale}${nextPath}`;
 }
 
 export default function LoginPage() {
