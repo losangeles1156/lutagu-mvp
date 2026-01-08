@@ -393,10 +393,10 @@ export default function LoginPage() {
                             {t('tryAsking')}
                         </h2>
                         {[
-                            { key: 'overtourism', node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
-                            { key: 'disruption', node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo' },
-                            { key: 'handsfree', node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
-                            { key: 'accessibility', node: 'odpt.Station:JR-East.Yamanote.Ueno' }
+                            { key: 'overtourism', demoId: 'overtourism' },
+                            { key: 'disruption', demoId: 'disruption' },
+                            { key: 'handsfree', demoId: 'handsfree' },
+                            { key: 'accessibility', demoId: 'accessibility' }
                         ].map((item) => {
                             const questionText = getDemoQuestion(item.key);
                             const issueLabel = getIssueLabel(item.key);
@@ -404,7 +404,8 @@ export default function LoginPage() {
                                 <button
                                     key={item.key}
                                     onClick={() => {
-                                        router.push(`/${locale}/?node=${item.node}&sheet=1&tab=lutagu&q=${encodeURIComponent(questionText)}`);
+                                        // Navigate to main page with demo parameter - enters fullscreen AI chat directly
+                                        router.push(`/${locale}/?demo=${item.demoId}`);
                                     }}
                                     className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >

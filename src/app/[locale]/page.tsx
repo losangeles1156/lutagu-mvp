@@ -76,9 +76,23 @@ export default function Home() {
         const q = searchParams.get('q');
         // L2: Support L1-L4 tab switching via URL parameter
         const nodeTab = searchParams.get('nodeTab');
+        // Demo mode parameter - enters fullscreen AI chat with demo script
+        const demo = searchParams.get('demo');
 
         let changed = false;
-        if (q) { transitionTo('fullscreen'); setPendingChat({ input: q, autoSend: true }); changed = true; }
+
+        // Demo mode: enter fullscreen AI chat directly (highest priority)
+        if (demo && ['overtourism', 'disruption', 'handsfree', 'accessibility'].includes(demo)) {
+            setDemoMode(true, demo);
+            transitionTo('fullscreen');
+            changed = true;
+        } else if (q) {
+            // Regular query: enter fullscreen with pending chat
+            transitionTo('fullscreen');
+            setPendingChat({ input: q, autoSend: true });
+            changed = true;
+        }
+
         if (tab === 'explore' || tab === 'trips' || tab === 'me') { setActiveTab(tab); changed = true; }
         if (typeof node === 'string' && node.length > 0) { setCurrentNode(node); if (sheet === '1') setBottomSheetOpen(true); changed = true; }
         if (sheet === '1' && !node) { setBottomSheetOpen(true); changed = true; }
@@ -88,7 +102,7 @@ export default function Home() {
             changed = true;
         }
         if (changed) router.replace(window.location.pathname);
-    }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab]);
+    }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
 
     // Onboarding check
     useEffect(() => {
