@@ -476,6 +476,15 @@ function AppMap() {
     const userProfile = useAppStore(s => s.userProfile);
     const setUserProfile = useAppStore(s => s.setUserProfile);
 
+    // Update GPS alert state based on useZoneAwareness
+    useEffect(() => {
+        if (isTooFar) {
+            setGpsAlert({ show: true, type: 'far' });
+        } else {
+            setGpsAlert(prev => prev.type === 'far' ? { ...prev, show: false } : prev);
+        }
+    }, [isTooFar]);
+
     // [FIX] Calculate hub count from actual hubDetails
     const hubCount = Object.values(hubDetails).reduce((acc, h) => acc + (h.member_count > 0 ? 1 : 0), 0);
 

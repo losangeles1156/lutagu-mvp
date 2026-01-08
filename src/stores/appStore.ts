@@ -54,6 +54,11 @@ interface AppState {
         actions?: any[];
         isLoading?: boolean;
     }) => void;
+    updateLastMessage: (updates: Partial<{
+        content: string;
+        isLoading: boolean;
+        actions?: any[];
+    }>) => void;
     setMapCenter: (center: { lat: number; lon: number } | null) => void;
     setTripGuardActive: (isActive: boolean) => void;
     setTripGuardSummary: (summary: string | null) => void;
@@ -152,6 +157,13 @@ export const useAppStore = create<AppState>()(
             setDifyConversationId: (id) => set({ difyConversationId: id }),
             resetDifyConversation: () => set({ difyConversationId: null }),
             addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+            updateLastMessage: (updates) => set((state) => {
+                if (state.messages.length === 0) return state;
+                const updatedMessages = [...state.messages];
+                const lastIndex = updatedMessages.length - 1;
+                updatedMessages[lastIndex] = { ...updatedMessages[lastIndex], ...updates };
+                return { messages: updatedMessages };
+            }),
             setMapCenter: (center) => set({ mapCenter: center }),
             setTripGuardActive: (isActive) => set({ isTripGuardActive: isActive }),
             setTripGuardSummary: (summary) => set({ tripGuardSummary: summary }),

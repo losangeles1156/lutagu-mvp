@@ -5,10 +5,7 @@ import { useAppStore } from '../stores/appStore';
 import { ZoneDetector } from '../lib/zones/detector';
 import { tokyoCoreAdapter } from '../lib/adapters/tokyo';
 import { calculateDistance } from '../lib/utils/distance';
-
-// Ueno Station coordinates as the center of wisdom
-const UENO_CENTER = { lat: 35.7138, lon: 139.7773 };
-const MAX_DISTANCE_KM = 50;
+import { TOKYO_CENTER, UENO_CENTER, TOKYO_RADIUS_THRESHOLD_KM } from '../lib/constants/geo';
 
 // Initialize detector with Tokyo config
 const detector = new ZoneDetector({
@@ -36,12 +33,18 @@ export function useZoneAwareness() {
                 if (!isSubscribed) return;
 
                 try {
-                    const { latitude, longitude } = position.coords;
+                    const { latitude, longitude, accuracy } = position.coords;
 
-                    // Calculate distance to Ueno
-                    const dist = calculateDistance(latitude, longitude, UENO_CENTER.lat, UENO_CENTER.lon);
+                    // Handle unstable GPS signal (e.g. accuracy > 500m)
+                    if (accuracy > 500) {
+                        console.warn('[useZoneAwareness] Low GPS accuracy:', accuracy);
+                        // We still use it but maybe we shouldn't reset if it's just a temporary jump
+                    }
 
-                    if (dist > MAX_DISTANCE_KM) {
+                    // Calculate distance to Tokyo Center
+                    const distFromCenter = calculateDistance(latitude, longitude, TOKYO_CENTER.lat, TOKYO_CENTER.lon);
+
+                    if (distFromCenter > TOKYO_RADIUS_THRESHOLD_KM) {
                         setIsTooFar(true);
                         setUserLocation(null); // Don't track real location if too far
                         setZone('core'); // Fallback to "Virtual Core"
@@ -73,11 +76,25 @@ export function useZoneAwareness() {
             },
             (error) => {
                 // Handle geolocation errors gracefully
-                console.warn('[useZoneAwareness] Geolocation error:', error.code, error.message);
-                if (isSubscribed) {
-                    setZone('core'); // Fallback to "Virtual Core"
-                    setIsTooFar(true);
+                if (!isSubscribed) return;
+                
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        console.warn('[useZoneAwareness] Geolocation permission denied');
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        console.warn('[useZoneAwareness] Geolocation position unavailable');
+                        break;
+                    case error.TIMEOUT:
+                        console.warn('[useZoneAwareness] Geolocation timeout');
+                        break;
+                    default:
+                        console.warn('[useZoneAwareness] Unknown geolocation error:', error.message);
                 }
+
+                setZone('core'); // Fallback to "Virtual Core"
+                setIsTooFar(true);
+                setUserLocation(null);
             },
             {
                 // [PERF] Optimized settings for mobile

@@ -116,12 +116,13 @@ export function useL1Places() {
             .from('l1_places')
             .select('*')
             .in('station_id', stationIds)
-            .order('distance_meters', { ascending: true });
+            .order('distance_meters', { ascending: true })
+            .limit(200);
 
         if (error) throw error;
 
         const parsed = (data || []).map((row: any) => {
-            let coords = [0, 0];
+            let coords: [number, number] = [0, 0];
             if (typeof row.location === 'string' && row.location.startsWith('POINT')) {
                 const match = row.location.match(/POINT\(([-0-9\.]+) ([-0-9\.]+)\)/);
                 if (match) {
@@ -174,18 +175,28 @@ export function useL1Places() {
             }
         }
 
-        // 按優先級排序
-        const result = allPlaces.sort((a, b) => {
+        // [Safety Guard] Max 30 items per category
+        // Sort first
+        allPlaces.sort((a, b) => {
             if (a.isCustom !== b.isCustom) return a.isCustom ? -1 : 1;
-            if (a.isPartner !== b.isPartner) return a.isPartner ? -1 : 1;
             if (a.priority && b.priority) return b.priority - a.priority;
-            if (a.distance_meters !== b.distance_meters) {
-                return (a.distance_meters || 0) - (b.distance_meters || 0);
-            }
-            return 0;
+            return (a.distance_meters || 0) - (b.distance_meters || 0);
         });
 
-        return result;
+        const categoryGroups: Record<string, L1Place[]> = {};
+        const limitedPlaces: L1Place[] = [];
+
+        for (const place of allPlaces) {
+            const cat = place.category || 'default';
+            if (!categoryGroups[cat]) categoryGroups[cat] = [];
+
+            if (categoryGroups[cat].length < 30) {
+                categoryGroups[cat].push(place);
+                limitedPlaces.push(place);
+            }
+        }
+
+        return limitedPlaces;
     }, []);
 
     useEffect(() => {

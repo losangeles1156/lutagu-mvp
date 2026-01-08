@@ -643,5 +643,33 @@
             "accessibility": "無障礙"
         }
     },
-    "validation": "驗證"
+    "validation": "驗證",
+    "feedback": {
+        "title": "告訴我們您的想法",
+        "openFeedback": "提供回饋",
+        "thankYou": "感謝您的回饋！",
+        "submittedMessage": "我們會認真閱讀您的每一條回饋。",
+        "back": "返回",
+        "ratingLabel": "整體評分",
+        "contentLabel": "詳細描述",
+        "submit": "提交回饋",
+        "types": {
+            "general": "使用感受",
+            "bug": "問題回報",
+            "spot": "景點情報",
+            "tip": "經驗分享"
+        },
+        "descriptions": {
+            "general": "對 LUTAGU 的整體評價",
+            "bug": "回報錯誤或異常",
+            "spot": "分享您發現的好去處",
+            "tip": "分享乘車技巧與避坑指南"
+        },
+        "placeholders": {
+            "general": "請告訴我們您的使用體驗...",
+            "bug": "請描述您遇到的問題，包含發生時的操作步驟...",
+            "spot": "請描述這個景點的特色與位置...",
+            "tip": "請分享您的經驗或技巧..."
+        }
+    }
 }

@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useAppStore } from '@/stores/appStore';
 import { NodeTabs } from '@/components/node/NodeTabs';
 import { SubscriptionModal } from '@/components/guard/SubscriptionModal';
+import { FeedbackHub } from '@/components/feedback/FeedbackHub';
 import { SystemMenu } from '@/components/ui/SystemMenu';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
@@ -76,9 +77,23 @@ export default function Home() {
         const q = searchParams.get('q');
         // L2: Support L1-L4 tab switching via URL parameter
         const nodeTab = searchParams.get('nodeTab');
+        // Demo mode parameter - enters fullscreen AI chat with demo script
+        const demo = searchParams.get('demo');
 
         let changed = false;
-        if (q) { transitionTo('fullscreen'); setPendingChat({ input: q, autoSend: true }); changed = true; }
+
+        // Demo mode: enter fullscreen AI chat directly (highest priority)
+        if (demo && ['overtourism', 'disruption', 'handsfree', 'accessibility'].includes(demo)) {
+            setDemoMode(true, demo);
+            transitionTo('fullscreen');
+            changed = true;
+        } else if (q) {
+            // Regular query: enter fullscreen with pending chat
+            transitionTo('fullscreen');
+            setPendingChat({ input: q, autoSend: true });
+            changed = true;
+        }
+
         if (tab === 'explore' || tab === 'trips' || tab === 'me') { setActiveTab(tab); changed = true; }
         if (typeof node === 'string' && node.length > 0) { setCurrentNode(node); if (sheet === '1') setBottomSheetOpen(true); changed = true; }
         if (sheet === '1' && !node) { setBottomSheetOpen(true); changed = true; }
@@ -88,7 +103,7 @@ export default function Home() {
             changed = true;
         }
         if (changed) router.replace(window.location.pathname);
-    }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab]);
+    }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
 
     // Onboarding check
     useEffect(() => {
@@ -189,8 +204,8 @@ export default function Home() {
 
             {/* Node Details Overlay */}
             {isBottomSheetOpen && (
-                <section className="fixed inset-0 z-[100] bg-white flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300" aria-label={tNode('details')} role="dialog" aria-modal="true">
-                    <header className="w-full h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-white/80 backdrop-blur-xl sticky top-0 z-[60]">
+                <section className="fixed inset-0 z-40 bg-white flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300" aria-label={tNode('details')} role="dialog" aria-modal="true">
+                    <header className="w-full h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-white/80 backdrop-blur-xl sticky top-0 z-10">
                         <div className="flex flex-col">
                             <h2 className="text-xl font-black text-gray-900 leading-none">
                                 {getLocaleString(nodeData?.name, locale) || nodeData?.title || (currentNodeId?.split('.').pop()) || tCommon('station')}
@@ -216,7 +231,7 @@ export default function Home() {
 
             {/* Onboarding Modal */}
             {isOnboardingOpen && (
-                <section className="fixed inset-0 z-[150] bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300" aria-labelledby="onboarding-title" role="dialog" aria-modal="true">
+                <section className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300" aria-labelledby="onboarding-title" role="dialog" aria-modal="true">
                     <div className="w-full max-w-[480px] bg-white rounded-[48px] shadow-2xl shadow-indigo-100/50 overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
                         <header className="p-8 pb-4 border-b border-gray-50 flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -443,6 +458,7 @@ export default function Home() {
             )}
 
             <SubscriptionModal />
+            <FeedbackHub nodeId={currentNodeId || undefined} nodeName={nodeData?.name?.en || nodeData?.name?.ja || undefined} />
         </div>
     );
 }

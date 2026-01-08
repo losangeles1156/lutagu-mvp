@@ -429,7 +429,7 @@
             "aiSubtitle": "この駅の専門家の洞察とヒントを集約",
             "aiPerceptionActive": "AI 感知中",
             "trapGuide": "トラップガイド",
-            "proHacks": "プロのハック",
+            "proHacks": "プロの裏技",
             "expertTips": "専門家のアドバイス",
             "proHacksLabel": "プロのハック",
             "startChat": "AIアシスタントとチャット",
@@ -462,7 +462,8 @@
                 "fareQueryFailed": "運賃の照会に失敗しました。",
                 "destinationRequired": "目的地が必要です。",
                 "noRouteFound": "ルートが見つかりませんでした。",
-                "routePlanningFailed": "ルート検索に失敗しました。"
+                "routePlanningFailed": "ルート検索に失敗しました。",
+                "unknown": "不明なエラーが発生しました。"
             },
             "fare": {
                 "to": "目的地",
@@ -572,6 +573,12 @@
         "placeholder": "メッセージを入力...",
         "feedbackLike": "参考になる",
         "feedbackDislike": "参考にならない",
+        "welcome": "こんにちは！あなたの東京交通ナビゲーションパートナーです！\nお手伝いできること：\n🚃 リアルタイムの列車状態と遅延情報\n♿ バリアフリー施設の位置\n🆘 交通異常時の代替ルート提案\n\n今どこにいるか、またはどこへ行きたいか教えてください。",
+        "suggestions": {
+            "status": "銀座線は今遅延していますか？",
+            "route": "浅草から秋葉原まで一番早い行き方は？",
+            "elevator": "神田駅の出口にはエレベーターがありますか？"
+        },
         "retrySend": "再送",
         "emptyTitle": "どのようなお手伝いをしましょうか？",
         "emptyDescription": "ルート、現在の状況、バリアフリー情報をお尋ねください",
@@ -635,6 +642,34 @@
             "disruption": "東京駅から東京都庁へ夜景を見に行きたいのですが、中央線が大幅に遅れていると聞きました。どうすればいいですか？",
             "handsfree": "成田空港から浅草に着いたばかりですが、ホテルのチェックインは午後からです。浅草駅のロッカーは空いていますか？",
             "accessibility": "ベビーカーで上野動物園に行きたいのですが、上野駅のどの出口が一番便利ですか？"
+        }
+    },
+    "feedback": {
+        "title": "ご意見をお聞かせください",
+        "openFeedback": "フィードバック",
+        "thankYou": "ありがとうございました！",
+        "submittedMessage": "いただいたご意見は一つひとつ大切に読ませていただきます。",
+        "back": "戻る",
+        "ratingLabel": "総合評価",
+        "contentLabel": "詳細",
+        "submit": "送信",
+        "types": {
+            "general": "使用感想",
+            "bug": "不具合報告",
+            "spot": "スポット情報",
+            "tip": "経験シェア"
+        },
+        "descriptions": {
+            "general": "LUTAGUの総合評価",
+            "bug": "エラーや問題を報告",
+            "spot": "見つけた穴場を共有",
+            "tip": "乗車テクニックを共有"
+        },
+        "placeholders": {
+            "general": "ご利用の感想をお聞かせください...",
+            "bug": "発生した問題と再現手順を教えてください...",
+            "spot": "このスポットの特徴と場所を教えてください...",
+            "tip": "あなたの経験やコツを共有してください..."
         }
     }
 }

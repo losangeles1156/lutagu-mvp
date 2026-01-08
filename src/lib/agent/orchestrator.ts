@@ -1,4 +1,5 @@
 import { AGENT_TOOLS, TOOL_HANDLERS } from './toolDefinitions';
+import { SecurityService } from '@/lib/security/securityService';
 
 export interface AgentMessage {
     role: 'system' | 'user' | 'assistant' | 'tool';
@@ -15,16 +16,26 @@ export interface OrchestratorContext {
     timestamp: number;
 }
 
+const FALLBACK_MESSAGES: Record<string, string> = {
+    'zh-TW': '抱歉，我現在連線有點不穩定，暫時無法連接大腦。您可以稍後再試，或直接參考車站即時資訊看板。',
+    'zh': '抱歉，我现在连线有点不稳定，暂时无法连接大脑。您可以稍后再试，或直接参考车站即时信息看板。',
+    'ja': '申し訳ありません。現在接続が不安定で、AIサーバーに接続できません。しばらくしてからもう一度お試しください。',
+    'en': 'I apologize, but I am having trouble connecting to the AI service right now. Please try again later or check the station information boards.',
+    'ar': 'أعتذر، ولكن لدي مشكلة في الاتصال بخدمة الذكاء الاصطناعي حاليًا. يرجى المحاولة مرة أخرى لاحقًا.',
+};
+
 export class AgentOrchestrator {
     private mistralKey: string;
     private geminiKey: string;
     private model: string;
-    private maxIterations = 5;
+    private maxIterations: number;
 
     constructor() {
         this.mistralKey = process.env.MISTRAL_API_KEY || '';
         this.geminiKey = process.env.GEMINI_API_KEY || '';
         this.model = process.env.AI_SLM_MODEL || 'mistral-small-latest';
+        // MVP optimization: reduce iterations for faster responses
+        this.maxIterations = parseInt(process.env.AI_MAX_ITERATIONS || '3', 10);
     }
 
     async run(messages: AgentMessage[], context: OrchestratorContext): Promise<ReadableStream> {
@@ -34,9 +45,27 @@ export class AgentOrchestrator {
         const apiKey = isGemini ? this.geminiKey : this.mistralKey;
         const maxIterations = this.maxIterations;
 
+        // 1. Security: Prune history to prevent token overflow and memory poisoning
+        let chatHistory = SecurityService.pruneHistory(messages, 10); // Keep last 10 turns
+
+        // 2. Security: Validate latest user input
+        const lastUserMsg = chatHistory.filter(m => m.role === 'user').pop();
+        if (lastUserMsg) {
+            const validation = SecurityService.validateInput(lastUserMsg.content);
+            if (!validation.isSafe) {
+                // Return a stream that immediately closes with a warning
+                return new ReadableStream({
+                    start(controller) {
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'message', answer: "⚠️ 您的輸入包含不允許的內容或過長，請修改後重試。" })}\n\n`));
+                        controller.close();
+                    }
+                });
+            }
+        }
+
         let currentIteration = 0;
-        let chatHistory = [...messages];
         const toolsCalled: string[] = []; // Track all tools called during this session
+
 
         return new ReadableStream({
             async start(controller) {
@@ -47,11 +76,12 @@ export class AgentOrchestrator {
                     while (currentIteration < maxIterations) {
                         currentIteration++;
 
-                        const apiUrl = isGemini 
+                        const apiUrl = isGemini
                             ? `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`
                             : `https://api.mistral.ai/v1/chat/completions`;
 
-                        const response = await fetch(apiUrl, {
+                        // Execute API call with auto-retry
+                        const response = await fetchWithRetry(apiUrl, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -72,7 +102,11 @@ export class AgentOrchestrator {
                         }
 
                         const data = await response.json();
-                        const message = data.choices[0].message;
+                        const message = data.choices?.[0]?.message;
+
+                        if (!message) {
+                            throw new Error('Invalid API response format: missing message content');
+                        }
 
                         if (message.tool_calls && message.tool_calls.length > 0) {
                             // Handle Tool Calls
@@ -98,18 +132,24 @@ export class AgentOrchestrator {
                                 if (handler) {
                                     try {
                                         const result = await handler(args, context);
+                                        const resultStr = typeof result === 'string' ? result : JSON.stringify(result);
+                                        // Security: Sanitize tool output
+                                        const sanitizedResult = SecurityService.sanitizeContent(resultStr);
+
                                         return {
                                             role: 'tool',
                                             name: name,
                                             tool_call_id: toolCall.id,
-                                            content: typeof result === 'string' ? result : JSON.stringify(result)
+                                            content: sanitizedResult
                                         } as AgentMessage;
                                     } catch (e: any) {
+                                        // Security: Sanitize error message
+                                        const sanitizedError = SecurityService.sanitizeContent(e.message);
                                         return {
                                             role: 'tool',
                                             name: name,
                                             tool_call_id: toolCall.id,
-                                            content: `Error executing tool ${name}: ${e.message}`
+                                            content: `Error executing tool ${name}: ${sanitizedError}`
                                         } as AgentMessage;
                                     }
                                 } else {
@@ -151,12 +191,54 @@ export class AgentOrchestrator {
 
                     controller.close();
                 } catch (error: any) {
-                    console.error('[AgentOrchestrator] Error:', error);
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'message', answer: `⚠️ Error: ${error.message}` })}\n\n`));
+                    // Security: Sanitize log
+                    const sanitizedErrorMsg = SecurityService.sanitizeContent(error.message || String(error));
+                    console.error('[AgentOrchestrator] Error:', sanitizedErrorMsg);
+
+                    // Graceful Fallback
+                    const locale = context.locale || 'en';
+                    // Determine language prefix (e.g., 'zh' from 'zh-TW') or use direct match
+                    let fallbackMsg = FALLBACK_MESSAGES[locale];
+                    if (!fallbackMsg) {
+                        if (locale.startsWith('zh')) fallbackMsg = FALLBACK_MESSAGES['zh'];
+                        else if (locale.startsWith('ja')) fallbackMsg = FALLBACK_MESSAGES['ja'];
+                        else fallbackMsg = FALLBACK_MESSAGES['en'];
+                    }
+
+                    // Append technical error for debugging if needed, or keep it clean for user
+                    // Ideally, user just sees friendly message.
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'message', answer: `⚠️ ${fallbackMsg}` })}\n\n`));
                     controller.close();
                 }
             }
         });
+    }
+}
+
+/**
+ * Fetch with exponential backoff retry logic.
+ * Retries on 5xx status codes or network errors.
+ */
+async function fetchWithRetry(url: string, options: RequestInit, retries: number = 3, backoff: number = 1000): Promise<Response> {
+    try {
+        const response = await fetch(url, options);
+
+        // Retry only on server errors (5xx)
+        if (response.status >= 500 && retries > 0) {
+            console.warn(`[fetchWithRetry] Request to ${url} failed with status ${response.status}. Retrying in ${backoff}ms... (${retries} retries left)`);
+            await new Promise(resolve => setTimeout(resolve, backoff));
+            return fetchWithRetry(url, options, retries - 1, backoff * 2);
+        }
+
+        return response;
+    } catch (error: any) {
+        // Retry on network errors
+        if (retries > 0) {
+            console.warn(`[fetchWithRetry] Network error: ${error.message}. Retrying in ${backoff}ms... (${retries} retries left)`);
+            await new Promise(resolve => setTimeout(resolve, backoff));
+            return fetchWithRetry(url, options, retries - 1, backoff * 2);
+        }
+        throw error;
     }
 }
 

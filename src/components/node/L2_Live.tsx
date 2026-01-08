@@ -105,25 +105,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
         updatedAt: undefined
     });
 
-    const [clickedCrowd, setClickedCrowd] = useState<number | null>(null);
 
-    // [New] Handle Crowd Vote
-    const handleVote = async (idx: number) => {
-        setClickedCrowd(idx); // Optimistic UI update
-
-        try {
-            await fetch('/api/l2/feedback', {
-                method: 'POST',
-                body: JSON.stringify({
-                    stationId: data.id,
-                    crowdLevel: idx + 1 // 0-based index to 1-5 scale
-                })
-            });
-            // Note: Data won't refresh until standard revalidation, but UI reflects the click
-        } catch (e) {
-            console.error('Vote failed', e);
-        }
-    };
 
     // [New] Airport Logic
     const isHaneda = data.id === 'odpt:Station:Airport.Haneda' || data.name?.en?.includes('Haneda');
@@ -147,8 +129,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
     const normalLines = displayLines.filter((l: any) => l.status === 'normal');
     const isBusyHub = displayLines.length > 4;
 
-    // Derived State for Crowd
-    const maxVoteIdx = crowd.userVotes.distribution.indexOf(Math.max(...crowd.userVotes.distribution));
+
 
     return (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom duration-500">
@@ -314,62 +295,116 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                     </a>
 
                     {/* User Crowd Report Section */}
-                    <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-3 shadow-sm flex flex-col justify-center">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Users size={14} className="text-gray-400" />
-                            <span className="text-[10px] font-black text-gray-400 uppercase">{tL2('crowdReport')}</span>
-                            <span className="text-[8px] text-indigo-400 bg-indigo-50 px-1 py-0.5 rounded ml-auto">
-                                LIVE CROWD
-                            </span>
-                        </div>
-                        {/* Disclaimer */}
-                        <p className="text-[8px] text-gray-400 mb-2 leading-tight">
-                            {tL2('dataSourceDisclaimer', { defaultValue: 'Source: Service Status & User Reports' })}
-                        </p>
-                        <div className="grid grid-cols-5 gap-1">
-                            {[
-                                { emoji: '😴', label: tL2('crowd.empty') },
-                                { emoji: '😊', label: tL2('crowd.comfortable') },
-                                { emoji: '😐', label: tL2('crowd.normal') },
-                                { emoji: '😓', label: tL2('crowd.crowded') },
-                                { emoji: '🥵', label: tL2('crowd.full') },
-                            ].map((opt, idx) => {
-                                const isMostPopular = clickedCrowd !== null && idx === maxVoteIdx;
-                                const isSelected = clickedCrowd === idx;
-
-                                return (
-                                    <button
-                                        key={idx}
-                                        className={`flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all relative min-h-[52px] touch-manipulation ${isSelected
-                                            ? 'bg-indigo-600 border-indigo-600 text-white scale-110 shadow-md z-10'
-                                            : isMostPopular
-                                                ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100'
-                                                : 'bg-white border-gray-100 hover:border-indigo-300 hover:bg-indigo-50'
-                                            }`}
-                                        onClick={() => handleVote(idx)}
-                                    >
-                                        <span className="text-base leading-none mb-1">{opt.emoji}</span>
-                                        <span className={`text-[9px] font-bold leading-none ${isSelected ? 'text-indigo-100' : 'text-gray-500'}`}>
-                                            {opt.label}
-                                        </span>
-
-                                        {/* Show Count if clicked (Simulated logic) */}
-                                        {clickedCrowd !== null && (
-                                            <span className={`text-[8px] font-bold mt-0.5 ${isSelected ? 'text-indigo-100' : 'text-gray-400'}`}>
-                                                {crowd.userVotes.distribution[idx] + (isSelected ? 1 : 0)}
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <p className="text-[9px] text-gray-300 mt-2 text-center">
-                            {clickedCrowd !== null ? tL2('crowdThanks') : tL2('crowdClick')}
-                        </p>
-                    </div>
+                    <CrowdFeedbackCard
+                        stationId={data.id}
+                        initialCrowd={crowd}
+                        tL2={tL2}
+                    />
                 </div>
             </div>
         </div>
     );
 }
 
+
+
+// Extracted Component for Crowd Feedback (Isolated Render)
+const CrowdFeedbackCard = memo(({ stationId, initialCrowd, tL2 }: { stationId: string, initialCrowd: any, tL2: any }) => {
+    const [clickedCrowd, setClickedCrowd] = useState<number | null>(null);
+
+    // Derived Logic for Popular Vote
+    const maxVoteIdx = useMemo(() => {
+        if (!initialCrowd?.userVotes?.distribution) return -1;
+        return initialCrowd.userVotes.distribution.indexOf(Math.max(...initialCrowd.userVotes.distribution));
+    }, [initialCrowd]);
+
+    const handleVote = async (idx: number) => {
+        setClickedCrowd(idx); // Standard react render update only for this component
+
+        try {
+            await fetch('/api/l2/feedback', {
+                method: 'POST',
+                body: JSON.stringify({
+                    stationId,
+                    crowdLevel: idx + 1
+                })
+            });
+        } catch (e) {
+            console.error('Vote failed', e);
+        }
+    };
+
+    return (
+        <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-3 shadow-sm flex flex-col justify-center">
+            <div className="flex items-center gap-2 mb-2">
+                <Users size={14} className="text-gray-400" />
+                <span className="text-[10px] font-black text-gray-400 uppercase">{tL2('crowdReport')}</span>
+                <span className="text-[8px] text-indigo-400 bg-indigo-50 px-1 py-0.5 rounded ml-auto">
+                    LIVE CROWD
+                </span>
+            </div>
+            <p className="text-[8px] text-gray-400 mb-2 leading-tight">
+                {tL2('dataSourceDisclaimer', { defaultValue: 'Source: Service Status & User Reports' })}
+            </p>
+            <div className="grid grid-cols-5 gap-1">
+                {[
+                    { emoji: '😴', label: tL2('crowd.empty') },
+                    { emoji: '😊', label: tL2('crowd.comfortable') },
+                    { emoji: '😐', label: tL2('crowd.normal') },
+                    { emoji: '😓', label: tL2('crowd.crowded') },
+                    { emoji: '🥵', label: tL2('crowd.full') },
+                ].map((opt, idx) => {
+                    // Logic: If user voted (clickedCrowd !== null), highlight their choice.
+                    // If not voted, highlight the global max (maxVoteIdx).
+                    // In original logic: isMostPopular = clickedCrowd !== null && idx === maxVoteIdx;
+                    // Wait, original logic was:
+                    // isMostPopular = clickedCrowd !== null && idx === maxVoteIdx;
+                    // This means we ONLY show the "Most Popular" highlight AFTER the user has voted?
+                    // Let's check original code:
+                    // const isMostPopular = clickedCrowd !== null && idx === maxVoteIdx;
+                    // Yes. So if user hasn't voted, no highlight?
+                    // "highlight the global max" usually implies showing the crowd BEFORE vote.
+                    // But maybe we want mystery until vote?
+                    // Let's stick to original behavior: Show popular ONLY after vote, or maybe show always?
+                    // Original code: isMostPopular = clickedCrowd !== null && idx === maxVoteIdx;
+                    // Actually, lines 343-348:
+                    // isSelected ? ... : isMostPopular ? ... : ...
+                    // So if NOT selected, check isMostPopular.
+                    // If `clickedCrowd` is null, isMostPopular is false.
+                    // So initially, nothing is emphasized. User clicks -> they see their choice AND the popular choice (if different).
+
+                    const isMostPopular = clickedCrowd !== null && idx === maxVoteIdx;
+                    const isSelected = clickedCrowd === idx;
+
+                    return (
+                        <button
+                            key={idx}
+                            className={`flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all relative min-h-[52px] touch-manipulation ${isSelected
+                                ? 'bg-indigo-600 border-indigo-600 text-white scale-110 shadow-md z-10'
+                                : isMostPopular
+                                    ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100'
+                                    : 'bg-white border-gray-100 hover:border-indigo-300 hover:bg-indigo-50'
+                                }`}
+                            onClick={() => handleVote(idx)}
+                        >
+                            <span className="text-base leading-none mb-1">{opt.emoji}</span>
+                            <span className={`text-[9px] font-bold leading-none ${isSelected ? 'text-indigo-100' : 'text-gray-500'}`}>
+                                {opt.label}
+                            </span>
+
+                            {clickedCrowd !== null && (
+                                <span className={`text-[8px] font-bold mt-0.5 ${isSelected ? 'text-indigo-100' : 'text-gray-400'}`}>
+                                    {initialCrowd.userVotes.distribution[idx] + (isSelected ? 1 : 0)}
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+            <p className="text-[9px] text-gray-300 mt-2 text-center">
+                {clickedCrowd !== null ? tL2('crowdThanks') : tL2('crowdClick')}
+            </p>
+        </div>
+    );
+});
+CrowdFeedbackCard.displayName = 'CrowdFeedbackCard';

@@ -141,7 +141,7 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
         l2: l2Adapter,
         l3_facilities: rawData.l3_facilities || [],
         l4_cards: rawData.l4_cards || [],
-        l4_knowledge: node.riding_knowledge || rawData.riding_knowledge || undefined
+        l4_knowledge: node.riding_knowledge || rawData.riding_knowledge || rawData.l4_knowledge || undefined
     };
 
     // Debug: Log L4 Knowledge data flow

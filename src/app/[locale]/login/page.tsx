@@ -12,14 +12,29 @@ import { useAppStore } from '@/stores/appStore';
 import { DEMO_SCENARIOS } from '@/lib/l4/demoScenarios';
 import { LoginChatPanel } from '@/components/chat/LoginChatPanel';
 
+const SUPPORTED_LOCALES = ['zh', 'en', 'ja', 'zh-TW', 'ar'];
+
 function normalizeNextPath(nextPath: string | null, locale: string) {
     if (!nextPath) return `/${locale}`;
     if (!nextPath.startsWith('/')) return `/${locale}`;
     if (nextPath.startsWith('//')) return `/${locale}`;
     if (nextPath.includes('://')) return `/${locale}`;
     if (nextPath.includes('\\')) return `/${locale}`;
-    if (nextPath === `/${locale}/login` || nextPath.startsWith(`/${locale}/login?`)) return `/${locale}`;
-    return nextPath;
+
+    // Check if path is a login page in any locale - redirect to home instead
+    const loginPathPattern = new RegExp(`^/(${SUPPORTED_LOCALES.join('|')})/login(?:\\?|$)`);
+    if (loginPathPattern.test(nextPath)) return `/${locale}`;
+
+    // Update locale prefix in the path to match current locale
+    const localePattern = new RegExp(`^/(${SUPPORTED_LOCALES.join('|')})(/|$)`);
+    const match = nextPath.match(localePattern);
+    if (match) {
+        // Replace old locale with current locale
+        return nextPath.replace(localePattern, `/${locale}$2`);
+    }
+
+    // Path without locale prefix - add current locale
+    return `/${locale}${nextPath}`;
 }
 
 export default function LoginPage() {
@@ -378,10 +393,10 @@ export default function LoginPage() {
                             {t('tryAsking')}
                         </h2>
                         {[
-                            { key: 'overtourism', node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
-                            { key: 'disruption', node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo' },
-                            { key: 'handsfree', node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
-                            { key: 'accessibility', node: 'odpt.Station:JR-East.Yamanote.Ueno' }
+                            { key: 'overtourism', demoId: 'overtourism' },
+                            { key: 'disruption', demoId: 'disruption' },
+                            { key: 'handsfree', demoId: 'handsfree' },
+                            { key: 'accessibility', demoId: 'accessibility' }
                         ].map((item) => {
                             const questionText = getDemoQuestion(item.key);
                             const issueLabel = getIssueLabel(item.key);
@@ -389,7 +404,8 @@ export default function LoginPage() {
                                 <button
                                     key={item.key}
                                     onClick={() => {
-                                        router.push(`/${locale}/?node=${item.node}&sheet=1&tab=lutagu&q=${encodeURIComponent(questionText)}`);
+                                        // Navigate to main page with demo parameter - enters fullscreen AI chat directly
+                                        router.push(`/${locale}/?demo=${item.demoId}`);
                                     }}
                                     className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >

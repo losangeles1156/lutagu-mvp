@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { orchestrator, AgentMessage } from '@/lib/agent/orchestrator';
 import { resolveNodeInheritance } from '@/lib/nodes/inheritance';
+import { generateRequestId, getTimestamp, getElapsedMs, logAIChatMetric } from '@/lib/monitoring/performanceLogger';
 
 type SupportedLocale = 'zh-TW' | 'zh' | 'en' | 'ja' | 'ar';
 
@@ -48,13 +49,13 @@ function isAIServiceAvailable(): boolean {
     const hasMistral = Boolean(process.env.MISTRAL_API_KEY);
     const hasGemini = Boolean(process.env.GEMINI_API_KEY);
     const model = process.env.AI_SLM_MODEL;
-    
-    console.log('[Chat API] Checking AI availability:', { 
-        hasMistral, 
-        hasGemini, 
-        model 
+
+    console.log('[Chat API] Checking AI availability:', {
+        hasMistral,
+        hasGemini,
+        model
     });
-    
+
     return hasMistral || hasGemini;
 }
 
@@ -69,6 +70,11 @@ export async function POST(req: NextRequest) {
         const userProfile = typeof inputs?.user_profile === 'string' ? inputs.user_profile : 'general';
         const timestamp = Date.now();
 
+        // Performance tracking
+        const requestId = generateRequestId();
+        const startTime = getTimestamp();
+        let toolsCalled: string[] = [];
+
         // Early check: If no AI service available, return offline mode immediately
         if (!isAIServiceAvailable()) {
             let offlineMessage = '🔌 Currently in offline mode (AI service unavailable). I can still provide basic station info.';
@@ -76,7 +82,17 @@ export async function POST(req: NextRequest) {
             else if (locale === 'zh') offlineMessage = '🔌 目前为离线模式（AI 服务未连线）。我仍可以提供基础站点信息。';
             else if (locale === 'ja') offlineMessage = '🔌 現在オフラインモードです。基本的な駅情報はお手伝いできます。';
             else if (locale === 'ar') offlineMessage = '🔌 حالياً في وضع عدم الاتصال (خدمة AI غير متوفرة). لا يزال بإمكاني تقديم معلومات المحطة الأساسية.';
-            
+
+            // Log offline mode
+            logAIChatMetric({
+                requestId,
+                nodeId,
+                locale,
+                responseTimeMs: getElapsedMs(startTime),
+                hadError: false,
+                metadata: { mode: 'offline' }
+            });
+
             return new NextResponse(createOfflineStream(offlineMessage, 'offline'), {
                 headers: { 'Content-Type': 'text/event-stream' }
             });
@@ -121,6 +137,8 @@ STRICT TOOL RULES:
 - "Status", "Delay" -> Call 'get_train_status'.
 - "Weather", "Rain" -> Call 'get_weather'.
 
+NOTE: Tools natively support fuzzy station names (e.g., "Airport", "NRT", "Asakusa"). Pass user's station terms directly to tools.
+
 CONSTRAINTS:
 - Answer primarily in ${locale}.
 - Do NOT say "Tokyo Subway Ticket" unless asked about fares.
@@ -155,6 +173,13 @@ CONSTRAINTS:
 
     } catch (error: any) {
         console.error('[Chat API] Fatal Error:', error);
+        // Log error metrics
+        logAIChatMetric({
+            requestId: generateRequestId(),
+            responseTimeMs: 0,
+            hadError: true,
+            errorMessage: error.message || 'Unknown error'
+        });
         return new NextResponse(createOfflineStream(`⚠️ ${error.message || 'Internal Server Error'}`, 'error'), {
             headers: { 'Content-Type': 'text/event-stream' }
         });

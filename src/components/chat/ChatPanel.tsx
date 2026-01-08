@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
@@ -53,6 +53,7 @@ export function ChatPanel() {
     // 從 AppStore 獲取 Chat 狀態與 Demo 狀態
     const messages = useAppStore(state => state.messages);
     const addMessage = useAppStore(state => state.addMessage);
+    const updateLastMessage = useAppStore(state => state.updateLastMessage);
     const clearMessages = useAppStore(state => state.clearMessages);
     const isDemoMode = useAppStore(state => state.isDemoMode);
     const activeDemoId = useAppStore(state => state.activeDemoId);
@@ -136,7 +137,7 @@ export function ChatPanel() {
         return '請用繁體中文做開場自我介紹，列出你能幫忙的 3 件事（即時列車狀態、無障礙、替代路線），最後問我現在在哪裡或想去哪裡。';
     }, [locale]);
 
-    const streamFromDify = useCallback(async (payload: {
+    const streamFromAgent = useCallback(async (payload: {
         query: string;
         includeUserMessage: boolean;
         assistantActions?: ChatAction[];
@@ -230,6 +231,12 @@ export function ChatPanel() {
                     }
                 }
             }
+
+            // Update the last assistant message with accumulated content
+            updateLastMessage({
+                content: accumulatedAnswer,
+                isLoading: false
+            });
         } catch (error) {
             console.error('Chat Error', error);
             setIsOffline(true);
@@ -241,12 +248,17 @@ export function ChatPanel() {
     }, [addMessage, currentNodeId, difyConversationId, effectiveDifyUserId, locale, tChat, setDifyConversationId, zone, mapCenter, selectedNeed]);
 
     const sendMessage = useCallback(async (text: string) => {
-        await streamFromDify({ query: text, includeUserMessage: true });
-    }, [streamFromDify]);
+        await streamFromAgent({ query: text, includeUserMessage: true });
+    }, [streamFromAgent]);
 
     // 初始化對話
     useEffect(() => {
         if (uiState !== 'fullscreen') return;
+
+        // Demo mode is handled by a separate useEffect - skip initialization here
+        if (isDemoMode && activeDemoId) {
+            return;
+        }
 
         // 優先處理 pendingChat (演示模式)
         if (pendingChatInput && pendingChatAutoSend) {
@@ -273,18 +285,14 @@ export function ChatPanel() {
             clearMessages();
         }
 
-        // 參考截圖設計的開場白內容
-        const welcomeContent = locale === 'ja'
-            ? `こんにちは！あなたの東京交通ナビゲーションパートナーです！\nお手伝いできること：\n🚃 リアルタイムの列車状態と遅延情報\n♿ バリアフリー施設の位置\n🆘 交通異常時の代替ルート提案\n\n今どこにいるか、またはどこへ行きたいか教えてください。`
-            : locale === 'en'
-                ? `Hello! I am your Tokyo transit navigation partner!\nI can help you with:\n🚃 Real-time train status and delay info\n♿ Accessibility facility locations\n🆘 Alternative route suggestions during disruptions\n\nTell me where you are now, or where you want to go.`
-                : `你好！我是你的東京交通導航夥伴！\n我可以幫助你：\n🚃 即時列車狀態與延誤情報\n♿ 無障礙設施位置\n🆘 交通異常時的替代路線建議\n\n請告訴我你現在在哪裡，或是想去哪裡？`;
+        // Welcome content from translations
+        const welcomeContent = tChat('welcome');
 
-        const suggestions = locale === 'ja'
-            ? ['銀座線は今遅延していますか？', '浅草から秋葉原まで一番早い行き方は？', '神田駅の出口にはエレベーターがありますか？']
-            : locale === 'en'
-                ? ['Is the Ginza Line delayed right now?', 'Fastest way from Asakusa to Akihabara?', 'Do Kanda Station exits have elevators?']
-                : ['現在銀座線有延誤嗎？', '從淺草到秋葉原怎麼去最快？', '神田站的出口都有電梯嗎？'];
+        const suggestions = [
+            tChat('suggestions.status'),
+            tChat('suggestions.route'),
+            tChat('suggestions.elevator')
+        ];
 
         addMessage({
             role: 'assistant',
@@ -296,7 +304,7 @@ export function ChatPanel() {
                 target: `chat:${encodeURIComponent(q)}`
             }))
         });
-    }, [uiState, messages.length, locale, addMessage, clearMessages, pendingChatInput, pendingChatAutoSend, setPendingChat, sendMessage]);
+    }, [uiState, messages.length, locale, addMessage, clearMessages, pendingChatInput, pendingChatAutoSend, setPendingChat, sendMessage, isDemoMode, activeDemoId]);
 
     // 獲取 L2 狀態
     useEffect(() => {
@@ -623,75 +631,14 @@ export function ChatPanel() {
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide" role="log" aria-live="polite">
                         {messages.map((msg: any, idx: number) => (
-                            <div
+                            <MessageBubble
                                 key={idx}
-                                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div className={`
-                                    max-w-[85%] p-4 rounded-2xl shadow-sm
-                                    ${msg.role === 'user'
-                                        ? 'bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-br-lg'
-                                        : 'bg-white text-slate-800 rounded-bl-lg border border-slate-100'
-                                    }
-                                `}>
-                                    {msg.isLoading ? (
-                                        <div className="flex space-x-2 items-center h-6">
-                                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                                {msg.content}
-                                            </div>
-
-                                            {/* Action Cards / Suggestions */}
-                                            {msg.actions && msg.actions.length > 0 && (
-                                                <div className="mt-4 flex flex-wrap gap-2">
-                                                    {msg.actions.map((action: any, i: number) => (
-                                                        <button
-                                                            key={i}
-                                                            onClick={() => handleAction(action)}
-                                                            className="px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-full text-xs font-medium hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm"
-                                                        >
-                                                            {action.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {/* Feedback Buttons */}
-                                            {msg.role === 'assistant' && !msg.isLoading && msg.content && (
-                                                <div className="mt-3 flex items-center gap-2 pt-2 border-t border-slate-100/50">
-                                                    <button
-                                                        onClick={() => handleFeedback(idx, 1)}
-                                                        disabled={!!msg.feedback}
-                                                        className={`p-1.5 rounded-full transition-all ${msg.feedback?.score === 1
-                                                            ? 'bg-emerald-100 text-emerald-600'
-                                                            : 'hover:bg-slate-100 text-slate-300 hover:text-emerald-500'
-                                                            }`}
-                                                        aria-label={tChat('feedbackLike')}
-                                                    >
-                                                        <ThumbsUp size={14} aria-hidden="true" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleFeedback(idx, -1)}
-                                                        disabled={!!msg.feedback}
-                                                        className={`p-1.5 rounded-full transition-all ${msg.feedback?.score === -1
-                                                            ? 'bg-rose-100 text-rose-600'
-                                                            : 'hover:bg-slate-100 text-slate-300 hover:text-rose-500'
-                                                            }`}
-                                                        aria-label={tChat('feedbackDislike')}
-                                                    >
-                                                        <ThumbsDown size={14} aria-hidden="true" />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                                msg={msg}
+                                idx={idx}
+                                handleAction={handleAction}
+                                handleFeedback={handleFeedback}
+                                tChat={tChat}
+                            />
                         ))}
                         <div ref={messagesEndRef} />
                     </div>
@@ -759,3 +706,86 @@ export function ChatPanel() {
 }
 
 export default ChatPanel;
+
+// Extracted Memoized Message Component
+const MessageBubble = memo(({
+    msg,
+    idx,
+    handleAction,
+    handleFeedback,
+    tChat
+}: {
+    msg: any;
+    idx: number;
+    handleAction: (action: any) => void;
+    handleFeedback: (index: number, score: number) => void;
+    tChat: any;
+}) => (
+    <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+        <div className={`
+            max-w-[85%] p-4 rounded-2xl shadow-sm
+            ${msg.role === 'user'
+                ? 'bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-br-lg'
+                : 'bg-white text-slate-800 rounded-bl-lg border border-slate-100'
+            }
+        `}>
+            {msg.isLoading ? (
+                <div className="flex space-x-2 items-center h-6">
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+            ) : (
+                <>
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {msg.content}
+                    </div>
+
+                    {/* Action Cards / Suggestions */}
+                    {msg.actions && msg.actions.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            {msg.actions.map((action: any, i: number) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleAction(action)}
+                                    className="px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-full text-xs font-medium hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm"
+                                >
+                                    {action.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Feedback Buttons */}
+                    {msg.role === 'assistant' && !msg.isLoading && msg.content && (
+                        <div className="mt-3 flex items-center gap-2 pt-2 border-t border-slate-100/50">
+                            <button
+                                onClick={() => handleFeedback(idx, 1)}
+                                disabled={!!msg.feedback}
+                                className={`p-1.5 rounded-full transition-all ${msg.feedback?.score === 1
+                                    ? 'bg-emerald-100 text-emerald-600'
+                                    : 'hover:bg-slate-100 text-slate-300 hover:text-emerald-500'
+                                    }`}
+                                aria-label={tChat('feedbackLike')}
+                            >
+                                <ThumbsUp size={14} aria-hidden="true" />
+                            </button>
+                            <button
+                                onClick={() => handleFeedback(idx, -1)}
+                                disabled={!!msg.feedback}
+                                className={`p-1.5 rounded-full transition-all ${msg.feedback?.score === -1
+                                    ? 'bg-rose-100 text-rose-600'
+                                    : 'hover:bg-slate-100 text-slate-300 hover:text-rose-500'
+                                    }`}
+                                aria-label={tChat('feedbackDislike')}
+                            >
+                                <ThumbsDown size={14} aria-hidden="true" />
+                            </button>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    </div>
+));
+MessageBubble.displayName = 'MessageBubble';

@@ -460,7 +460,8 @@
                 "fareQueryFailed": "Fare query failed.",
                 "destinationRequired": "Destination required.",
                 "noRouteFound": "No route found.",
-                "routePlanningFailed": "Route planning failed."
+                "routePlanningFailed": "Route planning failed.",
+                "unknown": "Unknown error."
             },
             "fare": {
                 "to": "To",
@@ -544,20 +545,6 @@
             "accessibility": "Accessibility",
             "rush": "In a hurry"
         },
-        "quickQuestions": {
-            "status": {
-                "text": "Is the Ginza Line delayed?",
-                "label": "Status"
-            },
-            "accessibility": {
-                "text": "Where are the elevators at Ueno?",
-                "label": "Accessibility"
-            },
-            "route": {
-                "text": "Fastest route from Asakusa to Tokyo",
-                "label": "Route"
-            }
-        },
         "connectionError": "Connection error. Please try again.",
         "offlineBadge": "OFFLINE",
         "backOnline": "Back Online",
@@ -571,6 +558,12 @@
         "placeholder": "Type a message...",
         "feedbackLike": "Helpful",
         "feedbackDislike": "Not helpful",
+        "welcome": "Hello! I am your Tokyo transit navigation partner!\nI can help you with:\n🚃 Real-time train status and delay info\n♿ Accessibility facility locations\n🆘 Alternative route suggestions during disruptions\n\nTell me where you are now, or where you want to go.",
+        "suggestions": {
+            "status": "Is the Ginza Line delayed right now?",
+            "route": "Fastest way from Asakusa to Akihabara?",
+            "elevator": "Do Kanda Station exits have elevators?"
+        },
         "retrySend": "Retry",
         "emptyTitle": "How can I help you?",
         "emptyDescription": "Ask about routes, live status, or accessibility",
@@ -636,5 +629,33 @@
             "accessibility": "I'm going to Ueno Zoo with a stroller. Which exit at Ueno Station is the most convenient?"
         }
     },
-    "validation": "Validation"
+    "validation": "Validation",
+    "feedback": {
+        "title": "Share Your Thoughts",
+        "openFeedback": "Send Feedback",
+        "thankYou": "Thank you for your feedback!",
+        "submittedMessage": "We read every piece of feedback carefully.",
+        "back": "Back",
+        "ratingLabel": "Overall Rating",
+        "contentLabel": "Details",
+        "submit": "Submit",
+        "types": {
+            "general": "General Feedback",
+            "bug": "Bug Report",
+            "spot": "Spot Tip",
+            "tip": "Share Experience"
+        },
+        "descriptions": {
+            "general": "Rate your overall experience",
+            "bug": "Report an issue or error",
+            "spot": "Share a hidden gem you found",
+            "tip": "Share transit tips and hacks"
+        },
+        "placeholders": {
+            "general": "Tell us about your experience...",
+            "bug": "Describe the issue including steps to reproduce...",
+            "spot": "Describe this spot and its location...",
+            "tip": "Share your experience or tip..."
+        }
+    }
 }

@@ -223,8 +223,8 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                 })()}
                             </div>
 
-                            {/* Vibe Tags - Compact Scrollable Row */}
-                            {displayVibeTags && displayVibeTags.length > 0 && (
+                            {/* Vibe Tags - Hidden for now as per design direction */}
+                            {/* {displayVibeTags && displayVibeTags.length > 0 && (
                                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mask-linear-fade">
                                     {displayVibeTags.map((tag: any, idx: number) => {
                                         const isActive = activeVibeFilter === tag.id;
@@ -247,7 +247,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                         );
                                     })}
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>
@@ -403,7 +403,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                         {/* Scrollable List */}
                         <div className="flex-1 overflow-y-auto px-6 pt-2 pb-12 bg-gray-50/50 space-y-4">
                             {filteredItems.length > 0 ? (
-                                filteredItems.map((item: L1Place, idx: number) => (
+                                filteredItems.slice(0, 5).map((item: L1Place, idx: number) => (
                                     <div
                                         key={item.osm_id || idx}
                                         className="animate-in fade-in slide-in-from-bottom duration-500"

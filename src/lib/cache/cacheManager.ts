@@ -39,6 +39,38 @@ export const CACHE_CONFIGS = {
         ttlMs: 60 * 60 * 1000, // 1 小時
         cleanupIntervalMs: 5 * 60 * 1000,
         evictionRatio: 0.2
+    } as CacheConfig,
+
+    /** AI 回應快取配置 (較短 TTL，避免過時回答) */
+    aiResponse: {
+        maxSize: 200,
+        ttlMs: 5 * 60 * 1000, // 5 分鐘
+        cleanupIntervalMs: 60 * 1000,
+        evictionRatio: 0.15
+    } as CacheConfig,
+
+    /** 票價快取配置 (票價穩定，可長期快取) */
+    fareData: {
+        maxSize: 500,
+        ttlMs: 60 * 60 * 1000, // 1 小時
+        cleanupIntervalMs: 5 * 60 * 1000,
+        evictionRatio: 0.1
+    } as CacheConfig,
+
+    /** 路線快取配置 */
+    routeData: {
+        maxSize: 500,
+        ttlMs: 30 * 60 * 1000, // 30 分鐘
+        cleanupIntervalMs: 5 * 60 * 1000,
+        evictionRatio: 0.1
+    } as CacheConfig,
+
+    /** 時刻表快取配置 (較短 TTL，因為需要即時性) */
+    timetableData: {
+        maxSize: 300,
+        ttlMs: 15 * 60 * 1000, // 15 分鐘
+        cleanupIntervalMs: 5 * 60 * 1000,
+        evictionRatio: 0.1
     } as CacheConfig
 } as const;
 
@@ -47,6 +79,9 @@ export const CACHE_CONFIGS = {
 let l1PlacesCache: CacheService | null = null;
 let apiResponseCache: CacheService | null = null;
 let stationDataCache: CacheService | null = null;
+let aiResponseCache: CacheService | null = null;
+let fareDataCache: CacheService | null = null;
+let routeDataCache: CacheService | null = null;
 
 /**
  * 獲取 L1 景點快取實例
@@ -76,6 +111,48 @@ export function getStationDataCache(): CacheService {
         stationDataCache = getCache('station_data', CACHE_CONFIGS.stationData);
     }
     return stationDataCache;
+}
+
+/**
+ * 獲取 AI 回應快取實例 (用於快取相似問題的回答)
+ */
+export function getAIResponseCache(): CacheService {
+    if (!aiResponseCache) {
+        aiResponseCache = getCache('ai_response', CACHE_CONFIGS.aiResponse);
+    }
+    return aiResponseCache;
+}
+
+/**
+ * 獲取票價快取實例 (票價資料穩定，長期快取)
+ */
+export function getFareDataCache(): CacheService {
+    if (!fareDataCache) {
+        fareDataCache = getCache('fare_data', CACHE_CONFIGS.fareData);
+    }
+    return fareDataCache;
+}
+
+/**
+ * 獲取路線快取實例
+ */
+export function getRouteDataCache(): CacheService {
+    if (!routeDataCache) {
+        routeDataCache = getCache('route_data', CACHE_CONFIGS.routeData);
+    }
+    return routeDataCache;
+}
+
+let timetableDataCache: CacheService | null = null;
+
+/**
+ * 獲取時刻表快取實例 (15 分鐘快取，兼顧即時性與效能)
+ */
+export function getTimetableDataCache(): CacheService {
+    if (!timetableDataCache) {
+        timetableDataCache = getCache('timetable_data', CACHE_CONFIGS.timetableData);
+    }
+    return timetableDataCache;
 }
 
 // ============== 封裝的快取操作 ==============

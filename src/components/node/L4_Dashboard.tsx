@@ -333,20 +333,20 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                 let destinationStationId = selectedDestination?.id ? normalizeOdptStationId(selectedDestination.id) : '';
                 if (!destinationStationId && intent.toStationId) { destinationStationId = normalizeOdptStationId(intent.toStationId); }
                 if (!destinationStationId) { const ids = extractOdptStationIds(text).map(normalizeOdptStationId); destinationStationId = ids.find(id => id !== currentOriginId) || ''; }
-                if (!destinationStationId) { setError(uiLocale.startsWith('zh') ? '請選擇目的地。' : uiLocale === 'ja' ? '到着駅が必要。' : 'Destination required.'); setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId: currentOriginId, demand, verified: false, options: [] })); return; }
+                if (!destinationStationId) { setError(t('errors.destinationRequired')); setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId: currentOriginId, demand, verified: false, options: [] })); return; }
                 if (cachedRouteResult && cachedRouteResult.origin === currentOriginId && cachedRouteResult.destination === destinationStationId && cachedRouteResult.text === text) { setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: true, options: cachedRouteResult.options, text })); return; }
                 try {
                     const json = await fetchJsonCached<any>(`/api/odpt/route?from=${encodeURIComponent(currentOriginId)}&to=${encodeURIComponent(destinationStationId)}&locale=${uiLocale}`, { ttlMs: 5 * 60_000, signal: controller.signal });
                     if (mySeq !== requestSeqRef.current) return;
                     const apiRoutes = json.routes || [];
-                    if (apiRoutes.length === 0) { setError(uiLocale.startsWith('zh') ? '找不到路線。' : uiLocale === 'ja' ? '経路が見つかりません。' : 'No route found.'); }
+                    if (apiRoutes.length === 0) { setError(t('errors.noRouteFound')); }
                     const baseOptions = apiRoutes.map((r: any): EnrichedRouteOption => ({ label: r.label, steps: r.steps, sources: r.sources || [{ type: 'odpt:Railway', verified: true }], railways: r.railways, transfers: Number(r.transfers ?? 0), duration: typeof r.duration === 'number' ? r.duration : undefined, fare: r.fare, nextDeparture: r.nextDeparture }));
                     setCachedRouteResult({ origin: currentOriginId, destination: destinationStationId, options: baseOptions, text });
                     setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: true, options: baseOptions, text }));
                     return;
-                } catch (e: any) { if (e?.name !== 'AbortError') { setError('Route planning failed.'); setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: false, options: [] })); } return; }
+                } catch (e: any) { if (e?.name !== 'AbortError') { setError(t('errors.routePlanningFailed')); setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: false, options: [] })); } return; }
             }
-        } catch (e: any) { if (e?.name !== 'AbortError') { setError(String(e?.message || 'Unknown error')); } }
+        } catch (e: any) { if (e?.name !== 'AbortError') { setError(String(e?.message || t('errors.unknown'))); } }
         finally { if (mySeq === requestSeqRef.current) { setIsLoading(false); } }
     };
 
@@ -360,308 +360,308 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
 
     return (
         <div className="w-full h-full flex flex-col bg-slate-50/50 overflow-hidden">
-                {/* Header */}
-                <motion.div 
-                    initial={false}
-                    animate={{ 
-                        height: isHeaderCollapsed ? '56px' : 'auto',
-                        paddingTop: isHeaderCollapsed ? '8px' : '16px',
-                        paddingBottom: isHeaderCollapsed ? '8px' : '8px'
-                    }}
-                    className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm px-4 flex items-center gap-3 border-b border-slate-100/50"
-                >
-                    <div className="flex-1 overflow-hidden">
-                        <ViewModeSelector activeMode={viewMode} onSelect={setViewMode} tL4={tL4} isCompact={isHeaderCollapsed} />
-                    </div>
-                </motion.div>
+            {/* Header */}
+            <motion.div
+                initial={false}
+                animate={{
+                    height: isHeaderCollapsed ? '56px' : 'auto',
+                    paddingTop: isHeaderCollapsed ? '8px' : '16px',
+                    paddingBottom: isHeaderCollapsed ? '8px' : '8px'
+                }}
+                className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm px-4 flex items-center gap-3 border-b border-slate-100/50"
+            >
+                <div className="flex-1 overflow-hidden">
+                    <ViewModeSelector activeMode={viewMode} onSelect={setViewMode} tL4={tL4} isCompact={isHeaderCollapsed} />
+                </div>
+            </motion.div>
 
-                {/* Main Content */}
-                <div 
-                    ref={scrollContainerRef}
-                    onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto"
-                >
-                    <AnimatePresence mode="wait">
-                        {viewMode === 'recommendations' ? (
-                            <motion.div 
-                                key="recommendations" 
-                                initial={{ opacity: 0, y: 10 }} 
-                                animate={{ opacity: 1, y: 0 }} 
-                                exit={{ opacity: 0, y: -10 }} 
-                                className="px-4 py-6 space-y-8"
-                            >
-                                {/* AI Intelligence Hub - Main Feature Highlight */}
-                                <section className="relative">
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
-                                    <div className="relative bg-white/80 backdrop-blur-2xl rounded-[2rem] border border-white/60 p-6 shadow-2xl shadow-indigo-100/50 overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-4">
-                                            <div className="flex items-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-                                                <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                                                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{t('aiPerceptionActive')}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-4 mb-6">
-                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-xl shadow-indigo-200 ring-4 ring-white">
-                                                <Sparkles size={28} className="animate-pulse" />
-                                            </div>
-                                            <div>
-                                                <h2 className="text-xl font-black text-slate-900 tracking-tight">
-                                                    {t('aiAssistant')}
-                                                </h2>
-                                                <p className="text-xs font-bold text-slate-500 mt-0.5">
-                                                    {t('aiSubtitle')}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
-                                                        <AlertTriangle size={14} />
-                                                    </div>
-                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('trapGuide')}</span>
-                                                </div>
-                                                <div className="flex items-baseline gap-1">
-                                                    <span className="text-base font-black text-slate-800">{l4Knowledge?.traps?.length || 0}</span>
-                                                    <span className="text-[9px] font-black text-slate-500 uppercase">{t('expertTips')}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
-                                                        <Lightbulb size={14} />
-                                                    </div>
-                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('proHacksLabel')}</span>
-                                                </div>
-                                                <div className="flex items-baseline gap-1">
-                                                    <span className="text-base font-black text-slate-800">{l4Knowledge?.hacks?.length || 0}</span>
-                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Pro Hacks</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <button 
-                                            onClick={() => setViewMode('chat')}
-                                            className="w-full mt-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:bg-indigo-600 transition-all active:scale-[0.98] shadow-lg shadow-slate-200"
-                                        >
-                                            <MessageSquare size={16} />
-                                            {t('startChat')}
-                                        </button>
-                                    </div>
-                                </section>
-
-                                {isRecommending ? (
-                                    <RecommendationSkeleton />
-                                ) : recommendations.length > 0 ? (
-                                    <StrategyCards cards={recommendations} locale={uiLocale} />
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-16 text-slate-400 space-y-3 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-                                        <Sparkles size={40} className="opacity-10" />
-                                        <div className="text-center">
-                                            <p className="text-sm font-black text-slate-500">
-                                                {t('discoverInspiration')}
-                                            </p>
-                                            <p className="text-[10px] font-bold text-slate-400 mt-1">
-                                                {t('adjustPreferences')}
-                                            </p>
+            {/* Main Content */}
+            <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto"
+            >
+                <AnimatePresence mode="wait">
+                    {viewMode === 'recommendations' ? (
+                        <motion.div
+                            key="recommendations"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="px-4 py-6 space-y-8"
+                        >
+                            {/* AI Intelligence Hub - Main Feature Highlight */}
+                            <section className="relative">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+                                <div className="relative bg-white/80 backdrop-blur-2xl rounded-[2rem] border border-white/60 p-6 shadow-2xl shadow-indigo-100/50 overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4">
+                                        <div className="flex items-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                                            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{t('aiPerceptionActive')}</span>
                                         </div>
                                     </div>
-                                )}
 
-                                {/* Expert Knowledge Sections */}
-                                <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-6 border border-slate-200/60 shadow-xl shadow-slate-200/20 space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                                                <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
-                                                {t('ridingGuide')}
-                                            </h3>
-                                            <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-full uppercase tracking-wider">{t('expertMode')}</span>
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-xl shadow-indigo-200 ring-4 ring-white">
+                                            <Sparkles size={28} className="animate-pulse" />
                                         </div>
-                                    
-                                    <div className="space-y-4">
-                                        {l4Knowledge?.traps?.map((item, i) => (
-                                            <div key={i} className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 flex gap-4 group hover:bg-red-50 transition-colors">
-                                                <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
-                                                <div>
-                                                    <div className="font-black text-red-900 text-sm mb-1">{item.title}</div>
-                                                    <div className="text-xs font-bold text-red-700/80 leading-relaxed">{item.description}</div>
-                                                    {item.advice && (
-                                                        <div className="mt-3 p-2.5 bg-white/80 rounded-xl text-[11px] font-bold text-red-800 flex items-start gap-2 shadow-sm ring-1 ring-red-100">
-                                                            <Lightbulb size={14} className="shrink-0 text-amber-500 mt-0.5" />
-                                                            <span>{item.advice}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                        
-                                        {l4Knowledge?.hacks?.map((item, i) => (
-                                            <div key={i} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 flex gap-4 group hover:bg-emerald-50 transition-colors">
-                                                <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
-                                                <div>
-                                                    <div className="font-black text-emerald-900 text-sm mb-1">{item.title}</div>
-                                                    <div className="text-xs font-bold text-emerald-700/80 leading-relaxed">{item.description}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ) : viewMode === 'chat' ? (
-                            <motion.div 
-                                key="chat" 
-                                initial={{ opacity: 0, x: 20 }} 
-                                animate={{ opacity: 1, x: 0 }} 
-                                exit={{ opacity: 0, x: -20 }} 
-                                className="w-full h-full flex flex-col"
-                            >
-                                <L4_Chat data={stationProfile} variant="strategy" />
-                            </motion.div>
-                        ) : (
-                            <motion.div 
-                                key="planner" 
-                                initial={{ opacity: 0, x: -20 }} 
-                                animate={{ opacity: 1, x: 0 }} 
-                                exit={{ opacity: 0, x: 20 }} 
-                                className="px-4 pb-32 space-y-6"
-                            >
-                                {/* Planner Title & Selector Section */}
-                                <div className="mt-2 space-y-4">
-                                    <div className="flex items-center justify-between px-1">
                                         <div>
-                                            <h3 className="text-xl font-black text-slate-900 tracking-tight">{t('smartPlanning')}</h3>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{t('smartPlanningSub')}</p>
-                                        </div>
-                                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-sm">
-                                            <MapIcon size={20} />
+                                            <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                                                {t('aiAssistant')}
+                                            </h2>
+                                            <p className="text-xs font-bold text-slate-500 mt-0.5">
+                                                {t('aiSubtitle')}
+                                            </p>
                                         </div>
                                     </div>
-                                    <PlannerTabSelector activeTask={task} onSelect={setTask} tL4={tL4} />
-                                </div>
 
-                                {/* Main Config Card */}
-                                <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden">
-                                    <div className="p-6 space-y-6">
-                                        <L4FormCard 
-                                            originInput={originInput} 
-                                            setOriginInput={setOriginInput} 
-                                            selectedOrigin={selectedOrigin} 
-                                            setSelectedOrigin={(s) => { setSelectedOrigin(s); if (s) setOriginInput(getStationDisplayName(s)); }} 
-                                            destinationInput={destinationInput} 
-                                            setDestinationInput={setDestinationInput} 
-                                            selectedDestination={selectedDestination} 
-                                            setSelectedDestination={(s) => { setSelectedDestination(s); if (s) setDestinationInput(getStationDisplayName(s)); }} 
-                                            swapStations={swapStations} 
-                                            task={task as any} 
-                                            isLoading={isLoading} 
-                                            getStationDisplayName={getStationDisplayName} 
-                                            locale={uiLocale} 
-                                            isCompact={isHeaderCollapsed}
-                                            directions={availableDirections}
-                                            selectedDirection={selectedDirection}
-                                            onDirectionChange={setSelectedDirection}
-                                            getLocalizedStationName={getLocalizedStationName}
-                                        />
-
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between px-1">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('travelPreferences')}</span>
-                                                <div className="h-px flex-1 bg-slate-200/50 mx-4" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+                                                    <AlertTriangle size={14} />
+                                                </div>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('trapGuide')}</span>
                                             </div>
-                                            <L4DemandChips 
-                                                demand={demand} 
-                                                setDemand={setDemand} 
-                                                wantsExpertTips={wantsExpertTips} 
-                                                setWantsExpertTips={setWantsExpertTips} 
-                                                task={task as any} 
-                                                locale={uiLocale} 
-                                            />
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-base font-black text-slate-800">{l4Knowledge?.traps?.length || 0}</span>
+                                                <span className="text-[9px] font-black text-slate-500 uppercase">{t('expertTips')}</span>
+                                            </div>
                                         </div>
 
-                                        <button 
-                                            onClick={ask} 
-                                            disabled={!canAsk} 
-                                            className="w-full h-16 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black shadow-xl shadow-slate-900/20 disabled:bg-slate-200 disabled:shadow-none flex items-center justify-center gap-3 active:scale-[0.98] transition-all relative overflow-hidden group"
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} className="text-indigo-400 group-hover:scale-110 transition-transform" />}
-                                            <span className="text-base relative z-10">
-                                                {t('generatePlan')}
-                                            </span>
-                                        </button>
+                                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                                    <Lightbulb size={14} />
+                                                </div>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('proHacksLabel')}</span>
+                                            </div>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-base font-black text-slate-800">{l4Knowledge?.hacks?.length || 0}</span>
+                                                <span className="text-[9px] font-black text-slate-500 uppercase">{t('proHacks')}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Advanced Options Toggle */}
-                                <div className="flex justify-center">
-                                    <button 
-                                        onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
-                                        className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-white/80 text-[11px] font-black text-slate-500 hover:text-indigo-600 hover:bg-white transition-all shadow-sm shadow-slate-200/50"
+                                    <button
+                                        onClick={() => setViewMode('chat')}
+                                        className="w-full mt-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:bg-indigo-600 transition-all active:scale-[0.98] shadow-lg shadow-slate-200"
                                     >
-                                        <Ticket size={13} className={isTemplatesOpen ? 'text-indigo-500' : ''} />
-                                        {t('templateLibrary')}
-                                        <ChevronDown size={13} className={`transition-transform duration-300 ${isTemplatesOpen ? 'rotate-180 text-indigo-500' : ''}`} />
+                                        <MessageSquare size={16} />
+                                        {t('startChat')}
                                     </button>
                                 </div>
+                            </section>
 
-                                <div ref={templatesContainerRef} className="space-y-4">
-                                    <AnimatePresence>
-                                        {isTemplatesOpen && (
-                                            <motion.div
-                                                initial={{ height: 0, opacity: 0 }}
-                                                animate={{ height: 'auto', opacity: 1 }}
-                                                exit={{ height: 0, opacity: 0 }}
-                                                className="overflow-hidden"
-                                            >
-                                                <L4TemplateList templates={visibleTemplates} isOpen={true} onSelect={(tpl) => void applyTemplate(tpl)} locale={uiLocale} />
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                            {isRecommending ? (
+                                <RecommendationSkeleton />
+                            ) : recommendations.length > 0 ? (
+                                <StrategyCards cards={recommendations} locale={uiLocale} />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-16 text-slate-400 space-y-3 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+                                    <Sparkles size={40} className="opacity-10" />
+                                    <div className="text-center">
+                                        <p className="text-sm font-black text-slate-500">
+                                            {t('discoverInspiration')}
+                                        </p>
+                                        <p className="text-[10px] font-bold text-slate-400 mt-1">
+                                            {t('adjustPreferences')}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Expert Knowledge Sections */}
+                            <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-6 border border-slate-200/60 shadow-xl shadow-slate-200/20 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                                        <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                                        {t('ridingGuide')}
+                                    </h3>
+                                    <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-full uppercase tracking-wider">{t('expertMode')}</span>
                                 </div>
 
-                                <AnimatePresence>{error && <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="rounded-2xl bg-rose-50 border border-rose-100 p-4 flex items-start gap-3"><div className="p-2 bg-rose-100 rounded-full text-rose-600"><AlertTriangle size={16} /></div><div className="text-sm font-bold text-rose-800">{error}</div></motion.div>}</AnimatePresence>
-                                {task === 'time' && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">{isLoading && !timetableData ? <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div> : <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</motion.div>}
-                                <AnimatePresence mode="wait">{(suggestion || activeDemo || activeKind) && (
-                                    <motion.div key={activeKind || 'results'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="space-y-4">
-                                        {activeDemo && (
-                                            <div className="p-4 rounded-3xl bg-indigo-50 border border-indigo-100">
-                                                <div className="flex items-center gap-2 mb-3 text-indigo-900 font-black">
-                                                    <Sparkles size={16} />
-                                                    {uiLocale === 'ja' && activeDemo.title_ja ? activeDemo.title_ja : uiLocale === 'en' && activeDemo.title_en ? activeDemo.title_en : activeDemo.title}
-                                                </div>
-                                                <div className="space-y-4">
-                                                    {activeDemo.steps.slice(0, demoStepIndex + 1).map((step, i) => (
-                                                        <div key={i} className="flex gap-3">
-                                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-lg shadow-sm">🤖</div>
-                                                            <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm font-bold text-slate-700">
-                                                                {uiLocale === 'ja' && step.agent_ja ? step.agent_ja : uiLocale === 'en' && step.agent_en ? step.agent_en : step.agent}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {demoStepIndex < activeDemo.steps.length - 1 ? (
-                                                        <button onClick={() => setDemoStepIndex(i => i + 1)} className="w-full py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">
-                                                            {t('nextStep')}
-                                                        </button>
-                                                    ) : (
-                                                        <div className="text-center text-xs text-slate-400 font-bold">
-                                                            {t('endOfDemo')}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                <div className="space-y-4">
+                                    {l4Knowledge?.traps?.map((item, i) => (
+                                        <div key={i} className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 flex gap-4 group hover:bg-red-50 transition-colors">
+                                            <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
+                                            <div>
+                                                <div className="font-black text-red-900 text-sm mb-1">{item.title}</div>
+                                                <div className="text-xs font-bold text-red-700/80 leading-relaxed">{item.description}</div>
+                                                {item.advice && (
+                                                    <div className="mt-3 p-2.5 bg-white/80 rounded-xl text-[11px] font-bold text-red-800 flex items-start gap-2 shadow-sm ring-1 ring-red-100">
+                                                        <Lightbulb size={14} className="shrink-0 text-amber-500 mt-0.5" />
+                                                        <span>{item.advice}</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                        {activeKind && activeKind !== 'unknown' && activeKind !== 'route' && <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm"><div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">{t('details')}</div>{activeKind === 'fare' && <FareModule fares={fareData} locale={uiLocale} />}{activeKind === 'timetable' && <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</div>}
-                                        {suggestion && activeKind === 'route' ? <div className="space-y-4"><InsightCards suggestion={suggestion} locale={uiLocale} visible={wantsExpertTips} /><div className="space-y-3">{suggestion.options.map((opt, idx) => <RouteResultCard key={`${opt.label}-${idx}`} option={{ ...opt, transfers: Number(opt.transfers ?? 0) }} rank={idx} locale={uiLocale} />)}</div></div> : suggestion ? <SuggestionModule suggestion={suggestion} /> : null}
-                                    </motion.div>
-                                )}</AnimatePresence>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                                        </div>
+                                    ))}
+
+                                    {l4Knowledge?.hacks?.map((item, i) => (
+                                        <div key={i} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 flex gap-4 group hover:bg-emerald-50 transition-colors">
+                                            <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
+                                            <div>
+                                                <div className="font-black text-emerald-900 text-sm mb-1">{item.title}</div>
+                                                <div className="text-xs font-bold text-emerald-700/80 leading-relaxed">{item.description}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ) : viewMode === 'chat' ? (
+                        <motion.div
+                            key="chat"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="w-full h-full flex flex-col"
+                        >
+                            <L4_Chat data={stationProfile} variant="strategy" />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="planner"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="px-4 pb-32 space-y-6"
+                        >
+                            {/* Planner Title & Selector Section */}
+                            <div className="mt-2 space-y-4">
+                                <div className="flex items-center justify-between px-1">
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-900 tracking-tight">{t('smartPlanning')}</h3>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{t('smartPlanningSub')}</p>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-sm">
+                                        <MapIcon size={20} />
+                                    </div>
+                                </div>
+                                <PlannerTabSelector activeTask={task} onSelect={setTask} tL4={tL4} />
+                            </div>
+
+                            {/* Main Config Card */}
+                            <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden">
+                                <div className="p-6 space-y-6">
+                                    <L4FormCard
+                                        originInput={originInput}
+                                        setOriginInput={setOriginInput}
+                                        selectedOrigin={selectedOrigin}
+                                        setSelectedOrigin={(s) => { setSelectedOrigin(s); if (s) setOriginInput(getStationDisplayName(s)); }}
+                                        destinationInput={destinationInput}
+                                        setDestinationInput={setDestinationInput}
+                                        selectedDestination={selectedDestination}
+                                        setSelectedDestination={(s) => { setSelectedDestination(s); if (s) setDestinationInput(getStationDisplayName(s)); }}
+                                        swapStations={swapStations}
+                                        task={task as any}
+                                        isLoading={isLoading}
+                                        getStationDisplayName={getStationDisplayName}
+                                        locale={uiLocale}
+                                        isCompact={isHeaderCollapsed}
+                                        directions={availableDirections}
+                                        selectedDirection={selectedDirection}
+                                        onDirectionChange={setSelectedDirection}
+                                        getLocalizedStationName={getLocalizedStationName}
+                                    />
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between px-1">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('travelPreferences')}</span>
+                                            <div className="h-px flex-1 bg-slate-200/50 mx-4" />
+                                        </div>
+                                        <L4DemandChips
+                                            demand={demand}
+                                            setDemand={setDemand}
+                                            wantsExpertTips={wantsExpertTips}
+                                            setWantsExpertTips={setWantsExpertTips}
+                                            task={task as any}
+                                            locale={uiLocale}
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={ask}
+                                        disabled={!canAsk}
+                                        className="w-full h-16 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black shadow-xl shadow-slate-900/20 disabled:bg-slate-200 disabled:shadow-none flex items-center justify-center gap-3 active:scale-[0.98] transition-all relative overflow-hidden group"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} className="text-indigo-400 group-hover:scale-110 transition-transform" />}
+                                        <span className="text-base relative z-10">
+                                            {t('generatePlan')}
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Advanced Options Toggle */}
+                            <div className="flex justify-center">
+                                <button
+                                    onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
+                                    className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-white/80 text-[11px] font-black text-slate-500 hover:text-indigo-600 hover:bg-white transition-all shadow-sm shadow-slate-200/50"
+                                >
+                                    <Ticket size={13} className={isTemplatesOpen ? 'text-indigo-500' : ''} />
+                                    {t('templateLibrary')}
+                                    <ChevronDown size={13} className={`transition-transform duration-300 ${isTemplatesOpen ? 'rotate-180 text-indigo-500' : ''}`} />
+                                </button>
+                            </div>
+
+                            <div ref={templatesContainerRef} className="space-y-4">
+                                <AnimatePresence>
+                                    {isTemplatesOpen && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <L4TemplateList templates={visibleTemplates} isOpen={true} onSelect={(tpl) => void applyTemplate(tpl)} locale={uiLocale} />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            <AnimatePresence>{error && <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="rounded-2xl bg-rose-50 border border-rose-100 p-4 flex items-start gap-3"><div className="p-2 bg-rose-100 rounded-full text-rose-600"><AlertTriangle size={16} /></div><div className="text-sm font-bold text-rose-800">{error}</div></motion.div>}</AnimatePresence>
+                            {task === 'time' && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">{isLoading && !timetableData ? <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div> : <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</motion.div>}
+                            <AnimatePresence mode="wait">{(suggestion || activeDemo || activeKind) && (
+                                <motion.div key={activeKind || 'results'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="space-y-4">
+                                    {activeDemo && (
+                                        <div className="p-4 rounded-3xl bg-indigo-50 border border-indigo-100">
+                                            <div className="flex items-center gap-2 mb-3 text-indigo-900 font-black">
+                                                <Sparkles size={16} />
+                                                {uiLocale === 'ja' && activeDemo.title_ja ? activeDemo.title_ja : uiLocale === 'en' && activeDemo.title_en ? activeDemo.title_en : activeDemo.title}
+                                            </div>
+                                            <div className="space-y-4">
+                                                {activeDemo.steps.slice(0, demoStepIndex + 1).map((step, i) => (
+                                                    <div key={i} className="flex gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-lg shadow-sm">🤖</div>
+                                                        <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm font-bold text-slate-700">
+                                                            {uiLocale === 'ja' && step.agent_ja ? step.agent_ja : uiLocale === 'en' && step.agent_en ? step.agent_en : step.agent}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {demoStepIndex < activeDemo.steps.length - 1 ? (
+                                                    <button onClick={() => setDemoStepIndex(i => i + 1)} className="w-full py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">
+                                                        {t('nextStep')}
+                                                    </button>
+                                                ) : (
+                                                    <div className="text-center text-xs text-slate-400 font-bold">
+                                                        {t('endOfDemo')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {activeKind && activeKind !== 'unknown' && activeKind !== 'route' && <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm"><div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">{t('details')}</div>{activeKind === 'fare' && <FareModule fares={fareData} locale={uiLocale} />}{activeKind === 'timetable' && <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</div>}
+                                    {suggestion && activeKind === 'route' ? <div className="space-y-4"><InsightCards suggestion={suggestion} locale={uiLocale} visible={wantsExpertTips} /><div className="space-y-3">{suggestion.options.map((opt, idx) => <RouteResultCard key={`${opt.label}-${idx}`} option={{ ...opt, transfers: Number(opt.transfers ?? 0) }} rank={idx} locale={uiLocale} />)}</div></div> : suggestion ? <SuggestionModule suggestion={suggestion} /> : null}
+                                </motion.div>
+                            )}</AnimatePresence>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
+        </div>
     );
 }
 
@@ -673,13 +673,13 @@ function ViewModeSelector({ activeMode, onSelect, tL4, isCompact }: { activeMode
     ];
     return (
         <div className={`relative flex p-1 bg-white/40 backdrop-blur-xl rounded-[1.25rem] border border-white/60 shadow-lg shadow-slate-200/20 transition-all ${isCompact ? 'gap-0.5' : 'gap-1'}`}>
-            {modes.map(mode => { 
-                const isActive = activeMode === mode.id; 
-                const Icon = mode.icon; 
+            {modes.map(mode => {
+                const isActive = activeMode === mode.id;
+                const Icon = mode.icon;
                 return (
-                    <button 
-                        key={mode.id} 
-                        onClick={() => onSelect(mode.id as L4ViewMode)} 
+                    <button
+                        key={mode.id}
+                        onClick={() => onSelect(mode.id as L4ViewMode)}
                         className={`
                             relative flex-1 flex items-center justify-center gap-1.5 rounded-[0.9rem] text-xs font-black transition-all active:scale-95 touch-manipulation z-10
                             ${isCompact ? 'py-2 px-1' : 'py-3'}
@@ -848,7 +848,7 @@ function TimetableModule({ timetables, stationId, locale, selectedDirection }: {
  */
 function getLocalizedStationName(id: string, locale: string): string {
     const base = String(id || '').split(/[:.]/).pop() || '';
-    
+
     // Comprehensive mapping for major Tokyo stations
     const stationMap: Record<string, Record<string, string>> = {
         'Tokyo': { 'zh': '東京', 'ja': '東京', 'en': 'Tokyo', 'ar': 'طوكيو' },

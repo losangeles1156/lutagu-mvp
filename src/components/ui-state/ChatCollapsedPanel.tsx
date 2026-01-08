@@ -6,11 +6,11 @@ import { useUIStateMachine, type ChatMessage } from '@/stores/uiStateMachine';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAppStore } from '@/stores/appStore';
 import { useTranslations } from 'next-intl';
-import { 
-  MessageSquare, 
-  X, 
-  ChevronUp, 
-  Send, 
+import {
+  MessageSquare,
+  X,
+  ChevronUp,
+  Send,
   Maximize2,
   RotateCcw
 } from 'lucide-react';
@@ -25,14 +25,14 @@ interface ChatCollapsedPanelProps {
 export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProps) {
   const tChat = useTranslations('chat');
   const tCommon = useTranslations('common');
-  
+
   const { deviceType } = useDeviceType();
   const isMobile = deviceType === 'mobile';
-  
-  const { 
-    uiState, 
-    messages, 
-    pendingInput, 
+
+  const {
+    uiState,
+    messages,
+    pendingInput,
     isAnimating,
     transitionTo,
     addMessage,
@@ -40,19 +40,19 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     clearMessages,
     backupMessages
   } = useUIStateMachine();
-  
-  const { 
-    difyConversationId, 
+
+  const {
+    difyConversationId,
     setDifyConversationId,
     difyUserId,
     currentNodeId,
     userContext,
     userProfile,
   } = useAppStore();
-  
+
   // 使用 'core' 作為 zone 預設值
   const zoneValue = 'core';
-  
+
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -75,32 +75,48 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // 發送訊息到 Dify
+  // Send message to Hybrid Agent
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
-    // 添加用戶訊息
-    addMessage({ role: 'user', content: text });
+    // Add user message immediately
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: text,
+      timestamp: Date.now()
+    };
+    addMessage(userMsg);
     setInput('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/dify/chat', {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+      // Prepare messages for the orchestrator (stateless)
+      const clientMessages = messages.map((m: any) => ({
+        role: m.role,
+        content: m.content
+      }));
+      // Append the new message
+      clientMessages.push({ role: 'user', content: text });
+
+      const response = await fetch('/api/agent/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
-          query: text,
-          conversation_id: difyConversationId,
+          messages: clientMessages,
+          nodeId: currentNodeId || '',
           inputs: {
-            user_profile: userProfile || 'general',
-            user_context: userContext || [],
-            current_station: currentNodeId || '',
-            locale: 'zh-TW',
-            zone: zoneValue || 'core',
-            user_id: difyUserId || 'anonymous'
+            locale: 'zh-TW', // Force traditional chinese or use locale from props
+            user_profile: userProfile || 'general'
           }
         })
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) throw new Error('API Error');
       if (!response.body) throw new Error('No response body');
@@ -109,6 +125,26 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
       const decoder = new TextDecoder();
       let accumulatedAnswer = '';
       let sseBuffer = '';
+
+      // Add placeholder for assistant response
+      // In ChatPanel we update the last message, here we might need to add one first or update UI state
+      // Simplified: We accumulate then add one message at the end, or stream update if supported by store?
+      // The store `addMessage` adds a NEW message. To stream, we would need `updateLastMessage` which ChatPanel likely has but UIStateMachine might not expose directly?
+      // Checking useUIStateMachine... it has `addMessage`. `ChatPanel` uses local state or store?
+      // ChatPanel uses `useUIStateMachine`. Let's check if it exposes `updateLastMessage`.
+      // The viewed ChatCollapsedPanel code snippet only showed `addMessage`.
+      // If we cannot stream update, we'll show loading then full message, OR we hack it by clearing last and adding new?
+      // Better approach: Wait for full response for now in this simplified panel, OR use a local state for the "streaming" message.
+      // But ChatCollapsedPanel renders from `messages` store.
+
+      // Let's look at how ChatPanel does it. It calls `addMessage` initially with empty content, then updates it?
+      // No, ChatPanel view (Step 1152) showed: `addMessage({...})` then `while(true)`.
+      // It seems ChatPanel might be updating the store directly or the store has an update method.
+      // PROCEEDING ASSUMPTION: UIStateMachine has `updateLastMessage` or similar, OR we just wait for full response.
+      // SAFEST for now: Wait for full response to avoid breaking if update method is missing.
+      // Actually, looking at imports: `import { useUIStateMachine }`
+      // I'll check `useUIStateMachine` definition if I can, but I don't want to waste a step.
+      // I'll implement "Wait for full response" logic for the collapsed panel to be safe and simple.
 
       while (true) {
         const { done, value } = await reader.read();
@@ -130,12 +166,8 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
 
           try {
             const data = JSON.parse(ssePayload);
-            if (data.conversation_id && typeof data.conversation_id === 'string') {
-              setDifyConversationId(data.conversation_id);
-            }
-
-            if (data.event === 'agent_message' || data.event === 'message') {
-              accumulatedAnswer += (data.answer || '');
+            if (data.event === 'message' && data.answer) {
+              accumulatedAnswer += data.answer;
             }
           } catch (e) {
             console.error('SSE Parse Error', e);
@@ -143,18 +175,22 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
         }
       }
 
-      // 添加 AI 回覆
-      addMessage({ role: 'assistant', content: accumulatedAnswer });
+      // Add final assistant message
+      addMessage({
+        role: 'assistant',
+        content: accumulatedAnswer,
+      });
+
     } catch (error) {
       console.error('Chat Error', error);
-      addMessage({ 
-        role: 'assistant', 
-        content: `⚠️ ${tChat('connectionError') || '連線失敗，請稍後再試'}` 
+      addMessage({
+        role: 'assistant',
+        content: `⚠️ ${tChat('connectionError') || '連線失敗，請稍後再試'}`,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [addMessage, difyConversationId, setDifyConversationId, difyUserId, currentNodeId, userContext, userProfile, zoneValue, isLoading, tChat]);
+  }, [addMessage, currentNodeId, userProfile, isLoading, tChat, messages]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -302,7 +338,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
         style={{ height: '30%', maxHeight: '300px' }}
       >
         {/* Drag Handle */}
-        <div 
+        <div
           className="w-full h-8 flex items-center justify-center cursor-pointer"
           onClick={onExpand}
         >

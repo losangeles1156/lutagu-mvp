@@ -73,7 +73,7 @@ export class CacheKeyBuilder {
 
         for (const key of sortedKeys) {
             const value = params[key];
-            
+
             // 跳過 undefined 值
             if (value === undefined) continue;
 
@@ -116,11 +116,11 @@ export class CacheKeyBuilder {
         locale?: string;
     }): string {
         const parts: string[] = ['l1', 'places'];
-        
+
         // 站台 ID 排序後雜湊
         const sortedStations = [...stationIds].sort().join(',');
         parts.push(hashString(sortedStations));
-        
+
         if (options?.category) {
             parts.push(`cat:${options.category}`);
         }
@@ -130,7 +130,7 @@ export class CacheKeyBuilder {
         if (options?.locale) {
             parts.push(`locale:${options.locale}`);
         }
-        
+
         return parts.join(':');
     }
 
@@ -175,7 +175,15 @@ export const CACHE_KEYS = {
     /** 翻譯文字 */
     TRANSLATION: 'i18n',
     /** 天氣資料 */
-    WEATHER: 'weather'
+    WEATHER: 'weather',
+    /** AI 回應快取 */
+    AI_RESPONSE: 'ai_response',
+    /** 票價快取 */
+    FARE: 'fare',
+    /** 路線快取 */
+    ROUTE: 'route',
+    /** 時刻表快取 */
+    TIMETABLE: 'timetable'
 } as const;
 
 /**

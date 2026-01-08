@@ -4,9 +4,162 @@ import { buildStationIdSearchCandidates } from '@/lib/api/nodes';
 import { WeatherTool, TrainStatusTool, FareTool, TimetableTool } from './tools/standardTools';
 import { odptClient } from '@/lib/odpt/client';
 import { getJSTTime } from '@/lib/utils/timeUtils';
-import { findSimpleRoutes, RailwayTopology, normalizeOdptStationId } from '@/lib/l4/assistantEngine';
+import { findSimpleRoutes, RailwayTopology, normalizeOdptStationId, findStationIdsByName } from '@/lib/l4/assistantEngine';
 import { NavigationService } from '@/lib/navigation/NavigationService';
 import { searchL4Knowledge } from '@/lib/l4/searchService';
+import CORE_TOPOLOGY from '@/lib/l4/generated/coreTopology.json';
+import { getFareDataCache, getRouteDataCache, getTimetableDataCache, getAIResponseCache, cached } from '@/lib/cache/cacheManager';
+import { CACHE_KEYS, hashString } from '@/lib/cache/cacheKeyBuilder';
+
+// ========== Station Alias Mapping for MVP ==========
+// Improves station name matching by mapping common names/aliases to ODPT station IDs
+const STATION_ALIASES: Record<string, string[]> = {
+    // Airports
+    '成田機場': ['Narita Airport', 'NRT', '成田空港', 'Narita', '成田'],
+    '羽田機場': ['Haneda Airport', 'HND', '羽田空港', 'Haneda', '羽田'],
+    // Major Hubs (Traditional Chinese, Simplified Chinese, Japanese, English)
+    '淺草': ['浅草', 'Asakusa', 'あさくさ', '浅草站', '淺草站'],
+    '上野': ['Ueno', 'うえの', '上野站', '上野駅'],
+    '秋葉原': ['Akihabara', 'アキバ', '秋叶原', '秋葉原站'],
+    '東京': ['Tokyo', 'とうきょう', '东京', '東京站', '東京駅'],
+    '新宿': ['Shinjuku', 'しんじゅく', '新宿站', '新宿駅'],
+    '澀谷': ['渋谷', 'Shibuya', 'しぶや', '涩谷', '澀谷站'],
+    '池袋': ['Ikebukuro', 'いけぶくろ', '池袋站', '池袋駅'],
+    '銀座': ['Ginza', 'ぎんざ', '银座', '銀座站'],
+    '六本木': ['Roppongi', 'ろっぽんぎ', '六本木站'],
+    '品川': ['Shinagawa', 'しながわ', '品川站', '品川駅'],
+    '橫濱': ['横浜', 'Yokohama', '横滨', '橫濱站'],
+    '日暮里': ['Nippori', 'にっぽり', '日暮里站'],
+    '押上': ['Oshiage', 'おしあげ', '押上站', 'スカイツリー前'],
+    '表參道': ['表参道', 'Omotesando', 'おもてさんどう'],
+    '原宿': ['Harajuku', 'はらじゅく', '原宿站'],
+};
+
+// Reverse lookup map: alias -> canonical name
+const ALIAS_TO_CANONICAL = new Map<string, string>();
+for (const [canonical, aliases] of Object.entries(STATION_ALIASES)) {
+    ALIAS_TO_CANONICAL.set(canonical.toLowerCase(), canonical);
+    for (const alias of aliases) {
+        ALIAS_TO_CANONICAL.set(alias.toLowerCase(), canonical);
+    }
+}
+
+/**
+ * Resolve station name/alias to ODPT station ID
+ * @param input - Station name, alias, or ODPT ID
+ * @returns Resolved ODPT station ID or original input
+ */
+function resolveStationAlias(input: string): string {
+    if (!input) return input;
+
+    // If already an ODPT ID, normalize and return
+    if (input.includes('odpt.Station:') || input.includes('odpt:Station:')) {
+        return normalizeOdptStationId(input);
+    }
+
+    const normalized = input.trim().toLowerCase();
+
+    // Check alias mapping
+    const canonical = ALIAS_TO_CANONICAL.get(normalized);
+    if (canonical) {
+        // Try to find ODPT ID for the canonical name
+        const stationIds = findStationIdsByName(canonical);
+        if (stationIds.length > 0) {
+            return stationIds[0];
+        }
+    }
+
+    // Fallback: try direct station name lookup
+    const directMatch = findStationIdsByName(input);
+    if (directMatch.length > 0) {
+        return directMatch[0];
+    }
+
+    // Return original input if no match found
+    return input;
+}
+
+// ========== AI Similar Question Cache ==========
+// Maps common question patterns to cache keys for faster responses
+
+/**
+ * Common question patterns for AI response caching
+ * Format: { pattern: RegExp, category: string, extractStation: boolean }
+ */
+const COMMON_QUESTION_PATTERNS: Array<{
+    pattern: RegExp;
+    category: string;
+    extractStation: boolean;
+}> = [
+        // Train status queries
+        { pattern: /銀座線.*延誤|銀座線.*遅延|ginza.*delay/i, category: 'status:ginza', extractStation: false },
+        { pattern: /丸之內線.*延誤|丸ノ内線.*遅延|marunouchi.*delay/i, category: 'status:marunouchi', extractStation: false },
+        { pattern: /山手線.*延誤|山手線.*遅延|yamanote.*delay/i, category: 'status:yamanote', extractStation: false },
+        { pattern: /延誤|遅延|delay|狀態|status|運行|運行状况/i, category: 'status:general', extractStation: true },
+
+        // Route queries
+        { pattern: /怎麼去|如何去|路線|去.*最快|行き方|ルート|how.*get|route.*to/i, category: 'route', extractStation: true },
+
+        // Fare queries
+        { pattern: /票價|多少錢|運賃|fare|price|cost/i, category: 'fare', extractStation: true },
+
+        // Timetable queries
+        { pattern: /時刻表|下一班|末班車|時刻|schedule|timetable|next train|last train/i, category: 'timetable', extractStation: true },
+
+        // Facility queries
+        { pattern: /電梯|エレベーター|elevator|無障礙|バリアフリー|barrier.*free|wheelchair/i, category: 'facility:elevator', extractStation: true },
+        { pattern: /置物櫃|ロッカー|locker|行李|luggage/i, category: 'facility:locker', extractStation: true },
+        { pattern: /廁所|トイレ|toilet|restroom/i, category: 'facility:toilet', extractStation: true },
+    ];
+
+/**
+ * Generate cache key for similar questions based on keyword matching
+ * Returns null if question doesn't match common patterns
+ */
+export function generateSimilarQuestionCacheKey(question: string, locale: string): string | null {
+    if (!question || question.length < 5) return null;
+
+    const normalized = question.toLowerCase().trim();
+
+    for (const { pattern, category, extractStation } of COMMON_QUESTION_PATTERNS) {
+        if (pattern.test(normalized)) {
+            let key = `${CACHE_KEYS.AI_RESPONSE}:${category}`;
+
+            if (extractStation) {
+                // Try to extract station name from the question
+                const stationIds = findStationIdsByName(question);
+                if (stationIds.length > 0) {
+                    key += `:${hashString(stationIds[0])}`;
+                }
+            }
+
+            key += `:${locale}`;
+            return key;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Try to get cached AI response for similar questions
+ */
+export async function getCachedAIResponse(question: string, locale: string): Promise<string | null> {
+    const cacheKey = generateSimilarQuestionCacheKey(question, locale);
+    if (!cacheKey) return null;
+
+    return getAIResponseCache().get(cacheKey);
+}
+
+/**
+ * Cache AI response for similar questions
+ */
+export function cacheAIResponse(question: string, locale: string, response: string): void {
+    const cacheKey = generateSimilarQuestionCacheKey(question, locale);
+    if (cacheKey && response && response.length > 10) {
+        getAIResponseCache().set(cacheKey, response);
+    }
+}
 
 // Mistral Tool Schema Types
 export interface MistralToolSchema {
@@ -177,6 +330,23 @@ export const AGENT_TOOLS: MistralToolSchema[] = [
                     stationId: { type: 'string', description: 'ODPT Station ID' }
                 },
                 required: ['stationId']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_user_feedback_insights',
+            description: 'Retrieve and analyze user feedback for product insights. Use for understanding user pain points, popular feature requests, bug trends, and community tips. Admin tool for improving LUTAGU.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    feedbackType: { type: 'string', enum: ['general', 'bug', 'spot', 'tip', 'all'], description: 'Filter by feedback type' },
+                    stationId: { type: 'string', description: 'Filter by station node ID (optional)' },
+                    limit: { type: 'number', description: 'Max number of feedback items to retrieve (default 20)' },
+                    summarize: { type: 'boolean', description: 'If true, return aggregated stats instead of raw items' }
+                },
+                required: []
             }
         }
     }
@@ -476,23 +646,256 @@ export const TOOL_HANDLERS = {
         }
     },
 
-    // ========== L4 新增工具 ==========
+    // ========== L4 Tools (Matching AGENT_TOOLS names) ==========
 
     /**
-     * 時刻表查詢工具
+     * 時刻表查詢工具 - matches get_timetable in AGENT_TOOLS
+     * Now with caching for improved performance (15min TTL)
      */
-    get_timetable_l4: async (params: { stationId: string; operator?: string }, context: any) => {
-        const tool = new TimetableTool();
-        // Map stationId to station for TimetableTool.execute
-        return await tool.execute({ station: params.stationId, operator: params.operator }, context);
+    get_timetable: async (params: { stationId: string; operator?: string }, context: any) => {
+        // Resolve station alias if needed
+        const resolvedStationId = resolveStationAlias(params.stationId);
+        const operator = params.operator || 'all';
+
+        // Generate cache key
+        const cacheKey = `${CACHE_KEYS.TIMETABLE}:${hashString(`${resolvedStationId}:${operator}`)}`;
+
+        // Try cache first
+        return await cached(
+            getTimetableDataCache(),
+            cacheKey,
+            async () => {
+                const tool = new TimetableTool();
+                return await tool.execute({ station: resolvedStationId, operator: params.operator }, context);
+            }
+        );
     },
 
     /**
-     * 票價查詢工具
+     * 票價查詢工具 - matches get_fare in AGENT_TOOLS
+     * Now with caching for improved performance (1hr TTL)
      */
+    get_fare: async (params: { fromStation: string; toStation: string }, context: any) => {
+        // Resolve station aliases if needed
+        const resolvedFrom = resolveStationAlias(params.fromStation);
+        const resolvedTo = resolveStationAlias(params.toStation);
+
+        // Generate cache key
+        const cacheKey = `${CACHE_KEYS.FARE}:${hashString(`${resolvedFrom}:${resolvedTo}`)}`;
+
+        // Try cache first
+        return await cached(
+            getFareDataCache(),
+            cacheKey,
+            async () => {
+                const tool = new FareTool();
+                return await tool.execute({ from: resolvedFrom, to: resolvedTo }, context);
+            }
+        );
+    },
+
+    /**
+     * 路線查詢工具 - matches get_route in AGENT_TOOLS
+     * Now with caching for improved performance (30min TTL)
+     */
+    get_route: async (params: { fromStation: string; toStation: string }, context: any) => {
+        const locale = context.locale || 'zh-TW';
+
+        // Resolve station aliases
+        const resolvedFrom = resolveStationAlias(params.fromStation);
+        const resolvedTo = resolveStationAlias(params.toStation);
+
+        // Generate cache key (includes locale for language-specific responses)
+        const cacheKey = `${CACHE_KEYS.ROUTE}:${hashString(`${resolvedFrom}:${resolvedTo}:${locale}`)}`;
+
+        // Try cache first
+        return await cached(
+            getRouteDataCache(),
+            cacheKey,
+            async () => {
+                try {
+                    // Use findSimpleRoutes with correct params format
+                    const routes = findSimpleRoutes({
+                        originStationId: resolvedFrom,
+                        destinationStationId: resolvedTo,
+                        railways: CORE_TOPOLOGY as any[],
+                        maxHops: 15,
+                        locale: locale as any
+                    });
+
+                    if (!routes || routes.length === 0) {
+                        // Fallback to basic route info
+                        return getBasicRouteInfo(params.fromStation, params.toStation, locale);
+                    }
+
+                    // Get expert tips for the route
+                    const expertTips = getExpertTipsForRoute(resolvedFrom, resolvedTo, locale);
+
+                    // Format route response
+                    let response = '';
+                    if (locale === 'zh-TW') {
+                        response = `🗺️ 路線規劃結果\n━━━━━━━━━━━━━━━━\n`;
+                    } else if (locale === 'ja') {
+                        response = `🗺️ ルート案内\n━━━━━━━━━━━━━━━━\n`;
+                    } else {
+                        response = `🗺️ Route Planning\n━━━━━━━━━━━━━━━━\n`;
+                    }
+
+                    routes.slice(0, 2).forEach((route, idx) => {
+                        const label = locale === 'zh-TW'
+                            ? `選項 ${idx + 1}: ${route.label}`
+                            : locale === 'ja'
+                                ? `オプション ${idx + 1}: ${route.label}`
+                                : `Option ${idx + 1}: ${route.label}`;
+
+                        response += `\n${label}\n`;
+                        route.steps.forEach(step => {
+                            response += `  ${step.icon || '•'} ${step.text}\n`;
+                        });
+
+                        if (route.transfers !== undefined) {
+                            const transferText = locale === 'zh-TW'
+                                ? `轉乘次數: ${route.transfers}`
+                                : locale === 'ja'
+                                    ? `乗換回数: ${route.transfers}`
+                                    : `Transfers: ${route.transfers}`;
+                            response += `  📊 ${transferText}\n`;
+                        }
+                    });
+
+                    if (expertTips) {
+                        response += `\n${expertTips}`;
+                    }
+
+                    return response;
+                } catch (error) {
+                    console.error('[get_route] Error:', error);
+                    return getBasicRouteInfo(params.fromStation, params.toStation, locale);
+                }
+            }
+        );
+    },
+
+    // Legacy L4 tool names (kept for backwards compatibility)
+    get_timetable_l4: async (params: { stationId: string; operator?: string }, context: any) => {
+        const tool = new TimetableTool();
+        return await tool.execute({ station: params.stationId, operator: params.operator }, context);
+    },
+
     get_fare_l4: async (params: { fromStation: string; toStation: string }, context: any) => {
         const tool = new FareTool();
-        // Map fromStation/toStation to from/to for FareTool.execute
         return await tool.execute({ from: params.fromStation, to: params.toStation }, context);
+    },
+
+    // ========== Feedback Analysis Tool (for AI + Admin) ==========
+    get_user_feedback_insights: async (params: {
+        feedbackType?: string;
+        stationId?: string;
+        limit?: number;
+        summarize?: boolean;
+    }, context: any) => {
+        const locale = context.locale || 'zh-TW';
+        const limit = params.limit || 20;
+
+        try {
+            let query = supabaseAdmin
+                .from('user_feedback')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            // Apply filters
+            if (params.feedbackType && params.feedbackType !== 'all') {
+                query = query.eq('feedback_type', params.feedbackType);
+            }
+            if (params.stationId) {
+                query = query.eq('node_id', params.stationId);
+            }
+
+            const { data, error } = await query.limit(limit);
+
+            if (error) {
+                return 'Unable to retrieve feedback data.';
+            }
+
+            if (!data || data.length === 0) {
+                return locale === 'zh-TW'
+                    ? '目前尚無使用者回饋資料。'
+                    : locale === 'ja'
+                        ? 'ユーザーフィードバックはまだありません。'
+                        : 'No user feedback available yet.';
+            }
+
+            // If summarize mode, return aggregated stats
+            if (params.summarize) {
+                const stats = {
+                    total: data.length,
+                    byType: {
+                        general: data.filter(f => f.feedback_type === 'general').length,
+                        bug: data.filter(f => f.feedback_type === 'bug').length,
+                        spot: data.filter(f => f.feedback_type === 'spot').length,
+                        tip: data.filter(f => f.feedback_type === 'tip').length,
+                    },
+                    avgRating: data.filter(f => f.rating).reduce((sum, f) => sum + (f.rating || 0), 0) / (data.filter(f => f.rating).length || 1),
+                    pending: data.filter(f => f.status === 'pending').length,
+                    recentTopics: data.slice(0, 5).map(f => f.content.substring(0, 50) + '...')
+                };
+
+                if (locale === 'zh-TW') {
+                    return `📊 使用者回饋洞察
+━━━━━━━━━━━━━━━━
+📝 總回饋數: ${stats.total}
+🌟 使用感受: ${stats.byType.general}
+🐛 問題回報: ${stats.byType.bug}
+📍 景點情報: ${stats.byType.spot}
+💡 經驗分享: ${stats.byType.tip}
+⭐ 平均評分: ${stats.avgRating.toFixed(1)}/5
+⏳ 待處理: ${stats.pending}
+
+📋 近期主題:
+${stats.recentTopics.map((t, i) => `${i + 1}. ${t}`).join('\n')}`;
+                } else {
+                    return `📊 User Feedback Insights
+━━━━━━━━━━━━━━━━
+📝 Total: ${stats.total}
+🌟 General: ${stats.byType.general}
+🐛 Bugs: ${stats.byType.bug}
+📍 Spots: ${stats.byType.spot}
+💡 Tips: ${stats.byType.tip}
+⭐ Avg Rating: ${stats.avgRating.toFixed(1)}/5
+⏳ Pending: ${stats.pending}
+
+📋 Recent Topics:
+${stats.recentTopics.map((t, i) => `${i + 1}. ${t}`).join('\n')}`;
+                }
+            }
+
+            // Return raw items in human-readable format
+            const typeLabels: Record<string, Record<string, string>> = {
+                general: { 'zh-TW': '使用感受', ja: '使用感想', en: 'General' },
+                bug: { 'zh-TW': '問題回報', ja: '不具合', en: 'Bug' },
+                spot: { 'zh-TW': '景點情報', ja: 'スポット', en: 'Spot' },
+                tip: { 'zh-TW': '經驗分享', ja: '経験', en: 'Tip' },
+            };
+
+            let response = locale === 'zh-TW'
+                ? `📬 使用者回饋 (${data.length} 筆)\n━━━━━━━━━━━━━━━━\n`
+                : `📬 User Feedback (${data.length} items)\n━━━━━━━━━━━━━━━━\n`;
+
+            data.slice(0, 10).forEach((f, i) => {
+                const typeLabel = typeLabels[f.feedback_type]?.[locale] || f.feedback_type;
+                const rating = f.rating ? '★'.repeat(f.rating) : '';
+                const date = new Date(f.created_at).toLocaleDateString(locale);
+                const station = f.node_id ? f.node_id.split('.').pop() : '';
+
+                response += `\n${i + 1}. [${typeLabel}] ${rating}\n`;
+                response += `   ${f.content.substring(0, 100)}${f.content.length > 100 ? '...' : ''}\n`;
+                response += `   📅 ${date}${station ? ` • 📍 ${station}` : ''}\n`;
+            });
+
+            return response;
+        } catch (error) {
+            console.error('[get_user_feedback_insights] Error:', error);
+            return 'Error retrieving feedback data.';
+        }
     }
 };

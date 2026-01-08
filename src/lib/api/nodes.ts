@@ -165,6 +165,7 @@ export interface NodeProfile {
     l3_facilities?: L3Facility[];
     l4_cards?: ActionCard[];
     l1_dna?: L1_DNA_Data;
+    l4_knowledge?: any; // Maps to L4Knowledge in frontend
     external_links?: { title: LocaleString; url: string; icon?: string; bg?: string; tracking_id?: string; type?: string }[];
 }
 
@@ -529,38 +530,54 @@ export async function fetchNodeConfig(nodeId: string) {
 
     // 2. Fetch L3 Facilities from `l3_facilities` table
     try {
-        // Gather all relevant IDs: Self, Parent (if any), Children (if any)
-        const stationIds = new Set<string>();
-        if (nodeId) stationIds.add(nodeId);
-        if (hubId) stationIds.add(hubId);
-        childNodes.forEach(c => stationIds.add(c.id));
+        // Gather all relevant IDs using the robust candidate builder
+        const stationCandidates = new Set<string>();
 
-        const { data: facilities, error: facilityError } = await supabase
-            .from('l3_facilities')
-            .select('*')
-            .in('station_id', Array.from(stationIds));
+        // Add candidates for the node itself
+        if (nodeId) {
+            buildStationIdSearchCandidates(nodeId).forEach(id => stationCandidates.add(id));
+        }
 
-        if (facilityError) {
-            console.warn('[fetchNodeConfig] L3 fetch failed:', facilityError);
-        } else if (facilities) {
-            enrichedProfile.l3_facilities = facilities.map((f: any) => {
-                // Parse location if it's JSON, otherwise treat as string
-                const locVal = typeof f.name_i18n === 'object' ? f.name_i18n : (f.location || 'Station');
-                const locObj: LocaleString = (typeof locVal === 'string')
-                    ? { ja: locVal, en: locVal, zh: locVal }
-                    : { ja: locVal.ja || locVal.en, en: locVal.en || locVal.ja, zh: locVal.zh || locVal.ja };
+        // Add candidates for the hub if it exists (for aggregation)
+        if (hubId) {
+            buildStationIdSearchCandidates(hubId).forEach(id => stationCandidates.add(id));
+        }
 
-                return {
-                    id: f.id,
-                    type: f.type,
-                    name: locObj,
-                    location: locObj, // Use same for now, or fetch distinct location field
-                    attributes: {
-                        ...f.attributes,
-                        subCategory: f.attributes?.sub_category || f.type
-                    }
-                } as L3Facility;
-            });
+        // Add candidates for all children
+        childNodes.forEach(c => {
+            buildStationIdSearchCandidates(c.id).forEach(id => stationCandidates.add(id));
+        });
+
+        const distinctIds = Array.from(stationCandidates);
+
+        if (distinctIds.length > 0) {
+            const { data: facilities, error: facilityError } = await supabase
+                .from('l3_facilities')
+                .select('*')
+                .in('station_id', distinctIds);
+
+            if (facilityError) {
+                console.warn('[fetchNodeConfig] L3 fetch failed:', facilityError);
+            } else if (facilities) {
+                enrichedProfile.l3_facilities = facilities.map((f: any) => {
+                    // Parse location if it's JSON, otherwise treat as string
+                    const locVal = typeof f.name_i18n === 'object' ? f.name_i18n : (f.location || 'Station');
+                    const locObj: LocaleString = (typeof locVal === 'string')
+                        ? { ja: locVal, en: locVal, zh: locVal }
+                        : { ja: locVal.ja || locVal.en, en: locVal.en || locVal.ja, zh: locVal.zh || locVal.ja };
+
+                    return {
+                        id: f.id,
+                        type: f.type,
+                        name: locObj,
+                        location: locObj, // Use same for now, or fetch distinct location field
+                        attributes: {
+                            ...f.attributes,
+                            subCategory: f.attributes?.sub_category || f.type
+                        }
+                    } as L3Facility;
+                });
+            }
         }
     } catch (err) {
         console.warn('[fetchNodeConfig] L3 fetch error:', err);
@@ -898,6 +915,8 @@ export async function fetchNodeConfig(nodeId: string) {
     // Attach aggregated riding_knowledge to finalNode for downstream use
     if (aggregatedRidingKnowledge && finalNode) {
         finalNode.riding_knowledge = aggregatedRidingKnowledge;
+        // [Fix] Pass to frontend profile for Expert Mode UI
+        enrichedProfile.l4_knowledge = aggregatedRidingKnowledge;
         console.log('[fetchNodeConfig] Aggregated riding_knowledge for', nodeId, ':', aggregatedRidingKnowledge);
     }
 

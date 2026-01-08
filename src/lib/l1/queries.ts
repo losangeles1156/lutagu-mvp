@@ -16,38 +16,57 @@ export async function getApprovedL1PlacesContext(nodeId: string, locale: string 
     if (!nodeId) return '';
 
     try {
-        // 1. Resolve Hub ID
         const inheritance = await resolveNodeInheritance({ nodeId, client: supabaseAdmin });
         const targetIds = [nodeId];
         if (inheritance?.hub?.id && inheritance.hub.id !== nodeId) {
             targetIds.push(inheritance.hub.id);
         }
 
-        // 2. Query DB
+        // 增強查詢：包含 vibe_tags 和 ai_description
         const { data, error } = await supabaseAdmin
             .from('l1_custom_places')
-            .select('name_i18n, category, description_i18n, affiliate_url')
+            .select(`
+                name_i18n, 
+                primary_category,
+                category, 
+                description_i18n, 
+                affiliate_url,
+                vibe_tags,
+                ai_description
+            `)
             .in('station_id', targetIds)
             .eq('is_active', true)
             .eq('status', 'approved')
-            .limit(10); // Limit to prevent context overflow
+            .order('priority', { ascending: false })
+            .limit(15);
 
         if (error || !data || data.length === 0) return '';
 
-        // 3. Format
+        // 格式化為 Agent 可理解的結構
         const places = data.map(row => {
             const name = getLocaleString(row.name_i18n, locale);
-            const desc = getLocaleString(row.description_i18n, locale);
-            const cat = row.category;
+            const cat = row.primary_category || row.category;
+            const vibes = Array.isArray(row.vibe_tags) ? row.vibe_tags.join(', ') : '';
+            const desc = row.ai_description || getLocaleString(row.description_i18n, locale);
             const url = row.affiliate_url;
 
-            let line = `- [${cat}] ${name}`;
-            if (desc) line += `: ${desc}`;
-            if (url) line += ` (Link: ${url})`;
+            let line = `• ${name} [${cat}]`;
+            if (vibes) line += ` (${vibes})`;
+            if (desc) line += ` - ${desc}`;
+            if (url) line += ` | Link: ${url}`;
             return line;
         });
 
-        return `\n\nVERIFIED LOCAL SPOTS (Recommend these first):\n${places.join('\n')}`;
+        return `
+
+📍 VERIFIED LOCAL SPOTS (推薦優先順序):
+${places.join('\n')}
+
+💡 使用這些標籤理解用戶需求：
+- 問「便宜/平價」→ 推薦有 "budget" 標籤的店家
+- 問「姻緣/戀愛」→ 推薦有 "love_luck" 標籤的景點
+- 問「網紅打卡」→ 推薦有 "instagram" 標籤的地點
+`;
 
     } catch (err) {
         console.error('Error fetching L1 context:', err);

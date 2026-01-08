@@ -3,7 +3,7 @@
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { MapPin, FileCheck, Shield, Users, LayoutDashboard } from 'lucide-react';
+import { MapPin, FileCheck, Shield, Users, LayoutDashboard, MessageSquare, Activity } from 'lucide-react';
 import { Toaster } from 'sonner';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -16,6 +16,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: `/${locale}/admin/l1-audit`, label: 'L1 Audit', icon: FileCheck },
         { href: `/${locale}/admin/partners`, label: 'Partners', icon: Users },
         { href: `/${locale}/admin/security`, label: 'Security', icon: Shield },
+        { href: `/${locale}/admin/feedback`, label: 'Feedback', icon: MessageSquare },
+        { href: `/${locale}/admin/metrics`, label: 'Metrics', icon: Activity },
     ];
 
     return (

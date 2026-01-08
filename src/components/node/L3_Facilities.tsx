@@ -287,13 +287,8 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
         );
     }
 
-    if (!facilities || facilities.length === 0) {
-        return (
-            <div className="p-8 text-center text-gray-400 text-xs bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                {tL3('noServices')}
-            </div>
-        );
-    }
+    // [FIX] Don't return early - we still want to show global services even if station-specific facilities are empty
+    const hasStationFacilities = facilities && facilities.length > 0;
 
     const toggleCategory = (type: string, items: L3Facility[], label: string) => {
         const isAccessible = type.toLowerCase().includes('barrier_free') || type.toLowerCase().includes('accessibility');
@@ -309,115 +304,39 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom duration-500 pb-20">
 
             {/* Grouped Facilities List */}
-            <div className="space-y-3">
-                <div className="flex items-center justify-between px-1 mb-2">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">{tL3('servicesTitle')}</h3>
-                        <span className="px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 text-[9px] font-black uppercase tracking-widest border border-orange-100">
-                            L3
-                        </span>
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-400">{tL3('facilitiesFound', { count: facilities.length })}</span>
-                </div>
-
-                {Object.entries(groupedFacilities).map(([type, items]) => {
-                    const isExpanded = expandedCategory === type;
-                    const typeLower = type.toLowerCase();
-                    const Icon = FACILITY_ICONS[type] || FACILITY_ICONS[typeLower] || Boxes;
-                    const colorClass = FACILITY_COLORS[type] || FACILITY_COLORS[typeLower] || 'bg-gray-100 text-gray-600';
-                    // Priority: FACILITY_KEY_MAP > i18n translation > raw type
-                    const keyMapEntry = FACILITY_KEY_MAP[type] || FACILITY_KEY_MAP[typeLower];
-                    const label = keyMapEntry
-                        ? getLocaleString(keyMapEntry, locale)
-                        : (tL3(`categories.${type}`) !== `l3.categories.${type}` ? tL3(`categories.${type}`) : type);
-
-                    return (
-                        <div key={type} className="bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 shadow-sm">
-
-                            {/* Category Header */}
-                            <button
-                                onClick={() => toggleCategory(type, items, label)}
-                                aria-label={`${label}: ${items.length} ${tL3('items', { defaultValue: 'items' })}${isExpanded ? ' - ' + tCommon('close') : ''}`}
-                                aria-expanded={isExpanded}
-                                className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 transition-colors group touch-manipulation min-h-[64px]"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${colorClass} shadow-sm group-hover:scale-105 transition-transform`}>
-                                        <Icon size={24} aria-hidden="true" strokeWidth={2.5} />
-                                    </div>
-                                    <div className="text-left">
-                                        <h4 className="text-sm font-extrabold text-gray-900 capitalize tracking-tight">{label}</h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[10px] text-gray-500 font-bold bg-white px-1.5 py-0.5 rounded-md border border-gray-100 shadow-sm">
-                                                {items.length} {tL3('items', { defaultValue: 'Items' })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className={`w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-100 text-gray-400 shadow-sm transition-all duration-300 ${isExpanded ? 'rotate-180 bg-gray-50' : 'group-hover:border-gray-200'}`}>
-                                    <ChevronDown size={16} aria-hidden="true" strokeWidth={2.5} />
-                                </div>
-                            </button>
-
-                            {/* Expanded Content */}
-                            <AnimatePresence>
-                                {isExpanded && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                    >
-                                        <div className="px-4 pb-4 space-y-3 border-t border-gray-50 bg-gray-50/30 pt-3">
-                                            {items.map((fac) => (
-                                                <div
-                                                    key={fac.id}
-                                                    className="bg-white p-3 rounded-xl border border-gray-100 flex items-start gap-3 cursor-pointer hover:border-indigo-200 hover:shadow-sm transition-all active:scale-[0.99] touch-manipulation min-h-[64px]"
-                                                    onClick={() => {
-                                                        trackEvent({
-                                                            activityType: 'facility_open',
-                                                            nodeId: data.id,
-                                                            facilityType: fac.type,
-                                                            facilityId: fac.id
-                                                        });
-                                                        setSelectedFacility(fac);
-                                                    }}
-                                                >
-                                                    <div className="mt-1 text-gray-300">
-                                                        <MapPin size={14} aria-hidden="true" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-900 leading-tight">
-                                                            {getBilingualString(fac.name, locale)}
-                                                        </p>
-                                                        {/* Relative Location Display - Only show if different from name */}
-                                                        {fac.location &&
-                                                            getLocaleString(fac.location, locale) !== getLocaleString(fac.name, locale) && (
-                                                                <div className="flex items-center gap-1 mt-1 text-xs text-indigo-600 font-medium bg-indigo-50 px-1.5 py-0.5 rounded w-fit max-w-full truncate">
-                                                                    <MapPin size={10} className="shrink-0" />
-                                                                    <span>{getLocaleString(fac.location, locale)}</span>
-                                                                </div>
-                                                            )}
-                                                        {fac.details && fac.details.length > 0 && (
-                                                            <div className="flex flex-wrap gap-1 mt-2">
-                                                                {fac.details.map((detail, idx) => (
-                                                                    <span key={idx} className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-500 rounded-md">
-                                                                        {getLocaleString(detail, locale)}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+            {hasStationFacilities ? (
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between px-1 mb-2">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">{tL3('servicesTitle')}</h3>
+                            <span className="px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 text-[9px] font-black uppercase tracking-widest border border-orange-100">
+                                L3
+                            </span>
                         </div>
-                    );
-                })}
-            </div>
+                        <span className="text-[10px] font-bold text-gray-400">{tL3('facilitiesFound', { count: facilities.length })}</span>
+                    </div>
+
+                    {Object.entries(groupedFacilities).map(([type, items]) => (
+                        <FacilityCategory
+                            key={type}
+                            type={type}
+                            items={items}
+                            expandedCategory={expandedCategory}
+                            toggleCategory={toggleCategory}
+                            trackEvent={trackEvent}
+                            setSelectedFacility={setSelectedFacility}
+                            locale={locale}
+                            tL3={tL3}
+                            tCommon={tCommon}
+                            id={data.id}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div className="p-6 text-center text-gray-400 text-xs bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    {tL3('noServices')}
+                </div>
+            )}
 
             {/* Quick Links / Actions (e.g. Toilet Vacancy) */}
             {(data.external_links && data.external_links.length > 0 || data.id === 'odpt.Station:JR-East.Tokyo' || data.id === 'odpt.Station:JR-East.Yamanote.Tokyo' || data.name?.en?.includes('Tokyo Station')) && (
@@ -640,3 +559,141 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
         </div>
     );
 }
+
+// Extracted Memoized Components
+
+const FacilityCategory = ({
+    type,
+    items,
+    expandedCategory,
+    toggleCategory,
+    trackEvent,
+    setSelectedFacility,
+    locale,
+    tL3,
+    tCommon,
+    id
+}: {
+    type: string;
+    items: L3Facility[];
+    expandedCategory: string | null;
+    toggleCategory: (type: string, items: L3Facility[], label: string) => void;
+    trackEvent: (payload: any) => void;
+    setSelectedFacility: (fac: L3Facility) => void;
+    locale: any;
+    tL3: any;
+    tCommon: any;
+    id: string;
+}) => {
+    const isExpanded = expandedCategory === type;
+    const typeLower = type.toLowerCase();
+    const Icon = FACILITY_ICONS[type] || FACILITY_ICONS[typeLower] || Boxes;
+    const colorClass = FACILITY_COLORS[type] || FACILITY_COLORS[typeLower] || 'bg-gray-100 text-gray-600';
+    const keyMapEntry = FACILITY_KEY_MAP[type] || FACILITY_KEY_MAP[typeLower];
+    const label = keyMapEntry
+        ? getLocaleString(keyMapEntry, locale)
+        : (tL3(`categories.${type}`) !== `l3.categories.${type}` ? tL3(`categories.${type}`) : type);
+
+    return (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 shadow-sm">
+            <button
+                onClick={() => toggleCategory(type, items, label)}
+                aria-label={`${label}: ${items.length} ${tL3('items', { defaultValue: 'items' })}${isExpanded ? ' - ' + tCommon('close') : ''}`}
+                aria-expanded={isExpanded}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 transition-colors group touch-manipulation min-h-[64px]"
+            >
+                <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${colorClass} shadow-sm group-hover:scale-105 transition-transform`}>
+                        <Icon size={24} aria-hidden="true" strokeWidth={2.5} />
+                    </div>
+                    <div className="text-left">
+                        <h4 className="text-sm font-extrabold text-gray-900 capitalize tracking-tight">{label}</h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] text-gray-500 font-bold bg-white px-1.5 py-0.5 rounded-md border border-gray-100 shadow-sm">
+                                {items.length} {tL3('items', { defaultValue: 'Items' })}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div className={`w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-100 text-gray-400 shadow-sm transition-all duration-300 ${isExpanded ? 'rotate-180 bg-gray-50' : 'group-hover:border-gray-200'}`}>
+                    <ChevronDown size={16} aria-hidden="true" strokeWidth={2.5} />
+                </div>
+            </button>
+
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    >
+                        <div className="px-4 pb-4 space-y-3 border-t border-gray-50 bg-gray-50/30 pt-3">
+                            {items.map((fac) => (
+                                <FacilityRow
+                                    key={fac.id}
+                                    fac={fac}
+                                    id={id}
+                                    locale={locale}
+                                    trackEvent={trackEvent}
+                                    setSelectedFacility={setSelectedFacility}
+                                />
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+const FacilityRow = ({
+    fac,
+    id,
+    locale,
+    trackEvent,
+    setSelectedFacility
+}: {
+    fac: L3Facility;
+    id: string;
+    locale: any;
+    trackEvent: (payload: any) => void;
+    setSelectedFacility: (fac: L3Facility) => void;
+}) => (
+    <div
+        className="bg-white p-3 rounded-xl border border-gray-100 flex items-start gap-3 cursor-pointer hover:border-indigo-200 hover:shadow-sm transition-all active:scale-[0.99] touch-manipulation min-h-[64px]"
+        onClick={() => {
+            trackEvent({
+                activityType: 'facility_open',
+                nodeId: id,
+                facilityType: fac.type,
+                facilityId: fac.id
+            });
+            setSelectedFacility(fac);
+        }}
+    >
+        <div className="mt-1 text-gray-300">
+            <MapPin size={14} aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 leading-tight">
+                {getBilingualString(fac.name, locale)}
+            </p>
+            {fac.location && getLocaleString(fac.location, locale) !== getLocaleString(fac.name, locale) && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-indigo-600 font-medium bg-indigo-50 px-1.5 py-0.5 rounded w-fit max-w-full truncate">
+                    <MapPin size={10} className="shrink-0" />
+                    <span>{getLocaleString(fac.location, locale)}</span>
+                </div>
+            )}
+            {fac.details && fac.details.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                    {fac.details.map((detail, idx) => (
+                        <span key={idx} className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-500 rounded-md">
+                            {getLocaleString(detail, locale)}
+                        </span>
+                    ))}
+                </div>
+            )}
+        </div>
+    </div>
+);
