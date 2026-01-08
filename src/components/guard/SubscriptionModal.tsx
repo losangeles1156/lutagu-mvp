@@ -6,8 +6,29 @@ import { useAppStore } from '@/stores/appStore';
 import { getSupabase } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+
+const MAX_INPUT_LENGTH = 200;
+
+function validateInput(text: string): { valid: boolean; message: string | null } {
+    if (!text.trim()) {
+        return { valid: false, message: null };
+    }
+    if (text.length > MAX_INPUT_LENGTH) {
+        return { valid: false, message: `內容超過 ${MAX_INPUT_LENGTH} 字元限制` };
+    }
+    if (text.length < 5) {
+        return { valid: false, message: '內容過短，請輸入至少 5 個字元' };
+    }
+    return { valid: true, message: null };
+}
 
 export function SubscriptionModal() {
+    const locale = useLocale();
+    const tTripGuard = useTranslations('tripGuard');
+    const tCommon = useTranslations('common');
+    const tValidation = useTranslations('validation'); // Add validation translations
+
     const {
         isSubscriptionModalOpen,
         setSubscriptionModalOpen,
@@ -15,7 +36,6 @@ export function SubscriptionModal() {
         setTripGuardActive,
         setTripGuardSubscriptionId,
         setTripGuardSummary,
-        locale
     } = useAppStore();
     const router = useRouter();
     const [isLoading, setIsLoading] = React.useState(false);
@@ -24,6 +44,13 @@ export function SubscriptionModal() {
     const [parsedPreview, setParsedPreview] = React.useState<any | null>(null);
     const [errorText, setErrorText] = React.useState<string | null>(null);
     const [activeSubscriptionId, setActiveSubscriptionId] = React.useState<string | null>(null);
+    const [validationMessage, setValidationMessage] = React.useState<string | null>(null);
+
+    // 即時驗證
+    React.useEffect(() => {
+        const validation = validateInput(inputText);
+        setValidationMessage(validation.message);
+    }, [inputText]);
 
     const supabase = React.useMemo<SupabaseClient | null>(() => {
         try {
@@ -62,8 +89,8 @@ export function SubscriptionModal() {
         setErrorText(null);
         setParsedPreview(null);
         setActiveSubscriptionId(null);
-        setInputText((prev) => prev || '从上野到东京，平日 07:00-09:30，关注银座线');
-    }, [isSubscriptionModalOpen]);
+        setInputText((prev) => prev || tTripGuard('sampleSubscriptionLabel') + ' ' + tTripGuard('sampleSubscriptionWindow'));
+    }, [isSubscriptionModalOpen, tTripGuard]);
 
     React.useEffect(() => {
         if (!isSubscriptionModalOpen) return;
@@ -135,13 +162,14 @@ export function SubscriptionModal() {
             }
 
             if (!res.ok) {
-                setErrorText(typeof data?.error === 'string' ? data.error : '订阅失败，请检查输入内容');
+                const data = await res.json().catch(() => null);
+                setErrorText(typeof data?.error === 'string' ? data.error : tTripGuard('error') || '订阅失敗，請檢查輸入內容');
                 setParsedPreview(data?.parsed || null);
                 return;
             }
 
             if (!data?.success) {
-                setErrorText('订阅失败，请稍后重试');
+                setErrorText(tTripGuard('error') || '订阅失败，请稍后重试');
                 setParsedPreview(data?.parsed || null);
                 return;
             }
@@ -158,7 +186,7 @@ export function SubscriptionModal() {
             setTimeout(() => setSubscriptionModalOpen(false), 800);
         } catch (error) {
             console.error(error);
-            setErrorText('订阅失败，请稍后重试');
+            setErrorText(tTripGuard('error') || '订阅失败，请稍后重试');
         } finally {
             setIsLoading(false);
         }
@@ -195,7 +223,7 @@ export function SubscriptionModal() {
 
             if (!res.ok) {
                 const data = await res.json().catch(() => null);
-                setErrorText(typeof data?.error === 'string' ? data.error : '关闭失败，请稍后重试');
+                setErrorText(typeof data?.error === 'string' ? data.error : tTripGuard('error') || '关闭失败，请稍后重试');
                 return;
             }
 
@@ -204,7 +232,7 @@ export function SubscriptionModal() {
             setTripGuardSummary(null);
             setSubscriptionModalOpen(false);
         } catch {
-            setErrorText('关闭失败，请稍后重试');
+            setErrorText(tTripGuard('error') || '关闭失败，请稍后重试');
         } finally {
             setIsLoading(false);
         }
@@ -224,22 +252,48 @@ export function SubscriptionModal() {
                         🛡️
                     </div>
 
-                    <h2 className="text-2xl font-bold text-gray-800">Trip Guard Plus</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">{tTripGuard('title')}</h2>
                     <p className="text-gray-500 text-sm">
-                        開啟全方位守護，享受無憂東京之旅。
-                        <br />
-                        包含末班車提醒與緊急叫車服務。
+                        {tTripGuard('subscriptionHint')}
                     </p>
 
                     <div className="bg-gray-50 p-4 rounded-xl text-left space-y-3">
-                        <div className="text-xs font-bold text-gray-700">用自然语言设置你的订阅</div>
-                        <textarea
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                            rows={4}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                            placeholder="例如：从上野到东京，平日 07:00-09:30，关注银座线"
-                        />
+                        <div className="text-xs font-bold text-gray-700">{tTripGuard('sampleSubscriptionLabel')}</div>
+                        <div className="relative">
+                            <textarea
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                maxLength={MAX_INPUT_LENGTH}
+                                rows={4}
+                                className={`w-full rounded-xl border bg-white px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 transition-colors
+                                    ${validationMessage
+                                        ? 'border-rose-200 focus:ring-rose-200'
+                                        : 'border-gray-200 focus:ring-indigo-200'
+                                    }
+                                `}
+                                placeholder={tTripGuard('sampleSubscriptionLabel') + ' ' + tTripGuard('sampleSubscriptionWindow')}
+                                aria-describedby="input-hint"
+                            />
+                            <div
+                                id="input-hint"
+                                className={`absolute right-2 bottom-2 text-[10px] font-bold transition-colors
+                                    ${inputText.length >= MAX_INPUT_LENGTH
+                                        ? 'text-rose-500'
+                                        : inputText.length >= MAX_INPUT_LENGTH * 0.9
+                                            ? 'text-amber-500'
+                                            : 'text-gray-300'
+                                    }
+                                `}
+                                aria-live="polite"
+                            >
+                                {inputText.length}/{MAX_INPUT_LENGTH}
+                            </div>
+                        </div>
+                        {validationMessage && (
+                            <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-bold text-rose-700">
+                                {validationMessage}
+                            </div>
+                        )}
                         {errorText && (
                             <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-bold text-rose-700">
                                 {errorText}
@@ -255,19 +309,19 @@ export function SubscriptionModal() {
                     {!isTripGuardActive ? (
                         <button
                             onClick={handleActivate}
-                            disabled={isLoading}
+                            disabled={isLoading || !!validationMessage}
                             className={`w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all
-                                ${isLoading ? 'opacity-70 cursor-wait' : ''}
+                                ${isLoading || validationMessage ? 'opacity-70 cursor-wait' : ''}
                             `}
                         >
-                            {isLoading ? '处理中…' : '确认订阅并启用'}
+                            {isLoading ? tCommon('loading') : tTripGuard('activate')}
                         </button>
                     ) : (
                         <button
                             onClick={handleDeactivate}
                             className="w-full bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl hover:bg-gray-200 transition-all"
                         >
-                            关闭
+                            {tTripGuard('statusInactive')}
                         </button>
                     )}
 
@@ -275,7 +329,7 @@ export function SubscriptionModal() {
                         onClick={() => setSubscriptionModalOpen(false)}
                         className="text-xs text-gray-400 underline hover:text-gray-600"
                     >
-                        暂时不需要
+                        {tCommon('skipLogin')}
                     </button>
                 </div>
             </div>

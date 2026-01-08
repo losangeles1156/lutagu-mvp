@@ -307,5 +307,5 @@ POST /api/cache/warmup
 
 ---
 
-**報告維護者**: BambiGO Tech Team  
+**報告維護者**: LUTAGU Tech Team  
 **最後更新**: 2026-01-06

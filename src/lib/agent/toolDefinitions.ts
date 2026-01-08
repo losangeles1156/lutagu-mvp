@@ -1,4 +1,3 @@
-
 import { STATION_WISDOM, KNOWLEDGE_BASE } from '@/data/stationWisdom';
 import { supabaseAdmin } from '@/lib/supabase';
 import { buildStationIdSearchCandidates } from '@/lib/api/nodes';
@@ -7,6 +6,7 @@ import { odptClient } from '@/lib/odpt/client';
 import { getJSTTime } from '@/lib/utils/timeUtils';
 import { findSimpleRoutes, RailwayTopology, normalizeOdptStationId } from '@/lib/l4/assistantEngine';
 import { NavigationService } from '@/lib/navigation/NavigationService';
+import { searchL4Knowledge } from '@/lib/l4/searchService';
 
 // Mistral Tool Schema Types
 export interface MistralToolSchema {
@@ -186,13 +186,13 @@ export const AGENT_TOOLS: MistralToolSchema[] = [
  * 輔助函數：獲取基本路線資訊（當無法計算時的回退）
  */
 function getBasicRouteInfo(fromName: string, toName: string, locale: string): string {
-    const fromOp = fromName.includes('Toei') || fromName.includes('都営') ? '都営' 
-        : fromName.includes('JR') || fromName.includes('東日本') ? 'JR' 
-        : '東京Metro';
-    const toOp = toName.includes('Toei') || toName.includes('都営') ? '都営' 
-        : toName.includes('JR') || toName.includes('東日本') ? 'JR' 
-        : '東京Metro';
-    
+    const fromOp = fromName.includes('Toei') || fromName.includes('都営') ? '都営'
+        : fromName.includes('JR') || fromName.includes('東日本') ? 'JR'
+            : '東京Metro';
+    const toOp = toName.includes('Toei') || toName.includes('都営') ? '都営'
+        : toName.includes('JR') || toName.includes('東日本') ? 'JR'
+            : '東京Metro';
+
     if (locale === 'zh-TW') {
         return `\n🗺️ ${fromName} → ${toName} 路徑規劃\n━━━━━━━━━━━━━━━━\n📍 起點: ${fromName} (${fromOp})\n📍 終點: ${toName} (${toOp})\n\n${fromOp === toOp ? '✅ 同一營運商，可直接轉乘' : '⚠️ 跨營運商轉乘，建議在主要轉乘站（如東京、新宿、池袋）轉乘'}\n\n💡 詳細路線請參考車站內的轉乘指南或使用 Google Maps。`;
     } else if (locale === 'ja') {
@@ -209,7 +209,7 @@ function getExpertTipsForRoute(fromStation: string, toStation: string, locale: s
     // 常見路線的專家建議
     const from = normalizeOdptStationId(fromStation);
     const to = normalizeOdptStationId(toStation);
-    
+
     // 淺草相關路線
     if (from.includes('Asakusa') || to.includes('Asakusa')) {
         if (locale === 'zh-TW') {
@@ -218,7 +218,7 @@ function getExpertTipsForRoute(fromStation: string, toStation: string, locale: s
             return '💡 浅草駅と東武線への乗り継ぎは改札外が必要です。5-10 分程度の余裕を持ってください。';
         }
     }
-    
+
     // 上野相關路線
     if (from.includes('Ueno') || to.includes('Ueno')) {
         if (locale === 'zh-TW') {
@@ -227,7 +227,7 @@ function getExpertTipsForRoute(fromStation: string, toStation: string, locale: s
             return '💡 上野駅 3 番出口にエレベーターがあります。日比谷線への乗り継ぎは地下通路が長いです。';
         }
     }
-    
+
     // 新宿相關路線
     if (from.includes('Shinjuku') || to.includes('Shinjuku')) {
         if (locale === 'zh-TW') {
@@ -236,7 +236,7 @@ function getExpertTipsForRoute(fromStation: string, toStation: string, locale: s
             return '💡 新宿駅は世界で最も忙しい駅です。200 以上の出口があるので、目的地の出口を必ず確認してください。';
         }
     }
-    
+
     return null;
 }
 
@@ -357,112 +357,32 @@ export const TOOL_HANDLERS = {
         return result;
     },
     retrieve_station_knowledge: async (params: { stationId: string, query?: string }, context: any) => {
-        let summary = '';
         const locale = context.locale || 'zh-TW';
-
-        const candidateStationIds = buildStationIdSearchCandidates(params.stationId);
+        const userProfile = context.userProfile || 'general';
+        const query = params.query || `Tips for ${params.stationId}`;
 
         try {
-            const { data } = await supabaseAdmin
-                .from('nodes')
-                .select('id, riding_knowledge')
-                .in('id', candidateStationIds);
+            const results = await searchL4Knowledge({
+                query,
+                stationId: params.stationId,
+                userContext: [userProfile as any],
+                topK: 3
+            });
 
-            const rows = (data || []) as any[];
-            const score = (rk: any) => {
-                if (!rk || typeof rk !== 'object') return 0;
-                const traps = Array.isArray(rk.traps) ? rk.traps.length : 0;
-                const hacks = Array.isArray(rk.hacks) ? rk.hacks.length : 0;
-                return traps * 10 + hacks;
-            };
-
-            const best = rows
-                .filter(r => score(r?.riding_knowledge) > 0)
-                .sort((a, b) => {
-                    const d = score(b.riding_knowledge) - score(a.riding_knowledge);
-                    if (d !== 0) return d;
-                    if (a.id === params.stationId) return -1;
-                    if (b.id === params.stationId) return 1;
-                    return 0;
-                })[0];
-
-            const rk = best?.riding_knowledge;
-            if (rk) {
-                if (Array.isArray(rk.traps)) {
-                    rk.traps.forEach((t: any) => {
-                        const title = t?.title ? String(t.title) : '';
-                        const desc = t?.description ? String(t.description) : '';
-                        const advice = t?.advice ? String(t.advice) : '';
-                        const label = title && desc ? `${title}: ${desc}` : (title || desc);
-                        summary += `[WARNING] ${label}${advice ? ` Advice: ${advice}` : ''}\n`;
-                    });
-                }
-                if (Array.isArray(rk.hacks)) {
-                    rk.hacks.forEach((h: any) => {
-                        const title = h?.title ? String(h.title) : '';
-                        const desc = h?.description ? String(h.description) : (h?.content ? String(h.content) : '');
-                        const text = title && desc ? `${title}: ${desc}` : (title || desc);
-                        if (text) summary += `[LOCAL TRICK] ${text}\n`;
-                    });
-                }
+            if (!results || results.length === 0) {
+                return "No specific expert knowledge found for this station. Suggesting standard navigation.";
             }
-        } catch {
+
+            let summary = `Expert knowledge for ${params.stationId}:\n`;
+            results.forEach((r: any, i: number) => {
+                summary += `${i + 1}. [${r.category}] ${r.content}\n`;
+            });
+
+            return summary;
+        } catch (error) {
+            console.error('Error in retrieve_station_knowledge handler:', error);
+            return "Knowledge base is currently unavailable.";
         }
-
-        const wisdom = (() => {
-            for (const id of candidateStationIds) {
-                const hit = (STATION_WISDOM as any)[id];
-                if (hit) return hit;
-            }
-            return null;
-        })();
-
-        if (wisdom) {
-            if (wisdom.traps) {
-                wisdom.traps.forEach((t: any) => {
-                    summary += `[WARNING] ${t.content} Advice: ${t.advice}\n`;
-                });
-            }
-            if (wisdom.hacks) {
-                wisdom.hacks.forEach((h: any) => {
-                    const text = typeof h === 'string' ? h : `${h.title}: ${h.content}`;
-                    summary += `[LOCAL TRICK] ${text}\n`;
-                });
-            }
-        }
-
-        // Filter Knowledge Base
-        const relevantKnowledge = KNOWLEDGE_BASE.filter(rule => {
-            const stationMatch =
-                !rule.trigger.station_ids ||
-                rule.trigger.station_ids.some((id: string) => candidateStationIds.includes(id));
-            if (!stationMatch) return false;
-
-            if (params.query && rule.trigger.keywords) {
-                const q = params.query.toLowerCase();
-                return rule.trigger.keywords.some(k => q.includes(k.toLowerCase()) || k.toLowerCase().includes(q));
-            }
-            return true;
-        });
-
-        relevantKnowledge.forEach(k => {
-            summary += `- ${k.title['en'] || k.title['zh-TW']}: ${k.content['en'] || k.content['zh-TW']}\n`;
-        });
-
-        // Add luggage-specific tips when query mentions locker/luggage
-        const luggageKeywords = ['locker', 'luggage', 'bags', '寄物', 'コインロッカー', '荷物', '行李'];
-        const isLuggageQuery = params.query && luggageKeywords.some(k => params.query!.toLowerCase().includes(k));
-
-        if (isLuggageQuery) {
-            const luggageTips: Record<string, string> = {
-                'zh-TW': `\n[LUGGAGE TIP] 若站內寄物櫃滿，推薦使用 ecbo cloak 服務，可將行李寄放在附近商店或咖啡廳。預約連結: https://cloak.ecbo.io/\n[LUGGAGE TIP] 大型行李（超過24吋）通常需要 ¥600-800 的大型寄物櫃。`,
-                'ja': `\n[LUGGAGE TIP] ロッカーが満杯の場合は、ecbo cloak サービスをおすすめします。近くのお店やカフェに荷物を預けられます。予約: https://cloak.ecbo.io/\n[LUGGAGE TIP] 大型荷物（24インチ以上）は通常 ¥600-800 の大型ロッカーが必要です。`,
-                'en': `\n[LUGGAGE TIP] If station lockers are full, try ecbo cloak - you can store luggage at nearby shops/cafes. Book at: https://cloak.ecbo.io/\n[LUGGAGE TIP] Large luggage (over 24 inches) typically requires ¥600-800 large lockers.`
-            };
-            summary += luggageTips[locale] || luggageTips['en'];
-        }
-
-        return summary || 'No specific knowledge found for this query.';
     },
     get_station_facilities: async (params: { stationId: string }, context: any) => {
         const { data: facilities } = await supabaseAdmin
@@ -555,203 +475,24 @@ export const TOOL_HANDLERS = {
             return `擁擠度資料暫時無法取得。`;
         }
     },
-    
+
     // ========== L4 新增工具 ==========
-    
+
     /**
      * 時刻表查詢工具
      */
-    get_timetable: async (params: { stationId: string; operator?: string }, context: any) => {
-        try {
-            const locale = context.locale || 'zh-TW';
-            const stationName = params.stationId.split('.').pop() || params.stationId;
-            
-            // 使用 ODPT API 獲取時刻表
-            const timetables = await odptClient.getStationTimetable(params.stationId, params.operator);
-            
-            if (!timetables || timetables.length === 0) {
-                return locale === 'zh-TW' 
-                    ? `⚠️ 無法取得 ${stationName} 的時刻表資料`
-                    : locale === 'ja'
-                        ? `⚠️ ${stationName} の時刻表データを取得できません`
-                        : `⚠️ Unable to get timetable data for ${stationName}`;
-            }
-            
-            // 獲取 JST 時間用於過濾
-            const { hour, minute, isHoliday } = getJSTTime();
-            const currentMinutes = hour * 60 + minute;
-            const calendarType = isHoliday ? 'Holiday' : 'Weekday';
-            
-            // 過濾並處理時刻表
-            const result: Record<string, any[]> = {};
-            
-            timetables.forEach((table: any) => {
-                const cal = table['odpt:calendar']?.replace('odpt.Calendar:', '') || '';
-                // 只處理平日或假日類型匹配的時刻表
-                if (!cal.includes(calendarType) && !cal.includes('SaturdayHoliday') && !cal.includes('Holiday')) {
-                    if (calendarType === 'Weekday' && !cal.includes('Weekday')) return;
-                }
-                
-                const direction = table['odpt:railDirection']?.replace('odpt.RailDirection:', '') || 'Unknown';
-                const trips = table['odpt:stationTimetableObject'] || [];
-                
-                // 找出接下來的 3 班車
-                const upcoming = trips
-                    .map((trip: any) => {
-                        const [h, m] = (trip['odpt:departureTime'] || '00:00').split(':').map(Number);
-                        const tripMinutes = h * 60 + m;
-                        return { ...trip, minutes: tripMinutes };
-                    })
-                    .filter((trip: any) => trip.minutes >= currentMinutes)
-                    .sort((a: any, b: any) => a.minutes - b.minutes)
-                    .slice(0, 3)
-                    .map((trip: any) => ({
-                        time: trip['odpt:departureTime'],
-                        dest: trip['odpt:destinationStation']?.[0]?.split('.').pop() || 'Unknown',
-                        trainType: trip['odpt:trainType']?.split(':').pop() || ''
-                    }));
-                
-                if (upcoming.length > 0) {
-                    if (!result[direction]) result[direction] = [];
-                    result[direction].push(...upcoming);
-                }
-            });
-            
-            // 格式化輸出
-            let output = '';
-            const dirLabel = locale === 'zh-TW' ? '方向' : locale === 'ja' ? '方面' : 'Direction';
-            
-            for (const [direction, trains] of Object.entries(result)) {
-                output += `\n【${dirLabel}: ${direction}】\n`;
-                trains.forEach((t: any) => {
-                    const trainInfo = t.trainType ? ` (${t.trainType})` : '';
-                    output += `  ${t.time} → ${t.dest}${trainInfo}\n`;
-                });
-            }
-            
-            if (!output) {
-                return locale === 'zh-TW' 
-                    ? `⚠️ ${stationName} 目前沒有後續班次`
-                    : locale === 'ja'
-                        ? `⚠️ ${stationName} に後続の列車はありません`
-                        : `⚠️ No upcoming trains at ${stationName}`;
-            }
-            
-            return output.trim();
-        } catch (e: any) {
-            console.error('get_timetable error:', e);
-            return `⚠️ 時刻表查詢失敗: ${e.message}`;
-        }
+    get_timetable_l4: async (params: { stationId: string; operator?: string }, context: any) => {
+        const tool = new TimetableTool();
+        // Map stationId to station for TimetableTool.execute
+        return await tool.execute({ station: params.stationId, operator: params.operator }, context);
     },
-    
+
     /**
      * 票價查詢工具
      */
-    get_fare: async (params: { fromStation: string; toStation: string }, context: any) => {
-        try {
-            const locale = context.locale || 'zh-TW';
-            const fromName = params.fromStation.split('.').pop() || params.fromStation;
-            const toName = params.toStation.split('.').pop() || params.toStation;
-            
-            // 使用 ODPT API 獲取票價
-            const fares = await odptClient.getFares(params.fromStation, params.toStation);
-            
-            if (!fares || fares.length === 0) {
-                return locale === 'zh-TW' 
-                    ? `⚠️ 無法取得 ${fromName} 到 ${toName} 的票價`
-                    : locale === 'ja'
-                        ? `⚠️ ${fromName} から ${toName} までの運賃を取得できません`
-                        : `⚠️ Unable to get fare from ${fromName} to ${toName}`;
-            }
-            
-            // 格式化輸出
-            const fare = fares[0];
-            const icFare = fare['odpt:icCardFare'];
-            const ticketFare = fare['odpt:ticketFare'];
-            
-            if (locale === 'zh-TW') {
-                return `\n💰 ${fromName} → ${toName} 票價\n━━━━━━━━━━━━━━━━\n🎫 車票 (Ticket): ¥${ticketFare}\n💳 IC 卡 (IC): ¥${icFare}\n━━━━━━━━━━━━━━━━\n💡 IC 卡通常比車票便宜 ¥1-2`;
-            } else if (locale === 'ja') {
-                return `\n💰 ${fromName} → ${toName} 運賃\n━━━━━━━━━━━━━━━━\n🎫 切符 (Ticket): ¥${ticketFare}\n💳 IC 卡 (IC): ¥${icFare}\n━━━━━━━━━━━━━━━━\n💡 IC 卡は切符より ¥1-2 安い`;
-            } else {
-                return `\n💰 ${fromName} → ${toName} Fare\n━━━━━━━━━━━━━━━━\n🎫 Ticket: ¥${ticketFare}\n💳 IC Card: ¥${icFare}\n━━━━━━━━━━━━━━━━\n💡 IC card is usually ¥1-2 cheaper than ticket`;
-            }
-        } catch (e: any) {
-            console.error('get_fare error:', e);
-            return `⚠️ 票價查詢失敗: ${e.message}`;
-        }
-    },
-    
-    /**
-     * 路徑查詢工具 - 使用 findSimpleRoutes 計算真實路線
-     */
-    get_route: async (params: { fromStation: string; toStation: string }, context: any) => {
-        try {
-            const locale = context.locale || 'zh-TW';
-            const fromName = params.fromStation.split('.').pop() || params.fromStation;
-            const toName = params.toStation.split('.').pop() || params.toStation;
-            
-            // 1. 獲取所有鐵路線數據用於計算路線
-            const railways = await odptClient.getRailways();
-            
-            if (!railways || railways.length === 0) {
-                // 如果無法獲取鐵路數據，回退到基本建議
-                return getBasicRouteInfo(fromName, toName, locale);
-            }
-            
-            // 2. 轉換為 RailwayTopology 格式
-            const railwayTopologies: RailwayTopology[] = railways.map((r: any) => ({
-                railwayId: r['owl:sameAs'],
-                operator: r['odpt:operator'],
-                title: r['odpt:title'],
-                stationOrder: (r['odpt:stationOrder'] || []).map((s: any, idx: number) => ({
-                    index: idx,
-                    station: s,
-                    title: {}
-                }))
-            }));
-            
-            // 3. 使用 findSimpleRoutes 計算路線
-            const routes = findSimpleRoutes({
-                originStationId: params.fromStation,
-                destinationStationId: params.toStation,
-                railways: railwayTopologies,
-                locale: locale
-            });
-            
-            if (routes.length === 0) {
-                return getBasicRouteInfo(fromName, toName, locale);
-            }
-            
-            // 4. 格式化輸出
-            let output = '';
-            const routeLabel = locale === 'zh-TW' ? '路線方案' : locale === 'ja' ? 'ルート案內' : 'Route Options';
-            
-            routes.forEach((route, idx) => {
-                output += `\n${routeLabel} ${idx + 1}: ${route.label}\n`;
-                output += '────────────────\n';
-                route.steps.forEach((step: any) => {
-                    output += `${step.text}\n`;
-                });
-                output += '\n';
-            });
-            
-            // 5. 添加專家建議
-            const expertTips = getExpertTipsForRoute(params.fromStation, params.toStation, locale);
-            if (expertTips) {
-                output += '────────────────\n';
-                output += expertTips;
-            }
-            
-            return output.trim();
-            
-        } catch (e: any) {
-            console.error('get_route error:', e);
-            return getBasicRouteInfo(
-                params.fromStation.split('.').pop() || params.fromStation,
-                params.toStation.split('.').pop() || params.toStation,
-                context.locale || 'zh-TW'
-            );
-        }
+    get_fare_l4: async (params: { fromStation: string; toStation: string }, context: any) => {
+        const tool = new FareTool();
+        // Map fromStation/toStation to from/to for FareTool.execute
+        return await tool.execute({ from: params.fromStation, to: params.toStation }, context);
     }
 };

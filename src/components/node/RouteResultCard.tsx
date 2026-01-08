@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { EnrichedRouteOption, SupportedLocale, RouteStep } from '@/lib/l4/assistantEngine';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, CreditCard, Repeat, Navigation2, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type RouteResultCardProps = {
     option: EnrichedRouteOption;
@@ -53,7 +54,7 @@ function computeCountdownMinutes(hhmm?: string) {
 }
 
 export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) {
-    const [expanded, setExpanded] = useState(rank === 0); // Auto-expand first result
+    const [expanded, setExpanded] = useState(rank === 0);
     const [tick, setTick] = useState(0);
 
     useEffect(() => {
@@ -85,32 +86,45 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
     const fareLabel = useMemo(() => {
         const fare = option.fare;
         if (!fare || !Number.isFinite(fare.ic) || !Number.isFinite(fare.ticket)) return null;
-        if (locale === 'ja') return `IC ¥${fare.ic} / 切符 ¥${fare.ticket}`;
-        if (locale === 'en') return `IC ¥${fare.ic} / Ticket ¥${fare.ticket}`;
-        return `IC ¥${fare.ic} / 車票 ¥${fare.ticket}`;
+        if (locale === 'ja') return `¥${fare.ic}`;
+        if (locale === 'en') return `¥${fare.ic}`;
+        return `¥${fare.ic}`;
     }, [locale, option.fare]);
 
     const railways = (option.railways || []).filter(Boolean);
 
     return (
-        <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-            <div className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                {rank === 0 ? '🏆 Best Match' : 'Alternative'}
-                            </div>
+        <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-[2.5rem] bg-white/60 backdrop-blur-xl border border-white/80 shadow-xl shadow-slate-200/20 overflow-hidden group"
+        >
+            <div className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                            {rank === 0 ? (
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+                                    <Sparkles size={12} className="animate-pulse" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">最佳方案 Recommended</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 text-slate-500 border border-slate-200/50">
+                                    <Navigation2 size={12} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">替代路線 Alternative</span>
+                                </div>
+                            )}
+                            
                             {railways.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap gap-1.5">
                                     {railways.slice(0, 3).map(rw => {
                                         const c = getRailwayColorClasses(rw);
                                         return (
                                             <span
                                                 key={rw}
-                                                className={`inline-flex items-center gap-2 px-2 py-0.5 rounded-full border text-[10px] font-black ${c.badge}`}
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black ${c.badge} shadow-sm backdrop-blur-md`}
                                             >
-                                                <span className={`w-2 h-2 rounded-full ${c.dot}`} />
+                                                <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
                                                 {formatRailwayLabel(rw, locale)}
                                             </span>
                                         );
@@ -118,63 +132,74 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                 </div>
                             )}
                         </div>
-                        <div className="mt-1 text-base font-black text-slate-900 break-words">{option.label}</div>
+                        <h3 className="text-xl font-black text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">
+                            {option.label}
+                        </h3>
                     </div>
 
                     <button
                         onClick={() => setExpanded(v => !v)}
-                        className="shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-[11px] font-black text-slate-700"
-                        aria-expanded={expanded}
+                        className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-sm ${
+                            expanded ? 'bg-slate-900 text-white' : 'bg-white/80 text-slate-400 hover:text-indigo-600 hover:bg-white'
+                        }`}
                     >
-                        {expanded
-                            ? (locale === 'ja' ? '閉じる' : locale === 'en' ? 'Hide' : '收起')
-                            : (locale === 'ja' ? '詳細' : locale === 'en' ? 'Details' : '展開')}
-                        {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
                 </div>
 
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-black text-slate-800 flex items-center justify-between">
-                        <span className="text-slate-500">⏱</span>
-                        <span>{durationLabel || (locale === 'ja' ? '— 分' : locale === 'en' ? '— min' : '— 分')}</span>
+                {/* Core Stats Grid */}
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                    <div className="p-3.5 rounded-2xl bg-white/50 border border-white/60 shadow-sm flex flex-col items-center justify-center text-center group/stat hover:bg-white transition-all hover:shadow-md">
+                        <Clock size={16} className="text-slate-400 mb-1 group-hover/stat:text-indigo-500 transition-colors" />
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">時間 Time</div>
+                        <div className="text-sm font-black text-slate-900">{durationLabel || '—'}</div>
                     </div>
-                    <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-black text-slate-800 flex items-center justify-between">
-                        <span className="text-slate-500">💰</span>
-                        <span className="truncate">{fareLabel || (locale === 'ja' ? '—' : locale === 'en' ? '—' : '—')}</span>
+                    <div className="p-3.5 rounded-2xl bg-white/50 border border-white/60 shadow-sm flex flex-col items-center justify-center text-center group/stat hover:bg-white transition-all hover:shadow-md">
+                        <CreditCard size={16} className="text-slate-400 mb-1 group-hover/stat:text-emerald-500 transition-colors" />
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">費用 Fare</div>
+                        <div className="text-sm font-black text-slate-900">{fareLabel || '—'}</div>
                     </div>
-                    <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-black text-slate-800 flex items-center justify-between">
-                        <span className="text-slate-500">🔄</span>
-                        <span>
-                            {locale === 'en'
-                                ? `${transferLabel} transfer${Number(option.transfers || 0) === 1 ? '' : 's'}`
-                                : locale === 'ja'
-                                    ? `乗換 ${transferLabel}`
-                                    : `轉乘 ${transferLabel}`}
-                        </span>
+                    <div className="p-3.5 rounded-2xl bg-white/50 border border-white/60 shadow-sm flex flex-col items-center justify-center text-center group/stat hover:bg-white transition-all hover:shadow-md">
+                        <Repeat size={16} className="text-slate-400 mb-1 group-hover/stat:text-amber-500 transition-colors" />
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">轉乘 Transfer</div>
+                        <div className="text-sm font-black text-slate-900">{transferLabel}</div>
                     </div>
                 </div>
 
+                {/* Next Departure Banner */}
                 {option.nextDeparture && (
-                    <div className="mt-3 rounded-2xl border border-indigo-100 bg-indigo-50 p-3">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="text-xs font-black text-indigo-900">
-                                🕐 {locale === 'ja' ? '次発' : locale === 'en' ? 'Next' : '下一班'}: {option.nextDeparture}
+                    <div className="mt-4 rounded-2xl bg-indigo-600 p-5 relative overflow-hidden group/next shadow-lg shadow-indigo-200/50">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl transition-transform group-hover/next:scale-125" />
+                        <div className="flex items-center justify-between gap-3 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-sm border border-white/20">
+                                    <Clock size={18} />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-black text-indigo-100/60 uppercase tracking-widest leading-none mb-1.5">
+                                        {locale === 'ja' ? '次発 Departure' : '下一班 Next Departure'}
+                                    </div>
+                                    <div className="text-lg font-black text-white leading-none tracking-tight">
+                                        {option.nextDeparture}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="text-xs font-black text-indigo-700">
-                                {countdownMin === null
-                                    ? '—'
-                                    : countdownMin === 0
-                                        ? (locale === 'ja' ? 'まもなく' : locale === 'en' ? 'Now' : '即將')
-                                        : (locale === 'ja' ? `${countdownMin} 分` : locale === 'en' ? `${countdownMin} min` : `${countdownMin} 分`)}
+                            <div className="text-right">
+                                <div className="text-2xl font-black text-white">
+                                    {countdownMin === null
+                                        ? '—'
+                                        : countdownMin === 0
+                                            ? (locale === 'ja' ? '即時' : '即將 Arriving')
+                                            : (locale === 'ja' ? `${countdownMin} 分` : `${countdownMin} min`)}
+                                </div>
                             </div>
                         </div>
                         {countdownMin !== null && (
-                            <div className="mt-2 h-2 rounded-full bg-indigo-100 overflow-hidden">
-                                <div
-                                    className="h-full bg-indigo-600 rounded-full transition-all"
-                                    style={{
-                                        width: `${Math.max(0, Math.min(100, Math.round((1 - Math.min(15, countdownMin) / 15) * 100)))}%`
-                                    }}
+                            <div className="mt-4 h-1.5 rounded-full bg-white/20 overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.max(0, Math.min(100, Math.round((1 - Math.min(15, countdownMin) / 15) * 100)))}%` }}
+                                    className="h-full bg-white rounded-full"
                                 />
                             </div>
                         )}
@@ -182,40 +207,53 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                 )}
             </div>
 
-            {expanded && (
-                <div className="px-4 pb-4">
-                    <div className="rounded-2xl border border-slate-100 bg-white">
-                        <div className="p-4">
-                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                {locale === 'ja' ? 'ステップ' : locale === 'en' ? 'Steps' : '步驟'}
-                            </div>
-                            <div className="mt-3 space-y-3">
-                                {option.steps.map((step, i) => {
-                                    const meta = parseStepKind(step);
-                                    const railwayId = meta.kind === 'train' ? step.railwayId : undefined;
-                                    const c = getRailwayColorClasses(railwayId);
-                                    return (
-                                        <div key={i} className="relative pl-10">
-                                            <div className="absolute left-4 top-0 bottom-0 w-px bg-slate-200" />
-                                            <div className="absolute left-0 top-0 w-8 h-8 rounded-2xl border border-slate-100 bg-white flex items-center justify-center">
-                                                {meta.kind === 'train' ? (
-                                                    <span className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
-                                                ) : (
-                                                    <span className="text-sm">{meta.icon}</span>
+            {/* Steps Section */}
+            <AnimatePresence>
+                {expanded && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="px-6 pb-6 pt-2">
+                            <div className="rounded-[2.5rem] bg-white/40 backdrop-blur-md border border-white/60 p-6 shadow-inner">
+                                <div className="flex items-center gap-2 mb-6 px-1">
+                                    <div className="w-1 h-4 bg-indigo-500 rounded-full" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                        {locale === 'ja' ? 'ルート詳細 Route Details' : '路線詳情 Route Details'}
+                                    </span>
+                                </div>
+                                <div className="space-y-6">
+                                    {option.steps.map((step, i) => {
+                                        const meta = parseStepKind(step);
+                                        const railwayId = meta.kind === 'train' ? step.railwayId : undefined;
+                                        const c = getRailwayColorClasses(railwayId);
+                                        return (
+                                            <div key={i} className="relative pl-12">
+                                                {i < option.steps.length - 1 && (
+                                                    <div className="absolute left-[1.125rem] top-10 bottom-[-1.5rem] w-0.5 bg-slate-200/60 rounded-full" />
                                                 )}
+                                                <div className="absolute left-0 top-0.5 w-9 h-9 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center z-10 group-hover:border-indigo-200 transition-colors">
+                                                    {meta.kind === 'train' ? (
+                                                        <span className={`w-3 h-3 rounded-full ${c.dot} shadow-sm shadow-black/10 animate-pulse`} />
+                                                    ) : (
+                                                        <span className="text-base">{meta.icon}</span>
+                                                    )}
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-white/80 border border-white/60 shadow-sm text-sm font-bold text-slate-700 leading-relaxed hover:bg-white hover:shadow-md transition-all">
+                                                    {step.text}
+                                                </div>
                                             </div>
-                                            <div className="px-3 py-2 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-800 break-words">
-                                                {step.text}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            )}
-        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
     );
 }
 

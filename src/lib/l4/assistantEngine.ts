@@ -21,7 +21,7 @@ const STATION_INDEX = new Map<string, string[]>();
     });
 });
 
-export type SupportedLocale = 'zh' | 'zh-TW' | 'ja' | 'en';
+export type SupportedLocale = 'zh' | 'zh-TW' | 'ja' | 'en' | 'ar';
 
 export type L4IntentKind = 'fare' | 'timetable' | 'route' | 'status' | 'amenity' | 'unknown';
 
@@ -60,6 +60,21 @@ export type L4DemandState = {
     avoidCrowds: boolean;
     avoidRain: boolean;
 };
+
+export interface StationL4KnowledgeItem {
+    icon: string;
+    title: string;
+    description: string;
+    advice?: string;
+}
+
+export interface StationL4Knowledge {
+    traps: StationL4KnowledgeItem[];
+    hacks: StationL4KnowledgeItem[];
+    vibe_tags?: string[];
+    description?: string;
+    facilities?: any[];
+}
 
 export type L4DataSource =
     | { type: 'odpt:RailwayFare'; verified: boolean }
@@ -660,6 +675,7 @@ function buildAdjacency(railways: RailwayTopology[]) {
     const stationGroups = new Map<string, string[]>();
 
     for (const r of railways) {
+        if (!r.stationOrder) continue;
         const stations = r.stationOrder
             .slice()
             .sort((x, y) => x.index - y.index)

@@ -19,32 +19,19 @@ interface Message {
     isLoading?: boolean;
 }
 
-// Sample welcome hints based on locale
-const getWelcomeHints = (locale: string) => {
-    if (locale === 'ja') {
-        return [
-            '浅草から渋谷までどう行くのが速いですか？',
-            '銀座線で遅延情報はありますか？',
-            '上野駅の出口にエレベーターはありますか？'
-        ];
-    }
-    if (locale === 'en') {
-        return [
-            'Fastest way from Asakusa to Shibuya?',
-            'Is the Ginza Line delayed right now?',
-            'Which exits at Ueno have elevators?'
-        ];
-    }
+// Sample welcome hints
+const getWelcomeHints = (t: any) => {
     return [
-        '從淺草到渋谷怎麼走最快？',
-        '現在銀座線有延誤嗎？',
-        '上野站哪個出口有電梯？'
+        t('hints.route'),
+        t('hints.status'),
+        t('hints.accessibility')
     ];
 };
 
 export function LoginChatPanel() {
     const locale = useLocale();
     const t = useTranslations('chat');
+    const tLoginChat = useTranslations('loginChat');
     const tCommon = useTranslations('common');
 
     const [isExpanded, setIsExpanded] = useState(true);
@@ -52,11 +39,7 @@ export function LoginChatPanel() {
     const [messages, setMessages] = useState<Message[]>([
         {
             role: 'assistant',
-            content: locale === 'ja'
-                ? 'こんにちは！LUTAGU AI です。🥌\n\n交通_OPTIONS 可以幫您：\n• 即時列車運行情報\n• 無障礙路徑規劃\n• 替代路線搜尋\n\n您現在在哪裡？またはどこへ行きたいですか？'
-                : locale === 'en'
-                ? 'Hi! I\'m LUTAGU AI. 🥌\n\nI can help you with:\n• Live train status\n• Accessibility routes\n• Alternative paths\n\nWhere are you now, or where do you want to go?'
-                : '嗨！我是 LUTAGU AI。🥌\n\n我可以幫您：\n• 即時列車運行狀態\n• 無障礙路徑規劃\n• 替代路線搜尋\n\n您現在在哪裡？或想去哪裡？'
+            content: tLoginChat('welcome')
         }
     ]);
     const [input, setInput] = useState('');
@@ -64,7 +47,7 @@ export function LoginChatPanel() {
     const [isError, setIsError] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const welcomeHints = getWelcomeHints(locale);
+    const welcomeHints = getWelcomeHints(tLoginChat);
 
     // Detect mobile on client side
     useEffect(() => {
@@ -89,20 +72,15 @@ export function LoginChatPanel() {
 
         // Simulate AI thinking delay
         const timeoutId = setTimeout(() => {
-            const responses: Record<string, string> = {
-                'ja': `ご質問ありがとうございます！\n\n「${userMessage}」について調べてみます。\n\n具体的な駅名を教えていただければ、より正確な情報をお伝えできます。`,
-                'en': `Thanks for your question!\n\nLet me look into "${userMessage}" for you.\n\nIf you can share a specific station name, I can provide more accurate information.`,
-                'zh': `感謝您的提問！\n\n關於「${userMessage}」，讓我為您查詢一下。\n\n如果您能提供具體的站點名稱，我可以提供更準確的資訊。`
-            };
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: responses[locale] || responses.zh
+                content: tLoginChat('aiResponse', { message: userMessage })
             }]);
             setIsLoading(false);
         }, 1500);
 
         return () => clearTimeout(timeoutId);
-    }, [locale]);
+    }, [tLoginChat]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -119,14 +97,10 @@ export function LoginChatPanel() {
     const handleRestart = useCallback(() => {
         setMessages([{
             role: 'assistant',
-            content: locale === 'ja'
-                ? 'こんにちは！LUTAGU AI です。🥌\n\n交通_OPTIONS 可以幫您：\n• 即時列車運行情報\n• 無障礙路徑規劃\n• 替代路線搜尋\n\n您現在在哪裡？またはどこへ行きたいですか？'
-                : locale === 'en'
-                ? 'Hi! I\'m LUTAGU AI. 🥌\n\nI can help you with:\n• Live train status\n• Accessibility routes\n• Alternative paths\n\nWhere are you now, or where do you want to go?'
-                : '嗨！我是 LUTAGU AI。🥌\n\n我可以幫您：\n• 即時列車運行狀態\n• 無障礙路徑規劃\n• 替代路線搜尋\n\n您現在在哪裡？或想去哪裡？'
+            content: tLoginChat('welcome')
         }]);
         setIsError(false);
-    }, [locale]);
+    }, [tLoginChat]);
 
     // Height based on screen size - reduced to avoid overlap with login card
     const getHeightClass = () => {

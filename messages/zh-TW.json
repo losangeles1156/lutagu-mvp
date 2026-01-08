@@ -1,9 +1,11 @@
 {
     "Home": {
         "title": "LUTAGU",
+        "subtitle": "東京交通 AI 助手",
         "currentLocation": "目前位置",
         "askLutagu": "問 LUTAGU...",
-        "aiPlaceholder": "問 LUTAGU..."
+        "aiPlaceholder": "問 LUTAGU...",
+        "version": "LUTAGU v3.0 • 賦能交通"
     },
     "status": {
         "crowded": "擁擠",
@@ -16,7 +18,8 @@
         "explore": "探索",
         "trips": "行程",
         "guard": "守護",
-        "me": "我的"
+        "me": "我的",
+        "navigation": "導航"
     },
     "views": {
         "trips": {
@@ -57,8 +60,11 @@
             "akihabara": "秋葉原",
             "tokyo": "東京"
         },
-        "enableLocation": "開啟定位",
-        "browseFirst": "先逛逛"
+        "enableLocation": "最近節點",
+        "nearbyNode": "最近節點",
+        "browseFirst": "先逛逛",
+        "skipConfirmTitle": "確定要跳過嗎？",
+        "skipConfirmDesc": "您可以稍後從功能表重新開啟新手引導。"
     },
     "tripGuard": {
         "title": "行程守護",
@@ -107,9 +113,14 @@
     },
     "tabs": {
         "dna": "附近",
+        "dnaLabel": "附近生活機能",
         "live": "狀態",
+        "liveLabel": "即時運行狀態",
         "facility": "設施",
+        "facilityLabel": "站點設施",
         "lutagu": "建議",
+        "lutaguLabel": "智能嚮導",
+        "lutaguSmart": "智能嚮導",
         "transit": "時刻票價"
     },
     "tag": {
@@ -185,7 +196,7 @@
     },
     "l1": {
         "dnaTitle": "生活機能",
-        "lutaguInsight": "ルタグ洞察",
+        "lutaguInsight": "LUTAGU 洞察",
         "nearbyHighlights": "周邊亮點 (300m)",
         "noHighlights": "暫無周邊亮點",
         "menuTitle": "類別詳情",
@@ -228,6 +239,9 @@
         "normalOperation": "正常運行",
         "delayOccurred": "發生延誤",
         "weatherAlert": "天候警報",
+        "liveFlightTitle": "即時航班狀態",
+        "tokyoWide": "東京廣域",
+        "dataSourceDisclaimer": "資料來源：運行情報與使用者回報",
         "status": {
             "normal": "正常運行",
             "delay": "發生延誤",
@@ -311,17 +325,51 @@
             "sizes": "尺寸: {sizes}",
             "count": "數量: {count} 個",
             "hours": "營業時間: {hours}",
-            "askLutagu": "詢問 ルタグ 關於此設施"
+            "askLutagu": "詢問 LUTAGU 關於此設施"
         }
     },
     "l4": {
+        "viewModes": {
+            "recommendations": "智能建議",
+            "planner": "行程規劃",
+            "chat": "AI 助手"
+        },
+        "plannerTabs": {
+            "route": "路線規劃",
+            "time": "發車時刻"
+        },
         "initialMessage": "嗨！我在 {station}。你想去哪裡？我可以為你查詢路線、票價和時刻表。",
+        "resetConfirm": "確定要重新開始對話嗎？",
+        "station": "車站",
+        "offline": "離線",
+        "quickButtons": {
+            "route": {
+                "label": "最快路線",
+                "prompt": "任務：路線規劃\n出發：{station}（{id}）\n目的地：請先問我想去哪一站/景點\n需求：最快 / 少轉乘（二選一）\n輸出：給 2 個選項，各含：路線、預估時間、轉乘關鍵點"
+            },
+            "access": {
+                "label": "無障礙",
+                "prompt": "任務：無障礙動線\n目前：{station}（{id}）\n需求：優先電梯可達的出口/動線\n不足資訊：需要時先問我「哪個出口 / 哪條線 / 方向」\n輸出：先給結論，再補必要追問"
+            },
+            "status": {
+                "label": "延誤/替代",
+                "prompt": "任務：即時運行狀態\n影響車站：{station}（{id}）\n要做：確認是否有延誤/停駛，若有給 1 個替代建議\n輸出：重點 1-2 行"
+            },
+            "fare": {
+                "label": "查詢票價",
+                "prompt": "任務：票價查詢\n起點：{station}（{id}）\n目的地：請詢問使用者目的地\n輸出：提供 IC 卡與單程票價，並說明是否有優惠票（如 24 小時券）"
+            },
+            "timetable": {
+                "label": "最近班次",
+                "prompt": "任務：時刻表查詢\n站點：{station}（{id}）\n需求：查詢最近 3 班發車時間與月台資訊\n輸出：列表顯示，標註終點站與車種"
+            }
+        },
         "strategyTitle": "LUTAGU 策略",
         "subtitle": "基於即時數據的智慧建議",
         "topPick": "首選推薦",
         "alternatives": "替代方案",
         "disclaimer": "建議是根據當前交通、天氣和設施狀態生成的。",
-        "lutaguStrategy": "ルタグ策略",
+        "lutaguStrategy": "LUTAGU 策略",
         "suggestion": "建議",
         "psychAlert": "心理建設提示",
         "synthesisTitle": "智慧決策合成",
@@ -346,7 +394,7 @@
         "inputPlaceholder": "規劃路線（問路、聊天...）",
         "chatError": "抱歉，連線發生錯誤。",
         "userLabel": "使用者",
-        "lutaguLabel": "ルタグ",
+        "lutaguLabel": "LUTAGU",
         "thinking": {
             "initializing": "啟動認知引擎...",
             "l2": "分析即時路況與天氣...",
@@ -359,6 +407,81 @@
             "reasoning": "決策依據",
             "l2Verified": "即時路況驗證",
             "odptVerified": "ODPT 時刻表確認"
+        },
+        "intent": {
+            "inputPlaceholder": "輸入您的問題（如：去新宿怎麼走、銀座線時刻表...）",
+            "route": "路線規劃",
+            "routeDesc": "尋找最快或最舒適的路徑",
+            "routeQuick1": "去東京車站怎麼走最快？",
+            "routeQuick2": "有沒有電梯較多的路線？",
+            "timetable": "時刻表",
+            "timetableDesc": "查詢車站即時發車時間",
+            "timetableQuick1": "最近一班去上野的車？",
+            "timetableQuick2": "查詢銀座線時刻表",
+            "fare": "票價查詢",
+            "fareDesc": "計算各路線乘車費用",
+            "fareQuick1": "去新宿要多少錢？",
+            "fareQuick2": "兒童票價是多少？",
+            "status": "運行狀態",
+            "statusDesc": "查看路線是否有延誤或中斷",
+            "statusQuick1": "現在銀座線正常嗎？",
+            "amenity": "車站設施",
+            "amenityDesc": "尋找電梯、置物櫃或廁所",
+            "amenityQuick1": "最近的電梯在哪裡？",
+            "amenityQuick2": "這站有大型置物櫃嗎？"
+        },
+        "dashboard": {
+            "aiAssistant": "LUTAGU 智能助手",
+            "aiSubtitle": "為您彙整此站點的專家經驗與建議",
+            "aiPerceptionActive": "AI 感知中",
+            "trapGuide": "避坑指南",
+            "proHacks": "交通攻略",
+            "expertTips": "專家建議",
+            "proHacksLabel": "專業攻略",
+            "startChat": "開始與 AI 助手對話",
+            "discoverInspiration": "探索靈感",
+            "adjustPreferences": "切換需求配置以獲取精確建議",
+            "ridingGuide": "LUTAGU 乘車與票務指南",
+            "expertMode": "專家模式",
+            "smartPlanning": "智能行程",
+            "smartPlanningSub": "Smart Planning",
+            "travelPreferences": "旅行偏好 Travel Preferences",
+            "templateLibrary": "快速模版庫 Template Library",
+            "generatePlan": "立即生成行程",
+            "details": "詳細數據",
+            "nextStep": "下一步",
+            "endOfDemo": "演示結束",
+            "modes": {
+                "recommendations": "智能建議",
+                "planner": "行程規劃",
+                "chat": "AI 助手"
+            },
+            "planner": {
+                "route": "路線規劃",
+                "timetable": "發車時刻"
+            },
+            "errors": {
+                "unresolvedStation": "目前站點無法解析。",
+                "pickTask": "請先選擇要查的項目。",
+                "selectDestination": "請選擇目的地車站。",
+                "noFareFound": "找不到票價。",
+                "fareQueryFailed": "票價查詢失敗。",
+                "destinationRequired": "請選擇目的地。",
+                "noRouteFound": "找不到路線。",
+                "routePlanningFailed": "路線規劃失敗。"
+            },
+            "fare": {
+                "to": "目的地",
+                "ic": "IC 卡",
+                "ticket": "車票"
+            },
+            "timetable": {
+                "noData": "暫無時刻表資料",
+                "noDataSub": "目前站點暫無對應方向的車次資訊",
+                "to": "往 ",
+                "weekday": "平日 Weekday",
+                "weekend": "週末/假日 Weekend"
+            }
         }
     },
     "weather": {
@@ -385,6 +508,15 @@
         "nature": "自然",
         "countSuffix": "處"
     },
+    "error": {
+        "systemError": "糟了！系統發生錯誤",
+        "loadingError": "我們在載入頁面時遇到了一些問題。請嘗試重新整理頁面。",
+        "componentError": "元件載入失敗",
+        "componentErrorDesc": "元件載入失敗，請嘗試重新整理或返回上頁。",
+        "retry": "重試",
+        "refresh": "重新整理",
+        "back": "返回"
+    },
     "common": {
         "tabMenu": "功能選單",
         "viewAll": "查看全部",
@@ -399,11 +531,43 @@
         "languageSwitcherLabel": "切換語言",
         "back": "返回",
         "select": "選擇",
-        "clear": "清除"
+        "clear": "清除",
+        "cancel": "取消",
+        "confirm": "確認",
+        "skipOnboardingTitle": "確定要跳過嗎？",
+        "skipOnboardingDesc": "您可以稍後從功能表重新開啟新手引導。",
+        "feedbackSent": "已收到您的回饋！",
+        "noNodesInView": "此區域暫無車站資料",
+        "noNodesHint": "嘗試移動地圖或縮放以查看其他區域"
     },
     "chat": {
+        "aiName": "LUTAGU AI",
+        "decision": "LUTAGU 決策建議",
+        "saveTime": "省下 {time}",
+        "viewDetails": "點擊查看詳情",
+        "contexts": {
+            "luggage": "大型行李",
+            "stroller": "推嬰兒車",
+            "accessibility": "行動不便",
+            "rush": "趕時間"
+        },
+        "quickQuestions": {
+            "status": {
+                "text": "現在銀座線有延誤嗎？",
+                "label": "運行狀態"
+            },
+            "accessibility": {
+                "text": "上野站的電梯在哪個出口？",
+                "label": "無障礙設施"
+            },
+            "route": {
+                "text": "從淺草到東京車站最快的路線",
+                "label": "路線規劃"
+            }
+        },
         "connectionError": "連線錯誤，請稍後再試。",
         "offlineBadge": "離線模式",
+        "backOnline": "已恢復連線",
         "tripAdded": "已將「{label}」加入行程！",
         "openingTimetable": "正在為您開啟「{label}」的詳細時刻表...",
         "activeBadge": "即時策略啟用中",
@@ -425,7 +589,10 @@
             "ticket": "票券",
             "weather": "天氣",
             "time": "時間"
-        }
+        },
+        "demoComplete": "演示完成",
+        "restartChat": "重新開始對話",
+        "demoHint": "這是預設演示，正式對話請點擊上方按鈕"
     },
     "systemMenu": {
         "language": "語言",
@@ -447,6 +614,7 @@
         "anonymous": "匿名使用中（可先試用地圖）",
         "continue": "繼續",
         "googleLogin": "使用 Google 登入 / 註冊",
+        "lineLogin": "透過 LINE 登入",
         "or": "或",
         "emailLabel": "Email（Magic Link）",
         "emailPlaceholder": "you@example.com",
@@ -454,10 +622,13 @@
         "magicLinkSent": "已寄出登入連結，請到信箱點擊完成登入。",
         "supabaseNotConfigured": "Supabase 環境變數未設定",
         "enterEmail": "請輸入 Email",
+        "invalidEmail": "Email 格式不正確",
         "initFailed": "登入後初始化失敗",
         "initFailedWithCode": "登入後初始化失敗（{code}）",
         "skipLogin": "先不登入",
         "logout": "登出",
+        "startButton": "開始使用",
+        "privacyNote": "點擊即表示您同意我們的服務條款和隱私政策",
         "tryAsking": "演示範本 (L4 自動演示) - 你可以直接問：",
         "tips": {
             "overtourism": "淺草寺這裡人潮多到有點不舒服，附近有沒有人少一點，但也能感受江戶風情的地方？",
@@ -471,5 +642,6 @@
             "handsfree": "空手觀光",
             "accessibility": "無障礙"
         }
-    }
+    },
+    "validation": "驗證"
 }

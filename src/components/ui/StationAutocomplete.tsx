@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Loader2, MapPin } from 'lucide-react';
 import type { Station } from '@/types/station';
+import type { SupportedLocale } from '@/lib/l4/assistantEngine';
 
 interface StationAutocompleteProps {
     value: string;
     onChange: (value: string) => void;
     onSelect: (station: Station) => void;
     placeholder?: string;
-    locale?: 'zh' | 'zh-TW' | 'ja' | 'en';
+    locale?: SupportedLocale;
     disabled?: boolean;
     className?: string;
 }
@@ -149,7 +150,7 @@ export function StationAutocomplete({
 
     // Click outside to close
     useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
+        const handleClickOutside = (e: MouseEvent | TouchEvent) => {
             if (
                 dropdownRef.current &&
                 !dropdownRef.current.contains(e.target as Node) &&
@@ -161,7 +162,11 @@ export function StationAutocomplete({
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
     }, []);
 
     // Get display name based on locale

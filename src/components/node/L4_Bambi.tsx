@@ -4,9 +4,13 @@ import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
-import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2, Mic, Maximize2, Layout, LayoutPanelTop, Square } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
+
+import { hybridEngine } from '@/lib/l4/HybridEngine';
+
+import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
 
 interface L4_BambiProps {
     data: StationUIProfile;
@@ -30,9 +34,12 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
     const setUserProfileStore = useAppStore(s => s.setUserProfile);
+    const isMobile = useAppStore(s => s.isMobile);
+    const chatDisplayMode = useAppStore(s => s.chatDisplayMode);
+    const setChatDisplayMode = useAppStore(s => s.setChatDisplayMode);
 
     // Robust Name Resolution
-    const displayName = (name?.zh && name?.zh !== '車站' && name?.zh !== 'Station')
+    const displayName = (name?.zh && name?.zh !== tL4('station') && name?.zh !== 'Station')
         ? name.zh
         : (name?.en || name?.ja || (stationId?.split(':').pop()?.split('.').pop()) || tCommon('station'));
 
@@ -85,80 +92,30 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     }, [selectedDemands]);
 
     const quickButtons = useMemo(() => {
-        if (locale === 'ja') {
-            return [
-                {
-                    id: 'route',
-                    label: '最短ルート',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `タスク：ルート案内\n出発：${displayName}（${stationId || ''}）\n目的地：先に「どこへ行きたいか（駅名/観光地）」を聞いてください\n要望：最速/乗換少なめ（どちらか）\n出力：2案、各案にルート・所要時間・乗換のコツを含める`
-                },
-                {
-                    id: 'access',
-                    label: 'バリアフリー',
-                    demands: ['accessibility'],
-                    profile: 'wheelchair',
-                    prompt: `タスク：バリアフリー案内\n現在地：${displayName}（${stationId || ''}）\n要望：エレベーターで移動できる出口/動線を優先\n不足情報：必要なら「どの出口/どの路線/どの方向か」を先に質問\n出力：結論→確認質問（必要時）の順で短く`
-                },
-                {
-                    id: 'status',
-                    label: '遅延・代替',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `タスク：運行状況\n影響駅：${displayName}（${stationId || ''}）\nやること：この駅に影響する遅延/運休があるか確認し、あるなら代替案を1つ\n出力：要点だけ（1-2行）`
-                }
-            ];
-        }
-        if (locale === 'en') {
-            return [
-                {
-                    id: 'route',
-                    label: 'Fastest Route',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `Task: Route planning\nFrom: ${displayName} (${stationId || ''})\nTo: Ask me where I want to go first (station/POI)\nPreference: fastest vs fewer transfers (pick one)\nOutput: 2 options, each with route, ETA, and key transfer tips`
-                },
-                {
-                    id: 'access',
-                    label: 'Accessibility',
-                    demands: ['accessibility'],
-                    profile: 'wheelchair',
-                    prompt: `Task: Accessibility guidance\nLocation: ${displayName} (${stationId || ''})\nPriority: elevator-only path and accessible exits\nIf missing info: ask which exit/line/direction\nOutput: direct recommendation first, then questions if needed`
-                },
-                {
-                    id: 'status',
-                    label: 'Delays & Backup',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `Task: Live disruptions\nAffected station: ${displayName} (${stationId || ''})\nDo: check any delays/disruptions impacting this station and give 1 backup suggestion\nOutput: concise bullets`
-                }
-            ];
-        }
         return [
             {
                 id: 'route',
-                label: '最快路線',
+                label: tL4('quickButtons.route.label'),
                 demands: ['speed'],
                 profile: 'general',
-                prompt: `任務：路線規劃\n出發：${displayName}（${stationId || ''}）\n目的地：請先問我想去哪一站/景點\n需求：最快 / 少轉乘（二選一）\n輸出：給 2 個選項，各含：路線、預估時間、轉乘關鍵點`
+                prompt: tL4('quickButtons.route.prompt', { station: displayName, id: stationId || '' })
             },
             {
-                id: 'access',
-                label: '無障礙',
-                demands: ['accessibility'],
-                profile: 'wheelchair',
-                prompt: `任務：無障礙動線\n目前：${displayName}（${stationId || ''}）\n需求：優先電梯可達的出口/動線\n不足資訊：需要時先問我「哪個出口 / 哪條線 / 方向」\n輸出：先給結論，再補必要追問`
+                id: 'fare',
+                label: tL4('quickButtons.fare.label'),
+                demands: ['budget'],
+                profile: 'general',
+                prompt: tL4('quickButtons.fare.prompt', { station: displayName, id: stationId || '' })
             },
             {
-                id: 'status',
-                label: '延誤/替代',
+                id: 'timetable',
+                label: tL4('quickButtons.timetable.label'),
                 demands: ['speed'],
                 profile: 'general',
-                prompt: `任務：即時運行狀態\n影響車站：${displayName}（${stationId || ''}）\n要做：確認是否有延誤/停駛，若有給 1 個替代建議\n輸出：重點 1-2 行`
+                prompt: tL4('quickButtons.timetable.prompt', { station: displayName, id: stationId || '' })
             }
         ];
-    }, [displayName, locale, stationId]);
+    }, [displayName, stationId, tL4]);
 
     // Scroll to bottom
     useEffect(() => {
@@ -176,7 +133,39 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         setIsOffline(false);
         setThinkingStep(tL4('thinking.initializing'));
 
+        // --- Hybrid Engine Interception ---
+        try {
+            const hybridRes = await hybridEngine.processRequest({
+                text,
+                locale: locale as any,
+                context: {
+                    currentStation: stationId
+                }
+            });
+
+            if (hybridRes) {
+                console.log(`[L4_Bambi] Intercepted by ${hybridRes.source}`);
+                const assistantMsg = {
+                    role: 'assistant' as const,
+                    content: hybridRes.content,
+                    source: hybridRes.source,
+                    data: hybridRes.data
+                };
+
+                // Add a small delay to feel more natural
+                await new Promise(r => setTimeout(r, 800));
+
+                setMessages(prev => [...prev, assistantMsg]);
+                setIsLoading(false);
+                setThinkingStep('');
+                return;
+            }
+        } catch (err) {
+            console.error('[HybridEngine] Error:', err);
+        }
+
         // Fake "Thinking Steps" to visualize the 4 Dimensions
+        const startTime = Date.now();
         const steps = [
             tL4('thinking.l2'),
             tL4('thinking.l3'),
@@ -193,10 +182,16 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         }, 1500);
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000); // 延長至 60 秒
+
+            console.log('[L4_Bambi] Sending request to Dify:', text);
+
             // Use Dify Agent endpoint
             const response = await fetch('/api/dify/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
                 body: JSON.stringify({
                     query: text,
                     conversation_id: difyConversationIdRef.current,
@@ -245,6 +240,12 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
 
                     try {
                         const data = JSON.parse(payload);
+
+                        // Debug log for all Dify events
+                        if (data.event !== 'ping') {
+                            console.log(`[L4_Bambi] Dify Event: ${data.event}`, data.task_id || '');
+                        }
+
                         if (data.conversation_id && typeof data.conversation_id === 'string') {
                             difyConversationIdRef.current = data.conversation_id;
                         }
@@ -260,6 +261,8 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                     }
                 }
             }
+
+            metricsCollector.recordRequest('llm', Date.now() - startTime);
 
         } catch (error) {
             console.error('Chat Error:', error);
@@ -292,6 +295,40 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         { id: 'accessibility', icon: Compass, label: tL4('demands.accessibility') }
     ];
 
+    if (isMobile && chatDisplayMode === 'mini') {
+        const lastMessage = messages[messages.length - 1];
+        return (
+            <div className="flex flex-col h-full bg-white relative overflow-hidden">
+                <div className="flex-1 flex items-center px-4 gap-3">
+                    <div className="p-2 bg-indigo-600 rounded-xl text-white shrink-0">
+                        <Sparkles size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-500 truncate">
+                            {lastMessage ? lastMessage.content : tL4('initialMessage', { station: displayName })}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                        <button
+                            className="p-2.5 bg-slate-50 text-slate-400 rounded-full active:scale-95 transition-all"
+                            onClick={() => {
+                                // Voice input placeholder
+                            }}
+                        >
+                            <Mic size={18} />
+                        </button>
+                        <button
+                            className="p-2.5 bg-indigo-50 text-indigo-600 rounded-full active:scale-95 transition-all"
+                            onClick={() => setChatDisplayMode('split')}
+                        >
+                            <Maximize2 size={18} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
             {/* Header Area */}
@@ -306,12 +343,36 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{tL4('subtitle')}</p>
                             {isOffline && (
                                 <span className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700/90 bg-amber-100/70 px-2 py-0.5 rounded-full border border-amber-200/70">
-                                    {locale.startsWith('en') ? 'Offline' : locale.startsWith('ja') ? 'オフライン' : '離線'}
+                                    {tCommon('temporarilyUnavailable')}
                                 </span>
                             )}
                         </div>
                     </div>
                 </div>
+
+                {/* Display Mode Toggle for Mobile */}
+                {isMobile && (
+                    <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                        <button
+                            onClick={() => setChatDisplayMode('mini')}
+                            className={`p-2 rounded-lg transition-all ${chatDisplayMode === 'mini' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
+                        >
+                            <Square size={16} />
+                        </button>
+                        <button
+                            onClick={() => setChatDisplayMode('split')}
+                            className={`p-2 rounded-lg transition-all ${chatDisplayMode === 'split' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
+                        >
+                            <LayoutPanelTop size={16} />
+                        </button>
+                        <button
+                            onClick={() => setChatDisplayMode('full')}
+                            className={`p-2 rounded-lg transition-all ${chatDisplayMode === 'full' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}
+                        >
+                            <Layout size={16} />
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Message Area */}
@@ -325,50 +386,50 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                     {getLocaleString(bestCard.title, locale)}
                                 </div>
                             </div>
-                    <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
-                        <MapPin size={18} className="text-white" />
-                    </div>
-                </div>
-                <div className="mt-3 text-sm font-bold text-white/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
-                    {getLocaleString(bestCard.description, locale)}
-                </div>
+                            <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+                                <MapPin size={18} className="text-white" />
+                            </div>
+                        </div>
+                        <div className="mt-3 text-sm font-bold text-white/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
+                            {getLocaleString(bestCard.description, locale)}
+                        </div>
 
-                <div className="mt-4 flex gap-2">
-                    <button
-                        onClick={() => {
-                            if (bestCard.actionUrl) {
-                                window.open(bestCard.actionUrl, '_blank', 'noopener,noreferrer');
-                                return;
-                            }
-                            if (otherCards.length > 0) setIsOtherOpen(true);
-                        }}
-                        className="flex-1 py-3 rounded-2xl bg-white text-indigo-700 font-black text-xs tracking-widest hover:bg-indigo-50 transition-colors active:scale-[0.99]"
-                    >
-                        {getLocaleString(bestCard.actionLabel, locale) || tCommon('view')}
-                    </button>
+                        <div className="mt-4 flex gap-2">
+                            <button
+                                onClick={() => {
+                                    if (bestCard.actionUrl) {
+                                        window.open(bestCard.actionUrl, '_blank', 'noopener,noreferrer');
+                                        return;
+                                    }
+                                    if (otherCards.length > 0) setIsOtherOpen(true);
+                                }}
+                                className="flex-1 py-3 rounded-2xl bg-white text-indigo-700 font-black text-xs tracking-widest hover:bg-indigo-50 transition-colors active:scale-[0.99]"
+                            >
+                                {getLocaleString(bestCard.actionLabel, locale) || tCommon('view')}
+                            </button>
 
-                    {/* Apply on Map: focus current station and reveal map context */}
-                    <button
-                        onClick={() => {
-                            if (stationId) {
-                                setCurrentNode(stationId);
-                                setBottomSheetOpen(false);
-                            }
-                        }}
-                        className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
-                    >
-                        {locale.startsWith('ja') ? '地図に反映' : locale.startsWith('en') ? 'Apply to Map' : '套用到地圖'}
-                    </button>
+                            {/* Apply on Map: focus current station and reveal map context */}
+                            <button
+                                onClick={() => {
+                                    if (stationId) {
+                                        setCurrentNode(stationId);
+                                        setBottomSheetOpen(false);
+                                    }
+                                }}
+                                className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
+                            >
+                                {locale.startsWith('ja') ? '地図に反映' : locale.startsWith('en') ? 'Apply to Map' : '套用到地圖'}
+                            </button>
 
-                    {otherCards.length > 0 && (
-                        <button
-                            onClick={() => setIsOtherOpen(v => !v)}
-                            className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
-                        >
-                            {tL4('alternatives')}
-                        </button>
-                    )}
-                </div>
+                            {otherCards.length > 0 && (
+                                <button
+                                    onClick={() => setIsOtherOpen(v => !v)}
+                                    className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
+                                >
+                                    {tL4('alternatives')}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -398,7 +459,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
 
                 {messages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${msg.role === 'user'
+                        <div className={`w-full rounded-2xl p-4 shadow-sm ${msg.role === 'user'
                             ? 'bg-indigo-600 text-white rounded-tr-none'
                             : 'bg-white text-slate-700 rounded-tl-none border border-slate-100'
                             }`}>
@@ -427,7 +488,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
 
             {/* Input Overlay (Hybrid Strategy) */}
             <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-[32px]">
-                <div className="space-y-4 max-w-lg mx-auto">
+                <div className="space-y-4 w-full">
                     <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide">
                         {quickButtons.map(b => (
                             <button
@@ -484,15 +545,15 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                 <button
                                     key={demand.id}
                                     onClick={() => {
-                                    if (isSelected) {
-                                        setSelectedDemands(prev => prev.filter(id => id !== demand.id));
-                                    } else {
-                                        setSelectedDemands(prev => [...prev, demand.id]);
-                                    }
+                                        if (isSelected) {
+                                            setSelectedDemands(prev => prev.filter(id => id !== demand.id));
+                                        } else {
+                                            setSelectedDemands(prev => [...prev, demand.id]);
+                                        }
 
-                                    // Sync user profile for map & agent
-                                    if (demand.id === 'accessibility') setUserProfileStore('wheelchair');
-                                    if (demand.id === 'family') setUserProfileStore('stroller');
+                                        // Sync user profile for map & agent
+                                        if (demand.id === 'accessibility') setUserProfileStore('wheelchair');
+                                        if (demand.id === 'family') setUserProfileStore('stroller');
                                     }}
                                     disabled={isLoading}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-black whitespace-nowrap transition-all ${isSelected

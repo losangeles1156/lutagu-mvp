@@ -1,13 +1,31 @@
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { STATION_LINES, LINES, StationLineDef } from '@/lib/constants/stationLines';
+import { STATION_LINES, LINES, StationLineDef, OPERATOR_COLORS } from '@/lib/constants/stationLines';
 import { getLiveWeather } from '@/lib/weather/service';
 
 // API Keys
 const API_KEY_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN; // Permanent (Metro/Toei)
 const API_KEY_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP; // Temporary (JR East)
 const ODPT_BASE_URL = 'https://api.odpt.org/api/v4';
+
+function cleanLineName(id: string): string {
+    let name = id
+        .replace(/^odpt\.Railway:/, '')
+        .replace(/^odpt\.Station:/, '')
+        .replace(/^(JR-East|TokyoMetro|Toei|Keikyu|Tokyu|Odakyu|Keio|Seibu|Tobu|Yurikamome|TWR|TokyoMonorail)\./, '');
+
+    // Remove known suffixes if present
+    name = name.replace(/Line$/, '');
+
+    // Handle Dot/CamelCase to Space
+    name = name.replace(/\./g, ' ');
+    // Insert space before capital letters if not already there (CamelCase -> Camel Case)
+    // Avoid breaking if it's already spaced
+    name = name.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+    return name.trim();
+}
 
 // Dynamic line lookup from nodes.transit_lines as fallback
 async function getNodeTransitLines(stationId: string): Promise<StationLineDef[]> {
@@ -22,37 +40,69 @@ async function getNodeTransitLines(stationId: string): Promise<StationLineDef[]>
             return [];
         }
 
-        return data.transit_lines.map((lineName: string) => {
-            // Try to match to known LINES constant
-            const lineNameLower = lineName.toLowerCase();
-            const match = Object.entries(LINES).find(([key, def]) => {
-                const enMatch = def.name.en.toLowerCase().includes(lineNameLower) ||
-                    lineNameLower.includes(def.name.en.toLowerCase().replace(' line', ''));
-                const jaMatch = def.name.ja.includes(lineName);
-                return enMatch || jaMatch;
+        return data.transit_lines.map((lineId: string) => {
+            const lineNameLower = lineId.toLowerCase();
+
+            // 1. Strict Match against LINES constant (Preferred)
+            const strictMatch = Object.values(LINES).find(def => {
+                const defEn = def.name.en.toLowerCase().replace(' line', '');
+                return lineNameLower.includes(defEn) ||
+                    (def.name.ja && lineId.includes(def.name.ja));
             });
 
-            if (match) {
-                return match[1];
+            if (strictMatch) {
+                return strictMatch;
             }
 
-            // Fallback: create generic line definition
-            // Detect operator from line name patterns
+            // 2. Fallback Construction with Smart Logic
             let operator: StationLineDef['operator'] = 'Other';
-            if (lineName.includes('Metro') || ['Ginza', 'Marunouchi', 'Hibiya', 'Tozai', 'Chiyoda', 'Yurakucho', 'Hanzomon', 'Namboku', 'Fukutoshin'].some(l => lineName.includes(l))) {
+            let color = '#9CA3AF'; // Default Gray
+
+            if (lineId.includes('Metro') || lineId.includes('Ginza') || lineId.includes('Marunouchi')) {
                 operator = 'Metro';
-            } else if (lineName.includes('Toei') || ['Asakusa', 'Mita', 'Shinjuku', 'Oedo'].some(l => lineName.includes(l))) {
+                color = OPERATOR_COLORS['Metro'];
+            } else if (lineId.includes('Toei') || lineId.includes('Oedo') || lineId.includes('Asakusa')) {
                 operator = 'Toei';
-            } else if (lineName.includes('JR') || ['Yamanote', 'Keihin', 'Chuo', 'Sobu', 'Joban', 'Keiyo'].some(l => lineName.includes(l))) {
+                color = OPERATOR_COLORS['Toei'];
+            } else if (lineId.includes('JR') || lineId.includes('Yamanote') || lineId.includes('Chuo')) {
                 operator = 'JR';
-            } else if (lineName.includes('Keikyu') || ['Keikyu', 'Airport'].some(l => lineName.includes(l))) {
-                operator = 'Private'; // or 'Keikyu' if we want specific
+                color = OPERATOR_COLORS['JR'];
+            } else if (lineId.includes('Keikyu')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Keikyu'];
+            } else if (lineId.includes('Odakyu')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Odakyu'];
+            } else if (lineId.includes('Keio')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Keio'];
+            } else if (lineId.includes('Seibu')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Seibu'];
+            } else if (lineId.includes('Tobu')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Tobu'];
+            } else if (lineId.includes('Tokyu')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Tokyu'];
+            } else if (lineId.includes('Yurikamome')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Yurikamome'];
+            } else if (lineId.includes('Monorail')) {
+                operator = 'Private';
+                color = OPERATOR_COLORS['Monorail'];
             }
+
+            const baseName = cleanLineName(lineId);
 
             return {
-                name: { ja: lineName, en: lineName, zh: lineName },
+                name: {
+                    ja: `${baseName}線`, // Fallback attempt
+                    en: `${baseName} Line`,
+                    zh: `${baseName}線`
+                },
                 operator,
-                color: operator === 'Metro' ? '#00A7DB' : operator === 'Toei' ? '#E73387' : operator === 'JR' ? '#008A3C' : '#00C3E3'
+                color
             } as StationLineDef;
         });
     } catch (e) {

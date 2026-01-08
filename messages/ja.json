@@ -1,10 +1,12 @@
 {
     "Home": {
         "title": "LUTAGU",
+        "subtitle": "東京交通 AI アシスタント",
         "currentLocation": "現在地",
-        "askLutagu": "ルタグに聞く...",
-        "aiPlaceholder": "ルタグに聞く...",
-        "brandStory": "LU は鹿、LU は路。鹿の斑点のように、すべての駅、すべての路線に、私たちはタグをつけました。ルタグ —— AIも人も読める、やさしい道しるべ。"
+        "askLutagu": "LUTAGUに聞く...",
+        "aiPlaceholder": "LUTAGUに聞く...",
+        "brandStory": "LU は鹿、LU は路。鹿の斑点のように、すべての駅、すべての路線に、私たちはタグをつけました。LUTAGU —— AIも人も読める、やさしい道しるべ。",
+        "version": "LUTAGU v3.0 • 交通に活力を"
     },
     "status": {
         "crowded": "混雑",
@@ -59,7 +61,10 @@
             "tokyo": "東京"
         },
         "enableLocation": "位置情報を有効化",
-        "browseFirst": "まずは見る"
+        "nearbyNode": "最寄り駅",
+        "browseFirst": "まずは見る",
+        "skipConfirmTitle": "スキップしてもよろしいですか？",
+        "skipConfirmDesc": "後からメニューからオンボーディングを再開できます。"
     },
     "tripGuard": {
         "title": "旅の見守り",
@@ -108,9 +113,14 @@
     },
     "tabs": {
         "dna": "周辺",
+        "dnaLabel": "周辺の生活機能",
         "live": "状況",
+        "liveLabel": "リアルタイム運行状況",
         "facility": "設備",
+        "facilityLabel": "駅設備",
         "lutagu": "提案",
+        "lutaguLabel": "スマートガイド",
+        "lutaguSmart": "スマートガイド",
         "transit": "時刻・運賃"
     },
     "tag": {
@@ -186,7 +196,7 @@
     },
     "l1": {
         "dnaTitle": "生活機能",
-        "lutaguInsight": "ルタグ インサイト",
+        "lutaguInsight": "LUTAGU インサイト",
         "nearbyHighlights": "周辺スポット (300m)",
         "noHighlights": "周辺スポットなし",
         "menuTitle": "カテゴリ詳細",
@@ -231,6 +241,14 @@
         "criticalAlert": "緊急特別警報",
         "warningAlert": "気象警報",
         "weatherAlert": "気象警報",
+        "noLiveData": "運行情報がありません",
+        "liveFlightTitle": "リアルタイムフライト情報",
+        "tokyoWide": "TOKYO WIDE",
+        "vacanTitle": "混雑マップ",
+        "vacanDesc": "周辺のお店や施設の空き状況をリアルタイムで確認",
+        "vacanCta": "VACANマップを開く",
+        "vacanSub": "空きを探す",
+        "dataSourceDisclaimer": "出典：運行状況・ユーザー通報",
         "status": {
             "normal": "平常運転",
             "delay": "遅延発生",
@@ -252,11 +270,7 @@
             "full": "満員"
         },
         "emergencyAlert": "緊急警報",
-        "viewJmaDetails": "気象庁の詳細を見る",
-        "vacanTitle": "混雑マップ",
-        "vacanDesc": "周辺のお店や施設の空き状況をリアルタイムで確認",
-        "vacanCta": "VACANマップを開く",
-        "vacanSub": "空きを探す"
+        "viewJmaDetails": "気象庁の詳細を見る"
     },
     "l3": {
         "servicesTitle": "サービス施設",
@@ -315,17 +329,50 @@
             "sizes": "サイズ: {sizes}",
             "count": "個数: {count}",
             "hours": "営業時間: {hours}",
-            "askLutagu": "この施設について ルタグ に聞く"
+            "askLutagu": "この施設について LUTAGU に聞く"
         }
     },
     "l4": {
+        "viewModes": {
+            "recommendations": "スマートヒント",
+            "planner": "プランナー",
+            "chat": "AIアシスタント"
+        },
+        "plannerTabs": {
+            "route": "ルート検索",
+            "time": "出発時刻"
+        },
         "initialMessage": "こんにちは！ここは {station} です。どこへ行きたいですか？ルート、運賃、時刻表を調べられます。",
-        "strategyTitle": "ルタグ 戦略",
+        "resetConfirm": "会話をリセットしますか？",
+        "station": "駅",
+        "quickButtons": {
+            "route": {
+                "label": "最速ルート",
+                "prompt": "任務：ルート案内\n出発：{station}（{id}）\n目的地：ユーザーに行き先を尋ねる\n要求：最速 / 乗換少なめ\n出力：ルート、所要時間、乗換ポイントを含む 2 つのオプション"
+            },
+            "access": {
+                "label": "バリアフリー",
+                "prompt": "任務：バリアフリー動線\n現在：{station}（{id}）\n要求：エレベーター優先の出口/動線\n不足情報：必要に応じて「どの出口 / どの路線 / 方向」を先に確認する\n出力：結論を先に、必要に応じて追問を補う"
+            },
+            "status": {
+                "label": "遅延・代替",
+                "prompt": "任務：リアルタイム運行状況\n対象駅：{station}（{id}）\n内容：遅延・運転見合わせの有無を確認し、あれば代替案を1つ提示\n出力：要点を1〜2行で"
+            },
+            "fare": {
+                "label": "運賃検索",
+                "prompt": "任務：運賃照會\n起點：{station}（{id}）\n目的地：ユーザーに行き先を尋ねる\n出力：IC運賃と切符運賃。24時間券などの割引券があれば言及する"
+            },
+            "timetable": {
+                "label": "次發列車",
+                "prompt": "任務：時刻表照會\n駅名：{station}（{id}）\n要求：直近 3 本の発車時間とホーム情報\n出力：リスト形式。行き先と列車種別を表示"
+            }
+        },
+        "strategyTitle": "LUTAGU 戦略",
         "subtitle": "リアルタイムデータに基づく提案",
         "topPick": "おすすめ",
         "alternatives": "その他の選択肢",
         "disclaimer": "提案は現在の交通、天気、施設状況に基づいています。",
-        "lutaguStrategy": "ルタグ 提案",
+        "lutaguStrategy": "LUTAGU 提案",
         "suggestion": "提案",
         "psychAlert": "心構え",
         "synthesisTitle": "意思決定サポート",
@@ -350,7 +397,7 @@
         "inputPlaceholder": "ルートを相談（質問・雑談...）",
         "chatError": "通信エラーが発生しました。",
         "userLabel": "あなた",
-        "lutaguLabel": "ルタグ",
+        "lutaguLabel": "LUTAGU",
         "thinking": {
             "initializing": "認知エンジンを起動中...",
             "l2": "運行・天気を分析中...",
@@ -363,6 +410,72 @@
             "reasoning": "根拠",
             "l2Verified": "ライブ状況を確認",
             "odptVerified": "ODPT時刻表を確認"
+        },
+        "intent": {
+            "inputPlaceholder": "質問を入力（例：新宿への行き方、銀座線の時刻表...）",
+            "route": "ルート検索",
+            "routeDesc": "最速または最も快適なルートを探す",
+            "timetable": "時刻表",
+            "timetableDesc": "駅のリアルタイム出発時間を確認",
+            "fare": "運賃照会",
+            "fareDesc": "各ルートの乗車料金を計算",
+            "status": "運行状況",
+            "statusDesc": "路線の遅延や運転見合わせを確認",
+            "amenity": "駅施設",
+            "amenityDesc": "エレベーター、ロッカー、トイレを探す"
+        },
+        "dashboard": {
+            "aiAssistant": "LUTAGU AI アシスタント",
+            "aiSubtitle": "この駅の専門家の洞察とヒントを集約",
+            "aiPerceptionActive": "AI 感知中",
+            "trapGuide": "トラップガイド",
+            "proHacks": "プロのハック",
+            "expertTips": "専門家のアドバイス",
+            "proHacksLabel": "プロのハック",
+            "startChat": "AIアシスタントとチャット",
+            "discoverInspiration": "インスピレーションを発見",
+            "adjustPreferences": "ヒントの好みを調整",
+            "ridingGuide": "LUTAGU 乗車ガイド",
+            "expertMode": "エキスパートモード",
+            "smartPlanning": "スマートプランニング",
+            "smartPlanningSub": "Smart Planning",
+            "travelPreferences": "旅行の好み Travel Preferences",
+            "templateLibrary": "テンプレートライブラリ Template Library",
+            "generatePlan": "プランを生成",
+            "details": "詳細データ",
+            "nextStep": "次へ",
+            "endOfDemo": "デモ終了",
+            "modes": {
+                "recommendations": "スマートヒント",
+                "planner": "プランナー",
+                "chat": "AIアシスタント"
+            },
+            "planner": {
+                "route": "ルート検索",
+                "timetable": "出発時刻"
+            },
+            "errors": {
+                "unresolvedStation": "駅を解決できません。",
+                "pickTask": "まずタスクを選択してください。",
+                "selectDestination": "目的地を選択してください。",
+                "noFareFound": "運賃が見つかりませんでした。",
+                "fareQueryFailed": "運賃の照会に失敗しました。",
+                "destinationRequired": "目的地が必要です。",
+                "noRouteFound": "ルートが見つかりませんでした。",
+                "routePlanningFailed": "ルート検索に失敗しました。"
+            },
+            "fare": {
+                "to": "目的地",
+                "ic": "ICカード",
+                "ticket": "切符"
+            },
+            "timetable": {
+                "noData": "時刻表データがありません",
+                "noDataSub": "この方向の運行情報はありません",
+                "to": "方面 ",
+                "weekday": "平日 Weekday",
+                "weekend": "土休日 Weekend"
+            }
         }
     },
     "weather": {
@@ -389,6 +502,15 @@
         "nature": "自然",
         "countSuffix": "件"
     },
+    "error": {
+        "systemError": "問題が発生しました",
+        "loadingError": "ページの読み込み中に問題が発生しました。ページを更新してください。",
+        "componentError": "コンポーネントの読み込みに失敗しました",
+        "componentErrorDesc": "コンポーネントが読み込めませんでした。ページを更新するか、前のページに戻ってください。",
+        "retry": "再試行",
+        "refresh": "更新",
+        "back": "戻る"
+    },
     "common": {
         "tabMenu": "機能メニュー",
         "viewAll": "すべて見る",
@@ -403,11 +525,43 @@
         "languageSwitcherLabel": "言語を切り替える",
         "back": "戻る",
         "select": "選択",
-        "clear": "クリア"
+        "clear": "クリア",
+        "cancel": "キャンセル",
+        "confirm": "確認",
+        "skipOnboardingTitle": "スキップしてもよろしいですか？",
+        "skipOnboardingDesc": "後からメニューからオンボーディングを再開できます。",
+        "feedbackSent": "フィードバックを受け付けました！",
+        "noNodesInView": "このエリアに駅はありません",
+        "noNodesHint": "地図を移動またはズームして他のエリアを表示してください"
     },
     "chat": {
+        "aiName": "LUTAGU AI",
+        "decision": "LUTAGU 意思決定提案",
+        "saveTime": "{time} 短縮",
+        "viewDetails": "タップして詳細を表示",
+        "contexts": {
+            "luggage": "大きな荷物",
+            "stroller": "ベビーカー",
+            "accessibility": "バリアフリー",
+            "rush": "急ぎ"
+        },
+        "quickQuestions": {
+            "status": {
+                "text": "銀座線は遅延していますか？",
+                "label": "運行状況"
+            },
+            "accessibility": {
+                "text": "上野駅のエレベーターはどこですか？",
+                "label": "バリアフリー"
+            },
+            "route": {
+                "text": "浅草から東京駅への最速ルート",
+                "label": "ルート検索"
+            }
+        },
         "connectionError": "通信エラーが発生しました。時間をおいて再試行してください。",
         "offlineBadge": "オフライン",
+        "backOnline": "オンライン復帰",
         "tripAdded": "「{label}」を旅程に追加しました！",
         "openingTimetable": "「{label}」の詳細時刻表を開いています...",
         "activeBadge": "リアルタイム戦略有効中",
@@ -421,7 +575,7 @@
         "retrySend": "再送",
         "emptyTitle": "どのようなお手伝いをしましょうか？",
         "emptyDescription": "ルート、現在の状況、バリアフリー情報をお尋ねください",
-        "quickQuestions": "よくある質問",
+        "quickQuestionsOld": "よくある質問",
         "intent": {
             "route": "ルート",
             "status": "運行",
@@ -429,7 +583,10 @@
             "ticket": "チケット",
             "weather": "天気",
             "time": "時間"
-        }
+        },
+        "demoComplete": "デモ終了",
+        "restartChat": "新しい会話を始める",
+        "demoHint": "これはデモです。上記ボタンでAIチャットを開始します。"
     },
     "systemMenu": {
         "language": "言語",
@@ -451,6 +608,7 @@
         "anonymous": "ゲストモード（地図を先にお試しください）",
         "continue": "続ける",
         "googleLogin": "Google でログイン / 登録",
+        "lineLogin": "LINEでログイン",
         "or": "または",
         "emailLabel": "メール（マジックリンク）",
         "emailPlaceholder": "you@example.com",
@@ -458,11 +616,14 @@
         "magicLinkSent": "ログインリンクを送信しました。メールをご確認ください。",
         "supabaseNotConfigured": "Supabase 環境変数が設定されていません",
         "enterEmail": "メールアドレスを入力してください",
+        "invalidEmail": "メールアドレスの形式が正しくありません",
         "initFailed": "ログイン後の初期化に失敗しました",
         "initFailedWithCode": "ログイン後の初期化に失敗しました（{code}）",
-        "skipLogin": "ログインしない",
+        "skipLogin": "ログインせずに開始",
         "logout": "ログアウト",
-        "tryAsking": "デモシナリオ (L4自動デモ) - 直接質問できます：",
+        "startButton": "利用を開始する",
+        "privacyNote": "開始をクリックすることで、利用規約とプライバシーポリシーに同意したものとみなされます",
+        "tryAsking": "デモシナリオ - 質問してみる:",
         "issues": {
             "overtourism": "オーバーツーリズム",
             "disruption": "運行情報・振替",

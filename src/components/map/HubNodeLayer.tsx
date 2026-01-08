@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useMap, useMapEvents } from 'react-leaflet';
 import { NodeDatum } from '@/lib/api/nodes';
 import { NodeMarker } from './NodeMarker';
@@ -31,58 +31,110 @@ interface HubNodeLayerProps {
     zone: 'core' | 'buffer' | 'outer';
     locale: string;
     showAllNodes?: boolean;  // Show all nodes when in Ward Mode
+    currentNodeId?: string | null;  // Currently selected node for highlighting
 }
 
 function clamp(value: number, min: number, max: number) {
     return Math.min(max, Math.max(min, value));
 }
 
-export function HubNodeLayer({ 
-    nodes, 
-    hubDetails, 
-    zone, 
-    locale, 
-    showAllNodes = false 
+// [PERF] Max nodes to render based on zoom level
+function getMaxNodesForZoom(zoom: number): number {
+    if (zoom >= 16) return 200;  // High zoom: show more detail
+    if (zoom >= 14) return 100;  // Medium zoom
+    if (zoom >= 12) return 50;   // Low zoom: only major hubs
+    return 30;                    // Very low zoom: minimal
+}
+
+export function HubNodeLayer({
+    nodes,
+    hubDetails,
+    zone,
+    locale,
+    showAllNodes = false,
+    currentNodeId = null
 }: HubNodeLayerProps) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
+    // [PERF] Track viewport bounds for culling
+    const [boundsVersion, setBoundsVersion] = useState(0);
 
+    // [PERF] Update bounds version on map movement to trigger re-filtering
     useMapEvents({
-        zoomend: () => setZoom(map.getZoom())
+        zoomend: () => {
+            setZoom(map.getZoom());
+            setBoundsVersion(v => v + 1);
+        },
+        moveend: () => {
+            setBoundsVersion(v => v + 1);
+        }
     });
 
     const clampedZoom = clamp(zoom, 1, 22);
+    const maxNodes = getMaxNodesForZoom(clampedZoom);
+
+    // [PERF] Get current viewport bounds for culling
+    const viewportBounds = useMemo(() => {
+        // Trigger recalculation when boundsVersion changes
+        void boundsVersion;
+        const bounds = map.getBounds();
+        // Pad bounds slightly to prevent pop-in at edges
+        const padded = bounds.pad(0.1);
+        return {
+            swLat: padded.getSouthWest().lat,
+            swLng: padded.getSouthWest().lng,
+            neLat: padded.getNorthEast().lat,
+            neLng: padded.getNorthEast().lng
+        };
+    }, [map, boundsVersion]);
 
     // Filter nodes based on:
-    // 1. showAllNodes mode - show all or just hubs
+    // 1. Viewport culling - only render nodes in view
     // 2. is_active status - filter out inactive nodes
     // 3. parent_hub_id - only show hubs (parent_hub_id IS NULL)
+    // 4. Zoom density control - limit nodes at low zoom
     const visibleNodes = useMemo(() => {
         if (!nodes || nodes.length === 0) return [];
-        
-        return nodes.filter(n => {
+
+        // Step 1: Filter by activity and hub status
+        const eligibleNodes = nodes.filter(n => {
             // Skip if is_active = false (from node_hierarchy)
-            // Note: is_active might be in different locations based on the API response
-            const isActive = (n as any).is_active ?? 
-                            (n as any).hierarchy?.is_active ?? 
-                            (n as any).node_hierarchy?.is_active ?? 
-                            true;
+            const isActive = (n as any).is_active ??
+                (n as any).hierarchy?.is_active ??
+                (n as any).node_hierarchy?.is_active ??
+                true;
             if (isActive === false) return false;
 
             if (showAllNodes) return true;
-            
+
             // Only show hubs (parent_hub_id IS NULL)
             return n.parent_hub_id === null;
         });
-    }, [nodes, showAllNodes]);
+
+        // Step 2: Viewport culling - only keep nodes within current view
+        const inViewNodes = eligibleNodes.filter(n => {
+            const [lon, lat] = n.location.coordinates;
+            return lat >= viewportBounds.swLat &&
+                lat <= viewportBounds.neLat &&
+                lon >= viewportBounds.swLng &&
+                lon <= viewportBounds.neLng;
+        });
+
+        // Step 3: Prioritize nodes with hub members (more important)
+        const prioritized = [...inViewNodes].sort((a, b) => {
+            const aCount = hubDetails[a.id]?.member_count || 0;
+            const bCount = hubDetails[b.id]?.member_count || 0;
+            return bCount - aCount;  // Higher member count first
+        });
+
+        // Step 4: Limit to maxNodes for performance
+        return prioritized.slice(0, maxNodes);
+    }, [nodes, showAllNodes, viewportBounds, hubDetails, maxNodes]);
 
     return (
         <>
             {visibleNodes.map((node) => {
                 const details = hubDetails[node.id];
-                if (!details) {
-                    console.log('[DEBUG] No hubDetails for node:', node.id);
-                }
                 return (
                     <NodeMarker
                         key={node.id}
@@ -91,6 +143,7 @@ export function HubNodeLayer({
                         zone={zone}
                         locale={locale}
                         zoom={clampedZoom}
+                        isSelected={node.id === currentNodeId}
                     />
                 );
             })}

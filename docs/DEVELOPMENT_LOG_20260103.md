@@ -249,7 +249,7 @@ npx supabase db push --include-all
 ### 6.1 關鍵檔案清單
 
 ```
-BambiGO_MVP/
+LUTAGU_MVP/
 ├── src/
 │   ├── app/
 │   │   ├── api/
@@ -385,8 +385,8 @@ NEXT_PUBLIC_DEFAULT_ZOOM=15
 
 ### 9.2 內部資源
 
-1. **技術規格文件**: `BambiGO 技術架構規格書V4.0.pdf`
-2. **數據庫 Schema**: `BambiGO_Database_Schema_v4.1.md.pdf`
+1. **技術規格文件**: `LUTAGU 技術架構規格書V4.0.pdf`
+2. **數據庫 Schema**: `LUTAGU_Database_Schema_v4.1.md.pdf`
 3. **開發指南**: `DEVELOPMENT_GUIDE.md`
 
 ---

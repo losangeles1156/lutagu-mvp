@@ -4,12 +4,14 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { orchestrator, AgentMessage } from '@/lib/agent/orchestrator';
 import { resolveNodeInheritance } from '@/lib/nodes/inheritance';
 
-type SupportedLocale = 'zh-TW' | 'en' | 'ja';
+type SupportedLocale = 'zh-TW' | 'zh' | 'en' | 'ja' | 'ar';
 
 function normalizeLocale(input?: string): SupportedLocale {
     const raw = String(input || '').trim().toLowerCase();
     if (raw.startsWith('ja')) return 'ja';
     if (raw.startsWith('en')) return 'en';
+    if (raw.startsWith('ar')) return 'ar';
+    if (raw.startsWith('zh-cn') || raw === 'zh') return 'zh';
     return 'zh-TW';
 }
 
@@ -43,7 +45,17 @@ function createOfflineStream(message: string, mode: 'offline' | 'error' = 'error
  * Check if AI service is available
  */
 function isAIServiceAvailable(): boolean {
-    return Boolean(process.env.MISTRAL_API_KEY);
+    const hasMistral = Boolean(process.env.MISTRAL_API_KEY);
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY);
+    const model = process.env.AI_SLM_MODEL;
+    
+    console.log('[Chat API] Checking AI availability:', { 
+        hasMistral, 
+        hasGemini, 
+        model 
+    });
+    
+    return hasMistral || hasGemini;
 }
 
 export async function POST(req: NextRequest) {
@@ -59,11 +71,12 @@ export async function POST(req: NextRequest) {
 
         // Early check: If no AI service available, return offline mode immediately
         if (!isAIServiceAvailable()) {
-            const offlineMessage = locale === 'zh-TW'
-                ? '🔌 目前為離線模式（AI 服務未連線）。我仍可以提供基礎站點資訊。'
-                : locale === 'ja'
-                    ? '🔌 現在オフラインモードです。基本的な駅情報はお手伝いできます。'
-                    : '🔌 Currently in offline mode (AI service unavailable). I can still provide basic station info.';
+            let offlineMessage = '🔌 Currently in offline mode (AI service unavailable). I can still provide basic station info.';
+            if (locale === 'zh-TW') offlineMessage = '🔌 目前為離線模式（AI 服務未連線）。我仍可以提供基礎站點資訊。';
+            else if (locale === 'zh') offlineMessage = '🔌 目前为离线模式（AI 服务未连线）。我仍可以提供基础站点信息。';
+            else if (locale === 'ja') offlineMessage = '🔌 現在オフラインモードです。基本的な駅情報はお手伝いできます。';
+            else if (locale === 'ar') offlineMessage = '🔌 حالياً في وضع عدم الاتصال (خدمة AI غير متوفرة). لا يزال بإمكاني تقديم معلومات المحطة الأساسية.';
+            
             return new NextResponse(createOfflineStream(offlineMessage, 'offline'), {
                 headers: { 'Content-Type': 'text/event-stream' }
             });
@@ -87,7 +100,8 @@ export async function POST(req: NextRequest) {
 
         const systemPrompt = `You are "Lutagu", a professional DIGITAL STATION STAFF at ${nodeName}.
 Tone: Helpful, warm, and natural.
-Locale: ${locale}.
+CRITICAL: You MUST answer the user in the language of "${locale}". 
+Even if the user greets you in another language, your response MUST be in ${locale}.
 Current Station: ${nodeName} (${nodeId || 'Ambient Mode'}).
 User Profile: ${userProfile}.
 

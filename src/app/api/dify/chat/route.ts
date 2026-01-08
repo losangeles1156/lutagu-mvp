@@ -62,10 +62,16 @@ export async function POST(req: NextRequest) {
         };
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 延長至 60 秒以支援複雜 Agent 任務
 
         let difyResponse: Response;
         try {
+            console.log(`[Dify] Forwarding request to Dify: ${DIFY_API_BASE}/chat-messages`, {
+                query: difyPayload.query,
+                user: difyPayload.user,
+                conversation_id: difyPayload.conversation_id
+            });
+            
             difyResponse = await fetch(`${DIFY_API_BASE}/chat-messages`, {
                 method: 'POST',
                 headers: {
@@ -94,6 +100,7 @@ export async function POST(req: NextRequest) {
 
         // For streaming mode, pipe the response directly
         if (response_mode === 'streaming') {
+            console.log(`[Dify] Starting stream response for query: ${query}`);
             return new NextResponse(difyResponse.body, {
                 headers: {
                     'Content-Type': 'text/event-stream',

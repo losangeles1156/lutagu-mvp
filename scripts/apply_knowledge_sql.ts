@@ -44,10 +44,9 @@ async function main() {
         let cleanJsonString = jsonString.replace(/''/g, "'");
 
         // 2. Fix Lone Surrogates (The cause of "Empty or invalid json" in Postgres)
-        // Remove Low Surrogates not preceded by High Surrogates
-        cleanJsonString = cleanJsonString.replace(/(?<!\\u[dD][89abAB][0-9a-fA-F]{2})\\u[dD][c-fC-F][0-9a-fA-F]{2}/g, "");
-        // Remove High Surrogates not followed by Low Surrogates
-        cleanJsonString = cleanJsonString.replace(/\\u[dD][89abAB][0-9a-fA-F]{2}(?!\\u[dD][c-fC-F][0-9a-fA-F]{2})/g, "");
+        // Simplified replacement without Lookbehind
+        cleanJsonString = cleanJsonString.replace(/\\u[dD][c-fC-F][0-9a-fA-F]{2}/g, "");
+        cleanJsonString = cleanJsonString.replace(/\\u[dD][89abAB][0-9a-fA-F]{2}/g, "");
 
         try {
             const payload = JSON.parse(cleanJsonString);

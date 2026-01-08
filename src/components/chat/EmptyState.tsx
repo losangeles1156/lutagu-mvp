@@ -11,23 +11,23 @@ export function EmptyState({ onSend }: EmptyStateProps) {
     const locale = useLocale();
     const t = useTranslations('chat');
 
-    const quickQuestions = locale === 'ja' 
-        ? [
-            { icon: Clock, text: '銀座線は遅延していますか？', label: '運行狀態' },
-            { icon: Accessibility, text: '上野駅の出口エレベーターはどこ？', label: '無障礙設施' },
-            { icon: Compass, text: '浅草から東京まで一番早いルート', label: '路線規劃' }
-        ]
-        : locale === 'en'
-        ? [
-            { icon: Clock, text: 'Is the Ginza Line delayed?', label: 'Status' },
-            { icon: Accessibility, text: 'Where are the elevators at Ueno?', label: 'Accessibility' },
-            { icon: Compass, text: 'Fastest route from Asakusa to Tokyo', label: 'Route' }
-        ]
-        : [
-            { icon: Clock, text: '現在銀座線有延誤嗎？', label: '運行狀態' },
-            { icon: Accessibility, text: '上野站的電梯在哪個出口？', label: '無障礙設施' },
-            { icon: Compass, text: '從淺草到東京車站最快的路線', label: '路線規劃' }
-        ];
+    const quickQuestions = [
+        { 
+            icon: Clock, 
+            text: t('quickQuestions.status.text'), 
+            label: t('quickQuestions.status.label') 
+        },
+        { 
+            icon: Accessibility, 
+            text: t('quickQuestions.accessibility.text'), 
+            label: t('quickQuestions.accessibility.label') 
+        },
+        { 
+            icon: Compass, 
+            text: t('quickQuestions.route.text'), 
+            label: t('quickQuestions.route.label') 
+        }
+    ];
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">

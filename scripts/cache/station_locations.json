@@ -1,0 +1,1158 @@
+{
+  "Ginza": {
+    "lat": 35.6712,
+    "lon": 139.7665
+  },
+  "Kyobashi": {
+    "lat": 35.6766,
+    "lon": 139.7702
+  },
+  "Mitsukoshimae": {
+    "lat": 35.6846,
+    "lon": 139.7746
+  },
+  "Kayabacho": {
+    "lat": 35.6797,
+    "lon": 139.7801
+  },
+  "Nihombashi": {
+    "lat": 35.6812,
+    "lon": 139.7745
+  },
+  "Shinjuku": {
+    "lat": 35.6896,
+    "lon": 139.7006
+  },
+  "Shibuya": {
+    "lat": 35.658,
+    "lon": 139.7016
+  },
+  "Ikebukuro": {
+    "lat": 35.7289,
+    "lon": 139.7109
+  },
+  "Asakusa": {
+    "lat": 35.7106,
+    "lon": 139.7967
+  },
+  "Tawaramachi": {
+    "lat": 35.7107,
+    "lon": 139.7892
+  },
+  "Iriya": {
+    "lat": 35.7208,
+    "lon": 139.785
+  },
+  "Inaricho": {
+    "lat": 35.7115,
+    "lon": 139.7825
+  },
+  "Minowa": {
+    "lat": 35.7296,
+    "lon": 139.7914
+  },
+  "Yushima": {
+    "lat": 35.7077,
+    "lon": 139.7711
+  },
+  "Tsukiji": {
+    "lat": 35.6695,
+    "lon": 139.7715
+  },
+  "Ochanomizu": {
+    "lat": 35.6994,
+    "lon": 139.7638
+  },
+  "Kasumigaseki": {
+    "lat": 35.6726,
+    "lon": 139.7513
+  },
+  "Iidabashi": {
+    "lat": 35.7021,
+    "lon": 139.745
+  },
+  "Hibiya": {
+    "lat": 35.6738,
+    "lon": 139.7599
+  },
+  "Otemachi": {
+    "lat": 35.6867,
+    "lon": 139.7639
+  },
+  "Shimbashi": {
+    "lat": 35.6665,
+    "lon": 139.7582
+  },
+  "Roppongi": {
+    "lat": 35.6633,
+    "lon": 139.7322
+  },
+  "Omotesando": {
+    "lat": 35.6653,
+    "lon": 139.7126
+  },
+  "Hiroo": {
+    "lat": 35.6532,
+    "lon": 139.7219
+  },
+  "Akasaka-mitsuke": {
+    "lat": 35.677,
+    "lon": 139.7371
+  },
+  "Kanda": {
+    "lat": 35.6952811,
+    "lon": 139.7704909
+  },
+  "Ueno": {
+    "lat": 35.7117224,
+    "lon": 139.776143
+  },
+  "Ogikubo": {
+    "lat": 35.7042744,
+    "lon": 139.6200267
+  },
+  "Tokyo": {
+    "lat": 35.6811505,
+    "lon": 139.7659765
+  },
+  "Yotsuya": {
+    "lat": 35.6860587,
+    "lon": 139.730612
+  },
+  "Akihabara": {
+    "lat": 35.6975265,
+    "lon": 139.7726842
+  },
+  "Ebisu": {
+    "lat": 35.6469738,
+    "lon": 139.7086461
+  },
+  "Hatchobori": {
+    "lat": 35.674006,
+    "lon": 139.7764689
+  },
+  "Kita-senju": {
+    "lat": 35.748916,
+    "lon": 139.8047536
+  },
+  "Minami-senju": {
+    "lat": 35.7324237,
+    "lon": 139.7988482
+  },
+  "Naka-meguro": {
+    "lat": 35.6441395,
+    "lon": 139.6988317
+  },
+  "Nakano": {
+    "lat": 35.7051575,
+    "lon": 139.6662118
+  },
+  "Takadanobaba": {
+    "lat": 35.7126839,
+    "lon": 139.7036425
+  },
+  "Toyocho": {
+    "lat": 35.6701014,
+    "lon": 139.8163047
+  },
+  "Ayase": {
+    "lat": 35.7621283,
+    "lon": 139.8248669
+  },
+  "Kita-ayase": {
+    "lat": 35.7768999,
+    "lon": 139.832145
+  },
+  "Meiji-jingumae": {
+    "lat": 35.6689704,
+    "lon": 139.7043604
+  },
+  "Nishi-nippori": {
+    "lat": 35.7325841,
+    "lon": 139.7672175
+  },
+  "Shin-ochanomizu": {
+    "lat": 35.6972185,
+    "lon": 139.7656264
+  },
+  "Yoyogi-uehara": {
+    "lat": 35.66865,
+    "lon": 139.679251
+  },
+  "Ichigaya": {
+    "lat": 35.6911864,
+    "lon": 139.7356237
+  },
+  "Kotake-mukaihara": {
+    "lat": 35.7433734,
+    "lon": 139.6795267
+  },
+  "Shin-kiba": {
+    "lat": 35.6450853,
+    "lon": 139.8264631
+  },
+  "Toyosu": {
+    "lat": 35.6544497,
+    "lon": 139.7969513
+  },
+  "Yurakucho": {
+    "lat": 35.6758436,
+    "lon": 139.7633623
+  },
+  "Aoyama-itchome": {
+    "lat": 35.671999,
+    "lon": 139.725183
+  },
+  "Hanzomon": {
+    "lat": 35.6852213,
+    "lon": 139.7415832
+  },
+  "Kinshicho": {
+    "lat": 35.6957184,
+    "lon": 139.8144323
+  },
+  "Kiyosumi-shirakawa": {
+    "lat": 35.6825333,
+    "lon": 139.7988393
+  },
+  "Nagatacho": {
+    "lat": 35.6779456,
+    "lon": 139.7415775
+  },
+  "Oshiage": {
+    "lat": 35.7090672,
+    "lon": 139.8136624
+  },
+  "Akabane-iwabuchi": {
+    "lat": 35.7829684,
+    "lon": 139.7198532
+  },
+  "Komagome": {
+    "lat": 35.7365848,
+    "lon": 139.7472412
+  },
+  "Meguro": {
+    "lat": 35.6340669,
+    "lon": 139.7157332
+  },
+  "Oji-kamiya": {
+    "lat": 35.7650552,
+    "lon": 139.7357178
+  },
+  "Oji": {
+    "lat": 35.7554462,
+    "lon": 139.7371227
+  },
+  "Tameike-sanno": {
+    "lat": 35.6708419,
+    "lon": 139.7412872
+  },
+  "Senkawa": {
+    "lat": 35.7394416,
+    "lon": 139.6875885
+  },
+  "Shinjuku-sanchome": {
+    "lat": 35.692525,
+    "lon": 139.7057682
+  },
+  "Daimon": {
+    "lat": 35.6569261,
+    "lon": 139.7547098
+  },
+  "Togoshi": {
+    "lat": 35.614502,
+    "lon": 139.7163642
+  },
+  "Sengakuji": {
+    "lat": 35.6377427,
+    "lon": 139.7391684
+  },
+  "Asakusabashi": {
+    "lat": 35.6983347,
+    "lon": 139.7870548
+  },
+  "Gotanda": {
+    "lat": 35.6264901,
+    "lon": 139.7243449
+  },
+  "Higashi-nihombashi": {
+    "lat": 35.6922927,
+    "lon": 139.7847763
+  },
+  "Mita": {
+    "lat": 35.6476619,
+    "lon": 139.7483983
+  },
+  "Nakanobu": {
+    "lat": 35.605254,
+    "lon": 139.7136531
+  },
+  "Nishi-takashimadaira": {
+    "lat": 35.7918932,
+    "lon": 139.6451474
+  },
+  "Shin-itabashi": {
+    "lat": 35.7487966,
+    "lon": 139.7199032
+  },
+  "Sugamo": {
+    "lat": 35.7334119,
+    "lon": 139.7394273
+  },
+  "Suidobashi": {
+    "lat": 35.7020419,
+    "lon": 139.7536358
+  },
+  "Takashimadaira": {
+    "lat": 35.7895131,
+    "lon": 139.660367
+  },
+  "Bakuro-yokoyama": {
+    "lat": 35.6917307,
+    "lon": 139.7840766
+  },
+  "Iwamotocho": {
+    "lat": 35.695614,
+    "lon": 139.7753176
+  },
+  "Mizue": {
+    "lat": 35.6932479,
+    "lon": 139.8976392
+  },
+  "Ojima": {
+    "lat": 35.6903724,
+    "lon": 139.8357601
+  },
+  "Higashi-nakano": {
+    "lat": 35.7073477,
+    "lon": 139.6832315
+  },
+  "Nakai": {
+    "lat": 35.714067,
+    "lon": 139.6863482
+  },
+  "Nerima": {
+    "lat": 35.7373437,
+    "lon": 139.6544918
+  },
+  "Ryogoku": {
+    "lat": 35.6960022,
+    "lon": 139.792755
+  },
+  "Shinjuku-nishiguchi": {
+    "lat": 35.6931366,
+    "lon": 139.6991763
+  },
+  "Ueno-okachimachi": {
+    "lat": 35.7076875,
+    "lon": 139.7728646
+  },
+  "Yoyogi": {
+    "lat": 35.682258,
+    "lon": 139.7019899
+  },
+  "Nippori": {
+    "lat": 35.7280064,
+    "lon": 139.7713776
+  },
+  "Taishido": {
+    "lat": 35.6445861,
+    "lon": 139.666303
+  },
+  "Oyama": {
+    "lat": 35.7486238,
+    "lon": 139.7024348
+  },
+  "Utsunomiya": {
+    "lat": 36.5593987,
+    "lon": 139.8795909
+  },
+  "Shimo-kitazawa": {
+    "lat": 35.6612659,
+    "lon": 139.6669207
+  },
+  "Shimo-takaido": {
+    "lat": 35.6661345,
+    "lon": 139.6415946
+  },
+  "Keio-nagayama": {
+    "lat": 35.6302581,
+    "lon": 139.4483564
+  },
+  "Keio-Tama Center": {
+    "lat": 35.6253226,
+    "lon": 139.424397
+  },
+  "Kichijoji": {
+    "lat": 35.7026985,
+    "lon": 139.5795432
+  },
+  "Bubaigawara": {
+    "lat": 35.6684475,
+    "lon": 139.4689952
+  },
+  "Takao": {
+    "lat": 35.6423428,
+    "lon": 139.2826625
+  },
+  "Keisei-Kanamachi": {
+    "lat": 35.7686276,
+    "lon": 139.8704721
+  },
+  "Keisei-Sekiya": {
+    "lat": 35.7439951,
+    "lon": 139.8117763
+  },
+  "Keisei-Takasago": {
+    "lat": 35.7509396,
+    "lon": 139.8671221
+  },
+  "Aoto": {
+    "lat": 35.7455654,
+    "lon": 139.8561184
+  },
+  "Keisei-Ueno": {
+    "lat": 35.7117682,
+    "lon": 139.775179
+  },
+  "Haneda Airport Terminal 1": {
+    "lat": 35.5491583,
+    "lon": 139.7845527
+  },
+  "Haneda Airport Terminal 2": {
+    "lat": 35.5508205,
+    "lon": 139.7882659
+  },
+  "Haneda Airport Terminal 3": {
+    "lat": 35.5450118,
+    "lon": 139.7670385
+  },
+  "Tenkubashi": {
+    "lat": 35.5484604,
+    "lon": 139.7547278
+  },
+  "Hamamatsucho": {
+    "lat": 35.6551111,
+    "lon": 139.7570622
+  },
+  "Oimachi": {
+    "lat": 35.6074356,
+    "lon": 139.7346118
+  },
+  "Osaki": {
+    "lat": 35.6193903,
+    "lon": 139.7284866
+  },
+  "Nishi-magome": {
+    "lat": 35.5872987,
+    "lon": 139.7063115
+  },
+  "Magome": {
+    "lat": 35.5967788,
+    "lon": 139.7119274
+  },
+  "Takanawadai": {
+    "lat": 35.6316762,
+    "lon": 139.7306846
+  },
+  "Higashi-ginza": {
+    "lat": 35.670715,
+    "lon": 139.7683097
+  },
+  "Takaracho": {
+    "lat": 35.6751038,
+    "lon": 139.7714824
+  },
+  "Ningyocho": {
+    "lat": 35.6862799,
+    "lon": 139.7821879
+  },
+  "Higashi-Nihombashi": {
+    "lat": 35.6922927,
+    "lon": 139.7847763
+  },
+  "Kuramae": {
+    "lat": 35.7032122,
+    "lon": 139.790939
+  },
+  "Honjo-azumabashi": {
+    "lat": 35.7085609,
+    "lon": 139.8043487
+  },
+  "Oshiage <SKYTREE>": {
+    "lat": 35.7102863,
+    "lon": 139.8132943
+  },
+  "Yoyogi-koen": {
+    "lat": 35.6690323,
+    "lon": 139.6901224
+  },
+  "Meiji-jingumae <Harajuku>": {
+    "lat": 35.6696991,
+    "lon": 139.7031448
+  },
+  "Omote-sando": {
+    "lat": 35.6651609,
+    "lon": 139.7125432
+  },
+  "Nogizaka": {
+    "lat": 35.6661905,
+    "lon": 139.7283561
+  },
+  "Akasaka": {
+    "lat": 35.672224,
+    "lon": 139.736388
+  },
+  "Kokkai-gijidomae": {
+    "lat": 35.6736889,
+    "lon": 139.7434262
+  },
+  "Nijubashimae <Marunouchi>": {
+    "lat": 35.6803213,
+    "lon": 139.7616161
+  },
+  "Nezu": {
+    "lat": 35.718286,
+    "lon": 139.765619
+  },
+  "Sendagi": {
+    "lat": 35.7255677,
+    "lon": 139.7632458
+  },
+  "Machiya": {
+    "lat": 35.7421779,
+    "lon": 139.7800901
+  },
+  "Wakamatsu-kawada": {
+    "lat": 35.6992849,
+    "lon": 139.7184084
+  },
+  "Ushigome-Yanagicho": {
+    "lat": 35.6994561,
+    "lon": 139.7255744
+  },
+  "Ushigome-kagurazaka": {
+    "lat": 35.7009139,
+    "lon": 139.7359501
+  },
+  "Kasuga": {
+    "lat": 35.7084896,
+    "lon": 139.7527409
+  },
+  "Hongo-sanchome": {
+    "lat": 35.7066036,
+    "lon": 139.7599358
+  },
+  "Shin-okachimachi": {
+    "lat": 35.7070597,
+    "lon": 139.7818428
+  },
+  "Morishita": {
+    "lat": 35.6878265,
+    "lon": 139.796278
+  },
+  "Kiyosumi": {
+    "lat": 35.6820504,
+    "lon": 139.7987644
+  },
+  "Monzen-nakacho": {
+    "lat": 35.67391,
+    "lon": 139.796165
+  },
+  "Tsukishima": {
+    "lat": 35.664645,
+    "lon": 139.7845639
+  },
+  "Kachidoki": {
+    "lat": 35.6592449,
+    "lon": 139.7776578
+  },
+  "Tsukijishijo": {
+    "lat": 35.6648789,
+    "lon": 139.7668843
+  },
+  "Shiodome": {
+    "lat": 35.662907,
+    "lon": 139.7599723
+  },
+  "Akabanebashi": {
+    "lat": 35.6550406,
+    "lon": 139.7439828
+  },
+  "Azabu-juban": {
+    "lat": 35.6551789,
+    "lon": 139.7371506
+  },
+  "Kokuritsu-kyogijo": {
+    "lat": 35.6801003,
+    "lon": 139.7139442
+  },
+  "Tochomae": {
+    "lat": 35.6906065,
+    "lon": 139.692814
+  },
+  "Nishi-shinjuku-gochome": {
+    "lat": 35.6898839,
+    "lon": 139.6845183
+  },
+  "Nakano-sakaue": {
+    "lat": 35.6971173,
+    "lon": 139.6817498
+  },
+  "Ochiai-minami-nagasaki": {
+    "lat": 35.7232248,
+    "lon": 139.6835782
+  },
+  "Toshimaen": {
+    "lat": 35.7421722,
+    "lon": 139.6490783
+  },
+  "Hikarigaoka": {
+    "lat": 35.7585523,
+    "lon": 139.6293801
+  },
+  "Chikatetsu-narimasu": {
+    "lat": 35.7766946,
+    "lon": 139.6312465
+  },
+  "Chikatetsu-akatsuka": {
+    "lat": 35.7699229,
+    "lon": 139.6441259
+  },
+  "Heiwadai": {
+    "lat": 35.7582229,
+    "lon": 139.6532308
+  },
+  "Hikawadai": {
+    "lat": 35.7497818,
+    "lon": 139.6650083
+  },
+  "Kanamecho": {
+    "lat": 35.7329675,
+    "lon": 139.6999142
+  },
+  "Zoshigaya": {
+    "lat": 35.7202465,
+    "lon": 139.7147782
+  },
+  "Nishi-waseda": {
+    "lat": 35.7079347,
+    "lon": 139.7090404
+  },
+  "Higashi-shinjuku": {
+    "lat": 35.6978967,
+    "lon": 139.7075443
+  },
+  "Kita-sando": {
+    "lat": 35.6784974,
+    "lon": 139.705414
+  },
+  "Gaiemmae": {
+    "lat": 35.6704649,
+    "lon": 139.7178823
+  },
+  "Toranomon Hills": {
+    "lat": 35.6674688,
+    "lon": 139.7477648
+  },
+  "Suehirocho": {
+    "lat": 35.7029361,
+    "lon": 139.7716793
+  },
+  "Ueno-hirokoji": {
+    "lat": 35.7078328,
+    "lon": 139.7729909
+  },
+  "Hiro-o": {
+    "lat": 35.6520629,
+    "lon": 139.7222033
+  },
+  "Kamiyacho": {
+    "lat": 35.6628993,
+    "lon": 139.7458769
+  },
+  "Toranomon-hills": {
+    "lat": 35.6674688,
+    "lon": 139.7477648
+  },
+  "Kodemmacho": {
+    "lat": 35.6907525,
+    "lon": 139.7784526
+  },
+  "Naka-okachimachi": {
+    "lat": 35.7064914,
+    "lon": 139.7761952
+  },
+  "Shirokanedai": {
+    "lat": 35.6381027,
+    "lon": 139.7265652
+  },
+  "Shirokane-takanawa": {
+    "lat": 35.6433523,
+    "lon": 139.7345747
+  },
+  "Shibakoen": {
+    "lat": 35.655327,
+    "lon": 139.749832
+  },
+  "Uchisaiwaicho": {
+    "lat": 35.6694556,
+    "lon": 139.7553799
+  },
+  "Jimbocho": {
+    "lat": 35.6959273,
+    "lon": 139.7572047
+  },
+  "Hakusan": {
+    "lat": 35.7215048,
+    "lon": 139.7521578
+  },
+  "Sengoku": {
+    "lat": 35.7277122,
+    "lon": 139.7449946
+  },
+  "Nishi-sugamo": {
+    "lat": 35.7435537,
+    "lon": 139.7286973
+  },
+  "Itabashi-kuyakushomae": {
+    "lat": 35.7513477,
+    "lon": 139.71004
+  },
+  "Itabashihoncho": {
+    "lat": 35.7614305,
+    "lon": 139.7055249
+  },
+  "Motohasunuma": {
+    "lat": 35.7685214,
+    "lon": 139.7024438
+  },
+  "Nishidai": {
+    "lat": 35.7869663,
+    "lon": 139.6740221
+  },
+  "Shin-takashimadaira": {
+    "lat": 35.7903397,
+    "lon": 139.6529603
+  },
+  "Minami-asagaya": {
+    "lat": 35.6993987,
+    "lon": 139.6357088
+  },
+  "Sin-koenji": {
+    "lat": 35.6978735,
+    "lon": 139.648688
+  },
+  "Higashi-koenji": {
+    "lat": 35.6978043,
+    "lon": 139.6577966
+  },
+  "Shin-nakano": {
+    "lat": 35.6974599,
+    "lon": 139.6686428
+  },
+  "Nishi-shinjuku": {
+    "lat": 35.6944315,
+    "lon": 139.6927667
+  },
+  "Shinjuku-gyoemmae": {
+    "lat": 35.6885735,
+    "lon": 139.7107396
+  },
+  "Yotsuya-sanchome": {
+    "lat": 35.687988,
+    "lon": 139.7205752
+  },
+  "Awajicho": {
+    "lat": 35.6950614,
+    "lon": 139.767473
+  },
+  "Korakuen": {
+    "lat": 35.7068198,
+    "lon": 139.7520811
+  },
+  "Myogadani": {
+    "lat": 35.7171896,
+    "lon": 139.7369396
+  },
+  "Shin-otsuka": {
+    "lat": 35.7257823,
+    "lon": 139.7299234
+  },
+  "Nakano-fujimicho": {
+    "lat": 35.6905641,
+    "lon": 139.6670329
+  },
+  "Nakano-shimbashi": {
+    "lat": 35.692021,
+    "lon": 139.6738042
+  },
+  "Roppongi-itchome": {
+    "lat": 35.6649728,
+    "lon": 139.738849
+  },
+  "Todaimae": {
+    "lat": 35.7173365,
+    "lon": 139.7581767
+  },
+  "Hon-komagome": {
+    "lat": 35.7247631,
+    "lon": 139.7537008
+  },
+  "Shin-egota": {
+    "lat": 35.7326022,
+    "lon": 139.6704167
+  },
+  "Nerima-kasugacho": {
+    "lat": 35.751398,
+    "lon": 139.6403755
+  },
+  "Shimura-sakaue": {
+    "lat": 35.7751437,
+    "lon": 139.6957299
+  },
+  "Shimura-sanchome": {
+    "lat": 35.7775108,
+    "lon": 139.6859968
+  },
+  "Hasune": {
+    "lat": 35.7853419,
+    "lon": 139.6793865
+  },
+  "Honancho": {
+    "lat": 35.6835007,
+    "lon": 139.6576888
+  },
+  "Nishigahara": {
+    "lat": 35.7460496,
+    "lon": 139.7421722
+  },
+  "Shimo": {
+    "lat": 35.7779045,
+    "lon": 139.7325256
+  },
+  "Akebonobashi": {
+    "lat": 35.6924146,
+    "lon": 139.7228634
+  },
+  "Kudanshita": {
+    "lat": 35.6954759,
+    "lon": 139.7520299
+  },
+  "Ogawamachi": {
+    "lat": 35.6949465,
+    "lon": 139.7662986
+  },
+  "Bakuro yokoyama": {
+    "lat": 35.6917307,
+    "lon": 139.7840766
+  },
+  "Hamacho": {
+    "lat": 35.6875884,
+    "lon": 139.7868701
+  },
+  "Kikukawa": {
+    "lat": 35.6876571,
+    "lon": 139.8062125
+  },
+  "Sumiyoshi": {
+    "lat": 35.6900137,
+    "lon": 139.8155019
+  },
+  "Nishi-ojima": {
+    "lat": 35.6886899,
+    "lon": 139.8264878
+  },
+  "Higashi-ojima": {
+    "lat": 35.6889178,
+    "lon": 139.8497956
+  },
+  "Funabori": {
+    "lat": 35.6841126,
+    "lon": 139.8640547
+  },
+  "Ichinoe": {
+    "lat": 35.6860437,
+    "lon": 139.8831198
+  },
+  "Shinozaki": {
+    "lat": 35.7060788,
+    "lon": 139.9038381
+  },
+  "Ochiai": {
+    "lat": 35.7106637,
+    "lon": 139.6859133
+  },
+  "Waseda": {
+    "lat": 35.7062201,
+    "lon": 139.7199397
+  },
+  "Kagurazaka": {
+    "lat": 35.7039298,
+    "lon": 139.7341347
+  },
+  "Takebashi": {
+    "lat": 35.689906,
+    "lon": 139.7604285
+  },
+  "Kiba": {
+    "lat": 35.6698172,
+    "lon": 139.8057798
+  },
+  "Minami-sunamachi": {
+    "lat": 35.6683446,
+    "lon": 139.8318642
+  },
+  "Nishi-kasai": {
+    "lat": 35.6642104,
+    "lon": 139.8591806
+  },
+  "Kasai": {
+    "lat": 35.6636282,
+    "lon": 139.8726921
+  },
+  "Urayasu": {
+    "lat": 35.6359285,
+    "lon": 139.8786741
+  },
+  "Higashi-ikebukuro": {
+    "lat": 35.7256214,
+    "lon": 139.7193857
+  },
+  "Gokokuji": {
+    "lat": 35.7190787,
+    "lon": 139.7274629
+  },
+  "Edogawabashi": {
+    "lat": 35.7095155,
+    "lon": 139.7335636
+  },
+  "Kojimachi": {
+    "lat": 35.6837921,
+    "lon": 139.7380022
+  },
+  "Sakuradamon": {
+    "lat": 35.6774009,
+    "lon": 139.7515757
+  },
+  "Ginza-itchome": {
+    "lat": 35.6752803,
+    "lon": 139.7659293
+  },
+  "Shintomicho": {
+    "lat": 35.6706344,
+    "lon": 139.7734197
+  },
+  "Tatsumi": {
+    "lat": 35.646756,
+    "lon": 139.809295
+  },
+  "Suitengumae": {
+    "lat": 35.6840844,
+    "lon": 139.7841615
+  },
+  "Myoden": {
+    "lat": 35.6910897,
+    "lon": 139.9244066
+  },
+  "Nishi-funabashi": {
+    "lat": 35.7080891,
+    "lon": 139.9588569
+  },
+  "Wakoshi": {
+    "lat": 35.7884589,
+    "lon": 139.6125511
+  },
+  "Motoyawata": {
+    "lat": 35.7237135,
+    "lon": 139.9270611
+  },
+  "Hashimoto": {
+    "lat": 35.594997,
+    "lon": 139.3439652
+  },
+  "Keio-inadazutsumi": {
+    "lat": 35.6343347,
+    "lon": 139.5324645
+  },
+  "Keisei-Chiba": {
+    "lat": 35.6116063,
+    "lon": 140.1144215
+  },
+  "Keisei-Makuharihongo": {
+    "lat": 35.672623,
+    "lon": 140.0421251
+  },
+  "Keisei-Narita": {
+    "lat": 35.776475,
+    "lon": 140.3152569
+  },
+  "Keisei-Funabashi": {
+    "lat": 35.7001753,
+    "lon": 139.9856033
+  },
+  "Keisei-Sakura": {
+    "lat": 35.7252033,
+    "lon": 140.2297298
+  },
+  "Narita Airport Terminal 1": {
+    "lat": 35.7653969,
+    "lon": 140.3859899
+  },
+  "Sogosando": {
+    "lat": 35.752702,
+    "lon": 140.2809736
+  },
+  "Higashi-Matsudo": {
+    "lat": 35.7699563,
+    "lon": 139.9431054
+  },
+  "Shin-Kamagaya": {
+    "lat": 35.7804825,
+    "lon": 139.9997254
+  },
+  "Minami-gyotoku": {
+    "lat": 35.6727318,
+    "lon": 139.902279
+  },
+  "Gyotoku": {
+    "lat": 35.6828816,
+    "lon": 139.9145062
+  },
+  "Baraki-nakayama": {
+    "lat": 35.7031484,
+    "lon": 139.9416595
+  },
+  "Sano": {
+    "lat": 36.3163292,
+    "lon": 139.5790301
+  },
+  "Ino": {
+    "lat": 36.3570844,
+    "lon": 139.0230202
+  },
+  "Takasaki": {
+    "lat": 36.3208614,
+    "lon": 139.0122633
+  },
+  "Tochigi": {
+    "lat": 36.3723299,
+    "lon": 139.7313358
+  },
+  "Sendai": {
+    "lat": 31.8137835,
+    "lon": 130.3122563
+  },
+  "Miyauchi": {
+    "lat": 37.4220724,
+    "lon": 138.8400378
+  },
+  "Nagaoka": {
+    "lat": 37.4478778,
+    "lon": 138.8541667
+  },
+  "Matsumoto": {
+    "lat": 36.2307332,
+    "lon": 137.9644409
+  },
+  "Shiojiri": {
+    "lat": 36.1143838,
+    "lon": 137.9477924
+  },
+  "Mito": {
+    "lat": 36.3720955,
+    "lon": 140.4756548
+  },
+  "Aizu-Wakamatsu": {
+    "lat": 37.5085622,
+    "lon": 139.9301344
+  },
+  "Koide": {
+    "lat": 37.2337116,
+    "lon": 138.953482
+  },
+  "Iwanuma": {
+    "lat": 38.1121315,
+    "lon": 140.8639243
+  },
+  "Kuroiso": {
+    "lat": 36.9701908,
+    "lon": 140.0601121
+  },
+  "Minami-Sendai": {
+    "lat": 38.197257,
+    "lon": 140.8833873
+  },
+  "Nagamachi": {
+    "lat": 38.2285294,
+    "lon": 140.8848863
+  },
+  "Natori": {
+    "lat": 38.1733422,
+    "lon": 140.8827769
+  },
+  "Tatekoshi": {
+    "lat": 38.1431219,
+    "lon": 140.8803223
+  },
+  "Nasushiobara": {
+    "lat": 36.9315325,
+    "lon": 140.0210685
+  },
+  "Omiya": {
+    "lat": 35.9063869,
+    "lon": 139.6243304
+  },
+  "Urasa": {
+    "lat": 37.1672238,
+    "lon": 138.9228409
+  },
+  "Hoshakuji": {
+    "lat": 36.6314909,
+    "lon": 139.979591
+  },
+  "Kobuchizawa": {
+    "lat": 35.8635909,
+    "lon": 138.3169496
+  },
+  "Isesaki": {
+    "lat": 36.3268395,
+    "lon": 139.1942704
+  },
+  "Maebashi": {
+    "lat": 36.3832125,
+    "lon": 139.0726408
+  },
+  "Tomobe": {
+    "lat": 36.3507978,
+    "lon": 140.3062895
+  },
+  "Nikko": {
+    "lat": 36.7471805,
+    "lon": 139.6219414
+  },
+  "Iwaki": {
+    "lat": 37.0582102,
+    "lon": 140.8921829
+  },
+  "Kitakata": {
+    "lat": 37.6439547,
+    "lon": 139.8678239
+  },
+  "Okaya": {
+    "lat": 36.0567607,
+    "lon": 138.0446054
+  },
+  "Kumagaya": {
+    "lat": 36.1390715,
+    "lon": 139.390035
+  },
+  "Echigo-Kawaguchi": {
+    "lat": 37.2729129,
+    "lon": 138.8619611
+  },
+  "Echigo-Yuzawa": {
+    "lat": 36.9359414,
+    "lon": 138.8090456
+  }
+}

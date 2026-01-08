@@ -16,19 +16,22 @@ export interface OrchestratorContext {
 }
 
 export class AgentOrchestrator {
-    private apiKey: string;
+    private mistralKey: string;
+    private geminiKey: string;
     private model: string;
     private maxIterations = 5;
 
     constructor() {
-        this.apiKey = process.env.MISTRAL_API_KEY || '';
+        this.mistralKey = process.env.MISTRAL_API_KEY || '';
+        this.geminiKey = process.env.GEMINI_API_KEY || '';
         this.model = process.env.AI_SLM_MODEL || 'mistral-small-latest';
     }
 
     async run(messages: AgentMessage[], context: OrchestratorContext): Promise<ReadableStream> {
         const encoder = new TextEncoder();
-        const apiKey = this.apiKey;
         const model = this.model;
+        const isGemini = model.toLowerCase().includes('gemini');
+        const apiKey = isGemini ? this.geminiKey : this.mistralKey;
         const maxIterations = this.maxIterations;
 
         let currentIteration = 0;
@@ -39,12 +42,16 @@ export class AgentOrchestrator {
             async start(controller) {
                 try {
                     // Send initial meta event
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'meta', mode: 'mistral' })}\n\n`));
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event: 'meta', mode: isGemini ? 'gemini' : 'mistral' })}\n\n`));
 
                     while (currentIteration < maxIterations) {
                         currentIteration++;
 
-                        const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                        const apiUrl = isGemini 
+                            ? `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`
+                            : `https://api.mistral.ai/v1/chat/completions`;
+
+                        const response = await fetch(apiUrl, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -61,7 +68,7 @@ export class AgentOrchestrator {
 
                         if (!response.ok) {
                             const errorText = await response.text();
-                            throw new Error(`Mistral API Error: ${response.status} ${errorText}`);
+                            throw new Error(`${isGemini ? 'Gemini' : 'Mistral'} API Error: ${response.status} ${errorText}`);
                         }
 
                         const data = await response.json();

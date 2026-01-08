@@ -37,6 +37,8 @@ function getAllowedOrigins(req: NextRequest) {
     if (process.env.NODE_ENV !== 'production') {
         addAllowedOrigin(allowed, 'http://localhost:3000');
         addAllowedOrigin(allowed, 'http://127.0.0.1:3000');
+        addAllowedOrigin(allowed, 'http://localhost:3001');
+        addAllowedOrigin(allowed, 'http://127.0.0.1:3001');
     }
     return allowed;
 }
@@ -111,7 +113,7 @@ function ensureVisitorId(req: NextRequest, res: NextResponse) {
 }
 
 const intlMiddleware = createMiddleware({
-    locales: ['zh', 'en', 'ja', 'zh-TW'],
+    locales: ['zh', 'en', 'ja', 'zh-TW', 'ar'],
     defaultLocale: 'zh',
     localePrefix: 'as-needed'
 });

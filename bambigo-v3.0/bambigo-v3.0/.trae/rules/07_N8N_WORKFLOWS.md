@@ -1,4 +1,4 @@
-# BambiGO 自動化流程
+# LUTAGU 自動化流程
 # n8n Workflows 設計
 
 ---
@@ -134,7 +134,7 @@ for (const hub of hubNodes) {
 
 // Step 7: 發送 Slack 通知
 await sendSlackNotification({
-  channel: '#bambigo-ops',
+  channel: '#lutagu-ops',
   text: `✅ L1 標籤計算完成，共處理 ${hubNodes.length} 個 Hub 節點`,
 });
 ```
@@ -718,7 +718,7 @@ async function handleWorkflowError(workflowName, error, context) {
   
   // 發送 Slack 通知
   await sendSlackNotification({
-    channel: '#bambigo-alerts',
+    channel: '#lutagu-alerts',
     attachments: [{
       color: 'danger',
       title: `❌ Workflow 錯誤: ${workflowName}`,

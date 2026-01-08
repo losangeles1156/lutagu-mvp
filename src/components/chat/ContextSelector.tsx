@@ -13,13 +13,13 @@ export interface UserContext {
 }
 
 export function ContextSelector() {
-    // In a real app, these would come from translations
-    // keeping hardcoded for MVP speed as requested
+    const t = useTranslations('chat');
+    
     const contexts: UserContext[] = [
-        { id: 'luggage', icon: Briefcase, label: '大型行李', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-        { id: 'stroller', icon: Baby, label: '推嬰兒車', color: 'bg-rose-100 text-rose-700 border-rose-200' },
-        { id: 'accessibility', icon: UserMinus, label: '行動不便', color: 'bg-purple-100 text-purple-700 border-purple-200' },
-        { id: 'rush', icon: Clock, label: '趕時間', color: 'bg-amber-100 text-amber-700 border-amber-200' }
+        { id: 'luggage', icon: Briefcase, label: t('contexts.luggage'), color: 'bg-blue-100 text-blue-700 border-blue-200' },
+        { id: 'stroller', icon: Baby, label: t('contexts.stroller'), color: 'bg-rose-100 text-rose-700 border-rose-200' },
+        { id: 'accessibility', icon: UserMinus, label: t('contexts.accessibility'), color: 'bg-purple-100 text-purple-700 border-purple-200' },
+        { id: 'rush', icon: Clock, label: t('contexts.rush'), color: 'bg-amber-100 text-amber-700 border-amber-200' }
     ];
 
     const { userContext, setUserContext } = useAppStore();

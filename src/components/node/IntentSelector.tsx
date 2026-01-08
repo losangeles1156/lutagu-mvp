@@ -131,15 +131,19 @@ export function IntentSelector({
         inputRef.current?.focus();
     }, [onChange, clearResult]);
 
-    // Handle touch outside to close suggestions
+    // Handle click/touch outside to close suggestions
     useEffect(() => {
-        const handleTouchOutside = (e: TouchEvent) => {
+        const handleClickOutside = (e: MouseEvent | TouchEvent) => {
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
                 setShowSuggestions(false);
             }
         };
-        document.addEventListener('touchstart', handleTouchOutside, { passive: true });
-        return () => document.removeEventListener('touchstart', handleTouchOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
     }, []);
 
     const selectedOption = options.find(o => o.id === (manualSelection || value));
@@ -163,18 +167,18 @@ export function IntentSelector({
                                 </div>
                                 <div>
                                     <div className="text-lg font-black text-slate-800">
-                                        {selectedOption.id === 'fare' ? t('intent.fare') :
-                                            selectedOption.id === 'timetable' ? t('intent.timetable') :
-                                                selectedOption.id === 'route' ? t('intent.route') :
-                                                    selectedOption.id === 'status' ? t('intent.status') :
-                                                        selectedOption.id === 'amenity' ? t('intent.amenity') : selectedOption.id}
+                                        {selectedOption.id === 'fare' ? t('intent.fare') || '票價查詢' :
+                                            selectedOption.id === 'timetable' ? t('intent.timetable') || '時刻表' :
+                                                selectedOption.id === 'route' ? t('intent.route') || '路線規劃' :
+                                                    selectedOption.id === 'status' ? t('intent.status') || '運行狀態' :
+                                                        selectedOption.id === 'amenity' ? t('intent.amenity') || '車站設施' : selectedOption.id}
                                     </div>
                                     <div className="text-sm font-bold text-slate-500">
-                                        {selectedOption.id === 'fare' ? t('intent.fareDesc') :
-                                            selectedOption.id === 'timetable' ? t('intent.timetableDesc') :
-                                                selectedOption.id === 'route' ? t('intent.routeDesc') :
-                                                    selectedOption.id === 'status' ? t('intent.statusDesc') :
-                                                        selectedOption.id === 'amenity' ? t('intent.amenityDesc') : ''}
+                                        {selectedOption.id === 'fare' ? t('intent.fareDesc') || '計算各路線乘車費用' :
+                                            selectedOption.id === 'timetable' ? t('intent.timetableDesc') || '查詢車站即時發車時間' :
+                                                selectedOption.id === 'route' ? t('intent.routeDesc') || '尋找最快或最舒適的路徑' :
+                                                    selectedOption.id === 'status' ? t('intent.statusDesc') || '查看路線是否有延誤或中斷' :
+                                                        selectedOption.id === 'amenity' ? t('intent.amenityDesc') || '尋找電梯、置物櫃或廁所' : ''}
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +200,7 @@ export function IntentSelector({
                                         key={idx}
                                         onClick={() => handleQuickPrompt(prompt)}
                                         disabled={disabled}
-                                        className="px-3 py-2 rounded-lg bg-white border border-indigo-100 text-xs font-bold text-indigo-600 hover:bg-indigo-50 active:scale-95 transition-all touch-manipulation"
+                                        className="px-4 py-3 rounded-xl bg-white border border-indigo-100 text-xs font-bold text-indigo-600 hover:bg-indigo-50 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 min-h-[44px]"
                                     >
                                         {prompt}
                                     </button>
@@ -251,14 +255,35 @@ export function IntentSelector({
                         {isClassifying ? (
                             <Loader2 size={16} className="animate-spin mx-auto" />
                         ) : (
-                            locale.startsWith('zh') ? '分析' : locale === 'ja' ? '分析' : 'Analyze'
+                            t('intent.analyze') || (locale.startsWith('zh') ? '分析' : locale === 'ja' ? '分析' : 'Analyze')
                         )}
                     </button>
                 </div>
 
-                {/* Classification Result */}
+                {/* Classification Result / Loading State */}
                 <AnimatePresence>
-                    {lastResult && lastResult.kind !== 'unknown' && (
+                    {isClassifying ? (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-2 overflow-hidden"
+                        >
+                            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                    <Loader2 size={16} className="text-indigo-600 animate-spin" />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="text-xs font-black text-indigo-700 uppercase tracking-wide">
+                                        {locale.startsWith('zh') ? '分析中...' : locale === 'ja' ? '分析中...' : 'Analyzing...'}
+                                    </div>
+                                    <div className="text-sm font-bold text-indigo-600">
+                                        {inputText.length > 25 ? inputText.substring(0, 25) + '...' : inputText}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ) : lastResult && lastResult.kind !== 'unknown' && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
@@ -321,18 +346,18 @@ export function IntentSelector({
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xs font-black text-slate-700">
-                                                {option.id === 'fare' ? t('intent.fare') :
-                                                    option.id === 'timetable' ? t('intent.timetable') :
-                                                        option.id === 'route' ? t('intent.route') :
-                                                            option.id === 'status' ? t('intent.status') :
-                                                                option.id === 'amenity' ? t('intent.amenity') : option.id}
+                                                {option.id === 'fare' ? t('intent.fare') || '票價查詢' :
+                                                    option.id === 'timetable' ? t('intent.timetable') || '時刻表' :
+                                                        option.id === 'route' ? t('intent.route') || '路線規劃' :
+                                                            option.id === 'status' ? t('intent.status') || '運行狀態' :
+                                                                option.id === 'amenity' ? t('intent.amenity') || '車站設施' : option.id}
                                             </div>
                                             <div className="text-[10px] font-bold text-slate-400 mt-0.5">
-                                                {option.id === 'fare' ? t('intent.fareDesc') :
-                                                    option.id === 'timetable' ? t('intent.timetableDesc') :
-                                                        option.id === 'route' ? t('intent.routeDesc') :
-                                                            option.id === 'status' ? t('intent.statusDesc') :
-                                                                option.id === 'amenity' ? t('intent.amenityDesc') : ''}
+                                                {option.id === 'fare' ? t('intent.fareDesc') || '票價' :
+                                                    option.id === 'timetable' ? t('intent.timetableDesc') || '時間' :
+                                                        option.id === 'route' ? t('intent.routeDesc') || '路線' :
+                                                            option.id === 'status' ? t('intent.statusDesc') || '狀態' :
+                                                                option.id === 'amenity' ? t('intent.amenityDesc') || '設施' : ''}
                                             </div>
                                         </div>
                                     </button>
@@ -355,9 +380,9 @@ export function IntentSelector({
                         >
                             <option.icon size={16} strokeWidth={2.5} />
                             <span className="truncate">
-                                {option.id === 'fare' ? t('intent.fare') :
-                                    option.id === 'timetable' ? t('intent.timetable') :
-                                        option.id === 'route' ? t('intent.route') : option.id}
+                                {option.id === 'fare' ? t('intent.fare') || '票價' :
+                                    option.id === 'timetable' ? t('intent.timetable') || '時刻表' :
+                                        option.id === 'route' ? t('intent.route') || '路線' : option.id}
                             </span>
                         </button>
                     ))}

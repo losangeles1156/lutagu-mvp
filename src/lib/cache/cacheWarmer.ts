@@ -168,7 +168,10 @@ export class CacheWarmer {
      * 獲取預熱統計
      */
     getStats(): CacheWarmerStats {
-        return { ...this.stats };
+        return { 
+            ...this.stats,
+            hotStationsCount: this.hotStations.size
+        };
     }
 
     /**
@@ -214,4 +217,8 @@ export function destroyCacheWarmer(): void {
         warmerInstance.destroy();
         warmerInstance = null;
     }
+}
+
+export function getWarmerStats(): CacheWarmerStats | null {
+    return warmerInstance ? warmerInstance.getStats() : null;
 }

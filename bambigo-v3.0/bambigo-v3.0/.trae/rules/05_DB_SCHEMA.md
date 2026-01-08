@@ -1,4 +1,4 @@
-# BambiGO 資料庫結構
+# LUTAGU 資料庫結構
 # Supabase PostgreSQL Schema
 
 ---

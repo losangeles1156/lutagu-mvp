@@ -1,9 +1,10 @@
 'use client';
 
 import { MatchedStrategyCard } from '@/types/lutagu_l4';
-import { ExternalLink, Info, AlertTriangle, Lightbulb, Ticket, Clock, Snowflake } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ExternalLink, Info, AlertTriangle, Lightbulb, Ticket, Clock, Snowflake, ChevronDown, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getLocaleString } from '@/lib/utils/localeUtils';
+import { useState } from 'react';
 
 interface StrategyCardsProps {
     cards: MatchedStrategyCard[];
@@ -11,11 +12,13 @@ interface StrategyCardsProps {
 }
 
 export function StrategyCards({ cards, locale }: StrategyCardsProps) {
+    const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+
     if (!cards || cards.length === 0) return null;
 
     const getIconColor = (type: string) => {
         switch (type) {
-            case 'warning': return 'bg-red-500 shadow-red-200';
+            case 'warning': return 'bg-rose-500 shadow-rose-200';
             case 'tip': return 'bg-amber-500 shadow-amber-200';
             case 'ticket_advice': return 'bg-emerald-500 shadow-emerald-200';
             case 'timing': return 'bg-blue-500 shadow-blue-200';
@@ -27,107 +30,127 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
 
     const getCardBg = (type: string) => {
         switch (type) {
-            case 'warning': return 'from-red-50 to-orange-50 border-red-200';
-            case 'tip': return 'from-amber-50 to-orange-50 border-amber-200';
-            case 'ticket_advice': return 'from-emerald-50 to-teal-50 border-emerald-200';
-            case 'timing': return 'from-blue-50 to-indigo-50 border-blue-200';
-            case 'seasonal': return 'from-cyan-50 to-blue-50 border-cyan-200';
-            case 'ai_suggestion': return 'from-purple-50 to-fuchsia-50 border-purple-200';
-            default: return 'from-slate-50 to-gray-50 border-slate-200';
+            case 'warning': return 'bg-white/60 border-rose-200/60 shadow-rose-200/10';
+            case 'tip': return 'bg-white/60 border-amber-200/60 shadow-amber-200/10';
+            case 'ticket_advice': return 'bg-white/60 border-emerald-200/60 shadow-emerald-200/10';
+            case 'timing': return 'bg-white/60 border-blue-200/60 shadow-blue-200/10';
+            case 'seasonal': return 'bg-white/60 border-cyan-200/60 shadow-cyan-200/10';
+            case 'ai_suggestion': return 'bg-white/60 border-purple-200/60 shadow-purple-200/10';
+            default: return 'bg-white/60 border-white/80 shadow-slate-200/10';
         }
     };
 
     const getTitleColor = (type: string) => {
         switch (type) {
-            case 'warning': return 'text-red-800';
-            case 'tip': return 'text-amber-800';
-            case 'ticket_advice': return 'text-emerald-800';
-            case 'timing': return 'text-blue-800';
-            case 'seasonal': return 'text-cyan-800';
-            case 'ai_suggestion': return 'text-purple-800';
-            default: return 'text-slate-800';
+            case 'warning': return 'text-rose-900';
+            case 'tip': return 'text-amber-900';
+            case 'ticket_advice': return 'text-emerald-900';
+            case 'timing': return 'text-blue-900';
+            case 'seasonal': return 'text-cyan-900';
+            case 'ai_suggestion': return 'text-purple-900';
+            default: return 'text-slate-900';
         }
     };
 
-    const getSubtitleColor = (type: string) => {
-        switch (type) {
-            case 'warning': return 'text-red-600';
-            case 'tip': return 'text-amber-600';
-            case 'ticket_advice': return 'text-emerald-600';
-            case 'timing': return 'text-blue-600';
-            case 'seasonal': return 'text-cyan-600';
-            case 'ai_suggestion': return 'text-purple-600';
-            default: return 'text-slate-600';
-        }
+    const toggleExpand = (id: string) => {
+        setExpandedCardId(expandedCardId === id ? null : id);
     };
 
     return (
         <div className="space-y-4 mb-6">
             <div className="flex items-center gap-2 px-1 mb-2">
                 <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
-                <h3 className="text-lg font-black text-slate-800">
-                    {locale.startsWith('zh') ? 'Lutagu 智能建議' : locale === 'ja' ? 'Lutagu スマート提案' : 'Lutagu Smart Tips'}
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                    {locale.startsWith('zh') ? 'LUTAGU 智能建議' : locale === 'ja' ? 'LUTAGU スマート提案' : 'LUTAGU Smart Tips'}
                 </h3>
-                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full ml-auto">
-                    L4 Layer Active
-                </span>
+                <div className="ml-auto flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                    <Sparkles size={10} className="text-indigo-500" />
+                    <span className="text-[9px] font-black text-indigo-600 uppercase tracking-wider">L4 Active</span>
+                </div>
             </div>
 
-            {cards.map((card, idx) => (
-                <motion.div
-                    key={card.id || idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className={`rounded-2xl bg-gradient-to-r ${getCardBg(card.type)} border p-4 shadow-sm hover:shadow-md transition-all group`}
-                >
-                    <div className="flex items-start gap-3">
-                        {/* Icon Badge */}
-                        <div className={`shrink-0 w-10 h-10 rounded-xl ${getIconColor(card.type)} flex items-center justify-center shadow-lg transition-transform group-hover:scale-110`}>
-                            <span className="text-xl">{card.icon || '💡'}</span>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                                <div className={`text-sm font-black truncate ${getTitleColor(card.type)}`}>
-                                    {typeof card.title === 'object' ? getLocaleString(card.title, locale) : card.title}
-                                </div>
-                                {card.priority >= 80 && (
-                                    <span className="shrink-0 text-[9px] font-black uppercase tracking-wider bg-white/60 px-1.5 py-0.5 rounded border border-white/40 text-red-500">
-                                        High Priority
-                                    </span>
-                                )}
+            {cards.map((card, idx) => {
+                const isExpanded = expandedCardId === (card.id || String(idx));
+                const isLongDescription = card.description.length > 60;
+                
+                return (
+                    <motion.div
+                        key={card.id || idx}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ 
+                            type: 'spring',
+                            stiffness: 260,
+                            damping: 20,
+                            delay: idx * 0.08 
+                        }}
+                        className={`rounded-[2rem] ${getCardBg(card.type)} border backdrop-blur-xl p-5 shadow-xl shadow-slate-200/10 hover:shadow-2xl hover:shadow-slate-200/20 transition-all group ring-1 ring-white/20`}
+                    >
+                        <div className="flex items-start gap-4">
+                            {/* Icon Badge */}
+                            <div className={`shrink-0 w-12 h-12 rounded-2xl ${getIconColor(card.type)} flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 relative overflow-hidden`}>
+                                <div className="absolute inset-0 bg-white/20 transform rotate-45 translate-y-8" />
+                                <span className="text-2xl relative z-10">{card.icon || '💡'}</span>
                             </div>
 
-                            <p className="text-xs font-bold text-slate-600 leading-relaxed mb-3">
-                                {typeof card.description === 'object' ? getLocaleString(card.description, locale) : card.description}
-                            </p>
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2 mb-1.5">
+                                    <div className={`text-base font-black truncate ${getTitleColor(card.type)}`}>
+                                        {typeof card.title === 'object' ? getLocaleString(card.title, locale) : card.title}
+                                    </div>
+                                    {card.priority >= 80 && (
+                                        <div className="shrink-0 flex items-center gap-1 bg-rose-100/50 px-2 py-0.5 rounded-full border border-rose-200/50">
+                                            <AlertTriangle size={10} className="text-rose-600" />
+                                            <span className="text-[9px] font-black uppercase tracking-wider text-rose-600">High</span>
+                                        </div>
+                                    )}
+                                </div>
 
-                            {/* Action Button */}
-                            {card.actionUrl && (
-                                <a
-                                    href={card.actionUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/80 border border-white/50 text-[11px] font-black text-slate-700 hover:bg-white hover:shadow-sm transition-all active:scale-95"
-                                >
-                                    {card.actionLabel || (locale.startsWith('zh') ? '查看詳情' : 'Details')}
-                                    <ExternalLink size={12} className="opacity-50" />
-                                </a>
-                            )}
-                        </div>
-                    </div>
+                                <div className={`text-sm font-bold text-slate-600 leading-relaxed ${!isExpanded && isLongDescription ? 'line-clamp-2' : ''}`}>
+                                    {typeof card.description === 'object' ? getLocaleString(card.description, locale) : card.description}
+                                </div>
 
-                    {card._debug_reason && (
-                        <div className="mt-3 pt-2 border-t border-black/5 flex items-center gap-1.5">
-                            <span className="text-[8px] font-mono text-slate-400">
-                                DEBUG: {card._debug_reason}
-                            </span>
+                                <div className="mt-4 flex flex-wrap items-center gap-2">
+                                    {/* Action Button */}
+                                    {card.actionUrl && (
+                                        <a
+                                            href={card.actionUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-slate-900 text-white text-[11px] font-black hover:bg-indigo-600 transition-all active:scale-95 shadow-lg shadow-slate-900/20"
+                                        >
+                                            {card.actionLabel || (locale.startsWith('zh') ? '立即查看 View' : 'View Now')}
+                                            <ExternalLink size={12} className="opacity-70" />
+                                        </a>
+                                    )}
+
+                                    {/* Expand Button */}
+                                    {isLongDescription && (
+                                        <button
+                                            onClick={() => toggleExpand(card.id || String(idx))}
+                                            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-white/80 border border-slate-200/60 text-[11px] font-black text-slate-600 hover:text-indigo-600 hover:bg-white transition-all active:scale-95 shadow-sm"
+                                        >
+                                            {isExpanded 
+                                                ? (locale.startsWith('zh') ? '收起詳情 Hide' : 'Show Less') 
+                                                : (locale.startsWith('zh') ? '展開建議 More' : 'Show More')}
+                                            <ChevronDown size={12} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    )}
-                </motion.div>
-            ))}
+
+                        {card._debug_reason && (
+                            <div className="mt-4 pt-3 border-t border-slate-900/5 flex items-center gap-1.5 opacity-40">
+                                <span className="text-[8px] font-mono text-slate-500">
+                                    ID: {card.id} | SCORE: {card.priority} | {card._debug_reason}
+                                </span>
+                            </div>
+                        )}
+                    </motion.div>
+                );
+            })}
         </div>
     );
 }

@@ -4,8 +4,8 @@ import { Marker } from 'react-leaflet';
 import L from 'leaflet';
 import { useAppStore } from '@/stores/appStore';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Crown, MapPin, Train, Link2 } from 'lucide-react';
-import { OPERATOR_COLORS, getPrimaryOperator } from '@/lib/constants/stationLines';
+import { Crown, MapPin, Train, Link2, Plane } from 'lucide-react';
+import { OPERATOR_COLORS, getPrimaryOperator, getOperatorAbbreviation, STATION_LINES } from '@/lib/constants/stationLines';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { memo, useMemo, useCallback } from 'react';
 
@@ -43,19 +43,36 @@ interface NodeMarkerProps {
     zone: 'core' | 'buffer' | 'outer';
     locale?: string;
     zoom?: number;
+    isSelected?: boolean;
     onClick?: (node: any) => void;
 }
 
-// [PERF] Static icon cache to avoid recreating identical icons
+// [PERF] LRU icon cache to avoid recreating identical icons
+// Using Map which maintains insertion order for LRU behavior
+const ICON_CACHE_MAX_SIZE = 400;
 const iconCache = new Map<string, L.DivIcon>();
 
-function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClick }: NodeMarkerProps) {
+const AIRPORT_TERMINAL_IDS = [
+    'odpt.Station:JR-East.NaritaAirportBranch.NaritaAirportTerminal1',
+    'odpt.Station:JR-East.NaritaAirportBranch.NaritaAirportTerminal2and3',
+    'odpt.Station:JR-East.NaritaAirportTerminal1', // Consolidated ID
+    'odpt.Station:JR-East.NaritaAirportTerminal2And3', // Consolidated ID
+    'odpt.Station:Keikyu.Airport.HanedaAirportTerminal1and2',
+    'odpt.Station:Keikyu.Airport.HanedaAirportTerminal3',
+    'odpt.Station:TokyoMonorail.HanedaMonorail.HanedaAirportTerminal1',
+    'odpt.Station:TokyoMonorail.HanedaMonorail.HanedaAirportTerminal2',
+    'odpt.Station:TokyoMonorail.HanedaMonorail.HanedaAirportTerminal3',
+    'odpt.Station:Keisei.KeiseiMain.NaritaAirportTerminal1',
+    'odpt.Station:Keisei.KeiseiMain.NaritaAirportTerminal2and3',
+    'odpt.Station:Keisei.NaritaSkyAccess.NaritaAirportTerminal1',
+    'odpt.Station:Keisei.NaritaSkyAccess.NaritaAirportTerminal2and3'
+];
+
+function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSelected = false, onClick }: NodeMarkerProps) {
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
-    const currentNodeId = useAppStore(s => s.currentNodeId);
 
     // Derive all values BEFORE any hooks to avoid conditional hook calls
-    const isSelected = currentNodeId === node.id;
     const isMajor = node.tier === 'major' || node.is_hub;
     const hasMembers = hubDetails && hubDetails.member_count > 0;
     const memberCount = hubDetails?.member_count || 0;
@@ -77,12 +94,26 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClic
         return { lat, lon };
     }, [node]);
 
+    // [UPDATED] Flexible airport detection for consolidated nodes
+    const isAirport = useMemo(() => {
+        return node.type === 'airport' ||
+            AIRPORT_TERMINAL_IDS.includes(node.id) ||
+            node.id.includes('Airport');
+    }, [node.id, node.type]);
+
     // [PERF] Memoize operator color lookup (MUST be before early return)
+    const primaryOperator = useMemo(() => getPrimaryOperator(node.id), [node.id]);
+    const operatorAbbr = useMemo(() => getOperatorAbbreviation(primaryOperator), [primaryOperator]);
+    const isPrivate = useMemo(() => !['JR', 'Metro', 'Toei'].includes(primaryOperator), [primaryOperator]);
+
+    const lines = useMemo(() => STATION_LINES[node.id] || [], [node.id]);
+    const primaryLineColor = useMemo(() => lines.length > 0 ? lines[0].color : null, [lines]);
+
     const baseColor = useMemo(() => {
-        const primaryOperator = getPrimaryOperator(node.id);
+        if (isAirport) return '#3B82F6'; // Blue for airports
         const operatorColor = OPERATOR_COLORS[primaryOperator] || OPERATOR_COLORS['Metro'];
         return isSelected ? '#111827' : operatorColor;
-    }, [node.id, isSelected]);
+    }, [node.id, isSelected, isAirport, primaryOperator]);
 
     const label = useMemo(() => getLocaleString(node.name, locale) || node.id, [node.name, node.id, locale]);
     const showLabel = isSelected || hasMembers || isMajor || (zoom >= 15);
@@ -119,10 +150,15 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClic
         const cached = iconCache.get(iconCacheKey);
         if (cached) return cached;
 
-        const DisplayIcon = isMajor ? Train : MapPin;
-        const ringRadiusClass = hasMembers ? 'rounded-[22px]' : 'rounded-full';
-        const markerSize = isMajor || hasMembers ? 56 : 48;
-        const iconSize = isMajor ? 24 : 22;
+        // Use Plane icon for airports, Train for major hubs/train stations, MapPin for others
+        const DisplayIcon = isAirport ? Plane : (isMajor ? Train : MapPin);
+
+        // Custom styling for Private Railways: use rounded-xl (square-ish) instead of rounded-full
+        const shapeClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[18px]' : 'rounded-full'));
+        const ringRadiusClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[22px]' : 'rounded-full'));
+
+        const markerSize = isAirport || isMajor || hasMembers ? 56 : 48;
+        const iconSize = isAirport ? 26 : (isMajor ? 24 : 22);
 
         // [PERF] Simplified markup for mobile - removed heavy animations
         const iconMarkup = renderToStaticMarkup(
@@ -132,20 +168,36 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClic
             >
                 {/* [PERF] Removed animate-ping for mobile performance */}
                 {hasMembers && (
-                    <div className="absolute inset-0 rounded-[22px] bg-indigo-600/10" />
+                    <div className={`absolute inset-0 ${ringRadiusClass} bg-indigo-600/10`} />
                 )}
 
                 <div className="relative">
                     {/* [PERF] Simplified shadow layers - reduced from 2 to 1 */}
                     {hasMembers && (
-                        <div className="absolute inset-0 translate-x-[3px] translate-y-[3px] rounded-[18px] bg-slate-900/10" />
+                        <div className={`absolute inset-0 translate-x-[3px] translate-y-[3px] ${shapeClass} bg-slate-900/10`} />
                     )}
 
                     <div
-                        className={`relative flex items-center justify-center border-[3px] border-white text-white shadow-lg ${hasMembers ? 'rounded-[18px]' : 'rounded-full'}`}
+                        className={`relative flex flex-col items-center justify-center border-[3px] border-white text-white shadow-lg ${shapeClass}`}
                         style={{ width: markerSize, height: markerSize, backgroundColor: baseColor }}
                     >
-                        <DisplayIcon size={iconSize} strokeWidth={2.6} />
+                        {/* Line color accent ring (inner) */}
+                        {primaryLineColor && primaryLineColor !== baseColor && (
+                            <div
+                                className={`absolute inset-[2px] border-[2px] opacity-60 ${shapeClass}`}
+                                style={{ borderColor: primaryLineColor }}
+                            />
+                        )}
+
+                        {!isAirport && (
+                            <span className="text-xl font-black leading-none tracking-tighter z-10">
+                                {operatorAbbr || 'S'}
+                            </span>
+                        )}
+                        {/* Only show icon if Airport */}
+                        {isAirport && (
+                            <DisplayIcon size={iconSize} strokeWidth={2.6} className="z-10" />
+                        )}
 
                         {isSelected && (
                             <div className={`absolute inset-[-6px] ${ringRadiusClass} ring-2 ring-indigo-400/80`} />
@@ -203,10 +255,15 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClic
             iconAnchor: [36, 72],
         });
 
-        // Store in cache (limit cache size to prevent memory issues)
-        if (iconCache.size > 500) {
-            const firstKey = iconCache.keys().next().value;
-            if (firstKey) iconCache.delete(firstKey);
+        // [PERF] LRU cache: delete & re-insert to move to end (most recent)
+        // If key exists, remove it first to update its position
+        if (iconCache.has(iconCacheKey)) {
+            iconCache.delete(iconCacheKey);
+        }
+        // Evict oldest (first) entry if at capacity
+        if (iconCache.size >= ICON_CACHE_MAX_SIZE) {
+            const oldestKey = iconCache.keys().next().value;
+            if (oldestKey) iconCache.delete(oldestKey);
         }
         iconCache.set(iconCacheKey, icon);
 
@@ -230,10 +287,13 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, onClic
 // [PERF] Export memoized component to prevent unnecessary re-renders
 export const NodeMarker = memo(NodeMarkerInner, (prevProps, nextProps) => {
     // Custom comparison: only re-render if important props changed
+    // Added updated_at check for version control support
     return (
         prevProps.node.id === nextProps.node.id &&
+        (prevProps.node as any).updated_at === (nextProps.node as any).updated_at &&
         prevProps.hubDetails?.member_count === nextProps.hubDetails?.member_count &&
         prevProps.locale === nextProps.locale &&
-        prevProps.zoom === nextProps.zoom
+        prevProps.zoom === nextProps.zoom &&
+        prevProps.isSelected === nextProps.isSelected
     );
 });

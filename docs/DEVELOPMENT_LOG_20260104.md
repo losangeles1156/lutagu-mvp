@@ -1,4 +1,4 @@
-# BambiGO MVP 開發日誌 - 2026-01-04
+# LUTAGU MVP 開發日誌 - 2026-01-04
 
 ## Phase 3 & 4 進度：後台管理 UI 與前端整合
 
@@ -55,4 +55,4 @@ Ward error: { code: 'PGRST116', details: 'The result contains 0 rows' }
 
 ### 參考文件
 - 設計文件: `plans/node_admin_design.md`
-- 資料庫結構: `BambiGO_Database_Schema_v4.1.md.pdf`
+- 資料庫結構: `LUTAGU_Database_Schema_v4.1.md.pdf`

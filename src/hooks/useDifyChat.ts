@@ -8,6 +8,8 @@ export interface DifyMessage {
     role: 'user' | 'assistant';
     content: string;
     isStrategy?: boolean;
+    source?: 'template' | 'algorithm' | 'llm';
+    data?: any;
 }
 
 export interface UseDifyChatOptions {
@@ -37,30 +39,35 @@ export interface QuickButton {
     prompt: string;
 }
 
+// removed hybridEngine import to avoid server-side code in client bundle
+
+import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
+
 export function useDifyChat(options: UseDifyChatOptions) {
     const { stationId, stationName, onMessage, onComplete, onError } = options;
-    
+
     const tL4 = useTranslations('l4');
     const locale = useLocale();
     const { zone } = useZoneAwareness();
-    
+
     const [messages, setMessages] = useState<DifyMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const loadingRef = useRef(false);
     const [isOffline, setIsOffline] = useState(false);
     const [thinkingStep, setThinkingStep] = useState<string>('');
-    
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const conversationIdRef = useRef<string | null>(null);
     const userIdRef = useRef<string>(
         globalThis.crypto?.randomUUID?.() ||
         `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
     );
-    
+
     // Generate quick buttons based on locale
     const quickButtons = useCallback((): QuickButton[] => {
         const displayName = stationName || '車站';
         const id = stationId || '';
-        
+
         if (locale === 'ja') {
             return [
                 {
@@ -86,7 +93,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
                 }
             ];
         }
-        
+
         if (locale === 'en') {
             return [
                 {
@@ -112,7 +119,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
                 }
             ];
         }
-        
+
         return [
             {
                 id: 'route',
@@ -137,30 +144,77 @@ export function useDifyChat(options: UseDifyChatOptions) {
             }
         ];
     }, [locale, stationId, stationName]);
-    
+
     // Scroll to bottom when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, thinkingStep]);
-    
+
     // Send message to Dify API
     const sendMessage = useCallback(async (text: string, userProfile: string = 'general') => {
-        if (!text.trim() || isLoading) return;
-        
+        if (!text.trim() || loadingRef.current) return;
+
+        loadingRef.current = true;
+        setIsLoading(true);
         const userMsg: DifyMessage = { role: 'user', content: text };
         setMessages(prev => [...prev, userMsg]);
-        setIsLoading(true);
         setIsOffline(false);
         setThinkingStep(tL4('thinking.initializing'));
-        
+
+        // --- Hybrid Engine Interception (Server API) ---
+        try {
+            const hybridApiRes = await fetch('/api/agent/hybrid', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text,
+                    locale,
+                    context: {
+                        current_station: stationId,
+                        user_profile: userProfile,
+                        zone
+                    }
+                })
+            });
+
+            if (hybridApiRes.ok) {
+                const hybridRes = await hybridApiRes.json();
+
+                if (hybridRes && !hybridRes.passToLLM && !hybridRes.error) {
+                    console.log(`[useDifyChat] Intercepted by ${hybridRes.source}`);
+                    const assistantMsg: DifyMessage = {
+                        role: 'assistant',
+                        content: hybridRes.content,
+                        source: hybridRes.source,
+                        data: hybridRes.data
+                    };
+
+                    // Add a small delay to feel more natural
+                    await new Promise(r => setTimeout(r, 800));
+
+                    setMessages(prev => [...prev, assistantMsg]);
+                    setIsLoading(false);
+                    loadingRef.current = false;
+                    setThinkingStep('');
+                    onMessage?.(assistantMsg);
+                    onComplete?.();
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error('[HybridEngine] API Error:', err);
+            // Continue to Dify if hybrid fails
+        }
+
         // Fake "Thinking Steps" to visualize the process
+        const startTime = Date.now();
         const steps = [
             tL4('thinking.l2'),
             tL4('thinking.l3'),
             tL4('thinking.kb'),
             tL4('thinking.synthesizing')
         ];
-        
+
         let stepIdx = 0;
         const stepInterval = setInterval(() => {
             if (stepIdx < steps.length) {
@@ -168,7 +222,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
                 stepIdx++;
             }
         }, 1500);
-        
+
         try {
             const response = await fetch('/api/dify/chat', {
                 method: 'POST',
@@ -186,38 +240,38 @@ export function useDifyChat(options: UseDifyChatOptions) {
                     }
                 })
             });
-            
+
             clearInterval(stepInterval);
-            
+
             if (!response.ok) throw new Error('Network error');
             if (!response.body) throw new Error('No body');
-            
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let accumulatedResponse = '';
             let sseBuffer = '';
-            
+
             setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
             setThinkingStep('');
-            
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                
+
                 sseBuffer += decoder.decode(value, { stream: true });
                 while (true) {
                     const newlineIndex = sseBuffer.indexOf('\n');
                     if (newlineIndex === -1) break;
-                    
+
                     const rawLine = sseBuffer.slice(0, newlineIndex);
                     sseBuffer = sseBuffer.slice(newlineIndex + 1);
-                    
+
                     const line = rawLine.trimEnd();
                     if (!line.startsWith('data:')) continue;
-                    
+
                     const payload = line.slice(5).trimStart();
                     if (!payload || payload === '[DONE]') continue;
-                    
+
                     try {
                         const data = JSON.parse(payload);
                         if (data.conversation_id && typeof data.conversation_id === 'string') {
@@ -237,9 +291,10 @@ export function useDifyChat(options: UseDifyChatOptions) {
                     }
                 }
             }
-            
+
             onComplete?.();
-            
+            metricsCollector.recordRequest('llm', Date.now() - startTime);
+
         } catch (error) {
             console.error('Dify Chat Error:', error);
             setIsOffline(true);
@@ -248,15 +303,16 @@ export function useDifyChat(options: UseDifyChatOptions) {
             onError?.(error instanceof Error ? error : new Error('Unknown error'));
         } finally {
             setIsLoading(false);
+            loadingRef.current = false;
             setThinkingStep('');
         }
-    }, [isLoading, locale, stationId, stationName, zone, tL4, onMessage, onComplete, onError]);
-    
+    }, [locale, stationId, stationName, zone, tL4, onMessage, onComplete, onError]);
+
     const clearMessages = useCallback(() => {
         setMessages([]);
         conversationIdRef.current = null;
     }, []);
-    
+
     return {
         messages,
         setMessages,

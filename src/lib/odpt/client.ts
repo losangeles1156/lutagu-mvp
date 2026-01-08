@@ -90,31 +90,31 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
 
     // Use retry-enabled fetch with caching via Next.js fetch
     try {
-        const res = await fetchWithRetry<any>(url, {
+        const response = await fetch(url, {
             next: { revalidate: 3600 }
-        }, ODPT_RETRY_CONFIG);
-        return res;
-    } catch (error) {
-        const err = error instanceof Error ? error : new Error(String(error));
-        console.error(`[ODPT Client] Failed after retries: ${err.message}`);
+        });
 
-        const msg = String(err.message || '');
-        const isAuthError = msg.includes('Invalid acl:consumerKey') || msg.includes('HTTP 403') || msg.includes('403');
-        const canFallbackToPublic = baseUrl !== API_PUBLIC;
-
-        if (isAuthError && canFallbackToPublic) {
-            try {
-                const fallbackParams = new URLSearchParams(params);
-                const fallbackUrl = `${API_PUBLIC}/${type}?${fallbackParams.toString()}`;
-                const res = await fetchWithRetry<any>(fallbackUrl, {
-                    next: { revalidate: 3600 }
-                }, ODPT_RETRY_CONFIG);
-                return res;
-            } catch {
+        if (response.status === 403) {
+            console.warn(`[ODPT Client] 403 Forbidden for ${operator} via ${strategyName}. Check API keys.`);
+            // Fallback for Strategy B (Challenge) -> Try Strategy A (Public) if applicable
+            if (strategyName === 'Challenge' && TOKENS.PUBLIC) {
+                const fallbackUrl = `${API_PUBLIC}/${type}?${searchParams.toString()}`;
+                console.log(`[ODPT Client] Attempting fallback to Public API for ${operator}...`);
+                const fallbackRes = await fetch(fallbackUrl, { next: { revalidate: 3600 } });
+                if (fallbackRes.ok) return await fallbackRes.json();
             }
+            return [] as any; // Graceful failure
         }
 
-        throw new Error(`ODPT API Error: ${err.message}`);
+        if (!response.ok) {
+            throw new Error(`ODPT API error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error(`[ODPT Client] Failed: ${err.message}`);
+        return [] as any;
     }
 }
 

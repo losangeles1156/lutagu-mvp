@@ -11,9 +11,18 @@ function getEnvConfig() {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     // Choose the best available key for general purpose
-    const supabaseKey = supabaseServiceKey || supabaseAnonKey;
+    // Choose the best available key for general purpose
+    const supabaseKey = supabaseServiceKey || supabaseAnonKey || 'sb_publishable_qskNmAdUYEk4r80N6cFJXg_mAS5sZZB';
+    const finalUrl = supabaseUrl || 'https://evubeqeaafdjnuocyhmb.supabase.co';
 
-    return { supabaseUrl, supabaseKey, supabaseServiceKey };
+    console.log('[SupabaseConfig] Loading Env:', {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!supabaseKey,
+        usingFallback: !supabaseUrl,
+        nodeEnv: process.env.NODE_ENV
+    });
+
+    return { supabaseUrl: finalUrl, supabaseKey, supabaseServiceKey };
 }
 
 // Lazy Getter for Default Client

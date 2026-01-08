@@ -58,6 +58,7 @@
             "tokyo": "東京"
         },
         "enableLocation": "開啟定位",
+        "nearbyNode": "最近節點",
         "browseFirst": "先逛逛"
     },
     "tripGuard": {
@@ -107,9 +108,14 @@
     },
     "tabs": {
         "dna": "附近",
+        "dnaLabel": "附近生活機能",
         "live": "狀態",
+        "liveLabel": "即時運行狀態",
         "facility": "設施",
+        "facilityLabel": "站點設施",
         "lutagu": "建議",
+        "lutaguLabel": "智能嚮導",
+        "lutaguSmart": "智能嚮導",
         "transit": "時刻票價"
     },
     "tag": {
@@ -228,6 +234,14 @@
         "normalOperation": "正常運行",
         "delayOccurred": "發生延誤",
         "weatherAlert": "天候警報",
+        "noLiveData": "目前沒有即時列車資訊",
+        "liveFlightTitle": "即時航班資訊",
+        "tokyoWide": "TOKYO WIDE",
+        "vacanTitle": "人潮地圖",
+        "vacanDesc": "即時查看周邊餐廳與設施的空位狀況",
+        "vacanCta": "開啟地圖",
+        "vacanSub": "探索空位",
+        "dataSourceDisclaimer": "數據來源：運行狀況與用戶回報",
         "status": {
             "normal": "正常運行",
             "delay": "發生延誤",
@@ -249,7 +263,8 @@
             "full": "爆滿"
         },
         "emergencyAlert": "緊急警報",
-        "viewJmaDetails": "查看 JMA 詳情"
+        "viewJmaDetails": "查看 JMA 詳情",
+        "error": "操作失敗，請稍後重試"
     },
     "l3": {
         "servicesTitle": "服務設施",
@@ -396,22 +411,149 @@
         "languageSwitcherLabel": "切換語言"
     },
     "chat": {
-        "connectionError": "連線錯誤，請稍後再試。",
-        "offlineBadge": "離線模式",
-        "tripAdded": "已將「{label}」加入行程！",
-        "openingTimetable": "正在為您開啟「{label}」的詳細時刻表...",
-        "activeBadge": "即時策略啟用中",
+        "aiName": "LUTAGU AI",
+        "decision": "LUTAGU 决策建议",
+        "saveTime": "节省 {time}",
+        "viewDetails": "点击查看详情",
+        "contexts": {
+            "luggage": "大型行李",
+            "stroller": "推婴儿车",
+            "accessibility": "行动不便",
+            "rush": "赶时间"
+        },
+        "demoComplete": "演示完成",
+        "restartChat": "重新开始对话",
+        "demoHint": "这是预设演示，正式对话请点击上方按钮"
+    },
+    "l4_cn": {
+        "initialMessage": "嗨！我在 {station}。你想去哪里？我可以为你查询路线、票价和时刻表。",
+        "strategyTitle": "LUTAGU 策略",
+        "subtitle": "基于即时数据的智慧建议",
+        "topPick": "首选推荐",
+        "alternatives": "替代方案",
+        "disclaimer": "建议是根据当前交通、天气和设施状态生成的。",
+        "lutaguStrategy": "LUTAGU 策略",
+        "suggestion": "建议",
+        "psychAlert": "心理建设提示",
+        "synthesisTitle": "智慧决策合成",
+        "demandCard": "您的需求",
+        "expertKnowledge": "专家逻辑",
+        "liveData": "即时状态",
+        "actionLabel": "行动指令",
+        "demands": {
+            "speed": "赶时间",
+            "luggage": "大行李",
+            "budget": "省钱",
+            "comfort": "舒适",
+            "family": "親子同游",
+            "accessibility": "行动不便",
+            "vibe": "探索体验"
+        },
+        "chips": {
+            "synthesize": "合成策略",
+            "route": "规划路线",
+            "nearby": "附近景点"
+        },
+        "inputPlaceholder": "规划路线（问路、聊天...）",
+        "chatError": "抱歉，连线发生错误。",
+        "userLabel": "使用者",
+        "lutaguLabel": "LUTAGU",
+        "thinking": {
+            "initializing": "启动认知引擎...",
+            "l2": "分析即时路况与天气...",
+            "l3": "查询设施与 ODPT 时刻表...",
+            "kb": "读取专家知识库（Tips & Hacks）...",
+            "synthesizing": "综合需求，生成最佳策略..."
+        },
+        "card": {
+            "title": "已合成最佳策略",
+            "reasoning": "决策依据",
+            "l2Verified": "即时路况验证",
+            "odptVerified": "ODPT 时刻表确认"
+        },
+        "intent": {
+            "inputPlaceholder": "输入您的问题（如：去新宿怎么走、银座线时刻表...）",
+            "route": "路线规划",
+            "routeDesc": "寻找最快或最舒适的路径",
+            "timetable": "时刻表",
+            "timetableDesc": "查询车站即时发车时间",
+            "fare": "票价查询",
+            "fareDesc": "计算各路线乘车费用",
+            "status": "运行状态",
+            "statusDesc": "查看路线是否有延误或中断",
+            "amenity": "车站设施",
+            "amenityDesc": "寻找电梯、置物柜或厕所"
+        },
+        "dashboard": {
+            "aiAssistant": "LUTAGU 智能助手",
+            "aiSubtitle": "为您汇总此站点的专家经验与建议",
+            "aiPerceptionActive": "AI 感知中",
+            "trapGuide": "避坑指南",
+            "proHacks": "交通攻略",
+            "expertTips": "专家建议",
+            "proHacksLabel": "专业攻略",
+            "startChat": "开始与 AI 助手对话",
+            "discoverInspiration": "探索灵感",
+            "adjustPreferences": "切换需求配置以获取精确建议",
+            "ridingGuide": "LUTAGU 乘车与票务指南",
+            "expertMode": "专家模式",
+            "smartPlanning": "智能行程",
+            "smartPlanningSub": "Smart Planning",
+            "travelPreferences": "旅行偏好 Travel Preferences",
+            "templateLibrary": "快速模板库 Template Library",
+            "details": "详细数据",
+            "nextStep": "下一步",
+            "endOfDemo": "演示结束",
+            "modes": {
+                "recommendations": "智能建议",
+                "planner": "行程规划",
+                "chat": "AI 助手"
+            },
+            "planner": {
+                "route": "路线规划",
+                "timetable": "发车时刻"
+            },
+            "errors": {
+                "unresolvedStation": "目前站点无法解析。",
+                "pickTask": "请先选择要查的项目。",
+                "selectDestination": "请选择目的地车站。",
+                "noFareFound": "找不到票价。",
+                "fareQueryFailed": "票价查询失败。",
+                "destinationRequired": "请选择目的地。",
+                "noRouteFound": "找不到路线。",
+                "routePlanningFailed": "路线规划失败。"
+            },
+            "fare": {
+                "to": "目的地",
+                "ic": "IC 卡",
+                "ticket": "车票"
+            },
+            "timetable": {
+                "noData": "暂无时刻表资料",
+                "noDataSub": "目前站点暂无对应方向的车次信息",
+                "to": "往 ",
+                "weekday": "平日 Weekday",
+                "weekend": "周末/假日 Weekend"
+            }
+        }
+    },
+    "ui": {
+        "offlineBadge": "离线模式",
+        "tripAdded": "已将「{label}」加入行程！",
+        "openingTimetable": "正在为您开启「{label}」的详细时刻表...",
+        "activeBadge": "即时策略启用中",
         "demoNextStep": "演示下一步",
-        "restart": "重新開始對話",
+        "restart": "重新开始对话",
         "minimize": "最小化",
         "maximize": "最大化",
-        "placeholder": "輸入訊息...",
-        "feedbackLike": "有幫助",
-        "feedbackDislike": "沒幫助",
-        "retrySend": "重試傳送",
-        "emptyTitle": "有什麼可以幫您？",
-        "emptyDescription": "詢問路線、即時狀態或無障礙設施",
-        "quickQuestions": "快速問題",
+        "placeholder": "输入讯息...",
+        "feedbackLike": "有帮助",
+        "feedbackDislike": "没帮助",
+        "retrySend": "重试传送",
+        "emptyTitle": "有什么可以帮您？",
+        "emptyDescription": "询问路线、即时状态或无障碍设施",
+        "quickQuestionsOld": "快速问题",
+        "items": "項目",
         "intent": {
             "route": "路線",
             "status": "狀態",
@@ -421,15 +563,13 @@
             "time": "時間"
         }
     },
-    "ui": {
-        "items": "項目"
-    },
     "login": {
         "title": "會員登入",
         "currentUser": "目前登入：{email}",
         "anonymous": "匿名使用中（可先試用地圖）",
         "continue": "繼續",
         "googleLogin": "使用 Google 登入 / 註冊",
+        "lineLogin": "透過 LINE 登入",
         "or": "或",
         "emailLabel": "Email（Magic Link）",
         "emailPlaceholder": "you@example.com",

@@ -2,7 +2,7 @@
 # Four-Layer Tagging System - 後端技術規格書
 
 > **產品名稱**：ルタグ（LUTAGU）
-> **內部代號**：BambiGO
+> **內部代號**：LUTAGU
 > **版本**：v3.2
 
 ---
@@ -721,6 +721,6 @@ interface UserPreferences {
 ---
 
 *產品名稱：ルタグ（LUTAGU）*
-*內部代號：BambiGO*
+*內部代號：LUTAGU*
 *版本：v3.2 | 最後更新：2024-12-31*
 *本文件為後端技術規格，前端 UI 規格請參閱 06_UI_SPEC.md*

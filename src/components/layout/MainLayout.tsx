@@ -1,211 +1,278 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, ReactNode } from 'react';
+import { useEffect, useState, useCallback, ReactNode, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useUIStateMachine, initializeUIState, isCollapsedState, canEnterExploreMode } from '@/stores/uiStateMachine';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAppStore } from '@/stores/appStore';
+import { LoginPanel } from '@/components/ui-state/LoginPanel';
+import { ChatCollapsedPanel } from '@/components/ui-state/ChatCollapsedPanel';
+import { Sparkles, Map as MapIcon, MessageSquare } from 'lucide-react';
+
+// 常量定義
+const MOBILE_BREAKPOINT = 768;
+const DESKTOP_COLLAPSED_WIDTH = '25%';
+const MOBILE_COLLAPSED_HEIGHT = '30%';
 
 interface MainLayoutProps {
-    mapPanel: ReactNode;
-    chatPanel: ReactNode;
-    bottomBar?: ReactNode;
-    header?: ReactNode;
+  mapPanel: ReactNode;
+  chatPanel: ReactNode;
+  bottomBar?: ReactNode;
+  header?: ReactNode;
 }
 
-// Constants for panel sizing
-const MIN_LEFT_WIDTH = 300;
-const MIN_RIGHT_WIDTH = 320;
-const DEFAULT_LEFT_RATIO = 0.6;
-const MOBILE_BREAKPOINT = 1024;
-
-// Local storage key for user preference
-const PANEL_RATIO_KEY = 'lutagu_panel_ratio';
-
 export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayoutProps) {
-    const isChatOpen = useAppStore((s) => s.isChatOpen);
-    const setChatOpen = useAppStore((s) => s.setChatOpen);
+  const { deviceType, isMobile: isDeviceMobile } = useDeviceType();
+  const isMobile = deviceType === 'mobile';
 
-    // Panel sizing state
-    const [leftRatio, setLeftRatio] = useState(DEFAULT_LEFT_RATIO);
-    const [isMobile, setIsMobile] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
+  const {
+    uiState,
+    transitionTo,
+    setDeviceType,
+    messages,
+    pendingInput,
+    setPendingInput,
+    backupMessages
+  } = useUIStateMachine();
 
-    const containerRef = useRef<HTMLDivElement>(null);
-    const dragStartX = useRef(0);
-    const dragStartRatio = useRef(DEFAULT_LEFT_RATIO);
+  const { setIsMobile } = useAppStore();
 
-    // Load saved preference
-    useEffect(() => {
-        const saved = localStorage.getItem(PANEL_RATIO_KEY);
-        if (saved) {
-            const ratio = parseFloat(saved);
-            if (!isNaN(ratio) && ratio >= 0.3 && ratio <= 0.8) {
-                setLeftRatio(ratio);
-            }
-        }
-    }, []);
+  const desktopContainerRef = useRef<HTMLDivElement>(null);
 
-    // Handle responsive breakpoint
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-        };
+  // 初始化狀態
+  useEffect(() => {
+    initializeUIState();
+  }, []);
 
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    // Save preference when ratio changes
-    useEffect(() => {
-        if (!isDragging) {
-            localStorage.setItem(PANEL_RATIO_KEY, leftRatio.toString());
-        }
-    }, [leftRatio, isDragging]);
-
-    // Handle drag for resizing
-    const handleDragStart = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-        dragStartX.current = e.clientX;
-        dragStartRatio.current = leftRatio;
-    }, [leftRatio]);
-
-    useEffect(() => {
-        if (!isDragging) return;
-
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!containerRef.current) return;
-
-            const containerWidth = containerRef.current.offsetWidth;
-            const deltaX = e.clientX - dragStartX.current;
-            const deltaRatio = deltaX / containerWidth;
-            const newRatio = dragStartRatio.current + deltaRatio;
-
-            // Clamp to valid range
-            const minRatio = MIN_LEFT_WIDTH / containerWidth;
-            const maxRatio = 1 - (MIN_RIGHT_WIDTH / containerWidth);
-            setLeftRatio(Math.max(minRatio, Math.min(maxRatio, newRatio)));
-        };
-
-        const handleMouseUp = () => {
-            setIsDragging(false);
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [isDragging]);
-
-    // Calculate panel width
-    const getLeftWidth = () => `${leftRatio * 100}%`;
-    const getRightWidth = () => `${(1 - leftRatio) * 100}%`;
-
-    // Mobile Layout
-    if (isMobile) {
-        return (
-            <div className="flex flex-col h-screen bg-white">
-                {/* Header */}
-                {header && (
-                    <div className="shrink-0 z-20">
-                        {header}
-                    </div>
-                )}
-
-                {/* Map Panel - Collapsible on mobile */}
-                <div
-                    className={`relative transition-all duration-300 ${isChatOpen ? 'h-[35vh] min-h-[240px]' : 'flex-1'
-                        }`}
-                >
-                    {mapPanel}
-
-                    {/* Quick toggle to chat */}
-                    {!isChatOpen && (
-                        <button
-                            onClick={() => setChatOpen(true)}
-                            className="absolute bottom-4 right-4 z-10 px-5 py-4 
-                                bg-gradient-to-br from-indigo-600 to-indigo-800 
-                                text-white rounded-2xl shadow-xl shadow-indigo-200
-                                flex items-center gap-2 font-bold text-sm
-                                active:scale-95 transition-all min-h-[52px]"
-                        >
-                            <span className="text-lg">💬</span>
-                            <span>問 LUTAGU AI</span>
-                        </button>
-                    )}
-                </div>
-
-                {/* Chat Panel - Expandable on mobile */}
-                {isChatOpen && (
-                    <div className="flex-1 flex flex-col border-t border-slate-100 bg-white animate-in slide-in-from-bottom-4 duration-300">
-                        {chatPanel}
-                    </div>
-                )}
-
-                {/* Bottom Bar */}
-                {bottomBar && !isChatOpen && (
-                    <div className="shrink-0 z-20">
-                        {bottomBar}
-                    </div>
-                )}
-            </div>
-        );
-    }
-
-    // Desktop Layout
-    return (
-        <div ref={containerRef} className="flex flex-col h-screen bg-white overflow-hidden">
-            {/* Header */}
-            {header && (
-                <div className="shrink-0 z-20 border-b border-slate-100/50">
-                    {header}
-                </div>
-            )}
-
-            {/* Main Content Area */}
-            <div className="flex-1 flex overflow-hidden relative">
-                {/* Left Panel - Map */}
-                <div
-                    className="h-full overflow-hidden transition-all duration-200 ease-out"
-                    style={{ width: getLeftWidth() }}
-                >
-                    {mapPanel}
-                </div>
-
-                {/* Resizable Divider */}
-                <div
-                    onMouseDown={handleDragStart}
-                    className={`
-                        w-1.5 h-full cursor-col-resize flex items-center justify-center 
-                        group hover:bg-indigo-100 transition-colors
-                        ${isDragging ? 'bg-indigo-200' : 'bg-slate-100'}
-                    `}
-                >
-                    <div className={`
-                        w-1 h-16 rounded-full transition-colors
-                        ${isDragging ? 'bg-indigo-500' : 'bg-slate-300 group-hover:bg-indigo-400'}
-                    `} />
-                </div>
-
-                {/* Right Panel - Chat */}
-                <div
-                    className="h-full flex flex-col bg-white border-l border-slate-100 overflow-hidden transition-all duration-200 ease-out"
-                    style={{ width: getRightWidth() }}
-                >
-                    {chatPanel}
-                </div>
-            </div>
-
-            {/* Bottom Bar */}
-            {bottomBar && (
-                <div className="shrink-0 z-20 border-t border-slate-100/50">
-                    {bottomBar}
-                </div>
-            )}
-        </div>
+  // 同步裝置類型到 Store
+  useEffect(() => {
+    setDeviceType(
+      deviceType === 'mobile',
+      deviceType === 'tablet',
+      deviceType === 'desktop'
     );
+    setIsMobile(isDeviceMobile);
+  }, [deviceType, isDeviceMobile, setDeviceType, setIsMobile]);
+
+  // 根據裝置類型自動調整狀態
+  useEffect(() => {
+    if (uiState === 'collapsed_desktop' && isMobile) {
+      transitionTo('collapsed_mobile');
+    } else if (uiState === 'collapsed_mobile' && !isMobile) {
+      transitionTo('collapsed_desktop');
+    }
+  }, [isMobile, uiState, transitionTo]);
+
+  // 處理對話展開
+  const handleChatExpand = useCallback(() => {
+    transitionTo('fullscreen');
+  }, [transitionTo]);
+
+  // 處理對話關閉
+  const handleChatClose = useCallback(() => {
+    // 如果是從全螢幕（演示模式）關閉，清除訊息與會話以進入「全新對話」狀態
+    if (uiState === 'fullscreen') {
+      useUIStateMachine.setState({ messages: [] });
+      useAppStore.getState().resetDifyConversation();
+      useAppStore.setState({ messages: [] });
+    } else {
+      backupMessages();
+    }
+    transitionTo(isMobile ? 'collapsed_mobile' : 'collapsed_desktop');
+  }, [isMobile, transitionTo, backupMessages, uiState]);
+
+  // 處理探索模式
+  const handleExploreMode = useCallback(() => {
+    transitionTo('explore');
+  }, [transitionTo]);
+
+  // 處理返回收合狀態
+  const handleBackToCollapsed = useCallback(() => {
+    transitionTo(isMobile ? 'collapsed_mobile' : 'collapsed_desktop');
+  }, [isMobile, transitionTo]);
+
+  // 渲染登入頁面
+  if (uiState === 'login') {
+    return <LoginPanel />;
+  }
+
+  // 渲染全螢幕對話
+  if (uiState === 'fullscreen') {
+    return (
+      <div className="fixed inset-0 z-50 bg-white">
+        {chatPanel}
+        {/* 關閉按鈕 */}
+        <button
+          onClick={handleChatClose}
+          className="absolute top-4 right-4 z-50 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
+        >
+          <MessageSquare size={20} className="text-indigo-600" />
+        </button>
+      </div>
+    );
+  }
+
+  // 渲染探索模式
+  if (uiState === 'explore') {
+    return (
+      <div className="flex flex-col h-screen bg-white overflow-hidden">
+        {/* Header */}
+        {header && (
+          <div className="shrink-0 z-20">
+            {header}
+          </div>
+        )}
+
+        {/* Map Panel (90% height) */}
+        <div className="relative z-0" style={{ height: '90%' }}>
+          {mapPanel}
+
+          {/* Floating Chat Trigger Button */}
+          <button
+            onClick={handleBackToCollapsed}
+            className="absolute bottom-6 right-6 z-30 px-5 py-3 
+              bg-white text-indigo-600 rounded-2xl shadow-2xl
+              flex items-center gap-2 font-bold text-sm
+              active:scale-95 transition-all min-h-[56px] border border-indigo-100/50"
+          >
+            <MessageSquare size={20} className="text-indigo-600" />
+            <span>AI Agent</span>
+          </button>
+        </div>
+
+        {/* Bottom Bar (10% height) */}
+        <div className="shrink-0 z-20 relative bg-white border-t border-slate-100 flex items-center justify-center" style={{ height: '10%' }}>
+          {bottomBar || (
+            <div className="text-xs text-slate-400 font-medium">LUTAGU Map Explorer</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 渲染收合狀態 (桌機)
+  if (!isMobile) {
+    return (
+      <div ref={desktopContainerRef} className="flex flex-col h-screen bg-white overflow-hidden">
+        {/* Header */}
+        {header && (
+          <div className="shrink-0 z-20 border-b border-slate-100/50">
+            {header}
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 flex overflow-hidden relative">
+          {/* Map Panel (Left) */}
+          <div className="h-full overflow-hidden transition-all duration-300 ease-out flex-1">
+            {mapPanel}
+
+            {/* Floating Chat Button */}
+            {!isCollapsedState(uiState) && (
+              <button
+                onClick={handleChatClose}
+                className="absolute bottom-6 right-6 z-10 px-6 py-4 
+                  bg-indigo-600 text-white rounded-2xl shadow-2xl
+                  flex items-center gap-2 font-bold text-sm
+                  active:scale-95 transition-all min-h-[56px]"
+              >
+                <Sparkles size={20} />
+                <span>AI 助手</span>
+              </button>
+            )}
+          </div>
+
+          {/* Chat Collapsed Panel (Right) */}
+          <AnimatePresence>
+            {isCollapsedState(uiState) && (
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="h-full border-l border-slate-200 shadow-lg"
+                style={{ width: DESKTOP_COLLAPSED_WIDTH, minWidth: '280px', maxWidth: '400px' }}
+              >
+                <ChatCollapsedPanel
+                  onExpand={handleChatExpand}
+                  onClose={handleChatClose}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Bottom Bar */}
+        {bottomBar && (
+          <div className="shrink-0 z-20 border-t border-slate-100/50">
+            {bottomBar}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 渲染收合狀態 (手機)
+  return (
+    <div className="flex flex-col h-screen bg-white overflow-hidden relative">
+      {/* Header */}
+      {header && (
+        <div className="shrink-0 z-20">
+          {header}
+        </div>
+      )}
+
+      {/* Map Panel */}
+      <div
+        className="flex-1 relative z-0"
+        style={{
+          paddingBottom: isCollapsedState(uiState) ? MOBILE_COLLAPSED_HEIGHT : '0px'
+        }}
+      >
+        {mapPanel}
+
+        {/* Floating Toggle Button */}
+        {!isCollapsedState(uiState) && (
+          <button
+            onClick={handleChatClose}
+            className="absolute bottom-6 right-6 z-10 px-6 py-4 
+              bg-indigo-600 text-white rounded-2xl shadow-2xl
+              flex items-center gap-2 font-bold text-sm
+              active:scale-95 transition-all min-h-[56px]"
+          >
+            <span className="text-xl">🤖</span>
+            <span>AI 助手</span>
+          </button>
+        )}
+      </div>
+
+      {/* Chat Collapsed Panel (Bottom Sheet) */}
+      <AnimatePresence>
+        {isCollapsedState(uiState) && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed bottom-0 left-0 right-0 z-30"
+            style={{ height: MOBILE_COLLAPSED_HEIGHT, maxHeight: '300px' }}
+          >
+            <ChatCollapsedPanel
+              onExpand={handleChatExpand}
+              onClose={handleChatClose}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom Bar */}
+      {bottomBar && (
+        <div className="shrink-0 z-20 relative bg-white">
+          {bottomBar}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default MainLayout;

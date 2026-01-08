@@ -111,6 +111,7 @@ export interface L4FacilityHighlight {
 }
 
 export interface L4Knowledge {
+    vibe_summary?: LocaleString;
     traps: L4Item[];
     hacks: L4Item[];
     facilities: L4FacilityHighlight[];

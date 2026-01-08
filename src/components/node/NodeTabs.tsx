@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -16,6 +16,7 @@ import L4_Dashboard from '@/components/node/L4_Dashboard';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
+import { useAppStore } from '@/stores/appStore';
 
 const TABS = [
     { id: 'dna', icon: Compass, tone: 'sky', primary: false },
@@ -50,7 +51,14 @@ const TAB_STYLES: Record<TabId, { active: string; inactive: string; dot: string 
 };
 
 export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any }) {
-    const [activeTab, setActiveTab] = useState<TabId>('lutagu');
+    // L2: Use store state for deep link support
+    const storeNodeTab = useAppStore(state => state.nodeActiveTab);
+    const setNodeActiveTab = useAppStore(state => state.setNodeActiveTab);
+    const [localTab, setLocalTab] = useState<TabId>('lutagu');
+
+    // Use store tab if available, otherwise use local state
+    const activeTab = (storeNodeTab || localTab) as TabId;
+
     const tTabs = useTranslations('tabs');
     const tCommon = useTranslations('common');
     const tL4 = useTranslations('l4');
@@ -96,7 +104,7 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
         name: {
             ja: node.name?.ja || rawData.name?.ja || node.title || rawData.title || 'Station',
             en: node.name?.en || rawData.name?.en || node.title || rawData.title || 'Station',
-            zh: node.name?.zh || node.name?.['zh-TW'] || rawData.name?.zh || rawData.name?.['zh-TW'] || node.title || rawData.title || '車站'
+            zh: node.name?.zh || node.name?.['zh-TW'] || rawData.name?.zh || rawData.name?.['zh-TW'] || node.title || rawData.title || tCommon('station', { defaultValue: '車站' })
         },
         description: {
             ja: node.description?.ja || rawData.description?.ja || '',
@@ -105,7 +113,27 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
         },
         l1_dna: {
             categories: rawData.l1_dna?.categories || {},
-            vibe_tags: (node.vibe_tags || rawData.vibe_tags || []).map((t: string) => ({ id: t, label: { ja: t, en: t, zh: t }, score: 5 })),
+            vibe_tags: (() => {
+                // Ensure vibe_tags is always an array before mapping
+                const tags = node.vibe_tags || rawData.vibe_tags;
+                if (!tags) return [];
+                if (Array.isArray(tags)) {
+                    return tags.map((t: string | { id: string; label?: any; score?: number }) => {
+                        if (typeof t === 'string') {
+                            return { id: t, label: { ja: t, en: t, zh: t }, score: 5 };
+                        }
+                        // Ensure existing objects have all required fields
+                        return {
+                            id: t.id || String(t),
+                            label: t.label || { ja: t.id, en: t.id, zh: t.id },
+                            score: t.score ?? 5
+                        };
+                    });
+                }
+                // Handle case where tags is an object or other type
+                console.warn('[NodeTabs] vibe_tags is not an array:', typeof tags, tags);
+                return [];
+            })(),
             tagline: rawData.l1_dna?.tagline,
             title: rawData.l1_dna?.title,
             last_updated: new Date().toISOString()
@@ -122,8 +150,8 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
     return (
         <div className="flex flex-col h-full bg-slate-50 relative">
             {/* Tab Navigation */}
-            <div className="flex-none px-4 pb-2 pt-2 bg-white border-b border-slate-100 shadow-sm z-20">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+            <div className="flex-none px-4 pb-2 pt-2 bg-white border-b border-slate-100 shadow-sm z-20 flex items-center justify-between">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 flex-1" role="tablist">
                     {TABS.map((tab) => {
                         const isActive = activeTab === tab.id;
                         const styles = TAB_STYLES[tab.id];
@@ -132,20 +160,23 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
                         // Custom Label Logic
                         let label = tTabs(tab.id);
                         if (tab.id === 'lutagu') {
-                            // Override label for LUTAGU to be more descriptive about the new capabilities
-                            label = locale.startsWith('zh') ? '智能嚮導' : locale === 'ja' ? 'スマートガイド' : 'Smart Guide';
+                            // Override label for LUTAGU tab
+                            label = tTabs('lutaguSmart', { defaultValue: tL4('lutaguStrategy', { defaultValue: '智能嚮導' }) });
                         }
 
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => { setLocalTab(tab.id); setNodeActiveTab(tab.id); }}
+                                role="tab"
+                                aria-selected={isActive}
+                                aria-label={tTabs(`${tab.id}Label`, { defaultValue: label })}
                                 className={`
                                     flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap
                                     ${isActive ? styles.active : styles.inactive}
                                 `}
                             >
-                                <Icon size={16} className={isActive ? 'stroke-[3px]' : ''} />
+                                <Icon size={16} className={isActive ? 'stroke-[3px]' : ''} aria-hidden="true" />
                                 <span>{label}</span>
                                 {isActive && (
                                     <motion.div
@@ -168,7 +199,7 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="h-full w-full absolute inset-0"
+                        className={`h-full w-full absolute inset-0 ${activeTab === 'lutagu' ? 'overflow-hidden' : 'overflow-y-auto p-4'}`}
                     >
                         <ErrorBoundary>
                             {activeTab === 'dna' && (

@@ -1,9 +1,11 @@
 {
     "Home": {
         "title": "LUTAGU",
+        "subtitle": "Tokyo Transit AI Assistant",
         "currentLocation": "Current Location",
         "askLutagu": "Ask LUTAGU...",
-        "aiPlaceholder": "Ask LUTAGU..."
+        "aiPlaceholder": "Ask LUTAGU...",
+        "version": "LUTAGU v3.0 • Empowering Transit"
     },
     "status": {
         "crowded": "Crowded",
@@ -16,7 +18,8 @@
         "explore": "Explore",
         "trips": "Trips",
         "guard": "Guard",
-        "me": "Me"
+        "me": "Me",
+        "navigation": "Navigation"
     },
     "views": {
         "trips": {
@@ -58,7 +61,10 @@
             "tokyo": "Tokyo"
         },
         "enableLocation": "Enable location",
-        "browseFirst": "Browse first"
+        "nearbyNode": "Nearby Node",
+        "browseFirst": "Browse first",
+        "skipConfirmTitle": "Skip onboarding?",
+        "skipConfirmDesc": "You can reopen the onboarding from the menu later."
     },
     "tripGuard": {
         "title": "Trip Guard",
@@ -107,9 +113,14 @@
     },
     "tabs": {
         "dna": "Nearby",
+        "dnaLabel": "Nearby amenities",
         "live": "Status",
+        "liveLabel": "Live train status",
         "facility": "Facilities",
+        "facilityLabel": "Station facilities",
         "lutagu": "Advice",
+        "lutaguLabel": "Smart Guide",
+        "lutaguSmart": "Smart Guide",
         "transit": "Times & Fares"
     },
     "tag": {
@@ -228,6 +239,14 @@
         "normalOperation": "Normal",
         "delayOccurred": "Delays Reported",
         "weatherAlert": "Weather Alert",
+        "noLiveData": "No live line data available",
+        "liveFlightTitle": "Live Flight Status",
+        "tokyoWide": "TOKYO WIDE",
+        "vacanTitle": "Crowd Map",
+        "vacanDesc": "Check real-time availability of nearby shops & restaurants",
+        "vacanCta": "Open VACAN Map",
+        "vacanSub": "Find Empty Seats",
+        "dataSourceDisclaimer": "Source: Service Status & User Reports",
         "status": {
             "normal": "Normal",
             "delay": "Delayed",
@@ -249,11 +268,7 @@
             "full": "Full"
         },
         "emergencyAlert": "Emergency Alert",
-        "viewJmaDetails": "View JMA Details",
-        "vacanTitle": "Crowd Map",
-        "vacanDesc": "Check real-time availability of nearby shops & restaurants",
-        "vacanCta": "Open VACAN Map",
-        "vacanSub": "Find Empty Seats"
+        "viewJmaDetails": "View JMA Details"
     },
     "l3": {
         "servicesTitle": "Station Services",
@@ -316,7 +331,40 @@
         }
     },
     "l4": {
+        "viewModes": {
+            "recommendations": "Smart Tips",
+            "planner": "Planner",
+            "chat": "AI Assistant"
+        },
+        "plannerTabs": {
+            "route": "Route",
+            "time": "Timetable"
+        },
         "initialMessage": "Hi! I'm at {station}. Where do you want to go? I can help with routes, fares, and schedules.",
+        "resetConfirm": "Reset conversation?",
+        "station": "Station",
+        "quickButtons": {
+            "route": {
+                "label": "Fastest Route",
+                "prompt": "Task: Route Planning\nOrigin: {station} ({id})\nDestination: Ask user for destination\nRequirement: Fastest / Least transfers\nOutput: 2 options with route, time, and key transfer points"
+            },
+            "access": {
+                "label": "Accessibility",
+                "prompt": "Task: Accessible Route\nCurrent: {station} ({id})\nRequirement: Priority for exits/routes with elevators\nMissing Info: If needed, ask \"Which exit / line / direction\"\nOutput: Conclusion first, then necessary follow-up questions"
+            },
+            "status": {
+                "label": "Delay/Alt",
+                "prompt": "Task: Real-time Status\nAffected Station: {station} ({id})\nTo do: Check for delays/suspensions, if any, give 1 alternative suggestion\nOutput: Key points in 1-2 lines"
+            },
+            "fare": {
+                "label": "Check Fare",
+                "prompt": "Task: Fare Inquiry\nOrigin: {station} ({id})\nDestination: Ask user for destination\nOutput: IC & Ticket fares, mention discount passes if applicable"
+            },
+            "timetable": {
+                "label": "Next Trains",
+                "prompt": "Task: Timetable Inquiry\nStation: {station} ({id})\nRequirement: Next 3 departures and platform info\nOutput: List with destination and train type"
+            }
+        },
         "strategyTitle": "LUTAGU Strategy",
         "subtitle": "AI Suggestions based on live data",
         "topPick": "Top Pick",
@@ -360,6 +408,72 @@
             "reasoning": "Reasoning",
             "l2Verified": "Live status verified",
             "odptVerified": "ODPT schedule verified"
+        },
+        "intent": {
+            "inputPlaceholder": "Enter your question (e.g., How to get to Shinjuku, Ginza Line schedule...)",
+            "route": "Route Planning",
+            "routeDesc": "Find the fastest or most comfortable path",
+            "timetable": "Timetable",
+            "timetableDesc": "Check real-time station departures",
+            "fare": "Fare Inquiry",
+            "fareDesc": "Calculate travel costs for various routes",
+            "status": "Service Status",
+            "statusDesc": "Check for line delays or disruptions",
+            "amenity": "Station Facilities",
+            "amenityDesc": "Find elevators, lockers, or restrooms"
+        },
+        "dashboard": {
+            "aiAssistant": "LUTAGU AI Assistant",
+            "aiSubtitle": "Aggregating expert insights and tips for this station",
+            "aiPerceptionActive": "AI Perception Active",
+            "trapGuide": "Trap Guide",
+            "proHacks": "Pro Hacks",
+            "expertTips": "Expert Tips",
+            "proHacksLabel": "Pro Hacks",
+            "startChat": "Chat with AI Assistant",
+            "discoverInspiration": "Discover Inspiration",
+            "adjustPreferences": "Adjust preferences for tips",
+            "ridingGuide": "LUTAGU Riding Guide",
+            "expertMode": "Expert Mode",
+            "smartPlanning": "Smart Planning",
+            "smartPlanningSub": "Smart Planning",
+            "travelPreferences": "Travel Preferences",
+            "templateLibrary": "Template Library",
+            "generatePlan": "Generate Plan",
+            "details": "Details",
+            "nextStep": "Next Step",
+            "endOfDemo": "End of Demo",
+            "modes": {
+                "recommendations": "Smart Tips",
+                "planner": "Planner",
+                "chat": "AI Assistant"
+            },
+            "planner": {
+                "route": "Route",
+                "timetable": "Timetable"
+            },
+            "errors": {
+                "unresolvedStation": "Cannot resolve station.",
+                "pickTask": "Pick a task first.",
+                "selectDestination": "Select destination.",
+                "noFareFound": "No fare found.",
+                "fareQueryFailed": "Fare query failed.",
+                "destinationRequired": "Destination required.",
+                "noRouteFound": "No route found.",
+                "routePlanningFailed": "Route planning failed."
+            },
+            "fare": {
+                "to": "To",
+                "ic": "IC",
+                "ticket": "Ticket"
+            },
+            "timetable": {
+                "noData": "No Timetable Data",
+                "noDataSub": "No service info for this direction",
+                "to": "To ",
+                "weekday": "Weekday",
+                "weekend": "Weekend"
+            }
         }
     },
     "weather": {
@@ -386,6 +500,15 @@
         "nature": "Nature",
         "countSuffix": " spots"
     },
+    "error": {
+        "systemError": "Oops! Something went wrong",
+        "loadingError": "We encountered an issue loading the page. Please try refreshing.",
+        "componentError": "Component failed to load",
+        "componentErrorDesc": "This component couldn't load. Please try refreshing or go back.",
+        "retry": "Retry",
+        "refresh": "Refresh",
+        "back": "Go Back"
+    },
     "common": {
         "tabMenu": "Feature menu",
         "viewAll": "View All",
@@ -395,16 +518,49 @@
         "distance": "Distance",
         "loading": "Loading...",
         "error": "Error occurred",
+        "retry": "Retry",
         "station": "Station",
         "close": "Close",
         "languageSwitcherLabel": "Change language",
         "back": "Back",
         "select": "Select",
-        "clear": "Clear"
+        "clear": "Clear",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "skipOnboardingTitle": "Skip onboarding?",
+        "skipOnboardingDesc": "You can reopen the onboarding from the menu later.",
+        "feedbackSent": "Feedback received!",
+        "noNodesInView": "No stations in this area",
+        "noNodesHint": "Try moving or zooming the map to view other areas"
     },
     "chat": {
+        "aiName": "LUTAGU AI",
+        "decision": "LUTAGU DECISION",
+        "saveTime": "Save {time}",
+        "viewDetails": "Tap to view details",
+        "contexts": {
+            "luggage": "Large Luggage",
+            "stroller": "Stroller",
+            "accessibility": "Accessibility",
+            "rush": "In a hurry"
+        },
+        "quickQuestions": {
+            "status": {
+                "text": "Is the Ginza Line delayed?",
+                "label": "Status"
+            },
+            "accessibility": {
+                "text": "Where are the elevators at Ueno?",
+                "label": "Accessibility"
+            },
+            "route": {
+                "text": "Fastest route from Asakusa to Tokyo",
+                "label": "Route"
+            }
+        },
         "connectionError": "Connection error. Please try again.",
         "offlineBadge": "OFFLINE",
+        "backOnline": "Back Online",
         "tripAdded": "Added \"{label}\" to your trip!",
         "openingTimetable": "Opening detailed timetable for \"{label}\"...",
         "activeBadge": "Active Strategy Enabled",
@@ -426,7 +582,10 @@
             "ticket": "Ticket",
             "weather": "Weather",
             "time": "Time"
-        }
+        },
+        "demoComplete": "Demo Completed",
+        "restartChat": "Start New Chat",
+        "demoHint": "This is a pre-scripted demo. Click above to start a real AI chat."
     },
     "systemMenu": {
         "language": "Language",
@@ -448,6 +607,7 @@
         "anonymous": "Guest mode (you can try the map first)",
         "continue": "Continue",
         "googleLogin": "Sign in / Register with Google",
+        "lineLogin": "Sign in with LINE",
         "or": "or",
         "emailLabel": "Email (Magic Link)",
         "emailPlaceholder": "you@example.com",
@@ -455,11 +615,14 @@
         "magicLinkSent": "Login link sent! Please check your inbox and click the link to sign in.",
         "supabaseNotConfigured": "Supabase environment not configured",
         "enterEmail": "Please enter your email",
+        "invalidEmail": "Invalid email format",
         "initFailed": "Post-login initialization failed",
         "initFailedWithCode": "Post-login initialization failed ({code})",
-        "skipLogin": "Skip for now",
-        "logout": "Log out",
-        "tryAsking": "Demo Scenarios (L4 Auto Demo) - Try asking:",
+        "skipLogin": "Skip Login",
+        "logout": "Logout",
+        "startButton": "Start Using",
+        "privacyNote": "By clicking, you agree to our Terms of Service and Privacy Policy",
+        "tryAsking": "Demo Scenarios - Try asking:",
         "issues": {
             "overtourism": "Overtourism",
             "disruption": "Service Disruption",
@@ -472,5 +635,6 @@
             "handsfree": "I just arrived at Asakusa from Narita Airport, but I can't check into my hotel until this afternoon. Are there any lockers available at Asakusa Station?",
             "accessibility": "I'm going to Ueno Zoo with a stroller. Which exit at Ueno Station is the most convenient?"
         }
-    }
+    },
+    "validation": "Validation"
 }

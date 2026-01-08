@@ -514,7 +514,7 @@ export const SEED_NODES = [
         type: 'station',
         location: 'POINT(139.7865 35.6974)',
         geohash: 'xn77k',
-        is_hub: false,
+        is_hub: true, // Hub station: Toei Asakusa Line + JR Sobu Line transfer
         zone: 'core',
         source_dataset: 'odpt_seed',
         vibe: 'wholesale_craft'

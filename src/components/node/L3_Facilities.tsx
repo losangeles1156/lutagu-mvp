@@ -103,6 +103,7 @@ interface L3_FacilitiesProps {
 
 export function L3_Facilities({ data }: L3_FacilitiesProps) {
     const tL3 = useTranslations('l3');
+    const tCommon = useTranslations('common');
     const locale = useLocale();
     const [facilities, setFacilities] = useState<L3Facility[]>(data.l3_facilities || []);
     const [loading, setLoading] = useState(true);
@@ -251,12 +252,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                     setFacilities(adapted);
                 }
             } catch (err) {
-                const msg = locale.startsWith('ja')
-                    ? '設施情報を取得できませんでした。時間をおいて再試行してください。'
-                    : locale.startsWith('en')
-                        ? 'Unable to load facilities right now. Please try again later.'
-                        : '暫時無法取得設施資料，請稍後再試。';
-                if (isMounted) setError(msg);
+                if (isMounted) setError(tL3('noServices'));
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -285,7 +281,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                     onClick={() => setRetryKey(v => v + 1)}
                     className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-100 active:scale-[0.98] transition-all"
                 >
-                    {locale.startsWith('ja') ? '再試行' : locale.startsWith('en') ? 'Retry' : '重試'}
+                    {locale.startsWith('ja') ? tCommon('retry', { defaultValue: '再試行' }) : locale.startsWith('en') ? tCommon('retry', { defaultValue: 'Retry' }) : tCommon('retry', { defaultValue: '重試' })}
                 </button>
             </div>
         );
@@ -341,6 +337,8 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                             {/* Category Header */}
                             <button
                                 onClick={() => toggleCategory(type, items, label)}
+                                aria-label={`${label}: ${items.length} ${tL3('items', { defaultValue: 'items' })}${isExpanded ? ' - ' + tCommon('close') : ''}`}
+                                aria-expanded={isExpanded}
                                 className="w-full flex items-center justify-between p-4 hover:bg-gray-50/80 transition-colors group touch-manipulation min-h-[64px]"
                             >
                                 <div className="flex items-center gap-4">
@@ -450,10 +448,10 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
                                 </div>
                                 <div>
                                     <span className="font-bold text-sm block">
-                                        {locale === 'ja' ? 'トイレ空室状況' : locale === 'en' ? 'Toilet Vacancy' : '廁所即時空缺'}
+                                        {tL3('toiletVacancy', { defaultValue: '廁所即時空缺' })}
                                     </span>
                                     <span className="text-[10px] opacity-90 block">
-                                        {locale === 'ja' ? 'リアルタイム確認 (VACAN)' : locale === 'en' ? 'Live Status (VACAN)' : 'VACAN 即時狀態確認'}
+                                        {tL3('toiletVacancyDesc', { defaultValue: 'VACAN 即時狀態確認' })}
                                     </span>
                                 </div>
                             </div>
@@ -493,7 +491,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
             {/* Universal Service Links (Not station-specific) */}
             <div className="space-y-2">
                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
-                    {locale === 'ja' ? '旅行サービス' : locale === 'en' ? 'Travel Services' : '旅遊服務'}
+                    {tL3('travelServices', { defaultValue: '旅遊服務' })}
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
                     {(['shared_bike', 'charging', 'hands_free_tourism'] as ServiceCategory[]).map((cat) => {

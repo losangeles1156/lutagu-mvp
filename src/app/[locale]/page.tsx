@@ -5,9 +5,12 @@ import { useAppStore } from '@/stores/appStore';
 import { NodeTabs } from '@/components/node/NodeTabs';
 import { SubscriptionModal } from '@/components/guard/SubscriptionModal';
 import { SystemMenu } from '@/components/ui/SystemMenu';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { fetchNodeConfig, NodeProfile } from '@/lib/api/nodes';
 import { X, MessageSquare, Compass, CalendarDays, User2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -15,6 +18,7 @@ import { getLocaleString } from '@/lib/utils/localeUtils';
 import { getSupabase } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MapContainer = dynamic(
     () => import('@/components/map/MapContainer'),
@@ -46,11 +50,16 @@ export default function Home() {
         setChatOpen,
         isOnboardingOpen,
         setIsOnboardingOpen,
-        setPendingChat
+        setPendingChat,
+        setNodeActiveTab,
+        setDemoMode
     } = useAppStore();
+
+    const { transitionTo, isMobile: isMobileState } = useUIStateMachine();
 
     const [nodeData, setNodeData] = useState<any>(null);
     const [profile, setProfile] = useState<NodeProfile | null>(null);
+    const [showSkipConfirm, setShowSkipConfirm] = useState(false); // L1: Skip confirmation dialog
 
     const supabase = useMemo<SupabaseClient | null>(() => {
         try { return getSupabase(); } catch { return null; }
@@ -65,14 +74,21 @@ export default function Home() {
         const node = searchParams.get('node');
         const sheet = searchParams.get('sheet');
         const q = searchParams.get('q');
+        // L2: Support L1-L4 tab switching via URL parameter
+        const nodeTab = searchParams.get('nodeTab');
 
         let changed = false;
-        if (q) { setChatOpen(true); setPendingChat({ input: q, autoSend: true }); changed = true; }
+        if (q) { transitionTo('fullscreen'); setPendingChat({ input: q, autoSend: true }); changed = true; }
         if (tab === 'explore' || tab === 'trips' || tab === 'me') { setActiveTab(tab); changed = true; }
         if (typeof node === 'string' && node.length > 0) { setCurrentNode(node); if (sheet === '1') setBottomSheetOpen(true); changed = true; }
         if (sheet === '1' && !node) { setBottomSheetOpen(true); changed = true; }
+        // L2: Set node tab if provided (lutagu, dna, live, facility, transit)
+        if (nodeTab && ['lutagu', 'dna', 'live', 'facility', 'transit'].includes(nodeTab)) {
+            setNodeActiveTab(nodeTab);
+            changed = true;
+        }
         if (changed) router.replace(window.location.pathname);
-    }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat]);
+    }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab]);
 
     // Onboarding check
     useEffect(() => {
@@ -156,7 +172,7 @@ export default function Home() {
                     );
                 })}
                 <button
-                    onClick={() => setChatOpen(true)}
+                    onClick={() => transitionTo('fullscreen')}
                     className="ml-2 w-14 h-14 rounded-[22px] bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center shadow-[0_12px_30px_rgba(79,70,229,0.35)] active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     aria-label={tCommon('openChat')}
                 >
@@ -168,6 +184,7 @@ export default function Home() {
 
     return (
         <div className="relative min-h-screen bg-white">
+            <OfflineIndicator />
             <MainLayout header={header} mapPanel={mapPanel} chatPanel={chatPanel} bottomBar={bottomBar} />
 
             {/* Node Details Overlay */}
@@ -180,13 +197,16 @@ export default function Home() {
                             </h2>
                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{tNode('details')}</span>
                         </div>
-                        <button
-                            onClick={() => { setBottomSheetOpen(false); setCurrentNode(null); }}
-                            className="p-3 bg-gray-100 rounded-2xl text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-90 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-                            aria-label={tCommon('close')}
-                        >
-                            <X size={24} aria-hidden="true" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <LanguageSwitcher className="p-2 shadow-none glass-effect-none bg-transparent hover:bg-gray-100 rounded-2xl" />
+                            <button
+                                onClick={() => { setBottomSheetOpen(false); setCurrentNode(null); }}
+                                className="p-3 bg-gray-100 rounded-2xl text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-90 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                                aria-label={tCommon('close')}
+                            >
+                                <X size={24} aria-hidden="true" />
+                            </button>
+                        </div>
                     </header>
                     <div className="flex-1 overflow-hidden">
                         <NodeTabs nodeData={nodeData} profile={profile} />
@@ -208,13 +228,16 @@ export default function Home() {
                                     <p className="text-xs font-bold text-slate-400 mt-1">{tOnboarding('tagline')}</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); }}
-                                className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                aria-label={tOnboarding('skip')}
-                            >
-                                <X className="w-5 h-5" aria-hidden="true" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <LanguageSwitcher className="p-2 shadow-none glass-effect-none bg-transparent hover:bg-slate-50 rounded-full" />
+                                <button
+                                    onClick={() => setShowSkipConfirm(true)}
+                                    className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    aria-label={tOnboarding('skip')}
+                                >
+                                    <X className="w-5 h-5" aria-hidden="true" />
+                                </button>
+                            </div>
                         </header>
 
                         <div className="flex-1 overflow-y-auto px-8 py-2 custom-scrollbar">
@@ -233,9 +256,10 @@ export default function Home() {
                                         <button
                                             key={tip.id}
                                             onClick={() => {
-                                                router.push(`/${locale}/?node=${tip.node}&sheet=1&tab=lutagu&q=${encodeURIComponent(tip.text)}`);
                                                 setOnboardingSeenVersion(ONBOARDING_VERSION);
                                                 setIsOnboardingOpen(false);
+                                                setDemoMode(true, tip.id);
+                                                transitionTo('fullscreen');
                                             }}
                                             className="w-full text-left p-4 bg-slate-50 rounded-[24px] border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-lg hover:shadow-indigo-50 transition-all group active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                         >
@@ -281,23 +305,139 @@ export default function Home() {
                         <footer className="p-8 pt-4 pb-6 grid grid-cols-2 gap-4 bg-white border-t border-slate-50">
                             <button
                                 onClick={() => {
-                                    if (!navigator.geolocation) { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); return; }
+                                    const defaultNode = 'odpt.Station:TokyoMetro.Ginza.Ueno';
+                                    const defaultCenter = { lat: 35.7141, lon: 139.7774 };
+
+                                    if (!navigator.geolocation) {
+                                        // No geolocation support, use default
+                                        setMapCenter(defaultCenter);
+                                        setCurrentNode(defaultNode);
+                                        setBottomSheetOpen(true);
+                                        setNodeActiveTab('lutagu');
+                                        setOnboardingSeenVersion(ONBOARDING_VERSION);
+                                        setIsOnboardingOpen(false);
+                                        return;
+                                    }
+
                                     navigator.geolocation.getCurrentPosition(
-                                        (pos) => { setMapCenter({ lat: pos.coords.latitude, lon: pos.coords.longitude }); setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); },
-                                        () => { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); }
+                                        async (pos) => {
+                                            // Success: find nearest node
+                                            try {
+                                                const res = await fetch(`/api/nodes/nearest?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                                                if (res.ok) {
+                                                    const data = await res.json();
+                                                    if (data.node?.id) {
+                                                        setMapCenter({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                                                        setCurrentNode(data.node.id);
+                                                        setBottomSheetOpen(true);
+                                                        setNodeActiveTab('lutagu');
+                                                    } else {
+                                                        setMapCenter(defaultCenter);
+                                                        setCurrentNode(defaultNode);
+                                                        setBottomSheetOpen(true);
+                                                        setNodeActiveTab('lutagu');
+                                                    }
+                                                } else {
+                                                    setMapCenter({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                                                    setCurrentNode(defaultNode);
+                                                    setBottomSheetOpen(true);
+                                                    setNodeActiveTab('lutagu');
+                                                }
+                                            } catch {
+                                                setMapCenter({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                                                setCurrentNode(defaultNode);
+                                                setBottomSheetOpen(true);
+                                                setNodeActiveTab('lutagu');
+                                            }
+                                            setOnboardingSeenVersion(ONBOARDING_VERSION);
+                                            setIsOnboardingOpen(false);
+                                        },
+                                        () => {
+                                            // Error or denied: use default
+                                            setMapCenter(defaultCenter);
+                                            setCurrentNode(defaultNode);
+                                            setBottomSheetOpen(true);
+                                            setNodeActiveTab('lutagu');
+                                            setOnboardingSeenVersion(ONBOARDING_VERSION);
+                                            setIsOnboardingOpen(false);
+                                        }
                                     );
                                 }}
                                 className="py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                             >
-                                {tOnboarding('enableLocation')}
+                                {tOnboarding('nearbyNode')}
                             </button>
                             <button
-                                onClick={() => { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); }}
+                                onClick={() => {
+                                    if (!navigator.geolocation) {
+                                        // No geolocation, default to Ueno
+                                        setMapCenter({ lat: 35.7141, lon: 139.7774 });
+                                        setOnboardingSeenVersion(ONBOARDING_VERSION);
+                                        setIsOnboardingOpen(false);
+                                        return;
+                                    }
+                                    navigator.geolocation.getCurrentPosition(
+                                        (pos) => {
+                                            setMapCenter({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                                            setOnboardingSeenVersion(ONBOARDING_VERSION);
+                                            setIsOnboardingOpen(false);
+                                        },
+                                        () => {
+                                            // Denied: default to Ueno
+                                            setMapCenter({ lat: 35.7141, lon: 139.7774 });
+                                            setOnboardingSeenVersion(ONBOARDING_VERSION);
+                                            setIsOnboardingOpen(false);
+                                        }
+                                    );
+                                }}
                                 className="py-4 bg-slate-50 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-100 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300"
                             >
                                 {tOnboarding('browseFirst')}
                             </button>
                         </footer>
+
+                        {/* L1: Skip Confirmation Dialog */}
+                        <AnimatePresence>
+                            {showSkipConfirm && (
+                                <>
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10"
+                                        onClick={() => setShowSkipConfirm(false)}
+                                    />
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        className="absolute bottom-0 left-0 right-0 z-20 bg-white rounded-t-[32px] p-6 pb-8 shadow-2xl"
+                                    >
+                                        <div className="text-center mb-6">
+                                            <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <X className="w-7 h-7 text-amber-500" />
+                                            </div>
+                                            <h3 className="text-lg font-black text-slate-900 mb-2">{tCommon('skipOnboardingTitle')}</h3>
+                                            <p className="text-sm text-slate-500 font-medium">{tCommon('skipOnboardingDesc')}</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={() => setShowSkipConfirm(false)}
+                                                className="py-3.5 bg-slate-100 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-200 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300"
+                                            >
+                                                {tCommon('cancel')}
+                                            </button>
+                                            <button
+                                                onClick={() => { setOnboardingSeenVersion(ONBOARDING_VERSION); setIsOnboardingOpen(false); setShowSkipConfirm(false); }}
+                                                className="py-3.5 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                                            >
+                                                {tCommon('confirm')}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </section>
             )}

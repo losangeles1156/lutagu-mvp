@@ -20,6 +20,7 @@ export {
 export { 
     CacheWarmer, 
     getCacheWarmer, 
+    getWarmerStats,
     destroyCacheWarmer 
 } from './cacheWarmer';
 

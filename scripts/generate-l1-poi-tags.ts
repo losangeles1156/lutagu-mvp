@@ -1,0 +1,232 @@
+/**
+ * L1 POI Tag Generation Script (Phase 1)
+ * 
+ * Purpose: Generate location_tags and category_tags for all L1 POI records
+ * This script calls the PostgreSQL functions we created.
+ * 
+ * Usage: 
+ *   npx tsx scripts/generate-l1-poi-tags.ts [--batch-size 1000] [--tag-type location|category|all]
+ */
+
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' });
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY!;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+interface POIRecord {
+    id: string;
+    name: string;
+    station_id: string;
+    category: string;
+    tags: Record<string, unknown>;
+    location: string | null;
+}
+
+interface BatchResult {
+    updated: number;
+    errors: number;
+    tag_type: string;
+    timestamp: string;
+}
+
+// Brand category mapping for auto-tagging
+const BRAND_MAP: Record<string, Record<string, unknown>> = {
+    '吉野家': { primary: 'dining', secondary: 'japanese_food', detailed: 'gyudon', is_chain: true, price_range: 1 },
+    '松屋': { primary: 'dining', secondary: 'japanese_food', detailed: 'gyudon', is_chain: true, price_range: 1 },
+    '一蘭': { primary: 'dining', secondary: 'japanese_food', detailed: 'ramen', is_chain: true, price_range: 2 },
+    'Starbucks': { primary: 'dining', secondary: 'cafe', detailed: 'coffee', is_chain: true, price_range: 2 },
+    'サブウェイ': { primary: 'dining', secondary: 'western_food', detailed: 'sandwich', is_chain: true, price_range: 1 },
+    'マクドナルド': { primary: 'dining', secondary: 'western_food', detailed: 'burger', is_chain: true, price_range: 1 },
+    '肯德基': { primary: 'dining', secondary: 'western_food', detailed: 'fried_chicken', is_chain: true, price_range: 1 },
+    '鳥貴族': { primary: 'dining', secondary: 'izakaya', detailed: 'yakitori', is_chain: true, price_range: 2 },
+    '魚民': { primary: 'dining', secondary: 'izakaya', detailed: 'izakaya', is_chain: true, price_range: 2 },
+    'セブン-イレブン': { primary: 'shopping', secondary: 'convenience', detailed: 'convenience_store', is_chain: true, price_range: 1 },
+    'ファミリーマート': { primary: 'shopping', secondary: 'convenience', detailed: 'convenience_store', is_chain: true, price_range: 1 },
+    'ローソン': { primary: 'shopping', secondary: 'convenience', detailed: 'convenience_store', is_chain: true, price_range: 1 },
+    '伊勢丹': { primary: 'shopping', secondary: 'department', detailed: 'department_store', is_chain: true, price_range: 4 },
+    '高島屋': { primary: 'shopping', secondary: 'department', detailed: 'department_store', is_chain: true, price_range: 4 },
+    'BIC CAMERA': { primary: 'shopping', secondary: 'electronics', detailed: 'electronics', is_chain: true, price_range: 3 },
+    'ヤマダ電機': { primary: 'shopping', secondary: 'electronics', detailed: 'electronics', is_chain: true, price_range: 3 },
+    'UNIQLO': { primary: 'shopping', secondary: 'fashion', detailed: 'clothing', is_chain: true, price_range: 2 },
+    'GU': { primary: 'shopping', secondary: 'fashion', detailed: 'clothing', is_chain: true, price_range: 1 },
+};
+
+function detectChain(name: string): boolean {
+    const patterns = ['株式会社', 'Co.', 'Ltd.', 'Inc.', 'チェーン', 'Store', 'Shop', '连锁'];
+    return patterns.some(p => name.includes(p));
+}
+
+function estimatePrice(category: string, tags: Record<string, unknown>): number {
+    const priceRange = tags?.price_range as string;
+    if (priceRange === 'high') return 4;
+    if (priceRange === 'medium') return 3;
+    if (priceRange === 'low') return 1;
+    return 2;
+}
+
+function generateCategoryTags(name: string, category: string, tags: Record<string, unknown>): Record<string, unknown> {
+    for (const [brand, tagData] of Object.entries(BRAND_MAP)) {
+        if (name.includes(brand) || name.toLowerCase().includes(brand.toLowerCase())) {
+            return {
+                ...tagData,
+                brand_name: brand,
+                is_24h: tags?.opening_hours === '24/7',
+                is_partner: false
+            };
+        }
+    }
+    
+    return {
+        primary: category || 'other',
+        secondary: (tags?.amenity || tags?.shop || 'other') as string,
+        detailed: (tags?.cuisine || 'other') as string,
+        is_chain: detectChain(name),
+        is_24h: tags?.opening_hours === '24/7',
+        is_partner: false,
+        price_range: estimatePrice(category, tags)
+    };
+}
+
+async function processBatch(batchSize: number, tagType: 'location' | 'category' | 'all'): Promise<BatchResult> {
+    const { data, error } = await supabase
+        .rpc('batch_update_l1_tags', {
+            p_batch_size: batchSize,
+            p_tag_type: tagType
+        });
+    
+    if (error) {
+        console.error('Error calling batch_update_l1_tags:', error);
+        return { updated: 0, errors: batchSize, tag_type: tagType, timestamp: new Date().toISOString() };
+    }
+    
+    return data as BatchResult;
+}
+
+async function getUnprocessedCount(): Promise<number> {
+    const { count } = await supabase
+        .from('l1_places')
+        .select('id', { count: 'exact', head: true })
+        .is('location_tags', null);
+    
+    return count || 0;
+}
+
+async function runWithFallback(batchSize: number, tagType: 'location' | 'category' | 'all'): Promise<{ processed: number; errors: number }> {
+    let query = supabase
+        .from('l1_places')
+        .select('id, name, station_id, category, tags, location')
+        .limit(batchSize);
+    
+    if (tagType === 'location') {
+        query = query.is('location_tags', null).not('location', 'is', null);
+    } else if (tagType === 'category') {
+        query = query.is('category_tags', null);
+    }
+    
+    const { data: pois, error } = await query;
+    
+    if (error || !pois || pois.length === 0) {
+        return { processed: 0, errors: 0 };
+    }
+    
+    console.log(`Processing ${pois.length} POIs with ${tagType} tags...`);
+    
+    let processed = 0;
+    let errors = 0;
+    
+    for (const poi of pois) {
+        try {
+            const updateData: Record<string, unknown> = {};
+            
+            if (tagType !== 'category') {
+                updateData.category_tags = generateCategoryTags(poi.name, poi.category, poi.tags || {});
+            }
+            
+            if (tagType !== 'location' && poi.station_id) {
+                const { data: stationData } = await supabase
+                    .from('nodes')
+                    .select('id, parent_hub_id, name')
+                    .eq('id', poi.station_id)
+                    .single();
+                
+                if (stationData) {
+                    updateData.location_tags = {
+                        ward: null,
+                        micro_areas: [],
+                        hub_id: stationData.parent_hub_id || stationData.id,
+                        station_id: stationData.id,
+                        station_name: stationData.name,
+                        near_station: true,
+                        walking_minutes: 5,
+                        generated_at: new Date().toISOString()
+                    };
+                }
+            }
+            
+            await supabase.from('l1_places').update(updateData).eq('id', poi.id);
+            processed++;
+            
+            if (processed % 100 === 0) {
+                console.log(`Processed ${processed} POIs...`);
+            }
+            
+        } catch (err) {
+            errors++;
+            console.error(`Error processing POI ${poi.id}:`, err);
+        }
+    }
+    
+    return { processed, errors };
+}
+
+async function main() {
+    const args = process.argv.slice(2);
+    const batchSize = parseInt(args.find(a => a.startsWith('--batch-size'))?.split('=')[1] || '1000');
+    const tagType = (args.find(a => a.startsWith('--tag-type'))?.split('=')[1] || 'all') as 'location' | 'category' | 'all';
+    
+    console.log('=== L1 POI Tag Generation (Phase 1) ===');
+    console.log(`Batch size: ${batchSize}`);
+    console.log(`Tag type: ${tagType}`);
+    console.log('');
+    
+    const totalCount = await getUnprocessedCount();
+    console.log(`Total POIs to process: ${totalCount}`);
+    console.log('');
+    
+    let totalProcessed = 0;
+    let totalErrors = 0;
+    let iterations = 0;
+    const maxIterations = 200;
+    
+    while (iterations < maxIterations) {
+        const result = await processBatch(batchSize, tagType);
+        
+        if (result.updated === 0) {
+            const fallbackResult = await runWithFallback(batchSize, tagType);
+            totalProcessed += fallbackResult.processed;
+            totalErrors += fallbackResult.errors;
+            
+            if (fallbackResult.processed === 0) break;
+        } else {
+            totalProcessed += result.updated;
+            totalErrors += result.errors;
+        }
+        
+        iterations++;
+        console.log(`Iteration ${iterations}: Processed ${totalProcessed} POIs`);
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    console.log('');
+    console.log('=== Summary ===');
+    console.log(`Total processed: ${totalProcessed}`);
+    console.log(`Total errors: ${totalErrors}`);
+    console.log(`Iterations: ${iterations}`);
+}
+
+main().catch(console.error);

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useApiFetch } from '@/hooks/useApiFetch';
-import { AlertTriangle, Clock, Loader2, Map as MapIcon, MessageSquare, Sparkles, Ticket, ExternalLink, MessageCircle } from 'lucide-react';
+import { AlertTriangle, Clock, Loader2, Map as MapIcon, MessageSquare, Sparkles, Ticket, ExternalLink, MessageCircle, Snowflake, Lightbulb, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveHubStationMembers } from '@/lib/constants/stationLines';
 import type { Station } from '@/types/station';
@@ -34,16 +34,35 @@ interface L4DashboardProps {
     l4Knowledge?: L4Knowledge;
 }
 
-type L4Task = 'route' | 'knowledge' | 'timetable';
+type L4ViewMode = 'recommendations' | 'planner' | 'chat';
+type L4Task = 'route' | 'time' | 'qa';
 
-export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowledge }: L4DashboardProps) {
-    const localeHook = useLocale();
+function RecommendationSkeleton() {
+    return (
+        <div className="space-y-4 animate-pulse">
+            {[1, 2, 3].map(i => (
+                <div key={i} className="rounded-2xl bg-slate-50 border border-slate-100 p-4 flex items-start gap-3">
+                    <div className="shrink-0 w-10 h-10 rounded-xl bg-slate-200" />
+                    <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-slate-200 rounded w-3/4" />
+                        <div className="h-3 bg-slate-200 rounded w-full" />
+                        <div className="h-3 bg-slate-200 rounded w-5/6" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4DashboardProps) {
+    const t = useTranslations('l4.dashboard');
+    const tL4 = useTranslations('l4');
+    const uiLocale = useLocale() as SupportedLocale;
     const stationId = useMemo(() => normalizeOdptStationId(String(currentNodeId || '').trim()), [currentNodeId]);
-    const uiLocale = locale;
-    const [chatMode, setChatMode] = useState(false);
     const setChatOpen = useAppStore(state => state.setChatOpen);
     const { fetchJson: fetchJsonCached } = useApiFetch();
 
+    const [viewMode, setViewMode] = useState<L4ViewMode>('recommendations');
     const [recommendations, setRecommendations] = useState<MatchedStrategyCard[]>([]);
     const [isRecommending, setIsRecommending] = useState(false);
 
@@ -79,9 +98,21 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
     const [selectedOrigin, setSelectedOrigin] = useState<Station | null>(null);
     const [destinationInput, setDestinationInput] = useState('');
     const [selectedDestination, setSelectedDestination] = useState<Station | null>(null);
+    const [selectedDirection, setSelectedDirection] = useState<string | null>(null);
     const [question, setQuestion] = useState('');
+    const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+    const [isMenuExpanded, setIsMenuExpanded] = useState(false); // 預設收起需求選單以最大化對話空間
 
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+    // Handle scroll for compact header
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+        const scrollTop = e.currentTarget.scrollTop;
+        setIsHeaderCollapsed(scrollTop > 50);
+    }, []);
+
+    const templatesContainerRef = useRef<HTMLDivElement | null>(null);
     const requestAbortRef = useRef<AbortController | null>(null);
     const requestSeqRef = useRef(0);
 
@@ -118,17 +149,33 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
         setCachedRouteResult(null); setActiveDemo(null); setDemoStepIndex(0); setQuestion('');
         setTask('route'); setIsTemplatesOpen(false); setTemplateCategory('basic');
         setOriginInput(''); setSelectedOrigin(null); setDestinationInput(''); setSelectedDestination(null);
+        setSelectedDirection(null);
         requestAbortRef.current?.abort();
     }, [stationId]);
+
+    // Handle click outside for templates
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+            if (templatesContainerRef.current && !templatesContainerRef.current.contains(e.target as Node)) {
+                setIsTemplatesOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, []);
 
     const templates = useMemo(() => buildL4DefaultQuestionTemplates({ originStationId: selectedOrigin?.id || stationId, locale: uiLocale }), [stationId, uiLocale, selectedOrigin]);
     const visibleTemplates = useMemo(() => templates.filter(t => t.category === templateCategory && (t.kind === task)), [templates, templateCategory, task]);
 
     const getStationDisplayName = useCallback((s: Station) => {
-        if (uiLocale === 'zh-TW') return s.name['zh-TW'] || s.name.ja || s.name.en || s.id;
-        if (uiLocale === 'ja') return s.name.ja || s.name['zh-TW'] || s.name.en || s.id;
-        if (uiLocale === 'en') return s.name.en || s.name.ja || s.name['zh-TW'] || s.id;
-        return s.name.ja || s.name.en || s.id;
+        const locale = uiLocale as SupportedLocale;
+        if (locale === 'zh-TW') return s.name['zh-TW'] || s.name.ja || s.name.en || s.id;
+        if (locale === 'ja') return s.name.ja || s.name['zh-TW'] || s.name.en || s.id;
+        return s.name.en || s.name.ja || s.name['zh-TW'] || s.id;
     }, [uiLocale]);
 
     const resolveStationById = useCallback(async (stationIdOrQuery: string): Promise<Station | null> => {
@@ -175,9 +222,9 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
         const originId = selectedOrigin?.id || stationId;
         const originOk = /^odpt[.:]Station:/.test(originId);
         if (!originOk) return false;
-        if (task === 'timetable') return true;
+        if (task === 'time') return true;
         if (task === 'route') return Boolean(selectedDestination?.id);
-        if (task === 'knowledge') return true;
+        if (task === 'qa') return true;
         return true;
     }, [isLoading, selectedOrigin, selectedDestination, stationId, task]);
 
@@ -185,13 +232,13 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
         const originId = normalizeOdptStationId(selectedOrigin?.id || stationId);
         const destId = selectedDestination?.id ? normalizeOdptStationId(selectedDestination.id) : '';
         const note = String(question || '').trim();
-        if (task === 'timetable') return `timetable station: ${originId}${note ? `\n${note}` : ''}`;
-        if (task === 'knowledge') return `knowledge station: ${originId}${note ? `\n${note}` : ''}`;
+        if (task === 'time') return `timetable station: ${originId}${note ? `\n${note}` : ''}`;
+        if (task === 'qa') return `knowledge station: ${originId}${note ? `\n${note}` : ''}`;
         return `route from: ${originId} to: ${destId}${note ? `\n${note}` : ''}`;
     }, [question, selectedDestination, selectedOrigin, stationId, task]);
 
     useEffect(() => {
-        if (task === 'timetable' && stationId && !timetableData) {
+        if (task === 'time' && stationId && !timetableData) {
             setIsLoading(true);
             const allMembers = resolveHubStationMembers(stationId);
             const prioritized = [...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')), ...allMembers.filter(id => id.includes('JR-East'))];
@@ -227,11 +274,11 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
             const intent = classifyQuestion(text, uiLocale);
             const kind = intent.kind;
             if (!/^odpt[.:]Station:/.test(currentOriginId)) {
-                setError(uiLocale.startsWith('zh') ? '目前站點無法解析。' : uiLocale === 'ja' ? 'ODPT駅に解決できません。' : 'Cannot resolve station.');
+                setError(t('errors.unresolvedStation'));
                 setActiveKind('unknown'); return;
             }
             if (kind === 'unknown') {
-                setError(uiLocale.startsWith('zh') ? '請先選擇要查的項目。' : uiLocale === 'ja' ? '項目を選んでください。' : 'Pick a task first.');
+                setError(t('errors.pickTask'));
                 setActiveKind('unknown'); return;
             }
             setActiveKind(kind);
@@ -247,7 +294,7 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                 const toStationId = selectedDestination?.id || intent.toStationId || (ids.find(id => normalizeOdptStationId(id) !== currentOriginId) ?? '');
                 if (!toStationId) {
                     setSuggestion(buildFareSuggestion({ originStationId: currentOriginId, originStationName: currentOriginName, destinationStationId: undefined, demand, verified: false }));
-                    setError(uiLocale.startsWith('zh') ? '請選擇目的地車站。' : uiLocale === 'ja' ? '到着駅を選択。' : 'Select destination.');
+                    setError(t('errors.selectDestination'));
                     return;
                 }
                 const from = normalizeOdptStationId(currentOriginId);
@@ -256,13 +303,13 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                     const json = await fetchJsonCached<any>(`/api/odpt/fare?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, { ttlMs: 10 * 60_000, signal: controller.signal });
                     if (mySeq !== requestSeqRef.current) return;
                     const items = Array.isArray(json?.fares) ? json.fares : [];
-                    if (!json?.found || items.length === 0) { setFareData([]); setError('No fare found.'); setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, destinationStationName: currentDestName, demand, verified: false })); return; }
+                    if (!json?.found || items.length === 0) { setFareData([]); setError(t('errors.noFareFound')); setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, destinationStationName: currentDestName, demand, verified: false })); return; }
                     const odptFares: OdptRailwayFare[] = items.map((f: any, idx: number) => ({ '@id': `l4:fare:${json.source || 'unknown'}:${f.operator}:${f.from}:${f.to}:${idx}`, '@type': 'odpt:RailwayFare', 'odpt:operator': f.operator.startsWith('odpt.Operator:') ? f.operator : `odpt.Operator:${f.operator}`, 'odpt:fromStation': f.from, 'odpt:toStation': f.to, 'odpt:ticketFare': f.ticket, 'odpt:icCardFare': f.ic }));
                     const filtered = filterFaresForOrigin(odptFares, from);
                     setFareData(filtered);
                     setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, destinationStationName: currentDestName, demand, verified: true }));
                     return;
-                } catch (e: any) { if (e?.name !== 'AbortError') { setError('Fare query failed.'); setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, demand, verified: false })); } return; }
+                } catch (e: any) { if (e?.name !== 'AbortError') { setError(t('errors.fareQueryFailed')); setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, demand, verified: false })); } return; }
             }
 
             if (kind === 'timetable') {
@@ -306,82 +353,307 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
     const ask = async () => { await askWithText(buildInternalQueryText()); };
     const swapStations = () => { const temp = selectedOrigin; const tempInput = originInput; setSelectedOrigin(selectedDestination); setOriginInput(destinationInput); setSelectedDestination(temp); setDestinationInput(tempInput); };
 
+    const availableDirections = useMemo(() => {
+        if (!timetableData) return [];
+        return Array.from(new Set(timetableData.map(t => t['odpt:railDirection']).filter(Boolean))) as string[];
+    }, [timetableData]);
+
     return (
-        <div className="h-full bg-slate-50 overflow-hidden">
-            <div className="h-full flex flex-col">
+        <div className="w-full h-full flex flex-col bg-slate-50/50 overflow-hidden">
                 {/* Header */}
-                <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm pt-4 px-4 pb-2 flex items-center gap-3">
-                    <div className="flex-1">
-                        {chatMode ? (
-                            <div className="flex items-center gap-2">
-                                <div className="p-2 bg-indigo-600 rounded-xl text-white"><MessageCircle size={18} /></div>
-                                <div>
-                                    <div className="text-sm font-black text-slate-800">LUTAGU AI</div>
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{localeHook.startsWith('zh') ? '智能對話' : localeHook === 'ja' ? 'スマートガイド' : 'Smart Guide'}</div>
-                                </div>
-                            </div>
-                        ) : (
-                            <TabSelector activeTask={task} onSelect={setTask} locale={uiLocale} />
-                        )}
+                <motion.div 
+                    initial={false}
+                    animate={{ 
+                        height: isHeaderCollapsed ? '56px' : 'auto',
+                        paddingTop: isHeaderCollapsed ? '8px' : '16px',
+                        paddingBottom: isHeaderCollapsed ? '8px' : '8px'
+                    }}
+                    className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm px-4 flex items-center gap-3 border-b border-slate-100/50"
+                >
+                    <div className="flex-1 overflow-hidden">
+                        <ViewModeSelector activeMode={viewMode} onSelect={setViewMode} tL4={tL4} isCompact={isHeaderCollapsed} />
                     </div>
-                    {/* Mode Toggle */}
-                    <div className="flex items-center gap-1 bg-slate-100 rounded-full p-1">
-                        <button onClick={() => setChatMode(false)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${!chatMode ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                            <span className={!chatMode ? '' : 'opacity-50'}>{localeHook.startsWith('zh') ? '📋 表單' : localeHook === 'ja' ? '📋 フォーム' : '📋 Form'}</span>
-                        </button>
-                        <button onClick={() => setChatMode(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${chatMode ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                            <span className={chatMode ? '' : 'opacity-50'}>{localeHook.startsWith('zh') ? '💬 對話' : localeHook === 'ja' ? '💬 チャット' : '💬 Chat'}</span>
-                        </button>
-                    </div>
-                    <button onClick={() => setChatOpen(true)} className="ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 text-white text-[11px] font-black shadow-sm shadow-indigo-200 active:scale-95 transition-all">
-                        <MessageSquare size={14} />
-                        <span>{uiLocale.startsWith('zh') ? '問 LUTAGU' : uiLocale === 'ja' ? 'LUTAGU に聞く' : 'Ask LUTAGU'}</span>
-                    </button>
-                </div>
+                </motion.div>
 
                 {/* Main Content */}
-                <div className="flex-1 overflow-y-auto">
+                <div 
+                    ref={scrollContainerRef}
+                    onScroll={handleScroll}
+                    className="flex-1 overflow-y-auto"
+                >
                     <AnimatePresence mode="wait">
-                        {chatMode ? (
-                            <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="h-full">
+                        {viewMode === 'recommendations' ? (
+                            <motion.div 
+                                key="recommendations" 
+                                initial={{ opacity: 0, y: 10 }} 
+                                animate={{ opacity: 1, y: 0 }} 
+                                exit={{ opacity: 0, y: -10 }} 
+                                className="px-4 py-6 space-y-8"
+                            >
+                                {/* AI Intelligence Hub - Main Feature Highlight */}
+                                <section className="relative">
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+                                    <div className="relative bg-white/80 backdrop-blur-2xl rounded-[2rem] border border-white/60 p-6 shadow-2xl shadow-indigo-100/50 overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-4">
+                                            <div className="flex items-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                                                <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{t('aiPerceptionActive')}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-xl shadow-indigo-200 ring-4 ring-white">
+                                                <Sparkles size={28} className="animate-pulse" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                                                    {t('aiAssistant')}
+                                                </h2>
+                                                <p className="text-xs font-bold text-slate-500 mt-0.5">
+                                                    {t('aiSubtitle')}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+                                                        <AlertTriangle size={14} />
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('trapGuide')}</span>
+                                                </div>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-base font-black text-slate-800">{l4Knowledge?.traps?.length || 0}</span>
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase">{t('expertTips')}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                                        <Lightbulb size={14} />
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('proHacksLabel')}</span>
+                                                </div>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-base font-black text-slate-800">{l4Knowledge?.hacks?.length || 0}</span>
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Pro Hacks</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            onClick={() => setViewMode('chat')}
+                                            className="w-full mt-6 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:bg-indigo-600 transition-all active:scale-[0.98] shadow-lg shadow-slate-200"
+                                        >
+                                            <MessageSquare size={16} />
+                                            {t('startChat')}
+                                        </button>
+                                    </div>
+                                </section>
+
+                                {isRecommending ? (
+                                    <RecommendationSkeleton />
+                                ) : recommendations.length > 0 ? (
+                                    <StrategyCards cards={recommendations} locale={uiLocale} />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-16 text-slate-400 space-y-3 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+                                        <Sparkles size={40} className="opacity-10" />
+                                        <div className="text-center">
+                                            <p className="text-sm font-black text-slate-500">
+                                                {t('discoverInspiration')}
+                                            </p>
+                                            <p className="text-[10px] font-bold text-slate-400 mt-1">
+                                                {t('adjustPreferences')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Expert Knowledge Sections */}
+                                <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-6 border border-slate-200/60 shadow-xl shadow-slate-200/20 space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                                                <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                                                {t('ridingGuide')}
+                                            </h3>
+                                            <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-full uppercase tracking-wider">{t('expertMode')}</span>
+                                        </div>
+                                    
+                                    <div className="space-y-4">
+                                        {l4Knowledge?.traps?.map((item, i) => (
+                                            <div key={i} className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 flex gap-4 group hover:bg-red-50 transition-colors">
+                                                <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
+                                                <div>
+                                                    <div className="font-black text-red-900 text-sm mb-1">{item.title}</div>
+                                                    <div className="text-xs font-bold text-red-700/80 leading-relaxed">{item.description}</div>
+                                                    {item.advice && (
+                                                        <div className="mt-3 p-2.5 bg-white/80 rounded-xl text-[11px] font-bold text-red-800 flex items-start gap-2 shadow-sm ring-1 ring-red-100">
+                                                            <Lightbulb size={14} className="shrink-0 text-amber-500 mt-0.5" />
+                                                            <span>{item.advice}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        
+                                        {l4Knowledge?.hacks?.map((item, i) => (
+                                            <div key={i} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 flex gap-4 group hover:bg-emerald-50 transition-colors">
+                                                <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
+                                                <div>
+                                                    <div className="font-black text-emerald-900 text-sm mb-1">{item.title}</div>
+                                                    <div className="text-xs font-bold text-emerald-700/80 leading-relaxed">{item.description}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : viewMode === 'chat' ? (
+                            <motion.div 
+                                key="chat" 
+                                initial={{ opacity: 0, x: 20 }} 
+                                animate={{ opacity: 1, x: 0 }} 
+                                exit={{ opacity: 0, x: -20 }} 
+                                className="w-full h-full flex flex-col"
+                            >
                                 <L4_Chat data={stationProfile} variant="strategy" />
                             </motion.div>
                         ) : (
-                            <motion.div key="form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }} className="max-w-xl mx-auto min-h-full flex flex-col px-4 pb-32 space-y-4">
-                                {/* Intent Selector for AI-powered intent classification */}
-                                <IntentSelector 
-                                    value={null}
-                                    onChange={(intent) => {
-                                        if (intent === 'route') setTask('route');
-                                        else if (intent === 'timetable') setTask('timetable');
-                                        else if (intent === 'fare' || intent === 'status' || intent === 'amenity') setTask('knowledge');
-                                    }}
-                                    disabled={isLoading}
-                                />
-                                <L4FormCard originInput={originInput} setOriginInput={setOriginInput} selectedOrigin={selectedOrigin} setSelectedOrigin={(s) => { setSelectedOrigin(s); if (s) setOriginInput(getStationDisplayName(s)); }} destinationInput={destinationInput} setDestinationInput={setDestinationInput} selectedDestination={selectedDestination} setSelectedDestination={(s) => { setSelectedDestination(s); if (s) setDestinationInput(getStationDisplayName(s)); }} swapStations={swapStations} task={task} isLoading={isLoading} getStationDisplayName={getStationDisplayName} locale={uiLocale as 'zh-TW' | 'ja' | 'en'} />
-                                <L4DemandChips demand={demand} setDemand={setDemand} wantsExpertTips={wantsExpertTips} setWantsExpertTips={setWantsExpertTips} task={task} locale={uiLocale as 'zh-TW' | 'ja' | 'en'} />
-                                <button onClick={ask} disabled={!canAsk} className="w-full h-14 rounded-xl bg-indigo-600 text-white font-black shadow-lg shadow-indigo-200 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.97] transition-all touch-manipulation">
-                                    {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
-                                    <span className="text-base">{uiLocale.startsWith('zh') ? '開始規劃' : uiLocale === 'ja' ? '検索する' : 'Plan Trip'}</span>
-                                </button>
-                                <L4TemplateSelector templates={templates} visibleTemplates={visibleTemplates} isOpen={isTemplatesOpen} setIsOpen={setIsTemplatesOpen} onSelect={applyTemplate} locale={uiLocale as 'zh-TW' | 'ja' | 'en'} />
-                                <L4TemplateList templates={visibleTemplates} isOpen={isTemplatesOpen} onSelect={(tpl) => void applyTemplate(tpl)} locale={uiLocale as 'zh-TW' | 'ja' | 'en'} />
+                            <motion.div 
+                                key="planner" 
+                                initial={{ opacity: 0, x: -20 }} 
+                                animate={{ opacity: 1, x: 0 }} 
+                                exit={{ opacity: 0, x: 20 }} 
+                                className="px-4 pb-32 space-y-6"
+                            >
+                                {/* Planner Title & Selector Section */}
+                                <div className="mt-2 space-y-4">
+                                    <div className="flex items-center justify-between px-1">
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-900 tracking-tight">{t('smartPlanning')}</h3>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{t('smartPlanningSub')}</p>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-sm">
+                                            <MapIcon size={20} />
+                                        </div>
+                                    </div>
+                                    <PlannerTabSelector activeTask={task} onSelect={setTask} tL4={tL4} />
+                                </div>
+
+                                {/* Main Config Card */}
+                                <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden">
+                                    <div className="p-6 space-y-6">
+                                        <L4FormCard 
+                                            originInput={originInput} 
+                                            setOriginInput={setOriginInput} 
+                                            selectedOrigin={selectedOrigin} 
+                                            setSelectedOrigin={(s) => { setSelectedOrigin(s); if (s) setOriginInput(getStationDisplayName(s)); }} 
+                                            destinationInput={destinationInput} 
+                                            setDestinationInput={setDestinationInput} 
+                                            selectedDestination={selectedDestination} 
+                                            setSelectedDestination={(s) => { setSelectedDestination(s); if (s) setDestinationInput(getStationDisplayName(s)); }} 
+                                            swapStations={swapStations} 
+                                            task={task as any} 
+                                            isLoading={isLoading} 
+                                            getStationDisplayName={getStationDisplayName} 
+                                            locale={uiLocale} 
+                                            isCompact={isHeaderCollapsed}
+                                            directions={availableDirections}
+                                            selectedDirection={selectedDirection}
+                                            onDirectionChange={setSelectedDirection}
+                                            getLocalizedStationName={getLocalizedStationName}
+                                        />
+
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between px-1">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('travelPreferences')}</span>
+                                                <div className="h-px flex-1 bg-slate-200/50 mx-4" />
+                                            </div>
+                                            <L4DemandChips 
+                                                demand={demand} 
+                                                setDemand={setDemand} 
+                                                wantsExpertTips={wantsExpertTips} 
+                                                setWantsExpertTips={setWantsExpertTips} 
+                                                task={task as any} 
+                                                locale={uiLocale} 
+                                            />
+                                        </div>
+
+                                        <button 
+                                            onClick={ask} 
+                                            disabled={!canAsk} 
+                                            className="w-full h-16 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black shadow-xl shadow-slate-900/20 disabled:bg-slate-200 disabled:shadow-none flex items-center justify-center gap-3 active:scale-[0.98] transition-all relative overflow-hidden group"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} className="text-indigo-400 group-hover:scale-110 transition-transform" />}
+                                            <span className="text-base relative z-10">
+                                                {t('generatePlan')}
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Advanced Options Toggle */}
+                                <div className="flex justify-center">
+                                    <button 
+                                        onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
+                                        className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-white/80 text-[11px] font-black text-slate-500 hover:text-indigo-600 hover:bg-white transition-all shadow-sm shadow-slate-200/50"
+                                    >
+                                        <Ticket size={13} className={isTemplatesOpen ? 'text-indigo-500' : ''} />
+                                        {t('templateLibrary')}
+                                        <ChevronDown size={13} className={`transition-transform duration-300 ${isTemplatesOpen ? 'rotate-180 text-indigo-500' : ''}`} />
+                                    </button>
+                                </div>
+
+                                <div ref={templatesContainerRef} className="space-y-4">
+                                    <AnimatePresence>
+                                        {isTemplatesOpen && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <L4TemplateList templates={visibleTemplates} isOpen={true} onSelect={(tpl) => void applyTemplate(tpl)} locale={uiLocale} />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
                                 <AnimatePresence>{error && <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="rounded-2xl bg-rose-50 border border-rose-100 p-4 flex items-start gap-3"><div className="p-2 bg-rose-100 rounded-full text-rose-600"><AlertTriangle size={16} /></div><div className="text-sm font-bold text-rose-800">{error}</div></motion.div>}</AnimatePresence>
-                                {!isLoading && recommendations.length > 0 && task === 'knowledge' && <div className="mb-6"><StrategyCards cards={recommendations} locale={uiLocale} /></div>}
-                                {task === 'knowledge' && !isLoading && (
-                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
-                                        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2"><Ticket className="text-indigo-500" size={20} />{uiLocale.startsWith('zh') ? '乘車與票務指南' : uiLocale === 'ja' ? '乗車・切符ガイド' : 'Riding & Tickets'}</h3>
-                                        {l4Knowledge?.traps?.map((item, i) => <div key={i} className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex gap-3"><div className="text-2xl">{item.icon}</div><div><div className="font-bold text-orange-900 text-sm">{item.title}</div><div className="text-xs text-orange-800 mt-1">{item.description}</div>{item.advice && <div className="mt-2 p-2 bg-white/60 rounded-lg text-xs font-bold text-orange-700"><span>💡</span><span>{item.advice}</span></div>}</div></div>)}
-                                        {l4Knowledge?.hacks?.map((item, i) => <div key={i} className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex gap-3"><div className="text-2xl">{item.icon}</div><div><div className="font-bold text-emerald-900 text-sm">{item.title}</div><div className="text-xs text-emerald-800 mt-1">{item.description}</div></div></div>)}
-                                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100"><h4 className="font-bold text-slate-700 mb-2 text-sm">{uiLocale.startsWith('zh') ? '交通IC卡' : 'IC Cards'}</h4><p className="text-xs text-slate-600 leading-relaxed">{uiLocale.startsWith('zh') ? '東京車站可用 Suica、PASMO 等 IC 卡。' : 'Most Tokyo stations accept Suica, PASMO.'}</p></div>
-                                        <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100"><h4 className="font-bold text-indigo-900 mb-2 text-sm">{uiLocale.startsWith('zh') ? '地鐵通票' : 'Subway Ticket'}</h4><p className="text-xs text-indigo-800 leading-relaxed">{uiLocale.startsWith('zh') ? '24/48/72 小時券可無限搭乘。' : 'Unlimited rides for 24/48/72 hours.'}</p></div>
-                                    </motion.div>
-                                )}
-                                {task === 'timetable' && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">{isLoading && !timetableData ? <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div> : <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} />}</motion.div>}
+                                {task === 'time' && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">{isLoading && !timetableData ? <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div> : <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</motion.div>}
                                 <AnimatePresence mode="wait">{(suggestion || activeDemo || activeKind) && (
                                     <motion.div key={activeKind || 'results'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="space-y-4">
-                                        {activeDemo && <div className="p-4 rounded-3xl bg-indigo-50 border border-indigo-100"><div className="flex items-center gap-2 mb-3 text-indigo-900 font-black"><Sparkles size={16} />{uiLocale === 'ja' && activeDemo.title_ja ? activeDemo.title_ja : uiLocale === 'en' && activeDemo.title_en ? activeDemo.title_en : activeDemo.title}</div><div className="space-y-4">{activeDemo.steps.slice(0, demoStepIndex + 1).map((step, i) => <div key={i} className="flex gap-3"><div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-lg shadow-sm">🤖</div><div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm font-bold text-slate-700">{uiLocale === 'ja' && step.agent_ja ? step.agent_ja : uiLocale === 'en' && step.agent_en ? step.agent_en : step.agent}</div></div>)}{demoStepIndex < activeDemo.steps.length - 1 ? <button onClick={() => setDemoStepIndex(i => i + 1)} className="w-full py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">{uiLocale === 'ja' ? '次のステップ' : uiLocale === 'en' ? 'Next Step' : '下一步'}</button> : <div className="text-center text-xs text-slate-400 font-bold">{uiLocale === 'ja' ? 'デモ終了' : uiLocale === 'en' ? 'End of Demo' : '演示結束'}</div>}</div></div>}
-                                        {activeKind && activeKind !== 'unknown' && activeKind !== 'route' && <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm"><div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">{uiLocale.startsWith('zh') ? '詳細數據' : 'Details'}</div>{activeKind === 'fare' && <FareModule fares={fareData} />}{activeKind === 'timetable' && <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} />}</div>}
+                                        {activeDemo && (
+                                            <div className="p-4 rounded-3xl bg-indigo-50 border border-indigo-100">
+                                                <div className="flex items-center gap-2 mb-3 text-indigo-900 font-black">
+                                                    <Sparkles size={16} />
+                                                    {uiLocale === 'ja' && activeDemo.title_ja ? activeDemo.title_ja : uiLocale === 'en' && activeDemo.title_en ? activeDemo.title_en : activeDemo.title}
+                                                </div>
+                                                <div className="space-y-4">
+                                                    {activeDemo.steps.slice(0, demoStepIndex + 1).map((step, i) => (
+                                                        <div key={i} className="flex gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-lg shadow-sm">🤖</div>
+                                                            <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm font-bold text-slate-700">
+                                                                {uiLocale === 'ja' && step.agent_ja ? step.agent_ja : uiLocale === 'en' && step.agent_en ? step.agent_en : step.agent}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {demoStepIndex < activeDemo.steps.length - 1 ? (
+                                                        <button onClick={() => setDemoStepIndex(i => i + 1)} className="w-full py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">
+                                                            {t('nextStep')}
+                                                        </button>
+                                                    ) : (
+                                                        <div className="text-center text-xs text-slate-400 font-bold">
+                                                            {t('endOfDemo')}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {activeKind && activeKind !== 'unknown' && activeKind !== 'route' && <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm"><div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">{t('details')}</div>{activeKind === 'fare' && <FareModule fares={fareData} locale={uiLocale} />}{activeKind === 'timetable' && <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</div>}
                                         {suggestion && activeKind === 'route' ? <div className="space-y-4"><InsightCards suggestion={suggestion} locale={uiLocale} visible={wantsExpertTips} /><div className="space-y-3">{suggestion.options.map((opt, idx) => <RouteResultCard key={`${opt.label}-${idx}`} option={{ ...opt, transfers: Number(opt.transfers ?? 0) }} rank={idx} locale={uiLocale} />)}</div></div> : suggestion ? <SuggestionModule suggestion={suggestion} /> : null}
                                     </motion.div>
                                 )}</AnimatePresence>
@@ -390,32 +662,225 @@ export default function L4_Dashboard({ currentNodeId, locale = 'zh-TW', l4Knowle
                     </AnimatePresence>
                 </div>
             </div>
+    );
+}
+
+function ViewModeSelector({ activeMode, onSelect, tL4, isCompact }: { activeMode: L4ViewMode; onSelect: (m: L4ViewMode) => void; tL4: any; isCompact?: boolean }) {
+    const modes = [
+        { id: 'recommendations', label: tL4('viewModes.recommendations'), icon: Sparkles },
+        { id: 'planner', label: tL4('viewModes.planner'), icon: MapIcon },
+        { id: 'chat', label: tL4('viewModes.chat'), icon: MessageCircle },
+    ];
+    return (
+        <div className={`relative flex p-1 bg-white/40 backdrop-blur-xl rounded-[1.25rem] border border-white/60 shadow-lg shadow-slate-200/20 transition-all ${isCompact ? 'gap-0.5' : 'gap-1'}`}>
+            {modes.map(mode => { 
+                const isActive = activeMode === mode.id; 
+                const Icon = mode.icon; 
+                return (
+                    <button 
+                        key={mode.id} 
+                        onClick={() => onSelect(mode.id as L4ViewMode)} 
+                        className={`
+                            relative flex-1 flex items-center justify-center gap-1.5 rounded-[0.9rem] text-xs font-black transition-all active:scale-95 touch-manipulation z-10
+                            ${isCompact ? 'py-2 px-1' : 'py-3'}
+                            ${isActive ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}
+                        `}
+                    >
+                        {isActive && (
+                            <motion.div
+                                layoutId="activeModePill"
+                                className="absolute inset-0 bg-white shadow-md shadow-indigo-100/50 rounded-[0.9rem] z-[-1]"
+                                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                            />
+                        )}
+                        <Icon size={isCompact ? 14 : 16} className={isActive ? 'text-indigo-500' : 'text-slate-400'} />
+                        <span className={isCompact ? 'hidden xs:inline' : ''}>{mode.label}</span>
+                    </button>
+                );
+            })}
         </div>
     );
 }
 
-function TabSelector({ activeTask, onSelect, locale }: { activeTask: string; onSelect: (t: L4Task) => void; locale: string }) {
+function PlannerTabSelector({ activeTask, onSelect, tL4 }: { activeTask: string; onSelect: (t: L4Task) => void; tL4: any }) {
     const tabs = [
-        { id: 'route', label: locale.startsWith('zh') ? '路線' : locale === 'ja' ? 'ルート' : 'Route', icon: MapIcon },
-        { id: 'knowledge', label: locale.startsWith('zh') ? '知識' : locale === 'ja' ? '知識' : 'Knowledge', icon: Ticket },
-        { id: 'timetable', label: locale.startsWith('zh') ? '時刻' : locale === 'ja' ? '時刻表' : 'Time', icon: Clock },
+        { id: 'route', label: tL4('plannerTabs.route'), icon: MapIcon },
+        { id: 'time', label: tL4('plannerTabs.time'), icon: Clock },
     ];
-    return <div className="flex p-1 bg-slate-100 rounded-2xl">{tabs.map(tab => { const isActive = activeTask === tab.id; const Icon = tab.icon; return <button key={tab.id} onClick={() => onSelect(tab.id as L4Task)} className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-black transition-all active:scale-95 touch-manipulation min-h-[44px] ${isActive ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}><Icon size={16} className={isActive ? 'stroke-[3px]' : ''} />{tab.label}</button>; })}</div>;
+    return (
+        <div className="flex gap-1.5 p-1 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60">
+            {tabs.map(tab => {
+                const isActive = activeTask === tab.id;
+                const Icon = tab.icon;
+                return (
+                    <button
+                        key={tab.id}
+                        onClick={() => onSelect(tab.id as L4Task)}
+                        className={`
+                            flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-black transition-all relative overflow-hidden
+                            ${isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}
+                        `}
+                    >
+                        {isActive && (
+                            <motion.div
+                                layoutId="activeTaskPill"
+                                className="absolute inset-0 bg-white shadow-sm rounded-xl z-[-1]"
+                                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                            />
+                        )}
+                        <Icon size={14} className={isActive ? 'text-indigo-500' : 'text-slate-400'} />
+                        {tab.label}
+                    </button>
+                );
+            })}
+        </div>
+    );
 }
 
-function FareModule({ fares }: { fares: OdptRailwayFare[] | null }) {
+function FareModule({ fares, locale }: { fares: OdptRailwayFare[] | null; locale: string }) {
+    const t = useTranslations('l4.dashboard');
     const rows = fares || [];
-    return <div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead className="bg-slate-50 text-slate-500 font-black text-xs"><tr><th className="p-3">To</th><th className="p-3">IC</th><th className="p-3">Ticket</th></tr></thead><tbody className="text-slate-700 font-bold">{rows.slice(0, 10).map((f) => <tr key={f['@id']} className="border-b border-slate-50"><td className="p-3">{String(f['odpt:toStation'] || '').split('.').pop()}</td><td className="p-3 text-indigo-600">¥{f['odpt:icCardFare']}</td><td className="p-3">¥{f['odpt:ticketFare']}</td></tr>)}</tbody></table></div>;
+    const tTo = t('fare.to');
+    const tIC = t('fare.ic');
+    const tTicket = t('fare.ticket');
+
+    return (
+        <div className="overflow-hidden rounded-2xl border border-slate-100/60 bg-white/40 backdrop-blur-sm" dir="auto">
+            <table className="w-full text-sm text-left rtl:text-right">
+                <thead className="bg-slate-50/50 text-slate-500 font-black text-[10px] uppercase tracking-wider">
+                    <tr>
+                        <th className="p-4">{tTo}</th>
+                        <th className="p-4">{tIC}</th>
+                        <th className="p-4">{tTicket}</th>
+                    </tr>
+                </thead>
+                <tbody className="text-slate-700 font-bold">
+                    {rows.slice(0, 10).map((f) => (
+                        <tr key={f['@id']} className="border-b border-slate-100/40 hover:bg-white/40 transition-colors">
+                            <td className="p-4 text-xs">{getLocalizedStationName(String(f['odpt:toStation'] || ''), locale)}</td>
+                            <td className="p-4 text-indigo-600 font-black">¥{f['odpt:icCardFare']}</td>
+                            <td className="p-4 text-slate-500">¥{f['odpt:ticketFare']}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
 }
 
-function TimetableModule({ timetables, stationId, locale }: { timetables: OdptStationTimetable[] | null; stationId: string; locale: string }) {
+function TimetableModule({ timetables, stationId, locale, selectedDirection }: { timetables: OdptStationTimetable[] | null; stationId: string; locale: string; selectedDirection?: string | null }) {
+    const t = useTranslations('l4.dashboard');
     const now = new Date();
-    const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+    // More stable JST time calculation (UTC+9)
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const jstNow = new Date(utc + (3600000 * 9));
     const nowHHMM = `${String(jstNow.getHours()).padStart(2, '0')}:${String(jstNow.getMinutes()).padStart(2, '0')}`;
     const items = timetables || [];
-    if (!items.length) return <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-3xl text-center"><div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-2xl">🕰️</div><p className="text-sm font-bold text-slate-600 mt-2">{locale.startsWith('zh') ? '暫無時刻表資料' : locale === 'ja' ? '時刻表データがありません' : 'No timetable'}</p></div>;
+
+    if (!items.length) {
+        return (
+            <div className="flex flex-col items-center justify-center p-12 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/60 text-center">
+                <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center text-3xl shadow-sm mb-4">🕰️</div>
+                <p className="text-sm font-black text-slate-600">
+                    {t('timetable.noData')}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">{t('timetable.noDataSub')}</p>
+            </div>
+        );
+    }
+
     const directions = Array.from(new Set(items.map(t => t['odpt:railDirection']).filter(Boolean)));
-    return <div className="space-y-6">{directions.map((dir) => { const tables = items.filter(t => t['odpt:railDirection'] === dir); const dirName = String(dir).split('.').pop() || 'Unknown'; return <div key={dir} className="bg-white rounded-2xl border border-slate-100 overflow-hidden"><div className="bg-slate-50 px-4 py-2 border-b border-slate-100"><span className="text-xs font-black text-slate-600 uppercase">To {dirName}</span></div><div className="p-3">{tables.map(table => { const objs = (table['odpt:stationTimetableObject'] || []).map(o => ({ time: String(o['odpt:departureTime'] || ''), dest: String(o['odpt:destinationStation'] || '').split('.').pop() })); const next = objs.filter(o => o.time >= nowHHMM).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 8); const calendar = String(table['odpt:calendar']).split(':').pop(); return <div key={table['@id']}><div className="text-xs font-bold text-indigo-600">{calendar}</div><div className="flex flex-wrap gap-2 mt-2">{next.map((t, idx) => <div key={`${t.time}-${idx}`} className="flex flex-col items-center p-2 bg-slate-50 rounded-lg min-w-[3rem]"><span className="text-sm font-black text-slate-800">{t.time}</span>{t.dest && <span className="text-[9px] text-slate-400">{t.dest}</span>}</div>)}</div></div>; })}</div></div>; })}</div>;
+    const filteredDirections = selectedDirection ? directions.filter(d => d === selectedDirection) : directions;
+    const tTo = t('timetable.to');
+
+    return (
+        <div className="space-y-4" dir="auto">
+            {filteredDirections.map((dir) => {
+                const tables = items.filter(t => t['odpt:railDirection'] === dir);
+                const dirName = getLocalizedStationName(String(dir), locale);
+                return (
+                    <div key={dir} className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-white/60 shadow-xl shadow-slate-200/10 overflow-hidden group">
+                        <div className="bg-slate-50/50 px-5 py-3 border-b border-slate-100/50 flex items-center justify-between">
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                {tTo}{dirName}
+                            </span>
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        </div>
+                        <div className="p-5">
+                            {tables.map(table => {
+                                const objs = (table['odpt:stationTimetableObject'] || []).map(o => ({
+                                    time: String(o['odpt:departureTime'] || ''),
+                                    dest: getLocalizedStationName(String(o['odpt:destinationStation'] || ''), locale)
+                                }));
+                                const next = objs.filter(o => o.time >= nowHHMM).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 8);
+                                const calendarId = String(table['odpt:calendar'] || '').split(':').pop() || '';
+                                const calendarLabel = calendarId.includes('Weekday') ? t('timetable.weekday') : t('timetable.weekend');
+
+                                return (
+                                    <div key={table['@id']} className="mb-6 last:mb-0">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className={`w-1 h-3 rounded-full ${calendarId.includes('Weekday') ? 'bg-indigo-500' : 'bg-rose-500'}`} />
+                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                                                {calendarLabel}
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {next.map((t, idx) => (
+                                                <div key={`${t.time}-${idx}`} className="flex flex-col items-center p-2.5 bg-white/80 rounded-xl border border-slate-100/50 shadow-sm hover:border-indigo-200 transition-colors group/item">
+                                                    <span className="text-sm font-black text-slate-800 group-hover/item:text-indigo-600 transition-colors">{t.time}</span>
+                                                    {t.dest && <span className="text-[9px] text-slate-400 font-bold truncate w-full text-center mt-0.5">{t.dest}</span>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+/**
+ * Robust localized station name resolver
+ */
+function getLocalizedStationName(id: string, locale: string): string {
+    const base = String(id || '').split(/[:.]/).pop() || '';
+    
+    // Comprehensive mapping for major Tokyo stations
+    const stationMap: Record<string, Record<string, string>> = {
+        'Tokyo': { 'zh': '東京', 'ja': '東京', 'en': 'Tokyo', 'ar': 'طوكيو' },
+        'Ueno': { 'zh': '上野', 'ja': '上野', 'en': 'Ueno', 'ar': 'أوينو' },
+        'Asakusa': { 'zh': '淺草', 'ja': '浅草', 'en': 'Asakusa', 'ar': 'أساكوسا' },
+        'Akihabara': { 'zh': '秋葉原', 'ja': '秋葉原', 'en': 'Akihabara', 'ar': 'أكيهابارا' },
+        'Shinjuku': { 'zh': '新宿', 'ja': '新宿', 'en': 'Shinjuku', 'ar': 'شينجوكو' },
+        'Shibuya': { 'zh': '澀谷', 'ja': '渋谷', 'en': 'Shibuya', 'ar': 'شيبويا' },
+        'Ginza': { 'zh': '銀座', 'ja': '銀座', 'en': 'Ginza', 'ar': 'جينزا' },
+        'Ikebukuro': { 'zh': '池袋', 'ja': '池袋', 'en': 'Ikebukuro', 'ar': 'إيكيبوكورو' },
+        'Roppongi': { 'zh': '六本木', 'ja': '六本木', 'en': 'Roppongi', 'ar': 'روبونغي' },
+        'Shinagawa': { 'zh': '品川', 'ja': '品川', 'en': 'Shinagawa', 'ar': 'شيناغاوا' },
+        'Nihombashi': { 'zh': '日本橋', 'ja': '日本橋', 'en': 'Nihombashi', 'ar': 'نيهونباشي' },
+        'Shimbashi': { 'zh': '新橋', 'ja': '新橋', 'en': 'Shimbashi', 'ar': 'شيمباشي' },
+        'Ebisu': { 'zh': '惠比壽', 'ja': '恵比寿', 'en': 'Ebisu', 'ar': 'إيبيسو' },
+        'Meguro': { 'zh': '目黑', 'ja': '目黒', 'en': 'Meguro', 'ar': 'ميغورو' },
+        'Harajuku': { 'zh': '原宿', 'ja': '原宿', 'en': 'Harajuku', 'ar': 'هاراجوكو' },
+        'Omotesando': { 'zh': '表參道', 'ja': '表参道', 'en': 'Omotesando', 'ar': 'أوموتيساندو' },
+        'Oshiage': { 'zh': '押上', 'ja': '押上', 'en': 'Oshiage', 'ar': 'أوشياغي' },
+        'Maihama': { 'zh': '舞濱', 'ja': '舞浜', 'en': 'Maihama', 'ar': 'مايهاما' },
+        'Toyosu': { 'zh': '豐洲', 'ja': '豊洲', 'en': 'Toyosu', 'ar': 'تويوسو' },
+        'Yurakucho': { 'zh': '有樂町', 'ja': '有楽町', 'en': 'Yurakucho', 'ar': 'يوراكوتشو' },
+        'Iidabashi': { 'zh': '飯田橋', 'ja': '飯田橋', 'en': 'Iidabashi', 'ar': 'إيداباشي' },
+        'Kanda': { 'zh': '神田', 'ja': '神田', 'en': 'Kanda', 'ar': 'كاندا' },
+        'Hamamatsucho': { 'zh': '濱松町', 'ja': '浜松町', 'en': 'Hamamatsucho', 'ar': 'هاماماتسوتشو' }
+    };
+
+    const entry = stationMap[base];
+    if (!entry) return base;
+
+    const lang = locale.startsWith('zh') ? 'zh' : locale.startsWith('ja') ? 'ja' : locale.startsWith('ar') ? 'ar' : 'en';
+    return entry[lang] || entry['en'] || base;
 }
 
 function SuggestionModule({ suggestion }: { suggestion: L4Suggestion }) {

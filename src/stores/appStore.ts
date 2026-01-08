@@ -10,6 +10,7 @@ interface AppState {
 
     isBottomSheetOpen: boolean;
     isChatOpen: boolean;
+    chatDisplayMode: 'mini' | 'split' | 'full';
     messages: Array<{
         role: 'user' | 'assistant';
         content: string;
@@ -23,6 +24,7 @@ interface AppState {
     tripGuardSubscriptionId: string | null;
     isSubscriptionModalOpen: boolean;
     isLineBound: boolean;
+    isMobile: boolean;
 
     locale: 'zh-TW' | 'ja' | 'en';
     accessibilityMode: boolean;
@@ -34,11 +36,16 @@ interface AppState {
     pendingChatInput: string | null;
     pendingChatAutoSend: boolean;
 
+    isDemoMode: boolean;
+    activeDemoId: string | null;
+    setDemoMode: (isDemo: boolean, demoId?: string) => void;
+
     setCurrentNode: (id: string | null) => void;
     setZone: (zone: 'core' | 'buffer' | 'outer') => void;
     setBottomSheetOpen: (isOpen: boolean) => void;
     setIsOnboardingOpen: (isOpen: boolean) => void;
     setChatOpen: (isOpen: boolean) => void;
+    setChatDisplayMode: (mode: 'mini' | 'split' | 'full') => void;
     setDifyConversationId: (id: string | null) => void;
     resetDifyConversation: () => void;
     addMessage: (message: {
@@ -53,7 +60,9 @@ interface AppState {
     setTripGuardSubscriptionId: (id: string | null) => void;
     setSubscriptionModalOpen: (isOpen: boolean) => void;
     setLineBound: (isBound: boolean) => void;
+    setIsMobile: (isMobile: boolean) => void;
     setLocale: (locale: 'zh-TW' | 'ja' | 'en') => void;
+    clearMessages: () => void;
     toggleAccessibility: () => void;
     setUserProfile: (profile: 'general' | 'wheelchair' | 'stroller') => void;
     setActiveTab: (tab: 'explore' | 'trips' | 'me') => void;
@@ -66,6 +75,10 @@ interface AppState {
     // Intent Selector State (for Dify selected_need)
     selectedNeed: string | null;
     setSelectedNeed: (need: string | null) => void;
+
+    // Node Tab State (for L1-L4 tab switching via URL)
+    nodeActiveTab: string;
+    setNodeActiveTab: (tab: string) => void;
 
     // Route State
     routeStart: { lat: number; lon: number; name?: string; id?: string } | null;
@@ -95,6 +108,7 @@ export const useAppStore = create<AppState>()(
 
             isBottomSheetOpen: false,
             isChatOpen: false,
+            chatDisplayMode: 'split',
             messages: [],
             mapCenter: null,
             isTripGuardActive: false,
@@ -102,6 +116,7 @@ export const useAppStore = create<AppState>()(
             tripGuardSubscriptionId: null,
             isSubscriptionModalOpen: false,
             isLineBound: false,
+            isMobile: false,
             locale: 'zh-TW',
             accessibilityMode: false,
             userProfile: 'general',
@@ -112,9 +127,14 @@ export const useAppStore = create<AppState>()(
             isOnboardingOpen: false,
             pendingChatInput: null,
             pendingChatAutoSend: false,
+            isDemoMode: false,
+            activeDemoId: null,
 
             // Intent Selector State
             selectedNeed: null,
+
+            // Node Tab State
+            nodeActiveTab: 'lutagu',
 
             // Route State Initial Values
             routeStart: null,
@@ -128,6 +148,7 @@ export const useAppStore = create<AppState>()(
             setBottomSheetOpen: (isOpen) => set({ isBottomSheetOpen: isOpen }),
             setIsOnboardingOpen: (isOpen) => set({ isOnboardingOpen: isOpen }),
             setChatOpen: (isOpen) => set({ isChatOpen: isOpen }),
+            setChatDisplayMode: (mode) => set({ chatDisplayMode: mode }),
             setDifyConversationId: (id) => set({ difyConversationId: id }),
             resetDifyConversation: () => set({ difyConversationId: null }),
             addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
@@ -137,7 +158,9 @@ export const useAppStore = create<AppState>()(
             setTripGuardSubscriptionId: (id) => set({ tripGuardSubscriptionId: id }),
             setSubscriptionModalOpen: (isOpen) => set({ isSubscriptionModalOpen: isOpen }),
             setLineBound: (isBound) => set({ isLineBound: isBound }),
+            setIsMobile: (isMobile) => set({ isMobile }),
             setLocale: (locale) => set({ locale }),
+            clearMessages: () => set({ messages: [] }),
             toggleAccessibility: () => set((state) => ({ accessibilityMode: !state.accessibilityMode })),
             setUserProfile: (profile) => set({ userProfile: profile }),
             setActiveTab: (tab) => set({ activeTab: tab }),
@@ -150,8 +173,14 @@ export const useAppStore = create<AppState>()(
                     pendingChatAutoSend: autoSend ?? false
                 }),
 
+            // Demo Mode State
+            setDemoMode: (isDemo, demoId) => set({ isDemoMode: isDemo, activeDemoId: demoId || null }),
+
             // Intent Selector Action
             setSelectedNeed: (need) => set({ selectedNeed: need }),
+
+            // Node Tab Action
+            setNodeActiveTab: (tab) => set({ nodeActiveTab: tab }),
 
             // Route Actions
             setRouteStart: (point) => set({ routeStart: point }),

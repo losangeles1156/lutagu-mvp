@@ -125,19 +125,6 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
         }
     };
 
-    import { LiveFlightBoard } from '@/components/node/LiveFlightBoard';
-
-    // ... (existing imports)
-
-    // ... inside L2_Live component
-
-
-    import { LiveFlightBoard } from '@/components/node/LiveFlightBoard';
-
-    // ... (existing imports)
-
-    // ... inside L2_Live component
-
     // [New] Airport Logic
     const isHaneda = data.id === 'odpt:Station:Airport.Haneda' || data.name?.en?.includes('Haneda');
     const isNarita = data.id === 'odpt:Station:Airport.Narita' || data.name?.en?.includes('Narita');
@@ -169,7 +156,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
             {isAirport && (
                 <div className="space-y-2">
                     <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest px-1">
-                        {locale.startsWith('zh') ? '即時航班資訊' : locale === 'ja' ? 'リアルタイムフライト情報' : 'Live Flight Status'}
+                        {tL2('liveFlightTitle', { defaultValue: 'Live Flight Status' })}
                     </h3>
                     <LiveFlightBoard airportCode={airportCode} />
                 </div>
@@ -236,11 +223,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-1">
                     {lines.length === 0 ? (
                         <div className="p-8 text-center text-gray-400 text-xs">
-                            {locale.startsWith('ja')
-                                ? '運行情報がありません'
-                                : locale.startsWith('en')
-                                    ? 'No live line data available'
-                                    : '目前沒有即時列車資訊'}
+                            {tL2('noLiveData', { defaultValue: 'No live line data available' })}
                         </div>
                     ) : (
                         <div className="flex flex-col gap-1">
@@ -288,7 +271,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                     <div className="relative">
                         {/* Scope Label - Explicitly stating this is TOKYO-wide */}
                         <div className="absolute -top-2 left-2 z-20 px-1.5 py-0.5 bg-gray-900/90 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-sm border border-white/10">
-                            TOKYO WIDE
+                            {tL2('tokyoWide', { defaultValue: 'TOKYO WIDE' })}
                         </div>
                         <SmartWeatherCard initialData={data.l2?.weather} />
                     </div>
@@ -341,7 +324,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                         </div>
                         {/* Disclaimer */}
                         <p className="text-[8px] text-gray-400 mb-2 leading-tight">
-                            {locale.startsWith('zh') ? '數據來源：運行狀況與用戶回報' : 'Source: Service Status & User Reports'}
+                            {tL2('dataSourceDisclaimer', { defaultValue: 'Source: Service Status & User Reports' })}
                         </p>
                         <div className="grid grid-cols-5 gap-1">
                             {[

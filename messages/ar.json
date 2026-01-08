@@ -1,0 +1,180 @@
+{
+    "Home": {
+        "title": "LUTAGU",
+        "currentLocation": "الموقع الحالي",
+        "askLutagu": "اسأل LUTAGU...",
+        "aiPlaceholder": "اسأل LUTAGU..."
+    },
+    "status": {
+        "crowded": "مزدحم",
+        "normal": "عادي",
+        "delayed": "متأخر {minutes} دقيقة",
+        "ready": "جاهز",
+        "ginzaDelay": "تأخير في خط جينزا"
+    },
+    "nav": {
+        "explore": "استكشاف",
+        "trips": "رحلاتي",
+        "guard": "الحماية",
+        "me": "أنا"
+    },
+    "l4": {
+        "viewModes": {
+            "recommendations": "نصائح ذكية",
+            "planner": "المخطط",
+            "chat": "مساعد AI"
+        },
+        "plannerTabs": {
+            "route": "تخطيط المسار",
+            "time": "أوقات المغادرة"
+        },
+        "initialMessage": "مرحباً! أنا في {station}. أين تريد الذهاب؟ يمكنني التحقق من المسارات والأسعار والجداول الزمنية لك.",
+        "station": "محطة",
+        "quickButtons": {
+            "route": {
+                "label": "أسرع مسار",
+                "prompt": "المهمة: تخطيط المسار\nنقطة الانطلاق: {station} ({id})\nالوجهة: اطلب من المستخدم تحديد الوجهة\nالمتطلبات: الأسرع / أقل عدد من التبديلات\nالمخرجات: خياران مع المسار والوقت ونقاط التبديل الرئيسية"
+            },
+            "access": {
+                "label": "سهولة الوصول",
+                "prompt": "المهمة: مسار ميسر\nالموقع الحالي: {station} ({id})\nالمتطلبات: الأولوية للمخارج/المسارات التي تحتوي على مصاعد\nالمعلومات الناقصة: إذا لزم الأمر، اسأل \"أي مخرج / أي خط / أي اتجاه\"\nالمخرجات: الاستنتاج أولاً، ثم الأسئلة المتابعة الضرورية"
+            },
+            "status": {
+                "label": "التأخير/البديل",
+                "prompt": "المهمة: الحالة الفورية\nالمحطة المتأثرة: {station} ({id})\nالمطلوب: التحقق من وجود تأخيرات/توقفات، وإذا وجدت، تقديم اقتراح بديل واحد\nالمخرجات: النقاط الرئيسية في 1-2 سطر"
+            },
+            "fare": {
+                "label": "الاستعلام عن السعر",
+                "prompt": "المهمة: استعلام عن السعر\nنقطة الانطلاق: {station} ({id})\nالوجهة: اطلب من المستخدم تحديد الوجهة\nالمخرجات: أسعار بطاقة IC والتذاكر، مع ذكر التذاكر المخفضة إن وجدت"
+            },
+            "timetable": {
+                "label": "الرحلات القادمة",
+                "prompt": "المهمة: استعلام عن الجدول الزمني\nالمحطة: {station} ({id})\nالمتطلبات: أوقات المغادرة لآخر 3 رحلات ومعلومات الرصيف\nالمخرجات: قائمة مع الوجهة ونوع القطار"
+            }
+        },
+        "strategyTitle": "استراتيجية LUTAGU",
+        "subtitle": "اقتراحات ذكية بناءً على البيانات الفورية",
+        "topPick": "أفضل اختيار",
+        "alternatives": "البدائل",
+        "disclaimer": "تعتمد الاقتراحات على الحالة الحالية للنقل والطقس والمرافق.",
+        "lutaguStrategy": "استراتيجية LUTAGU",
+        "suggestion": "اقتراح",
+        "psychAlert": "تنبيه نفسي",
+        "synthesisTitle": "توليف القرار الذكي",
+        "demandCard": "احتياجاتك",
+        "expertKnowledge": "منطق الخبراء",
+        "liveData": "البيانات المباشرة",
+        "actionLabel": "تعليمات العمل",
+        "demands": {
+            "speed": "عجلة من أمري",
+            "luggage": "أمتعة كبيرة",
+            "budget": "توفير المال",
+            "comfort": "راحة",
+            "family": "رحلة عائلية",
+            "accessibility": "سهولة الوصول",
+            "vibe": "تجربة استكشاف"
+        },
+        "chips": {
+            "synthesize": "توليف الاستراتيجية",
+            "route": "تخطيط المسار",
+            "nearby": "المعالم القريبة"
+        },
+        "inputPlaceholder": "تخطيط المسار (اسأل، دردش...)",
+        "chatError": "عذراً، حدث خطأ في الاتصال.",
+        "userLabel": "المستخدم",
+        "lutaguLabel": "LUTAGU",
+        "thinking": {
+            "initializing": "بدء محرك الإدراك...",
+            "l2": "تحليل حركة المرور والطقس...",
+            "l3": "التحقق من المرافق والجداول الزمنية...",
+            "kb": "قراءة قاعدة معرفة الخبراء...",
+            "synthesizing": "توليف الاحتياجات لإنشاء أفضل استراتيجية..."
+        },
+        "card": {
+            "title": "تم توليف أفضل استراتيجية",
+            "reasoning": "أساس القرار",
+            "l2Verified": "التحقق من حركة المرور",
+            "odptVerified": "تأكيد الجدول الزمني ODPT"
+        },
+        "intent": {
+            "inputPlaceholder": "أدخل سؤالك (مثلاً: كيف أذهب إلى شينجوكو؟)",
+            "route": "تخطيط المسار",
+            "routeDesc": "البحث عن أسرع أو أريح مسار",
+            "timetable": "الجدول الزمني",
+            "timetableDesc": "التحقق من أوقات المغادرة الفورية",
+            "fare": "استعلام عن السعر",
+            "fareDesc": "حساب تكاليف السفر لمختلف المسارات",
+            "status": "حالة التشغيل",
+            "statusDesc": "التحقق من التأخيرات أو الانقطاعات",
+            "amenity": "مرافق المحطة",
+            "amenityDesc": "البحث عن مصاعد، خزائن، أو مراحيض"
+        },
+        "dashboard": {
+            "aiAssistant": "مساعد LUTAGU الذكي",
+            "aiSubtitle": "نصائح ورؤى الخبراء لهذه المحطة",
+            "aiPerceptionActive": "إدراك AI نشط",
+            "trapGuide": "دليل الفخاخ",
+            "proHacks": "حيل المحترفين",
+            "expertTips": "نصائح الخبراء",
+            "proHacksLabel": "حيل المحترفين",
+            "startChat": "ابدأ الدردشة مع مساعد AI",
+            "discoverInspiration": "اكتشف الإلهام",
+            "adjustPreferences": "ضبط تفضيلات النصائح",
+            "ridingGuide": "دليل الركوب من LUTAGU",
+            "expertMode": "وضع الخبير",
+            "smartPlanning": "التخطيط الذكي",
+            "smartPlanningSub": "Smart Planning",
+            "travelPreferences": "تفضيلات السفر Travel Preferences",
+            "templateLibrary": "مكتبة القوالب Template Library",
+            "generatePlan": "ابدأ التخطيط",
+            "details": "البيانات التفصيلية",
+            "nextStep": "الخطوة التالية",
+            "endOfDemo": "نهاية العرض",
+            "modes": {
+                "recommendations": "نصائح ذكية",
+                "planner": "المخطط",
+                "chat": "مساعد AI"
+            },
+            "planner": {
+                "route": "تخطيط المسار",
+                "timetable": "أوقات المغادرة"
+            },
+            "errors": {
+                "unresolvedStation": "لا يمكن حل المحطة.",
+                "pickTask": "يرجى اختيار مهمة أولاً.",
+                "selectDestination": "يرجى اختيار وجهة.",
+                "noFareFound": "لم يتم العثور على سعر.",
+                "fareQueryFailed": "فشل الاستعلام عن السعر.",
+                "destinationRequired": "الوجهة مطلوبة.",
+                "noRouteFound": "لم يتم العثور على مسار.",
+                "routePlanningFailed": "فشل تخطيط المسار."
+            },
+            "fare": {
+                "to": "إلى",
+                "ic": "بطاقة IC",
+                "ticket": "تذكرة"
+            },
+            "timetable": {
+                "noData": "لا توجد بيانات جدول زمني",
+                "noDataSub": "لا توجد معلومات رحلات لهذا الاتجاه حالياً",
+                "to": "إلى ",
+                "weekday": "أيام الأسبوع Weekday",
+                "weekend": "عطلة نهاية الأسبوع Weekend"
+            }
+        }
+    },
+    "chat": {
+        "aiName": "LUTAGU AI",
+        "decision": "توصية قرار LUTAGU",
+        "saveTime": "توفير {time}",
+        "viewDetails": "انقر للتفاصيل",
+        "placeholder": "أدخل رسالة...",
+        "emptyTitle": "كيف يمكنني مساعدتك؟",
+        "emptyDescription": "اسأل عن المسارات، الحالة الفورية، أو المرافق"
+    },
+    "ui": {
+        "offlineBadge": "وضع عدم الاتصال",
+        "tripAdded": "تمت إضافة {label} إلى الرحلة!",
+        "activeBadge": "الاستراتيجية الفورية نشطة"
+    }
+}

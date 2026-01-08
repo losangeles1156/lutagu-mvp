@@ -1,4 +1,4 @@
-# BambiGO 母子節點繼承機制
+# LUTAGU 母子節點繼承機制
 # Hub/Spoke 設計模式
 
 ---

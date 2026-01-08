@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { 
-    Globe, 
-    User, 
-    Settings, 
-    LogOut, 
-    Star, 
-    CalendarDays, 
+import { LanguageSwitcher } from './LanguageSwitcher';
+import {
+    Globe,
+    User,
+    Settings,
+    LogOut,
+    Star,
+    CalendarDays,
     MessageSquare,
     ChevronDown,
     X
@@ -21,30 +22,30 @@ interface SystemMenuProps {
     variant?: 'header' | 'floating';
 }
 
-const LANGUAGES = [
-    { code: 'zh-TW', name: '繁體中文', iso: 'ZH' },
-    { code: 'ja', name: '日本語', iso: 'JA' },
-    { code: 'en', name: 'English', iso: 'EN' },
-] as const;
-
 export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
     const locale = useLocale();
     const router = useRouter();
     const pathname = usePathname();
     const t = useTranslations('systemMenu');
     const tCommon = useTranslations('common');
-    
+
     const [session, setSession] = useState<Session | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isLangOpen, setIsLangOpen] = useState(false);
     const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
-    
+
     const menuRef = useRef<HTMLDivElement>(null);
-    const langRef = useRef<HTMLDivElement>(null);
+
+    // Safe Supabase initialization with try-catch (consistent with page.tsx and LoginPanel)
+    const supabase = useMemo<SupabaseClient | null>(() => {
+        try {
+            return getSupabase();
+        } catch {
+            return null;
+        }
+    }, []);
 
     // Load session
     useEffect(() => {
-        const supabase = getSupabase();
         if (!supabase) return;
 
         const client = supabase;
@@ -67,17 +68,13 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
                 data.subscription.unsubscribe();
             }
         };
-    }, []);
+    }, [supabase]);
 
     // Close menus on click outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsMenuOpen(false);
-                setIsLangOpen(false);
-            }
-            if (langRef.current && !langRef.current.contains(event.target as Node)) {
-                setIsLangOpen(false);
             }
         }
 
@@ -85,77 +82,25 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleLanguageChange = useCallback((newLocale: string) => {
-        const currentPath = pathname;
-        const segments = currentPath.split('/');
-        segments[1] = newLocale;
-        const newPath = segments.join('/');
-        router.replace(newPath);
-        setIsLangOpen(false);
-    }, [pathname, router]);
-
     const handleLogout = useCallback(async () => {
-        const supabase = getSupabase();
         if (supabase) {
             await supabase.auth.signOut();
         }
         setSession(null);
         setIsMenuOpen(false);
-    }, []);
+    }, [supabase]);
 
     const handleMenuItemClick = useCallback((action: () => void) => {
         action();
         setIsMenuOpen(false);
     }, []);
 
-    const currentLang = LANGUAGES.find(l => l.code === locale) || LANGUAGES[0];
-
     return (
         <div className="relative" ref={menuRef}>
             {/* Main Menu Button */}
             <div className="flex items-center gap-1">
-                {/* Language Switcher */}
-                <div className="relative" ref={langRef}>
-                    <button
-                        onClick={() => setIsLangOpen(!isLangOpen)}
-                        className={`
-                            flex items-center gap-1.5 px-3 py-2 rounded-xl
-                            text-slate-600 hover:text-slate-900 hover:bg-slate-100
-                            transition-all active:scale-95
-                            min-h-[44px] min-w-[44px]
-                        `}
-                        aria-label={t('language')}
-                        title={t('language')}
-                    >
-                        <Globe size={20} />
-                        <span className="text-xs font-bold hidden sm:inline bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{currentLang.iso}</span>
-                        <ChevronDown size={14} className={`transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {/* Language Dropdown */}
-                    {isLangOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                            {LANGUAGES.map((lang) => (
-                                <button
-                                    key={lang.code}
-                                    onClick={() => handleLanguageChange(lang.code)}
-                                    className={`
-                                        w-full px-4 py-3 flex items-center gap-3 text-left
-                                        hover:bg-slate-50 transition-colors
-                                        ${locale === lang.code ? 'text-indigo-600 bg-indigo-50' : 'text-slate-700'}
-                                        min-h-[44px]
-                                    `}
-                                >
-                                    <span className="text-xs font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 w-8 h-6 flex items-center justify-center">{lang.iso}</span>
-                                    <span className="text-sm font-bold">{lang.name}</span>
-                                    {locale === lang.code && (
-                                        <span className="ml-auto w-2 h-2 bg-indigo-600 rounded-full" />
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                {/* Unified Language Switcher */}
+                <LanguageSwitcher className="p-2 shadow-none glass-effect-none bg-transparent hover:bg-slate-100 rounded-xl" />
 
                 {/* User/Settings Button */}
                 {session ? (
@@ -214,23 +159,23 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
 
                     {/* Menu Items */}
                     <div className="py-2">
-                        <MenuItem 
-                            icon={<MessageSquare size={18} />} 
+                        <MenuItem
+                            icon={<MessageSquare size={18} />}
                             label={t('myConversations')}
                             onClick={() => handleMenuItemClick(() => router.push(`/${locale}/?tab=conversations`))}
                         />
-                        <MenuItem 
-                            icon={<Star size={18} />} 
+                        <MenuItem
+                            icon={<Star size={18} />}
                             label={t('myFavorites')}
                             onClick={() => handleMenuItemClick(() => router.push(`/${locale}/?tab=favorites`))}
                         />
-                        <MenuItem 
-                            icon={<CalendarDays size={18} />} 
+                        <MenuItem
+                            icon={<CalendarDays size={18} />}
                             label={t('myTrips')}
                             onClick={() => handleMenuItemClick(() => router.push(`/${locale}/?tab=trips`))}
                         />
-                        <MenuItem 
-                            icon={<Settings size={18} />} 
+                        <MenuItem
+                            icon={<Settings size={18} />}
                             label={t('settings')}
                             onClick={() => handleMenuItemClick(() => router.push(`/${locale}/?tab=settings`))}
                         />
@@ -258,8 +203,8 @@ export function SystemMenu({ variant = 'header' }: SystemMenuProps) {
 
             {/* Backdrop */}
             {isMenuOpen && (
-                <div 
-                    className="fixed inset-0 z-40" 
+                <div
+                    className="fixed inset-0 z-40"
                     onClick={() => setIsMenuOpen(false)}
                 />
             )}
@@ -307,11 +252,32 @@ function LoginPanel({ onClose }: LoginPanelProps) {
     const router = useRouter();
     const t = useTranslations('login');
     const tOnboarding = useTranslations('onboarding');
-    
+
     const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [emailTouched, setEmailTouched] = useState(false);
     const [busy, setBusy] = useState(false);
     const [sentMagicLink, setSentMagicLink] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Email validation regex
+    const isValidEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Real-time email validation
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setEmail(value);
+        setEmailTouched(true);
+
+        if (value.trim() && !isValidEmail(value.trim())) {
+            setEmailError(t('invalidEmail'));
+        } else {
+            setEmailError(null);
+        }
+    };
 
     const supabase = useMemo<SupabaseClient | null>(() => {
         try {
@@ -354,6 +320,10 @@ function LoginPanel({ onClose }: LoginPanelProps) {
         }
         if (!email.trim()) {
             setError(t('enterEmail'));
+            return;
+        }
+        if (!isValidEmail(email.trim())) {
+            setError(t('invalidEmail'));
             return;
         }
 
@@ -424,10 +394,10 @@ function LoginPanel({ onClose }: LoginPanelProps) {
                         className="w-full py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl text-sm font-black hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3 active:scale-[0.98] min-h-[52px]"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                         </svg>
                         {t('googleLogin')}
                     </button>
@@ -445,14 +415,26 @@ function LoginPanel({ onClose }: LoginPanelProps) {
                             <input
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={handleEmailChange}
+                                onBlur={() => setEmailTouched(true)}
                                 placeholder={t('emailPlaceholder')}
-                                className="w-full px-5 py-4 bg-slate-50 border border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none min-h-[52px]"
+                                aria-invalid={!!emailError && emailTouched}
+                                aria-describedby={emailError ? 'email-error' : undefined}
+                                className={`w-full px-5 py-4 bg-slate-50 border rounded-2xl text-sm font-bold transition-all outline-none min-h-[52px]
+                                    ${emailError && emailTouched
+                                        ? 'border-rose-300 focus:border-rose-400 bg-rose-50/30'
+                                        : 'border-transparent focus:border-indigo-100 focus:bg-white'
+                                    }`}
                             />
+                            {emailError && emailTouched && (
+                                <p id="email-error" className="text-xs font-bold text-rose-500 px-2 animate-in fade-in slide-in-from-top-1" role="alert">
+                                    {emailError}
+                                </p>
+                            )}
                         </div>
                         <button
                             onClick={handleMagicLink}
-                            disabled={busy || !email.trim()}
+                            disabled={busy || !email.trim() || !!emailError}
                             className="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all disabled:opacity-50 active:scale-[0.98] min-h-[52px]"
                         >
                             {busy ? '...' : t('sendMagicLink')}

@@ -1,17 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { CacheStats } from '@/lib/cache/cacheService';
+import { getAllCacheStats, getWarmerStats } from '@/lib/cache';
 
 interface MonitorMetrics {
     timestamp: number;
-    caches: Record<string, CacheStats>;
-    warmer: {
-        totalWarmups: number;
-        successfulWarmups: number;
-        failedWarmups: number;
-        hotStationsCount: number;
-    };
+    caches: ReturnType<typeof getAllCacheStats>;
+    warmer: ReturnType<typeof getWarmerStats>;
     system: {
         totalHitRate: number;
         totalMemoryUsage: number;
@@ -27,56 +22,34 @@ interface MonitorMetrics {
     }>;
 }
 
-// Mock metrics generator
-function generateMockMetrics(): MonitorMetrics {
+// Real metrics generator
+function generateRealMetrics(): MonitorMetrics {
     const now = Date.now();
+    const caches = getAllCacheStats();
+    const warmer = getWarmerStats();
+    
+    let totalHitCount = 0;
+    let totalMissCount = 0;
+    let totalMemory = 0;
+    let totalEntries = 0;
+    
+    Object.values(caches).forEach(stats => {
+        totalHitCount += stats.hitCount;
+        totalMissCount += stats.missCount;
+        totalMemory += stats.memoryUsage;
+        totalEntries += stats.size;
+    });
+
     return {
         timestamp: now,
-        caches: {
-            l1_places: {
-                size: Math.floor(Math.random() * 100) + 50,
-                maxSize: 200,
-                hitCount: Math.floor(Math.random() * 1000) + 500,
-                missCount: Math.floor(Math.random() * 100) + 50,
-                hitRate: 85 + Math.random() * 10,
-                memoryUsage: 1024 * 1024 * (50 + Math.random() * 30),
-                evictionCount: Math.floor(Math.random() * 20),
-                avgAccessTime: 5 + Math.random() * 10,
-                layerDistribution: { 1: 60, 2: 30, 3: 10 }
-            },
-            l2_geo: {
-                size: Math.floor(Math.random() * 50) + 20,
-                maxSize: 100,
-                hitCount: Math.floor(Math.random() * 500) + 200,
-                missCount: Math.floor(Math.random() * 50) + 20,
-                hitRate: 88 + Math.random() * 8,
-                memoryUsage: 1024 * 1024 * (20 + Math.random() * 20),
-                evictionCount: Math.floor(Math.random() * 10),
-                avgAccessTime: 10 + Math.random() * 15,
-                layerDistribution: { 1: 40, 2: 40, 3: 20 }
-            },
-            l3_api: {
-                size: Math.floor(Math.random() * 30) + 10,
-                maxSize: 50,
-                hitCount: Math.floor(Math.random() * 300) + 100,
-                missCount: Math.floor(Math.random() * 30) + 10,
-                hitRate: 90 + Math.random() * 7,
-                memoryUsage: 1024 * 1024 * (10 + Math.random() * 15),
-                evictionCount: Math.floor(Math.random() * 5),
-                avgAccessTime: 15 + Math.random() * 20,
-                layerDistribution: { 1: 30, 2: 50, 3: 20 }
-            }
-        },
-        warmer: {
-            totalWarmups: Math.floor(Math.random() * 50) + 20,
-            successfulWarmups: Math.floor(Math.random() * 45) + 18,
-            failedWarmups: Math.floor(Math.random() * 5),
-            hotStationsCount: 20
-        },
+        caches,
+        warmer,
         system: {
-            totalHitRate: 88 + Math.random() * 8,
-            totalMemoryUsage: 1024 * 1024 * (80 + Math.random() * 40),
-            totalEntries: Math.floor(Math.random() * 200) + 100
+            totalHitRate: totalHitCount + totalMissCount > 0 
+                ? (totalHitCount / (totalHitCount + totalMissCount)) * 100 
+                : 0,
+            totalMemoryUsage: totalMemory,
+            totalEntries: totalEntries
         },
         alerts: []
     };
@@ -88,7 +61,7 @@ export function CacheMonitorDashboard() {
     const [refreshInterval, setRefreshInterval] = useState(5000);
 
     const refreshData = useCallback(() => {
-        setMetrics(generateMockMetrics());
+        setMetrics(generateRealMetrics());
     }, []);
 
     useEffect(() => {
@@ -181,10 +154,10 @@ export function CacheMonitorDashboard() {
                 <div className="bg-white rounded-lg shadow p-4">
                     <div className="text-sm text-gray-500">熱門站點預熱</div>
                     <div className="text-3xl font-bold">
-                        {metrics.warmer.hotStationsCount}
+                        {metrics.warmer?.hotStationsCount ?? 0}
                     </div>
                     <div className="text-xs text-gray-500">
-                        成功 {metrics.warmer.successfulWarmups} / 失敗 {metrics.warmer.failedWarmups}
+                        成功 {metrics.warmer?.successfulWarmups ?? 0} / 失敗 {metrics.warmer?.failedWarmups ?? 0}
                     </div>
                 </div>
             </div>
@@ -255,19 +228,19 @@ export function CacheMonitorDashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                         <div className="text-sm text-gray-500">總預熱次數</div>
-                        <div className="text-2xl font-bold">{metrics.warmer.totalWarmups}</div>
+                        <div className="text-2xl font-bold">{metrics.warmer?.totalWarmups ?? 0}</div>
                     </div>
                     <div>
                         <div className="text-sm text-gray-500">成功</div>
-                        <div className="text-2xl font-bold text-green-600">{metrics.warmer.successfulWarmups}</div>
+                        <div className="text-2xl font-bold text-green-600">{metrics.warmer?.successfulWarmups ?? 0}</div>
                     </div>
                     <div>
                         <div className="text-sm text-gray-500">失敗</div>
-                        <div className="text-2xl font-bold text-red-600">{metrics.warmer.failedWarmups}</div>
+                        <div className="text-2xl font-bold text-red-600">{metrics.warmer?.failedWarmups ?? 0}</div>
                     </div>
                     <div>
                         <div className="text-sm text-gray-500">熱門站點</div>
-                        <div className="text-2xl font-bold">{metrics.warmer.hotStationsCount}</div>
+                        <div className="text-2xl font-bold">{metrics.warmer?.hotStationsCount ?? 0}</div>
                     </div>
                 </div>
             </div>

@@ -61,12 +61,13 @@ function statsToCategorySummaries(
 export function L1_DNA({ data }: { data: StationUIProfile }) {
     const tL1 = useTranslations('l1');
     const tTag = useTranslations('tag');
+    const tCommon = useTranslations('common');
     const { getCategoryLabel, getSubcategoryLabel } = useCategoryTranslation();
     const locale = useLocale();
 
     // 使用 useL1Places 獲取實際景點資料
     const { places: l1Places, loading: placesLoading } = useL1Places();
-    
+
     // 靜態 DNA 資料（用於 title、tagline、vibe_tags）
     const { title, tagline, vibe_tags } = useStationDNA({ ...data.l1_dna, name: data.name, id: data.id }, locale);
 
@@ -231,6 +232,8 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                             <button
                                                 key={tag.id}
                                                 onClick={() => handleVibeClick(tag.id)}
+                                                aria-label={`${isActive ? tCommon('clear') : ''} ${getLocaleString(tag.label, locale)}`}
+                                                aria-pressed={isActive}
                                                 className={`
                                                     shrink-0 group/tag relative inline-flex items-center gap-1.5 px-3 py-2 rounded-full border transition-all duration-300 touch-manipulation min-h-[36px]
                                                     ${isActive
@@ -263,8 +266,28 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                 </div>
 
                 {placesLoading ? (
-                    <div className="grid grid-cols-2 gap-3">
-                        {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-gray-50 animate-pulse rounded-3xl" />)}
+                    <div className="space-y-6" role="status" aria-label={tCommon('loading')}>
+                        {/* Hero Section Skeleton */}
+                        <div className="rounded-[2rem] bg-slate-800 p-6 animate-pulse">
+                            <div className="h-8 bg-slate-700 rounded-lg w-3/4 mb-4" />
+                            <div className="h-4 bg-slate-700 rounded w-full mb-2" />
+                            <div className="h-4 bg-slate-700 rounded w-2/3" />
+                            <div className="flex gap-2 mt-4">
+                                <div className="h-8 bg-slate-700 rounded-full w-20" />
+                                <div className="h-8 bg-slate-700 rounded-full w-24" />
+                                <div className="h-8 bg-slate-700 rounded-full w-16" />
+                            </div>
+                        </div>
+                        {/* Categories Skeleton */}
+                        <div className="grid grid-cols-2 gap-4">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="bg-white border border-slate-100 rounded-[2rem] p-5 animate-pulse">
+                                    <div className="w-12 h-12 bg-slate-100 rounded-2xl mb-4" />
+                                    <div className="h-5 bg-slate-100 rounded w-20 mb-2" />
+                                    <div className="h-3 bg-slate-100 rounded w-12" />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 ) : categoryList.length === 0 ? (
                     <div className="py-12 text-center">
@@ -282,6 +305,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                                 <button
                                     key={cat.id}
                                     onClick={() => toggleDrawer(cat.id)}
+                                    aria-label={`${getCategoryLabel(cat.id)}: ${cat.count} ${tL1('items', { defaultValue: 'items' })}`}
                                     className={`group relative flex flex-col items-start p-5 rounded-[2rem] bg-white border ${style.borderColor} hover:shadow-xl hover:shadow-indigo-500/5 transition-all active:scale-[0.97] overflow-hidden touch-manipulation min-h-[120px]`}
                                 >
                                     {/* Subtle Bg Icon */}

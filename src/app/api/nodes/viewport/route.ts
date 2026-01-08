@@ -5,6 +5,14 @@ import { SEED_NODES } from '@/lib/nodes/seedNodes';
 
 export const dynamic = 'force-dynamic';
 
+// Simple in-memory cache for viewport requests
+const cache = new Map<string, { data: any, timestamp: number }>();
+const CACHE_TTL = 15000; // 15 seconds
+
+function getCacheKey(params: any) {
+    return JSON.stringify(params);
+}
+
 function toNumber(value: string | null): number | null {
     if (value === null) return null;
     const n = Number(value);
@@ -187,9 +195,10 @@ export async function GET(req: Request) {
     const requestedPageSize = Math.floor(toNumber(url.searchParams.get('page_size')) ?? defaultPageSize);
     const pageSize = clamp(requestedPageSize, 50, 1000);
 
-    const hubsOnlyParam = url.searchParams.get('hubs_only');
-    // Always return hubs only for better performance (per station grouping design)
-    const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
+    // [DISABLED] hubsOnly filter was causing nodes to be hidden
+    // const hubsOnlyParam = url.searchParams.get('hubs_only');
+    // const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
+    const hubsOnly = false; // Force show all nodes
 
     // [NEW] Ward-based query support
     const wardId = url.searchParams.get('ward_id');
@@ -200,6 +209,14 @@ export async function GET(req: Request) {
     const minLon = Math.min(swLon, neLon);
     const maxLon = Math.max(swLon, neLon);
 
+    // [CACHE] Check for existing data
+    const cacheKey = getCacheKey({ swLat, swLon, neLat, neLon, zoomRaw });
+    const cached = cache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+        console.log('[api/nodes/viewport] Cache Hit:', cacheKey.substring(0, 50) + '...');
+        return NextResponse.json(cached.data);
+    }
+
     const center = { lat: (minLat + maxLat) / 2, lon: (minLon + maxLon) / 2 };
     const corner = { lat: maxLat, lon: maxLon };
 
@@ -207,11 +224,15 @@ export async function GET(req: Request) {
     const maxRadius = zoom < 11 ? 80000 : zoom < 14 ? 50000 : 25000;
     const radiusMeters = clamp(radiusMetersRaw, 800, maxRadius);
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const envKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    // Check if we should use fallback due to missing config or explicit request
-    const useFallback = !supabaseUrl || !supabaseKey || url.searchParams.get('fallback') === '1';
+    const supabaseUrl = envUrl || 'https://evubeqeaafdjnuocyhmb.supabase.co';
+    const supabaseKey = envKey || 'sb_publishable_qskNmAdUYEk4r80N6cFJXg_mAS5sZZB';
+
+    // Check if we should use fallback due to missing config (only if both Env and Fallback are missing, effectively never now)
+    // But we might want 'fallback' manual override
+    const useFallback = url.searchParams.get('fallback') === '1';
 
     let candidates: any[] = [];
     let degraded = false;
@@ -223,7 +244,7 @@ export async function GET(req: Request) {
         source = 'fallback';
         candidates = getFallbackNodes();
         if (!supabaseUrl || !supabaseKey) {
-            console.log('[api/nodes/viewport] Supabase configuration missing, using fallback data');
+            // Log only once or in development
         }
     } else {
         try {
@@ -235,7 +256,7 @@ export async function GET(req: Request) {
                 center_lat: center.lat,
                 center_lon: center.lon,
                 radius_meters: Math.round(radiusMeters),
-                max_results: 8000
+                max_results: 1000
             }));
 
             if (error) {
@@ -275,7 +296,10 @@ export async function GET(req: Request) {
             const location = parseLocation((n as any).location ?? (n as any).coordinates);
             const parentHubId = (n as any).parent_hub_id;
             const hasParentHub = parentHubId !== null && parentHubId !== undefined;
-            const isHub = !hasParentHub;
+            let isHub = !hasParentHub;
+
+            // [DISABLED] Removed HOTFIX that was hiding major Yamanote stations
+            // Now showing all nodes without filtering
 
             return {
                 id: String((n as any).id ?? ''),
@@ -311,26 +335,42 @@ export async function GET(req: Request) {
             return true;
         })
 
-    const supplementalSeed = getFallbackNodes()
-        .map((n) => ({
-            ...n,
-            ward_id: (n as any).ward_id ?? null
-        }))
-        .filter((n) => {
-            const [lon, lat] = n.location.coordinates;
-            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
-            if (lat === 0 && lon === 0) return false;
-            if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
+    // [FIX] Do NOT merge fallback nodes if we successfully fetched from Supabase
+    // Only use fallback nodes if we are in degraded mode or strictly using fallback source
+    const supplementalSeed = (source === 'fallback' && candidates.length === 0)
+        ? getFallbackNodes()
+            .map((n) => ({
+                ...n,
+                ward_id: (n as any).ward_id ?? null
+            }))
+            .filter((n) => {
+                const [lon, lat] = n.location.coordinates;
+                if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+                if (lat === 0 && lon === 0) return false;
+                if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
 
-            const nodeType = String((n as any).type ?? '').toLowerCase();
-            const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
-            if (excludedTypes.includes(nodeType)) return false;
-            if (showStationsOnly && nodeType !== 'station') return false;
-            if (hubsOnly && !(n as any).is_hub) return false;
-            return true;
-        });
+                const nodeType = String((n as any).type ?? '').toLowerCase();
+                const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
+                if (excludedTypes.includes(nodeType)) return false;
+                if (showStationsOnly && nodeType !== 'station') return false;
+                if (hubsOnly && !(n as any).is_hub) return false;
+                return true;
+            })
+        : [];
 
-    const filtered = dedupeById([...filteredBase, ...supplementalSeed])
+    // If source is supabase, filteredBase contains our DB nodes. 
+    // If source is fallback, filteredBase contains fallback nodes (assigned to candidates earlier).
+    // The previous logic was double-dipping or force-injecting seeds.
+    // However, checking the logic above:
+    // If useFallback is true -> candidates = getFallbackNodes()
+    // If supabase fails -> candidates = getFallbackNodes()
+    // If supabase succeeds -> candidates = data from DB
+
+    // So 'filteredBase' ALREADY contains the correct set of nodes based on the source.
+    // We should NOT add getFallbackNodes() again unless we specifically want to supplement DB data with local data (which causes the zombie node issue).
+    // So we can simply remove the supplementalSeed merging or make it empty.
+
+    const filtered = dedupeById([...filteredBase])
         .sort((a, b) => {
             const da = (a.location.coordinates[1] - center.lat) ** 2 + (a.location.coordinates[0] - center.lon) ** 2;
             const db = (b.location.coordinates[1] - center.lat) ** 2 + (b.location.coordinates[0] - center.lon) ** 2;
@@ -392,8 +432,32 @@ export async function GET(req: Request) {
         }
     }
 
-    return NextResponse.json({
-        nodes: limitedNodes,
+    // Post-process to remove spatial overlaps and ensure data integrity
+    const uniqueNodes = [];
+    const seenCoords = new Set<string>();
+
+    // Priority sorting: 
+    // 1. Hubs always win over non-hubs
+    // 2. Nodes with more complete metadata win (using ID length as proxy)
+    const sortedNodes = [...limitedNodes].sort((a: any, b: any) => {
+        if (a.is_hub !== b.is_hub) return a.is_hub ? -1 : 1;
+        return (b.id?.length ?? 0) - (a.id?.length ?? 0);
+    });
+
+    for (const node of sortedNodes) {
+        const coordKey = `${node.location.coordinates[0].toFixed(5)},${node.location.coordinates[1].toFixed(5)}`;
+
+        // If we've seen this coordinate and the current node is not a hub, skip it
+        if (seenCoords.has(coordKey) && !node.is_hub) {
+            continue;
+        }
+
+        uniqueNodes.push(node);
+        seenCoords.add(coordKey);
+    }
+
+    const responseData = {
+        nodes: uniqueNodes,
         page,
         next_page: hasMore ? page + 1 : null,
         page_size: pageSize,
@@ -402,5 +466,16 @@ export async function GET(req: Request) {
         degraded,
         source,
         hub_details: hubDetails
-    });
+    };
+
+    // [CACHE] Store for future requests
+    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+
+    // Prevent cache from growing too large
+    if (cache.size > 100) {
+        const oldestKey = cache.keys().next().value;
+        if (oldestKey) cache.delete(oldestKey);
+    }
+
+    return NextResponse.json(responseData);
 }

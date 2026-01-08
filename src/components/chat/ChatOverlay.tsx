@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { ActionCard, Action as ChatAction } from './ActionCard';
 import { ContextSelector } from './ContextSelector';
+import { demoScripts } from '@/data/demoScripts';
 
 export function ChatOverlay() {
     const locale = useLocale();
@@ -18,6 +19,7 @@ export function ChatOverlay() {
         setChatOpen,
         messages,
         addMessage,
+        clearMessages,
         currentNodeId,
         setCurrentNode,
         setBottomSheetOpen,
@@ -28,7 +30,10 @@ export function ChatOverlay() {
         userProfile,
         pendingChatInput,
         pendingChatAutoSend,
-        setPendingChat
+        setPendingChat,
+        isDemoMode,
+        activeDemoId,
+        setDemoMode
     } = useAppStore();
     const { zone } = useZoneAwareness();
     const [input, setInput] = useState('');
@@ -76,14 +81,14 @@ export function ChatOverlay() {
     // Monitor context changes for UI feedback
     useEffect(() => {
         if (!isChatOpen) return;
-        
+
         const prev = prevContextRef.current;
         if (JSON.stringify(prev) === JSON.stringify(userContext)) return;
 
         // Find what changed
         const added = userContext.filter(x => !prev.includes(x));
         const removed = prev.filter(x => !userContext.includes(x));
-        
+
         const contextLabels: Record<string, string> = {
             'luggage': tChat('contextLuggage', { defaultValue: '大型行李' }),
             'stroller': tChat('contextStroller', { defaultValue: '推嬰兒車' }),
@@ -122,20 +127,20 @@ export function ChatOverlay() {
         });
 
         try {
-            const response = await fetch('/api/dify/chat', {
+            // Format messages for the orchestrator
+            const clientMessages = messages.map(m => ({
+                role: m.role,
+                content: m.content
+            }));
+
+            const response = await fetch('/api/agent/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    query: payload.query,
-                    conversation_id: difyConversationId,
-                    inputs: {
-                        user_profile: userProfile || 'general',
-                        user_context: userContext || [],
-                        current_station: currentNodeId || '',
-                        locale,
-                        zone: zone || 'core',
-                        user_id: difyUserId
-                    }
+                    messages: clientMessages.concat(payload.includeUserMessage ? [] : [{ role: 'user', content: payload.query }]),
+                    nodeId: currentNodeId || '',
+                    locale,
+                    userProfile: userProfile || 'general'
                 })
             });
 
@@ -215,24 +220,110 @@ export function ChatOverlay() {
             hasBootstrappedRef.current = false;
             return;
         }
-        if (messages.length > 0) return;
+
+        // Demo Mode Logic
+        if (isDemoMode && activeDemoId && demoScripts[activeDemoId]) {
+            const script = demoScripts[activeDemoId];
+            const lang = (locale === 'ja' || locale === 'en' || locale === 'zh-TW') ? locale : 'zh';
+
+            // Clear messages and add user message
+            useAppStore.setState({
+                messages: [{
+                    role: 'user',
+                    content: script.userMessage[lang]
+                }]
+            });
+
+            // Simulate Assistant Response
+            setTimeout(async () => {
+                addMessage({
+                    role: 'assistant',
+                    content: '',
+                    isLoading: true
+                });
+
+                const responseText = script.assistantResponse[lang];
+                let displayedText = '';
+                const chunkSize = 2;
+
+                for (let i = 0; i < responseText.length; i += chunkSize) {
+                    await new Promise(r => setTimeout(r, 30));
+                    displayedText += responseText.slice(i, i + chunkSize);
+
+                    useAppStore.setState(state => {
+                        const newMessages = [...state.messages];
+                        const lastMsg = newMessages[newMessages.length - 1];
+                        if (lastMsg && lastMsg.role === 'assistant') {
+                            lastMsg.content = displayedText;
+                        }
+                        return { messages: newMessages };
+                    });
+                }
+
+                // Finish stream, add actions
+                useAppStore.setState(state => {
+                    const newMessages = [...state.messages];
+                    const lastMsg = newMessages[newMessages.length - 1];
+                    if (lastMsg && lastMsg.role === 'assistant') {
+                        lastMsg.isLoading = false;
+                        lastMsg.actions = [
+                            ...script.actions.map(a => ({
+                                ...a,
+                                label: a.label[lang]
+                            })),
+                            {
+                                type: 'discovery',
+                                label: tChat('restartChat'), // Use translation key
+                                target: 'internal:restart'
+                            }
+                        ];
+                    }
+                    return { messages: newMessages };
+                });
+            }, 600);
+
+            return;
+        }
+
+        // 如果目前沒有訊息，或者只有一條且內容不是開場白，則強制初始化
+        const needsInitialization = messages.length === 0 ||
+            (messages.length === 1 && !messages[0].content.includes('導航夥伴'));
+
+        if (!needsInitialization) return;
         if (pendingChatInput) return;
         if (hasBootstrappedRef.current) return;
 
         hasBootstrappedRef.current = true;
 
-        const actions = openingQuickReplies.map(q => ({
-            type: 'discovery' as const,
-            label: q,
-            target: `chat:${encodeURIComponent(q)}`
-        }));
+        // 先清空，確保乾淨
+        if (messages.length > 0) {
+            clearMessages();
+        }
 
-        streamFromDify({
-            query: openingQuery,
-            includeUserMessage: false,
-            assistantActions: actions
+        // 參考截圖設計的開場白內容
+        const welcomeContent = locale === 'ja'
+            ? `こんにちは！あなたの東京交通ナビゲーションパートナーです！\nお手伝いできること：\n🚃 リアルタイムの列車状態と遅延情報\n♿ バリアフリー施設の位置\n🆘 交通異常時の代替ルート提案\n\n今どこにいるか、またはどこへ行きたいか教えてください。`
+            : locale === 'en'
+                ? `Hello! I am your Tokyo transit navigation partner!\nI can help you with:\n🚃 Real-time train status and delay info\n♿ Accessibility facility locations\n🆘 Alternative route suggestions during disruptions\n\nTell me where you are now, or where you want to go.`
+                : `你好！我是你的東京交通導航夥伴！\n我可以幫助你：\n🚃 即時列車狀態與延誤情報\n♿ 無障礙設施位置\n🆘 交通異常時的替代路線建議\n\n請告訴我你現在在哪裡，或是想去哪裡？`;
+
+        const suggestions = locale === 'ja'
+            ? ['銀座線は今遅延していますか？', '浅草から秋葉原まで一番早い行き方は？', '神田駅の出口にはエレベーターがありますか？']
+            : locale === 'en'
+                ? ['Is the Ginza Line delayed right now?', 'Fastest way from Asakusa to Akihabara?', 'Do Kanda Station exits have elevators?']
+                : ['現在銀座線有延誤嗎？', '從淺草到秋葉原怎麼去最快？', '神田站的出口都有電梯嗎？'];
+
+        addMessage({
+            role: 'assistant',
+            content: welcomeContent,
+            isLoading: false,
+            actions: suggestions.map(q => ({
+                type: 'discovery',
+                label: q,
+                target: `chat:${encodeURIComponent(q)}`
+            }))
         });
-    }, [isChatOpen, messages.length, openingQuery, openingQuickReplies, pendingChatInput, streamFromDify]);
+    }, [isChatOpen, messages.length, locale, addMessage, clearMessages, isDemoMode, activeDemoId, pendingChatInput]);
 
     useEffect(() => {
         const fetchL2 = async () => {
@@ -251,6 +342,7 @@ export function ChatOverlay() {
                 console.error('L2 Fetch Error', e);
             }
         };
+        // Skip L2 fetch in demo mode if we want to keep it simple, or keep it. Keeping it is fine.
         if (isChatOpen) fetchL2();
     }, [isChatOpen, currentNodeId]);
 
@@ -260,6 +352,7 @@ export function ChatOverlay() {
 
     useEffect(() => {
         if (!isChatOpen) return;
+        if (isDemoMode) return; // Block pending chat in demo mode
         if (!pendingChatInput) return;
 
         const text = pendingChatInput;
@@ -272,7 +365,7 @@ export function ChatOverlay() {
         }
 
         setInput(text);
-    }, [isChatOpen, pendingChatInput, pendingChatAutoSend, sendMessage, setPendingChat]);
+    }, [isChatOpen, pendingChatInput, pendingChatAutoSend, sendMessage, setPendingChat, isDemoMode]);
 
     if (!isChatOpen) return null;
 
@@ -286,6 +379,14 @@ export function ChatOverlay() {
     };
 
     const handleAction = (action: ChatAction) => {
+        // Handle internal restart action for demo mode
+        if (action.target === 'internal:restart') {
+            setDemoMode(false);
+            useAppStore.setState({ messages: [] });
+            hasBootstrappedRef.current = false;
+            return;
+        }
+
         if (action.type === 'navigate') {
             const targets: Record<string, [number, number]> = {
                 'ueno': [35.7141, 139.7774],
@@ -322,6 +423,8 @@ export function ChatOverlay() {
             }
         }
     };
+
+
 
     const handleFeedback = async (index: number, score: number) => {
         const msg = messages[index];
@@ -434,7 +537,7 @@ export function ChatOverlay() {
             )}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth scrollbar-hide">
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth scrollbar-hide" role="log" aria-live="polite">
                 {messages.map((msg: any, idx: number) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-4 fade-in duration-700`}>
                         <div className={`max-w-[88%] p-5 rounded-[28px] shadow-sm ${msg.role === 'user'
@@ -454,15 +557,17 @@ export function ChatOverlay() {
                                 </div>
                             )}
 
-                            {/* Action Cards */}
+                            {/* Action Cards / Suggestions */}
                             {msg.actions && msg.actions.length > 0 && (
-                                <div className="mt-5 space-y-3">
+                                <div className="mt-4 flex flex-wrap gap-2">
                                     {msg.actions.map((action: ChatAction, i: number) => (
-                                        <ActionCard
+                                        <button
                                             key={i}
-                                            action={action}
-                                            onClick={handleAction}
-                                        />
+                                            onClick={() => handleAction(action)}
+                                            className="px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-full text-xs font-bold hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm"
+                                        >
+                                            {action.label}
+                                        </button>
                                     ))}
                                 </div>
                             )}
@@ -510,11 +615,6 @@ export function ChatOverlay() {
                         </div>
                     </div>
                 )}
-                
-                {/* User Context Selector (Prompt 3) */}
-                <div className="mb-4 max-w-2xl mx-auto">
-                    <ContextSelector />
-                </div>
 
                 <form onSubmit={handleSubmit} className="flex gap-3 max-w-2xl mx-auto relative group">
                     <div className="absolute inset-0 bg-indigo-500/5 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />

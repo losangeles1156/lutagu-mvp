@@ -1,4 +1,4 @@
-# BambiGO AI 混合架構
+# LUTAGU AI 混合架構
 # 三層職責分工與商業導流整合
 
 ---
@@ -404,7 +404,7 @@ export async function handleComplexQuery(
         persona: context.personaPrompt || '',
       },
       query: input,
-      user: 'bambigo-user',
+      user: 'lutagu-user',
       response_mode: 'blocking',
     }),
   });
@@ -419,7 +419,7 @@ export async function handleComplexQuery(
 
 function buildSystemPrompt(context: any): string {
   return `
-你是城市導航助手（內部代號 BambiGO）。
+你是城市導航助手（內部代號 LUTAGU）。
 
 你的特點：
 - 不只給路線，還給「建議」

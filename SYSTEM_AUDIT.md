@@ -1,4 +1,4 @@
-# BambiGO System Architecture Review & Resource Inventory
+# LUTAGU-MVP 系統審計報告 (2026-01-08)
 
 ## 1. System Architecture Overview
 

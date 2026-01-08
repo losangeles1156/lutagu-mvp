@@ -1,4 +1,4 @@
-# BambiGO 技術選型
+# LUTAGU 技術選型
 # Tech Stack & Module Structure
 
 ---
@@ -20,7 +20,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      BambiGO Tech Stack                          │
+│                      LUTAGU Tech Stack                          │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │   Frontend                                                      │
@@ -113,7 +113,7 @@
 ## 3. 專案結構
 
 ```
-bambigo/
+lutagu/
 ├── app/                          # Next.js App Router
 │   ├── (main)/                   # 主要頁面群組
 │   │   ├── page.tsx              # Home (/)
@@ -263,7 +263,7 @@ JMA_API_KEY=xxx  # 如需要
 # ─────────────────────────────────────────────
 # App Config
 # ─────────────────────────────────────────────
-NEXT_PUBLIC_APP_URL=https://bambigo.app
+NEXT_PUBLIC_APP_URL=https://lutagu.app
 NEXT_PUBLIC_DEFAULT_LOCALE=zh-TW
 NEXT_PUBLIC_DEFAULT_CITY=tokyo
 
@@ -280,7 +280,7 @@ NEXT_PUBLIC_ENABLE_AI_PERSONA=true
 | 變數 | 開發環境 | 生產環境 |
 |------|----------|----------|
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Zeabur URL |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | `https://bambigo.app` |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | `https://lutagu.app` |
 | `DIFY_BASE_URL` | Dify Cloud / Self-hosted | Dify Cloud |
 
 ---
@@ -541,8 +541,8 @@ function mapToDeepLLang(locale: string): string {
 
 ```bash
 # 1. Clone & Install
-git clone https://github.com/xxx/bambigo.git
-cd bambigo
+git clone https://github.com/xxx/lutagu.git
+cd lutagu
 pnpm install
 
 # 2. 設定環境變數

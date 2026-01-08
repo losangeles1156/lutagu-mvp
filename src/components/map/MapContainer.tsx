@@ -5,15 +5,18 @@ import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useAppStore } from '@/stores/appStore';
+
 import { fetchNearbyNodes, fetchNodeConfig, fetchNodesByViewport, NodeDatum } from '@/lib/api/nodes';
 import { NodeMarker } from './NodeMarker';
+import { HubNodeLayer } from './HubNodeLayer';
 import { TrainLayer } from './TrainLayer';
 import { PedestrianLayer } from './PedestrianLayer';
 import { RouteLayer } from './RouteLayer';
 import { RouteInfoCard } from '@/components/route/RouteInfoCard';
-import { WardNodeLoader } from './WardNodeLoader';
-import { WardSelector } from './WardSelector';
+
 import { useLocale } from 'next-intl';
+import { JapanTimeClock } from '@/components/ui/JapanTimeClock';
+import { SystemMenu } from '@/components/ui/SystemMenu';
 
 // Type definitions for hub details from API
 interface HubMemberInfo {
@@ -59,7 +62,7 @@ function viewportStepForZoom(zoom: number) {
 }
 
 // Cache version: Increment this to force refresh of stale cached data
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v6';
 
 function buildViewportKey(input: { swLat: number; swLon: number; neLat: number; neLon: number; zoom: number; hubsOnly: boolean }) {
     const step = viewportStepForZoom(input.zoom);
@@ -152,7 +155,7 @@ function MapController({ center, isTooFar, fallback, nodes }: {
     const lastTargetRef = useRef<{ lat: number, lon: number } | null>(null);
 
     const target = mapCenter || (isTooFar ? null : center);
-    const { currentNodeId } = useAppStore();
+    const currentNodeId = useAppStore(state => state.currentNodeId);
     const [prevNodeId, setPrevNodeId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -249,18 +252,30 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
     const callKey = useMemo(() => getDailyKey('map_api_calls'), []);
 
     /**
-     * Check if cached data is still valid based on version
+     * [PERF] Get cache TTL based on zoom level
+     * Higher zoom = more detail = shorter TTL
+     * Lower zoom = less detail = longer TTL (data changes less often)
+     */
+    const getCacheTTL = useCallback((zoom: number): number => {
+        if (zoom >= 16) return 30_000;   // 30 seconds at high zoom
+        if (zoom >= 14) return 60_000;   // 60 seconds at medium zoom
+        return 120_000;                   // 120 seconds at low zoom
+    }, []);
+
+    /**
+     * Check if cached data is still valid based on version and dynamic TTL
      * Returns true if cache is valid, false if stale
      */
-    const isCacheValid = useCallback((cached: typeof cacheRef.current extends Map<string, infer V> ? V : never, currentMinVersion: number) => {
+    const isCacheValid = useCallback((cached: typeof cacheRef.current extends Map<string, infer V> ? V : never, currentMinVersion: number, zoom: number) => {
         if (!cached) return false;
         const now = Date.now();
-        // Cache expires after 60 seconds (standard TTL)
-        if (now - cached.ts > 60_000) return false;
+        const ttl = getCacheTTL(zoom);
+        // Cache expires based on dynamic TTL
+        if (now - cached.ts > ttl) return false;
         // If current data has higher versions than cached, invalidate
         if (currentMinVersion > cached.minVersion) return false;
         return true;
-    }, []);
+    }, [getCacheTTL]);
 
     const load = useCallback(async () => {
         const zoom = clamp(map.getZoom(), 1, 22);
@@ -268,8 +283,8 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
         const sw = padded.getSouthWest();
         const ne = padded.getNorthEast();
 
-        // [FIX] Always request hubs only for better performance (per station grouping design)
-        const hubsOnly = true;
+        // [FIX] Always request all nodes (hubsOnly=false) to ensure visibility
+        const hubsOnly = false;
         const key = buildViewportKey({ swLat: sw.lat, swLon: sw.lng, neLat: ne.lat, neLon: ne.lng, zoom, hubsOnly });
         const now = Date.now();
 
@@ -279,7 +294,7 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
             console.log(`[VersionCache] Cache hit for ${key}, minVersion: ${cached.minVersion}, maxVersion: ${cached.maxVersion}`);
         }
 
-        if (cached && isCacheValid(cached, 0)) {
+        if (cached && isCacheValid(cached, 0, zoom)) {
             onError(null);
             onData(cached.nodes, cached.hubDetails);
             return;
@@ -399,56 +414,10 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
     return null;
 }
 
-function HubNodeLayer({ nodes, hubDetails, zone, locale, showAllNodes = false }: {
-    nodes: NodeDatum[];
-    hubDetails: Record<string, HubDetails>;
-    zone: any;
-    locale: string;
-    showAllNodes?: boolean;
-}) {
-    const map = useMap();
-    const [zoom, setZoom] = useState(map.getZoom());
-
-    useMapEvents({
-        zoomend: () => setZoom(map.getZoom())
-    });
-
-    const clampedZoom = clamp(zoom, 1, 22);
-
-    // [NEW] Filter to show:
-    // - If showAllNodes is true, show ALL nodes (Ward Mode)
-    // - Else:
-    //   - Hub nodes (is_hub = true, parent_hub_id = null) - with transfer info
-    //   - Standalone nodes (is_hub = false, parent_hub_id = null) - normal stations
-    //   - Hide child nodes (parent_hub_id IS NOT NULL)
-    const visibleNodes = useMemo(() => {
-        if (!nodes || nodes.length === 0) return [];
-        // [FIX] Always hide children (nodes with a parent_hub_id)
-        // Even in "showAllNodes" (Ward Mode), we only want to see the Hub representative, not the children.
-        return nodes.filter(n => n.parent_hub_id === null);
-    }, [nodes, showAllNodes]);
-
-    return (
-        <>
-            {visibleNodes.map((node) => {
-                const details = hubDetails[node.id];
-                if (!details) {
-                    console.log('[DEBUG] No hubDetails for node:', node.id);
-                }
-                return (
-                    <NodeMarker
-                        key={node.id}
-                        node={node}
-                        hubDetails={details}
-                        zone={zone}
-                        locale={locale}
-                        zoom={clampedZoom}
-                    />
-                );
-            })}
-        </>
-    );
-}
+// [REMOVED] HubNodeLayer now imported from ./HubNodeLayer.tsx with performance optimizations:
+// - Viewport culling (only render nodes in view)
+// - Zoom-based density control (limit nodes at low zoom)
+// - LRU icon caching
 
 // Error Boundary for Map
 class MapErrorBoundary extends Component<{ children: ReactNode; onReset: () => void }, { hasError: boolean }> {
@@ -499,70 +468,13 @@ function AppMap() {
     const [gpsAlert, setGpsAlert] = useState<{ show: boolean, type: 'far' | 'denied' }>({ show: false, type: 'far' });
     const locale = useLocale();
 
-    // [UPDATED] Multi-Ward Selection State
-    const [activeWardIds, setActiveWardIds] = useState<string[]>(['ward:taito']); // Default to Taito
-    const [isSwitchingWard, setIsSwitchingWard] = useState(false);
 
-    // Ward center coordinates for map panning
-    const wardCenters: Record<string, [number, number]> = {
-        'ward:taito': [35.7141, 139.7774], // Ueno
-        'ward:chiyoda': [35.6812, 139.7671], // Tokyo Station
-        'ward:chuo': [35.6712, 139.7665], // Ginza
-        'ward:shinjuku': [35.6909, 139.7005], // Shinjuku
-        'ward:shibuya': [35.6580, 139.7016], // Shibuya
-        'ward:minato': [35.6586, 139.7454], // Tokyo Tower area
-        'ward:sumida': [35.7103, 139.8015], // Skytree area
-        'ward:koto': [35.6729, 139.8174], // Toyosu
-        'ward:shinagawa': [35.6095, 139.7300], // Shinagawa Station
-        'ward:bunkyo': [35.7081, 139.7516], // Tokyo Dome area
-        'ward:toshima': [35.7295, 139.7109], // Ikebukuro
-        'ward:arakawa': [35.7360, 139.7833], // Nippori
-        'ward:nakano': [35.7057, 139.6658], // Nakano Station
-        'ward:kita': [35.7536, 139.7346], // Oji area
-        'ward:ota': [35.5616, 139.7161], // Haneda Airport area
-        'ward:setagaya': [35.6461, 139.6532], // Sangenjaya area
-    };
-
-    // Handle ward toggle (multi-select)
-    const handleWardSelect = useCallback((wardId: string, isFirstSelection: boolean) => {
-        setActiveWardIds(prev => {
-            const isSelected = prev.includes(wardId);
-            if (isSelected) {
-                // Deselect
-                return prev.filter(id => id !== wardId);
-            } else {
-                // Select (add)
-                const newSelection = [...prev, wardId];
-                // Fly to this ward's center if it's the first selection or newly added
-                if (isFirstSelection || prev.length === 0) {
-                    const center = wardCenters[wardId];
-                    if (center) {
-                        useAppStore.getState().setMapCenter({ lat: center[0], lon: center[1] });
-                    }
-                }
-                return newSelection;
-            }
-        });
-        setIsSwitchingWard(true);
-    }, []);
-
-    // Handle Select All
-    const handleSelectAll = useCallback(() => {
-        const allWardIds = Object.keys(wardCenters);
-        setActiveWardIds(allWardIds);
-        setIsSwitchingWard(true);
-    }, []);
-
-    // Handle Clear All
-    const handleClearAll = useCallback(() => {
-        setActiveWardIds([]);
-        setNodes([]);
-        setHubDetails({});
-    }, []);
 
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
-    const { userProfile, setUserProfile } = useAppStore();
+    const currentNodeId = useAppStore(s => s.currentNodeId);
+    const userProfile = useAppStore(s => s.userProfile);
+    const setUserProfile = useAppStore(s => s.setUserProfile);
 
     // [FIX] Calculate hub count from actual hubDetails
     const hubCount = Object.values(hubDetails).reduce((acc, h) => acc + (h.member_count > 0 ? 1 : 0), 0);
@@ -583,7 +495,25 @@ function AppMap() {
     const defaultCenter: [number, number] = [centerFallback.lat, centerFallback.lon];
 
     return (
-        <div className="w-full h-screen relative z-0">
+        <div
+            className="w-full h-screen relative z-0"
+            role="application"
+            aria-label={locale.startsWith('ja') ? '東京地铁导航地图。現在の位置と铁路站を表示します。' : locale.startsWith('en') ? 'Tokyo transit navigation map. Shows your location and train stations.' : '東京交通導航地圖。顯示您的位置與鐵路車站。'}
+            aria-describedby="map-instructions"
+        >
+            {/* Top Right UI Overlay */}
+            <div className="absolute top-4 right-4 z-[500] flex items-start gap-3 pointer-events-none">
+                <div className="pointer-events-auto">
+                    <JapanTimeClock />
+                </div>
+                <div className="pointer-events-auto">
+                    <SystemMenu variant="floating" />
+                </div>
+            </div>
+
+            <span id="map-instructions" className="sr-only">
+                {locale.startsWith('ja') ? '地図を操作するには、ドラッグして移動します。ズームするには、2本指でタップするか、スクロールホイールを使用します。駅のマーカーをタップして詳細を表示できます。' : locale.startsWith('en') ? 'To interact with the map, drag to pan. To zoom, use two-finger tap or scroll wheel. Tap on station markers to view details.' : '要與地圖互動，請拖動以移動。使用兩指點擊或滾輪縮放。點擊車站標記以查看詳情。'}
+            </span>
             <MapContainer
                 center={defaultCenter}
                 zoom={15}
@@ -591,8 +521,9 @@ function AppMap() {
                 className="w-full h-full"
             >
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    subdomains="abcd"
                 />
 
                 <MapController
@@ -602,45 +533,18 @@ function AppMap() {
                     nodes={nodes}
                 />
 
-                <WardNodeLoader
-                    wardIds={activeWardIds}
-                    onNodesLoaded={(newNodes: any[]) => {
+
+
+                {/* Viewport Loading (Always active) */}
+                <ViewportNodeLoader
+                    onData={(newNodes, newHubDetails) => {
                         setNodes(newNodes);
-                        // Build hub details from node data
-                        const simulatedDetails: Record<string, HubDetails> = {};
-                        newNodes.forEach((n: any) => {
-                            const hubData = Array.isArray(n.hub_data) ? n.hub_data[0] : n.hub_data;
-                            const childCount = n.child_count ?? hubData?.child_count;
-
-                            if (childCount !== undefined && childCount > 0) {
-                                simulatedDetails[n.id] = {
-                                    member_count: childCount,
-                                    transfer_type: 'interconnected',
-                                    transfer_complexity: 'medium',
-                                    walking_distance_meters: 100,
-                                    indoor_connection_notes: null
-                                };
-                            }
-                        });
-                        setHubDetails(simulatedDetails);
-                        setIsSwitchingWard(false);
-                        console.log(`[AppMap] Ward nodes updated: ${newNodes.length} from ${activeWardIds.length} wards`);
+                        setHubDetails(newHubDetails);
                     }}
-                    onLoadingChange={setLoadingNodes}
+                    onLoading={setLoadingNodes}
+                    onError={setNodesError}
+                    refreshKey={refreshKey}
                 />
-
-                {/* Viewport Loading (Fallback only if no wards selected) */}
-                {activeWardIds.length === 0 && (
-                    <ViewportNodeLoader
-                        onData={(newNodes, newHubDetails) => {
-                            setNodes(newNodes);
-                            setHubDetails(newHubDetails);
-                        }}
-                        onLoading={setLoadingNodes}
-                        onError={setNodesError}
-                        refreshKey={refreshKey}
-                    />
-                )}
 
                 {/* User Location Marker */}
                 {userLocation && !isTooFar && (
@@ -668,7 +572,8 @@ function AppMap() {
                     hubDetails={hubDetails}
                     zone={zone}
                     locale={locale}
-                    showAllNodes={activeWardIds.length > 0} // Show all nodes when in Ward Mode
+                    currentNodeId={currentNodeId}
+                    showAllNodes={true} // Force show all nodes for debugging
                 />
 
                 {/* Real-time Train Layer */}
@@ -712,17 +617,6 @@ function AppMap() {
                             zone === 'buffer' ? '🟡 Buffer Zone' : '⚪ Outer Zone'}
                     </span>
                 </div>
-
-                {/* Ward Selector */}
-                <div className="bg-white/90 backdrop-blur p-1 rounded-xl shadow-lg pointer-events-auto">
-                    <WardSelector
-                        currentWardIds={activeWardIds}
-                        onSelectWard={handleWardSelect}
-                        onSelectAll={handleSelectAll}
-                        onClearAll={handleClearAll}
-                        lang={locale as any}
-                    />
-                </div>
             </div>
 
             {/* Agent Profile Switcher */}
@@ -761,6 +655,26 @@ function AppMap() {
                         ? (locale.startsWith('ja') ? 'ノード取得失敗（再試行）' : locale.startsWith('en') ? 'Nodes load failed (retry)' : '節點載入失敗（重試）')
                         : (locale.startsWith('ja') ? '読み込み中…' : locale.startsWith('en') ? 'Loading…' : '載入中…')}
                 </button>
+            )}
+
+            {/* L4: Empty nodes state message */}
+            {!loadingNodes && !nodesError && nodes.length === 0 && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[900] flex flex-col items-center px-6">
+                    <div className="w-16 h-16 mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 8v4M12 16h.01" />
+                        </svg>
+                    </div>
+                    <div className="px-6 py-4 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 flex flex-col items-center gap-2">
+                        <span className="text-sm font-black text-slate-700">
+                            {locale.startsWith('ja') ? 'このエリアに駅はありません' : locale.startsWith('en') ? 'No stations in this area' : '此區域暫無車站資料'}
+                        </span>
+                        <span className="text-xs text-slate-500 font-medium">
+                            {locale.startsWith('ja') ? '地図を移動またはズームしてください' : locale.startsWith('en') ? 'Try moving or zooming the map' : '嘗試移動或縮放地圖'}
+                        </span>
+                    </div>
+                </div>
             )}
             {isTooFar && (
                 <div className="bg-rose-500/90 text-white backdrop-blur px-3 py-1 rounded-full shadow-lg text-[10px] font-black uppercase tracking-widest animate-pulse">
@@ -886,7 +800,7 @@ function AppMap() {
                     </div>
                 )
             }
-            
+
             <RouteInfoCard />
         </div >
     );

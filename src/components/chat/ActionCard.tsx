@@ -1,4 +1,5 @@
 import { MapPin, Info, CalendarPlus, Train, Car, Navigation, Zap, Banknote } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { TrapCard } from './TrapCard';
 import { HackCard } from './HackCard';
 
@@ -69,6 +70,7 @@ const CONFIG: Record<string, any> = {
 };
 
 export function ActionCard({ action, onClick }: ActionCardProps) {
+    const t = useTranslations('chat');
     // 1. Specialized Cards
     if (action.type === 'trap') {
         return <TrapCard action={action} onClick={onClick} />;
@@ -97,12 +99,12 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                     <div className="flex-1">
                         <div className="flex justify-between items-start mb-1">
                             <span className={`text-[10px] font-black uppercase tracking-widest ${config.textColor} opacity-80`}>
-                                LUTAGU DECISION
+                                {t('decision')}
                             </span>
                             {action.timeSaved && (
                                 <span className="flex items-center gap-1 text-[10px] font-black bg-white/60 px-2 py-0.5 rounded-full text-green-700 uppercase tracking-tighter shadow-sm">
                                     <Zap size={10} fill="currentColor" />
-                                    省下 {action.timeSaved}
+                                    {t('saveTime', { time: action.timeSaved })}
                                 </span>
                             )}
                         </div>
@@ -161,7 +163,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                         {action.timeSaved && (
                             <span className="flex items-center gap-1 text-[10px] font-black bg-white/80 px-2 py-0.5 rounded-full text-green-600 uppercase tracking-tighter shadow-sm whitespace-nowrap">
                                 <Zap size={10} fill="currentColor" />
-                                省下 {action.timeSaved}
+                                {t('saveTime', { time: action.timeSaved })}
                             </span>
                         )}
                     </div>

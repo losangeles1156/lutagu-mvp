@@ -56,12 +56,22 @@ export const LINES = {
     KeikyuAirport: { name: { ja: '京急空港線', en: 'Keikyu Airport Line', zh: '京急機場線' }, operator: 'Private', color: '#00C3E3' } as StationLineDef,
 };
 
-// Operator Colors for Map Icons
+// Operator Colors for Map Icons (Official Brand Colors)
 export const OPERATOR_COLORS: Record<string, string> = {
-    'JR': '#008A3C',      // JR East - Green
-    'Metro': '#00A7DB',   // Tokyo Metro - Blue  
-    'Toei': '#E73387',    // Toei - Magenta
-    'Private': '#6B7280', // Others - Gray
+    'JR': '#006400',           // JR East - Dark Green (深綠色)
+    'Metro': '#149BDF',        // Tokyo Metro - Heart Blue 官方企業色
+    'Toei': '#008E48',         // Toei - Leaf Green 銀杏葉綠 (官方色)
+    'Keikyu': '#8B0000',       // Keikyu - Dark Red (深紅色)
+    'Tokyu': '#EE0000',        // Tokyu - Red
+    'Odakyu': '#0060B2',       // Odakyu - Blue
+    'Keio': '#DD0077',         // Keio - Pink
+    'Seibu': '#009944',        // Seibu - Green
+    'Keisei': '#00008B',       // Keisei - Dark Blue (深藍色)
+    'Tobu': '#1E40AF',         // Tobu - Blue
+    'Tsukuba': '#DD1320',      // Tsukuba Express - Red
+    'Yurikamome': '#1B94C2',   // Yurikamome - Blue
+    'Monorail': '#00BFFF',     // Tokyo Monorail - Deep Sky Blue
+    'Private': '#6B7280',      // Others - Gray
 };
 
 // Hub Primary Operator Override (when auto-detection isn't accurate)
@@ -89,8 +99,41 @@ export function getPrimaryOperator(nodeId: string): string {
     if (nodeId.includes('JR-East')) return 'JR';
     if (nodeId.includes('TokyoMetro')) return 'Metro';
     if (nodeId.includes('Toei')) return 'Toei';
-    if (nodeId.includes('TsukubaExpress')) return 'Private';
+
+    // Private Railways
+    if (nodeId.includes('Keikyu')) return 'Keikyu';
+    if (nodeId.includes('Tokyu')) return 'Tokyu';
+    if (nodeId.includes('Odakyu')) return 'Odakyu';
+    if (nodeId.includes('Keio')) return 'Keio';
+    if (nodeId.includes('Seibu')) return 'Seibu';
+    if (nodeId.includes('Keisei')) return 'Keisei';
+    if (nodeId.includes('Tobu')) return 'Tobu';
+    if (nodeId.includes('TsukubaExpress')) return 'Tsukuba';
+    if (nodeId.includes('Yurikamome')) return 'Yurikamome';
+    if (nodeId.includes('TokyoMonorail')) return 'Monorail';
+
     return 'Metro'; // Default fallback
+}
+
+// Get Short Abbreviation for Operator (English letters only)
+export function getOperatorAbbreviation(operator: string): string {
+    const abbreviations: Record<string, string> = {
+        'JR': 'J',
+        'Metro': 'M',
+        'Toei': 'T',
+        'Keikyu': 'KQ',
+        'Tokyu': 'TQ',
+        'Odakyu': 'OE',
+        'Keio': 'KO',
+        'Seibu': 'SE',
+        'Keisei': 'KS',
+        'Tobu': 'TB',
+        'Tsukuba': 'TX',
+        'Yurikamome': 'YK',
+        'Monorail': 'MO',
+        'Private': 'P',
+    };
+    return abbreviations[operator] || '';
 }
 
 export const STATION_LINES: Record<string, StationLineDef[]> = {

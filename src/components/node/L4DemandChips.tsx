@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { L4DemandState } from '@/lib/l4/assistantEngine';
+import type { L4DemandState, SupportedLocale } from '@/lib/l4/assistantEngine';
 
 type SimplifiedDemand = 'optimalRoute' | 'saveMoney' | 'accessibility' | 'expertTips' | 'avoidCrowds' | 'fastTrack';
 
@@ -12,8 +12,9 @@ interface L4DemandChipsProps {
     setDemand: React.Dispatch<React.SetStateAction<L4DemandState>>;
     wantsExpertTips: boolean;
     setWantsExpertTips: React.Dispatch<React.SetStateAction<boolean>>;
-    task: 'route' | 'knowledge' | 'timetable';
-    locale: 'zh-TW' | 'ja' | 'en';
+    task: 'route' | 'time' | 'qa';
+    locale: SupportedLocale;
+    isCompact?: boolean;
 }
 
 export function L4DemandChips({
@@ -22,13 +23,22 @@ export function L4DemandChips({
     wantsExpertTips,
     setWantsExpertTips,
     task,
-    locale
+    locale,
+    isCompact
 }: L4DemandChipsProps) {
-    const isDemandOpen = useMemo(() => {
-        // 檢查是否有隱藏的 chips
-        const hiddenKeys: SimplifiedDemand[] = ['optimalRoute', 'expertTips'];
-        return hiddenKeys.some(key => isSimplifiedDemandActive(key));
-    }, [demand, wantsExpertTips]);
+    const isSimplifiedDemandActive = (key: SimplifiedDemand) => {
+        if (key === 'expertTips') return wantsExpertTips;
+
+        const mapping: Record<Exclude<SimplifiedDemand, 'expertTips'>, (keyof L4DemandState)[]> = {
+            optimalRoute: ['comfort'],
+            saveMoney: ['budget'],
+            accessibility: ['wheelchair', 'stroller', 'senior'],
+            avoidCrowds: ['avoidCrowds'],
+            fastTrack: ['rushing'],
+        };
+        const keys = mapping[key];
+        return keys.every(k => demand[k]);
+    };
 
     const toggleSimplifiedDemand = (key: SimplifiedDemand) => {
         if (key === 'expertTips') {
@@ -55,130 +65,59 @@ export function L4DemandChips({
         });
     };
 
-    const isSimplifiedDemandActive = (key: SimplifiedDemand) => {
-        if (key === 'expertTips') return wantsExpertTips;
-
-        const mapping: Record<Exclude<SimplifiedDemand, 'expertTips'>, (keyof L4DemandState)[]> = {
-            optimalRoute: ['comfort'],
-            saveMoney: ['budget'],
-            accessibility: ['wheelchair', 'stroller', 'senior'],
-            avoidCrowds: ['avoidCrowds'],
-            fastTrack: ['rushing'],
-        };
-        const keys = mapping[key];
-        return keys.every(k => demand[k]);
-    };
-
     const chips = useMemo(() => {
         const all: { key: SimplifiedDemand; icon: string; label: string }[] = [
             {
-                key: 'accessibility',
-                icon: '🛗',
-                label: locale.startsWith('zh')
-                    ? '無障礙/親子'
-                    : locale === 'ja'
-                        ? 'バリアフリー/子連れ'
-                        : 'Accessibility & Kids'
-            },
-            {
                 key: 'fastTrack',
                 icon: '⚡',
-                label: locale.startsWith('zh')
-                    ? '趕時間'
-                    : locale === 'ja'
-                        ? '時間優先'
-                        : 'In a Hurry'
+                label: locale.startsWith('zh') ? '趕時間' : locale === 'ja' ? '時間優先' : 'Fast Track'
+            },
+            {
+                key: 'accessibility',
+                icon: '🛗',
+                label: locale.startsWith('zh') ? '無障礙' : locale === 'ja' ? 'バリアフリー' : 'Accessible'
             },
             {
                 key: 'saveMoney',
                 icon: '💰',
-                label: locale.startsWith('zh')
-                    ? '省錢優先'
-                    : locale === 'ja'
-                        ? '料金重視'
-                        : 'Save Money'
+                label: locale.startsWith('zh') ? '省錢' : locale === 'ja' ? '料金重視' : 'Budget'
             },
             {
                 key: 'avoidCrowds',
-                icon: '🚶',
-                label: locale.startsWith('zh')
-                    ? '避開人潮'
-                    : locale === 'ja'
-                        ? '混雑回避'
-                        : 'Avoid Crowds'
+                icon: '🧘',
+                label: locale.startsWith('zh') ? '避開擁擠' : locale === 'ja' ? '混雑回避' : 'Quiet'
             },
             {
                 key: 'optimalRoute',
-                icon: '✨',
-                label: locale.startsWith('zh') ? '優化' : locale === 'ja' ? '最適' : 'Optimal'
+                icon: '🛋️',
+                label: locale.startsWith('zh') ? '舒適' : locale === 'ja' ? '快適優先' : 'Comfort'
             },
             {
                 key: 'expertTips',
                 icon: '💡',
-                label: locale.startsWith('zh') ? '專家建議' : locale === 'ja' ? 'プロのコツ' : 'Expert Tips'
+                label: locale.startsWith('zh') ? '專家建議' : locale === 'ja' ? '裏技' : 'Tips'
             }
         ];
 
-        if (task === 'timetable') {
-            return all.filter(c => ['accessibility', 'avoidCrowds', 'expertTips'].includes(c.key));
-        }
         return all;
-    }, [task, locale]);
+    }, [locale]);
 
-    const visibleChips = chips.slice(0, 4);
-    const hiddenChips = chips.slice(4);
+    if (task !== 'route') return null;
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {locale.startsWith('zh') ? '偏好設定' : locale === 'ja' ? '設定' : 'Preferences'}
-                </label>
-                {hiddenChips.length > 0 && (
-                    <button
-                        onClick={() => {}} // Toggle logic handled by parent
-                        className="text-[10px] font-bold text-indigo-600 flex items-center gap-1 hover:underline touch-manipulation px-2 py-1"
-                    >
-                        {locale.startsWith('zh') ? '更多選項' : locale === 'ja' ? '詳細' : 'More'}
-                        <Settings size={12} />
-                    </button>
-                )}
-            </div>
-
-            <div className="grid grid-cols-3 gap-2.5">
-                {visibleChips.map(chip => (
+        <div className="space-y-3">
+            <div className={`grid grid-cols-3 ${isCompact ? 'gap-2' : 'gap-3'}`}>
+                {chips.map(chip => (
                     <SimplifiedDemandChip
                         key={chip.key}
                         icon={chip.icon}
                         label={chip.label}
                         active={isSimplifiedDemandActive(chip.key)}
                         onClick={() => toggleSimplifiedDemand(chip.key)}
+                        isCompact={isCompact}
                     />
                 ))}
             </div>
-
-            <AnimatePresence>
-                {isDemandOpen && hiddenChips.length > 0 && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                    >
-                        <div className="pt-3 grid grid-cols-3 gap-2.5 border-t border-slate-50 mt-3">
-                            {hiddenChips.map(chip => (
-                                <SimplifiedDemandChip
-                                    key={chip.key}
-                                    icon={chip.icon}
-                                    label={chip.label}
-                                    active={isSimplifiedDemandActive(chip.key)}
-                                    onClick={() => toggleSimplifiedDemand(chip.key)}
-                                />
-                            ))}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </div>
     );
 }
@@ -188,19 +127,28 @@ interface SimplifiedDemandChipProps {
     label: string;
     active: boolean;
     onClick: () => void;
+    isCompact?: boolean;
 }
 
-function SimplifiedDemandChip({ icon, label, active, onClick }: SimplifiedDemandChipProps) {
+function SimplifiedDemandChip({ icon, label, active, onClick, isCompact }: SimplifiedDemandChipProps) {
     return (
         <button
             onClick={onClick}
-            className={`flex items-center justify-center gap-1.5 p-3 min-h-[52px] rounded-xl border transition-all active:scale-[0.96] touch-manipulation ${active
-                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
-                : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-white'
+            className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border transition-all active:scale-[0.96] touch-manipulation relative overflow-hidden ${isCompact ? 'p-2 min-h-[50px]' : 'p-3 min-h-[70px]'} ${active
+                ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-200/50'
+                : 'bg-white/50 backdrop-blur-sm border-slate-200/60 text-slate-600 hover:bg-white hover:border-slate-300'
                 }`}
         >
-            <span className="text-lg">{icon}</span>
-            <span className="text-xs font-bold">{label}</span>
+            {active && (
+                <motion.div
+                    layoutId="active-bg"
+                    className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-700 -z-10"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+            )}
+            <span className={isCompact ? 'text-lg' : 'text-xl'}>{icon}</span>
+            <span className={`font-black tracking-tight ${isCompact ? 'text-[9px]' : 'text-[10px]'}`}>{label}</span>
         </button>
     );
 }

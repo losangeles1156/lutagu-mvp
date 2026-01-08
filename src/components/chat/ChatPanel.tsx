@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/stores/appStore';
+import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useLocale, useTranslations } from 'next-intl';
 import {
@@ -11,29 +12,28 @@ import {
     X,
     MapPin,
     RotateCcw,
-    Copy,
+    Send,
     ThumbsUp,
     ThumbsDown,
-    Send,
     ChevronDown
 } from 'lucide-react';
 import { ActionCard, Action as ChatAction } from './ActionCard';
-import { ContextSelector } from './ContextSelector';
-import { IntentSelector } from './IntentSelector';
+import { demoScripts } from '@/data/demoScripts';
 import { EmptyState } from './EmptyState';
+import { useToast } from '@/components/ui/Toast';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 const MIN_HEIGHT = 200;
 const MAX_HEIGHT = 600;
 const DEFAULT_HEIGHT = 400;
+const MAX_INPUT_LENGTH = 500;
 
 // Helper function to extract station name from node ID
 function getStationName(nodeId: string | null): string {
     if (!nodeId) return '';
-    // Format: odpt.Station:Operator.Line.StationName
     const parts = nodeId.split('.');
     if (parts.length < 2) return nodeId;
     const stationPart = parts[parts.length - 1];
-    // Convert snake_case to readable format
     return stationPart
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -45,33 +45,41 @@ export function ChatPanel() {
     const tChat = useTranslations('chat');
     const tCommon = useTranslations('common');
 
-    const {
-        isChatOpen,
-        setChatOpen,
-        messages,
-        addMessage,
-        currentNodeId,
-        setCurrentNode,
-        difyUserId,
-        difyConversationId,
-        setDifyConversationId,
-        userContext,
-        userProfile,
-        pendingChatInput,
-        pendingChatAutoSend,
-        setPendingChat,
-        resetDifyConversation,
-        mapCenter,
-        selectedNeed,
-    } = useAppStore();
+    // 使用新狀態機的狀態
+    // 使用新狀態機的狀態 (Navigation)
+    const uiState = useUIStateMachine(state => state.uiState);
+    const transitionTo = useUIStateMachine(state => state.transitionTo);
 
-    // [FIX] Lazy initialize difyUserId on client-side to avoid hydration mismatch
+    // 從 AppStore 獲取 Chat 狀態與 Demo 狀態
+    const messages = useAppStore(state => state.messages);
+    const addMessage = useAppStore(state => state.addMessage);
+    const clearMessages = useAppStore(state => state.clearMessages);
+    const isDemoMode = useAppStore(state => state.isDemoMode);
+    const activeDemoId = useAppStore(state => state.activeDemoId);
+    const setDemoMode = useAppStore(state => state.setDemoMode);
+    const setPendingChat = useAppStore(state => state.setPendingChat);
+    const pendingChatInput = useAppStore(state => state.pendingChatInput);
+    const pendingChatAutoSend = useAppStore(state => state.pendingChatAutoSend);
+
+    // 從 AppStore 獲取必要狀態
+    const difyUserId = useAppStore(state => state.difyUserId);
+    const difyConversationId = useAppStore(state => state.difyConversationId);
+    const setDifyConversationId = useAppStore(state => state.setDifyConversationId);
+    const resetDifyConversation = useAppStore(state => state.resetDifyConversation);
+    const currentNodeId = useAppStore(state => state.currentNodeId);
+    const setCurrentNode = useAppStore(state => state.setCurrentNode);
+    const mapCenter = useAppStore(state => state.mapCenter);
+    const selectedNeed = useAppStore(state => state.selectedNeed);
+
     const effectiveDifyUserId = useMemo(() => {
         if (difyUserId) return difyUserId;
         return 'ssr-placeholder';
     }, [difyUserId]);
 
-    // Side effect to initialize difyUserId if missing
+    // L3: Toast hook for feedback confirmation
+    const showToast = useToast();
+
+    // 產生 difyUserId
     useEffect(() => {
         if (typeof window !== 'undefined' && !difyUserId) {
             const newId = globalThis.crypto?.randomUUID?.() ||
@@ -82,14 +90,13 @@ export function ChatPanel() {
 
     const { zone } = useZoneAwareness();
 
+    // 內部狀態
     const [input, setInput] = useState('');
     const [l2Status, setL2Status] = useState<any>(null);
     const [isOffline, setIsOffline] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
-    const [isMaximized, setIsMaximized] = useState(false);
     const [height, setHeight] = useState(DEFAULT_HEIGHT);
     const [isResizing, setIsResizing] = useState(false);
-    const [showHistory, setShowHistory] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -148,29 +155,26 @@ export function ChatPanel() {
         });
 
         try {
-            // [Safety] Add timeout to fetch to prevent infinite hanging on mobile data
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-            const response = await fetch('/api/dify/chat', {
+            console.log('[ChatPanel] Sending request to Agent Orchestrator:', payload.query);
+
+            // Format messages for the orchestrator
+            const clientMessages = messages.map((m: any) => ({
+                role: m.role,
+                content: m.content
+            }));
+
+            const response = await fetch('/api/agent/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 signal: controller.signal,
                 body: JSON.stringify({
-                    query: payload.query,
-                    conversation_id: difyConversationId,
-                    inputs: {
-                        user_profile: userProfile || 'general',
-                        user_context: userContext || [],
-                        current_station: currentNodeId || '',
-                        station_name: getStationName(currentNodeId),
-                        lat: mapCenter?.lat || null,
-                        lng: mapCenter?.lon || null,
-                        selected_need: selectedNeed || null,
-                        locale,
-                        zone: zone || 'core',
-                        user_id: effectiveDifyUserId
-                    }
+                    messages: clientMessages.concat(payload.includeUserMessage ? [] : [{ role: 'user', content: payload.query }]),
+                    nodeId: currentNodeId || '',
+                    locale,
+                    userProfile: 'general'
                 })
             });
 
@@ -188,16 +192,10 @@ export function ChatPanel() {
             const decoder = new TextDecoder();
             let accumulatedAnswer = '';
             let sseBuffer = '';
-            let isFirstChunk = true;
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-
-                if (isFirstChunk) {
-                    isFirstChunk = false;
-                    // Optional: handle first response logic
-                }
 
                 sseBuffer += decoder.decode(value, { stream: true });
                 while (true) {
@@ -215,75 +213,92 @@ export function ChatPanel() {
 
                     try {
                         const data = JSON.parse(ssePayload);
+
+                        if (data.event !== 'ping') {
+                            console.log(`[ChatPanel] Dify Event: ${data.event}`, data.task_id || '');
+                        }
+
                         if (data.conversation_id && typeof data.conversation_id === 'string') {
                             setDifyConversationId(data.conversation_id);
                         }
 
                         if (data.event === 'agent_message' || data.event === 'message') {
                             accumulatedAnswer += (data.answer || '');
-
-                            useAppStore.setState(state => {
-                                const newMessages = [...state.messages];
-                                const lastMsg = newMessages[newMessages.length - 1];
-                                if (lastMsg && lastMsg.role === 'assistant') {
-                                    lastMsg.content = accumulatedAnswer;
-                                    lastMsg.isLoading = false;
-                                }
-                                return { messages: newMessages };
-                            });
                         }
                     } catch (parseError) {
-                        // [FIX] Log but don't crash - malformed SSE chunks are common during network issues
                         console.warn('[ChatPanel] SSE parse error (non-fatal):', parseError);
-                        // Don't update state here - let the stream continue
                     }
                 }
             }
         } catch (error) {
             console.error('Chat Error', error);
             setIsOffline(true);
-            useAppStore.setState(state => {
-                const newMessages = [...state.messages];
-                const lastMsg = newMessages[newMessages.length - 1];
-                if (lastMsg.role === 'assistant') {
-                    lastMsg.content = `⚠️ ${tChat('connectionError')}`;
-                    lastMsg.isLoading = false;
-                }
-                return { messages: newMessages };
+            addMessage({
+                role: 'assistant',
+                content: `⚠️ ${tChat('connectionError')}`
             });
         }
-    }, [addMessage, currentNodeId, difyConversationId, effectiveDifyUserId, locale, tChat, setDifyConversationId, zone, userContext, userProfile, mapCenter, selectedNeed]);
+    }, [addMessage, currentNodeId, difyConversationId, effectiveDifyUserId, locale, tChat, setDifyConversationId, zone, mapCenter, selectedNeed]);
 
     const sendMessage = useCallback(async (text: string) => {
         await streamFromDify({ query: text, includeUserMessage: true });
     }, [streamFromDify]);
 
-    // Bootstrap conversation
+    // 初始化對話
     useEffect(() => {
-        if (!isChatOpen) {
-            hasBootstrappedRef.current = false;
+        if (uiState !== 'fullscreen') return;
+
+        // 優先處理 pendingChat (演示模式)
+        if (pendingChatInput && pendingChatAutoSend) {
+            hasBootstrappedRef.current = true;
+            const query = pendingChatInput;
+            // 清除狀態避免重複觸發
+            setPendingChat({ input: null, autoSend: false });
+            // 直接發送訊息
+            sendMessage(query);
             return;
         }
-        if (messages.length > 0) return;
-        if (pendingChatInput) return;
+
+        // 如果目前沒有訊息，或者只有一條且內容不是開場白，則強制初始化
+        const needsInitialization = messages.length === 0 ||
+            (messages.length === 1 && !messages[0].content.includes('導航夥伴'));
+
+        if (!needsInitialization) return;
         if (hasBootstrappedRef.current) return;
 
         hasBootstrappedRef.current = true;
 
-        const actions = openingQuickReplies.map(q => ({
-            type: 'discovery' as const,
-            label: q,
-            target: `chat:${encodeURIComponent(q)}`
-        }));
+        // 先清空，確保乾淨
+        if (messages.length > 0) {
+            clearMessages();
+        }
 
-        streamFromDify({
-            query: openingQuery,
-            includeUserMessage: false,
-            assistantActions: actions
+        // 參考截圖設計的開場白內容
+        const welcomeContent = locale === 'ja'
+            ? `こんにちは！あなたの東京交通ナビゲーションパートナーです！\nお手伝いできること：\n🚃 リアルタイムの列車状態と遅延情報\n♿ バリアフリー施設の位置\n🆘 交通異常時の代替ルート提案\n\n今どこにいるか、またはどこへ行きたいか教えてください。`
+            : locale === 'en'
+                ? `Hello! I am your Tokyo transit navigation partner!\nI can help you with:\n🚃 Real-time train status and delay info\n♿ Accessibility facility locations\n🆘 Alternative route suggestions during disruptions\n\nTell me where you are now, or where you want to go.`
+                : `你好！我是你的東京交通導航夥伴！\n我可以幫助你：\n🚃 即時列車狀態與延誤情報\n♿ 無障礙設施位置\n🆘 交通異常時的替代路線建議\n\n請告訴我你現在在哪裡，或是想去哪裡？`;
+
+        const suggestions = locale === 'ja'
+            ? ['銀座線は今遅延していますか？', '浅草から秋葉原まで一番早い行き方は？', '神田駅の出口にはエレベーターがありますか？']
+            : locale === 'en'
+                ? ['Is the Ginza Line delayed right now?', 'Fastest way from Asakusa to Akihabara?', 'Do Kanda Station exits have elevators?']
+                : ['現在銀座線有延誤嗎？', '從淺草到秋葉原怎麼去最快？', '神田站的出口都有電梯嗎？'];
+
+        addMessage({
+            role: 'assistant',
+            content: welcomeContent,
+            isLoading: false,
+            actions: suggestions.map(q => ({
+                type: 'discovery',
+                label: q,
+                target: `chat:${encodeURIComponent(q)}`
+            }))
         });
-    }, [isChatOpen, messages.length, openingQuery, openingQuickReplies, pendingChatInput, streamFromDify]);
+    }, [uiState, messages.length, locale, addMessage, clearMessages, pendingChatInput, pendingChatAutoSend, setPendingChat, sendMessage]);
 
-    // Fetch L2 status
+    // 獲取 L2 狀態
     useEffect(() => {
         const fetchL2 = async () => {
             if (!currentNodeId) return;
@@ -299,32 +314,15 @@ export function ChatPanel() {
                 console.error('L2 Fetch Error', e);
             }
         };
-        if (isChatOpen) fetchL2();
-    }, [isChatOpen, currentNodeId]);
+        if (uiState === 'fullscreen') fetchL2();
+    }, [uiState, currentNodeId]);
 
-    // Scroll to bottom
+    // 滾動到底部
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Handle pending input
-    useEffect(() => {
-        if (!isChatOpen) return;
-        if (!pendingChatInput) return;
-
-        const text = pendingChatInput;
-        setPendingChat({ input: null, autoSend: false });
-
-        if (pendingChatAutoSend) {
-            setInput('');
-            sendMessage(text);
-            return;
-        }
-
-        setInput(text);
-    }, [isChatOpen, pendingChatInput, pendingChatAutoSend, sendMessage, setPendingChat]);
-
-    // Handle resize
+    // 處理調整大小
     const handleResizeStart = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         setIsResizing(true);
@@ -352,9 +350,8 @@ export function ChatPanel() {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isResizing]);
+    }, [isResizing, resizeStartY, resizeStartHeight]);
 
-    // Handle submit
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim()) return;
@@ -363,7 +360,6 @@ export function ChatPanel() {
         await sendMessage(text);
     };
 
-    // Handle action
     const handleAction = (action: ChatAction) => {
         if (action.type === 'navigate') {
             const targets: Record<string, [number, number]> = {
@@ -373,16 +369,23 @@ export function ChatPanel() {
             };
             const coords = action.metadata?.coordinates || targets[action.target] || [35.6895, 139.6917];
             useAppStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
-            useAppStore.getState().setChatOpen(false);
+            transitionTo('collapsed_desktop');
         } else if (action.type === 'details') {
             if (action.target) {
                 setCurrentNode(action.target);
                 useAppStore.getState().setBottomSheetOpen(true);
-                setChatOpen(false);
+                transitionTo('collapsed_desktop');
             }
         } else if (action.type === 'trip') {
             addMessage({ role: 'assistant', content: `✅ ${tChat('tripAdded', { label: action.label })}` });
         } else if (action.type === 'discovery') {
+            if (action.target === 'internal:restart') {
+                setDemoMode(false);
+                clearMessages();
+                hasBootstrappedRef.current = false;
+                return;
+            }
+
             if (action.target?.startsWith('chat:')) {
                 const q = decodeURIComponent(action.target.slice('chat:'.length));
                 sendMessage(q);
@@ -392,16 +395,110 @@ export function ChatPanel() {
         }
     };
 
-    // Handle feedback
+    // Demo Mode Logic
+    useEffect(() => {
+        if (uiState !== 'fullscreen') {
+            hasBootstrappedRef.current = false;
+            return;
+        }
+
+        // Check if demo mode is active
+        if (isDemoMode && activeDemoId && demoScripts[activeDemoId]) {
+            const script = demoScripts[activeDemoId];
+            const lang = locale as 'en' | 'ja' | 'zh-TW' | 'zh';
+
+            // Clear existing messages if not already bootstrapped or if unexpected state
+            if (!hasBootstrappedRef.current) {
+                clearMessages();
+                hasBootstrappedRef.current = true;
+
+                // Add User Message
+                addMessage({
+                    role: 'user',
+                    content: script.userMessage[lang]
+                });
+
+                // Simulate Assistant Response
+                setTimeout(async () => {
+                    // 1. Add "thinking" state
+                    addMessage({
+                        role: 'assistant',
+                        content: '',
+                        isLoading: true
+                    });
+
+                    // 2. Wait for "thinking" delay
+                    await new Promise(r => setTimeout(r, 800));
+
+                    // 3. Start typing (Clear loading state first!)
+                    useAppStore.setState(state => {
+                        const newMessages = [...state.messages];
+                        const lastMsg = newMessages[newMessages.length - 1];
+                        if (lastMsg && lastMsg.role === 'assistant') {
+                            lastMsg.isLoading = false;
+                        }
+                        return { messages: newMessages };
+                    });
+
+                    const responseText = script.assistantResponse[lang];
+                    let displayedText = '';
+                    const chunkSize = 2;
+
+                    for (let i = 0; i < responseText.length; i += chunkSize) {
+                        await new Promise(r => setTimeout(r, 20)); // Faster typing
+                        displayedText += responseText.slice(i, i + chunkSize);
+
+                        useAppStore.setState(state => {
+                            const newMessages = [...state.messages];
+                            const lastMsg = newMessages[newMessages.length - 1];
+                            if (lastMsg && lastMsg.role === 'assistant') {
+                                lastMsg.content = displayedText;
+                            }
+                            return { messages: newMessages };
+                        });
+                    }
+
+                    // 4. Finish stream, add actions
+                    useAppStore.setState(state => {
+                        const newMessages = [...state.messages];
+                        const lastMsg = newMessages[newMessages.length - 1];
+                        if (lastMsg && lastMsg.role === 'assistant') {
+                            lastMsg.actions = [
+                                ...script.actions.map(a => ({
+                                    ...a,
+                                    label: a.label[lang]
+                                })),
+                                {
+                                    type: 'discovery',
+                                    label: tChat('restartChat'), // Use translation key
+                                    target: 'internal:restart'
+                                }
+                            ];
+                        }
+                        return { messages: newMessages };
+                    });
+                }, 100);
+            }
+            return;
+        }
+    }, [isDemoMode, activeDemoId, locale, addMessage, clearMessages, uiState, tChat]);
+
     const handleFeedback = async (index: number, score: number) => {
         const msg = messages[index];
         if (!msg || msg.role !== 'assistant') return;
 
+        // Optimistic update using useAppStore.setState
         useAppStore.setState(state => {
             const newMessages = [...state.messages];
-            newMessages[index] = { ...msg, feedback: { score } };
+            if (newMessages[index]) {
+                newMessages[index] = { ...newMessages[index], feedback: { score } };
+            }
             return { messages: newMessages };
         });
+
+        if (showToast) {
+            showToast(tChat('feedbackSent', { defaultValue: '已收到您的回饋！' }), 'success');
+        }
 
         try {
             await fetch('/api/agent/feedback', {
@@ -422,29 +519,29 @@ export function ChatPanel() {
         }
     };
 
-    // Handle restart conversation
     const handleRestart = useCallback(() => {
+        // backupMessages(); // Removed as we are using appStore directly
+        setDemoMode(false);
         resetDifyConversation();
-        useAppStore.getState().messages = [];
+        clearMessages();
         hasBootstrappedRef.current = false;
-    }, [resetDifyConversation]);
+    }, [resetDifyConversation, clearMessages, setDemoMode]);
 
-    // Handle back to map
     const handleBackToMap = useCallback(() => {
-        setChatOpen(false);
-    }, [setChatOpen]);
+        transitionTo('collapsed_desktop');
+    }, [transitionTo]);
 
-    if (!isChatOpen) return null;
+    // 全螢幕模式下才渲染
+    if (uiState !== 'fullscreen') return null;
 
     return (
         <div
             ref={containerRef}
             className={`
                 flex flex-col bg-white border-l border-slate-200
-                transition-all duration-300 ease-out
-                ${isMaximized ? 'fixed inset-0 z-50 h-[100dvh]' : ''}
+                transition-all duration-300 ease-out h-full
             `}
-            style={isMaximized ? {} : { height }}
+            style={{ height: '100%' }}
         >
             {/* Header */}
             <div className="shrink-0 px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-white/95 backdrop-blur-sm">
@@ -468,6 +565,7 @@ export function ChatPanel() {
 
                 {/* Controls */}
                 <div className="flex items-center gap-1">
+                    <LanguageSwitcher className="p-2 shadow-none glass-effect-none bg-transparent hover:bg-indigo-50 rounded-lg" />
                     <button
                         onClick={handleRestart}
                         className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -483,14 +581,7 @@ export function ChatPanel() {
                         <Minus size={16} />
                     </button>
                     <button
-                        onClick={() => setIsMaximized(!isMaximized)}
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-                        title={tChat('maximize')}
-                    >
-                        <Maximize2 size={16} />
-                    </button>
-                    <button
-                        onClick={() => setChatOpen(false)}
+                        onClick={handleBackToMap}
                         className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
                         title={tCommon('close')}
                     >
@@ -531,10 +622,7 @@ export function ChatPanel() {
 
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide" role="log" aria-live="polite">
-                        {messages.length === 0 ? (
-                            <EmptyState onSend={sendMessage} />
-                        ) : (
-                            messages.map((msg, idx) => (
+                        {messages.map((msg: any, idx: number) => (
                             <div
                                 key={idx}
                                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -558,15 +646,17 @@ export function ChatPanel() {
                                                 {msg.content}
                                             </div>
 
-                                            {/* Action Cards */}
+                                            {/* Action Cards / Suggestions */}
                                             {msg.actions && msg.actions.length > 0 && (
-                                                <div className="mt-3 space-y-2">
-                                                    {msg.actions.map((action, i) => (
-                                                        <ActionCard
+                                                <div className="mt-4 flex flex-wrap gap-2">
+                                                    {msg.actions.map((action: any, i: number) => (
+                                                        <button
                                                             key={i}
-                                                            action={action}
-                                                            onClick={handleAction}
-                                                        />
+                                                            onClick={() => handleAction(action)}
+                                                            className="px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-full text-xs font-medium hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm"
+                                                        >
+                                                            {action.label}
+                                                        </button>
                                                     ))}
                                                 </div>
                                             )}
@@ -581,9 +671,9 @@ export function ChatPanel() {
                                                             ? 'bg-emerald-100 text-emerald-600'
                                                             : 'hover:bg-slate-100 text-slate-300 hover:text-emerald-500'
                                                             }`}
-                                                        title={tChat('feedbackLike')}
+                                                        aria-label={tChat('feedbackLike')}
                                                     >
-                                                        <ThumbsUp size={14} />
+                                                        <ThumbsUp size={14} aria-hidden="true" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleFeedback(idx, -1)}
@@ -592,9 +682,9 @@ export function ChatPanel() {
                                                             ? 'bg-rose-100 text-rose-600'
                                                             : 'hover:bg-slate-100 text-slate-300 hover:text-rose-500'
                                                             }`}
-                                                        title={tChat('feedbackDislike')}
+                                                        aria-label={tChat('feedbackDislike')}
                                                     >
-                                                        <ThumbsDown size={14} />
+                                                        <ThumbsDown size={14} aria-hidden="true" />
                                                     </button>
                                                 </div>
                                             )}
@@ -606,28 +696,40 @@ export function ChatPanel() {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Intent & Context Selectors */}
-                    <div className="shrink-0 px-4 py-2 border-t border-slate-100 bg-slate-50/50">
-                        <IntentSelector />
-                        <ContextSelector />
-                    </div>
-
                     {/* Input Area */}
                     <div className="shrink-0 p-4 border-t border-slate-100 bg-white/95 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]">
                         <form onSubmit={handleSubmit} className="flex gap-2">
-                            <input
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                placeholder={tChat('placeholder')}
-                                className="flex-1 px-4 py-3 bg-slate-50 border-0 rounded-xl 
-                                    focus:ring-2 focus:ring-indigo-500 focus:bg-white
-                                    text-base font-bold placeholder:text-slate-400
-                                    min-h-[48px]"
-                                autoFocus
-                            />
+                            <div className="flex-1 relative">
+                                <input
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    placeholder={tChat('placeholder')}
+                                    maxLength={MAX_INPUT_LENGTH}
+                                    className="w-full px-4 py-3 pr-20 bg-slate-50 border-0 rounded-xl 
+                                        focus:ring-2 focus:ring-indigo-500 focus:bg-white
+                                        text-base font-bold placeholder:text-slate-400
+                                        min-h-[48px]"
+                                    autoFocus
+                                    aria-label={tChat('placeholder')}
+                                    aria-describedby="char-count"
+                                />
+                                <div
+                                    id="char-count"
+                                    className={`absolute right-3 bottom-2 text-[10px] font-bold transition-colors
+                                        ${input.length >= MAX_INPUT_LENGTH
+                                            ? 'text-rose-500'
+                                            : input.length >= MAX_INPUT_LENGTH * 0.9
+                                                ? 'text-amber-500'
+                                                : 'text-slate-300'
+                                        }`}
+                                    aria-live="polite"
+                                >
+                                    {input.length}/{MAX_INPUT_LENGTH}
+                                </div>
+                            </div>
                             <button
                                 type="submit"
-                                disabled={!input.trim()}
+                                disabled={!input.trim() || input.length > MAX_INPUT_LENGTH}
                                 className="px-4 py-3 bg-indigo-600 text-white rounded-xl
                                     hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed
                                     transition-all active:scale-95 min-w-[48px] min-h-[48px]
@@ -641,19 +743,17 @@ export function ChatPanel() {
             )}
 
             {/* Resize Handle */}
-            {!isMaximized && (
-                <div
-                    onMouseDown={handleResizeStart}
-                    className={`
-                        absolute bottom-0 left-0 right-0 h-1 
-                        cursor-row-resize flex items-center justify-center
-                        hover:bg-indigo-100 transition-colors
-                        ${isResizing ? 'bg-indigo-300' : 'bg-transparent'}
-                    `}
-                >
-                    <div className="w-12 h-1 bg-slate-300 rounded-full" />
-                </div>
-            )}
+            <div
+                onMouseDown={handleResizeStart}
+                className={`
+                    absolute bottom-0 left-0 right-0 h-1 
+                    cursor-row-resize flex items-center justify-center
+                    hover:bg-indigo-100 transition-colors
+                    ${isResizing ? 'bg-indigo-300' : 'bg-transparent'}
+                `}
+            >
+                <div className="w-12 h-1 bg-slate-300 rounded-full" />
+            </div>
         </div>
     );
 }

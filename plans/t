@@ -1,154 +1,316 @@
-# 東京23區車站 L1~L4 數據顯示執行計畫
+# 東京車站節點顯示異常問題分析報告
 
-> 最終版本 v2.0  
-> 根據用戶反饋更新  
-> 範圍：東京地下鐵、都營地下鐵、JR 23區內車站、機場車站
+## 問題摘要
 
----
+### 症狀描述
+1. **東京車站節點異常**：僅在選擇特定行政區時才會在東京站位置出現節點異常
+2. **豐島區問題**：當點選豐島區時，系統錯誤地顯示板橋區的車站節點而非豐島區應有的節點
+3. **千代田區問題**：節點顯示極為不穩定，存在節點遺漏或無法正常顯示的情況
 
-## 📋 執行範圍定義
-
-### L1 數據範圍（節點為主，避免重複）
-- **東京地下鐵 (9條線)**：銀座丸之內、日比谷、東西、南北、有樂町、半藏門、副都心、大江戶、三田
-- **都營地下鐵 (4條線)**：淺草線、新宿線、大江戶線、三田線
-- **JR 東日本（23區內）**：山手線、中央線、京濱東北線、總武線等
-- **機場鐵道**：京成 Skyliner、都營淺草線機場連絡、JR 京葉線
-
-### L2 數據範圍
-- 確認顯示的路線名稱對應正確
-- 動態數據由 ODPT API 提供
-
-### L3 數據範圍
-- 無障礙設施（電梯、電扶梯、廁所）
-- 換乘設施
-- 便利商店、藥妝店等周邊設施
-
-### L4 數據範圍
-- 共用策略卡片
-- 大型樞紐車站的專家知識庫
+### 問題發生時機
+此問題是在 L4 樞紐車站知識庫建立完成之後才開始產生
 
 ---
 
-## 🎯 優先處理順序
+## 根本原因分析
 
-### Zone A：核心商業區（最高優先）
-1. **新宿區** - JR新宿、東京Metro丸之內線、都營新宿線/大江戶線
-2. **港區** - 品川、濱松町、赤坂見附
-3. **渋谷區** - JR渋谷、東京Metro銀座/半藏門/副都心、東急、京王
-4. **千代田區** - 東京、大手町、日比谷、永代橋
-5. **中央區** - 銀座、日本橋、人形町
+### 原因 1：行政區車站重複定義（豐島區/板橋區衝突）
 
-### Zone B：傳統文化區
-6. **文京區** - 上野、御茶之水
-7. **台東區** - 淺草、秋葉原、藏前
+**問題檔案**：[`20260103_all_tokyo_23wards_hubs.sql`](supabase/migrations/20260103_all_tokyo_23wards_hubs.sql)
 
-### Zone C：西南區
-8. **豐島區** - 池袋
-9. **目黑區** - 中目黑、自由之丘
-10. **大田区** - 蒲田（機場連絡）
+**具體問題**：
+- 豐島區定義（第 349-367 行）：
+  ```sql
+  ('odpt:Station:JR-East.Ikebukuro', true, NULL, '豐島'),
+  ('odpt:Station:TokyoMetro.Ikebukuro', false, 'odpt:Station:JR-East.Ikebukuro', '豐島'),
+  ```
 
-### Zone D：北區
-11. **北區** - 赤羽、田端
-12. **荒川區** - 日暮里、西日暮里
+- 板橋區定義（第 401-414 行）：
+  ```sql
+  ('odpt:Station:JR-East.Ikebukuro', true, NULL, '板橋'),  -- 衝突！
+  ```
+
+**影響**：SQL 執行時，板橋區的定義會覆蓋豐島區的定義，導致豐島區選擇後顯示的是板橋區的節點。
 
 ---
 
-## 📊 數據完整性檢查清單
+### 原因 2：seed_hierarchy 與 seedNodes.ts 邏輯不一致
 
-### L1 檢查項目
-| 項目 | 檢查內容 |
-|------|----------|
-| 設施分類 | convenience_count, restaurant_count, cafe_count |
-| vibe_tags | 確認氛圍標籤正確 |
-| facility_profile | JSON 結構完整性 |
+**問題檔案**：
+- [`20260103_all_tokyo_23wards_hubs.sql`](supabase/migrations/20260103_all_tokyo_23wards_hubs.sql)
+- [`src/lib/nodes/seedNodes.ts`](src/lib/nodes/seedNodes.ts)
 
-### L2 檢查項目
-| 項目 | 檢查內容 |
-|------|----------|
-| 路線名稱 | ODPT 格式正確性 |
-| 經營公司 | TokyoMetro / Toei / JR-East |
-| 車站ID | odpt.Station: 格式一致性 |
+**具體問題**：
 
-### L3 檢查項目
-| 項目 | 檢查內容 |
-|------|----------|
-| 電梯位置 | B1F~2F 月台連絡 |
-| 電扶梯配置 | 上下行各方向 |
-| 廁所位置 | 站內/站外 |
-| 無障礙設施 | 電梯、斜坡、輪椅空間 |
+在 `seedNodes.ts` 中，東京 Metro 站點被標記為 Child 節點：
+```typescript
+// seedNodes.ts 第 363-372 行
+{
+    id: 'odpt:Station:TokyoMetro.Ikebukuro',
+    is_hub: false,
+    parent_hub_id: 'odpt:Station:JR-East.Ikebukuro',
+}
+```
 
-### L4 檢查項目
-| 項目 | 檢查內容 |
-|------|----------|
-| 專家知識庫 | 上野、秋葉原、池袋等大型樞紐 |
-| 策略卡片 | 票價、路線、時刻表模板 |
-| persona_prompt | 站點特色對話 |
+但在 `seed_hierarchy` 中，這些站點可能沒有正確的父子關係映射。
+
+**影響**：當 L4 知識庫建立後，`parent_hub_id` 的設置可能與行政區過濾邏輯衝突。
 
 ---
 
-## 🔧 執行腳本
+### 原因 3：MapContainer 過濾邏輯過於嚴格
 
-### 審計腳本
-```bash
-# 執行數據完整性審計
-npx tsx scripts/audit_simple.ts
+**問題檔案**：[`src/components/map/MapContainer.tsx`](src/components/map/MapContainer.tsx:425-430)
 
-# 執行 L1 數據檢查
-npm run crawl:l1
+```typescript
+const visibleNodes = useMemo(() => {
+    if (!nodes || nodes.length === 0) return [];
+    // [FIX] Always hide children (nodes with a parent_hub_id)
+    return nodes.filter(n => n.parent_hub_id === null);
+}, [nodes]);
+```
 
-# 執行 L3 設施補齊
-npm run crawl:l3
-npm run crawl:l3:toilets
-npm run crawl:l3:access
+**問題**：
+- 這個過濾會隱藏所有子節點，但某些應該在特定行政區顯示的節點可能被錯誤標記為子節點
+- 當行政區選擇變更時，節點的 `is_hub` 狀態可能沒有正確更新
+
+---
+
+### 原因 4：千代田區車站父子關係不完整
+
+**問題車站**：
+- `TokyoMetro.Otemachi` 被設置為 `JR-East.Tokyo` 的子站
+- 但 `JR-East.Tokyo` 本身可能沒有正確設置為 Hub
+- `TokyoMetro.Ginza` 和 `TokyoMetro.Marunouchi` 的父子關係定義不完整
+
+**影響**：導致千代田區的節點顯示不穩定，存在遺漏。
+
+---
+
+## 資料流分析
+
+```
+行政區選擇 → WardNodeLoader.fetchNodesByWard()
+    ↓
+/api/wards/[wardId] → 查詢 nodes 表 WHERE ward_id = 'ward:toshima'
+    ↓
+返回 nodes 陣列
+    ↓
+MapContainer.HubNodeLayer → filter(n => n.parent_hub_id === null)
+    ↓
+只顯示 is_hub = true 的節點
+```
+
+**瓶頸點**：
+1. `ward_id` 欄位可能沒有正確設置
+2. `parent_hub_id` 欄位可能與預期不符
+3. API 返回的 `nodes` 陣列可能不完整
+
+---
+
+## 修復方案
+
+### 修復 1：修正 seed_hierarchy 行政區定義
+
+**目標**：確保每個車站只屬於一個行政區
+
+**SQL 修復腳本**：
+
+```sql
+-- 修正豐島區和板橋區的池袋站定義衝突
+-- 原則：池袋站主要位於豐島區，板橋區不應包含池袋站
+
+-- Step 1: 驗證當前狀態
+SELECT id, name->>'zh-TW' as name, ward_id, is_hub, parent_hub_id
+FROM nodes 
+WHERE id = 'odpt:Station:JR-East.Ikebukuro'
+   OR id = 'odpt:Station:TokyoMetro.Ikebukuro';
+
+-- Step 2: 修正豐島區的定義
+-- 確保 JR 池袋站正確設置為 Hub，隸屬豐島區
+UPDATE nodes 
+SET ward_id = 'ward:toshima', is_hub = true, parent_hub_id = NULL
+WHERE id = 'odpt:Station:JR-East.Ikebukuro';
+
+-- Step 3: 從板橋區移除池袋站（如果不正確）
+-- 板橋區應該只包含：
+-- - JR-East.Itabashi（板橋站）
+-- - JR-East.Shin-Itabashi（新板橋站）
+-- - JR-East.Tobu（東武站）
+-- - 相關的地鐵子站
+
+-- Step 4: 驗證板橋區的正確節點
+SELECT id, name->>'zh-TW' as name
+FROM nodes 
+WHERE ward_id = 'ward:itabashi'
+ORDER BY name->>'zh-TW';
 ```
 
 ---
 
-## 📁 創建的腳本檔案
+### 修復 2：驗證並修正千代田區車站關係
 
-| 檔案 | 功能 |
-|------|------|
-| `scripts/audit_simple.ts` | 簡化版數據審計 |
-| `scripts/audit_final.ts` | 最終版數據審計 |
-| `scripts/audit_tokyo_wards_data.ts` | 按行政區審計 |
-| `plans/tokyo-stations-hierarchy-plan.md` | 車站階層設計 |
-| `plans/station-node-grouping-design.md` | 節點分組設計 |
+```sql
+-- 驗證千代田區的主要樞紐站
+SELECT 
+    id, 
+    name->>'zh-TW' as name, 
+    is_hub, 
+    parent_hub_id
+FROM nodes 
+WHERE ward_id = 'ward:chiyoda'
+  AND (is_hub = true OR parent_hub_id IS NOT NULL)
+ORDER BY name->>'zh-TW';
+
+-- 修正東京站及其子站的父子關係
+-- JR 東京站是 Hub
+UPDATE nodes 
+SET is_hub = true, parent_hub_id = NULL
+WHERE id = 'odpt:Station:JR-East.Tokyo';
+
+-- 東京 Metro 大手町站是 JR 東京站的子站
+UPDATE nodes 
+SET parent_hub_id = 'odpt:Station:JR-East.Tokyo'
+WHERE id = 'odpt:Station:TokyoMetro.Otemachi'
+   OR id = 'odpt:Station:TokyoMetro.Chiyoda.Otemachi'
+   OR id = 'odpt:Station:Toei.Mita.Otemachi';
+
+-- 驗證銀座線和日比谷線的核心站
+SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
+FROM nodes 
+WHERE id IN (
+    'odpt:Station:TokyoMetro.Ginza',
+    'odpt:Station:TokyoMetro.Hibiya',
+    'odpt:Station:TokyoMetro.Marunouchi'
+);
+```
 
 ---
 
-## ✅ 驗收標準
+### 修復 3：同步 seedNodes.ts 和 seed_hierarchy
 
-### L1 驗收
-- [ ] 每個東京Metro/都營車站有 `facility_profile`
-- [ ] `vibe_tags` 包含正確的氛圍標籤
-- [ ] 避免共構車站重複數據
+**目標**：確保 seedNodes.ts 中的 `parent_hub_id` 設置與 seed_hierarchy 一致
 
-### L2 驗證
-- [ ] 築地站顯示「日比谷線」正確
-- [ ] 上野站顯示「JR東日本/東京Metro/京成」正確
-- [ ] 所有路線名稱符合 ODPT 格式
+**建議**：在 L4 知識庫建立後，重新執行同步：
 
-### L3 驗收
-- [ ] 主要樞紐站有電梯位置資訊
-- [ ] 廁所位置標註室內/室外
-- [ ] 無障礙設施清單完整
+```sql
+-- 重新同步 seed_hierarchy 到 nodes 表
+-- 確保 is_hub 和 parent_hub_id 正確設置
 
-### L4 驗收
-- [ ] 上野、秋葉原、池袋有專家知識庫
-- [ ] 策略卡片可正常顯示
-- [ ] Persona 對話功能正常
+-- 先備份當前狀態
+CREATE TABLE nodes_backup AS SELECT * FROM nodes WHERE is_hub = true;
+
+-- 重新執行 seed_hierarchy 更新
+-- 確保每個行政區只定義一次每個車站
+```
 
 ---
 
-## 📅 預估工時
+### 修復 4：改進前端過濾邏輯
 
-| 階段 | 任務 | 預估工時 |
-|------|------|----------|
-| Phase 1 | 數據庫同步 Seed Nodes | 2 小時 |
-| Phase 2 | Zone A 車站 L1 補齊 | 4 小時 |
-| Phase 3 | Zone B~E 車站 L1 補齊 | 6 小時 |
-| Phase 4 | L3 設施數據補齊 | 8 小時 |
-| Phase 5 | L4 專家知識庫建立 | 4 小時 |
-| Phase 6 | 驗證與除錯 | 4 小時 |
+**檔案**：[`src/components/map/MapContainer.tsx`](src/components/map/MapContainer.tsx:425-430)
 
-**總計：約 28 小時**
+**建議修改**：
+
+```typescript
+const visibleNodes = useMemo(() => {
+    if (!nodes || nodes.length === 0) return [];
+    
+    // 在 Ward 模式下，顯示所有該行政區的 Hub
+    // 考慮加入一個參數來控制是否嚴格隱藏子節點
+    return nodes.filter(n => {
+        // 顯示條件：
+        // 1. 是 Hub (is_hub = true, parent_hub_id = null)
+        // 2. 或者是該行政區的主要站點（需要額外的邏輯判斷）
+        return n.parent_hub_id === null || 
+               (n.is_hub === true && n.parent_hub_id === null);
+    });
+}, [nodes]);
+```
+
+---
+
+## 驗證清單
+
+### Step 1：驗證豐島區節點
+```sql
+-- 檢查豐島區的 Hub 站點
+SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
+FROM nodes 
+WHERE ward_id = 'ward:toshima'
+  AND is_hub = true
+ORDER BY name->>'zh-TW';
+```
+
+**預期結果**：
+- `odpt:Station:JR-East.Ikebukuro` (池袋站)
+- 其他豐島區的 Hub 站點
+
+### Step 2：驗證板橋區節點
+```sql
+-- 檢查板橋區的 Hub 站點（不應包含池袋站）
+SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
+FROM nodes 
+WHERE ward_id = 'ward:itabashi'
+  AND is_hub = true
+ORDER BY name->>'zh-TW';
+```
+
+**預期結果**：
+- `odpt:Station:JR-East.Itabashi` (板橋站)
+- `odpt:Station:JR-East.Shin-Itabashi` (新板橋站)
+- `odpt:Station:JR-East.Tobu` (東武站)
+
+### Step 3：驗證千代田區節點
+```sql
+-- 檢查千代田區的主要 Hub
+SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
+FROM nodes 
+WHERE ward_id = 'ward:chiyoda'
+  AND is_hub = true
+ORDER BY name->>'zh-TW';
+```
+
+**預期結果**：
+- `odpt:Station:JR-East.Tokyo` (東京站)
+- `odpt:Station:JR-East.Kanda` (神田站)
+- `odpt:Station:JR-East.Iidabashi` (飯田橋站)
+- `odpt:Station:JR-East.Ichigaya` (市谷站)
+- `odpt:Station:JR-East.Kudanshita` (九段下站)
+- `odpt:Station:Toei.Jimbocho` (神保町站)
+- `odpt:Station:Toei.Mita` (三田站)
+
+---
+
+## 監控建議
+
+### 新增監控日誌
+
+在 `WardNodeLoader.tsx` 中添加更多日誌：
+
+```typescript
+console.log(`[WardNodeLoader] Ward ${wardId} nodes:`, {
+    total: filteredNodes.length,
+    hubs: filteredNodes.filter(n => n.is_hub).length,
+    children: filteredNodes.filter(n => n.parent_hub_id).length,
+    sampleIds: filteredNodes.slice(0, 5).map(n => n.id)
+});
+```
+
+---
+
+## 結論
+
+東京車站節點顯示異常的根本原因是：
+
+1. **seed_hierarchy 定義衝突**：豐島區和板橋區都定義了同一個車站（池袋站），導致 `ward_id` 被覆蓋
+2. **父子節點邏輯不一致**：`seedNodes.ts` 和 `seed_hierarchy` 中的 `parent_hub_id` 設置可能不一致
+3. **前端過濾邏輯過於嚴格**：可能隱藏了應該顯示的節點
+
+**修復優先順序**：
+1. **高優先級**：修正豐島區和板橋區的 `ward_id` 衝突
+2. **高優先級**：驗證並修正千代田區車站的父子關係
+3. **中優先級**：同步 seedNodes.ts 和 seed_hierarchy
+4. **低優先級**：改進前端過濾邏輯
+
+建議按照驗證清單逐一檢查各行政區的節點狀態，確保修復後的數據一致性。

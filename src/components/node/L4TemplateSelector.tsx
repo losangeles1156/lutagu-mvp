@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { L4QuestionTemplate, L4TemplateCategory } from '@/lib/l4/assistantEngine';
+import type { L4QuestionTemplate, L4TemplateCategory, SupportedLocale } from '@/lib/l4/assistantEngine';
 
 interface L4TemplateSelectorProps {
     templates: L4QuestionTemplate[];
@@ -11,7 +11,7 @@ interface L4TemplateSelectorProps {
     isOpen: boolean;
     setIsOpen: (v: boolean) => void;
     onSelect: (tpl: L4QuestionTemplate) => void;
-    locale: 'zh-TW' | 'ja' | 'en';
+    locale: SupportedLocale;
 }
 
 export function L4TemplateSelector({
@@ -29,7 +29,7 @@ export function L4TemplateSelector({
                 className="text-xs font-bold text-slate-400 flex items-center gap-1 hover:text-indigo-600 transition-colors touch-manipulation px-4 py-2 rounded-lg"
             >
                 {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                {locale.startsWith('zh') ? '常用問句模板' : locale === 'ja' ? 'テンプレート' : 'Templates'}
+                {locale.startsWith('zh') ? '常用問句模板' : locale === 'ja' ? 'テンプレート' : locale === 'ar' ? 'نماذج الأسئلة' : 'Templates'}
             </button>
         </div>
     );
@@ -39,7 +39,7 @@ interface L4TemplateListProps {
     templates: L4QuestionTemplate[];
     isOpen: boolean;
     onSelect: (tpl: L4QuestionTemplate) => void;
-    locale: 'zh-TW' | 'ja' | 'en';
+    locale: SupportedLocale;
 }
 
 export function L4TemplateList({ templates, isOpen, onSelect, locale }: L4TemplateListProps) {
