@@ -5,6 +5,7 @@ import { WeatherTool, TrainStatusTool, FareTool, TimetableTool } from './tools/s
 import { odptClient } from '@/lib/odpt/client';
 import { getJSTTime } from '@/lib/utils/timeUtils';
 import { findSimpleRoutes, RailwayTopology, normalizeOdptStationId } from '@/lib/l4/assistantEngine';
+import CORE_TOPOLOGY from '@/lib/l4/generated/coreTopology.json';
 import { NavigationService } from '@/lib/navigation/NavigationService';
 import { searchL4Knowledge } from '@/lib/l4/searchService';
 
@@ -479,20 +480,59 @@ export const TOOL_HANDLERS = {
     // ========== L4 新增工具 ==========
 
     /**
-     * 時刻表查詢工具
+     * 時刻表查詢工具 - 對應 AGENT_TOOLS 中的 get_timetable
      */
-    get_timetable_l4: async (params: { stationId: string; operator?: string }, context: any) => {
+    get_timetable: async (params: { stationId: string; operator?: string }, context: any) => {
         const tool = new TimetableTool();
-        // Map stationId to station for TimetableTool.execute
         return await tool.execute({ station: params.stationId, operator: params.operator }, context);
     },
 
     /**
-     * 票價查詢工具
+     * 票價查詢工具 - 對應 AGENT_TOOLS 中的 get_fare
      */
-    get_fare_l4: async (params: { fromStation: string; toStation: string }, context: any) => {
+    get_fare: async (params: { fromStation: string; toStation: string }, context: any) => {
         const tool = new FareTool();
-        // Map fromStation/toStation to from/to for FareTool.execute
         return await tool.execute({ from: params.fromStation, to: params.toStation }, context);
+    },
+
+    /**
+     * 路線規劃工具 - 對應 AGENT_TOOLS 中的 get_route
+     */
+    get_route: async (params: { fromStation: string; toStation: string }, context: any) => {
+        const locale = context.locale || 'zh-TW';
+        const fromId = normalizeOdptStationId(params.fromStation);
+        const toId = normalizeOdptStationId(params.toStation);
+
+        try {
+            const routes = findSimpleRoutes({
+                originStationId: fromId,
+                destinationStationId: toId,
+                railways: CORE_TOPOLOGY as unknown as RailwayTopology[],
+                locale
+            });
+
+            if (!routes || routes.length === 0) {
+                // Fallback to expert tips
+                const expertTip = getExpertTipsForRoute(fromId, toId, locale);
+                return getBasicRouteInfo(params.fromStation, params.toStation, locale) + (expertTip ? `\n\n${expertTip}` : '');
+            }
+
+            const best = routes[0];
+            const steps = best.steps?.map((s: any, i: number) => `${i + 1}. ${s.instruction || s.text || s}`).join('\n') || '';
+
+            const fareInfo = best.fare?.ic || best.fare?.ticket;
+            const timeInfo = best.totalTime || best.time;
+
+            if (locale === 'zh-TW' || locale === 'zh') {
+                return `🚃 路線規劃: ${params.fromStation} → ${params.toStation}\n\n${steps || '直達路線'}\n\n⏱️ 約 ${timeInfo || '?'} 分鐘 | 💴 約 ${fareInfo || '?'} 円`;
+            } else if (locale === 'ja') {
+                return `🚃 ルート案内: ${params.fromStation} → ${params.toStation}\n\n${steps || '直行ルート'}\n\n⏱️ 約 ${timeInfo || '?'} 分 | 💴 約 ${fareInfo || '?'} 円`;
+            } else {
+                return `🚃 Route: ${params.fromStation} → ${params.toStation}\n\n${steps || 'Direct route'}\n\n⏱️ ~${timeInfo || '?'} min | 💴 ~${fareInfo || '?'} yen`;
+            }
+        } catch (e: any) {
+            console.error('[get_route] Error:', e);
+            return getBasicRouteInfo(params.fromStation, params.toStation, locale);
+        }
     }
 };

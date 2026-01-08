@@ -19,7 +19,8 @@ export class AgentOrchestrator {
     private mistralKey: string;
     private geminiKey: string;
     private model: string;
-    private maxIterations = 5;
+    // Reduced from 5 to 3 for faster responses in MVP
+    private maxIterations = 3;
 
     constructor() {
         this.mistralKey = process.env.MISTRAL_API_KEY || '';
