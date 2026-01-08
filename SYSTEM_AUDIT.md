@@ -1,4 +1,4 @@
-# BambiGO System Architecture Review & Resource Inventory
+# LUTAGU(ルタグ) System Architecture Review & Resource Inventory
 
 ## 1. System Architecture Overview
 

@@ -1,5 +1,5 @@
 -- ============================================
--- BambiGO Admin Migration - Phase 3 & 4 (Fixed v3)
+-- LUTAGU Admin Migration - Phase 3 & 4 (Fixed v3)
 -- Fixed: DROP FUNCTION before CREATE OR REPLACE
 -- Date: 2026-01-04
 -- ============================================
@@ -157,7 +157,7 @@ GRANT EXECUTE ON FUNCTION public.nearby_nodes_v2 TO anon, authenticated;
 DO $$
 BEGIN
     RAISE NOTICE '======================================';
-    RAISE NOTICE 'BambiGO Admin Migration Complete (Fixed v3)';
+    RAISE NOTICE 'LUTAGU Admin Migration Complete (Fixed v3)';
     RAISE NOTICE '======================================';
     RAISE NOTICE 'All functions installed successfully!';
 END;

@@ -116,7 +116,7 @@
             "credentials": {
                 "supabaseApi": {
                     "id": "SUPABASE_CREDENTIALS",
-                    "name": "BambiGO Supabase"
+                    "name": "LUTAGU Supabase"
                 }
             }
         }
@@ -194,6 +194,6 @@
     ],
     "triggerCount": 0,
     "meta": {
-        "instanceId": "bambigo-mvp"
+        "instanceId": "lutagu-mvp"
     }
 }

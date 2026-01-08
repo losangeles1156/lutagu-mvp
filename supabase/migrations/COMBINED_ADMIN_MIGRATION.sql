@@ -1,5 +1,5 @@
 -- ============================================
--- BambiGO Admin Migration - Phase 3 & 4 (Fixed v3)
+-- LUTAGU Admin Migration - Phase 3 & 4 (Fixed v3)
 -- Fixed: DROP FUNCTION before CREATE OR REPLACE
 -- Date: 2026-01-04
 -- ============================================

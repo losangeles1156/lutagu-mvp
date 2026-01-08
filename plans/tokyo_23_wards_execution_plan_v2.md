@@ -871,7 +871,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
         error: 'DEPRECATED',
         message: 'Viewport API 已廢棄，請使用 /api/wards 端點',
-        documentation: 'https://docs.bambigo.tokyo/wards-guide'
+        documentation: 'https://docs.lutagu.tokyo/wards-guide'
     }, { status: 410 }); // 410 Gone
 }
 ```
