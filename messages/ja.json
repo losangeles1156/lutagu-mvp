@@ -19,7 +19,8 @@
         "explore": "探索",
         "trips": "旅程",
         "guard": "見守り",
-        "me": "マイ"
+        "me": "マイ",
+        "navigation": "ナビゲーション"
     },
     "views": {
         "trips": {
@@ -212,7 +213,11 @@
             "finance": "金融",
             "accommodation": "宿泊",
             "service": "公共サービス",
-            "business": "ビジネス"
+            "business": "ビジネス",
+            "historic": "歴史",
+            "mall": "ショッピングモール",
+            "souvenir": "お土産",
+            "bento": "弁当"
         }
     },
     "l2": {
@@ -280,6 +285,9 @@
         "available": "利用可",
         "quickLinks": "クイックリンク",
         "items": "件",
+        "toiletVacancy": "トイレ空き状況",
+        "toiletVacancyDesc": "VACAN リアルタイム確認",
+        "travelServices": "旅行サービス",
         "categories": {
             "toilet": "トイレ",
             "locker": "ロッカー",
@@ -582,7 +590,7 @@
         "retrySend": "再送",
         "emptyTitle": "どのようなお手伝いをしましょうか？",
         "emptyDescription": "ルート、現在の状況、バリアフリー情報をお尋ねください",
-        "quickQuestionsOld": "よくある質問",
+        "quickQuestionsTitle": "よくある質問",
         "intent": {
             "route": "ルート",
             "status": "運行",
@@ -644,6 +652,7 @@
             "accessibility": "ベビーカーで上野動物園に行きたいのですが、上野駅のどの出口が一番便利ですか？"
         }
     },
+    "validation": "検証",
     "feedback": {
         "title": "ご意見をお聞かせください",
         "openFeedback": "フィードバック",

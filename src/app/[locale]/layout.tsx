@@ -4,6 +4,7 @@ import '../globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { NodeDisplayProvider } from '@/providers/NodeDisplayProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -36,10 +37,13 @@ export default async function RootLayout({
             <body className={inter.className}>
                 <NextIntlClientProvider messages={messages}>
                     <ErrorBoundary>
-                        {children}
+                        <NodeDisplayProvider>
+                            {children}
+                        </NodeDisplayProvider>
                     </ErrorBoundary>
                 </NextIntlClientProvider>
             </body>
         </html>
     );
 }
+

@@ -2,7 +2,7 @@
 
 ## 概述 (Overview)
 
-本文檔描述 BambiGO MVP 前端節點的 ward-based 重建計劃，旨在解決以下問題：
+本文檔描述 lutagu MVP 前端節點的 ward-based 重建計劃，旨在解決以下問題：
 
 1. 公車站牌 (`bus_stop`) 與火車站混合顯示在地圖上
 2. 父子節點關係失效 - 父節點和子節點同時顯示

@@ -133,7 +133,8 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         setIsOffline(false);
         setThinkingStep(tL4('thinking.initializing'));
 
-        // --- Hybrid Engine Interception ---
+        // --- Hybrid Engine Interception DISABLED (User Request) ---
+        /*
         try {
             const hybridRes = await hybridEngine.processRequest({
                 text,
@@ -163,6 +164,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         } catch (err) {
             console.error('[HybridEngine] Error:', err);
         }
+        */
 
         // Fake "Thinking Steps" to visualize the 4 Dimensions
         const startTime = Date.now();

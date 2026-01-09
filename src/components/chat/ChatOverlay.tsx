@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useLocale, useTranslations } from 'next-intl';
-
 import { ActionCard, Action as ChatAction } from './ActionCard';
 import { ContextSelector } from './ContextSelector';
 import { demoScripts } from '@/data/demoScripts';
@@ -17,9 +18,9 @@ export function ChatOverlay() {
     const {
         isChatOpen,
         setChatOpen,
-        messages,
-        addMessage,
-        clearMessages,
+        messages: storeMessages,
+        addMessage: addStoreMessage,
+        clearMessages: clearStoreMessages,
         currentNodeId,
         setCurrentNode,
         setBottomSheetOpen,
@@ -43,37 +44,36 @@ export function ChatOverlay() {
 
     const hasBootstrappedRef = useRef(false);
 
-    const openingQuickReplies = useMemo(() => {
-        if (locale === 'ja') {
-            return [
-                '今、銀座線は遅延していますか？',
-                '浅草から秋葉原まで一番早い行き方は？',
-                '神田駅の出口にはエレベーターがありますか？'
-            ];
+    // AI SDK v6 transport-based architecture
+    const transport = useMemo(() => new DefaultChatTransport({
+        api: '/api/agent/chat',
+        body: {
+            nodeId: currentNodeId || '',
+            locale,
+            user_profile: userProfile || 'general',
+            zone: zone || 'core'
         }
-        if (locale === 'en') {
-            return [
-                'Is the Ginza Line delayed right now?',
-                'Fastest way from Asakusa to Akihabara?',
-                'Do Kanda Station exits have elevators?'
-            ];
-        }
-        return [
-            '現在銀座線有延誤嗎？',
-            '從淺草到秋葉原怎麼去最快？',
-            '神田站的出口都有電梯嗎？'
-        ];
-    }, [locale]);
+    }), [currentNodeId, locale, userProfile, zone]);
 
-    const openingQuery = useMemo(() => {
-        if (locale === 'ja') {
-            return '日本語で短い挨拶をして、できることを3つ（運行情報・バリアフリー・代替ルート）箇条書きで示し、最後に「今どこにいるか／どこへ行きたいか」を質問してください。';
+    const {
+        messages: aiMessages,
+        sendMessage: sendAiMessage,
+        status,
+        setMessages: setAiMessages,
+    } = useChat({
+        transport,
+        onError: (error: Error) => {
+            console.error('Chat Error:', error);
+            setIsOffline(true);
         }
-        if (locale === 'en') {
-            return 'Give a short greeting in English, list 3 things you can help with (live status, accessibility, alternative routes), and end by asking where I am or where I want to go.';
-        }
-        return '請用繁體中文做開場自我介紹，列出你能幫忙的 3 件事（即時列車狀態、無障礙、替代路線），最後問我現在在哪裡或想去哪裡。';
-    }, [locale]);
+    });
+
+    const isLoading = status === 'streaming' || status === 'submitted';
+
+    // Display Messages Logic: Demo Mode vs AI Mode
+    // We treat storeMessages as the source of truth for Demo Mode (legacy)
+    // and aiMessages as the source for the new Real AI mode.
+    const displayMessages = isDemoMode ? storeMessages : aiMessages;
 
     const [statusMessage, setStatusMessage] = useState<string | null>(null);
     const prevContextRef = useRef<string[]>(userContext);
@@ -108,112 +108,11 @@ export function ChatOverlay() {
         return () => clearTimeout(timer);
     }, [userContext, isChatOpen, tChat]);
 
-    const streamFromDify = useCallback(async (payload: {
-        query: string;
-        includeUserMessage: boolean;
-        assistantActions?: ChatAction[];
-    }) => {
-        if (!payload.query.trim()) return;
-
-        if (payload.includeUserMessage) {
-            addMessage({ role: 'user', content: payload.query });
-        }
-
-        addMessage({
-            role: 'assistant',
-            content: '',
-            isLoading: true,
-            actions: payload.assistantActions
-        });
-
-        try {
-            // Format messages for the orchestrator
-            const clientMessages = messages.map(m => ({
-                role: m.role,
-                content: m.content
-            }));
-
-            const response = await fetch('/api/agent/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    messages: clientMessages.concat(payload.includeUserMessage ? [] : [{ role: 'user', content: payload.query }]),
-                    nodeId: currentNodeId || '',
-                    locale,
-                    userProfile: userProfile || 'general'
-                })
-            });
-
-            if (!response.ok) throw new Error('API Error');
-            if (!response.body) throw new Error('No response body');
-
-            setIsOffline(false);
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let accumulatedAnswer = '';
-            let sseBuffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                sseBuffer += decoder.decode(value, { stream: true });
-                while (true) {
-                    const newlineIndex = sseBuffer.indexOf('\n');
-                    if (newlineIndex === -1) break;
-
-                    const rawLine = sseBuffer.slice(0, newlineIndex);
-                    sseBuffer = sseBuffer.slice(newlineIndex + 1);
-
-                    const line = rawLine.trimEnd();
-                    if (!line.startsWith('data:')) continue;
-
-                    const ssePayload = line.slice(5).trimStart();
-                    if (!ssePayload || ssePayload === '[DONE]') continue;
-
-                    try {
-                        const data = JSON.parse(ssePayload);
-                        if (data.conversation_id && typeof data.conversation_id === 'string') {
-                            setDifyConversationId(data.conversation_id);
-                        }
-
-                        if (data.event === 'agent_message' || data.event === 'message') {
-                            accumulatedAnswer += (data.answer || '');
-
-                            useAppStore.setState(state => {
-                                const newMessages = [...state.messages];
-                                const lastMsg = newMessages[newMessages.length - 1];
-                                if (lastMsg.role === 'assistant') {
-                                    lastMsg.content = accumulatedAnswer;
-                                    lastMsg.isLoading = false;
-                                }
-                                return { messages: newMessages };
-                            });
-                        }
-                    } catch (e) {
-                        console.error('SSE Parse Error', e);
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Chat Error', error);
-            setIsOffline(true);
-            useAppStore.setState(state => {
-                const newMessages = [...state.messages];
-                const lastMsg = newMessages[newMessages.length - 1];
-                if (lastMsg.role === 'assistant') {
-                    lastMsg.content = `⚠️ ${tChat('connectionError')}`;
-                    lastMsg.isLoading = false;
-                }
-                return { messages: newMessages };
-            });
-        }
-    }, [addMessage, currentNodeId, difyConversationId, difyUserId, locale, tChat, setDifyConversationId, zone, userContext, userProfile]);
-
     const sendMessage = useCallback(async (text: string) => {
-        await streamFromDify({ query: text, includeUserMessage: true });
-    }, [streamFromDify]);
+        if (!text.trim()) return;
+        setIsOffline(false);
+        await sendAiMessage({ text });
+    }, [sendAiMessage]);
 
     useEffect(() => {
         if (!isChatOpen) {
@@ -236,7 +135,7 @@ export function ChatOverlay() {
 
             // Simulate Assistant Response
             setTimeout(async () => {
-                addMessage({
+                addStoreMessage({
                     role: 'assistant',
                     content: '',
                     isLoading: true
@@ -285,27 +184,22 @@ export function ChatOverlay() {
             return;
         }
 
-        // 如果目前沒有訊息，或者只有一條且內容不是開場白，則強制初始化
-        const needsInitialization = messages.length === 0 ||
-            (messages.length === 1 && !messages[0].content.includes('導航夥伴'));
+        // 如果目前沒有訊息，強制初始化歡迎訊息
+        const currentMessages = isDemoMode ? storeMessages : (aiMessages as any[]);
 
-        if (!needsInitialization) return;
+        // Skip if: already has messages, pending input, or already bootstrapped
+        if (currentMessages.length > 0 && hasBootstrappedRef.current) return;
         if (pendingChatInput) return;
         if (hasBootstrappedRef.current) return;
 
         hasBootstrappedRef.current = true;
-
-        // 先清空，確保乾淨
-        if (messages.length > 0) {
-            clearMessages();
-        }
 
         // 參考截圖設計的開場白內容
         const welcomeContent = locale === 'ja'
             ? `こんにちは！あなたの東京交通ナビゲーションパートナーです！\nお手伝いできること：\n🚃 リアルタイムの列車状態と遅延情報\n♿ バリアフリー施設の位置\n🆘 交通異常時の代替ルート提案\n\n今どこにいるか、またはどこへ行きたいか教えてください。`
             : locale === 'en'
                 ? `Hello! I am your Tokyo transit navigation partner!\nI can help you with:\n🚃 Real-time train status and delay info\n♿ Accessibility facility locations\n🆘 Alternative route suggestions during disruptions\n\nTell me where you are now, or where you want to go.`
-                : `你好！我是你的東京交通導航夥伴！\n我可以幫助你：\n🚃 即時列車狀態與延誤情報\n♿ 無障礙設施位置\n🆘 交通異常時的替代路線建議\n\n請告訴我你現在在哪裡，或是想去哪裡？`;
+                : `你好！我是你的東京交通導覽夥伴！\n我可以幫助你：\n🚃 即時列車狀態與延誤情報\n♿ 無障礙設施位置\n🆘 交通異常時的替代路線建議\n\n請告訴我你現在在哪裡，或是想去哪裡？`;
 
         const suggestions = locale === 'ja'
             ? ['銀座線は今遅延していますか？', '浅草から秋葉原まで一番早い行き方は？', '神田駅の出口にはエレベーターがありますか？']
@@ -313,17 +207,28 @@ export function ChatOverlay() {
                 ? ['Is the Ginza Line delayed right now?', 'Fastest way from Asakusa to Akihabara?', 'Do Kanda Station exits have elevators?']
                 : ['現在銀座線有延誤嗎？', '從淺草到秋葉原怎麼去最快？', '神田站的出口都有電梯嗎？'];
 
-        addMessage({
+        const welcomeMessage: any = {
+            id: 'welcome',
             role: 'assistant',
             content: welcomeContent,
+            parts: [{ type: 'text', text: welcomeContent }],
             isLoading: false,
             actions: suggestions.map(q => ({
                 type: 'discovery',
                 label: q,
                 target: `chat:${encodeURIComponent(q)}`
             }))
-        });
-    }, [isChatOpen, messages.length, locale, addMessage, clearMessages, isDemoMode, activeDemoId, pendingChatInput]);
+        };
+
+        console.log('[ChatOverlay] Initializing welcome message for', isDemoMode ? 'Demo Mode' : 'AI Mode');
+
+        if (isDemoMode) {
+            clearStoreMessages();
+            addStoreMessage(welcomeMessage);
+        } else {
+            setAiMessages([welcomeMessage]);
+        }
+    }, [isChatOpen, storeMessages, aiMessages, locale, addStoreMessage, clearStoreMessages, isDemoMode, activeDemoId, pendingChatInput, setAiMessages, tChat]);
 
     useEffect(() => {
         const fetchL2 = async () => {
@@ -348,7 +253,7 @@ export function ChatOverlay() {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    }, [displayMessages]);
 
     useEffect(() => {
         if (!isChatOpen) return;
@@ -403,7 +308,12 @@ export function ChatOverlay() {
                 setChatOpen(false);
             }
         } else if (action.type === 'trip') {
-            addMessage({ role: 'assistant', content: `✅ ${tChat('tripAdded', { label: action.label })}` });
+            const content = `✅ ${tChat('tripAdded', { label: action.label })}`;
+            if (isDemoMode) {
+                addStoreMessage({ role: 'assistant', content });
+            } else {
+                setAiMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content, parts: [{ type: 'text', text: content }] } as any]);
+            }
         } else if (action.type === 'taxi') {
             window.open(`https://go.mo-t.com/`, '_blank');
         } else if (action.type === 'discovery') {
@@ -419,7 +329,12 @@ export function ChatOverlay() {
             if (action.target?.startsWith('http')) {
                 window.open(action.target, '_blank');
             } else {
-                addMessage({ role: 'assistant', content: tChat('openingTimetable', { label: action.label }) });
+                const content = tChat('openingTimetable', { label: action.label });
+                if (isDemoMode) {
+                    addStoreMessage({ role: 'assistant', content });
+                } else {
+                    setAiMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content, parts: [{ type: 'text', text: content }] } as any]);
+                }
             }
         }
     };
@@ -427,15 +342,23 @@ export function ChatOverlay() {
 
 
     const handleFeedback = async (index: number, score: number) => {
-        const msg = messages[index];
+        const msg = (displayMessages as any[])[index];
         if (!msg || msg.role !== 'assistant') return;
 
         // Optimistic update
-        useAppStore.setState(state => {
-            const newMessages = [...state.messages];
-            newMessages[index] = { ...msg, feedback: { score } };
-            return { messages: newMessages };
-        });
+        if (isDemoMode) {
+            useAppStore.setState(state => {
+                const newMessages = [...state.messages];
+                newMessages[index] = { ...msg, feedback: { score } };
+                return { messages: newMessages };
+            });
+        } else {
+            setAiMessages(prev => {
+                const next = [...prev];
+                next[index] = { ...msg, feedback: { score } } as any;
+                return next;
+            });
+        }
 
         try {
             await fetch('/api/agent/feedback', {
@@ -538,7 +461,7 @@ export function ChatOverlay() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth scrollbar-hide" role="log" aria-live="polite">
-                {messages.map((msg: any, idx: number) => (
+                {displayMessages.map((msg: any, idx: number) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-4 fade-in duration-700`}>
                         <div className={`max-w-[88%] p-5 rounded-[28px] shadow-sm ${msg.role === 'user'
                             ? 'bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-br-lg shadow-indigo-200'
@@ -553,7 +476,7 @@ export function ChatOverlay() {
                                 </div>
                             ) : (
                                 <div className="whitespace-pre-wrap leading-relaxed tracking-wide text-sm font-bold opacity-90">
-                                    {msg.content}
+                                    {msg.content || (msg.parts && (msg.parts as any[]).find(p => p.type === 'text')?.text)}
                                 </div>
                             )}
 
@@ -573,7 +496,7 @@ export function ChatOverlay() {
                             )}
 
                             {/* Feedback Buttons (Assistant only) */}
-                            {msg.role === 'assistant' && !msg.isLoading && msg.content && (
+                            {msg.role === 'assistant' && (msg.isLoading || msg.content) && (
                                 <div className="mt-3 flex items-center gap-2 pt-3 border-t border-gray-100/80">
                                     <button
                                         onClick={() => handleFeedback(idx, 1)}

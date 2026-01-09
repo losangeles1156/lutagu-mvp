@@ -71,7 +71,10 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
 
             {cards.map((card, idx) => {
                 const isExpanded = expandedCardId === (card.id || String(idx));
-                const isLongDescription = card.description.length > 60;
+                const descStr = typeof card.description === 'object' 
+                    ? getLocaleString(card.description, locale) 
+                    : (card.description || '');
+                const isLongDescription = descStr.length > 60;
                 
                 return (
                     <motion.div

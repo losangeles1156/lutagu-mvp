@@ -176,5 +176,6 @@
         "offlineBadge": "وضع عدم الاتصال",
         "tripAdded": "تمت إضافة {label} إلى الرحلة!",
         "activeBadge": "الاستراتيجية الفورية نشطة"
-    }
+    },
+    "validation": "تحقق"
 }

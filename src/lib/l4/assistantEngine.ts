@@ -21,6 +21,10 @@ const STATION_INDEX = new Map<string, string[]>();
     });
 });
 
+import { calcTransferPainIndex } from './algorithms/TransferPainIndex';
+import { calcCascadeDelayRisk } from './algorithms/CascadeDelayRisk';
+import { TPIResult, CDRResult, JourneyLeg, TPIInput } from './types';
+
 export type SupportedLocale = 'zh' | 'zh-TW' | 'ja' | 'en' | 'ar';
 
 export type L4IntentKind = 'fare' | 'timetable' | 'route' | 'status' | 'amenity' | 'unknown';
@@ -510,6 +514,8 @@ export type EnrichedRouteOption = RouteOption & {
     fare?: { ic: number; ticket: number };
     duration?: number;
     nextDeparture?: string;
+    tpi?: TPIResult;
+    cdr?: CDRResult;
 };
 
 // Expert Knowledge Repository
@@ -1034,7 +1040,7 @@ function dijkstraBestPath(params: {
 
                 nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty;
 
-                if (decoded.lastOperator && decoded.lastOperator !== operatorKey) {
+                if (decoded.lastOperator !== operatorKey) {
                     nextCosts.fare += baseFareForOperator(operatorKey);
                     nextCosts.time += 3; // Reduced from 5
                 }
@@ -1061,13 +1067,102 @@ function dijkstraBestPath(params: {
     return null;
 }
 
+export function enrichRoutesWithL4Scores(
+    routes: RouteOption[],
+    userDemand: L4DemandState,
+    locale: string = 'zh'
+): EnrichedRouteOption[] {
+    return routes.map(route => {
+        // 1. Calculate TPI (Transfer Pain Index)
+        // For simplicity, we aggregate TPIs of all transfers in the route
+        // In a real app, we might want to show TPI per transfer
+        let totalTpiScore = 0;
+        let transferCount = 0;
+
+        route.steps.forEach(step => {
+            if (step.kind === 'transfer') {
+                // Mocking TPI input based on demand
+                const tpiInput: TPIInput = {
+                    transfer: {
+                        fromStationId: 'mock-station',
+                        fromLineId: 'mock-line-a',
+                        toStationId: 'mock-station',
+                        toLineId: 'mock-line-b',
+                        walkingDistanceMeters: 300,
+                        floorDifference: 2,
+                        verticalMethod: 'stairs' as const,
+                        complexity: {
+                            turnCount: 3,
+                            signageClarity: 2,
+                            exitCount: 8,
+                            underConstruction: false
+                        },
+                        baseTpi: 20,
+                        peakHourMultiplier: 1.2
+                    },
+                    crowdLevel: 'normal' as const,
+                    userHasLuggage: userDemand.largeLuggage,
+                    userAccessibilityNeeds: {
+                        wheelchair: userDemand.wheelchair || false,
+                        stroller: userDemand.stroller || false,
+                        elderly: userDemand.senior || false,
+                        visualImpairment: false
+                    }
+                };
+
+                const tpiResult = calcTransferPainIndex(tpiInput, undefined, locale);
+                totalTpiScore += tpiResult.score;
+                transferCount++;
+            }
+        });
+
+        const avgTpi = transferCount > 0 ? totalTpiScore / transferCount : 0;
+        // Mock TPI result for the whole route
+        const routeTpi: TPIResult = {
+            score: Math.round(avgTpi),
+            level: avgTpi <= 20 ? 'easy' : avgTpi <= 40 ? 'normal' : avgTpi <= 60 ? 'hard' : avgTpi <= 80 ? 'difficult' : 'extreme',
+            breakdown: { distance: 20, vertical: 20, complexity: 20, crowd: 20, userModifier: 20 },
+            recommendation: '這是一條評估後的路徑建議'
+        };
+
+        // 2. Calculate CDR (Cascade Delay Risk)
+        const legs: JourneyLeg[] = [];
+        let currentTime = new Date();
+
+        route.steps.forEach((step, i) => {
+            if (step.kind === 'train') {
+                legs.push({
+                    line: step.railwayId || 'unknown',
+                    lineName: step.text,
+                    fromStation: 'station-a',
+                    toStation: 'station-b',
+                    scheduledDeparture: new Date(currentTime.getTime()),
+                    scheduledArrival: new Date(currentTime.getTime() + 10 * 60000),
+                    currentDelayMinutes: 0
+                });
+                currentTime = new Date(currentTime.getTime() + 15 * 60000); // 10 min travel + 5 min buffer
+            }
+        });
+
+        const cdrResult = calcCascadeDelayRisk(legs, locale);
+
+        return {
+            ...route,
+            transfers: route.transfers || 0,
+            tpi: routeTpi,
+            cdr: cdrResult
+        };
+    });
+}
+
 export function findRankedRoutes(params: {
     originStationId: string | string[];
     destinationStationId: string | string[];
     railways: RailwayTopology[];
     maxHops?: number;
     locale?: SupportedLocale;
-}): RouteOption[] {
+    userDemand?: L4DemandState; // Added userDemand
+}): EnrichedRouteOption[] {
     const originIds = Array.isArray(params.originStationId)
         ? params.originStationId.map(normalizeOdptStationId)
         : [normalizeOdptStationId(params.originStationId)];
@@ -1130,7 +1225,14 @@ export function findRankedRoutes(params: {
         return [];
     }
 
-    return results;
+    // Enrich with L4 Scores
+    const userDemand = params.userDemand || {
+        wheelchair: false, stroller: false, vision: false, senior: false,
+        largeLuggage: false, lightLuggage: true,
+        rushing: false, budget: false, comfort: true, avoidCrowds: false, avoidRain: false
+    };
+
+    return enrichRoutesWithL4Scores(results, userDemand, locale.startsWith('ja') ? 'ja' : locale.startsWith('en') ? 'en' : 'zh');
 }
 
 export function findSimpleRoutes(params: {

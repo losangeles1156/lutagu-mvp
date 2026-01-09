@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport, UIMessage } from 'ai';
+import { useTranslations, useLocale } from 'next-intl';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 
 export interface DifyMessage {
@@ -50,18 +52,51 @@ export function useDifyChat(options: UseDifyChatOptions) {
     const locale = useLocale();
     const { zone } = useZoneAwareness();
 
-    const [messages, setMessages] = useState<DifyMessage[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const loadingRef = useRef(false);
     const [isOffline, setIsOffline] = useState(false);
     const [thinkingStep, setThinkingStep] = useState<string>('');
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const conversationIdRef = useRef<string | null>(null);
     const userIdRef = useRef<string>(
         globalThis.crypto?.randomUUID?.() ||
         `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
     );
+
+    // AI SDK v6 transport-based architecture
+    const transport = useMemo(() => new DefaultChatTransport({
+        api: '/api/agent/chat',
+        body: {
+            nodeId: stationId || '',
+            locale,
+            user_profile: 'general', // This will be overridden by sendMessage if userProfile is passed
+            zone: zone || 'core'
+        }
+    }), [stationId, locale, zone]);
+
+    const {
+        messages: aiMessages,
+        sendMessage: sendAiMessage,
+        status,
+        setMessages: setAiMessages,
+    } = useChat({
+        transport,
+        onError: (error: Error) => {
+            console.error('Chat Error:', error);
+            setIsOffline(true);
+            setThinkingStep('');
+            onError?.(error);
+        }
+    });
+
+    const isLoading = status === 'streaming' || status === 'submitted';
+
+    // Map aiMessages to DifyMessage format for backward compatibility
+    const messages: DifyMessage[] = useMemo(() => {
+        return aiMessages.map((m: any) => ({
+            role: m.role as 'user' | 'assistant',
+            content: m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || '',
+            data: m.data
+        }));
+    }, [aiMessages]);
 
     // Generate quick buttons based on locale
     const quickButtons = useCallback((): QuickButton[] => {
@@ -130,7 +165,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
             },
             {
                 id: 'access',
-                label: '無障礙',
+                label: '無障礙動線',
                 demands: ['accessibility'],
                 profile: 'wheelchair',
                 prompt: `任務：無障礙動線\n目前：${displayName}（${id}）\n需求：優先電梯可達的出口/動線\n不足資訊：需要時先問我「哪個出口 / 哪條線 / 方向」\n輸出：先給結論，再補必要追問`
@@ -150,18 +185,14 @@ export function useDifyChat(options: UseDifyChatOptions) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, thinkingStep]);
 
-    // Send message to Dify API
+    // Send message to our API
     const sendMessage = useCallback(async (text: string, userProfile: string = 'general') => {
-        if (!text.trim() || loadingRef.current) return;
+        if (!text.trim() || isLoading) return;
 
-        loadingRef.current = true;
-        setIsLoading(true);
-        const userMsg: DifyMessage = { role: 'user', content: text };
-        setMessages(prev => [...prev, userMsg]);
         setIsOffline(false);
         setThinkingStep(tL4('thinking.initializing'));
 
-        // --- Hybrid Engine Interception (Server API) ---
+        // --- Hybrid Engine Interception ---
         try {
             const hybridApiRes = await fetch('/api/agent/hybrid', {
                 method: 'POST',
@@ -179,143 +210,61 @@ export function useDifyChat(options: UseDifyChatOptions) {
 
             if (hybridApiRes.ok) {
                 const hybridRes = await hybridApiRes.json();
-
                 if (hybridRes && !hybridRes.passToLLM && !hybridRes.error) {
-                    console.log(`[useDifyChat] Intercepted by ${hybridRes.source}`);
-                    const assistantMsg: DifyMessage = {
+                    const hybridMsg: any = {
+                        id: `hybrid-${Date.now()}`,
                         role: 'assistant',
                         content: hybridRes.content,
-                        source: hybridRes.source,
-                        data: hybridRes.data
+                        parts: [{ type: 'text', text: hybridRes.content }],
+                        data: hybridRes.data,
+                        source: hybridRes.source
                     };
 
-                    // Add a small delay to feel more natural
-                    await new Promise(r => setTimeout(r, 800));
+                    // Add user message manually to aiMessages then assistant message
+                    setAiMessages(prev => [
+                        ...prev,
+                        { id: `user-${Date.now()}`, role: 'user', content: text, parts: [{ type: 'text', text }] } as any,
+                        hybridMsg
+                    ]);
 
-                    setMessages(prev => [...prev, assistantMsg]);
-                    setIsLoading(false);
-                    loadingRef.current = false;
                     setThinkingStep('');
-                    onMessage?.(assistantMsg);
+                    onMessage?.({
+                        role: 'assistant',
+                        content: hybridRes.content,
+                        data: hybridRes.data,
+                        source: hybridRes.source
+                    });
                     onComplete?.();
                     return;
                 }
             }
         } catch (err) {
             console.error('[HybridEngine] API Error:', err);
-            // Continue to Dify if hybrid fails
         }
 
-        // Fake "Thinking Steps" to visualize the process
+        // Visualizing steps
+        setThinkingStep(tL4('thinking.l2'));
         const startTime = Date.now();
-        const steps = [
-            tL4('thinking.l2'),
-            tL4('thinking.l3'),
-            tL4('thinking.kb'),
-            tL4('thinking.synthesizing')
-        ];
-
-        let stepIdx = 0;
-        const stepInterval = setInterval(() => {
-            if (stepIdx < steps.length) {
-                setThinkingStep(steps[stepIdx]);
-                stepIdx++;
-            }
-        }, 1500);
 
         try {
-            const response = await fetch('/api/dify/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    query: text,
-                    conversation_id: conversationIdRef.current,
-                    inputs: {
-                        user_profile: userProfile,
-                        current_station: stationId || '',
-                        station_name: stationName || '',
-                        locale,
-                        zone: zone || 'core',
-                        user_id: userIdRef.current
-                    }
-                })
-            });
-
-            clearInterval(stepInterval);
-
-            if (!response.ok) throw new Error('Network error');
-            if (!response.body) throw new Error('No body');
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let accumulatedResponse = '';
-            let sseBuffer = '';
-
-            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+            await sendAiMessage({ text });
             setThinkingStep('');
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                sseBuffer += decoder.decode(value, { stream: true });
-                while (true) {
-                    const newlineIndex = sseBuffer.indexOf('\n');
-                    if (newlineIndex === -1) break;
-
-                    const rawLine = sseBuffer.slice(0, newlineIndex);
-                    sseBuffer = sseBuffer.slice(newlineIndex + 1);
-
-                    const line = rawLine.trimEnd();
-                    if (!line.startsWith('data:')) continue;
-
-                    const payload = line.slice(5).trimStart();
-                    if (!payload || payload === '[DONE]') continue;
-
-                    try {
-                        const data = JSON.parse(payload);
-                        if (data.conversation_id && typeof data.conversation_id === 'string') {
-                            conversationIdRef.current = data.conversation_id;
-                        }
-                        if (data.event === 'agent_message' || data.event === 'message') {
-                            accumulatedResponse += (data.answer || '');
-                            setMessages(prev => {
-                                const newMsgs = [...prev];
-                                newMsgs[newMsgs.length - 1].content = accumulatedResponse;
-                                onMessage?.(newMsgs[newMsgs.length - 1]);
-                                return newMsgs;
-                            });
-                        }
-                    } catch {
-                        // Ignore parse errors
-                    }
-                }
-            }
-
             onComplete?.();
             metricsCollector.recordRequest('llm', Date.now() - startTime);
-
         } catch (error) {
-            console.error('Dify Chat Error:', error);
+            console.error('Chat Error:', error);
             setIsOffline(true);
-            setMessages(prev => [...prev, { role: 'assistant', content: tL4('chatError') }]);
-            clearInterval(stepInterval);
-            onError?.(error instanceof Error ? error : new Error('Unknown error'));
-        } finally {
-            setIsLoading(false);
-            loadingRef.current = false;
             setThinkingStep('');
         }
-    }, [locale, stationId, stationName, zone, tL4, onMessage, onComplete, onError]);
+    }, [isLoading, locale, stationId, zone, tL4, sendAiMessage, setAiMessages, onMessage, onComplete]);
 
     const clearMessages = useCallback(() => {
-        setMessages([]);
-        conversationIdRef.current = null;
-    }, []);
+        setAiMessages([]);
+    }, [setAiMessages]);
 
     return {
         messages,
-        setMessages,
+        setMessages: setAiMessages as any,
         isLoading,
         isOffline,
         thinkingStep,

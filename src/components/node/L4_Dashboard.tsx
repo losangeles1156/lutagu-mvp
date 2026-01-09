@@ -27,6 +27,7 @@ import { L4DemandChips } from '@/components/node/L4DemandChips';
 import { L4TemplateSelector, L4TemplateList } from '@/components/node/L4TemplateSelector';
 import { L4_Chat } from '@/components/node/L4_Chat';
 import { IntentSelector } from '@/components/node/IntentSelector';
+import { getLocaleString } from '@/lib/utils/localeUtils';
 
 interface L4DashboardProps {
     currentNodeId: string;
@@ -484,14 +485,14 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                 <div className="space-y-4">
                                     {l4Knowledge?.traps?.map((item, i) => (
                                         <div key={i} className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 flex gap-4 group hover:bg-red-50 transition-colors">
-                                            <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
+                                            <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{getLocaleString(item.icon, uiLocale) || '⚠️'}</div>
                                             <div>
-                                                <div className="font-black text-red-900 text-sm mb-1">{item.title}</div>
-                                                <div className="text-xs font-bold text-red-700/80 leading-relaxed">{item.description}</div>
+                                                <div className="font-black text-red-900 text-sm mb-1">{getLocaleString(item.title, uiLocale)}</div>
+                                                <div className="text-xs font-bold text-red-700/80 leading-relaxed">{getLocaleString(item.description, uiLocale)}</div>
                                                 {item.advice && (
                                                     <div className="mt-3 p-2.5 bg-white/80 rounded-xl text-[11px] font-bold text-red-800 flex items-start gap-2 shadow-sm ring-1 ring-red-100">
                                                         <Lightbulb size={14} className="shrink-0 text-amber-500 mt-0.5" />
-                                                        <span>{item.advice}</span>
+                                                        <span>{getLocaleString(item.advice, uiLocale)}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -500,10 +501,10 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
 
                                     {l4Knowledge?.hacks?.map((item, i) => (
                                         <div key={i} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 flex gap-4 group hover:bg-emerald-50 transition-colors">
-                                            <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
+                                            <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{getLocaleString(item.icon, uiLocale) || '💡'}</div>
                                             <div>
-                                                <div className="font-black text-emerald-900 text-sm mb-1">{item.title}</div>
-                                                <div className="text-xs font-bold text-emerald-700/80 leading-relaxed">{item.description}</div>
+                                                <div className="font-black text-emerald-900 text-sm mb-1">{getLocaleString(item.title, uiLocale)}</div>
+                                                <div className="text-xs font-bold text-emerald-700/80 leading-relaxed">{getLocaleString(item.description, uiLocale)}</div>
                                             </div>
                                         </div>
                                     ))}

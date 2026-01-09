@@ -8,6 +8,8 @@ import {
     EvaluationContext
 } from '@/types/lutagu_l4';
 import { KNOWLEDGE_BASE } from '@/data/stationWisdom';
+import { calcWaitValue } from './algorithms/WaitValueCoefficient';
+import { WVCInput, WVCResult } from './types';
 
 export class L4DecisionEngine {
 
@@ -61,8 +63,68 @@ export class L4DecisionEngine {
             }
         }
 
+        // [NEW] Add dynamic WVC-based recommendations if waitMinutes is provided
+        if (context.waitMinutes !== undefined && context.waitMinutes > 0) {
+            const wvcCard = this.generateWVCCard(context);
+            if (wvcCard) {
+                matches.push(wvcCard);
+            }
+        }
+
         // Sort by priority (descending)
         return matches.sort((a, b) => b.priority - a.priority);
+    }
+
+    /**
+     * Generates a recommendation card based on Wait Value Coefficient
+     */
+    private generateWVCCard(context: EvaluationContext): MatchedStrategyCard | null {
+        const { waitMinutes, destinationValue, userPreferences, locale } = context;
+        if (waitMinutes === undefined) return null;
+
+        const wvcInput: WVCInput = {
+            destinationUrgency: (destinationValue || 5) / 10,
+            expectedWaitMinutes: waitMinutes,
+            waitEnvironment: 'indoor_standing', // Default for MVP
+            userFatigue: userPreferences.travel_style.comfort ? 0.7 : 0.3,
+            hasLuggage: userPreferences.luggage.large_luggage || userPreferences.luggage.multiple_bags,
+            weather: 'good', // Default for MVP
+            currentTime: new Date(),
+            nearbyAmenities: [], // Empty for now
+            areaVibeTags: [] // Empty for now
+        };
+
+        const wvcResult = calcWaitValue(wvcInput, locale === 'zh-TW' ? 'zh' : locale);
+
+        // Map WVCRecommendation to icons and titles
+        const recommendationMap: Record<string, { icon: string, title: string }> = {
+            'wait': { 
+                icon: '⏳', 
+                title: locale === 'ja' ? '待機推奨' : locale === 'en' ? 'Wait for Train' : '建議在月台等候' 
+            },
+            'divert': { 
+                icon: '🚕', 
+                title: locale === 'ja' ? '代替手段推奨' : locale === 'en' ? 'Alternative Recommended' : '建議考慮替代方案' 
+            },
+            'rest_nearby': { 
+                icon: '☕', 
+                title: locale === 'ja' ? '休憩のすすめ' : locale === 'en' ? 'Take a Break' : '建議稍作休息' 
+            }
+        };
+
+        const { icon, title } = recommendationMap[wvcResult.recommendation] || { icon: 'ℹ️', title: 'Recommendation' };
+
+        const card: MatchedStrategyCard = {
+            id: `wvc-recommendation-${Date.now()}`,
+            type: 'timing',
+            icon,
+            title,
+            description: wvcResult.reasoningLocalized?.[locale === 'zh-TW' ? 'zh' : locale] || wvcResult.reasoning,
+            priority: 85, // High priority for real-time timing advice
+            _debug_reason: `WVC Score: ${wvcResult.coefficient.toFixed(2)}, Recommendation: ${wvcResult.recommendation}`
+        };
+
+        return card;
     }
 
     /**

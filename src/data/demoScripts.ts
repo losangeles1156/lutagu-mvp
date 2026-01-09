@@ -37,22 +37,22 @@ export const demoScripts: Record<string, DemoScript> = {
             zh: '浅草寺这里人潮多到有点不舒服，附近有没有人少一点，但也能感受江户风情的地方？'
         },
         assistantResponse: {
-            ja: '浅草の喧騒を離れたいなら、**今戸神社**や**待乳山聖天**がおすすめです。\n\n隅田川沿いを少し歩くと、静かで落ち着いた下町の雰囲気を感じられますよ。特に今戸神社は「招き猫発祥の地」としても知られ、縁結びのパワースポットです。\n\nまた、川沿いのカフェで一休みするのも良いでしょう。',
-            en: 'If you want to escape the crowds of Asakusa, I recommend **Imado Shrine** or **Matsuchiyama Shoden**.\n\nA short walk along the Sumida River offers a quiet and calm "Shitamachi" (downtown) atmosphere. Imado Shrine is particularly famous as the birthplace of the "Maneki Neko" (beckoning cat) and is a power spot for matchmaking.\n\nTaking a break at a riverside cafe is also a great idea.',
-            'zh-TW': '如果您想避開淺草的人潮，我非常推薦**今戶神社**或**待乳山聖天**。\n\n沿著隅田川稍微走一段路，就能感受到寧靜且充滿「下町」風情的氛圍。特別是今戶神社，被認為是「招財貓的發源地」，也是求姻緣的能量景點。\n\n或者，在河邊的咖啡廳休息一下也是個不錯的選擇。',
-            zh: '如果您想避开浅草的人潮，我非常推荐**今户神社**或**待乳山圣天**。\n\n沿著隅田川稍微走一段路，就能感受到宁静且充满「下町」风情的氛围。特别是今户神社，被认为是「招财猫的发源地」，也是求姻缘的能量景点。\n\n或者，在河边的咖啡厅休息一下也是个不错的选择。'
+            ja: '浅草の混雑を避けたいなら、AIが雰囲気を分析して選んだ**根津神社**がおすすめです。\n\n「東京の伏見稲荷」とも呼ばれる千本鳥居があり、静かで歴史ある江戸の風情を色濃く残しています。\n\n**アクセス**：銀座線で上野広小路駅まで行き、そこからバスまたは徒歩で約15分です。浅草よりずっと静かですよ。',
+            en: 'If you want to avoid the crowds, matching the "Edo Vibe", I suggest **Nezu Shrine**.\n\nIt features a stunning path of "Senbon Torii" (thousand gates) similar to Kyoto\'s Fushimi Inari, offering a serene and historic atmosphere.\n\n**Access**: Take the Ginza Line to Ueno-hirokoji Station, then it\'s a short bus ride or 15-min walk.',
+            'zh-TW': '根據您對「江戶風情」與「避開人潮」的需求，我為您檢索到了最佳替代景點：**根津神社**。\n\n這裡擁有壯觀的紅色千本鳥居，被譽為「東京的伏見稻荷」，完整保留了江戶時代的靜謐與歷史感，遊客密度遠低於淺草。\n\n**交通方式**：建議從淺草站搭乘銀座線至**上野廣小路站**，再轉乘巴士或是散步約 15 分鐘即可抵達。',
+            zh: '根据您对「江户风情」与「避开人潮」的需求，我为您检索到了最佳替代景点：**根津神社**。\n\n这里拥有壮观的红色千本鸟居，被誉为「东京的伏见稻荷」，完整保留了江户时代的静谧与历史感，游客密度远低于浅草。\n\n**交通方式**：建议从浅草站搭乘银座线至**上野广小路站**，再转乘巴士或是散步约 15 分钟即可抵达。'
         },
         actions: [
             {
                 type: 'navigate',
-                label: { ja: '今戸神社へ行く', en: 'Go to Imado Shrine', 'zh-TW': '導航至今戶神社', zh: '导航至今户神社' },
-                target: 'imado_shrine',
-                metadata: { coordinates: [35.7185, 139.8028] } // Approx coords
+                label: { ja: '根津神社へ行く', en: 'Go to Nezu Shrine', 'zh-TW': '導航至根津神社', zh: '导航至根津神社' },
+                target: 'nezu_shrine',
+                metadata: { coordinates: [35.7202, 139.7593] }
             },
             {
                 type: 'discovery',
-                label: { ja: '川沿いのカフェを探す', en: 'Find riverside cafes', 'zh-TW': '尋找河邊咖啡廳', zh: '寻找河边咖啡厅' },
-                target: 'chat:尋找隅田川附近的咖啡廳'
+                label: { ja: '近くのカフェを探す', en: 'Find nearby cafes', 'zh-TW': '尋找谷根千咖啡廳', zh: '寻找谷根千咖啡厅' },
+                target: 'chat:尋找根津附近的古民家咖啡'
             }
         ],
         node: 'odpt.Station:TokyoMetro.Ginza.Asakusa'
@@ -66,16 +66,16 @@ export const demoScripts: Record<string, DemoScript> = {
             zh: '我要从东京车站去东京都厅看夜景，但听说中央线现在大误点，该怎么办？'
         },
         assistantResponse: {
-            ja: 'あわてないでください。中央線が遅れている場合、**東京メトロ丸ノ内線**が最適な代替ルートです。\n\n東京駅から「荻窪・新宿方面」行きに乗れば、乗り換えなしで**西新宿駅**まで行けます。そこから都庁までは地下道で直結しており、雨の日でも濡れずに移動できますよ。\n\n所要時間は約20分です。',
-            en: 'Don\'t panic. If the Chuo Line is delayed, the **Tokyo Metro Marunouchi Line** is your best alternative.\n\nTake the train bound for Ogikubo/Shinjuku from Tokyo Station, and you can get to **Nishi-Shinjuku Station** without transferring. From there, an underground passage connects directly to the Metropolitan Government Building, so you stay dry even if it rains.\n\nIt takes about 20 minutes.',
-            'zh-TW': '別擔心。如果中央線發生延誤，**東京地鐵丸之內線**是您的最佳替代方案。\n\n從東京車站搭乘往「荻窪・新宿方向」的列車，無需轉乘即可直達**西新宿站**。從那裡有地下通道直通都廳，即使下雨也不用擔心。\n\n車程大約 20 分鐘，且班次很頻繁。',
-            zh: '别担心。如果中央线发生延误，**东京地铁丸之内线**是您的最佳替代方案。\n\n从东京车站搭乘往「荻窪・新宿方向」的列车，无需转乘即可直达**西新宿站**。从那里有地下通道直通都厅，即使下雨也不用担心。\n\n车程大约 20 分钟，且班次很频繁。'
+            ja: '中央線が遅延している場合、山手線への振替輸送も考えられますが、混雑度と乗換の快適性（TPI指標）を考慮すると、**東京メトロ丸ノ内線**がベストです。\n\n時間は少しかかりますが、**西新宿駅**まで一本で行けて、新宿駅の複雑な乗り換えを回避できます。地下通路で都庁直結なので快適です。',
+            en: 'While you could take the Yamanote Line, considering the **Transfer Pain Index (TPI)** and current congestion, I recommend the **Marunouchi Line** instead.\n\nTake it towards Ogikubo to **Nishi-Shinjuku Station**. It avoids the complex transfer maze at Shinjuku Station and connects directly to the Gov Building via underground passage.',
+            'zh-TW': '別擔心。原本搭乘中央線最快，但既然發生誤點，我為您評估了替代路線。\n\n考慮到**轉乘辛苦指標 (TPI)** 與新宿站目前的擁擠程度，我不建議改搭山手線，而是推薦您改搭 **東京地鐵丸之內線**。\n\n雖然會多花幾分鐘，但您可以直達 **西新宿站**，既能避開新宿站的大迷宮，出站後還有地下道直通都廳。這是目前最輕鬆穩定的選擇。',
+            zh: '别担心。原本搭乘中央线最快，但既然发生误点，我为您评估了替代路线。\n\n考虑到**转乘辛苦指标 (TPI)** 与新宿站目前的拥挤程度，我不建议改搭山手线，而是推荐您改搭 **东京地铁丸之内线**。\n\n虽然会多花几分钟，但这您可以直达 **西新宿站**，既能避开新宿站的大迷宫，出站后还有地下道直通都厅。这是目前最轻松稳定的选择。'
         },
         actions: [
             {
                 type: 'process',
-                label: { ja: '丸ノ内線のルートを見る', en: 'View Marunouchi Route', 'zh-TW': '查看丸之內線路線', zh: '查看丸之内线路线' },
-                target: 'route:tokyo_to_tocho'
+                label: { ja: '丸ノ内線のルート', en: 'Marunouchi Route', 'zh-TW': '查看丸之內線路線', zh: '查看丸之内线路线' },
+                target: 'route:tokyo_to_tocho_marunouchi'
             },
             {
                 type: 'discovery',

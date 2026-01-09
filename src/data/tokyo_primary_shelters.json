@@ -1,0 +1,177 @@
+[
+    {
+        "id": "shelter_chiyoda",
+        "name": {
+            "ja": "千代田区役所",
+            "en": "Chiyoda Annual Office",
+            "zh": "千代田區役所"
+        },
+        "wardCode": "13101",
+        "wardName": "Chiyoda",
+        "address": "千代田区九段南1-2-1",
+        "coordinates": {
+            "lat": 35.6940,
+            "lng": 139.7536
+        },
+        "suitableFor": [
+            "heavy_rain",
+            "snow",
+            "earthquake"
+        ],
+        "altitude": 10,
+        "facilities": {
+            "hasToilet": true,
+            "hasBedding": true,
+            "hasFood": true,
+            "isAccessible": true
+        },
+        "source": "manual_mvp",
+        "lastUpdated": "2026-01-09T12:00:00Z"
+    },
+    {
+        "id": "shelter_chuo",
+        "name": {
+            "ja": "中央区役所",
+            "en": "Chuo Ward Office",
+            "zh": "中央區役所"
+        },
+        "wardCode": "13102",
+        "wardName": "Chuo",
+        "address": "中央区築地1-1-1",
+        "coordinates": {
+            "lat": 35.6705,
+            "lng": 139.7719
+        },
+        "suitableFor": [
+            "heavy_rain",
+            "snow",
+            "earthquake"
+        ],
+        "altitude": 2,
+        "facilities": {
+            "hasToilet": true,
+            "hasBedding": true,
+            "hasFood": true,
+            "isAccessible": true
+        },
+        "source": "manual_mvp",
+        "lastUpdated": "2026-01-09T12:00:00Z"
+    },
+    {
+        "id": "shelter_minato",
+        "name": {
+            "ja": "港区スポーツセンター",
+            "en": "Minato City Sports Center",
+            "zh": "港區運動中心"
+        },
+        "wardCode": "13103",
+        "wardName": "Minato",
+        "address": "港区芝浦1-16-1",
+        "coordinates": {
+            "lat": 35.6475,
+            "lng": 139.7516
+        },
+        "suitableFor": [
+            "heavy_rain",
+            "snow",
+            "earthquake"
+        ],
+        "altitude": 4,
+        "facilities": {
+            "hasToilet": true,
+            "hasBedding": true,
+            "hasFood": true,
+            "isAccessible": true
+        },
+        "source": "manual_mvp",
+        "lastUpdated": "2026-01-09T12:00:00Z"
+    },
+    {
+        "id": "shelter_shinjuku",
+        "name": {
+            "ja": "新宿コズミックセンター",
+            "en": "Shinjuku Cosmic Center",
+            "zh": "新宿宇宙中心"
+        },
+        "wardCode": "13104",
+        "wardName": "Shinjuku",
+        "address": "新宿区大久保3-1-2",
+        "coordinates": {
+            "lat": 35.7051,
+            "lng": 139.7077
+        },
+        "suitableFor": [
+            "heavy_rain",
+            "snow",
+            "earthquake"
+        ],
+        "altitude": 30,
+        "facilities": {
+            "hasToilet": true,
+            "hasBedding": true,
+            "hasFood": true,
+            "isAccessible": true
+        },
+        "source": "manual_mvp",
+        "lastUpdated": "2026-01-09T12:00:00Z"
+    },
+    {
+        "id": "shelter_shibuya",
+        "name": {
+            "ja": "渋谷区役所",
+            "en": "Shibuya Ward Office",
+            "zh": "澀谷區役所"
+        },
+        "wardCode": "13113",
+        "wardName": "Shibuya",
+        "address": "渋谷区宇田川町1-1",
+        "coordinates": {
+            "lat": 35.6640,
+            "lng": 139.6980
+        },
+        "suitableFor": [
+            "heavy_rain",
+            "snow",
+            "earthquake"
+        ],
+        "altitude": 30,
+        "facilities": {
+            "hasToilet": true,
+            "hasBedding": true,
+            "hasFood": true,
+            "isAccessible": true
+        },
+        "source": "manual_mvp",
+        "lastUpdated": "2026-01-09T12:00:00Z"
+    },
+    {
+        "id": "shelter_koto",
+        "name": {
+            "ja": "江東区防災センター",
+            "en": "Koto City Disaster Prevention Center",
+            "zh": "江東區防災中心"
+        },
+        "wardCode": "13108",
+        "wardName": "Koto",
+        "address": "江東区南砂2-1-1",
+        "coordinates": {
+            "lat": 35.6729,
+            "lng": 139.8173
+        },
+        "suitableFor": [
+            "heavy_rain",
+            "snow",
+            "earthquake",
+            "flood"
+        ],
+        "altitude": 0,
+        "facilities": {
+            "hasToilet": true,
+            "hasBedding": true,
+            "hasFood": true,
+            "isAccessible": true
+        },
+        "source": "manual_mvp",
+        "lastUpdated": "2026-01-09T12:00:00Z"
+    }
+]

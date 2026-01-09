@@ -34,7 +34,9 @@ const RecommendRequestSchema = z.object({
     stationId: z.string().min(1, 'stationId is required'),
     lineIds: z.array(z.string()).optional(),
     userPreferences: UserPreferencesSchema,
-    locale: z.enum(['zh-TW', 'ja', 'en']).optional().default('zh-TW')
+    locale: z.enum(['zh-TW', 'ja', 'en']).optional().default('zh-TW'),
+    waitMinutes: z.number().optional(),
+    destinationValue: z.number().min(1).max(10).optional()
 });
 
 // Custom Error Classes
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
             throw new ValidationError('Invalid request parameters', parseResult.error.issues);
         }
 
-        const { stationId, lineIds, userPreferences, locale } = parseResult.data;
+        const { stationId, lineIds, userPreferences, locale, waitMinutes, destinationValue } = parseResult.data;
 
         // Normalize userPreferences with defaults to satisfy UserPreferences type
         const normalizedPreferences = {
@@ -97,7 +99,9 @@ export async function POST(req: NextRequest) {
             lineIds: lineIds || [],
             userPreferences: normalizedPreferences,
             currentDate: new Date(),
-            locale
+            locale,
+            waitMinutes,
+            destinationValue
         };
 
         console.log('[L4 API] Evaluating for:', context.stationId);

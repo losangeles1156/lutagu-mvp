@@ -1,0 +1,113 @@
+{
+    "id": "snow_safety_zh",
+    "topic": "snow_safety",
+    "title": {
+        "ja": "雪の日の安全ガイド",
+        "en": "Snow Day Safety Guide",
+        "zh": "雪天安全須知"
+    },
+    "icon": "❄️",
+    "triggerConditions": {
+        "disasterTypes": [
+            "snow"
+        ],
+        "alertLevels": [
+            "advisory",
+            "warning",
+            "special_emergency"
+        ],
+        "userLocales": [
+            "zh-TW",
+            "zh"
+        ],
+        "weatherConditions": [
+            "snow"
+        ]
+    },
+    "sections": [
+        {
+            "title": {
+                "ja": "交通への影響",
+                "en": "Transport Impact",
+                "zh": "交通影響"
+            },
+            "content": {
+                "ja": "大雪時、JRや地下鉄は6時間以上停止する可能性があります。食料と水を確保してください。",
+                "en": "During heavy snow, JR and Metro may halt for 6+ hours. Secure food and water.",
+                "zh": "大雪期間，JR 與地鐵可能停運超過 6 小時。請確保有食物與飲水。"
+            },
+            "icon": "🚃"
+        },
+        {
+            "title": {
+                "ja": "路面凍結に注意",
+                "en": "Slippery Roads Warning",
+                "zh": "路面濕滑警告"
+            },
+            "content": {
+                "ja": "積雪が溶けて凍ると「アイスバーン」になります。滑り止め靴を着用してください。",
+                "en": "Melted snow refreezes into 'ice burn'. Wear anti-slip shoes.",
+                "zh": "積雪融化後會結冰（アイスバーン）。請穿著防滑鞋，小步行走。"
+            },
+            "icon": "🧊"
+        },
+        {
+            "title": {
+                "ja": "低体温症に注意",
+                "en": "Hypothermia Risk",
+                "zh": "低溫症風險"
+            },
+            "content": {
+                "ja": "戸外で30分以上過ごさないでください。手袋と帽子を着用してください。",
+                "en": "Do not stay outdoors for more than 30 minutes. Wear gloves and hat.",
+                "zh": "請勿在戶外停留超過 30 分鐘。請穿著保暖衣物、手套與帽子。"
+            },
+            "icon": "🥶"
+        }
+    ],
+    "relatedLinks": [
+        {
+            "label": {
+                "ja": "JR東日本 運行情報",
+                "en": "JR East Service Status",
+                "zh": "JR 東日本運行狀態"
+            },
+            "url": "https://traininfo.jreast.co.jp/"
+        },
+        {
+            "label": {
+                "ja": "東京メトロ 運行情報",
+                "en": "Tokyo Metro Service Status",
+                "zh": "東京 Metro 運行狀態"
+            },
+            "url": "https://www.tokyometro.jp/unkou/"
+        },
+        {
+            "label": {
+                "ja": "最寄りの避難所を探す",
+                "en": "Find Nearest Shelter",
+                "zh": "尋找最近避難所"
+            },
+            "url": "https://map.bosai.metro.tokyo.lg.jp/"
+        }
+    ],
+    "emergencyContacts": [
+        {
+            "label": "警察 Police",
+            "phone": "110"
+        },
+        {
+            "label": "急救 Emergency",
+            "phone": "119"
+        },
+        {
+            "label": {
+                "ja": "観光案内 (多言語)",
+                "en": "Tourist Helpline (Multilingual)",
+                "zh": "旅遊熱線 (多語言)"
+            },
+            "phone": "03-5321-3077"
+        }
+    ],
+    "lastUpdated": "2026-01-09"
+}

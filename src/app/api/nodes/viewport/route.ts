@@ -59,6 +59,126 @@ function parseLocation(loc: any): { coordinates: [number, number] } {
     return { coordinates: [0, 0] };
 }
 
+/**
+ * Parse node ID to extract operator and station name
+ * Format: odpt.Station:{Operator}.{Line}.{StationName} or odpt.Station:{Operator}.{StationName}
+ */
+function parseNodeId(id: string): { operator: string; stationName: string; line?: string } | null {
+    if (!id || !id.startsWith('odpt.Station:')) return null;
+
+    const parts = id.replace('odpt.Station:', '').split('.');
+    if (parts.length < 2) return null;
+
+    const operator = parts[0];
+    // If 3+ parts, format is Operator.Line.StationName
+    // If 2 parts, format is Operator.StationName
+    if (parts.length >= 3) {
+        return {
+            operator,
+            line: parts[1],
+            stationName: parts.slice(2).join('.') // Handle station names with dots
+        };
+    } else {
+        return {
+            operator,
+            stationName: parts[1]
+        };
+    }
+}
+
+/**
+ * Through-service priority map: station name (LOWERCASE) -> primary operator
+ * For stations shared between operators via through-service, only show the primary operator
+ */
+const THROUGH_SERVICE_PRIMARY_OPERATOR: Record<string, string> = {
+    // Tokyo Metro <-> Tokyu through-service
+    'nakameguro': 'Tokyu',
+    'denenchofu': 'Tokyu',
+    'kikuna': 'Tokyu',
+
+    // Tokyo Metro <-> Seibu through-service  
+    'kotakemukaihara': 'TokyoMetro',
+    'nerimakasugacho': 'TokyoMetro',
+
+    // Tokyo Metro <-> Tobu through-service
+    'wakoshi': 'TokyoMetro',
+
+    // Toei <-> Keikyu through-service
+    'sengakuji': 'Toei',
+
+    // Add more as needed based on actual through-service arrangements
+};
+
+/**
+ * Operator display priority (lower = higher priority for co-located stations)
+ * Used when multiple operators have stations at the same location
+ */
+const OPERATOR_PRIORITY: Record<string, number> = {
+    'JR-East': 1,
+    'TokyoMetro': 2,
+    'Toei': 3,
+    'Tokyu': 4,
+    'Keio': 5,
+    'Odakyu': 6,
+    'Seibu': 7,
+    'Tobu': 8,
+    'Keisei': 9,
+    'Keikyu': 10,
+    'TWR': 11,
+    'Yurikamome': 12,
+    'TokyoMonorail': 13
+};
+
+/**
+ * Deduplicate nodes by (Operator, StationName) - same operator different lines = 1 node
+ * Also applies through-service logic to hide secondary operator nodes
+ */
+function deduplicateByOperatorStation<T extends { id: string; location: { coordinates: [number, number] } }>(
+    nodes: T[]
+): T[] {
+    const seen = new Map<string, T>(); // key: "operator:stationName"
+    const stationOperators = new Map<string, Set<string>>(); // key: stationName, value: set of operators
+
+    // First pass: collect all operators per station name
+    for (const node of nodes) {
+        const parsed = parseNodeId(node.id);
+        if (!parsed) {
+            // Non-ODPT nodes, keep as-is
+            seen.set(node.id, node);
+            continue;
+        }
+
+        const operators = stationOperators.get(parsed.stationName) || new Set();
+        operators.add(parsed.operator);
+        stationOperators.set(parsed.stationName, operators);
+    }
+
+    // Second pass: deduplicate
+    for (const node of nodes) {
+        const parsed = parseNodeId(node.id);
+        if (!parsed) continue;
+
+        const { operator, stationName } = parsed;
+
+        // Check through-service priority (use lowercase for case-insensitive matching)
+        const primaryOperator = THROUGH_SERVICE_PRIMARY_OPERATOR[stationName.toLowerCase()];
+        if (primaryOperator && operator !== primaryOperator) {
+            // This station has a designated primary operator, and this node is not it
+            // Skip this node (it will be represented by the primary operator's node)
+            continue;
+        }
+
+        // Deduplicate by (operator, stationName)
+        const key = `${operator}:${stationName}`;
+        if (!seen.has(key)) {
+            seen.set(key, node);
+        }
+        // If already seen, skip (first occurrence wins, which is usually the main line)
+    }
+
+    return Array.from(seen.values());
+}
+
 function getFallbackNodes() {
     return SEED_NODES.map((n: any) => {
         const location = parseLocation(n.location);
@@ -195,13 +315,14 @@ export async function GET(req: Request) {
     const requestedPageSize = Math.floor(toNumber(url.searchParams.get('page_size')) ?? defaultPageSize);
     const pageSize = clamp(requestedPageSize, 50, 1000);
 
-    // [DISABLED] hubsOnly filter was causing nodes to be hidden
-    // const hubsOnlyParam = url.searchParams.get('hubs_only');
-    // const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
-    const hubsOnly = false; // Force show all nodes
+    // [RESTORED] hubsOnly filter: show only hubs at low zoom for performance and visual clarity
+    // This ensures same-operator stations are grouped as single nodes
+    const hubsOnlyParam = url.searchParams.get('hubs_only') ?? url.searchParams.get('hubsOnly');
+    const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
 
-    // [NEW] Ward-based query support
+    // [DISABLED] Ward-based filtering relaxed per user request
     const wardId = url.searchParams.get('ward_id');
+    const coreOnly = false; // Disabled: url.searchParams.get('coreOnly') === 'true' || url.searchParams.get('core_only') === 'true';
     const showStationsOnly = url.searchParams.get('stations_only') === '1';
 
     const minLat = Math.min(swLat, neLat);
@@ -321,6 +442,31 @@ export async function GET(req: Request) {
             if (lat === 0 && lon === 0) return false;
             if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
 
+            // [FIX] Ward/Core filtering disabled by user request to ensure node visibility.
+            // We rely on the viewport bounds and pageSize limit for performance.
+            /*
+            if (wardId) {
+                if (n.ward_id === 'ward:airport') {
+                    // Always show airports
+                } else if (n.ward_id !== wardId) {
+                    return false;
+                }
+            }
+
+            if (coreOnly) {
+                const isAirport = n.ward_id === 'ward:airport';
+                const isCoreWard = n.ward_id && [
+                    'ward:chiyoda', 'ward:chuo', 'ward:minato', 'ward:shinjuku', 'ward:bunkyo', 
+                    'ward:taito', 'ward:sumida', 'ward:koto', 'ward:shinagawa', 'ward:meguro', 'ward:shibuya'
+                ].includes(n.ward_id);
+                
+                // Keep if Airport, Core Ward, or Unknown (FAIL OPEN)
+                if (!isAirport && !isCoreWard && n.ward_id) {
+                    return false;
+                }
+            }
+            */
+
             // [NEW] Filter out non-station nodes (bus stops, POIs, etc.)
             const nodeType = n.type;
             const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
@@ -329,7 +475,6 @@ export async function GET(req: Request) {
             }
 
             // [FIX] When hubsOnly is true, only show actual station hubs (not standalone non-hubs)
-            // Bus stops have is_hub=true but are not stations - already filtered above
             if (hubsOnly && !n.is_hub) return false;
 
             return true;
@@ -389,7 +534,9 @@ export async function GET(req: Request) {
         return out;
     }
 
-    const deduplicated = filtered;
+    // [NEW] Apply operator+station deduplication to reduce same-operator different-line duplicates
+    const deduplicatedByOperator = deduplicateByOperatorStation(filtered);
+    const deduplicated = deduplicatedByOperator;
 
     // Implement truncation to respect maxDataSizeKb
     // A rough estimation: each node is about 0.4KB to 0.6KB in JSON

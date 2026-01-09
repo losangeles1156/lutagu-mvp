@@ -212,7 +212,11 @@
             "finance": "金融",
             "accommodation": "住宿",
             "service": "服務",
-            "business": "商務"
+            "business": "商務",
+            "historic": "歷史",
+            "mall": "購物中心",
+            "souvenir": "伴手禮",
+            "bento": "便當"
         }
     },
     "l2": {
@@ -276,6 +280,10 @@
         "rent": "租借",
         "available": "可借用",
         "quickLinks": "快速連結",
+        "items": "項",
+        "toiletVacancy": "廁所空位提示",
+        "toiletVacancyDesc": "VACAN 即時察看",
+        "travelServices": "旅遊服務",
         "categories": {
             "toilet": "廁所",
             "locker": "置物櫃",
@@ -581,7 +589,7 @@
         "retrySend": "重試傳送",
         "emptyTitle": "有什麼可以幫您？",
         "emptyDescription": "詢問路線、即時狀態或無障礙設施",
-        "quickQuestions": "快速問題",
+        "quickQuestionsTitle": "快速問題",
         "intent": {
             "route": "路線",
             "status": "狀態",

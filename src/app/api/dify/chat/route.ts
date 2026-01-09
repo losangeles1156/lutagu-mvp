@@ -45,15 +45,13 @@ export async function POST(req: NextRequest) {
         const difyPayload = {
             inputs: {
                 ...rawInputs,
+                // Simplified Context Parameters (User Requested "Max 2" + Locale)
                 user_profile: (rawInputs as any).user_profile || 'general',
-                user_context: normalizedUserContext,
-                current_station: (rawInputs as any).current_station || '',
                 station_name: (rawInputs as any).station_name || '',
-                lat: (rawInputs as any).lat ?? null,
-                lng: (rawInputs as any).lng ?? null,
-                selected_need: (rawInputs as any).selected_need || null,
-                locale: (rawInputs as any).locale || 'zh-TW',
-                zone: (rawInputs as any).zone || 'core'
+                locale: (rawInputs as any).locale || 'zh-TW'
+
+                // Removed to reduce latency:
+                // user_context, current_station, selected_need, lat, lng, zone
             },
             query,
             response_mode,
@@ -71,7 +69,7 @@ export async function POST(req: NextRequest) {
                 user: difyPayload.user,
                 conversation_id: difyPayload.conversation_id
             });
-            
+
             difyResponse = await fetch(`${DIFY_API_BASE}/chat-messages`, {
                 method: 'POST',
                 headers: {

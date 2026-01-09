@@ -23,7 +23,7 @@ export interface NodeDatum {
     updated_at?: number;  // Unix timestamp (milliseconds) for version control
     version?: number;     // Incremental version number
     data_hash?: string;   // SHA-256 hash of node data for change detection
-    ward_id?: string;     // Ward/行政區 ID for ward-based node grouping
+    ward_id?: string | null;     // Ward/行政區 ID for ward-based node grouping
 }
 
 /**

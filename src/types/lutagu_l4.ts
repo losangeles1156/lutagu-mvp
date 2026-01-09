@@ -118,6 +118,10 @@ export interface EvaluationContext {
     userPreferences: UserPreferences;
     currentDate: Date;
     locale: 'zh-TW' | 'ja' | 'en';
+    
+    // Optional WVC Factors
+    waitMinutes?: number;
+    destinationValue?: number; // 1-10 (1=casual, 10=critical meeting)
 }
 
 export interface RecommendRequest {

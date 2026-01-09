@@ -12,20 +12,20 @@ export function EmptyState({ onSend }: EmptyStateProps) {
     const t = useTranslations('chat');
 
     const quickQuestions = [
-        { 
-            icon: Clock, 
-            text: t('quickQuestions.status.text'), 
-            label: t('quickQuestions.status.label') 
+        {
+            icon: Clock,
+            text: t('quickQuestions.status.text'),
+            label: t('quickQuestions.status.label')
         },
-        { 
-            icon: Accessibility, 
-            text: t('quickQuestions.accessibility.text'), 
-            label: t('quickQuestions.accessibility.label') 
+        {
+            icon: Accessibility,
+            text: t('quickQuestions.accessibility.text'),
+            label: t('quickQuestions.accessibility.label')
         },
-        { 
-            icon: Compass, 
-            text: t('quickQuestions.route.text'), 
-            label: t('quickQuestions.route.label') 
+        {
+            icon: Compass,
+            text: t('quickQuestions.route.text'),
+            label: t('quickQuestions.route.label')
         }
     ];
 
@@ -36,9 +36,9 @@ export function EmptyState({ onSend }: EmptyStateProps) {
             </div>
             <h3 className="text-lg font-black text-slate-900 mb-2">{t('emptyTitle')}</h3>
             <p className="text-sm text-slate-500 mb-6 max-w-[240px]">{t('emptyDescription')}</p>
-            
+
             <div className="w-full max-w-[280px] space-y-2">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">{t('quickQuestions')}</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">{t('quickQuestionsTitle')}</p>
                 {quickQuestions.map((q, idx) => (
                     <button
                         key={idx}

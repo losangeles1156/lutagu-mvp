@@ -212,7 +212,11 @@
             "finance": "Finance",
             "accommodation": "Accommodation",
             "service": "Service",
-            "business": "Business"
+            "business": "Business",
+            "historic": "Historic",
+            "mall": "Mall",
+            "souvenir": "Souvenir",
+            "bento": "Bento"
         }
     },
     "l2": {
@@ -278,6 +282,9 @@
         "available": "Available",
         "quickLinks": "Quick Links",
         "items": "Items",
+        "toiletVacancy": "Restroom Vacancy",
+        "toiletVacancyDesc": "VACAN Real-time Check",
+        "travelServices": "Travel Services",
         "categories": {
             "toilet": "Restroom",
             "locker": "Lockers",
@@ -567,7 +574,21 @@
         "retrySend": "Retry",
         "emptyTitle": "How can I help you?",
         "emptyDescription": "Ask about routes, live status, or accessibility",
-        "quickQuestions": "Quick questions",
+        "quickQuestionsTitle": "Quick questions",
+        "quickQuestions": {
+            "status": {
+                "text": "Is the Ginza Line delayed right now?",
+                "label": "Service Status"
+            },
+            "accessibility": {
+                "text": "Do Ueno Station exits have elevators?",
+                "label": "Accessibility"
+            },
+            "route": {
+                "text": "Fastest way from Asakusa to Tokyo Station?",
+                "label": "Route Planning"
+            }
+        },
         "intent": {
             "route": "Route",
             "status": "Status",
