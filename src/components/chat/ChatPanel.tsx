@@ -75,7 +75,7 @@ export function ChatPanel() {
     const [input, setInput] = useState('');
     const [aiMessages, setAiMessages] = useState<any[]>([]);
 
-    // Manual Chat Implementation (Bypassing broken SDK hook)
+    // Manual Chat Implementation with HybridEngine Fast Path
     const [isLoading, setIsLoading] = useState(false);
 
     const sendMessage = async (payload: { role: string; content: string } | string, options?: any) => {
@@ -87,9 +87,42 @@ export function ChatPanel() {
 
         // Optimistic Update
         setAiMessages(prev => [...prev, userMsg]);
-        // Also update store for demo mode compatibility if needed (but we prioritized AI mode)
 
         try {
+            // === STEP 1: Try HybridEngine Fast Path (Level 1/2) ===
+            const hybridResponse = await fetch('/api/agent/hybrid', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text,
+                    locale,
+                    context: {
+                        currentStation: currentNodeId || '',
+                        userId: difyUserId
+                    }
+                })
+            });
+
+            if (hybridResponse.ok) {
+                const hybridResult = await hybridResponse.json();
+
+                // If HybridEngine handled it (Level 1 or Level 2)
+                if (hybridResult && !hybridResult.passToLLM && hybridResult.content) {
+                    console.log('[ChatPanel] HybridEngine fast path:', hybridResult.source);
+                    const aiMsgId = (Date.now() + 1).toString();
+                    setAiMessages(prev => [...prev, {
+                        id: aiMsgId,
+                        role: 'assistant',
+                        content: hybridResult.content,
+                        source: hybridResult.source // template, algorithm, poi_tagged, knowledge
+                    }]);
+                    setIsLoading(false);
+                    return; // Fast path complete!
+                }
+            }
+
+            // === STEP 2: Fall through to Dify Agent (Level 3) ===
+            console.log('[ChatPanel] Falling through to Dify Agent');
             const response = await fetch('/api/agent/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -110,7 +143,7 @@ export function ChatPanel() {
 
             if (!response.body) throw new Error('No response body');
 
-            // Initialize AI Message
+            // Initialize AI Message for streaming
             const aiMsgId = (Date.now() + 1).toString();
             setAiMessages(prev => [...prev, { id: aiMsgId, role: 'assistant', content: '' }]);
 
@@ -131,11 +164,9 @@ export function ChatPanel() {
             }
 
         } catch (error: any) {
-            console.error('Manual Chat Error:', error);
+            console.error('Chat Error:', error);
             const msg = error.message || 'Connection Failed';
             showToast?.(msg, 'error');
-            alert('Error: ' + msg); // Emergency visible error
-            // Remove the failed user message or mark error? for now let it be.
         } finally {
             setIsLoading(false);
         }
