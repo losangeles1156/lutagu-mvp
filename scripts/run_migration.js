@@ -1,13 +1,14 @@
 const { Pool } = require('pg');
 const { readFileSync } = require('fs');
 const { join } = require('path');
+require('dotenv').config({ path: join(__dirname, '../.env.local') });
 
 const pool = new Pool({
-  host: 'evubeqeaafdjnuocyhmb.supabase.co',
-  database: 'postgres',
-  user: 'postgres',
-  password: 'sb_secret_DM67oQWGbhFDbiU269BrWA_h-2oUfHj',
-  port: 5432,
+  host: process.env.DATABASE_HOST || 'localhost',
+  database: process.env.DATABASE_NAME || 'postgres',
+  user: process.env.DATABASE_USER || 'postgres',
+  password: process.env.DATABASE_PASSWORD || '',
+  port: parseInt(process.env.DATABASE_PORT || '5432', 10),
   ssl: { rejectUnauthorized: false }
 });
 

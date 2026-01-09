@@ -11,8 +11,8 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABAS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const TOKENS = {
-    CHALLENGE: 'cned75kfykj8zgzggi9b5w98hxxhk57hz8k30w1iq5dqwgzje0otmwodvogurrd3',
-    STANDARD: 'ntf1ryl3xiy9lgmf5qsyef04xa9pl8jfx01l669mjtoru6s3xi3zd6xt7kqn19iw'
+    CHALLENGE: process.env.ODPT_CHALLENGE_TOKEN || process.env.ODPT_API_TOKEN_BACKUP || '',
+    STANDARD: process.env.ODPT_STANDARD_TOKEN || process.env.ODPT_API_TOKEN || ''
 };
 
 const OPERATORS = [

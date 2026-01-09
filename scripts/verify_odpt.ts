@@ -67,8 +67,8 @@ async function verify() {
     await testNoToken();
 
     console.log('\n--- Testing Tokyo Metro (User Provided URL) ---');
-    // User provided: https://api.odpt.org/api/v4/odpt:Station?odpt:operator=odpt.Operator:TokyoMetro&acl:consumerKey=...
-    const metroToken = 'ntf1ryl3xiy9lgmf5qsyef04xa9pl8jfx01l669mjtoru6s3xi3zd6xt7kqn19iw';
+    // Use environment variable for Metro token
+    const metroToken = process.env.ODPT_METRO_TOKEN || process.env.ODPT_API_TOKEN || '';
     const metroUrl = `https://api.odpt.org/api/v4/odpt:Station?odpt:operator=odpt.Operator:TokyoMetro&acl:consumerKey=${metroToken}`;
 
     console.log(`[Metro] Fetching: ${metroUrl.replace(metroToken, '***')}`);
@@ -85,8 +85,8 @@ async function verify() {
     }
 
     console.log('\n--- Testing JR East (Challenge API) ---');
-    // User provided: https://api-challenge.odpt.org/api/v4/... keys=8q0zb...
-    const jrToken = '8q0zbz99brwjt46mowbqs2e15ebiajv0d5f9qbjd4ndids493s1vta30bxmcjbgg';
+    // Use environment variable for JR token
+    const jrToken = process.env.ODPT_JR_TOKEN || process.env.ODPT_API_TOKEN_BACKUP || '';
     const jrUrl = `https://api-challenge.odpt.org/api/v4/odpt:Station?odpt:operator=odpt.Operator:JR-East&acl:consumerKey=${jrToken}`;
     console.log(`[JR-East] Fetching: ${jrUrl.replace(jrToken, '***')}`);
     try {

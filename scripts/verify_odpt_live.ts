@@ -8,8 +8,8 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
-// Try NEW Challenge Key
-const ODPT_API_KEY = 'r6tnd0rua4rv978tn74r7a901kec30zoy8r6kzgq0pl7zcq3avzmao5gcyw8c6co';
+// Use environment variable instead of hardcoded key
+const ODPT_API_KEY = process.env.ODPT_API_TOKEN || process.env.ODPT_API_KEY || '';
 const ODPT_BASE_URL = 'https://api.odpt.org/api/v4';
 
 async function fetchLiveTrainInfo() {
