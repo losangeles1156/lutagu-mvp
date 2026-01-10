@@ -84,42 +84,41 @@ interface GeminiParams extends LLMParams {
 }
 
 async function generateGeminiResponse(params: GeminiParams): Promise<string | null> {
-    const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-3-flash-preview' } = params;
-    // Map 'gemini-2.5-flash-lite' to actual model name if known, currently using preview for 2.5 if available or fallback
-    // Since 2.5 might not be public API yet, we stick to 1.5-flash or 3-flash-preview as "Fast" models
-    // User requested "gemini-2.5-flash-lite", let's assume it matches 'gemini-2.0-flash-lite-preview' or similar logic
-    // For safety, defaulting to 1.5-flash or 3-flash logic
+    const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-2.5-flash-lite' } = params;
 
-    // Note: Adjust model version based on actual API availability. 
-    // Assuming 'gemini-2.0-flash-exp' or similar for "2.5" placeholder if needed, 
-    // but for now let's use the valid `gemini-1.5-flash` as the "Lite" equivalent until 2.5 is confirmed.
-    // User explicitly asked for "gemini-3-flash-preview" and "gemini-2.5-flash-lite".
-
-    const targetModel = model === 'gemini-2.5-flash-lite' ? 'gemini-1.5-flash' : model;
+    // Fallback: If 1.5 is requested but not supported, swap to 2.5-lite
+    let targetModel = model;
+    if (model === 'gemini-1.5-flash') targetModel = 'gemini-2.5-flash-lite';
+    if (model === 'gemini-3-flash-preview') targetModel = 'gemini-2.5-flash'; // Fallback if 3 is unstable
 
     try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        // Zeabur AI Hub (Tokyo Node) - OpenAI Compatible
+        const endpoint = `https://hnd1.aihub.zeabur.ai/v1/chat/completions`;
+
+        const res = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`
+            },
             body: JSON.stringify({
-                contents: [{
-                    parts: [
-                        { text: `System: ${systemPrompt}` },
-                        { text: `User: ${userPrompt}` }
-                    ]
-                }],
-                generationConfig: { temperature }
+                model: targetModel,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature
             })
         });
 
         if (!res.ok) {
-            const err = await res.text();
-            console.error(`Gemini API Error (${targetModel}):`, err);
+            const errText = await res.text();
+            console.error(`Gemini API Error (${targetModel}):`, res.status, errText);
             return null;
         }
 
         const data: any = await res.json();
-        return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        return data?.choices?.[0]?.message?.content || null;
     } catch (error) {
         console.error('Gemini API Failed:', error);
         return null;

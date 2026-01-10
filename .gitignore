@@ -70,3 +70,4 @@ public/workbox-*.js
 **/secrets/**
 *.bak
 *.bak
+!scripts/benchmark_hybrid_performance.ts

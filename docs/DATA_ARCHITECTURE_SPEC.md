@@ -34,14 +34,15 @@ This document outlines the tiered data architecture and the ETL (Extract, Transf
 
 ### L4: Expert Knowledge & Insights
 *   **Purpose**: Human-curated tips, warnings, and complex transfer guides for RAG.
-*   **Primary Table**: `l4_knowledge_v2`
+*   **Primary Table**: `l4_knowledge_embeddings` (and `l4_knowledge_v2`)
 *   **Schema Highlights**:
-    *   `node_id`: Associated station or location ID.
+    *   `entity_id`: Associated station or location ID (ODPT format).
     *   `knowledge_type`: 'hub_station', 'railway_line', 'general'.
-    *   `tag_category`: e.g., 'tip', 'warning', 'transfer'.
+    *   `category`: e.g., 'tip', 'warning', 'transfer'.
     *   `content`: Detailed text in UTF-8.
-    *   `embedding`: Vector data for semantic search (pgvector).
-*   **Data Source**: Scraped articles, expert markdown files, and manual entries.
+    *   `embedding`: Vector data for semantic search (pgvector, 1024 dimensions for Mistral).
+    *   `source`: URL of the original article.
+*   **Data Source**: Scraped articles from Tokyo LetsgoJP and Matcha JP, expert markdown files.
 
 ---
 
@@ -59,19 +60,26 @@ This document outlines the tiered data architecture and the ETL (Extract, Transf
 3.  **Load**: Stores into `stations_static` and `routes`.
 *   *Scripts*: `scripts/etl_odpt_knowledge.ts`, `scripts/l3_fill_toilets.ts`, `scripts/l3_fill_accessibility.ts`.
 
-### 2.3 L4 Pipeline (Knowledge Ingestion)
-1.  **Extract**: Scrapes travel websites or reads local markdown files.
-2.  **Transform**: Extracts entities (stations), categorizes content, and generates vector embeddings using OpenAI/Cohere models.
-3.  **Load**: Upserts into `l4_knowledge_v2`.
-*   *Scripts*: `scripts/ingest_l4_markdown.ts`, `scripts/crawler/` (New crawler framework).
+### 2.3 L4 Crawler & Ingestion Pipeline
+1.  **Crawl**: Uses Puppeteer for dynamic rendering of travel articles.
+2.  **Extract**: Identifies station entities using a predefined mapping (`STATION_MAPPING`).
+3.  **Transform**:
+    *   L1: Stores raw page structure and metadata.
+    *   L4: Summarizes content and categorizes it (tip, warning, transfer).
+4.  **Load**: Upserts into `l4_knowledge_embeddings` with source URL for incremental updates.
+*   *Main Script*: `scripts/crawler/main.ts`
+*   *Crawlers*: `tokyo_letsgojp.ts`, `matcha_jp.ts`
 
 ---
 
 ## 3. Data Integrity & Quality Standards
 
 *   **Encoding**: All text data MUST be stored in **UTF-8** format.
-*   **Incremental Updates**: Use `UPSERT` logic based on unique identifiers (e.g., URL for scraped data, Station ID for facilities) to avoid duplication.
+*   **Incremental Updates**: 
+    *   Based on `source` URL in `l4_knowledge_embeddings`.
+    *   Uses `upsert` logic to prevent duplicates while allowing content updates.
 *   **Validation**:
-    *   Coordinate bounds check (must be within Tokyo/Greater Tokyo area).
-    *   Multilingual completeness check (ensure at least `ja` and `zh-TW` names exist for L1/L4).
-    *   Source tracking: Every record must have a `source` or `url` field.
+    *   Entity Mapping: Ensures `entity_id` matches standard ODPT station IDs.
+    *   Language: Primary storage in `zh-TW` and `ja`.
+    *   Deduplication: Prevents re-crawling the same URL via `isAlreadyCrawled` check.
+*   **Error Handling**: Failed crawls or database insertions are logged, and partial successes are tracked.

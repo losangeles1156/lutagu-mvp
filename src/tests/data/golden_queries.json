@@ -1,0 +1,58 @@
+[
+    {
+        "id": "l1_greeting_zh",
+        "text": "你好",
+        "expected_source": "template",
+        "expected_type": "text",
+        "category": "L1 (Greeting)"
+    },
+    {
+        "id": "l2_fare_zh",
+        "text": "去新宿多少錢",
+        "expected_source": "algorithm",
+        "expected_type": "fare",
+        "category": "L2 (Fare)"
+    },
+    {
+        "id": "l2_route_zh",
+        "text": "從東京車站怎麼去上野",
+        "expected_source": "algorithm",
+        "expected_type": "route",
+        "category": "L2 (Route)"
+    },
+    {
+        "id": "l3_poi_sushi_zh",
+        "text": "附近的壽司",
+        "expected_source": "poi_tagged",
+        "expected_type": "recommendation",
+        "category": "L3 (POI)"
+    },
+    {
+        "id": "l3_poi_shopping_zh",
+        "text": "哪裡有便宜的藥妝店",
+        "expected_source": "poi_tagged",
+        "expected_type": "recommendation",
+        "category": "L3 (POI)"
+    },
+    {
+        "id": "l4_knowledge_zh",
+        "text": "新宿站有什麼要注意的",
+        "expected_source": "knowledge",
+        "expected_type": "expert_tip",
+        "category": "L4 (Knowledge)"
+    },
+    {
+        "id": "complex_reasoning_zh",
+        "text": "帶小孩去哪裡玩比較好？要安靜一點的",
+        "expected_source": "llm",
+        "expected_type": "text",
+        "category": "Complex (Reasoning)"
+    },
+    {
+        "id": "fallback_joke_zh",
+        "text": "講一個關於電車的笑話",
+        "expected_source": "llm",
+        "expected_type": "text",
+        "category": "Fallback (LLM)"
+    }
+]
