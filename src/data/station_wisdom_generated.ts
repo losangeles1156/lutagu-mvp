@@ -94,9 +94,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "東京車站: 轉乘注意事項"
     },
     "content": {
-      "zh-TW": "- 車站分為「八重洲側」（東側）和「丸之內側」（西側）\n- 「北自由通路」可自由穿越八重洲、丸之內兩側，不需出站\n- 京葉線月台位於地下5樓，距離主要月台很遠，步行約14-20分鐘\n- 轉乘京葉線時，找到UNIQLO代表正經過GRANSTA東京地下街\n- 橫須賀線、總武線（含N'EX）在丸之內中央口直下處",
-      "ja": "- 車站分為「八重洲側」（東側）和「丸之內側」（西側）\n- 「北自由通路」可自由穿越八重洲、丸之內兩側，不需出站\n- 京葉線月台位於地下5樓，距離主要月台很遠，步行約14-20分鐘\n- 轉乘京葉線時，找到UNIQLO代表正經過GRANSTA東京地下街\n- 橫須賀線、總武線（含N'EX）在丸之內中央口直下處",
-      "en": "- 車站分為「八重洲側」（東側）和「丸之內側」（西側）\n- 「北自由通路」可自由穿越八重洲、丸之內兩側，不需出站\n- 京葉線月台位於地下5樓，距離主要月台很遠，步行約14-20分鐘\n- 轉乘京葉線時，找到UNIQLO代表正經過GRANSTA東京地下街\n- 橫須賀線、總武線（含N'EX）在丸之內中央口直下處"
+      "zh-TW": "- 車站分為「八重洲側」（東側）和「丸之內側」（西側）\n- 「北自由通路」可自由穿越八重洲、丸之內兩側，不需出站\n- 京葉線月台位於地下 5 層（深度 27m），經 4 段電扶梯 + 200m 電動步道，實測需 15-20 分鐘\n- 路途地標：看到 UNIQLO → 進入 GRANSTA 地下街 → 京葉地下八重洲口\n- 橫須賀線/總武線（N'EX）在丸之內中央口「正下方」地下 4 層",
+      "ja": "- 駅は「八重洲口側」（東）と「丸の内口側」（西）に分かれています。\n- 「北自由通路」で改札外でも両側を行き来できます。\n- 京葉線は地下5階（深さ27m）、エスカレーター4本＋動く歩道200mで所要15-20分。\n- 目印：ユニクロ → グランスタ → 京葉地下八重洲口。\n- 横須賀線/総武線(N'EX)は丸の内中央口直下の地下4階。",
+      "en": "- Split into 'Yaesu Side' (East) and 'Marunouchi Side' (West).\n- 'North Free Passage' connects both sides without exiting gates.\n- Keiyo Line is B5F (27m deep): 4 escalators + 200m moving walkway = 15-20 min.\n- Landmarks: UNIQLO → GRANSTA Mall → Keiyo Underground Yaesu Gate.\n- Yokosuka/Sobu (N'EX) is B4F directly under Marunouchi Central Gate."
     }
   },
   {
@@ -169,9 +169,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "東京車站: 前往迪士尼"
     },
     "content": {
-      "zh-TW": "- 搭乘京葉線至舞濱站，車程約15分鐘\n- 從JR驗票口到京葉線月台需步行約14-20分鐘，務必預留時間",
-      "ja": "- 搭乘京葉線至舞濱站，車程約15分鐘\n- 從JR驗票口到京葉線月台需步行約14-20分鐘，務必預留時間",
-      "en": "- 搭乘京葉線至舞濱站，車程約15分鐘\n- 從JR驗票口到京葉線月台需步行約14-20分鐘，務必預留時間"
+      "zh-TW": "- 搭乘京葉線至舞濱站，車程約 15 分鐘\n- ⚠️ 從 JR 改札口到京葉線月台需經：4 段電扶梯＋200m 電動步道，實測 15-20 分鐘\n- 💡 省時技巧：從「八重洲南口」出站，穿越東京國際論壇大樓 (Glass Hall)，直達京葉線有樂町入口（步行僅 7 分鐘）",
+      "ja": "- 京葉線で舞浜まで約15分\n- ⚠️ 改札から京葉線ホームへはエスカレーター4本＋動く歩道200m、所要15-20分\n- 💡 時短技：八重洲南口から出て、東京国際フォーラム経由で有楽町入口へ（徒歩7分）",
+      "en": "- Keiyo Line to Maihama: ~15 min ride\n- ⚠️ JR Gates to Keiyo Platform = 4 escalators + 200m walkway = 15-20 min walk!\n- 💡 Shortcut: Exit 'Yaesu South Exit', walk through Tokyo Int'l Forum to Yurakucho Keiyo entrance (7 min only)"
     }
   },
   {
@@ -246,9 +246,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "上野車站: 上野地區共有4個「上野」站"
     },
     "content": {
-      "zh-TW": "1. **JR上野站**：最主要的車站\n2. **東京Metro銀座線上野站**：往淺草、銀座、澀谷\n3. **東京Metro日比谷線上野站**：往秋葉原、築地、六本木\n4. **京成上野站**：往成田機場（獨立建築，步行5分鐘）",
-      "ja": "1. **JR上野站**：最主要的車站\n2. **東京Metro銀座線上野站**：往淺草、銀座、澀谷\n3. **東京Metro日比谷線上野站**：往秋葉原、築地、六本木\n4. **京成上野站**：往成田機場（獨立建築，步行5分鐘）",
-      "en": "1. **JR上野站**：最主要的車站\n2. **東京Metro銀座線上野站**：往淺草、銀座、澀谷\n3. **東京Metro日比谷線上野站**：往秋葉原、築地、六本木\n4. **京成上野站**：往成田機場（獨立建築，步行5分鐘）"
+      "zh-TW": "1. **JR上野站**：主站（公園口→動物園/美術館；廣小路口→阿美橫丁）\n2. **Metro銀座線**：往淺草、銀座、澀谷\n3. **Metro日比谷線**：往秋葉原、築地、六本木\n4. **京成上野站**：Skyliner 往成田機場（!獨立建築，從 JR 廣小路口出站後，經 2 個電扶梯下到地下，穿越商場，共 6-8 分鐘）",
+      "ja": "1. **JR上野駅**：メイン駅（公園口→動物園/美術館、広小路口→アメ横）\n2. **Metro銀座線**：浅草・銀座・渋谷方面\n3. **Metro日比谷線**：秋葉原・築地・六本木方面\n4. **京成上野駅**：成田空港行き（独立駅舎、JR広小路口からエスカレーター2本で地下へ、買い物モールを抜けて所要6-8分）",
+      "en": "1. **JR Ueno**: Main hub (Park Gate→Zoo; Hirokoji Gate→Ameyoko)\n2. **Metro Ginza**: To Asakusa, Ginza, Shibuya\n3. **Metro Hibiya**: To Akiba, Tsukiji, Roppongi\n4. **Keisei Ueno**: Skyliner to Narita (!Separate building: Exit JR Hirokoji, 2 escalators down, through mall = 6-8 min)"
     }
   },
   {
@@ -457,9 +457,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "淺草車站: 各站往雷門的走法"
     },
     "content": {
-      "zh-TW": "**銀座線**：\n- 從1號出口出站，往左前方直走約1分鐘\n**都營淺草線**：\n- 從A4出口出站，往右直走，遇大馬路左轉\n- 有大型行李請從A2-b出口（電梯）\n**東武線**：\n- 從2F剪票口出站，下樓梯後過馬路左轉\n- 位於EKIMISE商業大樓內\n**筑波快線**：\n- 從A1出口出站，沿國際通直走約5分鐘\n- 遇雷門通左轉，再走約5分鐘",
-      "ja": "**銀座線**：\n- 從1號出口出站，往左前方直走約1分鐘\n**都營淺草線**：\n- 從A4出口出站，往右直走，遇大馬路左轉\n- 有大型行李請從A2-b出口（電梯）\n**東武線**：\n- 從2F剪票口出站，下樓梯後過馬路左轉\n- 位於EKIMISE商業大樓內\n**筑波快線**：\n- 從A1出口出站，沿國際通直走約5分鐘\n- 遇雷門通左轉，再走約5分鐘",
-      "en": "**銀座線**：\n- 從1號出口出站，往左前方直走約1分鐘\n**都營淺草線**：\n- 從A4出口出站，往右直走，遇大馬路左轉\n- 有大型行李請從A2-b出口（電梯）\n**東武線**：\n- 從2F剪票口出站，下樓梯後過馬路左轉\n- 位於EKIMISE商業大樓內\n**筑波快線**：\n- 從A1出口出站，沿國際通直走約5分鐘\n- 遇雷門通左轉，再走約5分鐘"
+      "zh-TW": "**銀座線 (G19)**：\n- 終點站，位於淺草通地下。若要去雷門，請走 **1 號出口** (有樓梯) 或 **3 號出口**。\n**都營淺草線 (A18)**：\n- 與銀座線透過充斥昭和風情的「地下商店街」連接。若有大型行李，**A2-b 出口**是唯一的地面電梯入口。\n**東武線 (TS01)**：\n- 位於 EKIMISE 大樓 2F，與地下鐵不直通，需先至地面層。",
+      "ja": "**銀座線**：雷門へは1番出口へ。\n**都営浅草線**：銀座線とは古い地下商店街で繋がっています。エレベーターはA2-b出口のみです。\n**東武線**：駅ビル2階にあります。地下鉄とは直結していません。",
+      "en": "**Ginza Line**: Terminus station. Use Exit 1 for Kaminarimon.\n**Asakusa Line**: Connected via an old underground arcade. **Exit A2-b** is the ONLY elevator access to ground.\n**Tobu Line**: Located on 2F of EKIMISE building. Not directly connected to subway underground."
     }
   },
   {
@@ -607,17 +607,80 @@ export const GENERATED_KNOWLEDGE = [
       ]
     },
     "type": "warning",
-    "priority": 80,
+    "priority": 90,
     "icon": "⚠️",
     "title": {
-      "zh-TW": "秋葉原車站: 轉乘注意事項",
-      "ja": "秋葉原車站: 轉乘注意事項",
-      "en": "秋葉原車站: 轉乘注意事項"
+      "zh-TW": "秋葉原: 筑波快線深層警告",
+      "ja": "秋葉原: TX線乗り換え注意",
+      "en": "Akihabara: TX Line Depth"
     },
     "content": {
-      "zh-TW": "- JR「電器街口」是最便利的出口\n- 日比谷線出口距離電器街稍遠，需步行約5-8分鐘\n- 從淺草搭筑波快線僅需4分鐘（210日圓）",
-      "ja": "- JR「電器街口」是最便利的出口\n- 日比谷線出口距離電器街稍遠，需步行約5-8分鐘\n- 從淺草搭筑波快線僅需4分鐘（210日圓）",
-      "en": "- JR「電器街口」是最便利的出口\n- 日比谷線出口距離電器街稍遠，需步行約5-8分鐘\n- 從淺草搭筑波快線僅需4分鐘（210日圓）"
+      "zh-TW": "- **筑波快線**：月台位於地下 33.6 公尺（相當於地下 6 層）。從 JR 轉乘需經過 JR 中央改札，步行至 A1 出口旁搭乘「超長電扶梯」，至少預留 10 分鐘。\n- **昭和通口 vs 電器街口**：兩者位於車站相反兩側，距離約 200m。去 Yodobashi 請走「昭和通口」，去 Sega/GiGO 請走「電器街口」。",
+      "ja": "- **つくばエクスプレス**：ホームは地下33.6m（地下6階相当）にあります。JR中央改札を出てA1出口横の長いエスカレーターを利用。乗り換えには10分見てください。\n- **昭和通り口 vs 電気街口**：反対側に位置します。ヨドバシは「昭和通り口」、ゲーセン街は「電気街口」です。",
+      "en": "- **Tsukuba Express**: Platform is 33.6m deep (B6F). Exit JR Central Gate and use the long escalator near Exit A1. Allow 10 mins.\n- **Exit Guide**: 'Showa-dori' for Yodobashi Camera. 'Electric Town' for anime shops/arcades. They are on opposite sides!"
+    }
+  },
+  // --- 池袋轉乘陷阱 (Ikebukuro Transfer Trap) ---
+  {
+    "id": "generated-池袋車站-東武西武陷阱-1767182229604ikebukuro",
+    "trigger": {
+      "station_names_hint": ["池袋車站"],
+      "station_ids": ["odpt:Station:JR-East.Ikebukuro", "odpt:Station:Tobu.Tojo.Ikebukuro", "odpt:Station:Seibu.Ikebukuro", "odpt:Station:TokyoMetro.Ikebukuro"]
+    },
+    "type": "warning",
+    "priority": 95,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "池袋: 命名陷阱",
+      "ja": "池袋: 東と西の罠",
+      "en": "Ikebukuro: Naming Trap"
+    },
+    "content": {
+      "zh-TW": "- **口訣**：「東口是西武、西口是東武」。請務必記住這點以免走錯。\n- **副都心線**：月台位於車站「西側」地下深處，轉乘 JR 或丸之內線（位於中央/東側）需步行約 10 分鐘（經由地下長廊）。\n- **迷路對策**：若迷失方向，請先回到 1 樓地面層尋找地標。",
+      "ja": "- **合言葉**：「東が西武で、西が東武」。\n- **副都心線**：ホームは西側の深い地下にあります。JRや丸ノ内線（東側）への乗り換えは10分（地下通路経由）かかります。\n- **迷子対策**：迷ったら地上に出ましょう。",
+      "en": "- **Mnemonic**: 'East is Seibu, West is Tobu'. Remember this!\n- **Fukutoshin Line**: Located deep underground on the WEST side. Transfer to JR/Marunouchi (East side) takes ~10 min via long tunnel.\n- **Lost?**: Go to ground level to re-orient."
+    }
+  },
+  // --- 溜池山王轉乘陷阱 (Tameike-Sanno Transfer Trap) ---
+  {
+    "id": "generated-溜池山王-超長距離轉乘-1767182230005tameike",
+    "trigger": {
+      "station_names_hint": ["溜池山王車站", "國會議事堂前"],
+      "station_ids": ["odpt:Station:TokyoMetro.TameikeSanno", "odpt:Station:TokyoMetro.KokkaiGijidomae"]
+    },
+    "type": "warning",
+    "priority": 90,
+    "icon": "🚶",
+    "title": {
+      "zh-TW": "溜池山王: 隱形馬拉松",
+      "ja": "溜池山王: 長距離乗り換え",
+      "en": "Tameike-Sanno: Long Walk"
+    },
+    "content": {
+      "zh-TW": "- **看似同站其實超遠**：銀座線/南北線（溜池山王）與 千代田線/丸之內線（國會議事堂前）雖站內連通，但兩端月台相距超過 450 公尺。\n- **實測**：從銀座線轉乘千代田線，快步走需 10-12 分鐘，包含上下階梯。趕時間請避免在此轉乘。\n- **南北線↔銀座線**：相對較近，約 3-5 分鐘。",
+      "ja": "- **遠い乗り換え**：銀座線/南北線（溜池山王）と千代田線/丸ノ内線（国会議事堂前）は繋がっていますが、端から端まで450mあります。\n- **所要時間**：銀座線→千代田線は早歩きで10-12分。急ぎの場合は避けてください。\n- **南北線↔銀座線**：比較的近く、3-5分です。",
+      "en": "- **Deceptive Connection**: Tameike-Sanno and Kokkai-gijidomae are connected, but platforms are 450m+ apart.\n- **Reality Check**: Ginza to Chiyoda Line transfer takes 10-12 mins of fast walking. Avoid if in a hurry.\n- **Namboku↔Ginza**: Closer, taking ~3-5 mins."
+    }
+  },
+  // --- 品川轉乘陷阱 (Shinagawa Transfer Trap) ---
+  {
+    "id": "generated-品川車站-轉乘迷宮-1767182230101shinagawa",
+    "trigger": {
+      "station_names_hint": ["品川車站"],
+      "station_ids": ["odpt:Station:JR-East.Shinagawa", "odpt:Station:Keikyu.Shinagawa"]
+    },
+    "type": "tip",
+    "priority": 90,
+    "icon": "🚄",
+    "title": {
+      "zh-TW": "品川: 轉乘攻略",
+      "ja": "品川: 乗り換えガイド",
+      "en": "Shinagawa: Transfer Guide"
+    },
+    "content": {
+      "zh-TW": "- **京急轉乘 JR**：請利用「京急線與 JR 線聯絡改札口」，可直接過閘不需出站，非常方便。\n- **港南口 (東口)**：通往新幹線改札、辦公大樓群。\n- **高輪口 (西口)**：通往王子飯店、水族館 (Maxell Aqua Park)。\n- **主要通道**：車站有一條巨大的東西自由通路，人潮洶湧請小心。",
+      "ja": "- **京急↔JR**：「連絡改札口」を使えば改札を出ずに乗り換え可能です。\n- **港南口(東)**：新幹線、オフィス街。\n- **高輪口(西)**：プリンスホテル、水族館。\n- **自由通路**：東西を結ぶ巨大な通路は非常に混雑します。",
+      "en": "- **Keikyu↔JR**: Use the 'Transfer Gate' for direct access without exiting station.\n- **Konan Exit (East)**: For Shinkansen & Offices.\n- **Takanawa Exit (West)**: For Prince Hotels & Aquarium.\n- **Concourse**: The central walkway is huge and always crowded."
     }
   },
   {
@@ -1358,9 +1421,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "Shinjuku Stn: The World's Busiest Maze"
     },
     "content": {
-      "zh-TW": "- **絕對迷路警告**：東口與西口在地下並不直通（需繞很遠）。請務必確認目的地是「東側（歌舞伎町）」還是「西側（都廳/高層大樓）」。\n- **南口**：位於跨線橋上，最不容易迷路，適合約見面。\n- 如迷路請回到地面層。",
-      "ja": "- **迷宮注意**：東口と西口は地下で直結していません。目的地を確認してください。\n- **南口**：地上にあるため、待ち合わせに最適です。\n- 迷ったら地上へ出ましょう。",
-      "en": "- **Maze Alert**: East and West exits are NOT connected underground easily. Confirm your destination side first.\n- **South Exit**: Located on bridge level, easiest for meeting up.\n- If lost, go to ground level."
+      "zh-TW": "- **東西自由通路**：2020 年開通，現可直接穿越東口與西口改札外（不需出站繞路）。\n- **迷宮提醒**：雖然有自由通路，但 JR、京王、小田急、地下鐵在各層交錯。若要去「都廳」，請走西口地下道（經電動步道）；若去「歌舞伎町」，請認明東口 B1 標誌。\n- **京王新線**：月台在地下 5 層（極深），與京王線/京王百貨月台不在同一處，請預留 10 分鐘。",
+      "ja": "- **東西自由通路**：2020年に開通。改札外で東口と西口をスムーズに行き来できます。\n- **迷宮注意**：自由通路はありますが、JR・京王・小田急・地下鉄が複雑に交差。都庁へは「西口地下道」、歌舞伎町へは「東口」を目指してください。\n- **京王新線**：地下5階と非常に深く、通常の京王線とは場所が異なります。所要10分。",
+      "en": "- **E-W Free Passage**: Opened in 2020, allows direct walk between East and West exits outside gates.\n- **Maze Alert**: Despite the passage, multiple lines (JR, Keio, etc.) still cross at different levels. Follow signs for 'West Underground' (Gov Bldg) or 'East' (Kabukicho).\n- **Keio New Line**: Platform is B5F (very deep) and separate from the main Keio Line. Allow 10 mins."
     }
   },
   {
@@ -1418,9 +1481,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "Shibuya Stn: Allow Extra Time"
     },
     "content": {
-      "zh-TW": "- **垂直距離極大**：銀座線在**3樓**，但副都心線/東橫線在**地下5樓**。\n- **轉乘時間**：兩者轉乘需經由長電扶梯，請至少預留 **10-15分鐘**。\n- JR 線與井之頭線轉乘較近，約 5-7 分鐘。",
-      "ja": "- **高低差大**：銀座線は3階、副都心線/東横線は地下5階です。\n- **所要時間**：乗り換えには **10-15分** 見てください。\n- JRと井の頭線の乗り換えは比較的近いです。",
-      "en": "- **Vertical Gap**: Ginza Line is on **3F**, Fukutoshin/Toyoko Lines are on **B5**.\n- **Time**: Allow **10-15 mins** for transfer via multiple escalators."
+      "zh-TW": "- **垂直移動地獄**：銀座線在 **3 樓**，副都心線則在 **地下 5 樓**。轉乘需經過 **5 段長手扶梯**，實測需 12-15 分鐘。\n- **省時攻略**：利用「Scramble Square」建築內的透明電梯或大型斜扶梯做垂直移動，比走車站內部老舊通道更具方向感且快速。",
+      "ja": "- **高低差地獄**：銀座線(3F)から副都心線(B5F)への乗り換えは、**5本のエスカレーター** を乗り継ぎます。所要12-15分。\n- **時短技**：「スクランブルスクエア」内のエレベーターやエスカレーターを垂直移動に使うと、視界が開けてスムーズです。",
+      "en": "- **Vertical Hell**: Ginza Line (3F) to Fukutoshin Line (B5F) requires **5 long escalators**. Allow 12-15 mins.\n- **Tip**: Use elevators/escalators inside 'Scramble Square' for vertical movement. It's more intuitive and faster than the old station tunnels."
     }
   },
   {
@@ -1519,9 +1582,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "Iidabashi Stn: Transfer Trap"
     },
     "content": {
-      "zh-TW": "- **東西線 ↔ 大江戶線**：轉乘距離極遠（需步行約 10 分鐘以上），建議避開。\n- **有樂町線/南北線**：轉乘較為方便。\n- **B3出口**：通往神樂坂（小巴黎）的主要出口。",
-      "ja": "- **東西線 ↔ 大江戸線**：乗り換え距離が非常に長い（徒歩10分以上）ため、避けることを推奨します。\n- **有楽町線/南北線**：比較的スムーズに乗り換え可能です。\n- **B3出口**：神楽坂へのメイン出口です。",
-      "en": "- **Tozai <-> Oedo**: Extremely long walk (10+ mins). Avoid if possible.\n- **Yurakucho/Namboku**: Smoother transfer.\n- **Exit B3**: Main exit for Kagurazaka (Little Paris)."
+      "zh-TW": "- **東西線 ↔ 大江戶線**：悲劇轉乘！兩線月台位於「完全不同的建築」，需出地面走天橋再下深層地下，實測 10-12 分鐘。\n- **有樂町線/南北線**：較順，共用同一站舍。\n- **神樂坂出口**：B3 出口上手扶梯，右轉過馬路即是。",
+      "ja": "- **東西線 ↔ 大江戸線**：悪名高い乗り換え！別々の駅舎で、地上の歩道橋を渡って移動します。所要10-12分。\n- **有楽町線/南北線**：同じ駅舎内なのでスムーズ。\n- **神楽坂**：B3出口が最寄りです。",
+      "en": "- **Tozai ↔ Oedo**: Infamous transfer! Different station buildings, requires surface-level bridge walk = 10-12 min.\n- **Yurakucho/Namboku**: Same building, smoother.\n- **Kagurazaka**: Exit B3 is your friend."
     }
   },
   {
@@ -1560,9 +1623,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "Otemachi Stn: 5-Line Maze"
     },
     "content": {
-      "zh-TW": "- **東京地下鐵最大站**：丸之內、半藏門、千代田、東西、三田線5線交匯。\n- **東西線與千代田線**：兩者轉乘距離極遠（像在兩個不同車站），步行可能需 10 分鐘。\n- **與東京車站直結**：可通過地下道步行至東京車站丸之內測，但路程較長。",
-      "ja": "- **地下鉄最大**：丸ノ内、半蔵門、千代田、東西、三田線の5路線。\n- **東西線と千代田線**：乗り換えは非常に遠く、徒歩10分かかることも。\n- **東京駅直結**：地下通路で東京駅まで歩けますが、距離は長いです。",
-      "en": "- **Largest Subway Stn**: 5 lines intersect here.\n- **Tozai <-> Chiyoda**: Extremely far apart (10 min walk).\n- **Connects to Tokyo Stn**: Walkable via underground passage, but quite far."
+      "zh-TW": "- **東京 Metro 最大站**：丸之內、半藏門、千代田、東西、三田線 5 線交匯。\n- **東西線 ↔ 千代田線**：地獄轉乘！相距 500m+，需經 3 段電扶梯＋長廊，實測 10-15 分鐘（像走隧道）。\n- **與東京站直結**：經「北自由通路」可步行至丸之內側（約 12 分鐘，但有冷氣且不用出站）。",
+      "ja": "- **最大駅**：丸ノ内、半蔵門、千代田、東西、三田線の5路線が集結。\n- **東西線 ↔ 千代田線**：悪名高い！500m以上離れており、エスカレーター3本＋廊下で10-15分。\n- **東京駅直結**：北自由通路経由で丸の内側へ徒歩12分（空調あり、改札外不要）。",
+      "en": "- **Largest Metro Stn**: 5 lines (Marunouchi, Hanzomon, Chiyoda, Tozai, Mita).\n- **Tozai ↔ Chiyoda**: Nightmare! 500m+ apart, 3 escalators + corridors = 10-15 min tunnel walk.\n- **Tokyo Stn link**: 12 min walk via 'North Free Passage' (air-conditioned, no re-entry needed)."
     }
   },
   {
@@ -1580,9 +1643,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "Akasaka-mitsuke: Same Platform Transfer"
     },
     "content": {
-      "zh-TW": "- **銀座線 ↔ 丸之內線**：在赤坂見附站可對於同一月台轉乘（例如往新宿/澀谷方向），非常方便，省去上下樓梯。\n- **永田町轉乘**：赤坂見附與永田町站內相通，但轉乘有樂町/半藏門/南北線需步行較長距離（約 5-8 分鐘）。",
-      "ja": "- **銀座選 ↔ 丸ノ内線**：同じホームで乗り換え可能。非常に便利です。\n- **永田町乗り換え**：駅構内で繋がっていますが、有楽町/半蔵門/南北線への乗り換えは距離があります（5-8分）。",
-      "en": "- **Ginza <-> Marunouchi**: Cross-platform transfer available (e.g. for Shinjuku/Shibuya). Very convenient.\n- **Nagatacho Connection**: Connected underground, but long walk to Yurakucho/Hanzomon/Namboku lines."
+      "zh-TW": "- **銀座線 ↔ 丸之內線**：赤坂見附站提供「分身轉乘」，往新宿/澀谷方向在同一月台兩側，轉車僅需 10 秒。\n- **永田町 (南北/半藏門/有樂町)**：雖然號稱站內轉乘，但半藏門線往有樂町線需經過一段**長達 150m 的地下斜坡**與多次轉彎。轉乘時請沿著紫色（半藏門）或黃色（有樂町）標示走，預留 8-10 分鐘。",
+      "ja": "- **銀座線 ↔ 丸ノ内線**：赤坂見附駅で同一ホーム乗り換えが可能。新宿/渋谷方面は向かい側の電車に乗るだけです(10秒)。\n- **南北/半蔵門/有楽町線**：駅構内で繋がっていますが、半蔵門線と有楽町線の間には **150mの長いスロープ** があり、移動に8-10分かかります。",
+      "en": "- **Ginza ↔ Marunouchi**: 'Flash Transfer' at Akasaka-mitsuke. Both lines share the same platform for same-direction travel (10 sec walk).\n- **Nagatacho Lines**: Connected underground, but Hanzomon to Yurakucho line requires walking through a **150m long underground slope** and multiple turns. Allow 8-10 mins."
     }
   },
   {
@@ -1620,9 +1683,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "Roppongi Stn: Deep Underground"
     },
     "content": {
-      "zh-TW": "- **大江戶線月台**：位於地下 7 樓（深達 42 公尺），從地面到月台需搭乘多次電扶梯，請預留 10 分鐘移動時間。\n- **日比谷線**：位於地下 2 樓，相對容易到達。\n- **出口**：六本木Hills走 1C 出口，Midtown 走 8 號出口。",
-      "ja": "- **大江戸線**：地下7階（深さ42m）。地上からホームまで10分見てください。\n- **日比谷線**：地下2階で、比較的浅いです。\n- **出口**：六本木ヒルズは1C、ミッドタウンは8番出口。",
-      "en": "- **Oedo Line**: B7 floor (42m deep). Allow 10 mins to reach platform.\n- **Hibiya Line**: B2 floor, much easier access.\n- **Exits**: 1C for Roppongi Hills, 8 for Midtown."
+      "zh-TW": "- **日本最深 42.3m**：大江戶線 1 號月台位於地下 7 樓，是日本最深鐵路月台。全程需搭乘 **7 段長電扶梯**，從地面到登車至少需 10 分鐘。\n- **轉乘提醒**：日比谷線在地下 2 樓，轉乘大江戶線請務必預留充足體力與時間。\n- **出口**：1C 出口直結六本木 Hills，不用等紅綠燈。",
+      "ja": "- **日本一深い駅(42.3m)**：大江戸線1番ホームは地下7階にあります。地上まで **階段/エスカレーターを7本** 乗り継ぎ、移動に10分以上かかります。\n- **日比谷線**：地下2階にあり、大江戸線との高低差にご注意ください。\n- **出口**：ヒルズへは1C出口が直結で便利です。",
+      "en": "- **Deepest in Japan (42.3m)**: Oedo Line Platform 1 is B7F, the deepest in the country. It takes **7 long escalators** and at least 10 mins from ground to train.\n- **Transfer**: Hibiya Line is B2F, huge vertical gap from Oedo Line. Allow extra time.\n- **Exits**: Use Exit 1C for Roppongi Hills direct access."
     }
   },
   // --- 批次 2: 山手線重要站點 (Ebisu, Harajuku, Gotanda, Yurakucho) ---
@@ -1762,9 +1825,9 @@ export const GENERATED_KNOWLEDGE = [
       "en": "Ryogoku: Sumo Town"
     },
     "content": {
-      "zh-TW": "- **JR西口**：直達「兩國國技館」與「江戶東京博物館」。車站旁有「江戶NOREN」美食街，設有相撲土俵。\n- **都營大江戶線**：車站位於較遠處，轉乘 JR 需步行約 7-10 分鐘（地面轉乘）。",
-      "ja": "- **JR西口**：国技館、江戸東京博物館へ直結。\n- **大江戸線**：駅は少し離れており、JRへの乗り換えは徒歩7-10分かかります。",
-      "en": "- **JR West Exit**: Direct access to Sumo Hall (Kokugikan) & Edo-Tokyo Museum.\n- **Oedo Line**: Station is further away. Allow 7-10 mins walk to connect with JR."
+      "zh-TW": "- **JR 西口**：直達「兩國國技館」與「江戶東京博物館（整修中至2025年底）」。車站旁「江戶 NOREN」美食街有相撲土俵。\n- **都營大江戶線**：!注意！月台在 JR 站東南方 700m 遠處（國技館對面方向），需出 JR 站、走地面過墨田區道路，實測 7-10 分鐘。",
+      "ja": "- **JR西口**：国技館、江戸東京博物館（2025年末まで閉館中）へ直結。「江戸NOREN」内には土俵が！\n- **大江戸線**：!注意！JR駅から700m南東（隅田川側）。地上を徒歩7-10分かかります。",
+      "en": "- **JR West Exit**: Direct to Kokugikan Sumo Arena & Edo-Tokyo Museum (closed until late 2025). Try 'Edo NOREN' food hall with a sumo ring inside.\n- **Oedo Line**: !Beware! 700m southeast of JR station. Surface walk 7-10 min towards Sumida River."
     }
   },
   {
@@ -2288,6 +2351,27 @@ export const GENERATED_KNOWLEDGE = [
       "zh-TW": "- **播磨坂櫻花並木**：著名的賞櫻景點，步行約 7 分鐘。\n- **拓殖/御茶水女大**：周邊學校眾多，通勤時段學生很多。",
       "ja": "- **播磨坂**：桜の名所です。\n- **学生**：周辺に大学が多く、学生で賑わいます。",
       "en": "- **Harimazaka**: Famous cherry blossom slope nearby.\n- **Students**: Many universities in the area."
+    }
+  },
+  // --- 藏前轉乘陷阱 (Kuramae Transfer Trap) ---
+  {
+    "id": "generated-藏前車站-站外轉乘陷阱-1767182230120kuramae",
+    "trigger": {
+      "station_names_hint": ["藏前車站", "蔵前駅"],
+      "station_ids": ["odpt:Station:Toei.Asakusa.Kuramae", "odpt:Station:Toei.Oedo.Kuramae"]
+    },
+    "type": "warning",
+    "priority": 95,
+    "icon": "⚠️",
+    "title": {
+      "zh-TW": "藏前: 站外轉乘陷阱",
+      "ja": "蔵前: 地上乗り換え注意",
+      "en": "Kuramae: Surface Transfer"
+    },
+    "content": {
+      "zh-TW": "- **非站內直通**：都營淺草線與大江戶線月台完全分開，需由 A2/A4 出口回到地面，沿街道步行約 200 公尺至另一側入口。實測需 5-7 分鐘。\n- **橘色閘門**：持實體車票者轉乘時，務必走「橘色專用閘門」並保留車票（60 分鐘內有效），IC 卡則無此限制。\n- **文青商圈**：轉乘路徑上有很多特色文具店與咖啡廳，時間充裕可順道逛逛。",
+      "ja": "- **改札外連絡**：浅草線と大江戸線は繋がっていません。一度地上に出て、約200m歩く必要があります(所要5-7分)。\n- **オレンジの改札**：切符の方はオレンジ色の自動改札機を通ってください(60分以内に乗り継ぎ)。\n- **カフェ街**：道中にオシャレなカフェや雑貨屋が多いエリアです。",
+      "en": "- **Surface Transfer**: Asakusa and Oedo lines are NOT connected underground. You must exit to the street and walk ~200m to the other station (5-7 mins).\n- **Orange Gates**: If using a paper ticket, use the 'Orange Gate' and keep your ticket. You have 60 mins to complete the transfer.\n- **Hipster Area**: The walk passes through a neighborhood famous for cafes and workshops."
     }
   }
 ];

@@ -15,8 +15,8 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
     {
         id: 'tokyo-keiyo-transfer',
         trigger: {
-            station_ids: ['odpt.Station:JR-East.Tokyo'],
-            line_ids: ['odpt.Railway:JR-East.Keiyo'],
+            station_ids: ['odpt:Station:JR-East.Tokyo'],
+            line_ids: ['odpt:Railway:JR-East.Keiyo'],
             keywords: ['transfer', 'keiyo', 'long_walk', 'walk']
         },
         type: 'warning',
@@ -28,9 +28,9 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
             en: 'Transfer Warning',
         },
         content: {
-            'zh-TW': '總武快速線與京葉線月台位於地下深處，與其他月台步行約 15 分鐘。攜帶大行李請預留 20 分鐘。',
-            ja: '京葉線・総武快速線のホームは深く、他ホームから徒歩約15分かかります。大きな荷物がある場合は20分見てください。',
-            en: 'Keiyo/Sobu Line platforms are deep underground, 15m walk from others. Allow 20m if you have large luggage.',
+            'zh-TW': '京葉線月台位於地下 5 層深處（約 27 公尺），從其他月台轉乘需經過：\n① 4 段電扶梯\n② 長達 200 公尺的水平電動步道 (動く歩道)\n全程至少 15 分鐘，攜帶大型行李者請預留 20-25 分鐘。',
+            ja: '京葉線ホームは地下約27m（5層相当）にあります。乗り換えには：\n① 4本のエスカレーター\n② 約200mの動く歩道\nを通過します。所要15分以上。大きな荷物があれば20-25分見てください。',
+            en: 'Keiyo Line platforms are 27m underground (5 levels deep). Transfer requires:\n① 4 escalators\n② 200m of moving walkways\nAllow 15+ mins, or 20-25 mins with large luggage.',
         },
     },
 
@@ -41,7 +41,7 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
             // In a real DB, we might tag specific Station+Exit. 
             // For this example, let's assume it targets a specific station where A1 is bad.
             // Let's assign it to 'Ueno' for demonstration, or leave station empty if it was a global rule (which this isn't).
-            station_ids: ['odpt.Station:TokyoMetro.Ginza.Ueno', 'odpt.Station:TokyoMetro.Hibiya.Ueno', 'odpt.Station:JR-East.Ueno'],
+            station_ids: ['odpt:Station:TokyoMetro.Ginza.Ueno', 'odpt:Station:TokyoMetro.Hibiya.Ueno', 'odpt:Station:JR-East.Ueno'],
             user_states: ['accessibility.wheelchair', 'accessibility.stroller'],
             keywords: ['elevator', 'accessibility', 'barrier_free', 'wheelchair', 'stroller', 'exit']
         },
@@ -88,8 +88,8 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
     {
         id: 'ueno-shinkansen-timing',
         trigger: {
-            station_ids: ['odpt.Station:JR-East.Ueno'],
-            line_ids: ['odpt.Railway:JR-East.Shinkansen'], // Generic for Shinkansen lines
+            station_ids: ['odpt:Station:JR-East.Ueno'],
+            line_ids: ['odpt:Railway:JR-East.Shinkansen'], // Generic for Shinkansen lines
         },
         type: 'timing',
         priority: 70,
@@ -110,7 +110,7 @@ export const KNOWLEDGE_BASE: ExpertKnowledge[] = [
     {
         id: 'asakusa-new-year-control',
         trigger: {
-            station_ids: ['odpt.Station:TokyoMetro.Ginza.Asakusa', 'odpt.Station:Toei.Asakusa'],
+            station_ids: ['odpt:Station:TokyoMetro.Ginza.Asakusa', 'odpt:Station:Toei.Asakusa'],
             time_patterns: ['12/31-01/01'], // Simple date matching
         },
         type: 'seasonal',
