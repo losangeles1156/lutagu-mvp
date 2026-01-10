@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { join, basename } from 'path';
 
 dotenv.config({ path: '.env.local' });
 
@@ -9,10 +9,27 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function runMigration() {
-  console.log('=== Running Ward Boundaries Migration ===\n');
+// Get migration file from command line argument
+const migrationFile = process.argv[2];
 
-  const migrationPath = join(__dirname, '../supabase/migrations/20260104080000_add_ward_boundaries.sql');
+if (!migrationFile) {
+  console.error('Usage: npx tsx scripts/run_migration.ts <migration-file>');
+  console.error('Example: npx tsx scripts/run_migration.ts supabase/migrations/20260110_add_location_tags_column.sql');
+  process.exit(1);
+}
+
+const migrationPath = migrationFile.startsWith('/') 
+  ? migrationFile 
+  : join(__dirname, '..', migrationFile);
+
+if (!existsSync(migrationPath)) {
+  console.error(`Migration file not found: ${migrationPath}`);
+  process.exit(1);
+}
+
+async function runMigration() {
+  console.log(`=== Running Migration: ${basename(migrationPath)} ===\n`);
+
   const sql = readFileSync(migrationPath, 'utf-8');
 
   // Execute the SQL

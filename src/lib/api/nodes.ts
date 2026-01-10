@@ -3,6 +3,7 @@ import { STATION_WISDOM } from '../../data/stationWisdom';
 import { STATIC_L1_DATA, L1_NAME_INDEX } from '../../data/staticL1Data';
 import { STATION_LINES, getStationIdVariants, guessPhysicalOdptStationIds, resolveHubStationMembers } from '@/lib/constants/stationLines';
 import { L1_DNA_Data, L3Facility, StationUIProfile, LocaleString, ActionCard } from '@/lib/types/stationStandard';
+import { getAllIdVariants, extractStationNameSlug } from '@/lib/nodes/nodeIdNormalizer';
 
 // Types aligning with DB schema
 // Version 2.0: Added version control for cache invalidation
@@ -169,7 +170,7 @@ export interface NodeProfile {
     external_links?: { title: LocaleString; url: string; icon?: string; bg?: string; tracking_id?: string; type?: string }[];
 }
 
-// Fetch nearby nodes
+
 export async function fetchNearbyNodes(lat: number, lon: number, radiusMeters: number = 2000) {
     try {
         let data: any = null;
@@ -333,18 +334,23 @@ export function buildStationIdSearchCandidates(stationId: string): string[] {
     const ids = new Set<string>();
     const add = (id: string | null | undefined) => {
         if (!id) return;
+        // 使用增強的 ID 變體生成器
         for (const v of getStationIdVariants(id)) ids.add(v);
+        for (const v of getAllIdVariants(id)) ids.add(v);
     };
 
     add(stationId);
 
+    // Hub 成員
     for (const id of resolveHubStationMembers(stationId)) add(id);
 
+    // 物理 ID 變體
     for (const physical of guessPhysicalOdptStationIds(stationId)) {
         add(physical);
         for (const member of resolveHubStationMembers(physical)) add(member);
     }
 
+    // 代表性 ODPT ID
     const rep = resolveRepresentativeOdptStationId(stationId);
     add(rep);
     if (rep) {
@@ -462,19 +468,45 @@ export async function fetchNodeConfig(nodeId: string) {
         }
     } else if (isNodeHub) {
         // Case 2: Hub Node -> Fetch Children for Aggregation
-
         try {
-            const { data: children, error } = await supabase
-                .from('nodes')
-                .select('*')
-                .eq('parent_hub_id', nodeId);
+            // [NEW] Use hub_station_members table for dynamic resolution
+            let memberIds: string[] = [];
+            const { data: members, error: memberError } = await supabase
+                .from('hub_station_members')
+                .select('member_id')
+                .eq('hub_id', nodeId);
 
+            if (!memberError && members && members.length > 0) {
+                memberIds = members.map(m => m.member_id);
+            }
 
-            if (children) {
-                childNodes = children;
-                children.forEach((c: any) => {
+            // Fallback: Use static resolution if DB return empty
+            if (memberIds.length === 0) {
+                // Use buildStationIdSearchCandidates or resolveHubStationMembers logic
+                // Here we just use the static resolver we have imported
+                memberIds = resolveHubStationMembers(nodeId).filter(id => id !== nodeId);
+            }
 
-                });
+            if (memberIds.length > 0) {
+                // Fetch actual node data for these members
+                const { data: children, error: childrenError } = await supabase
+                    .from('nodes')
+                    .select('*')
+                    .in('id', memberIds);
+
+                if (!childrenError && children) {
+                    childNodes = children;
+                }
+            } else {
+                // Legacy: try lookup by parent_hub_id as a last resort
+                const { data: children } = await supabase
+                    .from('nodes')
+                    .select('*')
+                    .eq('parent_hub_id', nodeId);
+
+                if (children) {
+                    childNodes = children;
+                }
             }
         } catch (err) {
             console.warn('[fetchNodeConfig] Failed to fetch child nodes for hub aggregation:', err);
@@ -549,39 +581,63 @@ export async function fetchNodeConfig(nodeId: string) {
         });
 
         const distinctIds = Array.from(stationCandidates);
+        let facilities: any[] = [];
 
         if (distinctIds.length > 0) {
-            const { data: facilities, error: facilityError } = await supabase
+            const { data: exactFacilities, error: facilityError } = await supabase
                 .from('l3_facilities')
                 .select('*')
                 .in('station_id', distinctIds);
 
             if (facilityError) {
                 console.warn('[fetchNodeConfig] L3 fetch failed:', facilityError);
-            } else if (facilities) {
-                enrichedProfile.l3_facilities = facilities.map((f: any) => {
-                    // Parse location if it's JSON, otherwise treat as string
-                    const locVal = typeof f.name_i18n === 'object' ? f.name_i18n : (f.location || 'Station');
-                    const locObj: LocaleString = (typeof locVal === 'string')
-                        ? { ja: locVal, en: locVal, zh: locVal }
-                        : { ja: locVal.ja || locVal.en, en: locVal.en || locVal.ja, zh: locVal.zh || locVal.ja };
-
-                    return {
-                        id: f.id,
-                        type: f.type,
-                        name: locObj,
-                        location: locObj, // Use same for now, or fetch distinct location field
-                        attributes: {
-                            ...f.attributes,
-                            subCategory: f.attributes?.sub_category || f.type
-                        }
-                    } as L3Facility;
-                });
+            } else if (exactFacilities && exactFacilities.length > 0) {
+                facilities = exactFacilities;
             }
+        }
+
+        // [NEW] Fallback: 基於車站名稱片段的模糊匹配
+        if (facilities.length === 0) {
+            const stationSlug = extractStationNameSlug(nodeId);
+            if (stationSlug && stationSlug.length >= 3) {
+                console.log(`[fetchNodeConfig] L3 fallback: searching by slug "${stationSlug}"`);
+                const { data: fuzzyFacilities, error: fuzzyError } = await supabase
+                    .from('l3_facilities')
+                    .select('*')
+                    .ilike('station_id', `%${stationSlug}%`)
+                    .limit(50);
+
+                if (!fuzzyError && fuzzyFacilities && fuzzyFacilities.length > 0) {
+                    console.log(`[fetchNodeConfig] L3 fallback found ${fuzzyFacilities.length} facilities`);
+                    facilities = fuzzyFacilities;
+                }
+            }
+        }
+
+        if (facilities.length > 0) {
+            enrichedProfile.l3_facilities = facilities.map((f: any) => {
+                // Parse location if it's JSON, otherwise treat as string
+                const locVal = typeof f.name_i18n === 'object' ? f.name_i18n : (f.location || 'Station');
+                const locObj: LocaleString = (typeof locVal === 'string')
+                    ? { ja: locVal, en: locVal, zh: locVal }
+                    : { ja: locVal.ja || locVal.en, en: locVal.en || locVal.ja, zh: locVal.zh || locVal.ja };
+
+                return {
+                    id: f.id,
+                    type: f.type,
+                    name: locObj,
+                    location: locObj, // Use same for now, or fetch distinct location field
+                    attributes: {
+                        ...f.attributes,
+                        subCategory: f.attributes?.sub_category || f.type
+                    }
+                } as L3Facility;
+            });
         }
     } catch (err) {
         console.warn('[fetchNodeConfig] L3 fetch error:', err);
     }
+
 
 
     // [New] Merge Static L1 Data if DB is empty

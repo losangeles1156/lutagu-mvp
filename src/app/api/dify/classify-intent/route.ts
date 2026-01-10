@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Dify API configuration
-const DIFY_API_URL = process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
+// Dify API configuration - use same config as other Dify routes
+const DIFY_API_URL = process.env.DIFY_API_BASE || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
 const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
 
 interface IntentClassificationRequest {
@@ -28,7 +28,9 @@ export async function POST(request: NextRequest) {
         }
 
         // Build the prompt for intent classification
-        const classificationPrompt = buildClassificationPrompt(query, currentStationId, currentStationName, locale, context);
+        // Safe context handling with defaults
+        const safeContext = context || { userPreferences: [], recentQueries: [] };
+        const classificationPrompt = buildClassificationPrompt(query, currentStationId, currentStationName, locale, safeContext);
 
         // Call Dify API for intent classification
         const difyResponse = await fetch(`${DIFY_API_URL}/chat-messages`, {
@@ -43,8 +45,8 @@ export async function POST(request: NextRequest) {
                     current_station_id: currentStationId,
                     current_station_name: currentStationName,
                     locale,
-                    user_preferences: context.userPreferences,
-                    recent_queries: context.recentQueries,
+                    user_preferences: safeContext.userPreferences || [],
+                    recent_queries: safeContext.recentQueries || [],
                 },
                 query,
                 response_mode: 'streaming',

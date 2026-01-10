@@ -262,7 +262,7 @@ export function L3_Facilities({ data }: L3_FacilitiesProps) {
         else setLoading(false);
 
         return () => { isMounted = false; };
-    }, [data.id, data.l3_facilities, locale, retryKey]);
+    }, [data.id, data.l3_facilities, locale, retryKey, tL3]);
 
     if (loading) {
         return (

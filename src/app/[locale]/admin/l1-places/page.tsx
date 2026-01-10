@@ -66,12 +66,14 @@ export default function L1PlacesAdminPage() {
     }, []);
 
     // Refetch when filters change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         setPage(1);
         fetchPlaces();
     }, [category, status, isPartner]);
 
     // Refetch when page changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         fetchPlaces();
     }, [page]);

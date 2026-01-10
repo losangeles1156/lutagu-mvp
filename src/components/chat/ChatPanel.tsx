@@ -78,7 +78,7 @@ export function ChatPanel() {
     // Manual Chat Implementation (Bypassing broken SDK hook)
     const [isLoading, setIsLoading] = useState(false);
 
-    const sendMessage = async (payload: { role: string; content: string } | string, options?: any) => {
+    const sendMessage = useCallback(async (payload: { role: string; content: string } | string, options?: any) => {
         const text = typeof payload === 'string' ? payload : payload.content;
         if (!text.trim()) return;
 
@@ -139,10 +139,12 @@ export function ChatPanel() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [currentNodeId, locale, difyConversationId, difyUserId, showToast]);
 
-    // Alias for compatibility
-    const append = async (msg: { role: string; content: string }) => sendMessage(msg);
+    // Alias for compatibility (stable reference)
+    const append = useCallback(async (msg: { role: string; content: string }) => {
+        await sendMessage(msg);
+    }, [sendMessage]);
 
     // Display Messages Logic: Demo Mode vs AI Mode
     // We treat storeMessages as the source of truth for Demo Mode (legacy)

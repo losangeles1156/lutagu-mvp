@@ -43,12 +43,14 @@ export default function PartnersAdminPage() {
     }, [status, search]);
 
     // Refetch when filters change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         setPage(1);
         fetchPartners();
     }, [status, search]);
 
     // Refetch when page changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         fetchPartners();
     }, [page]);

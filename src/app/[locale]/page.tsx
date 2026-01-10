@@ -106,6 +106,7 @@ export default function Home() {
     }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
 
     // Onboarding check
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (isBottomSheetOpen) return;
         if (onboardingSeenVersion >= ONBOARDING_VERSION) return;

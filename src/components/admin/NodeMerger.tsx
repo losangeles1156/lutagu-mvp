@@ -23,12 +23,14 @@ export function NodeMerger() {
     const [isFetchingCandidates, setIsFetchingCandidates] = useState(false);
     const [candidateRefreshTrigger, setCandidateRefreshTrigger] = useState(0);
 
-    // Init Wards
+    // Init Wards (eslint-disable because wards.length check ensures idempotency)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (wards.length === 0) fetchWards();
     }, []);
 
-    // Fetch Nodes when ward changes
+    // Fetch Nodes when ward changes (eslint-disable because getNodesByWard is a stable store function)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (!selectedWard) return;
         setLoading(true);
@@ -85,6 +87,7 @@ export function NodeMerger() {
     // 3. [NEW] Distance Filter: Only show nodes within 1km of the target hub
     // Candidates for merging (Fetched via Spatial API)
     // Triggered when targetHubId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (!targetHubId) {
             setCandidates([]);

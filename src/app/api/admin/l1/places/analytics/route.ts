@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
+// Mark as dynamic to prevent static generation error
+// "Route couldn't be rendered statically because it used `request.url`"
+export const dynamic = 'force-dynamic';
+
 // GET /api/admin/l1/places/analytics - Get analytics data
 export async function GET(request: NextRequest) {
     try {

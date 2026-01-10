@@ -113,7 +113,7 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         if (isAirport) return '#3B82F6'; // Blue for airports
         const operatorColor = OPERATOR_COLORS[primaryOperator] || OPERATOR_COLORS['Metro'];
         return isSelected ? '#111827' : operatorColor;
-    }, [node.id, isSelected, isAirport, primaryOperator]);
+    }, [isSelected, isAirport, primaryOperator]);
 
     const label = useMemo(() => getLocaleString(node.name, locale) || node.id, [node.name, node.id, locale]);
     const showLabel = isSelected || hasMembers || isMajor || (zoom >= 15);
@@ -268,7 +268,7 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         iconCache.set(iconCacheKey, icon);
 
         return icon;
-    }, [iconCacheKey, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge]);
+    }, [iconCacheKey, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge, isAirport, isPrivate, operatorAbbr, primaryLineColor]);
 
     // NOW we can do early return - after all hooks
     if (!coords.lat || !coords.lon) return null;

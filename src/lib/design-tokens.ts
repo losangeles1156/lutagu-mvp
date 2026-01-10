@@ -304,7 +304,11 @@ export function getTouchOptimizedStyle(minHeight = 44) {
     `;
 }
 
-export default {
+/**
+ * Design Tokens - Default Export
+ * All tokens and helper functions for easy importing
+ */
+const designTokens = {
     colors,
     semanticColors,
     fontSize,
@@ -325,3 +329,5 @@ export default {
     getTabStyle,
     getTouchOptimizedStyle,
 };
+
+export default designTokens;
