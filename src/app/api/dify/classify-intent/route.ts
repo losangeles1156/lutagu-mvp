@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Dify API configuration - use same config as other Dify routes
-const DIFY_API_URL = process.env.DIFY_API_BASE || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
+const DIFY_API_URL = process.env.DIFY_API_BASE || process.env.DIFY_BASE_URL || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
 const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
 
 interface IntentClassificationRequest {
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
                         try {
                             const parsed = JSON.parse(data);
-                            
+
                             if (parsed.conversation_id && !conversationId) {
                                 conversationId = parsed.conversation_id;
                             }
@@ -105,12 +105,12 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Intent classification error:', error);
-        
+
         // Fallback to rule-based classification
         const fallbackResult = ruleBasedClassification(
             await request.json().catch(() => ({}))
         );
-        
+
         return NextResponse.json(fallbackResult);
     }
 }
@@ -122,8 +122,8 @@ function buildClassificationPrompt(
     locale: string,
     context: { userPreferences: string[]; recentQueries: string[] }
 ): string {
-    const localeInstructions = locale.startsWith('zh') 
-        ? 'Response in JSON format with Traditional Chinese labels.' 
+    const localeInstructions = locale.startsWith('zh')
+        ? 'Response in JSON format with Traditional Chinese labels.'
         : locale === 'ja'
             ? '返信は JSON 形式で、日本語のラベルを使用してください。'
             : 'Response should be in JSON format with English labels.';
@@ -141,13 +141,13 @@ Recent queries: ${recentQueriesStr}
 
 Return JSON format:
 ${JSON.stringify({
-    kind: 'route|timetable|fare|status|amenity|unknown',
-    confidence: 0.5,
-    suggestedStationId: 'optional',
-    alternativeIntents: [{ kind: 'string', score: 0.5 }],
-    needsMoreInfo: false,
-    missingInfoPrompt: 'question if needed'
-}, null, 2)}
+        kind: 'route|timetable|fare|status|amenity|unknown',
+        confidence: 0.5,
+        suggestedStationId: 'optional',
+        alternativeIntents: [{ kind: 'string', score: 0.5 }],
+        needsMoreInfo: false,
+        missingInfoPrompt: 'question if needed'
+    }, null, 2)}
 
 Intent definitions:
 - route: directions, transfers, how to get somewhere
@@ -210,7 +210,7 @@ function ruleBasedClassification(data: { query: string }): {
     // Calculate scores for each intent
     const scores: Record<string, number> = {};
     let totalScore = 0;
-    
+
     for (const [intent, keywords] of Object.entries(patterns)) {
         const score = keywords.reduce((s, keyword) => s + (query.includes(keyword) ? 1 : 0), 0);
         scores[intent] = score;
@@ -229,7 +229,7 @@ function ruleBasedClassification(data: { query: string }): {
     }
 
     // Calculate confidence
-    const confidence = totalScore > 0 
+    const confidence = totalScore > 0
         ? Math.min(0.95, 0.5 + (bestScore / totalScore) * 0.45)
         : 0.3;
 

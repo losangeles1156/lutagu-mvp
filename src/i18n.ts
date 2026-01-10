@@ -14,7 +14,8 @@ export default getRequestConfig(async (params) => {
         if (locale === 'zh-TW') {
             messages = (await import('../messages/zh-TW.json')).default;
         } else if (locale === 'zh') {
-            messages = (await import('../messages/zh.json')).default;
+            // Use zh-TW.json for both zh and zh-TW (both should display Traditional Chinese)
+            messages = (await import('../messages/zh-TW.json')).default;
         } else if (locale === 'ja') {
             messages = (await import('../messages/ja.json')).default;
         } else if (locale === 'ar') {

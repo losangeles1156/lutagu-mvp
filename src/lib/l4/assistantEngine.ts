@@ -796,8 +796,10 @@ class MinHeap<T> {
 type RouteCosts = {
     time: number;
     fare: number;
-    transfers: number;
-    hops: number;
+    transfers: number;           // 站內轉乘次數（同名站換乘）
+    hops: number;                // 經過的站數
+    railwaySwitches: number;     // 同公司換線次數（如 JR山手線→JR中央線）
+    operatorSwitches: number;    // 跨公司轉乘次數（如 JR→Metro）
 };
 
 function operatorKeyFromRailwayId(railwayId: string): string {
@@ -819,6 +821,48 @@ function perHopFareForOperator(operatorKey: string): number {
     if (operatorKey === 'TokyoMetro') return 12;
     if (operatorKey === 'Toei') return 12;
     return 12;
+}
+
+/**
+ * 基於距離（以站數估算）計算票價
+ * JR/Metro/Toei 票價都是基於距離，同公司內換乘票價一致
+ * 
+ * JR 東日本東京圈票價表（IC卡）：
+ * 1-3km: ¥140, 4-6km: ¥160, 7-10km: ¥170, 11-15km: ¥200, 16-20km: ¥220
+ * 
+ * Tokyo Metro 票價表（IC卡）：
+ * 1-6km: ¥180, 7-11km: ¥200, 12-19km: ¥250, 20-27km: ¥290, 28km+: ¥330
+ */
+function estimateFareByDistance(operatorKey: string, hops: number): number {
+    // 平均每站距離約 1.5km
+    const estimatedKm = hops * 1.5;
+
+    if (operatorKey === 'JR-East') {
+        // JR 東日本票價區間
+        if (estimatedKm <= 3) return 150;
+        if (estimatedKm <= 6) return 170;
+        if (estimatedKm <= 10) return 180;
+        if (estimatedKm <= 15) return 210;
+        if (estimatedKm <= 20) return 240;
+        if (estimatedKm <= 25) return 260;
+        if (estimatedKm <= 30) return 300;
+        return 340;
+    } else if (operatorKey === 'TokyoMetro') {
+        // Tokyo Metro 票價區間
+        if (estimatedKm <= 6) return 180;
+        if (estimatedKm <= 11) return 210;
+        if (estimatedKm <= 19) return 260;
+        if (estimatedKm <= 27) return 300;
+        return 340;
+    } else if (operatorKey === 'Toei') {
+        // 都營地下鐵票價區間
+        if (estimatedKm <= 4) return 180;
+        if (estimatedKm <= 8) return 220;
+        if (estimatedKm <= 12) return 270;
+        if (estimatedKm <= 16) return 320;
+        return 380;
+    }
+    return 200;
 }
 
 function edgeTimeMinutes(railwayId: string): number {
@@ -948,6 +992,19 @@ function buildRouteOptionFromPath(params: {
     const uniqueRailways = Array.from(new Set(edgeRailways.filter(rw => rw !== 'transfer')));
     const transfers = edgeRailways.filter(rw => rw === 'transfer').length;
 
+    // 計算每個運營商的總 hops，基於距離估算票價
+    const hopsByOperator: Record<string, number> = {};
+    for (const rw of edgeRailways) {
+        if (rw === 'transfer') continue;
+        const op = operatorKeyFromRailwayId(rw);
+        hopsByOperator[op] = (hopsByOperator[op] || 0) + 1;
+    }
+
+    let totalFare = 0;
+    for (const [op, hopCount] of Object.entries(hopsByOperator)) {
+        totalFare += estimateFareByDistance(op, hopCount);
+    }
+
     return {
         label,
         steps,
@@ -955,7 +1012,7 @@ function buildRouteOptionFromPath(params: {
         railways: uniqueRailways,
         transfers,
         duration: Math.max(1, Math.round(costs.time)),
-        fare: { ic: Math.max(0, Math.round(costs.fare)), ticket: Math.max(0, Math.round(costs.fare)) },
+        fare: { ic: Math.max(0, Math.round(totalFare)), ticket: Math.max(0, Math.round(totalFare + 10)) },
     };
 }
 
@@ -978,7 +1035,7 @@ function dijkstraBestPath(params: {
     for (const origin of origins) {
         const startKey = encodeStateKey(origin, null, null);
         dist.set(startKey, 0);
-        costsByKey.set(startKey, { time: 0, fare: 0, transfers: 0, hops: 0 });
+        costsByKey.set(startKey, { time: 0, fare: 0, transfers: 0, hops: 0, railwaySwitches: 0, operatorSwitches: 0 });
         heap.push({ key: startKey }, 0);
     }
 
@@ -1017,6 +1074,8 @@ function dijkstraBestPath(params: {
                 fare: currentCosts.fare,
                 transfers: currentCosts.transfers,
                 hops: currentCosts.hops + 1,
+                railwaySwitches: currentCosts.railwaySwitches,
+                operatorSwitches: currentCosts.operatorSwitches,
             };
 
             if (viaRailwayId === 'transfer') {
@@ -1028,23 +1087,34 @@ function dijkstraBestPath(params: {
 
                 let transferTime = edgeTimeMinutes(viaRailwayId);
                 if (fromOp && toOp && fromOp !== toOp) {
-                    transferTime += 5; // Reduced from 10
+                    transferTime += 5;
+                    nextCosts.operatorSwitches += 1;  // 跨公司轉乘
                 }
 
                 nextCosts.time += transferTime;
                 nextCosts.transfers += 1;
             } else {
                 const operatorKey = operatorKeyFromRailwayId(viaRailwayId);
-                const isTransfer = decoded.lastRailway && decoded.lastRailway !== viaRailwayId;
-                const boardingPenalty = isTransfer ? 3 : 0; // Reduced from 5
+                const isRailwaySwitch = decoded.lastRailway && decoded.lastRailway !== viaRailwayId;
+                const isOperatorSwitch = decoded.lastOperator && decoded.lastOperator !== operatorKey;
+
+                let boardingPenalty = 0;
+                if (isRailwaySwitch) {
+                    boardingPenalty = 3;
+                    if (isOperatorSwitch) {
+                        // 跨公司換線（已在 transfer 步驟計算，這裡是備用）
+                        nextCosts.operatorSwitches += 1;
+                    } else {
+                        // 同公司換線（如JR山手線→JR中央線）
+                        nextCosts.railwaySwitches += 1;
+                    }
+                }
 
                 nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty;
 
-                if (decoded.lastOperator !== operatorKey) {
-                    nextCosts.fare += baseFareForOperator(operatorKey);
-                    nextCosts.time += 3; // Reduced from 5
+                if (isOperatorSwitch) {
+                    nextCosts.time += 3;
                 }
-                nextCosts.fare += perHopFareForOperator(operatorKey);
             }
 
             const nextLastRailway = viaRailwayId === 'transfer' ? decoded.lastRailway : viaRailwayId;
@@ -1177,19 +1247,28 @@ export function findRankedRoutes(params: {
 
     const candidates: Array<{ key: string; label: string; score: (c: RouteCosts) => number }> = [
         {
-            key: 'fastest',
+            // 直達優先：同一條線直達，即使時間略長也優先推薦
+            // 這符合乘換案內的預設邏輯
+            key: 'direct',
             label: t('最快', '最短時間', 'Fastest'),
-            score: (c) => c.time + c.transfers * 8 + c.hops * 0.1,
+            score: (c) => {
+                // 跨公司轉乘懲罰最高，同公司換線次之
+                const operatorPenalty = c.operatorSwitches * 20;
+                const railwayPenalty = c.railwaySwitches * 5;
+                return c.time + operatorPenalty + railwayPenalty;
+            },
         },
         {
-            key: 'cheapest',
-            label: t('最便宜', '最安', 'Cheapest'),
-            score: (c) => c.fare + c.time * 0.5 + c.transfers * 15,
+            // 純時間最短（接受轉乘換取更快到達）
+            key: 'fastest',
+            label: t('時間最短', '時間優先', 'Time Priority'),
+            score: (c) => c.time + c.operatorSwitches * 8,
         },
         {
+            // 轉乘最少（完全避免轉乘）
             key: 'fewestTransfers',
             label: t('轉乘最少', '乗換最少', 'Fewest transfers'),
-            score: (c) => c.transfers * 1000 + c.time,
+            score: (c) => (c.railwaySwitches + c.operatorSwitches) * 100 + c.time,
         },
     ];
 

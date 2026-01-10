@@ -295,16 +295,16 @@ export default function Home() {
                                 <h3 id="onboarding-hubs-title" className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{tOnboarding('hubTitle')}</h3>
                                 <div className="grid grid-cols-4 gap-2">
                                     {[
-                                        { label: tOnboarding('hubs.ueno'), center: { lat: 35.7141, lon: 139.7774 } },
-                                        { label: tOnboarding('hubs.asakusa'), center: { lat: 35.7119, lon: 139.7976 } },
-                                        { label: tOnboarding('hubs.akihabara'), center: { lat: 35.6984, lon: 139.7753 } },
-                                        { label: tOnboarding('hubs.tokyo'), center: { lat: 35.6812, lon: 139.7671 } }
+                                        { label: tOnboarding('hubs.ueno'), center: { lat: 35.7141, lon: 139.7774 }, node: 'odpt.Station:TokyoMetro.Ginza.Ueno' },
+                                        { label: tOnboarding('hubs.asakusa'), center: { lat: 35.7119, lon: 139.7976 }, node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
+                                        { label: tOnboarding('hubs.akihabara'), center: { lat: 35.6984, lon: 139.7753 }, node: 'odpt.Station:TokyoMetro.Hibiya.Akihabara' },
+                                        { label: tOnboarding('hubs.tokyo'), center: { lat: 35.6812, lon: 139.7671 }, node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo' }
                                     ].map((hub) => (
                                         <button
                                             key={hub.label}
                                             onClick={() => {
                                                 setMapCenter(hub.center);
-                                                setCurrentNode('odpt.Station:TokyoMetro.Ginza.Ueno');
+                                                setCurrentNode(hub.node);
                                                 setBottomSheetOpen(true);
                                                 setOnboardingSeenVersion(ONBOARDING_VERSION);
                                                 setIsOnboardingOpen(false);

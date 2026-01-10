@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, ReactNode, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useUIStateMachine, initializeUIState, isCollapsedState, canEnterExploreMode } from '@/stores/uiStateMachine';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAppStore } from '@/stores/appStore';
@@ -36,6 +37,8 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
   } = useUIStateMachine();
 
   const { setIsMobile } = useAppStore();
+  const tCommon = useTranslations('common');
+  const tChat = useTranslations('chat');
 
   const desktopContainerRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +139,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
               active:scale-95 transition-all min-h-[56px] border border-indigo-100/50"
           >
             <MessageSquare size={20} className="text-indigo-600" />
-            <span>AI Agent</span>
+            <span>{tChat('aiName', { defaultValue: 'AI 助手' })}</span>
           </button>
         </div>
 
@@ -177,7 +180,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
                   active:scale-95 transition-all min-h-[56px]"
               >
                 <Sparkles size={20} />
-                <span>AI 助手</span>
+                <span>{tChat('aiName', { defaultValue: 'AI 助手' })}</span>
               </button>
             )}
           </div>

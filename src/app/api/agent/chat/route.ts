@@ -1,7 +1,7 @@
 
 import { NextRequest } from 'next/server';
 
-const DIFY_API_BASE = process.env.DIFY_API_BASE || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
+const DIFY_API_BASE = process.env.DIFY_API_BASE || process.env.DIFY_BASE_URL || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
 const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
 
 export const maxDuration = 60;
@@ -39,10 +39,23 @@ export async function POST(req: NextRequest) {
         }
 
         // Inputs for Dify
+        const rawLocale = body.locale || 'en';
+
+        // 將 locale 轉換為明確的語言指示給 Dify
+        const getResponseLanguage = (locale: string): string => {
+            if (locale === 'zh' || locale === 'zh-TW') return '繁體中文（台灣）';
+            if (locale === 'ja') return '日本語';
+            return 'English';
+        };
+
         const inputs = {
             current_station: body.nodeId || body.current_station || '',
-            locale: body.locale || 'en',
-            user_profile: body.user_profile || 'general'
+            locale: rawLocale,
+            user_profile: body.user_profile || 'general',
+            response_language: getResponseLanguage(rawLocale), // 明確語言指示
+            language_instruction: rawLocale === 'zh' || rawLocale === 'zh-TW'
+                ? '請務必使用繁體中文（台灣用語）回答，不要使用简体中文。'
+                : ''
         };
 
         const conversationId = body.conversationId || undefined;
