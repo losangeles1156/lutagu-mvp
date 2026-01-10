@@ -36,38 +36,44 @@ export class DbImporter {
     }
 
     async importL1(data: L1Data) {
-        const { error } = await this.supabase
-            .from('crawler_raw_data')
-            .upsert({
-                url: data.url,
-                title: data.title,
-                raw_structure: JSON.parse(data.raw_structure),
-                metadata: data.metadata,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'url' });
+        try {
+            const { error } = await this.supabase
+                .from('crawler_raw_data')
+                .upsert({
+                    url: data.url,
+                    title: data.title,
+                    raw_structure: JSON.parse(data.raw_structure),
+                    metadata: data.metadata,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'url' });
 
-        if (error) {
-            console.error(`[DbImporter] Error importing L1 data for ${data.url}:`, error);
-            throw error;
+            if (error) {
+                if (error.code === 'PGRST204' || error.code === 'PGRST205') {
+                    console.warn(`[DbImporter] Table 'crawler_raw_data' not found. Skipping L1 raw data storage for ${data.url}.`);
+                    return;
+                }
+                console.error(`[DbImporter] Error importing L1 data for ${data.url}:`, error);
+                throw error;
+            }
+        } catch (err) {
+            console.warn(`[DbImporter] Failed to import L1 data: ${err instanceof Error ? err.message : String(err)}`);
         }
     }
 
     async importL4(data: L4Data) {
-        // Map L4Data to l4_knowledge_v2 schema
+        // Map L4Data to l4_knowledge_embeddings schema
         const { error } = await this.supabase
-            .from('l4_knowledge_v2')
+            .from('l4_knowledge_embeddings')
             .upsert({
                 knowledge_type: data.knowledge_type,
-                node_id: data.entity_id,
-                title: `${data.entity_name.ja || data.entity_name['zh-TW']} - ${data.subcategory}`,
+                entity_id: data.entity_id,
+                entity_name: data.entity_name,
                 content: data.content,
-                tag_category: [data.category],
-                tag_subcategory: [data.subcategory],
+                category: data.category,
+                subcategory: data.subcategory,
                 source: data.source,
-                language: 'zh-TW',
-                importance: 5,
                 updated_at: new Date().toISOString()
-            }, { onConflict: 'node_id, title' }); // Assuming unique constraint or similar
+            });
 
         if (error) {
             console.error(`[DbImporter] Error importing L4 data:`, error);
@@ -77,10 +83,11 @@ export class DbImporter {
 
     async isAlreadyCrawled(url: string): Promise<boolean> {
         const { data, error } = await this.supabase
-            .from('crawler_raw_data')
-            .select('url')
-            .eq('url', url)
-            .single();
+            .from('l4_knowledge_embeddings')
+            .select('source')
+            .eq('source', url)
+            .limit(1)
+            .maybeSingle();
         
         return !!data;
     }

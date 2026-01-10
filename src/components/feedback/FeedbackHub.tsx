@@ -8,6 +8,7 @@ import { useTranslations, useLocale } from 'next-intl';
 interface FeedbackHubProps {
     nodeId?: string;
     nodeName?: string;
+    children?: React.ReactNode;
 }
 
 type FeedbackType = 'general' | 'bug' | 'spot' | 'tip';
@@ -24,7 +25,7 @@ const FEEDBACK_OPTIONS: {
         { type: 'tip', icon: Lightbulb, color: 'text-blue-600', bgColor: 'bg-blue-100' }
     ];
 
-export function FeedbackHub({ nodeId, nodeName }: FeedbackHubProps) {
+export function FeedbackHub({ nodeId, nodeName, children }: FeedbackHubProps) {
     const t = useTranslations('feedback');
     const locale = useLocale();
     const [isOpen, setIsOpen] = useState(false);
@@ -76,16 +77,22 @@ export function FeedbackHub({ nodeId, nodeName }: FeedbackHubProps) {
 
     return (
         <>
-            {/* Floating Action Button */}
-            <motion.button
-                onClick={() => setIsOpen(true)}
-                className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 flex items-center justify-center active:scale-95 transition-transform"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                aria-label={t('openFeedback', { defaultValue: '提供回饋' })}
-            >
-                <MessageSquarePlus size={24} />
-            </motion.button>
+            {/* Trigger Button */}
+            {children ? (
+                <div onClick={() => setIsOpen(true)} className="cursor-pointer">
+                    {children}
+                </div>
+            ) : (
+                <motion.button
+                    onClick={() => setIsOpen(true)}
+                    className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 flex items-center justify-center active:scale-95 transition-transform"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label={t('openFeedback', { defaultValue: '提供回饋' })}
+                >
+                    <MessageSquarePlus size={24} />
+                </motion.button>
+            )}
 
             {/* Feedback Drawer */}
             <AnimatePresence>
@@ -183,8 +190,8 @@ export function FeedbackHub({ nodeId, nodeName }: FeedbackHubProps) {
                                                             key={star}
                                                             onClick={() => setRating(star)}
                                                             className={`w-10 h-10 rounded-full transition-all ${rating && rating >= star
-                                                                    ? 'bg-amber-400 text-white'
-                                                                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                                                ? 'bg-amber-400 text-white'
+                                                                : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                                                                 }`}
                                                         >
                                                             <Star size={18} fill={rating && rating >= star ? 'currentColor' : 'none'} className="mx-auto" />

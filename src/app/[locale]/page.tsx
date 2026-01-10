@@ -13,7 +13,7 @@ import { ChatPanel } from '@/components/chat/ChatPanel';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { fetchNodeConfig, NodeProfile } from '@/lib/api/nodes';
-import { X, MessageSquare, Compass, CalendarDays, User2 } from 'lucide-react';
+import { X, MessageSquare, MessageSquarePlus } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { getSupabase } from '@/lib/supabase';
@@ -160,38 +160,34 @@ export default function Home() {
     // Bottom bar
     const bottomBar = (
         <nav className="mx-auto max-w-md px-4 pb-[env(safe-area-inset-bottom)]" aria-label={tNav('navigation')}>
-            <div className="h-[76px] bg-white/95 backdrop-blur-xl border border-black/[0.05] shadow-[0_18px_60px_rgba(0,0,0,0.10)] rounded-[28px] flex items-center justify-between px-4" role="tablist">
-                {[
-                    { id: 'explore' as const, label: tNav('explore'), Icon: Compass },
-                    { id: 'trips' as const, label: tNav('trips'), Icon: CalendarDays },
-                    { id: 'me' as const, label: tNav('me'), Icon: User2 }
-                ].map(({ id, label, Icon }) => {
-                    const isActive = activeTab === id;
-                    return (
-                        <button
-                            key={id}
-                            onClick={() => {
-                                if (id !== 'explore') { setBottomSheetOpen(false); setCurrentNode(null); }
-                                setActiveTab(id);
-                            }}
-                            role="tab"
-                            aria-selected={isActive}
-                            aria-controls={`${id}-panel`}
-                            className={`flex-1 h-full flex flex-col items-center justify-center gap-1.5 rounded-[22px] transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isActive ? 'text-indigo-700' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${isActive ? 'bg-indigo-50' : 'bg-transparent'}`}>
-                                <Icon size={20} aria-hidden="true" />
-                            </div>
-                            <div className={`text-[10px] font-black tracking-wider ${isActive ? 'text-indigo-700' : 'text-slate-400'}`}>{label}</div>
-                        </button>
-                    );
-                })}
+            <div className="h-[76px] bg-white/95 backdrop-blur-xl border border-black/[0.05] shadow-[0_18px_60px_rgba(0,0,0,0.10)] rounded-[28px] flex items-center justify-between px-3 gap-3" role="tablist">
+
+                {/* Feedback Button (Integrated) */}
+                <FeedbackHub nodeId={currentNodeId || undefined} nodeName={nodeData?.name?.en || nodeData?.name?.ja || undefined}>
+                    <button
+                        className="w-16 h-full flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-600 transition-colors active:scale-95"
+                        aria-label={tCommon('feedback')}
+                    >
+                        <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center">
+                            <MessageSquarePlus size={20} className="text-slate-500" />
+                        </div>
+                        <span className="text-[10px] font-bold">回饋</span>
+                    </button>
+                </FeedbackHub>
+
+                {/* Primary AI Chat Action */}
                 <button
                     onClick={() => transitionTo('fullscreen')}
-                    className="ml-2 w-14 h-14 rounded-[22px] bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center shadow-[0_12px_30px_rgba(79,70,229,0.35)] active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="flex-1 h-[60px] rounded-[22px] bg-gradient-to-r from-indigo-600 to-indigo-800 text-white flex items-center justify-center gap-3 shadow-[0_8px_20px_rgba(79,70,229,0.3)] active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 hover:shadow-[0_12px_28px_rgba(79,70,229,0.4)]"
                     aria-label={tCommon('openChat')}
                 >
-                    <MessageSquare size={22} aria-hidden="true" />
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                        <MessageSquare size={18} className="text-white" aria-hidden="true" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                        <span className="text-base font-black tracking-wide">AI 嚮導</span>
+                        <span className="text-[10px] font-medium text-indigo-100 opacity-90">隨時詢問交通與行程</span>
+                    </div>
                 </button>
             </div>
         </nav>
@@ -458,7 +454,7 @@ export default function Home() {
             )}
 
             <SubscriptionModal />
-            <FeedbackHub nodeId={currentNodeId || undefined} nodeName={nodeData?.name?.en || nodeData?.name?.ja || undefined} />
+            {/* FeedbackHub moved to bottomBar */}
         </div>
     );
 }
