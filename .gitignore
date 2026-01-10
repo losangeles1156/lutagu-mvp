@@ -22,11 +22,15 @@ npm-debug.log*
 yarn-debug.log*
 ts-debug.log*
 
+# Scripts and Tools
+scripts/*.js
+scripts/*.ts
+scripts/*.json
+!scripts/package.json
+
 # Local env files
 .env*.local
-
-# Vercel
-.vercel
+.env
 
 # Typescript
 *.tsbuildinfo
