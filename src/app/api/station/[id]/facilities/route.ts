@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { STATION_WISDOM } from '@/data/stationWisdom';
+
 import { getStationIdVariants } from '@/lib/constants/stationLines';
 import { buildStationIdSearchCandidates } from '@/lib/api/nodes';
 import { logUserActivity } from '@/lib/activityLogger';
@@ -101,14 +101,7 @@ export async function GET(
             dbFacilities = [];
         }
 
-        const wisdom = (() => {
-            for (const v of getStationIdVariants(stationId)) {
-                const hit = (STATION_WISDOM as any)[v];
-                if (hit) return hit;
-            }
-            return undefined;
-        })();
-        const mergedFacilities = [...(dbFacilities || []), ...((wisdom?.l3Facilities || []) as any[])];
+        const mergedFacilities = [...(dbFacilities || [])];
         const seen = new Set<string>();
         const deduped = mergedFacilities.filter((f: any) => {
             const key = [

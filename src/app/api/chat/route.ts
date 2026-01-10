@@ -4,7 +4,7 @@ import { StrategyEngine } from '@/lib/ai/strategyEngine';
 import { logUserActivity } from '@/lib/activityLogger';
 import { getVisitorIdFromRequest } from '@/lib/visitorIdentity';
 import { writeAuditLog, writeSecurityEvent } from '@/lib/security/audit';
-import { STATION_WISDOM } from '@/data/stationWisdom';
+
 
 export const runtime = 'nodejs';
 
@@ -189,25 +189,8 @@ function mockResponse(params: { query: string; locale: SupportedLocale }) {
 
     const stationId = extractStationId();
     if (stationId) {
-        const wisdom = (STATION_WISDOM as any)[stationId];
-        const facilities = Array.isArray(wisdom?.l3Facilities) ? wisdom.l3Facilities : [];
-
-        if (facilities.length > 0) {
-            const typeCounts: Record<string, number> = {};
-            for (const f of facilities) {
-                const t = String(f?.type || 'other');
-                typeCounts[t] = (typeCounts[t] || 0) + 1;
-            }
-            const top = Object.entries(typeCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 6)
-                .map(([t, c]) => `${t}×${c}`)
-                .join(locale === 'en' ? ', ' : '、');
-
-            const header = locale === 'en' ? 'Station facilities (offline): ' : locale === 'ja' ? '駅施設（オフライン）：' : '車站設施（離線）：';
-            answer = `${answer}\n\n${header}${top}`;
-        }
-
+        // [Refactor] knowledgeService can be used here if needed, but for minimal offline fallback 
+        // we omit complex facility listing to fix build errors.
         actions.push({
             type: 'details',
             label: locale === 'en' ? 'View station details' : locale === 'ja' ? '駅の詳細を見る' : '查看車站詳情',

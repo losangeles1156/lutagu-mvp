@@ -1,5 +1,5 @@
-import { supabaseAdmin } from '../supabase';
-import { STATION_WISDOM, StationWisdomData } from '@/data/stationWisdom';
+import { supabaseAdmin } from '@/lib/supabase';
+import { knowledgeService } from '@/lib/l4/knowledgeService';
 import { resolveNodeInheritance } from '../nodes/inheritance';
 
 export interface CommercialRule {
@@ -24,7 +24,7 @@ export interface StrategyContext {
     l2Status: any;
     commercialActions: any[];
     wisdomSummary?: string;
-    wisdom?: StationWisdomData;
+    wisdom?: any;
 }
 
 /**
@@ -85,15 +85,20 @@ export const StrategyEngine = {
         }
 
         // 4. Fetch Expert Wisdom (L4)
-        const wisdom = STATION_WISDOM[identityNode.id] || STATION_WISDOM[nearestNode.id];
+        const knowledgeItems = knowledgeService.getKnowledgeByStationId(identityNode.id);
+        const resolvedWisdom = {
+            traps: knowledgeItems.filter(k => k.type === 'warning').map(k => ({ severity: k.priority > 80 ? 'critical' : 'medium', content: k.content, advice: '' })),
+            hacks: knowledgeItems.filter(k => k.type === 'tip').map(k => k.content)
+        };
+
         let wisdomSummary = '';
 
-        if (wisdom) {
-            const criticalTrap = wisdom.traps?.find(t => t.severity === 'critical');
-            const highTrap = wisdom.traps?.find(t => t.severity === 'high');
-            const hack = wisdom.hacks?.[0];
+        if (resolvedWisdom) {
+            const criticalTrap = resolvedWisdom.traps.find(t => t.severity === 'critical');
+            const highTrap = resolvedWisdom.traps.find(t => t.severity === 'medium'); // downgrade check
+            const hack = resolvedWisdom.hacks?.[0];
 
-            if (criticalTrap) wisdomSummary += `[CRITICAL WARNING] ${criticalTrap.content} Advice: ${criticalTrap.advice}\n`;
+            if (criticalTrap) wisdomSummary += `[CRITICAL WARNING] ${criticalTrap.content}\n`;
             if (highTrap) wisdomSummary += `[WARNING] ${highTrap.content}\n`;
             if (hack) wisdomSummary += `[LOCAL TRICK] ${hack}\n`;
         }
@@ -105,7 +110,7 @@ export const StrategyEngine = {
             l2Status,
             commercialActions: commercialActions.sort((a, b) => b.priority - a.priority),
             wisdomSummary,
-            wisdom
+            wisdom: resolvedWisdom
         };
     }
 };

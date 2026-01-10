@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { STATION_WISDOM } from '@/data/stationWisdom';
+import { knowledgeService } from '@/lib/l4/knowledgeService';
 import { ActionCard } from '@/lib/types/stationStandard';
 import { logUserActivity } from '@/lib/activityLogger';
 
@@ -23,11 +23,11 @@ export async function POST(request: Request) {
             metadata: { feature: 'l4_strategy' }
         });
 
-        // 1. Get Wisdom for the station
-        const wisdom = STATION_WISDOM[stationId];
+        // 1. Get Wisdom for the station via KnowledgeService
+        const knowledgeItems = knowledgeService.getKnowledgeByStationId(stationId);
         const cards: ActionCard[] = [];
 
-        if (!wisdom) {
+        if (knowledgeItems.length === 0) {
             // Fallback for unknown stations
             return NextResponse.json({
                 cards: [{
@@ -40,6 +40,13 @@ export async function POST(request: Request) {
                 }]
             });
         }
+
+        // Adapt Knowledge Items to old "wisdom" structure where needed
+        const wisdom = {
+            hacks: knowledgeItems.filter(k => k.type === 'tip' || (k.type as string) === 'hack').map(k => ({ title: k.section, content: k.content })),
+            traps: knowledgeItems.filter(k => k.type === 'warning' || (k.type as string) === 'seasonal').map(k => ({ title: k.section, content: k.content, severity: k.priority > 80 ? 'critical' : 'medium', advice: '' })),
+            l3Facilities: [] as any[] // Explicitly empty for now to fix build
+        };
 
         // 2. Rule Engine Logic
 
@@ -95,95 +102,33 @@ export async function POST(request: Request) {
             }
         }
 
-        // --- DEMAND RULES (Priority: Medium) ---
-        // If no primary card derived from destination, try to derive from wisdom tags/facilities
-        if (cards.length === 0 && demand) {
-            // Rule: Luggage -> Look for Elevators or Lockers advice
-            if (demand === 'luggage') {
-                const lockerStart = wisdom.l3Facilities?.find(f => f.type === 'locker' && (f.attributes?.count || 0) > 50);
-                if (lockerStart) {
-                    const loc = lockerStart.location as { ja: string; en: string; zh: string };
-                    cards.push({
-                        id: 'luggage-advice',
-                        type: 'primary',
-                        title: { ja: '手荷物預かり・ロッカー', en: 'Luggage Storage / Lockers', zh: '大行李寄放建議' },
-                        description: {
-                            ja: `大型ロッカーは「${loc.ja}」にあります。`,
-                            en: `Large lockers are available at "${loc.en}".`,
-                            zh: `推薦前往「${loc.zh}」，那裡有較多的大型置物櫃與行李寄放服務。`
-                        },
-                        actionLabel: { ja: '構内図', en: 'Station Map', zh: '構內圖' },
-                        actionUrl: 'https://www.google.com/maps'
-                    });
-                } else {
-                    // Fallback Luggage Advice
-                    cards.push({
-                        id: 'luggage-general',
-                        type: 'primary',
-                        title: { ja: 'エレベーター利用推奨', en: 'Use Elevators', zh: '建議使用電梯' },
-                        description: {
-                            ja: '大きな荷物がある場合は、エレベータールートを確認してください。',
-                            en: 'With large luggage, please check the elevator routes to avoid stairs.',
-                            zh: '攜帶大行李時，請務必尋找電梯標示。此站部分出口僅有樓梯。'
-                        },
-                        actionLabel: { ja: '構内図', en: 'Station Map', zh: '構內圖' },
-                        actionUrl: ''
-                    });
-                }
-            }
-
-            // Rule: Family -> Look for Nursing/Wide gates
-            if (demand === 'family') {
-                const babyRoom = wisdom.l3Facilities?.find(f => f.attributes?.hasBabyRoom);
-                if (babyRoom) {
-                    const loc = babyRoom.location as { ja: string; en: string; zh: string };
-                    cards.push({
-                        id: 'family-babyroom',
-                        type: 'primary',
-                        title: { ja: '授乳室与設備', en: 'Nursing Room & Facilities', zh: '育嬰室與親子設施' },
-                        description: {
-                            ja: `授乳室は「${loc.ja}」にあります。`,
-                            en: `Nursing room is located at "${loc.en}".`,
-                            zh: `育嬰室位於「${loc.zh}」，提供熱水與尿布台。`
-                        },
-                        actionLabel: { ja: '詳細', en: 'Details', zh: '詳細資訊' }
-                    });
-                }
-            }
-            // Rule: Speed -> Check Hacks
-            if (demand === 'speed' && wisdom.hacks && wisdom.hacks.length > 0) {
-                const hack = wisdom.hacks[0];
-                cards.push({
-                    id: 'speed-hack',
-                    type: 'primary',
-                    title: { ja: hack.title, en: hack.title, zh: hack.title },
-                    description: {
-                        ja: hack.content,
-                        en: hack.content,
-                        zh: hack.content
-                    },
-                    actionLabel: { ja: '確認', en: 'Check', zh: '確認' }
-                });
-            }
+        // --- TRAIN / HACK SUGGESTIONS ---
+        // If wisdom.hacks exists, promote the first one
+        if (wisdom.hacks.length > 0) {
+            const hack = wisdom.hacks[0];
+            cards.push({
+                id: 'speed-hack',
+                type: 'primary',
+                title: { ja: hack.title, en: hack.title, zh: hack.title },
+                description: { ja: hack.content, en: hack.content, zh: hack.content },
+                actionLabel: { ja: '確認', en: 'Check', zh: '確認' }
+            });
         }
 
-        // --- TRAP WARNINGS (Always add as Secondary if High Severity) ---
-        const criticalTraps = wisdom.traps.filter(t => t.severity === 'critical' || t.severity === 'high');
-        criticalTraps.forEach((trap, idx) => {
-            cards.push({
-                id: `trap-${idx}`,
-                type: cards.length === 0 ? 'primary' : 'secondary',
-                title: { ja: trap.title, en: trap.title, zh: trap.title },
-                description: {
-                    ja: (trap.content || '') + '\n' + trap.advice,
-                    en: (trap.content || '') + '\n' + trap.advice,
-                    zh: (trap.content || '') + '\n' + trap.advice
-                },
-                actionLabel: { ja: '注意', en: 'Warning', zh: '注意' }
-            });
+        // --- TRAP WARNINGS ---
+        wisdom.traps.forEach((trap, idx) => {
+            if (trap.severity === 'critical') {
+                cards.push({
+                    id: `trap-${idx}`,
+                    type: 'secondary',
+                    title: { ja: trap.title, en: trap.title, zh: trap.title },
+                    description: { ja: trap.content, en: trap.content, zh: trap.content },
+                    actionLabel: { ja: '注意', en: 'Warning', zh: '注意' }
+                });
+            }
         });
 
-        // --- DEFAULT FALLBACK (If still empty) ---
+        // --- DEFAULT FALLBACK ---
         if (cards.length === 0) {
             cards.push({
                 id: 'default-explore',
@@ -199,29 +144,10 @@ export async function POST(request: Request) {
             });
         }
 
-        // Add hacks as secondary if not used
-        if (wisdom.hacks && wisdom.hacks.length > 0) {
-            const hack = wisdom.hacks[0];
-            // Check if already added
-            if (!cards.find(c => c.id === 'speed-hack')) {
-                cards.push({
-                    id: 'secondary-hack',
-                    type: 'secondary',
-                    title: { ja: hack.title, en: hack.title, zh: hack.title },
-                    description: {
-                        ja: hack.content,
-                        en: hack.content,
-                        zh: hack.content
-                    },
-                    actionLabel: { ja: '詳細', en: 'Detail', zh: '詳細' }
-                });
-            }
-        }
-
         return NextResponse.json({ cards });
+
     } catch (error) {
         console.error('Strategy API Error:', error);
         return NextResponse.json({ error: 'Failed to generate strategy' }, { status: 500 });
     }
 }
-

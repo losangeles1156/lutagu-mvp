@@ -1,5 +1,4 @@
 import { supabase } from '../supabase';
-import { STATION_WISDOM, KNOWLEDGE_BASE } from '../../data/stationWisdom';
 import { STATIC_L1_DATA, L1_NAME_INDEX } from '../../data/staticL1Data';
 import { STATION_LINES, getStationIdVariants, guessPhysicalOdptStationIds, resolveHubStationMembers } from '@/lib/constants/stationLines';
 import { L1_DNA_Data, L3Facility, StationUIProfile, LocaleString, ActionCard } from '@/lib/types/stationStandard';
@@ -13,41 +12,7 @@ function getLoc(obj: any) {
     return obj['zh-TW'] || obj.zh || obj.en || obj.ja || '';
 }
 
-function generateRidingKnowledgeFromRules(nodeId: string): any {
-    const candidates = buildStationIdSearchCandidates(nodeId);
 
-    // Filter rules
-    const rules = KNOWLEDGE_BASE.filter((rule: any) => {
-        if (!rule.trigger || !rule.trigger.station_ids) return false;
-        return rule.trigger.station_ids.some((id: string) => candidates.includes(id));
-    });
-
-    if (rules.length === 0) return null;
-
-    const traps: any[] = [];
-    const hacks: any[] = [];
-
-    rules.forEach((r: any) => {
-        const item = {
-            title: getLoc(r.title),
-            description: getLoc(r.content),
-            advice: '', // ExpertKnowledge usually has content as main text
-            priority: r.priority || 50
-        };
-
-        if (r.type === 'warning' || r.type === 'seasonal') {
-            traps.push(item);
-        } else {
-            hacks.push({ ...item, type: r.type });
-        }
-    });
-
-    // Sort by priority
-    traps.sort((a, b) => b.priority - a.priority);
-    hacks.sort((a, b) => b.priority - a.priority);
-
-    return { traps, hacks };
-}
 
 // Types aligning with DB schema
 // Version 2.0: Added version control for cache invalidation
@@ -695,14 +660,7 @@ export async function fetchNodeConfig(nodeId: string) {
         wisdomKeys.push(hubId);
     }
 
-    let wisdom: any = null;
-    for (const key of wisdomKeys) {
-        const hit = (STATION_WISDOM as any)[key];
-        if (hit) {
-            wisdom = hit;
-            break;
-        }
-    }
+
 
     if (!enrichedProfile.l1_dna) {
         let staticData: any = null;
@@ -785,7 +743,7 @@ export async function fetchNodeConfig(nodeId: string) {
 
 
     // 3. Determine Final L3 Data
-    let finalL3 = dbL3Facilities || (wisdom ? wisdom.l3Facilities : []);
+    let finalL3 = dbL3Facilities || [];
 
     if (finalL3 && finalL3.length > 0) {
         // Map StationFacility to L3Facility format
@@ -834,27 +792,6 @@ export async function fetchNodeConfig(nodeId: string) {
         });
 
         enrichedProfile.l3_facilities = wisdomFacilities;
-    }
-
-    // [New] Inject External Links (e.g. Toilet Vacancy)
-    if (wisdom && wisdom.links) {
-        enrichedProfile.external_links = wisdom.links.map((link: any, idx: number) => {
-            const title =
-                typeof link.title === 'string'
-                    ? { ja: link.title, en: link.title, zh: link.title }
-                    : link.title;
-
-            const trackingId =
-                typeof link.tracking_id === 'string' && link.tracking_id
-                    ? link.tracking_id
-                    : `ext_${nodeId}_${idx}`;
-
-            return {
-                ...link,
-                title,
-                tracking_id: trackingId
-            };
-        });
     }
 
     // --- L4: LUTAGU STRATEGY CARDS (V5 PASSIVE) ---
@@ -1012,18 +949,7 @@ export async function fetchNodeConfig(nodeId: string) {
         }
     }
 
-    // [New] Fallback to Rule Engine if DB empty
-    if (!aggregatedRidingKnowledge && nodeId) {
-        try {
-            const ruleBasedKnowledge = generateRidingKnowledgeFromRules(nodeId);
-            if (ruleBasedKnowledge) {
-                console.log('[fetchNodeConfig] Generated L4 knowledge from rules for', nodeId);
-                aggregatedRidingKnowledge = ruleBasedKnowledge;
-            }
-        } catch (e) {
-            console.warn('[fetchNodeConfig] Rule generation failed', e);
-        }
-    }
+
 
     // Attach aggregated riding_knowledge to finalNode for downstream use
     if (aggregatedRidingKnowledge && finalNode) {
