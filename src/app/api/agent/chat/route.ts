@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
 
         const inputs = {
             current_station: body.nodeId || body.current_station || '',
+            station_name: body.stationName || '',
             locale: rawLocale,
             user_profile: body.user_profile || 'general',
             response_language: getResponseLanguage(rawLocale), // 明確語言指示
@@ -58,9 +59,13 @@ export async function POST(req: NextRequest) {
                 : ''
         };
 
+        console.log('[Chat API] Dify Inputs:', JSON.stringify(inputs, null, 2));
+        
         const conversationId = body.conversationId || undefined;
         const userId = body.userId || 'anonymous';
 
+        console.log(`[Chat API] Calling Dify: ${DIFY_API_BASE}/chat-messages`);
+        const fetchStartTime = Date.now();
         // Fetch to Dify
         const difyResponse = await fetch(`${DIFY_API_BASE}/chat-messages`, {
             method: 'POST',
@@ -78,6 +83,7 @@ export async function POST(req: NextRequest) {
                 auto_generate_name: false
             })
         });
+        console.log(`[Chat API] Dify Response Received: ${Date.now() - fetchStartTime}ms`);
 
         if (!difyResponse.ok) {
             const errorText = await difyResponse.text();
@@ -96,12 +102,30 @@ export async function POST(req: NextRequest) {
 
         const stream = new ReadableStream({
             async start(controller) {
+                // Immediately send a thinking start marker to trigger TTFB on client
+                controller.enqueue(encoder.encode(`\n[THINKING]${body.locale === 'zh' || body.locale === 'zh-TW' ? '啟動認知引擎...' : 'Initializing cognitive engine...'}[/THINKING]\n`));
+
                 let buffer = '';
+                let outputBuffer = ''; // Buffer for smoother streaming
+                const startTime = Date.now();
+                let firstChunkTime: number | null = null;
 
                 try {
                     while (true) {
                         const { done, value } = await reader.read();
-                        if (done) break;
+                        
+                        if (done) {
+                            // Flush any remaining output buffer
+                            if (outputBuffer) {
+                                controller.enqueue(encoder.encode(outputBuffer));
+                            }
+                            break;
+                        }
+
+                        if (firstChunkTime === null) {
+                            firstChunkTime = Date.now();
+                            console.log(`[Chat API] TTFB (Dify): ${firstChunkTime - startTime}ms`);
+                        }
 
                         buffer += decoder.decode(value, { stream: true });
 
@@ -120,11 +144,19 @@ export async function POST(req: NextRequest) {
                             try {
                                 const data = JSON.parse(jsonStr);
                                 const event = data.event;
+                                console.log(`[Chat API] Dify Event: ${event}`);
 
                                 // Handle Thinking Events - 讓用戶知道 AI 正在思考
                                 if (event === 'agent_thought') {
-                                    const thought = data.thought || '';
+                                    let thought = data.thought || '';
                                     if (thought) {
+                                        // Flush output buffer before thought if needed
+                                        if (outputBuffer) {
+                                            controller.enqueue(encoder.encode(outputBuffer));
+                                            outputBuffer = '';
+                                        }
+                                        // Filter out ** symbols (Markdown bold) as per Dify prompt requirements
+                                        thought = thought.replace(/\*\*/g, '');
                                         // 發送思考狀態標記，前端可解析顯示
                                         controller.enqueue(encoder.encode(`\n[THINKING]${thought}[/THINKING]\n`));
                                     }
@@ -132,9 +164,18 @@ export async function POST(req: NextRequest) {
 
                                 // Handle Answer Events
                                 if (event === 'message' || event === 'agent_message') {
-                                    const answer = data.answer;
+                                    let answer = data.answer;
                                     if (answer) {
-                                        controller.enqueue(encoder.encode(answer));
+                                        // Filter out ** symbols (Markdown bold) as per Dify prompt requirements
+                                        answer = answer.replace(/\*\*/g, '');
+                                        
+                                        outputBuffer += answer;
+                                        
+                                        // Send if buffer gets large or contains a newline for responsiveness
+                                        if (outputBuffer.length > 20 || outputBuffer.includes('\n')) {
+                                            controller.enqueue(encoder.encode(outputBuffer));
+                                            outputBuffer = '';
+                                        }
                                     }
                                 }
 

@@ -54,14 +54,14 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
 
     useEffect(() => {
         if (displayName && !hasGreeted) {
-            setMessages([{ role: 'assistant', content: tL4('initialMessage', { station: displayName }) }]);
+            setMessages([{ id: 'initial', role: 'assistant', content: tL4('initialMessage', { station: displayName }) } as any]);
             setHasGreeted(true);
         }
     }, [displayName, hasGreeted, tL4, setMessages]);
 
     const handleReset = useCallback(() => {
         if (window.confirm(tL4('resetConfirm'))) {
-            setMessages([{ role: 'assistant', content: tL4('initialMessage', { station: displayName }) }]);
+            setMessages([{ id: 'initial', role: 'assistant', content: tL4('initialMessage', { station: displayName }) } as any]);
             setInput('');
         }
     }, [displayName, tL4, setMessages]);

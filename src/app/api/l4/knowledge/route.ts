@@ -19,6 +19,7 @@ import {
     getPassRecommendations,
     getCrowdTips
 } from '@/lib/l4/expertKnowledgeBase';
+import { knowledgeService } from '@/lib/l4/knowledgeService';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -43,14 +44,30 @@ export async function GET(request: NextRequest) {
                 if (!id) {
                     return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
                 }
-                const tips = getHubStationTips(id);
-                const accessibility = getAccessibilityAdvice(id);
+                
+                // Get hardcoded tips
+                const hardcodedTips = getHubStationTips(id);
+                const hardcodedAccessibility = getAccessibilityAdvice(id);
+                
+                // Get markdown-based tips
+                const markdownTips = knowledgeService.getKnowledgeByStationId(id);
+                
+                // Merge and format
+                const formattedMarkdownTips = markdownTips.map(k => ({
+                    icon: k.icon,
+                    text: k.content,
+                    category: k.type,
+                    section: k.section,
+                    source: 'markdown_kb'
+                }));
+
                 return NextResponse.json({ 
                     station_id: id, 
-                    tips,
-                    accessibility,
-                    tip_count: tips.length,
-                    has_accessibility: !!accessibility
+                    tips: [...hardcodedTips, ...formattedMarkdownTips],
+                    accessibility: hardcodedAccessibility,
+                    markdown_knowledge: markdownTips,
+                    tip_count: hardcodedTips.length + markdownTips.length,
+                    has_accessibility: !!hardcodedAccessibility || markdownTips.some(k => k.type === 'accessibility')
                 });
             }
             

@@ -86,7 +86,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                 content: tL4('greeting', { name: displayName }),
             } as any]);
         }
-    }, [displayName, tL4, setMessages]);
+    }, [displayName, tL4, setMessages, messages.length]);
 
     // Send Logic
     const handleSend = useCallback(async (textOverride?: string, profileOverride?: string) => {

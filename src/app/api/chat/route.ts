@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { StrategyEngine } from '@/lib/ai/strategyEngine';
+
 import { logUserActivity } from '@/lib/activityLogger';
 import { getVisitorIdFromRequest } from '@/lib/visitorIdentity';
 import { writeAuditLog, writeSecurityEvent } from '@/lib/security/audit';
 import { STATION_WISDOM } from '@/data/stationWisdom';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 type SupportedLocale = 'zh-TW' | 'en' | 'ja';
 

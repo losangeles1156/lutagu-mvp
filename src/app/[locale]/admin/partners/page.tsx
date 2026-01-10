@@ -43,17 +43,15 @@ export default function PartnersAdminPage() {
     }, [status, search]);
 
     // Refetch when filters change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         setPage(1);
         fetchPartners();
-    }, [status, search]);
+    }, [status, search, fetchPartners]);
 
     // Refetch when page changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         fetchPartners();
-    }, [page]);
+    }, [page, fetchPartners]);
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this partner?')) return;

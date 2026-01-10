@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Simple Short (Under 10 words)",
+    "ttfb": 5947,
+    "totalDuration": 6746,
+    "totalCharacters": 177,
+    "throughput": "26.24",
+    "success": true
+  },
+  {
+    "name": "Medium Complex (Around 50 words)",
+    "ttfb": 4495,
+    "totalDuration": 16626,
+    "totalCharacters": 495,
+    "throughput": "29.77",
+    "success": true
+  },
+  {
+    "name": "Complex Multi-turn (3+ turns simulation)",
+    "ttfb": 4787,
+    "totalDuration": 29383,
+    "totalCharacters": 772,
+    "throughput": "26.27",
+    "success": true
+  }
+]

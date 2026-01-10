@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 // GET: Retrieve all feedback for admin dashboard
 export async function GET(req: NextRequest) {

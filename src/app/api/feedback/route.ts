@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 interface FeedbackPayload {
     feedbackType: 'general' | 'bug' | 'spot' | 'tip';

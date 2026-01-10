@@ -7,7 +7,7 @@ import {
     getRecentAIErrors
 } from '@/lib/monitoring/performanceLogger';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 /**
  * GET: Retrieve performance metrics for admin dashboard

@@ -32,9 +32,12 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
 
 async function generateMiniMaxResponse(params: LLMParams): Promise<string | null> {
     const { systemPrompt, userPrompt, temperature = 0.2 } = params;
-    
+
+    // International endpoint: api.minimax.io
+    const endpoint = 'https://api.minimax.io/v1/chat/completions';
+
     try {
-        const res = await fetch('https://api.minimaxi.com/v1/chat/completions', {
+        const res = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -46,19 +49,25 @@ async function generateMiniMaxResponse(params: LLMParams): Promise<string | null
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                reasoning_split: true, 
+                reasoning_split: true,
                 temperature
             })
         });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error(`[MiniMax] API Error ${res.status}:`, errorText);
+            return null;
+        }
 
         const data: any = await res.json();
         if (data?.choices?.[0]?.reasoning_details) {
             console.log('💭 MiniMax Thinking:', data.choices[0].reasoning_details);
         }
-        
+
         return data?.choices?.[0]?.message?.content || null;
     } catch (error) {
-        console.error('MiniMax API Failed:', error);
+        console.error('[MiniMax] API Call Failed:', error);
         return null;
     }
 }

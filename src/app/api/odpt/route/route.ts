@@ -22,7 +22,7 @@ interface RouteResponse {
     error?: string;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const fromStation = searchParams.get('from');
     const toStation = searchParams.get('to');

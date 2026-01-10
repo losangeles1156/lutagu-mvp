@@ -67,11 +67,12 @@ export function useDifyChat(options: UseDifyChatOptions) {
         api: '/api/agent/chat',
         body: {
             nodeId: stationId || '',
+            stationName: stationName || '',
             locale,
             user_profile: 'general', // This will be overridden by sendMessage if userProfile is passed
             zone: zone || 'core'
         }
-    }), [stationId, locale, zone]);
+    }), [stationId, stationName, locale, zone]);
 
     const {
         messages: aiMessages,
@@ -106,6 +107,9 @@ export function useDifyChat(options: UseDifyChatOptions) {
     const messages: DifyMessage[] = useMemo(() => {
         return aiMessages.map((m: any) => {
             let content = m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || '';
+
+            // Filter out ** symbols (Markdown bold) as per Dify prompt requirements
+            content = content.replace(/\*\*/g, '');
 
             // Extract thinking markers from content
             const thinkingMatch = content.match(/\[THINKING\](.*?)\[\/THINKING\]/g);

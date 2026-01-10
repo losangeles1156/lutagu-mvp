@@ -66,17 +66,15 @@ export default function L1PlacesAdminPage() {
     }, []);
 
     // Refetch when filters change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         setPage(1);
         fetchPlaces();
-    }, [category, status, isPartner]);
+    }, [category, status, isPartner, fetchPlaces]);
 
     // Refetch when page changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         fetchPlaces();
-    }, [page]);
+    }, [page, fetchPlaces]);
 
     const handleApprove = async (id: string) => {
         try {
