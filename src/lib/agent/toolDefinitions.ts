@@ -1,4 +1,4 @@
-import { STATION_WISDOM, KNOWLEDGE_BASE } from '@/data/stationWisdom';
+
 import { supabaseAdmin } from '@/lib/supabase';
 import { buildStationIdSearchCandidates } from '@/lib/api/nodes';
 import { WeatherTool, TrainStatusTool, FareTool, TimetableTool } from './tools/standardTools';

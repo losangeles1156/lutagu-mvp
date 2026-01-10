@@ -176,25 +176,22 @@ export const tools = {
         }),
         execute: async ({ stationId, tags, query }) => {
             try {
-                // Dynamic import to avoid circular dependency
-                const { KNOWLEDGE_BASE, STATION_WISDOM } = await import('@/data/stationWisdom');
-                if (!KNOWLEDGE_BASE) return [];
+                // [Refactor] Use knowledgeService/searchService
+                const { searchL4Knowledge } = await import('@/lib/l4/searchService');
 
-                // Simple implementation for MVP: just return relevant entries by station or basic tag match
-                // Full TagEngine implementation can be ported if needed, but simplified here for migration safety first.
-
-                // For now, let's filter KNOWLEDGE_BASE by stationId if trigger exists
-                const entries = KNOWLEDGE_BASE.filter((rule: any) => {
-                    if (!rule.trigger?.station_ids || rule.trigger.station_ids.length === 0) return true;
-                    return rule.trigger.station_ids.includes(stationId);
+                const results = await searchL4Knowledge({
+                    query: query || (tags ? tags.join(' ') : 'tips'),
+                    stationId: stationId,
+                    topK: 5
                 });
 
-                // Map to simpler format
-                return entries.map((rule: any) => ({
-                    title: rule.title?.['zh-TW'] || rule.title?.ja,
-                    content: rule.content?.['zh-TW'] || rule.content?.ja,
-                    tags: rule.trigger?.keywords || []
-                })).slice(0, 5);
+                if (!results) return [];
+
+                return results.map((rule: any) => ({
+                    title: `[${rule.category}] ${rule.section}`,
+                    content: rule.content,
+                    tags: [rule.category]
+                }));
             } catch (e) {
                 console.error(e);
                 return [];
