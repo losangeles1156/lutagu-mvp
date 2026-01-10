@@ -121,6 +121,15 @@ export async function POST(req: NextRequest) {
                                 const data = JSON.parse(jsonStr);
                                 const event = data.event;
 
+                                // Handle Thinking Events - 讓用戶知道 AI 正在思考
+                                if (event === 'agent_thought') {
+                                    const thought = data.thought || '';
+                                    if (thought) {
+                                        // 發送思考狀態標記，前端可解析顯示
+                                        controller.enqueue(encoder.encode(`\n[THINKING]${thought}[/THINKING]\n`));
+                                    }
+                                }
+
                                 // Handle Answer Events
                                 if (event === 'message' || event === 'agent_message') {
                                     const answer = data.answer;
@@ -128,7 +137,6 @@ export async function POST(req: NextRequest) {
                                         controller.enqueue(encoder.encode(answer));
                                     }
                                 }
-                                // We could handle 'agent_thought' if we want to show thinking
                             } catch (e) {
                                 // Ignore parse errors for partial json
                             }

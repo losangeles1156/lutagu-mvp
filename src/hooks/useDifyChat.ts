@@ -89,13 +89,38 @@ export function useDifyChat(options: UseDifyChatOptions) {
 
     const isLoading = status === 'streaming' || status === 'submitted';
 
+    // Clear thinking step when streaming completes
+    useEffect(() => {
+        if (status === 'ready' || status === 'error') {
+            setThinkingStep('');
+        }
+    }, [status]);
+
     // Map aiMessages to DifyMessage format for backward compatibility
+    // Also extract [THINKING] markers for thinking indicator
     const messages: DifyMessage[] = useMemo(() => {
-        return aiMessages.map((m: any) => ({
-            role: m.role as 'user' | 'assistant',
-            content: m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || '',
-            data: m.data
-        }));
+        return aiMessages.map((m: any) => {
+            let content = m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || '';
+
+            // Extract thinking markers from content
+            const thinkingMatch = content.match(/\[THINKING\](.*?)\[\/THINKING\]/g);
+            if (thinkingMatch && thinkingMatch.length > 0) {
+                // Get the last thinking message
+                const lastThinking = thinkingMatch[thinkingMatch.length - 1];
+                const thinkingText = lastThinking.replace(/\[THINKING\]|\[\/THINKING\]/g, '').trim();
+                if (thinkingText) {
+                    setThinkingStep(thinkingText);
+                }
+                // Remove all thinking markers from content
+                content = content.replace(/\n?\[THINKING\].*?\[\/THINKING\]\n?/g, '').trim();
+            }
+
+            return {
+                role: m.role as 'user' | 'assistant',
+                content,
+                data: m.data
+            };
+        });
     }, [aiMessages]);
 
     // Generate quick buttons based on locale
