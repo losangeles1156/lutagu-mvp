@@ -42,44 +42,41 @@ export async function GET(req: NextRequest) {
         .select('facilities, id')
         .in('id', relatedIds);
 
-    let facilities: Record<string, any> = {};
+    let facilityList: string[] = [];
 
     if (staticData) {
-        // Merge facilities
+        // Merge facilities into a simple list of keys to save tokens
+        const mergedSet = new Set<string>();
         staticData.forEach(row => {
              const facs = row.facilities || {};
              if (typeof facs === 'object') {
                  Object.keys(facs).forEach(key => {
                      // @ts-ignore
                      if (facs[key]) {
-                        facilities[key] = true; // Simple boolean aggregation for now
+                        mergedSet.add(key);
                      }
                  });
              }
         });
+        facilityList = Array.from(mergedSet);
     }
 
-    // Also check L3 External Links (lockers, etc.) if available in l3_facilities table?
-    // Let's check l3_facilities table too.
+    // Also check L3 External Links (lockers, etc.)
     const { data: externalLinks } = await supabase
         .from('l3_facilities')
-        .select('*')
+        .select('category, provider')
         .in('station_id', relatedIds);
     
-    if (externalLinks) {
-        externalLinks.forEach(link => {
-            facilities[link.category] = {
-                available: true,
-                provider: link.provider,
-                url: link.url
-            };
-        });
-    }
+    const externalServices = externalLinks?.map(link => ({
+        type: link.category,
+        provider: link.provider
+    })) || [];
 
     return NextResponse.json({
         name: targetNode.name,
         type: targetNode.node_type,
-        facilities: facilities,
-        node_id: targetNode.id
+        facilities: facilityList,
+        external_services: externalServices,
+        id: targetNode.id
     });
 }

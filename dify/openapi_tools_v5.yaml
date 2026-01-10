@@ -96,32 +96,36 @@ paths:
 
   /api/l4/knowledge:
     get:
-      operationId: search_expert_knowledge
-      summary: Get expert tips
-      description: Get transit tips and advice
+      operationId: get_l4_knowledge
+      summary: 獲取 L4 專家知識 (包含轉乘、出口、無障礙等專家建議)
       parameters:
         - name: type
           in: query
           required: true
-          description: Type of knowledge
+          description: 知識類型 (railway, station, accessibility, location, passes, crowd)
           schema:
             type: string
-            enum:
-              - railway
-              - station
-              - accessibility
-              - location
-              - passes
-              - crowd
         - name: id
           in: query
           required: false
-          description: Station or railway ID
+          description: 對應的 ID (如 odpt:Station:JR-East.Yamanote.Shinjuku)
           schema:
             type: string
+        - name: min_priority
+          in: query
+          description: 最低優先級過濾 (0-100)，用於節省 Token。
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          description: 返回結果數量限制。
+          schema:
+            type: integer
+            default: 10
       responses:
         200:
-          description: OK
+          description: 成功返回知識點列表
           content:
             application/json:
               schema:

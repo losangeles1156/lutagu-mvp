@@ -1,27 +1,21 @@
 /**
- * L4 Expert Knowledge Base - Expanded for all major Hub stations
+ * L4 Expert Knowledge Base - LEGACY DATA
  * 
- * This file contains comprehensive expert knowledge, tips, and strategies
- * for Tokyo's major transit hubs and railway lines.
+ * @deprecated This file contains legacy hardcoded data. 
+ * Please use the Single Source of Truth (SSoT) instead:
+ * src/data/tokyo_transit_knowledge_base.md
  * 
- * Data Sources:
- * - Primary: Official operator websites (JR East, Tokyo Metro, Toei, etc.)
- * - Secondary: Wikipedia (ja.wikipedia.org)
- * - Reference: Japanese travel guides ( matcha-jp.com, letsgojp.com, gltjp.com )
+ * New knowledge should be added to the Markdown file, and then run:
+ * `npm run sync:knowledge` (or `tsx scripts/sync_knowledge.ts`)
  * 
- * Categories:
- * - Railway Lines: Line-specific tips and characteristics
- * - Hub Stations: Station-specific transfer advice and facilities
- * - Accessibility: Wheelchair, stroller, and large luggage guidance
- * - Special Routes: Airport transfers, tourist routes, etc.
- * 
- * Last Updated: 2024-12
+ * The API routes and services are refactored to prioritize the SSoT
+ * generated JSON (src/data/knowledge_base.json).
  */
 
 import { StationLineDef, LocaleString } from '../constants/stationLines';
 
 // ============================================================
-// RAILWAY LINE EXPERT KNOWLEDGE
+// RAILWAY LINE EXPERT KNOWLEDGE (LEGACY - DO NOT ADD NEW)
 // ============================================================
 
 export const RAILWAY_EXPERT_TIPS: Record<string, Array<{

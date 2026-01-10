@@ -1,108 +1,132 @@
 
 import { supabaseAdmin } from '@/lib/supabase';
+import { WEATHER_REGION_POLICY } from './policy';
+import { generateLLMResponse } from '@/lib/ai/llmClient';
+import { createHash } from 'crypto';
 
-// WMO Weather Code Mapping
-export const WMO_CODES: Record<number, { condition: string; label: string; emoji: string }> = {
-    0: { condition: 'Clear', label: '晴', emoji: '☀️' },
-    1: { condition: 'Clear', label: '晴', emoji: '☀️' },
-    2: { condition: 'PartlyCloudy', label: '多雲', emoji: '⛅' },
-    3: { condition: 'Cloudy', label: '陰', emoji: '☁️' },
-    45: { condition: 'Fog', label: '霧', emoji: '🌫️' },
-    48: { condition: 'Fog', label: '霧', emoji: '🌫️' },
-    51: { condition: 'Drizzle', label: '小雨', emoji: '🌧️' },
-    53: { condition: 'Drizzle', label: '小雨', emoji: '🌧️' },
-    55: { condition: 'Drizzle', label: '毛毛雨', emoji: '🌧️' },
-    61: { condition: 'Rain', label: '雨', emoji: '🌧️' },
-    63: { condition: 'Rain', label: '中雨', emoji: '🌧️' },
-    65: { condition: 'HeavyRain', label: '大雨', emoji: '🌧️' },
-    19: { condition: 'Snow', label: '小雪', emoji: '🌨️' }, // 71
-    20: { condition: 'Snow', label: '雪', emoji: '🌨️' }, // 73
-    21: { condition: 'HeavySnow', label: '大雪', emoji: '🌨️' }, // 75
-    22: { condition: 'Snow', label: '雪粒', emoji: '🌨️' }, // 77
-    71: { condition: 'Snow', label: '小雪', emoji: '🌨️' },
-    73: { condition: 'Snow', label: '雪', emoji: '🌨️' },
-    75: { condition: 'HeavySnow', label: '大雪', emoji: '🌨️' },
-    77: { condition: 'Snow', label: '雪粒', emoji: '🌨️' },
-    80: { condition: 'Showers', label: '陣雨', emoji: '🌦️' },
-    81: { condition: 'Showers', label: '陣雨', emoji: '🌦️' },
-    82: { condition: 'HeavyShowers', label: '暴雨', emoji: '⛈️' },
-    85: { condition: 'SnowShowers', label: '陣雪', emoji: '🌨️' },
-    86: { condition: 'HeavySnowShowers', label: '暴雪', emoji: '🌨️' },
-    95: { condition: 'Thunderstorm', label: '雷雨', emoji: '⛈️' },
-    96: { condition: 'Thunderstorm', label: '雷雨+冰雹', emoji: '⛈️' },
-    99: { condition: 'Thunderstorm', label: '強雷雨', emoji: '⛈️' }
-};
+// Helper to translate/summarize alert using AI with Caching
+async function getTranslatedAlert(title: string, summary: string, updated: string, severity: string) {
+    // 1. Create content hash
+    const hash = createHash('md5').update(`${title}:${updated}:${summary}:${severity}`).digest('hex');
+    const cacheKey = `weather:v1:${hash}`;
 
-export async function getLiveWeather(lat: number = 35.6895, lon: number = 139.6917) {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&hourly=precipitation_probability&timezone=Asia%2FTokyo&forecast_days=1`;
+    // 2. Check Cache
+    const { data: cached } = await supabaseAdmin
+        .from('l2_cache')
+        .select('value')
+        .eq('key', cacheKey)
+        .maybeSingle();
 
-    let response: Response | null = null;
-    let lastErr: any = null;
-    
-    // Retry logic
-    for (let i = 0; i < 2; i++) {
-        try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 4000);
-            response = await fetch(url, {
-                next: { revalidate: 300 },
-                signal: controller.signal
-            }).finally(() => clearTimeout(timeout));
-            if (response.ok) break;
-            lastErr = new Error('Failed to fetch from Open Meteo');
-        } catch (e: any) {
-            lastErr = e;
-        }
+    if (cached?.value) {
+        return cached.value;
     }
 
-    if (!response || !response.ok) {
-        // Fallback to DB if fetch fails
-        try {
-            const { data: row } = await supabaseAdmin
-                .from('transit_dynamic_snapshot')
-                .select('station_id, weather_info, updated_at')
-                .not('weather_info', 'is', null)
-                .order('updated_at', { ascending: false })
-                .limit(1)
-                .maybeSingle();
+    // 3. Call AI if miss
+    console.log(`[WeatherService] Cache miss for ${hash}. Calling AI...`);
 
-            if (row && row.weather_info) {
-                const w: any = row.weather_info;
-                return {
-                    temp: w.temp || 0,
-                    code: w.code || 0,
-                    condition: w.condition || 'Unknown',
-                    label: w.label || '不明',
-                    emoji: w.emoji || '❓',
-                    wind: w.wind || 0,
-                    humidity: w.humidity || 0,
-                    precipitationProbability: w.precipitationProbability || 0,
-                    source: 'Database Snapshot (Fallback)'
-                };
-            }
-        } catch (dbErr) {
-            console.error('DB Fallback failed:', dbErr);
-        }
-        throw lastErr || new Error('Failed to fetch weather');
-    }
-
-    const data = await response.json();
-    const code = data.current.weather_code;
-    const weatherInfo = WMO_CODES[code] || { condition: 'Unknown', label: '不明', emoji: '❓' };
-    
-    // Get current hour's precipitation probability
-    const currentHour = new Date().getHours();
-    const precipProb = data.hourly?.precipitation_probability?.[currentHour] ?? null;
-
-    return {
-        temp: data.current.temperature_2m,
-        code: code,
-        condition: weatherInfo.condition,
-        label: weatherInfo.label,
-        emoji: weatherInfo.emoji,
-        wind: data.current.wind_speed_10m,
-        humidity: data.current.relative_humidity_2m,
-        precipitationProbability: precipProb,
-        source: 'Open-Meteo'
+    // Fallback default
+    const fallback = {
+        ja: summary,
+        en: 'Detailed weather information is available in Japanese.',
+        zh: '詳細天氣資訊僅提供日文版本。'
     };
+
+    try {
+        // Adjust translation style based on severity
+        // ... (Reuse existing logic or simplified)
+        const severityConfig = {
+            critical: { style: '緊急、簡潔、嚴肅', maxLength: 30 },
+            warning: { style: '謹慎、清晰、實用', maxLength: 40 },
+            advisory: { style: '溫和、友善、提醒', maxLength: 50 },
+            info: { style: '中性、資訊性', maxLength: 60 }
+        };
+
+        const config = severityConfig[severity as keyof typeof severityConfig] || severityConfig.info;
+
+        const prompt = `
+You are a weather translator for a travel app in Tokyo.
+Translate and summarize the following JMA Weather Alert into a strictly valid JSON object.
+Severity: ${severity}
+Input: ${title} - ${summary}
+Output JSON format: { "ja": "...", "en": "...", "zh": "..." }
+Keep it concise.
+`;
+        const jsonStr = await generateLLMResponse({
+            systemPrompt: 'Output raw JSON only.',
+            userPrompt: prompt,
+            temperature: 0.1
+        });
+
+        if (!jsonStr) return fallback;
+
+        const cleanJson = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleanJson);
+
+        if (!parsed.ja || !parsed.en || !parsed.zh) throw new Error('Invalid JSON structure');
+
+        // 4. Write to Cache
+        await supabaseAdmin.from('l2_cache').insert({
+            key: cacheKey,
+            value: parsed,
+            updated_at: new Date().toISOString()
+        });
+
+        return parsed;
+
+    } catch (e) {
+        console.error('[WeatherService] AI Translation Failed:', e);
+        return fallback;
+    }
+}
+
+export async function fetchWeatherAlerts(locale: string = 'zh') {
+    try {
+        const response = await fetch('https://www.data.jma.go.jp/developer/xml/feed/extra.xml', {
+            next: { revalidate: 300 }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch JMA RSS');
+        }
+
+        const xml = await response.text();
+        const entries: any[] = [];
+        const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
+        let match;
+
+        while ((match = entryRegex.exec(xml)) !== null) {
+            const content = match[1];
+            const title = content.match(/<title>(.*?)<\/title>/)?.[1] || '';
+            const summary = content.match(/<content type="text">([\s\S]*?)<\/content>/)?.[1] ||
+                content.match(/<summary>([\s\S]*?)<\/summary>/)?.[1] || '';
+            const updated = content.match(/<updated>(.*?)<\/updated>/)?.[1] || '';
+
+            if (!WEATHER_REGION_POLICY.isTargetRegion(title, summary)) {
+                continue;
+            }
+
+            const severity = WEATHER_REGION_POLICY.getSeverity(title, summary);
+            const severityLabel = WEATHER_REGION_POLICY.getSeverityLabel(severity);
+            const cleanSummary = summary.replace(/<br \/>/g, '\n').trim();
+
+            const polyglotSummary = await getTranslatedAlert(title, cleanSummary, updated, severity);
+
+            let displaySummary = polyglotSummary.zh;
+            if (locale === 'en') displaySummary = polyglotSummary.en;
+            if (locale === 'ja') displaySummary = polyglotSummary.ja;
+
+            entries.push({
+                title,
+                summary: displaySummary,
+                severity: severityLabel,
+                region: WEATHER_REGION_POLICY.extractRegion(title, cleanSummary)
+            });
+        }
+
+        return entries;
+
+    } catch (error: any) {
+        console.error('Weather Service Error:', error.message);
+        return [];
+    }
 }

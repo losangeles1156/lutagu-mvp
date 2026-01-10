@@ -28,6 +28,7 @@ import { L4TemplateSelector, L4TemplateList } from '@/components/node/L4Template
 import { L4_Chat } from '@/components/node/L4_Chat';
 import { IntentSelector } from '@/components/node/IntentSelector';
 import { getLocaleString } from '@/lib/utils/localeUtils';
+import { L4KnowledgeSection } from '@/components/node/L4KnowledgeSection';
 
 interface L4DashboardProps {
     currentNodeId: string;
@@ -66,6 +67,8 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
     const [viewMode, setViewMode] = useState<L4ViewMode>('recommendations');
     const [recommendations, setRecommendations] = useState<MatchedStrategyCard[]>([]);
     const [isRecommending, setIsRecommending] = useState(false);
+    const [markdownKnowledge, setMarkdownKnowledge] = useState<any[]>([]);
+    const [isKnowledgeLoading, setIsKnowledgeLoading] = useState(false);
 
     const mapDemandToPreferences = useCallback((d: L4DemandState): UserPreferences => ({
         accessibility: { wheelchair: d.wheelchair, stroller: d.stroller, visual_impairment: d.vision, elderly: d.senior },
@@ -144,6 +147,25 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
         };
         fetchRecommendations();
     }, [stationId, demand, uiLocale, mapDemandToPreferences]);
+
+    useEffect(() => {
+        const fetchMarkdownKnowledge = async () => {
+            if (!stationId || !/^odpt[.:]Station:/.test(stationId)) return;
+            setIsKnowledgeLoading(true);
+            try {
+                const res = await fetch(`/api/l4/knowledge?type=station&id=${stationId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setMarkdownKnowledge(data.markdown_knowledge || []);
+                }
+            } catch (err) {
+                console.error('[L4 Dashboard] Failed to fetch markdown knowledge:', err);
+            } finally {
+                setIsKnowledgeLoading(false);
+            }
+        };
+        fetchMarkdownKnowledge();
+    }, [stationId]);
 
     useEffect(() => {
         setActiveKind(null); setError(''); setFareData(null); setTimetableData(null); setSuggestion(null);
@@ -472,7 +494,13 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                 </div>
                             )}
 
-                            {/* Expert Knowledge Sections */}
+                            {/* Markdown-based Expert Knowledge */}
+                            <L4KnowledgeSection 
+                                knowledge={markdownKnowledge} 
+                                isLoading={isKnowledgeLoading} 
+                            />
+
+                            {/* Existing Expert Knowledge Sections */}
                             <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-6 border border-slate-200/60 shadow-xl shadow-slate-200/20 space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">

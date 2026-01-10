@@ -63,8 +63,6 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({
             station_id: stationId,
             busy_level: busyLevel,
-            annual_journeys: annualJourneys,
-            survey_year: statsData?.survey_year || null,
             active_alerts: activeAlerts
         });
 

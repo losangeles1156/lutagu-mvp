@@ -110,14 +110,16 @@ export async function GET(req: Request) {
         const routes: RouteResponse['routes'] = routeOptions.map((opt) => {
             return {
                 label: opt.label,
-                steps: opt.steps,
+                steps: opt.steps.map(s => ({
+                    kind: s.kind,
+                    text: s.text,
+                    railwayId: s.railwayId,
+                    icon: s.icon
+                })),
                 duration: opt.duration,
                 transfers: Number(opt.transfers ?? 0),
                 fare: opt.fare,
-                railways: opt.railways,
-                sources: [
-                    { type: 'odpt:Railway', verified: true },
-                ]
+                sources: [] // Keeping as empty array to satisfy interface without adding token weight
             };
         });
 

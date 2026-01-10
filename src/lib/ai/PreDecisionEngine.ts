@@ -117,7 +117,7 @@ const LEVEL_2_KEYWORDS: Record<string, string[]> = {
     ],
     // 時間表 (不包含 "幾點"，因為與 Level 1 衝突)
     timetable: [
-        '時刻表', '時間表', 'timetable', 'schedule', 
+        '時刻表', '時間表', 'timetable', 'schedule',
         '首班車', '末班車', '首班车', '末班车', '班次',
         '發車', '到站時間', '列車時間',
         '發車時間', '到站時間', '行駛時間',
@@ -298,11 +298,12 @@ export class PreDecisionEngine {
 reason 必須在 10 個中文字以內，格式：
 {"level": "simple|medium|complex", "confidence": 0.0-1.0, "reason": "理由"}`,
                 userPrompt: prompt,
-                temperature: 0.1
+                temperature: 0.1,
+                taskType: 'classification'
             });
 
             const parsed = this.parseClassificationResult(result);
-            
+
             // 根據分類結果設定建議模型
             let suggestedModel = 'none';
             if (parsed.level === DecisionLevel.LEVEL_3_COMPLEX) {
@@ -320,7 +321,7 @@ reason 必須在 10 個中文字以內，格式：
             };
         } catch (error) {
             console.error('[PreDecisionEngine] ML 分類失敗:', error);
-            
+
             // ML 分類失敗時，保守估計為 Level 3
             return {
                 level: DecisionLevel.LEVEL_3_COMPLEX,
@@ -370,9 +371,9 @@ reason 必須在 10 個中文字以內，格式：
                 .replace(/```json/g, '')
                 .replace(/```/g, '')
                 .trim();
-            
+
             const parsed = JSON.parse(cleanResult);
-            
+
             return {
                 level: this.parseLevel(parsed.level),
                 confidence: Math.max(0, Math.min(1, parsed.confidence || 0.7)),
@@ -394,7 +395,7 @@ reason 必須在 10 個中文字以內，格式：
                     reason: '關鍵詞匹配'
                 };
             }
-            
+
             return {
                 level: DecisionLevel.LEVEL_3_COMPLEX,
                 confidence: 0.6,

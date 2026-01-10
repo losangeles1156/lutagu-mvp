@@ -25,102 +25,142 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type');
     const id = searchParams.get('id');
-    
+    const minPriority = parseInt(searchParams.get('min_priority') || '0', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+
     try {
         switch (type) {
             case 'railway': {
                 if (!id) {
                     return NextResponse.json({ error: 'Missing railway ID' }, { status: 400 });
                 }
-                const tips = getRailwayExpertTips(id);
-                return NextResponse.json({ 
-                    railway_id: id, 
-                    tips,
-                    count: tips.length 
-                });
-            }
-            
-            case 'station': {
-                if (!id) {
-                    return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
+
+                // Prioritize SSoT (Markdown)
+                let markdownTips = knowledgeService.getKnowledgeByRailwayId(id);
+                
+                // Apply filters
+                if (minPriority > 0) {
+                    markdownTips = markdownTips.filter(k => k.priority >= minPriority);
                 }
-                
-                // Get hardcoded tips
-                const hardcodedTips = getHubStationTips(id);
-                const hardcodedAccessibility = getAccessibilityAdvice(id);
-                
-                // Get markdown-based tips
-                const markdownTips = knowledgeService.getKnowledgeByStationId(id);
-                
-                // Merge and format
+                markdownTips = markdownTips.slice(0, limit);
+
                 const formattedMarkdownTips = markdownTips.map(k => ({
                     icon: k.icon,
                     text: k.content,
                     category: k.type,
                     section: k.section,
-                    source: 'markdown_kb'
+                    priority: k.priority
                 }));
 
-                return NextResponse.json({ 
-                    station_id: id, 
-                    tips: [...hardcodedTips, ...formattedMarkdownTips],
-                    accessibility: hardcodedAccessibility,
-                    markdown_knowledge: markdownTips,
-                    tip_count: hardcodedTips.length + markdownTips.length,
-                    has_accessibility: !!hardcodedAccessibility || markdownTips.some(k => k.type === 'accessibility')
+                // Fallback to hardcoded for now (to be deprecated)
+                const hardcodedTips = getRailwayExpertTips(id);
+                const hardcodedTipsFormatted = hardcodedTips.map(t => ({
+                    icon: t.icon,
+                    text: t.text,
+                    category: t.category,
+                    priority: 50 // Default legacy priority
+                }));
+
+                // Merge (prioritize markdown if available)
+                const combinedTips = markdownTips.length > 0 ? formattedMarkdownTips : hardcodedTipsFormatted;
+
+                return NextResponse.json({
+                    railway_id: id,
+                    tips: combinedTips
                 });
             }
-            
+
+            case 'station': {
+                if (!id) {
+                    return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
+                }
+
+                // Get markdown-based tips (SSoT)
+                let markdownTips = knowledgeService.getKnowledgeByStationId(id);
+                
+                // Apply filters
+                if (minPriority > 0) {
+                    markdownTips = markdownTips.filter(k => k.priority >= minPriority);
+                }
+                markdownTips = markdownTips.slice(0, limit);
+
+                const formattedMarkdownTips = markdownTips.map(k => ({
+                    icon: k.icon,
+                    text: k.content,
+                    category: k.type,
+                    section: k.section,
+                    priority: k.priority
+                }));
+
+                // Get hardcoded tips (Legacy)
+                const hardcodedTips = getHubStationTips(id);
+                const hardcodedAccessibility = getAccessibilityAdvice(id);
+
+                // Merge and format
+                const tips = markdownTips.length > 0 ? formattedMarkdownTips : hardcodedTips.map(t => ({
+                    icon: t.icon,
+                    text: t.text,
+                    category: t.category,
+                    priority: 50 // Default legacy priority
+                }));
+
+                return NextResponse.json({
+                    station_id: id,
+                    tips: tips,
+                    accessibility: hardcodedAccessibility
+                });
+            }
+
             case 'accessibility': {
                 if (!id) {
                     return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
                 }
                 const advice = getAccessibilityAdvice(id);
                 if (!advice) {
-                    return NextResponse.json({ 
-                        station_id: id, 
+                    return NextResponse.json({
+                        station_id: id,
                         advice: null,
                         message: 'No accessibility data available for this station'
                     });
                 }
-                return NextResponse.json({ 
-                    station_id: id, 
-                    advice 
+                return NextResponse.json({
+                    station_id: id,
+                    advice
                 });
             }
-            
+
             case 'location': {
                 if (!id) {
                     return NextResponse.json({ error: 'Missing location ID' }, { status: 400 });
                 }
                 const tips = getSpecialLocationTips(id);
-                return NextResponse.json({ 
-                    location_id: id, 
+                return NextResponse.json({
+                    location_id: id,
                     tips,
-                    count: tips.length 
+                    count: tips.length
                 });
             }
-            
+
             case 'passes': {
                 const passes = getPassRecommendations();
-                return NextResponse.json({ 
+                return NextResponse.json({
                     passes,
-                    count: passes.length 
+                    count: passes.length
                 });
             }
-            
+
             case 'crowd': {
                 const period = id as 'weekday-morning' | 'weekday-evening' | 'weekend' | 'holiday' || 'weekday-morning';
                 const tips = getCrowdTips(period);
-                return NextResponse.json({ 
-                    period, 
+                return NextResponse.json({
+                    period,
                     tips,
-                    count: tips.length 
+                    count: tips.length
                 });
             }
-            
+
             default:
-                return NextResponse.json({ 
+                return NextResponse.json({
                     error: 'Invalid type. Supported types: railway, station, accessibility, location, passes, crowd',
                     supported_types: [
                         'railway - Get expert tips for a railway line',

@@ -3,11 +3,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-    Lightbulb, 
-    AlertTriangle, 
-    Accessibility, 
-    Info, 
+import {
+    Lightbulb,
+    AlertTriangle,
+    Accessibility,
+    Info,
     ChevronRight,
     MapPin
 } from 'lucide-react';
@@ -44,71 +44,121 @@ export const L4KnowledgeSection: React.FC<L4KnowledgeSectionProps> = ({ knowledg
         return null;
     }
 
-    // Sort by priority
-    const sortedKnowledge = [...knowledge].sort((a, b) => b.priority - a.priority);
+    const warnings = knowledge.filter(k => k.type === 'warning').sort((a, b) => b.priority - a.priority);
+    const tips = knowledge.filter(k => k.type === 'tip').sort((a, b) => b.priority - a.priority);
+    const others = knowledge.filter(k => k.type !== 'warning' && k.type !== 'tip').sort((a, b) => b.priority - a.priority);
+
+    const renderCard = (item: KnowledgeItem) => (
+        <motion.div
+            key={item.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`
+                relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all hover:shadow-md
+                ${item.type === 'warning' ? 'border-red-100 bg-red-50/10' :
+                    item.type === 'tip' ? 'border-emerald-100 bg-emerald-50/10' : 'border-slate-100'}
+            `}
+        >
+            <div className={`
+                absolute top-0 left-0 w-1 h-full
+                ${item.type === 'warning' ? 'bg-red-500' :
+                    item.type === 'tip' ? 'bg-emerald-500' :
+                        item.type === 'accessibility' ? 'bg-blue-400' : 'bg-slate-300'}
+            `} />
+
+            <div className="flex items-start gap-4">
+                <div className={`
+                    shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm
+                    ${item.type === 'warning' ? 'bg-red-100 text-red-600' :
+                        item.type === 'tip' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-50 text-slate-500'}
+                `}>
+                    {item.icon}
+                </div>
+
+                <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                        <span className={`text-xs font-black uppercase tracking-widest ${item.type === 'warning' ? 'text-red-400' :
+                            item.type === 'tip' ? 'text-emerald-400' : 'text-slate-400'
+                            }`}>
+                            {item.section}
+                        </span>
+                        {item.type === 'warning' && (
+                            <span className="flex items-center gap-1 text-[9px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">
+                                <AlertTriangle size={10} />
+                                TRAP
+                            </span>
+                        )}
+                        {item.type === 'tip' && (
+                            <span className="flex items-center gap-1 text-[9px] font-black bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full uppercase">
+                                <Lightbulb size={10} />
+                                HACK
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="text-slate-700 text-sm font-medium leading-relaxed whitespace-pre-wrap">
+                        {item.content}
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-2 px-1">
-                <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-                    <Lightbulb size={18} className="text-violet-600" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-800">
-                    {t('expertKnowledge', { defaultValue: '專家攻略' })}
-                </h3>
-            </div>
-
-            <div className="grid gap-4">
-                {sortedKnowledge.map((item, index) => (
-                    <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className={`
-                            relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all hover:shadow-md
-                            ${item.type === 'warning' ? 'border-amber-100' : 'border-slate-100'}
-                        `}
-                    >
-                        {/* Type Indicator */}
-                        <div className={`
-                            absolute top-0 left-0 w-1 h-full
-                            ${item.type === 'warning' ? 'bg-amber-400' : 
-                              item.type === 'accessibility' ? 'bg-blue-400' : 
-                              item.type === 'tip' ? 'bg-emerald-400' : 'bg-slate-300'}
-                        `} />
-
-                        <div className="flex items-start gap-4">
-                            <div className={`
-                                shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl
-                                ${item.type === 'warning' ? 'bg-amber-50' : 
-                                  item.type === 'accessibility' ? 'bg-blue-50' : 
-                                  item.type === 'tip' ? 'bg-emerald-50' : 'bg-slate-50'}
-                            `}>
-                                {item.icon}
-                            </div>
-
-                            <div className="flex-1 space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                                        {item.section}
-                                    </span>
-                                    {item.type === 'warning' && (
-                                        <span className="flex items-center gap-1 text-[10px] font-black bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase">
-                                            <AlertTriangle size={10} />
-                                            Important
-                                        </span>
-                                    )}
-                                </div>
-                                
-                                <div className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                                    {item.content}
-                                </div>
-                            </div>
+        <div className="space-y-8 pb-8">
+            {/* 1. Warnings Section (Traps) */}
+            {warnings.length > 0 && (
+                <section className="space-y-4">
+                    <div className="flex items-center gap-3 px-1">
+                        <div className="w-8 h-8 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center shadow-sm">
+                            <AlertTriangle size={16} className="text-red-500" />
                         </div>
-                    </motion.div>
-                ))}
-            </div>
+                        <div>
+                            <h3 className="text-base font-black text-slate-800">轉乘陷阱</h3>
+                            <p className="text-[10px] font-bold text-red-400/80">Transfer Traps & Warnings</p>
+                        </div>
+                    </div>
+                    <div className="grid gap-3">
+                        {warnings.map(renderCard)}
+                    </div>
+                </section>
+            )}
+
+            {/* 2. Tips Section (Hacks) */}
+            {tips.length > 0 && (
+                <section className="space-y-4">
+                    <div className="flex items-center gap-3 px-1">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
+                            <Lightbulb size={16} className="text-emerald-500" />
+                        </div>
+                        <div>
+                            <h3 className="text-base font-black text-slate-800">專家密技</h3>
+                            <p className="text-[10px] font-bold text-emerald-500/60">Local Hacks & Tips</p>
+                        </div>
+                    </div>
+                    <div className="grid gap-3">
+                        {tips.map(renderCard)}
+                    </div>
+                </section>
+            )}
+
+            {/* 3. General Info Section */}
+            {others.length > 0 && (
+                <section className="space-y-4">
+                    <div className="flex items-center gap-3 px-1">
+                        <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm">
+                            <Info size={16} className="text-slate-500" />
+                        </div>
+                        <div>
+                            <h3 className="text-base font-black text-slate-800">政策與設施情報</h3>
+                            <p className="text-[10px] font-bold text-slate-400">Policies, Tickets & Facilities</p>
+                        </div>
+                    </div>
+                    <div className="grid gap-3">
+                        {others.map(renderCard)}
+                    </div>
+                </section>
+            )}
         </div>
     );
 };

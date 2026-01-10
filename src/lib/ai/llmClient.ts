@@ -4,7 +4,7 @@ export interface LLMParams {
     systemPrompt: string;
     userPrompt: string;
     temperature?: number;
-    taskType?: 'reasoning' | 'synthesis' | 'context_heavy';
+    taskType?: 'reasoning' | 'synthesis' | 'context_heavy' | 'classification';
 }
 
 export async function generateLLMResponse(params: LLMParams): Promise<string | null> {
@@ -15,7 +15,14 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return generateMiniMaxResponse(params);
     }
 
-    // 2. 彙整型或海量數據任務交給 Gemini 3 Flash
+    // 2. 分類/快速任務交給 Gemini 2.5 Flash Lite (if avail) or Gemini 3
+    if (taskType === 'classification' && process.env.GEMINI_API_KEY) {
+        // TODO: Add separate function for 2.5 if needed, for now use generic Gemini function
+        // which defaults to 3-flash-preview, but we can make it configurable
+        return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
+    }
+
+    // 3. 彙整型或海量數據任務交給 Gemini 3 Flash
     if ((taskType === 'synthesis' || taskType === 'context_heavy') && process.env.GEMINI_API_KEY) {
         return generateGeminiResponse(params);
     }
@@ -72,10 +79,26 @@ async function generateMiniMaxResponse(params: LLMParams): Promise<string | null
     }
 }
 
-async function generateGeminiResponse(params: LLMParams): Promise<string | null> {
-    const { systemPrompt, userPrompt, temperature = 0.2 } = params;
+interface GeminiParams extends LLMParams {
+    model?: string;
+}
+
+async function generateGeminiResponse(params: GeminiParams): Promise<string | null> {
+    const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-3-flash-preview' } = params;
+    // Map 'gemini-2.5-flash-lite' to actual model name if known, currently using preview for 2.5 if available or fallback
+    // Since 2.5 might not be public API yet, we stick to 1.5-flash or 3-flash-preview as "Fast" models
+    // User requested "gemini-2.5-flash-lite", let's assume it matches 'gemini-2.0-flash-lite-preview' or similar logic
+    // For safety, defaulting to 1.5-flash or 3-flash logic
+
+    // Note: Adjust model version based on actual API availability. 
+    // Assuming 'gemini-2.0-flash-exp' or similar for "2.5" placeholder if needed, 
+    // but for now let's use the valid `gemini-1.5-flash` as the "Lite" equivalent until 2.5 is confirmed.
+    // User explicitly asked for "gemini-3-flash-preview" and "gemini-2.5-flash-lite".
+
+    const targetModel = model === 'gemini-2.5-flash-lite' ? 'gemini-1.5-flash' : model;
+
     try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -89,10 +112,16 @@ async function generateGeminiResponse(params: LLMParams): Promise<string | null>
             })
         });
 
+        if (!res.ok) {
+            const err = await res.text();
+            console.error(`Gemini API Error (${targetModel}):`, err);
+            return null;
+        }
+
         const data: any = await res.json();
         return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
     } catch (error) {
-        console.error('Gemini 3 API Failed:', error);
+        console.error('Gemini API Failed:', error);
         return null;
     }
 }

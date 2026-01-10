@@ -148,17 +148,30 @@ export async function generateL1DNA(
 // L4 Strategy Card Text Generation
 // ==========================================
 
+import { knowledgeService } from '../l4/knowledgeService';
+
+// ...
+
 export async function generateL4Advice(
     context: L4Context,
     locale: SupportedLocale = 'zh-TW'
 ): Promise<string> {
     const { stationId, userNeeds, weather } = context;
 
-    const systemPrompt = locale === 'zh-TW'
-        ? '你是東京交通助手 LUTAGU。根據用戶情境，生成一條簡潔、實用的建議（30字以內）。'
-        : 'You are LUTAGU. Generate one short, practical advice (max 30 words) based on user context.';
+    // Fetch Station Knowledge (Limit to top items if many)
+    const stationKnowledge = knowledgeService.getKnowledgeByStationId(stationId);
+    let knowledgeContext = '';
 
-    const userPrompt = `Station: ${stationId}\n${userNeeds?.length ? `User Needs: ${userNeeds.join(', ')}` : 'General tourist'}${weather ? `\nWeather: ${weather.temp}°C, ${weather.condition}` : ''}`;
+    if (stationKnowledge.length > 0) {
+        knowledgeContext = '\n\nStation Knowledge (Use if relevant):\n' +
+            stationKnowledge.map(k => `- ${k.section}: ${k.content}`).join('\n');
+    }
+
+    const systemPrompt = locale === 'zh-TW'
+        ? '你是東京交通助手 LUTAGU。根據用戶情境與車站知識，生成一條簡潔、實用的建議（30字以內）。若知識庫中有對應用戶需求的資訊（如大行李、電梯），請優先引用。'
+        : 'You are LUTAGU. Generate one short, practical advice (max 30 words) based on user context and station knowledge. Prioritize knowledge base info if relevant.';
+
+    const userPrompt = `Station: ${stationId}\n${userNeeds?.length ? `User Needs: ${userNeeds.join(', ')}` : 'General tourist'}${weather ? `\nWeather: ${weather.temp}°C, ${weather.condition}` : ''}${knowledgeContext}`;
 
     const result = await generateLLMResponse({
         systemPrompt,

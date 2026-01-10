@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { STATION_WISDOM } from '@/data/stationWisdom';
+import { knowledgeService } from '@/lib/l4/knowledgeService';
 
 // Lazy initialization to avoid build-time errors
 let supabase: SupabaseClient | null = null;
@@ -29,14 +29,11 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        // 1. Get Static Wisdom (High Value Context)
-        const wisdom = STATION_WISDOM[stationId] || null;
-
-        // 2. Get Supabase client (may be null if not configured)
+        // 1. Get Supabase client (may be null if not configured)
         const client = getSupabaseClient();
 
-        let nodeData = null;
-        let profileData = null;
+        let nodeData: any = null;
+        let profileData: any = null;
 
         if (client) {
             // 2. Get Dynamic Node Data (Basic Info & Accessibility)
@@ -66,33 +63,37 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        // 4. Construct Context Object
-        // This object is shaped to be easily consumable by an LLM
+        // 4. Get Knowledge from SSoT (Markdown-based knowledgeService)
+        const knowledgeItems = knowledgeService.getKnowledgeByStationId(stationId);
+
+        // Filter by type for Agent consumption (simplified plain text)
+        const traps = knowledgeItems
+            .filter(k => k.type === 'warning')
+            .map(k => `${k.section}: ${k.content.substring(0, 100)}`);
+        const tips = knowledgeItems
+            .filter(k => k.type === 'tip')
+            .map(k => `${k.section}: ${k.content.substring(0, 100)}`);
+
+        // 5. Calculate busy_level from metadata if available
+        let busyLevel = 'unknown';
+        const dailyPassengers = nodeData?.metadata?.daily_passengers;
+        if (dailyPassengers) {
+            if (dailyPassengers > 500000) busyLevel = 'Very Busy';
+            else if (dailyPassengers > 200000) busyLevel = 'Busy';
+            else if (dailyPassengers > 50000) busyLevel = 'Moderate';
+            else busyLevel = 'Quiet';
+        }
+
+        // 6. Construct Token-Optimized Context Response
         const contextResponse = {
             stationId,
             name: nodeData?.name?.en || stationId,
             vibe: nodeData?.vibe || 'unknown',
+            busy_level: busyLevel,
             accessibility: nodeData?.accessibility || 'unknown',
-
-            // L1 Facility Tags
-            facilityProfile: profileData ? {
-                counts: profileData.category_counts,
-                vibeTags: profileData.vibe_tags,
-                dominant: profileData.dominant_category
-            } : null,
-
-            // Wisdom is the key "Secret Sauce" for our agent
-            wisdom: wisdom ? {
-                traps: wisdom.traps.map(t => ({ title: t.title, advice: t.advice, severity: t.severity })), // Simplify for token usage
-                hacks: wisdom.hacks,
-                l3Facilities: wisdom.l3Facilities || [], // L3 設施資料 - AI 可參照
-                accessibilityRoutes: wisdom.accessibilityRoutes || [] // 無障礙路線 - MLIT 資料
-            } : {
-                message: "No specific local secrets found for this station."
-            },
-
-            // Optional: Include raw metadata if useful
-            features: nodeData?.metadata?.features || []
+            facility_summary: profileData ? profileData.dominant_category : null,
+            wisdom: (traps.length > 0 || tips.length > 0) ? { traps, tips } : null,
+            _attribution: 'ODPT (Open Data Platform for Public Transportation)'
         };
 
         return NextResponse.json(contextResponse);
@@ -102,4 +103,3 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
-

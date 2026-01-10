@@ -8,7 +8,15 @@ export async function GET(req: NextRequest) {
 
         const results = await getTrainStatus(operatorParam);
 
-        return NextResponse.json(results, {
+        // Filter for Agent consumption
+        const filteredResults = results.map((item: any) => ({
+            railway: item['odpt:railway']?.split(':').pop(),
+            status: item['odpt:trainInformationText']?.zh || item['odpt:trainInformationText']?.en || item['odpt:trainInformationText']?.ja,
+            operator: item['odpt:operator']?.split(':').pop(),
+            time: item['dc:date']
+        }));
+
+        return NextResponse.json(filteredResults, {
             headers: {
                 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
             }
