@@ -7,6 +7,7 @@ import { Send, Bot, Loader2, Maximize2, Minimize2, X, RotateCcw } from 'lucide-r
 import { useAppStore } from '@/stores/appStore';
 import { useDifyChat } from '@/hooks/useDifyChat';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 
 interface L4_ChatProps {
     data: StationUIProfile;
@@ -68,19 +69,18 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
     }, [input, isLoading, sendMessage]);
 
     return (
-        <motion.div 
+        <motion.div
             drag={chatDisplayMode !== 'full'}
             dragControls={dragControls}
             dragListener={false}
             dragMomentum={false}
-            className={`flex flex-col bg-white shadow-2xl transition-all duration-300 overflow-hidden ${
-                chatDisplayMode === 'full' ? 'fixed inset-0 z-50' : 
-                chatDisplayMode === 'split' ? 'h-full w-full relative' : 
-                'fixed bottom-4 right-4 w-[380px] h-[500px] rounded-2xl z-50'
-            }`}
+            className={`flex flex-col bg-white shadow-2xl transition-all duration-300 overflow-hidden ${chatDisplayMode === 'full' ? 'fixed inset-0 z-50' :
+                chatDisplayMode === 'split' ? 'h-full w-full relative' :
+                    'fixed bottom-4 right-4 w-[380px] h-[500px] rounded-2xl z-50'
+                }`}
         >
             {/* Header Area */}
-            <div 
+            <div
                 onPointerDown={(e) => dragControls.start(e)}
                 className="h-12 bg-slate-900 flex items-center justify-between px-4 shrink-0 cursor-move select-none"
             >
@@ -92,7 +92,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <button 
+                    <button
                         onClick={handleReset}
                         className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                         title={tCommon('retry')}
@@ -100,19 +100,19 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                         <RotateCcw size={16} />
                     </button>
                     <div className="w-px h-4 bg-white/10 mx-1" />
-                    <button 
+                    <button
                         onClick={() => setChatDisplayMode('mini')}
                         className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                     >
                         <Minimize2 size={16} />
                     </button>
-                    <button 
+                    <button
                         onClick={() => setChatDisplayMode(chatDisplayMode === 'full' ? 'split' : 'full')}
                         className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                     >
                         <Maximize2 size={16} />
                     </button>
-                    <button 
+                    <button
                         onClick={() => setChatOpen(false)}
                         className="p-2 text-white/60 hover:text-rose-400 hover:bg-white/10 rounded-lg transition-all"
                     >
@@ -125,24 +125,25 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
             <div className="flex-1 overflow-y-auto p-5 space-y-6 bg-slate-50/50 scrollbar-hide">
                 <AnimatePresence initial={false}>
                     {messages.map((msg, idx) => (
-                        <motion.div 
+                        <motion.div
                             key={idx}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed ${
-                                msg.role === 'user'
+                            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed ${msg.role === 'user'
                                     ? 'bg-slate-900 text-white rounded-tr-none'
                                     : 'bg-white text-slate-700 rounded-tl-none border border-slate-200/50'
-                            }`}>
+                                }`}>
                                 {msg.role !== 'user' && (
                                     <div className="flex items-center gap-1.5 mb-1.5 opacity-40">
                                         <Bot size={12} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">LUTAGU</span>
                                     </div>
                                 )}
-                                <div className="font-medium">{msg.content}</div>
+                                <div className="font-medium prose prose-sm prose-slate max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-900">
+                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                </div>
                             </div>
                         </motion.div>
                     ))}

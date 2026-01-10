@@ -11,6 +11,7 @@ import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { hybridEngine } from '@/lib/l4/HybridEngine';
 
 import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
+import ReactMarkdown from 'react-markdown';
 
 interface L4_BambiProps {
     data: StationUIProfile;
@@ -471,7 +472,9 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                     {msg.role === 'user' ? tL4('userLabel') : tL4('bambiLabel')}
                                 </span>
                             </div>
-                            <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                            <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:font-black">
+                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            </div>
                         </div>
                     </div>
                 ))}

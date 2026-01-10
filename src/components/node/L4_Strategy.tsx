@@ -7,6 +7,7 @@ import { getLocaleString } from '@/lib/utils/localeUtils';
 import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2, Mic, Maximize2, Layout, LayoutPanelTop, Square } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
+import ReactMarkdown from 'react-markdown';
 
 interface L4_StrategyProps {
     data: StationUIProfile;
@@ -396,7 +397,9 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                                     {msg.role === 'user' ? tL4('userLabel') : tL4('lutaguLabel')}
                                 </span>
                             </div>
-                            <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                            <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:font-black">
+                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            </div>
                         </div>
                     </div>
                 ))}
