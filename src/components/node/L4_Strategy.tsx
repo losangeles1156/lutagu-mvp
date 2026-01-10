@@ -7,6 +7,7 @@ import { getLocaleString } from '@/lib/utils/localeUtils';
 import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2, Mic, Maximize2, Layout, LayoutPanelTop, Square } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
+import { useDifyChat } from '@/hooks/useDifyChat';
 import ReactMarkdown from 'react-markdown';
 
 interface L4_StrategyProps {
@@ -19,7 +20,7 @@ interface L4_StrategyProps {
 interface Message {
     role: 'user' | 'assistant';
     content: string;
-    isStrategy?: boolean; // New flag for structured response
+    isStrategy?: boolean;
 }
 
 export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsumed }: L4_StrategyProps) {
@@ -39,9 +40,28 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
         return (stationId?.split(':').pop()?.split('.').pop()) || tCommon('station');
     }, [name, locale, stationId, tCommon]);
 
-    // Chat State
-    const [messages, setMessages] = useState<Message[]>([]);
 
+    // Chat Hook
+    const {
+        messages,
+        setMessages,
+        isLoading,
+        thinkingStep,
+        suggestedQuestions,
+        sendMessage,
+        clearMessages,
+        messagesEndRef
+    } = useDifyChat({
+        stationId: stationId,
+        stationName: displayName,
+        onComplete: () => { }
+    });
+
+    // Local State
+    const [input, setInput] = useState('');
+    const [isOffline, setIsOffline] = useState(false);
+
+    // Cards Logic
     const bestCard = useMemo(() => {
         const cards = data?.l4_cards || [];
         return cards.find(c => c.type === 'primary') || cards[0] || null;
@@ -55,29 +75,42 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
 
     const [isOtherOpen, setIsOtherOpen] = useState(false);
 
-    // Initialize greeting ONLY once when displayName becomes available
+    // Initial Greeting (managed by hook/effect)
     const [hasGreeted, setHasGreeted] = useState(false);
     useEffect(() => {
-        if (displayName && !hasGreeted) {
-            setMessages([{ role: 'assistant', content: tL4('initialMessage', { station: displayName }) }]);
+        if (displayName && !hasGreeted && messages.length === 0) {
+            setMessages([{
+                id: 'init',
+                role: 'assistant',
+                content: tL4('initialMessage', { station: displayName })
+            } as any]);
             setHasGreeted(true);
         }
-    }, [displayName, hasGreeted, tL4]);
+    }, [displayName, hasGreeted, tL4, messages.length, setMessages]);
 
-    const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [isOffline, setIsOffline] = useState(false);
 
-    // Cognitive State Visualization
-    const [thinkingStep, setThinkingStep] = useState<string>('');
+    // Send Logic
+    const handleSend = useCallback(async (textOverride?: string, profileOverride?: string) => {
+        const text = textOverride || input.trim();
+        if (!text || isLoading) return;
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+        if (!textOverride) setInput('');
+        await sendMessage(text, profileOverride || seedUserProfile || 'general');
+    }, [input, isLoading, sendMessage, seedUserProfile]);
+
+
+    // Seed Question Handling
     const lastSeedQuestionRef = useRef<string>('');
-    const difyUserIdRef = useRef<string>(
-        globalThis.crypto?.randomUUID?.() ||
-        `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
-    );
-    const difyConversationIdRef = useRef<string | null>(null);
+    useEffect(() => {
+        const text = String(seedQuestion || '').trim();
+        if (!text) return;
+        if (isLoading) return;
+        if (lastSeedQuestionRef.current === text) return;
+
+        lastSeedQuestionRef.current = text;
+        handleSend(text);
+        onSeedConsumed?.();
+    }, [seedQuestion, isLoading, handleSend, onSeedConsumed]);
 
     // Hybrid UI State
     const [destination, setDestination] = useState('');
@@ -102,130 +135,6 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
             prompt: tL4(`quickButtons.${id}.prompt`, { station: displayName, id: stationId || '' })
         }));
     }, [displayName, stationId, tL4]);
-
-    // Scroll to bottom
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, thinkingStep]);
-
-    // Send Message Logic
-    const handleSend = useCallback(async (text: string, userProfile: string = 'general') => {
-        if (!text.trim() || isLoading) return;
-
-        const userMsg = { role: 'user' as const, content: text };
-        setMessages(prev => [...prev, userMsg]);
-        setInput('');
-        setIsLoading(true);
-        setIsOffline(false);
-        setThinkingStep(tL4('thinking.initializing'));
-
-        // Fake "Thinking Steps" to visualize the 4 Dimensions
-        const steps = [
-            tL4('thinking.l2'),
-            tL4('thinking.l3'),
-            tL4('thinking.kb'),
-            tL4('thinking.synthesizing')
-        ];
-
-        let stepIdx = 0;
-        const stepInterval = setInterval(() => {
-            if (stepIdx < steps.length) {
-                setThinkingStep(steps[stepIdx]);
-                stepIdx++;
-            }
-        }, 1500);
-
-        try {
-            // Use Dify Agent endpoint
-            const response = await fetch('/api/dify/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    query: text,
-                    conversation_id: difyConversationIdRef.current,
-                    inputs: {
-                        user_profile: userProfile,
-                        user_context: userContext,
-                        current_station: stationId || '',
-                        station_name: displayName,
-                        locale,
-                        zone: zone || 'core',
-                        user_id: difyUserIdRef.current
-                    }
-                })
-            });
-
-            clearInterval(stepInterval);
-
-            if (!response.ok) throw new Error('Network error');
-            if (!response.body) throw new Error('No body');
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let accumulatedResponse = '';
-            let sseBuffer = '';
-
-            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-            setThinkingStep('');
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                sseBuffer += decoder.decode(value, { stream: true });
-                while (true) {
-                    const newlineIndex = sseBuffer.indexOf('\n');
-                    if (newlineIndex === -1) break;
-
-                    const rawLine = sseBuffer.slice(0, newlineIndex);
-                    sseBuffer = sseBuffer.slice(newlineIndex + 1);
-
-                    const line = rawLine.trimEnd();
-                    if (!line.startsWith('data:')) continue;
-
-                    const payload = line.slice(5).trimStart();
-                    if (!payload || payload === '[DONE]') continue;
-
-                    try {
-                        const data = JSON.parse(payload);
-                        if (data.conversation_id && typeof data.conversation_id === 'string') {
-                            difyConversationIdRef.current = data.conversation_id;
-                        }
-                        if (data.event === 'agent_message' || data.event === 'message') {
-                            accumulatedResponse += (data.answer || '');
-                            setMessages(prev => {
-                                const newMsgs = [...prev];
-                                newMsgs[newMsgs.length - 1].content = accumulatedResponse;
-                                return newMsgs;
-                            });
-                        }
-                    } catch {
-                    }
-                }
-            }
-
-        } catch (error) {
-            console.error('Chat Error:', error);
-            setIsOffline(true);
-            setMessages(prev => [...prev, { role: 'assistant', content: tL4('chatError') }]);
-            clearInterval(stepInterval);
-        } finally {
-            setIsLoading(false);
-            setThinkingStep('');
-        }
-    }, [displayName, isLoading, locale, stationId, tL4, userContext, zone]);
-
-    useEffect(() => {
-        const text = String(seedQuestion || '').trim();
-        if (!text) return;
-        if (!hasGreeted) return;
-        if (isLoading) return;
-        if (lastSeedQuestionRef.current === text) return;
-
-        lastSeedQuestionRef.current = text;
-        handleSend(text, seedUserProfile || 'general');
-        onSeedConsumed?.();
-    }, [seedQuestion, seedUserProfile, hasGreeted, isLoading, handleSend, onSeedConsumed]);
 
     const demands = [
         { id: 'speed', icon: Clock, label: tL4('demands.speed') },
@@ -413,7 +322,26 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                         </div>
                     </div>
                 )}
-                <div ref={messagesEndRef} />
+
+                {suggestedQuestions.length > 0 && !thinkingStep && (
+                    <div className="flex flex-col gap-2 mt-2 px-1">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Suggested</p>
+                        <div className="flex flex-wrap gap-2">
+                            {suggestedQuestions.map((q, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleSend(q)}
+                                    disabled={isLoading}
+                                    className="text-left bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                    {q}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div ref={messagesEndRef} className="h-4" />
             </div>
 
             {/* Input Overlay (Hybrid Strategy) */}
@@ -465,6 +393,13 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                             />
                         </div>
+                        <button
+                            onClick={() => handleSend()}
+                            disabled={isLoading || !input.trim()}
+                            className="h-11 w-11 flex items-center justify-center bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        >
+                            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                        </button>
                     </div>
 
                     {/* Demand Chips (Multi-select) */}

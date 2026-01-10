@@ -137,6 +137,17 @@ export async function POST(req: NextRequest) {
                                         controller.enqueue(encoder.encode(answer));
                                     }
                                 }
+
+                                // Handle Suggested Questions (message_end event)
+                                if (event === 'message_end') {
+                                    const metadata = data.metadata;
+                                    if (metadata && metadata.suggested_questions && Array.isArray(metadata.suggested_questions)) {
+                                        const questions = metadata.suggested_questions;
+                                        if (questions.length > 0) {
+                                            controller.enqueue(encoder.encode(`\n[SUGGESTED_QUESTIONS]${JSON.stringify(questions)}[/SUGGESTED_QUESTIONS]\n`));
+                                        }
+                                    }
+                                }
                             } catch (e) {
                                 // Ignore parse errors for partial json
                             }

@@ -54,6 +54,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
 
     const [isOffline, setIsOffline] = useState(false);
     const [thinkingStep, setThinkingStep] = useState<string>('');
+    const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const userIdRef = useRef<string>(
@@ -93,6 +94,10 @@ export function useDifyChat(options: UseDifyChatOptions) {
     useEffect(() => {
         if (status === 'ready' || status === 'error') {
             setThinkingStep('');
+            // Clear suggested questions only on error, otherwise keep them until next message sent
+            if (status === 'error') {
+                setSuggestedQuestions([]);
+            }
         }
     }, [status]);
 
@@ -108,19 +113,79 @@ export function useDifyChat(options: UseDifyChatOptions) {
                 // Get the last thinking message
                 const lastThinking = thinkingMatch[thinkingMatch.length - 1];
                 const thinkingText = lastThinking.replace(/\[THINKING\]|\[\/THINKING\]/g, '').trim();
-                if (thinkingText) {
-                    setThinkingStep(thinkingText);
-                }
-                // Remove all thinking markers from content
+                // We use a separate useEffect to sync state to avoid update during render
+            }
+
+            // Extract suggested questions - using [\s\S] instead of 's' flag for compatibility
+            const suggestedMatch = content.match(/\[SUGGESTED_QUESTIONS\]([\s\S]*?)\[\/SUGGESTED_QUESTIONS\]/);
+
+            // Allow side-effects in render is bad practice, but common for this pattern. 
+            // Better to strip content here and update state in useEffect, but let's stick to this pattern for now
+            // and use a heuristic to avoid infinite loops (check content change)
+
+            // Actually, updating state during render is dangerous. 
+            // Let's just strip the content here, and rely on a separate effect to parse the raw content if needed.
+            // OR simpler: parse here but don't set state directly unless we are careful.
+
+            // Refactored approach: Strip tags for display, but use a separate effect for state updates?
+            // No, the previous code was trying to set state inside useMemo which causes React warnings.
+            // Let's just Return the content stripped, and handle extraction in an effect.
+
+            // Wait, to keep it simple and working:
+            // We will strip the tags for the UI.
+            // We need to extract the data.
+
+            if (thinkingMatch && thinkingMatch.length > 0) {
                 content = content.replace(/\n?\[THINKING\].*?\[\/THINKING\]\n?/g, '').trim();
+            }
+
+            if (suggestedMatch) {
+                content = content.replace(/\n?\[SUGGESTED_QUESTIONS\][\s\S]*?\[\/SUGGESTED_QUESTIONS\]\n?/, '').trim();
             }
 
             return {
                 role: m.role as 'user' | 'assistant',
                 content,
-                data: m.data
+                data: m.data,
+                // Pass raw content for effect to parse
+                rawContent: m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || ''
             };
         });
+    }, [aiMessages]);
+
+    // Effect to extract side-channel data (Thinking, Suggested Questions) from raw messages
+    useEffect(() => {
+        if (!aiMessages.length) return;
+
+        const lastMsg = aiMessages[aiMessages.length - 1] as any;
+        if (lastMsg.role !== 'assistant') return;
+
+        const content = lastMsg.content || (lastMsg.parts?.find((p: any) => p.type === 'text')?.text) || '';
+
+        // Thinking
+        const thinkingMatch = content.match(/\[THINKING\](.*?)\[\/THINKING\]/g);
+        if (thinkingMatch && thinkingMatch.length > 0) {
+            const lastThinking = thinkingMatch[thinkingMatch.length - 1];
+            const thinkingText = lastThinking.replace(/\[THINKING\]|\[\/THINKING\]/g, '').trim();
+            if (thinkingText) setThinkingStep(thinkingText);
+        }
+
+        // Suggested Questions
+        const suggestedMatch = content.match(/\[SUGGESTED_QUESTIONS\]([\s\S]*?)\[\/SUGGESTED_QUESTIONS\]/);
+        if (suggestedMatch) {
+            try {
+                const jsonStr = suggestedMatch[1];
+                const questions = JSON.parse(jsonStr);
+                if (Array.isArray(questions)) {
+                    setSuggestedQuestions(prev => {
+                        if (JSON.stringify(prev) !== JSON.stringify(questions)) return questions;
+                        return prev;
+                    });
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
     }, [aiMessages]);
 
     // Generate quick buttons based on locale
@@ -289,12 +354,13 @@ export function useDifyChat(options: UseDifyChatOptions) {
 
     return {
         messages,
-        setMessages: setAiMessages as any,
+        setMessages: setAiMessages,
         isLoading,
         isOffline,
         thinkingStep,
+        suggestedQuestions,
         sendMessage,
-        clearMessages,
+        clearMessages: () => setAiMessages([]),
         quickButtons,
         messagesEndRef,
         userId: userIdRef.current

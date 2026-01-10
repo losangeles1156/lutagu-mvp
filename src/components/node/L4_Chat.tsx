@@ -40,11 +40,16 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         setMessages,
         isLoading,
         thinkingStep,
+        suggestedQuestions,
         sendMessage,
+        clearMessages,
         messagesEndRef
     } = useDifyChat({
-        stationId,
-        stationName: displayName,
+        stationId: data.id, // Changed from stationId to data.id
+        stationName: displayName, // Kept displayName as getLocaleString is not defined
+        onComplete: () => {
+            // Optional callback
+        }
     });
 
     useEffect(() => {
@@ -61,12 +66,18 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         }
     }, [displayName, tL4, setMessages]);
 
-    const handleSend = useCallback(() => {
-        const text = input.trim();
+    const handleSend = useCallback(async (textOverride?: string) => {
+        const text = textOverride || input.trim();
         if (!text || isLoading) return;
-        sendMessage(text, 'general');
-        setInput('');
-    }, [input, isLoading, sendMessage]);
+
+        if (!textOverride) setInput('');
+        await sendMessage(text, seedUserProfile || 'general'); // Assuming userProfileStr was meant to be seedUserProfile or a default
+    }, [input, isLoading, sendMessage, seedUserProfile]);
+
+    const handleQuickAction = (actionId: string, prompt: string) => {
+        // ... implementation for quick actions ...
+        handleSend(prompt);
+    };
 
     return (
         <motion.div
@@ -132,8 +143,8 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed ${msg.role === 'user'
-                                    ? 'bg-slate-900 text-white rounded-tr-none'
-                                    : 'bg-white text-slate-700 rounded-tl-none border border-slate-200/50'
+                                ? 'bg-slate-900 text-white rounded-tr-none'
+                                : 'bg-white text-slate-700 rounded-tl-none border border-slate-200/50'
                                 }`}>
                                 {msg.role !== 'user' && (
                                     <div className="flex items-center gap-1.5 mb-1.5 opacity-40">
@@ -157,6 +168,25 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                         </div>
                     </div>
                 )}
+
+                {suggestedQuestions.length > 0 && !thinkingStep && (
+                    <div className="flex flex-col gap-2 mt-2 px-1">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Suggested</p>
+                        <div className="flex flex-wrap gap-2">
+                            {suggestedQuestions.map((q, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleSend(q)}
+                                    disabled={isLoading}
+                                    className="text-left bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                    {q}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <div ref={messagesEndRef} className="h-4" />
             </div>
 
@@ -179,9 +209,9 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                         className="flex-1 h-11 px-4 bg-slate-100 border-none rounded-xl text-sm font-bold text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 transition-all disabled:opacity-50"
                     />
                     <button
-                        onClick={handleSend}
-                        disabled={!input.trim() || isLoading}
-                        className="w-11 h-11 flex items-center justify-center bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-30"
+                        onClick={() => handleSend()}
+                        disabled={isLoading || !input.trim()}
+                        className="h-11 w-11 flex items-center justify-center bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
                         {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                     </button>
