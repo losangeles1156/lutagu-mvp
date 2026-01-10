@@ -119,73 +119,90 @@ export async function fetchWeatherAlerts(locale: string = 'zh') {
                 title,
                 summary: displaySummary,
                 severity: severityLabel,
-                region: WEATHER_REGION_POLICY.extractRegion(title, cleanSummary)
-            });
-        }
+                const region = WEATHER_REGION_POLICY.extractRegion(title, cleanSummary);
+
+                // [Filter] Double check: Explicitly exclude unwanted regions even if they passed isTargetRegion
+                // This catches cases where logic was too permissive
+                const isExcluded = WEATHER_REGION_POLICY.excludedRegions.some(ex => region.includes(ex)) ||
+                    region === '千葉南部' ||
+                    region === '千葉北東部' ||
+                    region === '神奈川西部';
+
+                if(isExcluded) {
+                    continue;
+                }
+
+            entries.push({
+                    title,
+                    summary: displaySummary,
+                    severity: severityLabel,
+                    region
+                });
+            }
 
         return entries;
 
-    } catch (error: any) {
-        console.error('Weather Service Error:', error.message);
-        return [];
+        } catch (error: any) {
+            console.error('Weather Service Error:', error.message);
+            return [];
+        }
     }
-}
 
 // Open-Meteo Live Weather Fetch
 export async function getLiveWeather(lat: number = 35.6895, lon: number = 139.6917) {
-    try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FTokyo`;
+        try {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FTokyo`;
 
-        const res = await fetch(url, { next: { revalidate: 300 } });
-        if (!res.ok) throw new Error('OpenMeteo Failed');
+            const res = await fetch(url, { next: { revalidate: 300 } });
+            if (!res.ok) throw new Error('OpenMeteo Failed');
 
-        const data = await res.json();
-        const current = data.current;
+            const data = await res.json();
+            const current = data.current;
 
-        if (!current) throw new Error('No current weather data');
+            if (!current) throw new Error('No current weather data');
 
-        const code = current.weather_code;
-        const condition = getWeatherLabel(code);
-        const emoji = getWeatherEmoji(code);
+            const code = current.weather_code;
+            const condition = getWeatherLabel(code);
+            const emoji = getWeatherEmoji(code);
 
-        return {
-            temp: current.temperature_2m,
-            humidity: current.relative_humidity_2m,
-            wind: current.wind_speed_10m,
-            condition,
-            label: condition, // Compat
-            emoji,
-            precipitationProbability: 0 // Not in basic current api
-        };
-    } catch (e) {
-        console.warn('Live Weather Warning:', e);
-        return {
-            temp: 20,
-            humidity: 50,
-            wind: 2,
-            condition: 'Unknown',
-            label: 'Unknown',
-            emoji: '☁️',
-            precipitationProbability: 0
-        };
+            return {
+                temp: current.temperature_2m,
+                humidity: current.relative_humidity_2m,
+                wind: current.wind_speed_10m,
+                condition,
+                label: condition, // Compat
+                emoji,
+                precipitationProbability: 0 // Not in basic current api
+            };
+        } catch (e) {
+            console.warn('Live Weather Warning:', e);
+            return {
+                temp: 20,
+                humidity: 50,
+                wind: 2,
+                condition: 'Unknown',
+                label: 'Unknown',
+                emoji: '☁️',
+                precipitationProbability: 0
+            };
+        }
     }
-}
 
-function getWeatherLabel(code: number): string {
-    if (code === 0) return 'Clear';
-    if (code >= 1 && code <= 3) return 'Cloudy';
-    if (code >= 45 && code <= 48) return 'Fog';
-    if (code >= 51 && code <= 67) return 'Rain';
-    if (code >= 71 && code <= 77) return 'Snow';
-    if (code >= 80 && code <= 82) return 'Showers';
-    if (code >= 95) return 'Thunderstorm';
-    return 'Unknown';
-}
+    function getWeatherLabel(code: number): string {
+        if (code === 0) return 'Clear';
+        if (code >= 1 && code <= 3) return 'Cloudy';
+        if (code >= 45 && code <= 48) return 'Fog';
+        if (code >= 51 && code <= 67) return 'Rain';
+        if (code >= 71 && code <= 77) return 'Snow';
+        if (code >= 80 && code <= 82) return 'Showers';
+        if (code >= 95) return 'Thunderstorm';
+        return 'Unknown';
+    }
 
-function getWeatherEmoji(code: number): string {
-    if (code === 0) return '☀️';
-    if (code >= 1 && code <= 3) return '☁️';
-    if (code >= 51 && code <= 67) return 'Hz🌧️';
-    if (code >= 95) return '⚡️';
-    return '🌥️';
-}
+    function getWeatherEmoji(code: number): string {
+        if (code === 0) return '☀️';
+        if (code >= 1 && code <= 3) return '☁️';
+        if (code >= 51 && code <= 67) return 'Hz🌧️';
+        if (code >= 95) return '⚡️';
+        return '🌥️';
+    }

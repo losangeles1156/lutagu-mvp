@@ -15,10 +15,14 @@ export const WEATHER_REGION_POLICY = {
         '23区',
         '多摩',
         '神奈川県東部',
-        '神奈川県西部',
-        '千葉県北西部',
-        '千葉県北東部',
-        '千葉県南部'
+        // '神奈川県西部', // Tourist areas (Hakone) but can be noisy. Removing for now.
+        '千葉県北西部', // Commuter belt (Matsudo, Urayasu)
+        // '千葉県北東部', // Narita area - keep? Or remove? Narita is important.
+        // Let's keep Narita (NE) if possible, but user complained about "Chiba South".
+        // Actually Narita is "North East"? No, Narita is roughly North/Central.
+        // JMA Chiba NE includes Narita.
+        // JMA Chiba S is Tateyama (far).
+        '埼玉県南部' // Add Saitama South (Commuter belt)
     ],
 
     // Explicit Exclusions (Level 3 Filter)
@@ -141,22 +145,22 @@ export const WEATHER_REGION_POLICY = {
         const normalize = WEATHER_REGION_POLICY.normalize;
         const normTitle = normalize(title);
         const normSummary = normalize(summary);
-        
+
         // Prepare patterns
         const targetRegionsPattern = new RegExp(WEATHER_REGION_POLICY.targetRegions.join('|'));
         const clearStatementPattern = /は晴れています|は崩れ|は回復|解除|ielder|注意報解除|警報解除|解除しました|発表はありません/;
-        
+
         // Split sentences (Summary + Title)
         const sentences = normSummary.split(/[。\n]/).map(s => s.trim()).filter(s => s.length > 0);
         sentences.push(normTitle);
-        
+
         let maxSeverity: 'info' | 'advisory' | 'warning' | 'critical' = 'info';
         const severityLevels = { info: 1, advisory: 2, warning: 3, critical: 4 };
 
         for (const sentence of sentences) {
             // 1. Skip clear statements / cancellations
             if (clearStatementPattern.test(sentence)) continue;
-            
+
             // 2. Region Scoping:
             // Ensure the sentence applies to our target regions.
             // We ignore sentences mentioning excluded regions (e.g. Izu Islands).
@@ -171,23 +175,23 @@ export const WEATHER_REGION_POLICY = {
             // So we are safe to enforce this.
             const mentionsTarget = targetRegionsPattern.test(sentence);
             if (!mentionsTarget) continue;
-            
+
             // 3. Determine Severity for this specific sentence
             const sanitized = sentence.replace(/警報級の可能性/g, '');
-            
+
             let currentSeverity: 'info' | 'advisory' | 'warning' | 'critical' = 'info';
-            
+
             if (WEATHER_REGION_POLICY.patterns.critical.test(sanitized)) currentSeverity = 'critical';
             else if (WEATHER_REGION_POLICY.patterns.warning.test(sanitized)) currentSeverity = 'warning';
             else if (WEATHER_REGION_POLICY.patterns.advisory.test(sanitized)) currentSeverity = 'advisory';
             else if (WEATHER_REGION_POLICY.patterns.info.test(sanitized)) currentSeverity = 'info';
-            
+
             // Update max severity
             if (severityLevels[currentSeverity] > severityLevels[maxSeverity]) {
                 maxSeverity = currentSeverity;
             }
         }
-        
+
         return maxSeverity;
     },
 
@@ -210,7 +214,7 @@ export const WEATHER_REGION_POLICY = {
     extractAlertType: (title: string): string => {
         const normalize = WEATHER_REGION_POLICY.normalize;
         const normTitle = normalize(title);
-        
+
         const patterns = [
             { regex: /強風/, label: '強風' },
             { regex: /大雨/, label: '大雨' },
@@ -239,7 +243,7 @@ export const WEATHER_REGION_POLICY = {
     extractRegion: (title: string, summary: string): string => {
         const normalize = WEATHER_REGION_POLICY.normalize;
         const text = normalize(title + summary);
-        
+
         // Prioritize specific regions
         const regionPatterns = [
             { regex: /23区/, label: '東京23区' },
