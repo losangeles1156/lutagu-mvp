@@ -23,7 +23,15 @@ export async function POST(req: NextRequest) {
     const startTime = Date.now();
 
     if (!DIFY_API_KEY) {
-        return new Response(JSON.stringify({ error: 'DIFY_API_KEY not configured' }), { status: 500 });
+        console.error('[Dify] DIFY_API_KEY not configured! Please set it in Vercel environment variables.');
+        // Return a user-friendly message instead of exposing internal config
+        return new Response(
+            'AI 服務暫時無法使用，請稍後再試。\n(AI service temporarily unavailable. Please try again later.)',
+            {
+                status: 503,
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            }
+        );
     }
 
     try {

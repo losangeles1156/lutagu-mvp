@@ -39,29 +39,43 @@ export interface RequestContext {
 }
 
 export class HybridEngine {
-    private poiTaggedEngine: POITaggedDecisionEngine;
+    private poiTaggedEngine: POITaggedDecisionEngine | null = null;
+    private isInitialized: boolean = false;
 
     constructor() {
-        // Initialize POI Tagged Engine with Redis support
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseKey = process.env.SUPABASE_SERVICE_KEY!;
+        // Initialize POI Tagged Engine with Redis support (graceful degradation)
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
         const redisUrl = process.env.REDIS_URL;
 
-        this.poiTaggedEngine = new POITaggedDecisionEngine(
-            supabaseUrl,
-            supabaseKey,
-            redisUrl,
-            {
-                enableRedisCache: !!redisUrl,
-                enableQueryNormalization: true,
-                enablePrefetch: true,
-                enableSimilarityFallback: true,
-                maxSimilarResults: 5,
-                similarityThreshold: 0.6,
-                cacheTTLSeconds: 3600,
-                maxResults: 10
+        // Only initialize POI engine if Supabase is configured
+        if (supabaseUrl && supabaseKey) {
+            try {
+                this.poiTaggedEngine = new POITaggedDecisionEngine(
+                    supabaseUrl,
+                    supabaseKey,
+                    redisUrl,
+                    {
+                        enableRedisCache: !!redisUrl,
+                        enableQueryNormalization: true,
+                        enablePrefetch: true,
+                        enableSimilarityFallback: true,
+                        maxSimilarResults: 5,
+                        similarityThreshold: 0.6,
+                        cacheTTLSeconds: 3600,
+                        maxResults: 10
+                    }
+                );
+                this.isInitialized = true;
+                console.log('[HybridEngine] Initialized with POI engine');
+            } catch (error) {
+                console.warn('[HybridEngine] POI engine init failed, running in degraded mode:', error);
+                this.isInitialized = true; // Still mark as initialized, just without POI
             }
-        );
+        } else {
+            console.warn('[HybridEngine] Missing Supabase config, running in degraded mode (Template + Algorithm only)');
+            this.isInitialized = true;
+        }
     }
 
     /**
@@ -221,6 +235,12 @@ export class HybridEngine {
         );
 
         if (!isPOIQuery) {
+            return null;
+        }
+
+        // Check if POI engine is available
+        if (!this.poiTaggedEngine) {
+            console.log('[HybridEngine] POI engine not available, skipping POI search');
             return null;
         }
 
@@ -390,8 +410,9 @@ export class HybridEngine {
      */
     public getStats() {
         return {
-            poiEngine: this.poiTaggedEngine.getCacheStats(),
-            // Add more stats as needed
+            poiEngine: this.poiTaggedEngine?.getCacheStats() || { available: false },
+            isInitialized: this.isInitialized,
+            hasPOIEngine: !!this.poiTaggedEngine
         };
     }
 
@@ -399,7 +420,7 @@ export class HybridEngine {
      * Clear Cache
      */
     public clearCache(): void {
-        this.poiTaggedEngine.clearCache();
+        this.poiTaggedEngine?.clearCache();
     }
 }
 
