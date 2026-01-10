@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Dify API configuration
-const DIFY_API_URL = process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
+// Dify API configuration (supports multiple env var names for flexibility)
+const DIFY_API_URL = process.env.DIFY_API_URL || process.env.DIFY_API_BASE || process.env.DIFY_BASE_URL || 'https://api.dify.ai/v1';
 const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
 
 interface IntentClassificationRequest {

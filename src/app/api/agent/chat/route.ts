@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 
-const DIFY_API_BASE = process.env.DIFY_API_BASE || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
+const DIFY_API_BASE = process.env.DIFY_API_BASE || process.env.DIFY_API_URL || process.env.DIFY_BASE_URL || 'https://api.dify.ai/v1';
 const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
 
 export const maxDuration = 60;
