@@ -194,7 +194,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
       console.error('Chat Error', error);
       addMessage({
         role: 'assistant',
-        content: `⚠️ ${error.message || tChat('connectionError') || '連線失敗，請稍後再試'}`,
+        content: `⚠️ ${(error as any).message || tChat('connectionError') || '連線失敗，請稍後再試'}`,
       });
     } finally {
       setIsLoading(false);
