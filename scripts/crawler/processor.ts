@@ -1,19 +1,23 @@
 import { CrawlerResult, L1Data, L4Data } from './types';
+import fs from 'fs';
+import path from 'path';
 
-// Mocked or imported entity mapping (simplified for this script)
-const STATION_MAPPING: Record<string, string> = {
-    '新宿': 'odpt.Station:JR-East.Shinjuku',
-    '澀谷': 'odpt.Station:JR-East.Shibuya',
-    '上野': 'odpt.Station:JR-East.Ueno',
-    '東京': 'odpt.Station:JR-East.Tokyo',
-    '秋葉原': 'odpt.Station:JR-East.Akihabara',
-    '淺草': 'odpt.Station:TokyoMetro.Ginza.Asakusa',
-    '池袋': 'odpt.Station:JR-East.Ikebukuro',
-    '銀座': 'odpt.Station:TokyoMetro.Ginza.Ginza',
-    '品川': 'odpt.Station:JR-East.Shinagawa',
-    '成田機場': 'odpt.Station:Keisei.NaritaAirportTerminal1',
-    '羽田機場': 'odpt.Station:TokyoMonorail.HanedaAirportTerminal1'
-};
+// Load station mapping from JSON
+const MAPPING_PATH = path.join(__dirname, 'station_mapping.json');
+let STATION_MAPPING: Record<string, string> = {};
+
+try {
+    if (fs.existsSync(MAPPING_PATH)) {
+        STATION_MAPPING = JSON.parse(fs.readFileSync(MAPPING_PATH, 'utf-8'));
+    }
+} catch (error) {
+    console.error('Failed to load station mapping:', error);
+}
+
+// List of common words that are also station names but often lead to false positives
+const STATION_FALSE_POSITIVES = new Set([
+    '昭和', '日本', '東京', '品川', '新宿', '池袋', '澀谷', '渋谷', '上野', '大門', '泉', '小田', '高田', '中山'
+]);
 
 export class DataProcessor {
     processL1(result: CrawlerResult): L1Data {
@@ -32,10 +36,17 @@ export class DataProcessor {
     processL4(result: CrawlerResult): L4Data[] {
         const knowledgeItems: L4Data[] = [];
         const content = result.content;
+        const title = result.title;
         
         // Find entities (stations) mentioned in the content
         for (const [name, id] of Object.entries(STATION_MAPPING)) {
-            if (result.title.includes(name) || content.includes(name)) {
+            // Skip false positives if they are too short and common
+            if (STATION_FALSE_POSITIVES.has(name) && !title.includes(name)) {
+                // Only include if the title specifically mentions it, or if it's a longer name
+                continue;
+            }
+
+            if (title.includes(name) || content.includes(name)) {
                 // Determine knowledge type based on keywords
                 let category = 'tip';
                 let subcategory = 'general';

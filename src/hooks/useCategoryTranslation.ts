@@ -16,24 +16,33 @@ export function useCategoryTranslation() {
      */
     const getCategoryLabel = useCallback((category: string) => {
         if (!category) return '';
-        const normalized = category.toLowerCase();
+        
+        // Handle cases where the category might already be a translation key path
+        // e.g., "l1.categories.park" -> "park"
+        let normalized = category.toLowerCase();
+        if (normalized.includes('.')) {
+            const parts = normalized.split('.');
+            normalized = parts[parts.length - 1];
+        }
+        
         const key = `categories.${normalized}`;
 
         // 1. Try L1 (General Categories)
         const l1Translation = tL1(key);
-        if (l1Translation !== key) return l1Translation;
+        // next-intl returns "namespace.key" if missing, so we check for that too
+        if (l1Translation !== key && l1Translation !== `l1.${key}`) return l1Translation;
 
         // 2. Try L3 (Facility Categories)
         const l3Translation = tL3(key);
-        if (l3Translation !== key) return l3Translation;
+        if (l3Translation !== key && l3Translation !== `l3.${key}`) return l3Translation;
 
-        // 3. Fallback: Try Tag Subcategories (for granular categories like 'cafe', 'fast_food')
+        // 3. Fallback: Try Tag Subcategories
         const tagKey = `sub.${normalized}`;
         const tagTranslation = tTag(tagKey);
-        if (tagTranslation !== tagKey) return tagTranslation;
+        if (tagTranslation !== tagKey && tagTranslation !== `tag.${tagKey}`) return tagTranslation;
 
         // 4. Final Fallback: Formatted Raw String
-        return category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' ');
+        return normalized.charAt(0).toUpperCase() + normalized.slice(1).replace(/_/g, ' ');
     }, [tL1, tL3, tTag]);
 
     /**
@@ -42,15 +51,21 @@ export function useCategoryTranslation() {
      */
     const getSubcategoryLabel = useCallback((subcategory: string) => {
         if (!subcategory) return '';
-        const normalized = subcategory.toLowerCase();
+        
+        let normalized = subcategory.toLowerCase();
+        if (normalized.includes('.')) {
+            const parts = normalized.split('.');
+            normalized = parts[parts.length - 1];
+        }
+        
         const key = `sub.${normalized}`;
 
         // 1. Try Tag Subcategories
         const tagTranslation = tTag(key);
-        if (tagTranslation !== key) return tagTranslation;
+        if (tagTranslation !== key && tagTranslation !== `tag.${key}`) return tagTranslation;
 
         // 2. Fallback: Formatted Raw String
-        return subcategory.charAt(0).toUpperCase() + subcategory.slice(1).replace(/_/g, ' ');
+        return normalized.charAt(0).toUpperCase() + normalized.slice(1).replace(/_/g, ' ');
     }, [tTag]);
 
     return { getCategoryLabel, getSubcategoryLabel };

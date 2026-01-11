@@ -42,12 +42,19 @@ export abstract class BaseCrawler {
             await page.setViewport({ width: 1280, height: 800 });
             
             console.log(`[Crawler] Visiting: ${url}`);
-            await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+            // Use a longer timeout and waitUntil: 'load' for redirected pages
+            await page.goto(url, { waitUntil: 'load', timeout: 60000 });
             
-            // Wait for dynamic content if needed
-            await this.sleep(1000);
+            // Extra wait for some JS to execute
+            await this.sleep(2000);
 
-            const result = await this.extractData(page, url);
+            // Check if we were redirected or if content is actually there
+            const currentUrl = page.url();
+            if (currentUrl !== url && !currentUrl.includes(url.replace('http:', 'https:'))) {
+                console.warn(`[Crawler] Redirected from ${url} to ${currentUrl}`);
+            }
+
+            const result = await this.extractData(page, currentUrl);
             await this.sleep(this.delayMs);
             return result;
         } catch (error) {

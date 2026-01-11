@@ -17,7 +17,7 @@ export class DbImporter {
     async initTables() {
         // Create crawler_raw_data table if it doesn't exist
         const { error } = await this.supabase.rpc('exec_sql', {
-            sql_query: `
+            sql: `
                 CREATE TABLE IF NOT EXISTS crawler_raw_data (
                     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                     url TEXT UNIQUE NOT NULL,
@@ -48,15 +48,11 @@ export class DbImporter {
                 }, { onConflict: 'url' });
 
             if (error) {
-                if (error.code === 'PGRST204' || error.code === 'PGRST205') {
-                    console.warn(`[DbImporter] Table 'crawler_raw_data' not found. Skipping L1 raw data storage for ${data.url}.`);
-                    return;
-                }
                 console.error(`[DbImporter] Error importing L1 data for ${data.url}:`, error);
                 throw error;
             }
         } catch (err) {
-            console.warn(`[DbImporter] Failed to import L1 data: ${err instanceof Error ? err.message : String(err)}`);
+            console.error(`[DbImporter] Failed to import L1 data: ${err instanceof Error ? err.message : String(err)}`);
         }
     }
 

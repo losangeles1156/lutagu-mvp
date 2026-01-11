@@ -45,19 +45,22 @@ export async function GET(request: NextRequest) {
                 markdownTips = markdownTips.slice(0, limit);
 
                 const formattedMarkdownTips = markdownTips.map(k => ({
+                    id: k.id,
                     icon: k.icon,
-                    text: k.content,
-                    category: k.type,
+                    content: k.content,
+                    type: k.type,
                     section: k.section,
                     priority: k.priority
                 }));
 
                 // Fallback to hardcoded for now (to be deprecated)
                 const hardcodedTips = getRailwayExpertTips(id);
-                const hardcodedTipsFormatted = hardcodedTips.map(t => ({
+                const hardcodedTipsFormatted = hardcodedTips.map((t, idx) => ({
+                    id: `legacy-railway-${id}-${idx}`,
                     icon: t.icon,
-                    text: t.text,
-                    category: t.category,
+                    content: t.text,
+                    type: t.category,
+                    section: '專家建議 (Expert Tips)',
                     priority: 50 // Default legacy priority
                 }));
 
@@ -85,9 +88,10 @@ export async function GET(request: NextRequest) {
                 markdownTips = markdownTips.slice(0, limit);
 
                 const formattedMarkdownTips = markdownTips.map(k => ({
+                    id: k.id,
                     icon: k.icon,
-                    text: k.content,
-                    category: k.type,
+                    content: k.content,
+                    type: k.type,
                     section: k.section,
                     priority: k.priority
                 }));
@@ -97,10 +101,12 @@ export async function GET(request: NextRequest) {
                 const hardcodedAccessibility = getAccessibilityAdvice(id);
 
                 // Merge and format
-                const tips = markdownTips.length > 0 ? formattedMarkdownTips : hardcodedTips.map(t => ({
+                const tips = markdownTips.length > 0 ? formattedMarkdownTips : hardcodedTips.map((t, idx) => ({
+                    id: `legacy-station-${id}-${idx}`,
                     icon: t.icon,
-                    text: t.text,
-                    category: t.category,
+                    content: t.text,
+                    type: t.category,
+                    section: '專家建議 (Expert Tips)',
                     priority: 50 // Default legacy priority
                 }));
 

@@ -156,7 +156,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                 const res = await fetch(`/api/l4/knowledge?type=station&id=${stationId}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setMarkdownKnowledge(data.markdown_knowledge || []);
+                    setMarkdownKnowledge(data.tips || []);
                 }
             } catch (err) {
                 console.error('[L4 Dashboard] Failed to fetch markdown knowledge:', err);
@@ -264,7 +264,11 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
         if (task === 'time' && stationId && !timetableData) {
             setIsLoading(true);
             const allMembers = resolveHubStationMembers(stationId);
-            const prioritized = [...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')), ...allMembers.filter(id => id.includes('JR-East'))];
+            const prioritized = [
+                ...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')),
+                ...allMembers.filter(id => id.includes('JR-East')),
+                ...allMembers.filter(id => !id.includes('TokyoMetro') && !id.includes('Toei') && !id.includes('JR-East'))
+            ];
             const uniqueIds = [...new Set(prioritized)];
             Promise.all(uniqueIds.map(memberId => fetchJsonCached<OdptStationTimetable[]>(`/api/odpt/timetable?station=${encodeURIComponent(memberId)}&raw=1`, { ttlMs: 5 * 60_000 }).catch(() => [] as OdptStationTimetable[])))
                 .then(results => {
@@ -337,7 +341,11 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
 
             if (kind === 'timetable') {
                 const allMembers = resolveHubStationMembers(currentOriginId);
-                const prioritized = [...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')), ...allMembers.filter(id => id.includes('JR-East'))];
+                const prioritized = [
+                    ...allMembers.filter(id => id.includes('TokyoMetro') || id.includes('Toei')),
+                    ...allMembers.filter(id => id.includes('JR-East')),
+                    ...allMembers.filter(id => !id.includes('TokyoMetro') && !id.includes('Toei') && !id.includes('JR-East'))
+                ];
                 const uniqueIds = [...new Set(prioritized)];
                 let allTimetables: OdptStationTimetable[] = [];
                 let fetchedAny = false;

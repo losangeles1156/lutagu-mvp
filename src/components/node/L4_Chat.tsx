@@ -87,7 +87,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
             dragMomentum={false}
             className={`flex flex-col bg-white shadow-2xl transition-all duration-300 overflow-hidden ${chatDisplayMode === 'full' ? 'fixed inset-0 z-50' :
                 chatDisplayMode === 'split' ? 'h-full w-full relative' :
-                    'fixed bottom-4 right-4 w-[380px] h-[500px] rounded-2xl z-50'
+                    'fixed bottom-0 right-0 sm:bottom-4 sm:right-4 w-full sm:w-[380px] h-full sm:h-[500px] sm:rounded-2xl z-50'
                 }`}
         >
             {/* Header Area */}
@@ -142,7 +142,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                             animate={{ opacity: 1, y: 0 }}
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed ${msg.role === 'user'
+                            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed break-words ${msg.role === 'user'
                                 ? 'bg-slate-900 text-white rounded-tr-none'
                                 : 'bg-white text-slate-700 rounded-tl-none border border-slate-200/50'
                                 }`}>

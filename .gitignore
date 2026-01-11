@@ -27,6 +27,14 @@ scripts/*.js
 scripts/*.ts
 scripts/*.json
 !scripts/package.json
+!scripts/benchmark_hybrid_performance.ts
+!scripts/optimize_l4_knowledge.ts
+!scripts/ingest_l4_markdown.ts
+!scripts/sync_knowledge.ts
+!scripts/stress_test_route_planning.ts
+!scripts/crawler/
+!scripts/ingest_new_operators.ts
+!scripts/verify_odpt.ts
 
 # Local env files
 .env*.local
@@ -40,7 +48,6 @@ next-env.d.ts
 lutagu-v3.0/*.json
 l1_workflow.json
 
-
 # Security / Debug Output
 dify_response.txt
 *_response.txt
@@ -48,8 +55,6 @@ dify_response.txt
 key.txt
 *.rtf
 dump.sql
-.env
-.env.local
 
 # Legacy Folders (Ignored after removal)
 lutagu-web/
@@ -69,5 +74,10 @@ public/workbox-*.js
 *.key
 **/secrets/**
 *.bak
-*.bak
-!scripts/benchmark_hybrid_performance.ts
+
+# IDE and other tool configs
+.agent/
+.antigravity/
+.cursorrules
+.windsurfrules
+.trae/

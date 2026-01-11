@@ -304,14 +304,18 @@ export function useDifyChat(options: UseDifyChatOptions) {
 
             if (hybridApiRes.ok) {
                 const hybridRes = await hybridApiRes.json();
-                if (hybridRes && !hybridRes.passToLLM && !hybridRes.error) {
+                
+                // The API returns { success: true, result: { content, source, ... } }
+                const result = hybridRes.result;
+                
+                if (hybridRes.success && result && !result.passToLLM) {
                     const hybridMsg: any = {
                         id: `hybrid-${Date.now()}`,
                         role: 'assistant',
-                        content: hybridRes.content,
-                        parts: [{ type: 'text', text: hybridRes.content }],
-                        data: hybridRes.data,
-                        source: hybridRes.source
+                        content: result.content || '',
+                        parts: [{ type: 'text', text: result.content || '' }],
+                        data: result.data,
+                        source: result.source
                     };
 
                     // Add user message manually to aiMessages then assistant message
@@ -324,9 +328,9 @@ export function useDifyChat(options: UseDifyChatOptions) {
                     setThinkingStep('');
                     onMessage?.({
                         role: 'assistant',
-                        content: hybridRes.content,
-                        data: hybridRes.data,
-                        source: hybridRes.source
+                        content: result.content || '',
+                        data: result.data,
+                        source: result.source
                     });
                     onComplete?.();
                     return;

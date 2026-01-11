@@ -39,52 +39,64 @@ interface RidingKnowledge {
 const KNOWLEDGE_DIR = path.resolve(__dirname, '../knowledge/stations/riding_knowledge');
 const EXCLUDE_FILES = ['metro_toei_all_stations.md', 'metro_toei_remaining.md', 'metro_remaining_lines_universal.md']; // Handle these separately or skip if redundant
 
-async function findNodeId(searchId: string): Promise<string | null> {
-    // 1. Try exact match
-    let { data: node } = await supabase.from('nodes').select('id').eq('id', searchId).maybeSingle();
-    if (node) return node.id;
+async function findNodeIds(searchId: string): Promise<string[]> {
+    console.log(`[ID] Resolving nodes for: ${searchId}...`);
+    let results: string[] = [];
 
-    // 2. Try swapping separators (odpt: vs odpt.)
-    const altId = searchId.includes('odpt:Station:')
-        ? searchId.replace('odpt:Station:', 'odpt.Station:')
-        : searchId.replace('odpt.Station:', 'odpt:Station:');
+    // Normalize searchId for mapping
+    const fullSearchId = searchId.startsWith('odpt') ? searchId : `odpt:Station:${searchId}`;
 
-    ({ data: node } = await supabase.from('nodes').select('id').eq('id', altId).maybeSingle());
-    if (node) return node.id;
-
-    // Manual overrides for tricky Markdown headers
-    const manualMappings: Record<string, string> = {
-        'odpt:Station:京急電鐵 羽田機場第1・第2航廈站': 'odpt.Station:Keikyu.Airport.HanedaAirportTerminal1And2',
-        'odpt:Station:京急電鐵 羽田機場第3航廈站': 'odpt.Station:Keikyu.Airport.HanedaAirportTerminal3',
-        'odpt:Station:東京單軌電車 羽田機場國際線航廈站': 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal3',
-        'odpt:Station:JR 機場第1航廈站 / JR 機場第2航廈站': 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal1',
-        'odpt:Station:JR-East 成田機場第1航廈站': 'odpt.Station:JR-East.NaritaAirport.NaritaAirportTerminal1',
-        'odpt:Station:JR-East 成田機場第2航廈站': 'odpt.Station:JR-East.NaritaAirport.NaritaAirportTerminal23',
+    // Manual overrides
+    const manualMappings: Record<string, string[]> = {
+        'odpt:Station:京急電鐵 羽田機場第1・第2航廈站': ['odpt.Station:Keikyu.Airport.HanedaAirportTerminal1And2'],
+        'odpt:Station:京急電鐵 羽田機場第3航廈站': ['odpt.Station:Keikyu.Airport.HanedaAirportTerminal3'],
+        'odpt:Station:東京單軌電車 羽田機場國際線航廈站': ['odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal3'],
+        'odpt:Station:JR 機場第1航廈站 / JR 機場第2航廈站': ['odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal1'],
+        'odpt:Station:JR-East 成田機場第1航廈站': ['odpt.Station:JR-East.NaritaAirport.NaritaAirportTerminal1'],
+        'odpt:Station:JR-East 成田機場第2航廈站': ['odpt.Station:JR-East.NaritaAirport.NaritaAirportTerminal23'],
+        'odpt:Station:JR-East.Yamanote.Ebisu': ['odpt:Station:TokyoMetro.Ebisu', 'odpt:Station:JR-East.u'],
+        'odpt:Station:JR-East.Meguro': ['odpt:Station:JR-East.Meguro', 'odpt:Station:TokyoMetro.Meguro', 'odpt:Station:Toei.Meguro'],
+        'odpt:Station:JR-East.Nakano': ['odpt:Station:JR-East.Nakano', 'odpt:Station:TokyoMetro.Nakano'],
+        'odpt:Station:Tokyu.Meguro': ['odpt:Station:JR-East.Meguro', 'odpt:Station:TokyoMetro.Meguro', 'odpt:Station:Toei.Meguro'],
     };
 
-    if (manualMappings[searchId]) {
-        return manualMappings[searchId];
+    if (manualMappings[fullSearchId]) {
+        results = manualMappings[fullSearchId];
+    } else {
+        // 1. Try exact match
+        let { data: node } = await supabase.from('nodes').select('id').eq('id', searchId).maybeSingle();
+        if (node) {
+            results.push(node.id);
+        } else {
+            // 2. Try swapping separators
+            const altId = searchId.includes('odpt:Station:')
+                ? searchId.replace('odpt:Station:', 'odpt.Station:')
+                : searchId.replace('odpt.Station:', 'odpt:Station:');
+
+            ({ data: node } = await supabase.from('nodes').select('id').eq('id', altId).maybeSingle());
+            if (node) {
+                results.push(node.id);
+            } else {
+                // 3. Fuzzy search
+                const parts = searchId.split(/[:.]/);
+                const stationName = parts[parts.length - 1];
+                const operator = parts.find(p => p.includes('JR') || p.includes('TokyoMetro') || p.includes('Toei') || p.includes('Keisei'));
+
+                if (stationName && operator) {
+                    const { data: nodes } = await supabase
+                        .from('nodes')
+                        .select('id')
+                        .ilike('id', `%${operator}%${stationName}%`)
+                        .limit(1);
+
+                    if (nodes && nodes.length > 0) results.push(nodes[0].id);
+                }
+            }
+        }
     }
 
-    // 3. Fuzzy search by "Line + StationName" segments
-    // Input: "odpt:Station:JR-East.Nippori" -> Extract "JR-East" and "Nippori"
-    // DB ID: "odpt.Station:JR-East.Yamanote.Nippori"
-    const parts = searchId.split(/[:.]/);
-    const stationName = parts[parts.length - 1]; // "Nippori"
-    const operator = parts.find(p => p.includes('JR') || p.includes('TokyoMetro') || p.includes('Toei') || p.includes('Keisei')); // "JR-East"
-
-    if (stationName && operator) {
-        // Query IDs containing both operator and stationName
-        const { data: nodes } = await supabase
-            .from('nodes')
-            .select('id')
-            .ilike('id', `%${operator}%${stationName}%`)
-            .limit(1);
-
-        if (nodes && nodes.length > 0) return nodes[0].id;
-    }
-
-    return null;
+    console.log(`[ID] Found ${results.length} nodes for ${searchId}: ${results.join(', ')}`);
+    return results;
 }
 
 // Output file path
@@ -97,7 +109,7 @@ async function ingestFile(filePath: string) {
 
     const stations: { id: string; data: RidingKnowledge }[] = [];
 
-    if (filename.startsWith('area')) {
+    if (filename.startsWith('area') || filename === 'expansion_minimax.md') {
         const sections = content.split(/^## /m).slice(1);
 
         for (const section of sections) {
@@ -150,9 +162,9 @@ async function ingestFile(filePath: string) {
     }
 
     for (const station of stations) {
-        const finalId = await findNodeId(station.id);
+        const nodeIds = await findNodeIds(station.id);
 
-        if (finalId) {
+        if (nodeIds.length > 0) {
             const rawData = JSON.parse(JSON.stringify(station.data));
             // Sanitize: Remove empty advice
             const safeData: any = {
@@ -164,16 +176,19 @@ async function ingestFile(filePath: string) {
             // Escape single quotes in JSON for SQL
             const jsonStr = JSON.stringify(safeData).replace(/'/g, "''");
 
-            const sql = `
--- Update for ${finalId} (${station.id})
+            for (const nodeId of nodeIds) {
+                const sql = `
+-- Update for ${nodeId} (${station.id})
 UPDATE nodes
 SET riding_knowledge = '${jsonStr}'
-WHERE id = '${finalId}';
-`;
-            fs.appendFileSync(OUTPUT_SQL, sql);
-            console.log(`[SQL] Generated for ${finalId}`);
+WHERE id = '${nodeId}';
+                `;
+                fs.appendFileSync(OUTPUT_SQL, sql + '\n');
+                console.log(`[SQL] Generated for ${nodeId}`);
+            }
         } else {
             console.warn(`[SKIP] ID resolution failed for: ${station.id}`);
+            fs.appendFileSync(OUTPUT_SQL, `-- [SKIP] ID resolution failed for: ${station.id}\n`);
         }
     }
 }
@@ -254,16 +269,23 @@ async function main() {
     if (fs.existsSync(OUTPUT_SQL)) fs.unlinkSync(OUTPUT_SQL);
     fs.writeFileSync(OUTPUT_SQL, '-- Auto-generated L4 Knowledge Ingestion\n\n');
 
+    // 1. Process bulk files FIRST
+    console.log('Processing bulk Metro/Toei file...');
+    const bulkFiles = ['metro_toei_all_stations.md', 'metro_toei_remaining.md', 'metro_remaining_lines_universal.md'];
+    for (const bf of bulkFiles) {
+        const fullPath = path.join(KNOWLEDGE_DIR, bf);
+        if (fs.existsSync(fullPath)) {
+            await ingestFile(fullPath);
+        }
+    }
+
+    // 2. Process area/specialized files SECOND (to allow overwriting bulk with more specific info)
     const files = fs.readdirSync(KNOWLEDGE_DIR);
     for (const f of files) {
-        if (EXCLUDE_FILES.includes(f)) continue; // Keep processing excluded files logic separate if needed
+        if (bulkFiles.includes(f)) continue;
         if (!f.endsWith('.md')) continue;
         await ingestFile(path.join(KNOWLEDGE_DIR, f));
     }
-
-    // Optionally process bulk files
-    console.log('Processing bulk Metro/Toei file...');
-    await ingestFile(path.join(KNOWLEDGE_DIR, 'metro_toei_all_stations.md'));
 
     console.log(`\nDone! SQL written to ${OUTPUT_SQL}`);
     process.exit(0);

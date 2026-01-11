@@ -4,23 +4,45 @@ import { CrawlerResult } from './types';
 
 export class TokyoLetsgojpCrawler extends BaseCrawler {
     protected async extractData(page: Page, url: string): Promise<CrawlerResult> {
+        const pageTitle = await page.title();
+        console.log(`[TokyoLetsgojp] Page Title from Browser: ${pageTitle}`);
+
         return await page.evaluate((url) => {
-            const title = document.querySelector('h1')?.textContent?.trim() || '';
-            const content = document.querySelector('article')?.textContent?.trim() || 
-                           document.querySelector('.article-content')?.textContent?.trim() || '';
+            const title = document.querySelector('h1')?.textContent?.trim() || 
+                          document.querySelector('.article-title')?.textContent?.trim() ||
+                          document.querySelector('.entry-title')?.textContent?.trim() || 
+                          document.querySelector('.title-area h1')?.textContent?.trim() || '';
+            
+            const contentElement = document.querySelector('article') || 
+                                  document.querySelector('.article-content') || 
+                                  document.querySelector('.entry-content') ||
+                                  document.querySelector('#main-content') ||
+                                  document.querySelector('.article-body');
+            
+            // Remove scripts, styles, and ads from content
+            if (contentElement) {
+                const cleanContent = contentElement.cloneNode(true) as HTMLElement;
+                cleanContent.querySelectorAll('script, style, .ads, .ad-container').forEach(el => el.remove());
+                var content = cleanContent.textContent?.trim() || '';
+            } else {
+                var content = '';
+            }
             
             const metaDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
-            const author = document.querySelector('.author-name')?.textContent?.trim() || '';
+            const author = document.querySelector('.author-name')?.textContent?.trim() || 
+                          document.querySelector('.entry-author')?.textContent?.trim() || '';
             const publishedAt = document.querySelector('.publish-date')?.textContent?.trim() || 
-                              document.querySelector('time')?.getAttribute('datetime') || '';
+                              document.querySelector('time')?.getAttribute('datetime') || 
+                              document.querySelector('.entry-date')?.textContent?.trim() || '';
             
             const tags: string[] = [];
-            document.querySelectorAll('.tag-item, .article-tags a').forEach(tag => {
+            document.querySelectorAll('.tag-item, .article-tags a, .entry-tags a').forEach(tag => {
                 const tagText = tag.textContent?.trim();
                 if (tagText) tags.push(tagText);
             });
 
-            const category = document.querySelector('.breadcrumb-item:nth-last-child(2)')?.textContent?.trim() || '';
+            const category = document.querySelector('.breadcrumb-item:nth-last-child(2)')?.textContent?.trim() || 
+                            document.querySelector('.entry-category')?.textContent?.trim() || '';
 
             return {
                 url,

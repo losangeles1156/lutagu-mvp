@@ -5,6 +5,7 @@
  * TPI = W_distance × D + W_vertical × V + W_complexity × C + W_crowd × R + W_user × U
  */
 
+import { TRANSFER_DATABASE } from '../data/transferDatabase';
 import {
   TPIInput,
   TPIResult,
@@ -252,7 +253,13 @@ export function getTransferTPI(
   toLineId: string,
   input?: Partial<TPIInput>
 ): number {
-  // Check preset
+  // 1. Check new Transfer Database first
+  const dbStation = TRANSFER_DATABASE[fromStationId];
+  if (dbStation && dbStation[toLineId]) {
+    return dbStation[toLineId].baseTpi;
+  }
+
+  // 2. Fallback to old PRESET_TPI
   const stationPresets = PRESET_TPI[fromStationId];
   if (stationPresets && stationPresets[toLineId]) {
     let baseTpi = stationPresets[toLineId];

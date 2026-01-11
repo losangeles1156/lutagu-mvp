@@ -68,14 +68,14 @@ export function L4FormCard({
                             </div>
                             
                             {task === 'time' ? (
-                                <div className={`pl-9 flex items-center justify-between bg-white/50 border border-slate-100/50 rounded-2xl transition-all ${isCompact ? 'h-10' : 'h-14'}`}>
+                                <div className={`pl-9 pr-12 flex items-center justify-between bg-white/50 border border-slate-100/50 rounded-2xl transition-all ${isCompact ? 'h-10' : 'h-14'}`}>
                                     <div className="flex items-center gap-2 overflow-hidden">
                                         <MapPin size={isCompact ? 14 : 16} className="text-emerald-500 shrink-0" />
                                         <span className={`font-black text-slate-800 truncate ${isCompact ? 'text-sm' : 'text-base'}`}>
                                             {selectedOrigin ? getStationDisplayName(selectedOrigin) : originInput}
                                         </span>
                                     </div>
-                                    <div className="px-3 shrink-0">
+                                    <div className="px-3 shrink-0 hidden sm:block">
                                         <span className="text-[10px] font-black text-emerald-600 bg-emerald-50/50 px-2 py-1 rounded-full uppercase tracking-wider">
                                             {locale.startsWith('zh') ? '目前站點' : locale === 'ja' ? '現在の駅' : 'Current'}
                                         </span>
@@ -93,7 +93,7 @@ export function L4FormCard({
                                         setOriginInput(getStationDisplayName(s));
                                     }}
                                     placeholder={locale === 'ar' ? 'من أين؟' : locale.startsWith('zh') ? '出發車站' : locale === 'ja' ? '出発駅' : 'Origin'}
-                                    className={`pl-9 font-bold bg-white/50 border-slate-100/50 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-2xl transition-all touch-manipulation ${isCompact ? 'h-10 text-sm' : 'h-14 text-base'}`}
+                                    className={`pl-9 pr-12 font-bold bg-white/50 border-slate-100/50 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-2xl transition-all touch-manipulation ${isCompact ? 'h-10 text-sm' : 'h-14 text-base'}`}
                                     locale={locale as 'zh-TW' | 'ja' | 'en' | 'ar'}
                                     disabled={isLoading}
                                 />
@@ -152,7 +152,7 @@ export function L4FormCard({
                                         setDestinationInput(getStationDisplayName(s));
                                     }}
                                     placeholder={locale === 'ar' ? 'إلى أين؟' : locale.startsWith('zh') ? '抵達目的地車站' : locale === 'ja' ? '到着駅' : 'Destination'}
-                                    className={`pl-9 font-bold bg-white/50 border-slate-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 rounded-2xl transition-all touch-manipulation ${isCompact ? 'h-10 text-sm' : 'h-14 text-base'}`}
+                                    className={`pl-9 pr-12 font-bold bg-white/50 border-slate-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 rounded-2xl transition-all touch-manipulation ${isCompact ? 'h-10 text-sm' : 'h-14 text-base'}`}
                                     locale={locale as 'zh-TW' | 'ja' | 'en' | 'ar'}
                                     disabled={isLoading}
                                 />

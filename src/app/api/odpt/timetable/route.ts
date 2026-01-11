@@ -23,6 +23,9 @@ export async function GET(req: NextRequest) {
 
     if (!station) return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
 
+    // Normalize station ID for ODPT API: must use "odpt:Station:" prefix
+    const apiStationId = station.replace(/^odpt[.:]Station:/, 'odpt:Station:');
+
     const ODPT_API_KEY = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN || process.env.ODPT_API_TOKEN_BACKUP;
     if (!ODPT_API_KEY) return NextResponse.json({ error: 'Missing API Key' }, { status: 500 });
 
@@ -30,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch Timetables for this station
     const odptSearchParams = new URLSearchParams({
-        'odpt:station': station,
+        'odpt:station': apiStationId,
         'acl:consumerKey': ODPT_API_KEY
     });
     const apiUrl = `${BASE_URL}?${odptSearchParams.toString()}`;

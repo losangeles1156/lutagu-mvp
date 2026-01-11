@@ -1,31 +1,27 @@
-import { Client } from 'pg';
-import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+import * as dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-const connectionString = "postgresql://postgres.evubeqeaafdjnuocyhmb:K521128lalK@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres";
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
+);
 
 async function listTables() {
-    const client = new Client({
-        connectionString,
-        ssl: { rejectUnauthorized: false }
-    });
+    const { data, error } = await supabase
+        .from('pg_catalog.pg_tables')
+        .select('tablename')
+        .filter('schemaname', 'eq', 'public');
 
-    try {
-        await client.connect();
-        const res = await client.query(`
-            SELECT table_name 
-            FROM information_schema.tables 
-            WHERE table_schema = 'public'
-            ORDER BY table_name;
-        `);
+    if (error) {
+        // Fallback: try to query something that likely exists to see what's available
+        console.error('Error listing tables:', error);
+    } else {
         console.log('Tables in public schema:');
-        res.rows.forEach(row => console.log(` - ${row.table_name}`));
-    } catch (err) {
-        console.error('Error listing tables:', err);
-    } finally {
-        await client.end();
+        console.log(data.map(t => t.tablename).join(', '));
     }
 }
 
-listTables();
+listTables().catch(console.error);

@@ -29,19 +29,23 @@ async function main() {
         await tokyoPage.close();
         console.log(`[TokyoLetsgojp] Found ${tokyoUrls.length} potential articles.`);
 
-        for (const url of tokyoUrls.slice(0, 5)) { // Limit for now
+        for (const url of tokyoUrls.slice(0, 50)) { // Increased limit to 50
             if (await importer.isAlreadyCrawled(url)) {
+                // If already in L4, we still check if it's in L1. If not, we might want to crawl it again.
+                // For now, skip to save time and respect robots.txt/bandwidth.
                 console.log(`[Skip] ${url} already crawled.`);
                 continue;
             }
             const result = await tokyoCrawler.crawl(url);
-            if (result) {
+            if (result && result.title) { // Ensure title is present
                 await importer.importL1(processor.processL1(result));
                 const l4Items = processor.processL4(result);
                 for (const l4 of l4Items) {
                     await importer.importL4(l4);
                     console.log(`[L4] Imported: ${l4.entity_id} - ${l4.subcategory}`);
                 }
+            } else if (result) {
+                console.warn(`[TokyoLetsgojp] Skipping ${url} due to empty title/content.`);
             }
         }
 
@@ -58,19 +62,21 @@ async function main() {
         await matchaPage.close();
         console.log(`[MatchaJp] Found ${matchaUrls.length} potential articles.`);
 
-        for (const url of matchaUrls.slice(0, 5)) { // Limit for now
+        for (const url of matchaUrls.slice(0, 50)) { // Increased limit to 50
             if (await importer.isAlreadyCrawled(url)) {
                 console.log(`[Skip] ${url} already crawled.`);
                 continue;
             }
             const result = await matchaCrawler.crawl(url);
-            if (result) {
+            if (result && result.title) {
                 await importer.importL1(processor.processL1(result));
                 const l4Items = processor.processL4(result);
                 for (const l4 of l4Items) {
                     await importer.importL4(l4);
                     console.log(`[L4] Imported: ${l4.entity_id} - ${l4.subcategory}`);
                 }
+            } else if (result) {
+                console.warn(`[MatchaJp] Skipping ${url} due to empty title/content.`);
             }
         }
 

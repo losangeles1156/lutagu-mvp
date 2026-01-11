@@ -793,13 +793,17 @@ class MinHeap<T> {
     }
 }
 
+import { TRANSFER_DATABASE, getTransferDistance, isOutOfStationTransfer, getHubBufferMinutes } from './data/transferDatabase';
+
 type RouteCosts = {
     time: number;
     fare: number;
-    transfers: number;           // 站內轉乘次數（同名站換乘）
+    transfers: number;           // 總轉乘次數
     hops: number;                // 經過的站數
-    railwaySwitches: number;     // 同公司換線次數（如 JR山手線→JR中央線）
-    operatorSwitches: number;    // 跨公司轉乘次數（如 JR→Metro）
+    railwaySwitches: number;     // 同公司換線次數
+    operatorSwitches: number;    // 跨公司轉乘次數
+    transferDistance: number;    // 總轉乘距離 (公尺)
+    crowding: number;            // 擁擠度得分 (0-100)
 };
 
 function operatorKeyFromRailwayId(railwayId: string): string {
@@ -867,8 +871,20 @@ function estimateFareByDistance(operatorKey: string, hops: number): number {
 
 function edgeTimeMinutes(railwayId: string): number {
     if (railwayId === 'transfer') return 5;
-    if (railwayId.includes('TokyoMetro') || railwayId.includes('Toei')) return 2.2;
-    if (railwayId.includes('JR-East')) return 2.5; // Decreased from 3.0
+    
+    // 快速線路站距較長，耗時較多
+    const isRapid = railwayId.includes('Rapid') || railwayId.includes('Express') || railwayId.includes('LimitedExpress') || railwayId.includes('Shinkansen');
+    
+    // 東京地鐵核心線路站距極短
+    const isCoreMetro = railwayId.includes('Ginza') || railwayId.includes('Marunouchi') || railwayId.includes('Hibiya');
+
+    if (railwayId.includes('TokyoMetro') || railwayId.includes('Toei')) {
+        if (isCoreMetro) return 1.5; // 核心地鐵站間僅約 1.5 分鐘
+        return isRapid ? 2.5 : 1.8;
+    }
+    if (railwayId.includes('JR-East')) {
+        return isRapid ? 3.5 : 2.5; 
+    }
     return 2.5;
 }
 
@@ -1032,10 +1048,21 @@ function dijkstraBestPath(params: {
 
     const destSet = new Set(dests);
 
+    const BASE_WAIT_TIME = 2.0; // 平均候車時間 (分鐘)
+
     for (const origin of origins) {
         const startKey = encodeStateKey(origin, null, null);
         dist.set(startKey, 0);
-        costsByKey.set(startKey, { time: 0, fare: 0, transfers: 0, hops: 0, railwaySwitches: 0, operatorSwitches: 0 });
+        costsByKey.set(startKey, { 
+            time: 0, 
+            fare: 0, 
+            transfers: 0, 
+            hops: 0, 
+            railwaySwitches: 0, 
+            operatorSwitches: 0,
+            transferDistance: 0,
+            crowding: 20 // 預設初始擁擠度
+        });
         heap.push({ key: startKey }, 0);
     }
 
@@ -1076,6 +1103,8 @@ function dijkstraBestPath(params: {
                 hops: currentCosts.hops + 1,
                 railwaySwitches: currentCosts.railwaySwitches,
                 operatorSwitches: currentCosts.operatorSwitches,
+                transferDistance: currentCosts.transferDistance,
+                crowding: currentCosts.crowding,
             };
 
             if (viaRailwayId === 'transfer') {
@@ -1085,35 +1114,74 @@ function dijkstraBestPath(params: {
                 const fromOp = inferOdptOperatorFromStationId(fromStationId);
                 const toOp = inferOdptOperatorFromStationId(toStationId);
 
-                let transferTime = edgeTimeMinutes(viaRailwayId);
-                if (fromOp && toOp && fromOp !== toOp) {
-                    transferTime += 5;
-                    nextCosts.operatorSwitches += 1;  // 跨公司轉乘
+                // 從資料庫獲取精確轉乘資訊
+                const stationIdParts = nextStation.split(':');
+                const lineAndStation = stationIdParts[1] || '';
+                const lineParts = lineAndStation.split('.');
+                const operator = lineParts[0];
+                const line = lineParts[1];
+                const toLineId = `odpt.Railway:${operator}.${line}`;
+                
+                const distance = getTransferDistance(fromStationId, toLineId);
+                const isOutStation = isOutOfStationTransfer(fromStationId, toLineId);
+                
+                let transferTime = distance / 60; // 稍微提高步行速度至 60m/min (東京節奏)
+                
+                if (isOutStation) {
+                    transferTime += 2; // 降低站外轉乘額外懲罰 (3 -> 2)
                 }
+                
+                if (fromOp && toOp && fromOp !== toOp) {
+                    transferTime += 1.5; // 跨公司購票/閘門時間 (2 -> 1.5)
+                    nextCosts.operatorSwitches += 1;
+                }
+
+                // 加上大型車站補償，但對於短途行程進行衰減
+                let hubBuffer = getHubBufferMinutes(fromStationId);
+                if (currentCosts.hops < 4) {
+                    hubBuffer *= 0.4; // 極短途行程進一步減少樞紐補償
+                } else if (currentCosts.hops < 8) {
+                    hubBuffer *= 0.7;
+                }
+                transferTime += hubBuffer;
 
                 nextCosts.time += transferTime;
                 nextCosts.transfers += 1;
+                nextCosts.transferDistance += distance;
             } else {
                 const operatorKey = operatorKeyFromRailwayId(viaRailwayId);
                 const isRailwaySwitch = decoded.lastRailway && decoded.lastRailway !== viaRailwayId;
                 const isOperatorSwitch = decoded.lastOperator && decoded.lastOperator !== operatorKey;
 
                 let boardingPenalty = 0;
+                // 根據線路類型動態調整候車時間
+                let lineWaitTime = (viaRailwayId.includes('TokyoMetro') || viaRailwayId.includes('Toei')) 
+                    ? BASE_WAIT_TIME * 0.6  // 地鐵班次更密 (0.7 -> 0.6)
+                    : BASE_WAIT_TIME;
+                
+                if (currentCosts.hops < 4) {
+                    lineWaitTime *= 0.6; // 極短途通常發生在繁華區，班次更密且用戶通常會趕車
+                }
+
                 if (isRailwaySwitch) {
-                    boardingPenalty = 3;
+                    // 同站換線，但不是透過 'transfer' 邊
+                    boardingPenalty = 2 + lineWaitTime; // 換線基礎時間降低 (3 -> 2)
+                    nextCosts.transfers += 1;
                     if (isOperatorSwitch) {
-                        // 跨公司換線（已在 transfer 步驟計算，這裡是備用）
                         nextCosts.operatorSwitches += 1;
                     } else {
-                        // 同公司換線（如JR山手線→JR中央線）
                         nextCosts.railwaySwitches += 1;
                     }
+                } else if (!decoded.lastRailway) {
+                    // 第一次上車
+                    boardingPenalty = lineWaitTime;
                 }
 
                 nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty;
-
-                if (isOperatorSwitch) {
-                    nextCosts.time += 3;
+                
+                // 擁擠度簡單估算：某些線路較擁擠
+                if (viaRailwayId.includes('Yamanote') || viaRailwayId.includes('Chuo')) {
+                    nextCosts.crowding = Math.min(100, nextCosts.crowding + 5);
                 }
             }
 
@@ -1245,30 +1313,41 @@ export function findRankedRoutes(params: {
     const locale = params.locale || 'zh-TW';
     const t = (zh: string, ja: string, en: string) => (locale === 'ja' ? ja : locale === 'en' ? en : zh);
 
+    const TRANSFER_THRESHOLD = 150; // 建議步行轉乘上限 (公尺)
+
     const candidates: Array<{ key: string; label: string; score: (c: RouteCosts) => number }> = [
         {
-            // 直達優先：同一條線直達，即使時間略長也優先推薦
-            // 這符合乘換案內的預設邏輯
-            key: 'direct',
-            label: t('最快', '最短時間', 'Fastest'),
+            key: 'smart',
+            label: t('最佳建議', 'おすすめ', 'Best Route'),
             score: (c) => {
-                // 跨公司轉乘懲罰最高，同公司換線次之
-                const operatorPenalty = c.operatorSwitches * 20;
-                const railwayPenalty = c.railwaySwitches * 5;
-                return c.time + operatorPenalty + railwayPenalty;
+                // 1. 實際行程時間 (65% 權重) - 提高時間權重以更精確匹配 Google Maps
+                const timeScore = c.time * 0.65;
+                
+                // 2. 轉乘次數 (15% 權重) - 每次轉乘約等同於 6 分鐘乘車痛感
+                const transferScore = c.transfers * 6 * 0.15;
+                
+                // 3. 轉乘距離與補償 (15% 權重)
+                let distancePenalty = 0;
+                if (c.transferDistance > TRANSFER_THRESHOLD) {
+                    distancePenalty = (c.transferDistance - TRANSFER_THRESHOLD) * 1.5;
+                }
+                const distanceScore = (c.transferDistance / 100 * 5 + distancePenalty) * 0.15;
+                
+                // 4. 列車擁擠度 (5% 權重)
+                const crowdScore = (c.crowding / 10) * 0.05;
+
+                return timeScore + transferScore + distanceScore + crowdScore;
             },
         },
         {
-            // 純時間最短（接受轉乘換取更快到達）
             key: 'fastest',
-            label: t('時間最短', '時間優先', 'Time Priority'),
-            score: (c) => c.time + c.operatorSwitches * 8,
+            label: t('最快到達', '最速', 'Fastest'),
+            score: (c) => c.time + c.transfers * 3, // 極度追求時間，轉乘懲罰極低
         },
         {
-            // 轉乘最少（完全避免轉乘）
-            key: 'fewestTransfers',
-            label: t('轉乘最少', '乗換最少', 'Fewest transfers'),
-            score: (c) => (c.railwaySwitches + c.operatorSwitches) * 100 + c.time,
+            key: 'comfort',
+            label: t('最舒適', 'らくらく', 'Comfortable'),
+            score: (c) => c.transfers * 60 + c.transferDistance * 0.3 + c.time, // 極度厭惡轉乘與步行
         },
     ];
 
