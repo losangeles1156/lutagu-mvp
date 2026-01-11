@@ -108,8 +108,15 @@ export function ChatPanel() {
             });
 
             if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`Server Error: ${response.status} ${errText}`);
+                let errorMsg = `Server Error: ${response.status}`;
+                try {
+                    const errorJson = await response.json();
+                    if (errorJson.error) errorMsg = errorJson.error;
+                } catch {
+                    const errText = await response.text();
+                    if (errText) errorMsg += ` ${errText}`;
+                }
+                throw new Error(errorMsg);
             }
 
             if (!response.body) throw new Error('No response body');
@@ -138,7 +145,12 @@ export function ChatPanel() {
             console.error('Manual Chat Error:', error);
             const msg = error.message || 'Connection Failed';
             showToast?.(msg, 'error');
-            alert('Error: ' + msg); // Emergency visible error
+            // Add error message to chat for visibility
+            setAiMessages(prev => [...prev, {
+                id: (Date.now() + 2).toString(),
+                role: 'assistant',
+                content: `⚠️ **Error**: ${msg}`
+            }]);
             // Remove the failed user message or mark error? for now let it be.
         } finally {
             setIsLoading(false);
@@ -362,10 +374,10 @@ export function ChatPanel() {
                         {isLoading && displayMessages[displayMessages.length - 1]?.role !== 'assistant' && (
                             <div className="flex justify-start">
                                 <div className="bg-white border border-slate-100 p-3 rounded-2xl rounded-bl-lg shadow-sm flex items-center gap-2">
-                                     <Brain size={14} className="animate-pulse text-indigo-500" />
-                                     <span className="text-xs text-indigo-500 font-medium">{tL4('thinking.initializing')}</span>
-                                     <Loader2 className="w-3 h-3 animate-spin text-slate-300" />
-                                 </div>
+                                    <Brain size={14} className="animate-pulse text-indigo-500" />
+                                    <span className="text-xs text-indigo-500 font-medium">{tL4('thinking.initializing')}</span>
+                                    <Loader2 className="w-3 h-3 animate-spin text-slate-300" />
+                                </div>
                             </div>
                         )}
 
@@ -406,14 +418,14 @@ const ParsedMessageContent = memo(({ content, role }: { content: string; role: s
         if (!content) return { text: '', thinking: null, suggestedQuestions: [] };
 
         let text = content;
-        
+
         // --- Response Content Filtering Mechanism ---
         // Filter out ** symbols (Markdown bold) as per Dify prompt requirements
         // but try to preserve them in code blocks or URLs if possible.
         // Simple approach: replace all ** with empty string if they are used for emphasis.
         // More robust: only replace ** that are not part of a URL.
         text = text.replace(/\*\*/g, '');
-        
+
         let thinking: string | null = null;
         let suggestedQuestions: string[] = [];
 

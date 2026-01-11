@@ -1,5 +1,5 @@
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const DIFY_API_BASE = process.env.DIFY_API_BASE || process.env.DIFY_BASE_URL || process.env.DIFY_API_URL || 'https://api.dify.ai/v1';
 const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
@@ -14,7 +14,8 @@ export const maxDuration = 60;
  */
 export async function POST(req: NextRequest) {
     if (!DIFY_API_KEY) {
-        return new Response(JSON.stringify({ error: 'DIFY_API_KEY not configured' }), { status: 500 });
+        console.error('[Chat API] Error: DIFY_API_KEY not configured');
+        return NextResponse.json({ error: 'System Error: DIFY_API_KEY not configured in environment variables.' }, { status: 500 });
     }
 
     try {
@@ -54,13 +55,14 @@ export async function POST(req: NextRequest) {
             locale: rawLocale,
             user_profile: body.user_profile || 'general',
             response_language: getResponseLanguage(rawLocale), // 明確語言指示
+            user_context: body.user_context || body.context || 'general',
             language_instruction: rawLocale === 'zh' || rawLocale === 'zh-TW'
                 ? '請務必使用繁體中文（台灣用語）回答，不要使用简体中文。'
                 : ''
         };
 
         console.log('[Chat API] Dify Inputs:', JSON.stringify(inputs, null, 2));
-        
+
         const conversationId = body.conversationId || undefined;
         const userId = body.userId || 'anonymous';
 
@@ -87,12 +89,21 @@ export async function POST(req: NextRequest) {
 
         if (!difyResponse.ok) {
             const errorText = await difyResponse.text();
-            console.error('[Chat API] Dify Error:', errorText);
-            return new Response(errorText, { status: difyResponse.status });
+            console.error('[Chat API] Dify Error:', difyResponse.status, errorText);
+            // Return JSON error if possible
+            try {
+                const errorJson = JSON.parse(errorText);
+                return NextResponse.json({
+                    error: `Dify Error (${difyResponse.status}): ${errorJson.message || errorJson.code || 'Unknown error'}`,
+                    details: errorJson
+                }, { status: difyResponse.status });
+            } catch (e) {
+                return NextResponse.json({ error: `Dify Error (${difyResponse.status}): ${errorText}` }, { status: difyResponse.status });
+            }
         }
 
         if (!difyResponse.body) {
-            return new Response('No response body from Dify', { status: 500 });
+            return NextResponse.json({ error: 'No response body from Dify' }, { status: 500 });
         }
 
         // Transform Stream
@@ -113,7 +124,7 @@ export async function POST(req: NextRequest) {
                 try {
                     while (true) {
                         const { done, value } = await reader.read();
-                        
+
                         if (done) {
                             // Flush any remaining output buffer
                             if (outputBuffer) {
@@ -144,7 +155,7 @@ export async function POST(req: NextRequest) {
                             try {
                                 const data = JSON.parse(jsonStr);
                                 const event = data.event;
-                                console.log(`[Chat API] Dify Event: ${event}`);
+                                // console.log(`[Chat API] Dify Event: ${event}`);
 
                                 // Handle Thinking Events - 讓用戶知道 AI 正在思考
                                 if (event === 'agent_thought') {
@@ -168,9 +179,9 @@ export async function POST(req: NextRequest) {
                                     if (answer) {
                                         // Filter out ** symbols (Markdown bold) as per Dify prompt requirements
                                         answer = answer.replace(/\*\*/g, '');
-                                        
+
                                         outputBuffer += answer;
-                                        
+
                                         // Send if buffer gets large or contains a newline for responsiveness
                                         if (outputBuffer.length > 20 || outputBuffer.includes('\n')) {
                                             controller.enqueue(encoder.encode(outputBuffer));
