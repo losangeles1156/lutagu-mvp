@@ -1,0 +1,100 @@
+{
+  "project": {
+    "name": "LUTAGU Tokyo MVP",
+    "description": "PWA-based city navigation service for Tokyo with AI-powered mobility recommendations",
+    "language": "zh-TW",
+    "primaryLanguages": ["typescript", "tsx", "sql"],
+    "framework": "next.js"
+  },
+  "rules": {
+    "primary": "./CLAUDE.md",
+    "supplementary": [
+      "./rules/lutagu_project_rules.md",
+      "./rules/AI_SECURITY_CHECKLIST.md",
+      "./SECURITY.md"
+    ]
+  },
+  "codeStyle": {
+    "typescript": {
+      "strictMode": true,
+      "noAny": true,
+      "fileNaming": "kebab-case",
+      "functionNaming": "camelCase",
+      "constantNaming": "UPPER_SNAKE_CASE",
+      "typeNaming": "PascalCase"
+    }
+  },
+  "security": {
+    "sensitivePatterns": [
+      "SUPABASE_SERVICE_KEY",
+      "PII_ENCRYPTION_KEY",
+      "LINE_CHANNEL_ACCESS_TOKEN",
+      "MISTRAL_API_KEY",
+      "ODPT_API_KEY",
+      "app-[a-zA-Z0-9]+",
+      "eyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+"
+    ],
+    "requireRateLimiting": true,
+    "requireAuditLogging": true
+  },
+  "architecture": {
+    "layers": {
+      "L1": {
+        "name": "Location DNA",
+        "description": "Static attributes and infrastructure capabilities",
+        "apiPrefix": "/api/l1"
+      },
+      "L2": {
+        "name": "Live Status",
+        "description": "Real-time dynamic variables",
+        "apiPrefix": "/api/l2",
+        "cacheTTL": 1200
+      },
+      "L3": {
+        "name": "Micro-Facilities",
+        "description": "Facility supply and suitability tags",
+        "apiPrefix": "/api/l3"
+      },
+      "L4": {
+        "name": "Strategy",
+        "description": "AI-generated action recommendations",
+        "apiPrefix": "/api/l4"
+      }
+    },
+    "hubSpokeInheritance": true,
+    "maxHubNodes": 15
+  },
+  "testing": {
+    "requiredCoverage": {
+      "security": 90,
+      "api": 80,
+      "core": 80,
+      "utils": 70
+    },
+    "commands": {
+      "unit": "npm test",
+      "integration": "npm run qa:upgrade",
+      "typecheck": "npm run typecheck",
+      "lint": "npm run lint"
+    }
+  },
+  "i18n": {
+    "defaultLocale": "zh-TW",
+    "supportedLocales": ["zh-TW", "ja", "en"],
+    "jsonbFormat": true
+  },
+  "cache": {
+    "tiers": [
+      {"name": "memory", "ttl": 15, "use": "viewport nodes"},
+      {"name": "redis", "ttl": 300, "use": "API responses"},
+      {"name": "supabase_kv", "ttl": 1200, "use": "L2 status"},
+      {"name": "database", "ttl": null, "use": "persistent data"}
+    ]
+  },
+  "externalAPIs": {
+    "odpt": {"maxFrequency": "1/min", "cacheTTL": 60},
+    "openweather": {"maxFrequency": "1/10min", "cacheTTL": 600},
+    "gbfs": {"maxFrequency": "1/min", "cacheTTL": 60},
+    "mistral": {"trackCost": true, "dailyBudget": 10.0}
+  }
+}
