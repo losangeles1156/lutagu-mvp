@@ -18566,38 +18566,31 @@ export const STATIC_L1_DATA: Record<string, L1_DNA_Data> = {
         "categories": {
             "dining": {
                 "id": "dining",
-                "count": 450,
+                "count": 600,
                 "label": { "ja": "食事", "en": "Dining", "zh": "美食" },
                 "subcategories": {},
                 "representative_spots": [
-                    { "name": { "ja": "無敵家", "en": "Mutekiya", "zh": "無敵家" }, "osm_id": "1" }
+                    { "name": { "ja": "無敵家", "en": "Mutekiya", "zh": "無敵家" }, "osm_id": "311314018" },
+                    { "name": { "ja": "タカセ", "en": "Takase", "zh": "高瀨" }, "osm_id": "311314019" }
                 ]
             },
             "shopping": {
                 "id": "shopping",
-                "count": 380,
-                "label": { "ja": "ショッピング", "en": "Shopping", "zh": "購物" },
+                "count": 550,
+                "label": { "ja": "買い物", "en": "Shopping", "zh": "購物" },
                 "subcategories": {},
                 "representative_spots": [
-                    { "name": { "ja": "西武池袋本店", "en": "Seibu Ikebukuro", "zh": "西武池袋本店" }, "osm_id": "2" }
+                    { "name": { "ja": "サンシャインシティ", "en": "Sunshine City", "zh": "陽光城" }, "osm_id": "311314020" },
+                    { "name": { "ja": "西武池袋本店", "en": "Seibu Ikebukuro", "zh": "西武池袋本店" }, "osm_id": "311314021" }
                 ]
             }
         },
-        "tagline": {
-            "ja": "サブカルチャーと商業が交差する巨大ターミナル",
-            "en": "A massive terminal where subculture and commerce collide",
-            "zh": "次文化與商業交織的巨大樞紐"
-        },
-        "title": {
-            "ja": "エンタメと買い物の聖地",
-            "en": "Entertainment & Shopping Hub",
-            "zh": "娛樂與購物的聖地"
-        },
         "vibe_tags": [
-            { "id": "entertainment", "label": { "ja": "エンタメ", "en": "Entertainment", "zh": "娛樂" }, "score": 5 },
-            { "id": "shopping", "label": { "ja": "ショッピング", "en": "Shopping", "zh": "購物" }, "score": 5 },
-            { "id": "subculture", "label": { "ja": "サブカルチャー", "en": "Subculture", "zh": "次文化" }, "score": 4 }
+            { "id": "entertainment_hub", "label": { "en": "Entertainment Hub", "ja": "エンタメの拠点", "zh": "娛樂據點" }, "score": 5 },
+            { "id": "anime_culture", "label": { "en": "Anime Culture", "ja": "アニメ文化", "zh": "動漫文化" }, "score": 4 }
         ],
+        "tagline": { "ja": "エンタメ、ショッピング、アニメが融合する巨大ターミナル", "en": "Giant terminal merging entertainment, shopping, and anime", "zh": "融合娛樂、購物與動漫的巨大轉運站" },
+        "title": { "ja": "巨大ターミナル", "en": "Giant Terminal", "zh": "巨大轉運站" },
         "last_updated": "2026-01-11T12:00:00.000Z"
     },
     "odpt.Station:JR-East.Yamanote.Hamamatsucho": {
@@ -18617,25 +18610,6 @@ export const STATIC_L1_DATA: Record<string, L1_DNA_Data> = {
         "tagline": { "ja": "古き良き江戸の情緒とサラリーマンの活気が共存する街", "en": "Old Edo spirit meets salaryman energy", "zh": "江戶風情與上班族活力的共存之地" },
         "title": { "ja": "下町の活気", "en": "Downtown Energy", "zh": "下町活力" },
         "vibe_tags": [{ "id": "traditional", "label": { "ja": "伝統的", "en": "Traditional", "zh": "傳統" }, "score": 4 }],
-        "last_updated": "2026-01-11T12:00:00.000Z"
-    },
-    "odpt.Station:JR-East.Yamanote.Okachimachi": {
-        "categories": {
-            "shopping": { "id": "shopping", "count": 300, "label": { "ja": "ショッピング", "en": "Shopping", "zh": "購物" }, "subcategories": {}, "representative_spots": [] }
-        },
-        "tagline": { "ja": "アメ横の活気と宝石街の輝きが混ざり合う場所", "en": "Where Ameyoko energy meets Jewelry District shine", "zh": "阿美橫丁活力與寶石街光芒交織之地" },
-        "title": { "ja": "買い物の楽園", "en": "Shopping Paradise", "zh": "購物樂園" },
-        "vibe_tags": [{ "id": "shopping", "label": { "ja": "ショッピング", "en": "Shopping", "zh": "購物" }, "score": 5 }],
-        "last_updated": "2026-01-11T12:00:00.000Z"
-    },
-    "odpt.Station:TokyoMetro.Hibiya.Roppongi": {
-        "categories": {
-            "dining": { "id": "dining", "count": 400, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] },
-            "nightlife": { "id": "nightlife", "count": 150, "label": { "ja": "ナイトライフ", "en": "Nightlife", "zh": "夜生活" }, "subcategories": {}, "representative_spots": [] }
-        },
-        "tagline": { "ja": "アートとナイトライフが融合する国際的な街", "en": "Where art and nightlife merge in an international hub", "zh": "藝術與夜生活融合的國際化街區" },
-        "title": { "ja": "眠らない街", "en": "The City That Never Sleeps", "zh": "不夜城" },
-        "vibe_tags": [{ "id": "nightlife", "label": { "ja": "ナイトライフ", "en": "Nightlife", "zh": "夜生活" }, "score": 5 }],
         "last_updated": "2026-01-11T12:00:00.000Z"
     },
     "odpt.Station:JR-East.Yamanote.Shimbashi": {
@@ -19034,7 +19008,6 @@ export const L1_NAME_INDEX: Record<string, string> = {
     "九段下": "odpt.Station.TokyoMetro.Kudanshita",
     "二重橋前〈丸の内〉": "odpt.Station.TokyoMetro.Nijubashimae",
     "五反田": "odpt.Station:JR-East.Yamanote.Gotanda",
-    "京橋": "odpt.Station.TokyoMetro.Kyobashi",
     "人形町": "odpt.Station.Toei.Ningyocho",
     "代々木": "odpt.Station.JR-East.Yoyogi",
     "代々木上原": "odpt.Station.TokyoMetro.YoyogiUehara",
@@ -19205,8 +19178,6 @@ export const L1_NAME_INDEX: Record<string, string> = {
     "秋葉原": "odpt.Station:JR-East.Yamanote.Akihabara",
     "稲荷町": "odpt.Station.TokyoMetro.Inaricho",
     "竹橋": "odpt.Station.TokyoMetro.Takebashi",
-    "築地": "odpt.Station.TokyoMetro.Tsukiji",
-    "築地市場": "odpt.Station.Toei.Tsukijishijo",
     "篠崎": "odpt.Station.Toei.Shinozaki",
     "綾瀬": "odpt.Station.TokyoMetro.Ayase",
     "練馬": "odpt.Station.Toei.Nerima",
@@ -19216,7 +19187,6 @@ export const L1_NAME_INDEX: Record<string, string> = {
     "船堀": "odpt.Station.Toei.Funabori",
     "芝公園": "odpt.Station.Toei.Shibakoen",
     "若松河田": "odpt.Station.Toei.WakamatsuKawada",
-    "茅場町": "odpt.Station.TokyoMetro.Kayabacho",
     "茗荷谷": "odpt.Station.TokyoMetro.Myogadani",
     "荒川一中前": "odpt.Station.Toei.ArakawaItchumae",
     "荒川七丁目": "odpt.Station.Toei.ArakawaNanachome",
@@ -19277,7 +19247,6 @@ export const L1_NAME_INDEX: Record<string, string> = {
     "青山一丁目": "odpt.Station.TokyoMetro.AoyamaItchome",
     "面影橋": "odpt.Station.Toei.Omokagebashi",
     "飛鳥山": "odpt.Station.Toei.Asukayama",
-    "飯田橋": "odpt.Station.TokyoMetro.Iidabashi",
     "馬喰横山": "odpt.Station.Toei.BakuroYokoyama",
     "馬込": "odpt.Station.Toei.Magome",
     "駒込": "odpt.Station.JR-East.Komagome",

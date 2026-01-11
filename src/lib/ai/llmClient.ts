@@ -1,4 +1,4 @@
-export type SupportedLocale = 'zh-TW' | 'en' | 'ja';
+export type SupportedLocale = 'zh-TW' | 'zh' | 'en' | 'ja';
 
 export interface LLMParams {
     systemPrompt: string;

@@ -165,7 +165,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     } finally {
       setIsLoading(false);
     }
-  }, [addMessage, currentNodeId, userProfile, isLoading, tChat, messages]);
+  }, [addMessage, updateLastMessage, currentNodeId, userProfile, isLoading, tChat, messages]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
