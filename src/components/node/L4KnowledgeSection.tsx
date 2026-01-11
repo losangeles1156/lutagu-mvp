@@ -97,7 +97,7 @@ export const L4KnowledgeSection: React.FC<L4KnowledgeSectionProps> = ({ knowledg
                     </div>
 
                     <div className="text-slate-700 text-sm font-medium leading-relaxed whitespace-pre-wrap">
-                        {item.content}
+                        {item.content.replace(/\*\*/g, '')}
                     </div>
                 </div>
             </div>

@@ -7,7 +7,7 @@ import { Send, Bot, Loader2, Maximize2, Minimize2, X, RotateCcw } from 'lucide-r
 import { useAppStore } from '@/stores/appStore';
 import { useDifyChat } from '@/hooks/useDifyChat';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import ReactMarkdown from 'react-markdown';
+import { ParsedMessageContent } from '../chat/ParsedMessageContent';
 
 interface L4_ChatProps {
     data: StationUIProfile;
@@ -152,8 +152,8 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                                         <span className="text-[10px] font-black uppercase tracking-widest">LUTAGU</span>
                                     </div>
                                 )}
-                                <div className="font-medium prose prose-sm prose-slate max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-slate-900">
-                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                <div className="font-medium text-slate-900">
+                                    <ParsedMessageContent content={msg.content} role={msg.role} />
                                 </div>
                             </div>
                         </motion.div>

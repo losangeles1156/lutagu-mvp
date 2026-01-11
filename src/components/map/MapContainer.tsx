@@ -513,6 +513,19 @@ function AppMap() {
     const [gpsAlert, setGpsAlert] = useState<{ show: boolean, type: 'far' | 'denied' }>({ show: false, type: 'far' });
     const locale = useLocale();
 
+    // Transient Alert State
+    const [showEmptyAlert, setShowEmptyAlert] = useState(false);
+
+    useEffect(() => {
+        if (!loadingNodes && !nodesError && nodes.length === 0) {
+            setShowEmptyAlert(true);
+            const timer = setTimeout(() => setShowEmptyAlert(false), 3000); // 3 seconds
+            return () => clearTimeout(timer);
+        } else {
+            setShowEmptyAlert(false);
+        }
+    }, [loadingNodes, nodesError, nodes.length]);
+
 
 
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
@@ -696,9 +709,9 @@ function AppMap() {
                 </button>
             )}
 
-            {/* L4: Empty nodes state message */}
-            {!loadingNodes && !nodesError && nodes.length === 0 && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[900] flex flex-col items-center px-6">
+            {/* L4: Empty nodes state message (Transient) */}
+            {!loadingNodes && !nodesError && nodes.length === 0 && showEmptyAlert && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[900] flex flex-col items-center px-6 animate-out fade-out duration-1000 delay-[2000ms] fill-mode-forwards">
                     <div className="w-16 h-16 mb-4 bg-slate-100 rounded-full flex items-center justify-center">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
                             <circle cx="12" cy="12" r="10" />

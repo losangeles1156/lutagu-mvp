@@ -69,6 +69,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
     const [isRecommending, setIsRecommending] = useState(false);
     const [markdownKnowledge, setMarkdownKnowledge] = useState<any[]>([]);
     const [isKnowledgeLoading, setIsKnowledgeLoading] = useState(false);
+    const [knowledgeFilter, setKnowledgeFilter] = useState<'all' | 'traps' | 'hacks'>('all');
 
     const mapDemandToPreferences = useCallback((d: L4DemandState): UserPreferences => ({
         accessibility: { wheelchair: d.wheelchair, stroller: d.stroller, visual_impairment: d.vision, elderly: d.senior },
@@ -447,7 +448,17 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
+                                        <button
+                                            onClick={() => setKnowledgeFilter(prev => prev === 'traps' ? 'all' : 'traps')}
+                                            className={`
+                                                relative rounded-2xl p-4 border text-left transition-all active:scale-[0.98] outline-none ring-2 ring-transparent
+                                                ${knowledgeFilter === 'traps'
+                                                    ? 'bg-red-50 border-red-200 ring-red-200/50 shadow-sm'
+                                                    : 'bg-slate-50/50 border-slate-100/50 hover:bg-white hover:shadow-md'
+                                                }
+                                                ${knowledgeFilter !== 'all' && knowledgeFilter !== 'traps' ? 'opacity-50 grayscale' : 'opacity-100'}
+                                            `}
+                                        >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
                                                     <AlertTriangle size={14} />
@@ -458,9 +469,19 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                                 <span className="text-base font-black text-slate-800">{l4Knowledge?.traps?.length || 0}</span>
                                                 <span className="text-[9px] font-black text-slate-500 uppercase">{t('expertTips')}</span>
                                             </div>
-                                        </div>
+                                        </button>
 
-                                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all">
+                                        <button
+                                            onClick={() => setKnowledgeFilter(prev => prev === 'hacks' ? 'all' : 'hacks')}
+                                            className={`
+                                                relative rounded-2xl p-4 border text-left transition-all active:scale-[0.98] outline-none ring-2 ring-transparent
+                                                ${knowledgeFilter === 'hacks'
+                                                    ? 'bg-emerald-50 border-emerald-200 ring-emerald-200/50 shadow-sm'
+                                                    : 'bg-slate-50/50 border-slate-100/50 hover:bg-white hover:shadow-md'
+                                                }
+                                                ${knowledgeFilter !== 'all' && knowledgeFilter !== 'hacks' ? 'opacity-50 grayscale' : 'opacity-100'}
+                                            `}
+                                        >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
                                                     <Lightbulb size={14} />
@@ -471,7 +492,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                                 <span className="text-base font-black text-slate-800">{l4Knowledge?.hacks?.length || 0}</span>
                                                 <span className="text-[9px] font-black text-slate-500 uppercase">{t('proHacks')}</span>
                                             </div>
-                                        </div>
+                                        </button>
                                     </div>
 
                                     <button
@@ -503,9 +524,9 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                             )}
 
                             {/* Markdown-based Expert Knowledge */}
-                            <L4KnowledgeSection 
-                                knowledge={markdownKnowledge} 
-                                isLoading={isKnowledgeLoading} 
+                            <L4KnowledgeSection
+                                knowledge={markdownKnowledge}
+                                isLoading={isKnowledgeLoading}
                             />
 
                             {/* Existing Expert Knowledge Sections */}
@@ -519,28 +540,28 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                 </div>
 
                                 <div className="space-y-4">
-                                    {l4Knowledge?.traps?.map((item, i) => (
-                                        <div key={i} className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 flex gap-4 group hover:bg-red-50 transition-colors">
+                                    {(knowledgeFilter === 'all' || knowledgeFilter === 'traps') && l4Knowledge?.traps?.map((item, i) => (
+                                        <div key={`trap-${i}`} className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 flex gap-4 group hover:bg-red-50 transition-colors">
                                             <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{getLocaleString(item.icon, uiLocale) || '⚠️'}</div>
                                             <div>
-                                                <div className="font-black text-red-900 text-sm mb-1">{getLocaleString(item.title, uiLocale)}</div>
-                                                <div className="text-xs font-bold text-red-700/80 leading-relaxed">{getLocaleString(item.description, uiLocale)}</div>
+                                                <div className="font-black text-red-900 text-sm mb-1">{getLocaleString(item.title, uiLocale).replace(/\*\*/g, '')}</div>
+                                                <div className="text-xs font-bold text-red-700/80 leading-relaxed">{getLocaleString(item.description, uiLocale).replace(/\*\*/g, '')}</div>
                                                 {item.advice && (
                                                     <div className="mt-3 p-2.5 bg-white/80 rounded-xl text-[11px] font-bold text-red-800 flex items-start gap-2 shadow-sm ring-1 ring-red-100">
                                                         <Lightbulb size={14} className="shrink-0 text-amber-500 mt-0.5" />
-                                                        <span>{getLocaleString(item.advice, uiLocale)}</span>
+                                                        <span>{getLocaleString(item.advice, uiLocale).replace(/\*\*/g, '')}</span>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
                                     ))}
 
-                                    {l4Knowledge?.hacks?.map((item, i) => (
-                                        <div key={i} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 flex gap-4 group hover:bg-emerald-50 transition-colors">
+                                    {(knowledgeFilter === 'all' || knowledgeFilter === 'hacks') && l4Knowledge?.hacks?.map((item, i) => (
+                                        <div key={`hack-${i}`} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 flex gap-4 group hover:bg-emerald-50 transition-colors">
                                             <div className="shrink-0 w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">{getLocaleString(item.icon, uiLocale) || '💡'}</div>
                                             <div>
-                                                <div className="font-black text-emerald-900 text-sm mb-1">{getLocaleString(item.title, uiLocale)}</div>
-                                                <div className="text-xs font-bold text-emerald-700/80 leading-relaxed">{getLocaleString(item.description, uiLocale)}</div>
+                                                <div className="font-black text-emerald-900 text-sm mb-1">{getLocaleString(item.title, uiLocale).replace(/\*\*/g, '')}</div>
+                                                <div className="text-xs font-bold text-emerald-700/80 leading-relaxed">{getLocaleString(item.description, uiLocale).replace(/\*\*/g, '')}</div>
                                             </div>
                                         </div>
                                     ))}

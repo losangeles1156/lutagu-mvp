@@ -14,6 +14,7 @@ import {
   Maximize2,
   RotateCcw
 } from 'lucide-react';
+import { ParsedMessageContent } from '../chat/ParsedMessageContent';
 
 const MAX_INPUT_LENGTH = 500;
 
@@ -36,6 +37,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     isAnimating,
     transitionTo,
     addMessage,
+    updateLastMessage,
     setPendingInput,
     clearMessages,
     backupMessages
@@ -130,68 +132,32 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
       }
       if (!response.body) throw new Error('No response body');
 
+      // Add placeholder for assistant response
+      addMessage({
+        role: 'assistant',
+        content: '',
+      });
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedAnswer = '';
-      let sseBuffer = '';
-
-      // Add placeholder for assistant response
-      // In ChatPanel we update the last message, here we might need to add one first or update UI state
-      // Simplified: We accumulate then add one message at the end, or stream update if supported by store?
-      // The store `addMessage` adds a NEW message. To stream, we would need `updateLastMessage` which ChatPanel likely has but UIStateMachine might not expose directly?
-      // Checking useUIStateMachine... it has `addMessage`. `ChatPanel` uses local state or store?
-      // ChatPanel uses `useUIStateMachine`. Let's check if it exposes `updateLastMessage`.
-      // The viewed ChatCollapsedPanel code snippet only showed `addMessage`.
-      // If we cannot stream update, we'll show loading then full message, OR we hack it by clearing last and adding new?
-      // Better approach: Wait for full response for now in this simplified panel, OR use a local state for the "streaming" message.
-      // But ChatCollapsedPanel renders from `messages` store.
-
-      // Let's look at how ChatPanel does it. It calls `addMessage` initially with empty content, then updates it?
-      // No, ChatPanel view (Step 1152) showed: `addMessage({...})` then `while(true)`.
-      // It seems ChatPanel might be updating the store directly or the store has an update method.
-      // PROCEEDING ASSUMPTION: UIStateMachine has `updateLastMessage` or similar, OR we just wait for full response.
-      // SAFEST for now: Wait for full response to avoid breaking if update method is missing.
-      // Actually, looking at imports: `import { useUIStateMachine }`
-      // I'll check `useUIStateMachine` definition if I can, but I don't want to waste a step.
-      // I'll implement "Wait for full response" logic for the collapsed panel to be safe and simple.
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        sseBuffer += decoder.decode(value, { stream: true });
-        while (true) {
-          const newlineIndex = sseBuffer.indexOf('\n');
-          if (newlineIndex === -1) break;
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedAnswer += chunk;
 
-          const rawLine = sseBuffer.slice(0, newlineIndex);
-          sseBuffer = sseBuffer.slice(newlineIndex + 1);
-
-          const line = rawLine.trimEnd();
-          if (!line.startsWith('data:')) continue;
-
-          const ssePayload = line.slice(5).trimStart();
-          if (!ssePayload || ssePayload === '[DONE]') continue;
-
-          try {
-            const data = JSON.parse(ssePayload);
-            if (data.event === 'message' && data.answer) {
-              accumulatedAnswer += data.answer;
-            }
-          } catch (e) {
-            console.error('SSE Parse Error', e);
-          }
-        }
+        // Update the last message in the store
+        updateLastMessage(accumulatedAnswer);
       }
-
-      // Add final assistant message
-      addMessage({
-        role: 'assistant',
-        content: accumulatedAnswer,
-      });
 
     } catch (error) {
       console.error('Chat Error', error);
+      // If error occurs during stream, we might want to append error or replace content
+      // For now, if we have content, keep it but append error? Or just replace if empty?
+      // Simple fallback:
       addMessage({
         role: 'assistant',
         content: `⚠️ ${(error as any).message || tChat('connectionError') || '連線失敗，請稍後再試'}`,
