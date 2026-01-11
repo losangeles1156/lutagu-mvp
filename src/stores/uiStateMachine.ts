@@ -243,8 +243,12 @@ export function initializeUIState(): void {
     // 有保存的對話，恢復到收合狀態
     const targetState = state.isMobile ? 'collapsed_mobile' : 'collapsed_desktop';
     useUIStateMachine.setState({ uiState: targetState });
+  } else if (state.uiState !== 'login') {
+    // 如果當前狀態不是 login (例如 explore)，保持現狀，不要強行跳回登入頁
+    // 這能防止多語系切換時（頁面重載）自動跳回登入頁
+    return;
   } else {
-    // 沒有對話，顯示登入頁
+    // 沒有對話且在登入頁，保持登入頁
     useUIStateMachine.setState({ uiState: 'login' });
   }
 }

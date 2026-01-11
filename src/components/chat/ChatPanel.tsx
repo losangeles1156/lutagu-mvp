@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { useAppStore } from '@/stores/appStore';
+import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { useLocale, useTranslations } from 'next-intl';
 import {
@@ -21,6 +22,7 @@ import {
 import { Action as ChatAction } from './ActionCard';
 import { EmptyState } from './EmptyState';
 import { useToast } from '@/components/ui/Toast';
+import { ThinkingBubble } from './ThinkingBubble';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { demoScripts } from '@/data/demoScripts';
 
@@ -34,6 +36,9 @@ export function ChatPanel() {
     const tChat = useTranslations('chat');
     const tCommon = useTranslations('common');
     const tL4 = useTranslations('l4');
+
+    // Location Awareness
+    const { userLocation } = useZoneAwareness();
 
     // UI State
     const uiState = useUIStateMachine(state => state.uiState);
@@ -91,71 +96,53 @@ export function ChatPanel() {
 
         // Optimistic Update
         setAiMessages(prev => [...prev, userMsg]);
-        // Also update store for demo mode compatibility if needed (but we prioritized AI mode)
 
         try {
-            const response = await fetch('/api/agent/chat', {
+            // Updated to use Hybrid Engine API (Phase 3)
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: [userMsg],
+                    userLocation: userLocation || undefined, // Access location from hook
                     nodeId: currentNodeId || '',
                     locale,
-                    user_profile: 'general',
-                    conversationId: difyConversationId,
-                    userId: difyUserId
+                    zone: 'core'
                 })
             });
 
             if (!response.ok) {
-                let errorMsg = `Server Error: ${response.status}`;
-                try {
-                    const errorJson = await response.json();
-                    if (errorJson.error) errorMsg = errorJson.error;
-                } catch {
-                    const errText = await response.text();
-                    if (errText) errorMsg += ` ${errText}`;
-                }
-                throw new Error(errorMsg);
+                const errorText = await response.text();
+                throw new Error(`API Error: ${response.status} ${errorText}`);
             }
 
-            if (!response.body) throw new Error('No response body');
+            const data = await response.json();
 
-            // Initialize AI Message
-            const aiMsgId = (Date.now() + 1).toString();
-            setAiMessages(prev => [...prev, { id: aiMsgId, role: 'assistant', content: '' }]);
+            // Construct AI Message with Thinking Process
+            const aiMsg = {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: data.answer || '',
+                actions: data.actions || [],
+                thought: data.context?.reasoning_log ? data.context.reasoning_log.join('\n') : null, // Map log to thought
+                metadata: data.context // Store full context
+            };
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let accumulatedContent = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                accumulatedContent += chunk;
-
-                setAiMessages(prev => prev.map(m =>
-                    m.id === aiMsgId ? { ...m, content: accumulatedContent } : m
-                ));
-            }
+            setAiMessages(prev => [...prev, aiMsg]);
 
         } catch (error: any) {
-            console.error('Manual Chat Error:', error);
+            console.error('Chat Error:', error);
             const msg = error.message || 'Connection Failed';
             showToast?.(msg, 'error');
-            // Add error message to chat for visibility
             setAiMessages(prev => [...prev, {
                 id: (Date.now() + 2).toString(),
                 role: 'assistant',
                 content: `⚠️ **Error**: ${msg}`
             }]);
-            // Remove the failed user message or mark error? for now let it be.
         } finally {
             setIsLoading(false);
         }
-    }, [currentNodeId, locale, difyConversationId, difyUserId, showToast]);
+    }, [currentNodeId, locale, showToast, userLocation]);
 
     // Alias for compatibility (stable reference)
     const append = useCallback(async (msg: { role: string; content: string }) => {
@@ -441,11 +428,8 @@ const MessageBubble = memo(({
                     : 'bg-white text-slate-800 rounded-bl-lg border border-slate-100'
                 }
             `}>
-                {/* Thinking Process (Brain) */}
-
-
-                {/* Message Content with Markdown */}
-                <ParsedMessageContent content={msg.content} role={msg.role} />
+                {/* Message Content with Markdown and Thinking Process */}
+                <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
 
                 {/* Render Legacy Actions (Demo Mode) */}
                 {legacyActions && legacyActions.length > 0 && (

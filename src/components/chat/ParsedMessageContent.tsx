@@ -5,12 +5,13 @@ import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Brain } from 'lucide-react';
+import { ThinkingBubble } from './ThinkingBubble';
 
 // Component to parse Dify markers and render Markdown
-export const ParsedMessageContent = memo(({ content, role }: { content: string; role: string }) => {
+export const ParsedMessageContent = memo(({ content, role, thought }: { content: string; role: string; thought?: string | null }) => {
     const tL4 = useTranslations('l4');
     const parsed = useMemo(() => {
-        if (!content) return { text: '', thinking: null, suggestedQuestions: [] };
+        if (!content) return { text: '', thinking: thought || null };
 
         let text = content;
 
@@ -18,38 +19,34 @@ export const ParsedMessageContent = memo(({ content, role }: { content: string; 
         // Filter out ** symbols (Markdown bold) as per Dify prompt requirements
         text = text.replace(/\*\*/g, '');
 
-        let thinking: string | null = null;
-        let suggestedQuestions: string[] = [];
+        let thinking: string | null = thought || null;
 
-        // Extract [THINKING] marker
-        const thinkingMatch = text.match(/\[THINKING\]([\s\S]*?)(?:\[\/THINKING\]|$)/);
-        if (thinkingMatch) {
-            thinking = thinkingMatch[1].trim();
-            text = text.replace(thinkingMatch[0], '').trim();
+        // Extract [THINKING] marker if not already provided via prop
+        if (!thinking) {
+            const thinkingMatch = text.match(/\[THINKING\]([\s\S]*?)(?:\[\/THINKING\]|$)/);
+            if (thinkingMatch) {
+                thinking = thinkingMatch[1].trim();
+                text = text.replace(thinkingMatch[0], '').trim();
+            }
+        } else {
+            // If thinking is provided via prop, still strip the marker if it exists in text
+            text = text.replace(/\[THINKING\]([\s\S]*?)(?:\[\/THINKING\]|$)/, '').trim();
         }
 
-        // Extract [SUGGESTED_QUESTIONS] marker
+        // Extract [SUGGESTED_QUESTIONS] marker and strip it
         const sqMatch = text.match(/\[SUGGESTED_QUESTIONS\]([\s\S]*?)\[\/SUGGESTED_QUESTIONS\]/);
         if (sqMatch) {
-            try {
-                suggestedQuestions = JSON.parse(sqMatch[1]);
-            } catch {
-                suggestedQuestions = [];
-            }
             text = text.replace(sqMatch[0], '').trim();
         }
 
-        return { text, thinking, suggestedQuestions };
-    }, [content]);
+        return { text, thinking };
+    }, [content, thought]);
 
     return (
         <div className="space-y-2">
-            {/* Thinking Indicator */}
+            {/* Thinking Indicator/Bubble */}
             {parsed.thinking && (
-                <div className="flex items-center gap-2 text-xs text-indigo-500 bg-indigo-50 px-3 py-2 rounded-lg mb-2">
-                    <Brain size={14} className="animate-pulse" />
-                    <span className="font-medium">{tL4('thinking.initializing')}</span>
-                </div>
+                <ThinkingBubble content={parsed.thinking} />
             )}
 
             {/* Main Content with Markdown */}
@@ -58,24 +55,6 @@ export const ParsedMessageContent = memo(({ content, role }: { content: string; 
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {parsed.text}
                     </ReactMarkdown>
-                </div>
-            )}
-
-            {/* Suggested Questions */}
-            {parsed.suggestedQuestions.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100/50">
-                    {parsed.suggestedQuestions.map((q, i) => (
-                        <button
-                            key={i}
-                            onClick={() => {
-                                // Will be handled by parent - for now just show
-                                console.log('Suggested question clicked:', q);
-                            }}
-                            className="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-medium hover:bg-indigo-100 transition-colors"
-                        >
-                            {q}
-                        </button>
-                    ))}
                 </div>
             )}
         </div>

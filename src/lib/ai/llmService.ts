@@ -6,6 +6,7 @@
  */
 
 import { generateLLMResponse, SupportedLocale } from './llmClient';
+export { generateLLMResponse, type SupportedLocale };
 
 // ==========================================
 // Types
@@ -142,6 +143,65 @@ export async function generateL1DNA(
         tagline: locale === 'zh-TW' ? '探索這個車站的魅力' : 'Discover this station',
         vibeTags: ['Transit Hub']
     };
+}
+
+// ==========================================
+// Knowledge Translation
+// ==========================================
+
+/**
+ * Translates a list of knowledge items to the target locale.
+ * Uses a batch processing approach to save tokens and maintain consistency.
+ */
+export async function translateKnowledgeItems(
+    items: Array<{ id: string; content: string; section: string }>,
+    targetLocale: SupportedLocale
+): Promise<Array<{ id: string; content: string; section: string }>> {
+    if (targetLocale === 'zh-TW' || targetLocale === 'zh') return items;
+    if (items.length === 0) return items;
+
+    const languageMap: Record<string, string> = {
+        'en': 'English',
+        'ja': 'Japanese',
+        'zh-TW': 'Traditional Chinese'
+    };
+
+    const targetLang = languageMap[targetLocale] || 'English';
+
+    const systemPrompt = `You are LUTAGU, a Tokyo transit expert. 
+    Translate the following transit tips from Traditional Chinese to ${targetLang}.
+    
+    Guidelines:
+    - Keep the tone helpful, professional, and concise.
+    - Keep specific proper nouns (station names, line names) as is if they are commonly known in ${targetLang}, or provide the ${targetLang} equivalent.
+    - Maintain the Markdown bullet point structure.
+    - DO NOT change the meaning or remove technical details.
+    - Return ONLY the translated items in a valid JSON array format matching the input structure.`;
+
+    const userPrompt = JSON.stringify(items.map(i => ({ id: i.id, content: i.content, section: i.section })));
+
+    try {
+        const result = await generateLLMResponse({
+            systemPrompt,
+            userPrompt,
+            taskType: 'reasoning',
+            temperature: 0.1 // Low temperature for factual translation
+        });
+
+        if (result) {
+            // Attempt to parse the JSON array
+            const cleanedResult = result.replace(/```json\n?|\n?```/g, '').trim();
+            const translatedItems = JSON.parse(cleanedResult);
+            if (Array.isArray(translatedItems)) {
+                return translatedItems;
+            }
+        }
+    } catch (e) {
+        console.error('[llmService] Knowledge translation failed:', e);
+    }
+
+    // Fallback: Return original items if translation fails
+    return items;
 }
 
 // ==========================================

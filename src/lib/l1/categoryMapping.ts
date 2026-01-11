@@ -154,6 +154,46 @@ export const CATEGORY_MAPPINGS: CategoryMapping[] = [
         osmValues: [],
         icon: '📍',
         weight: 99
+    },
+    {
+        id: 'dining',
+        name: { ja: '食事', en: 'Dining', 'zh-TW': '餐飲', 'zh-CN': '餐饮' },
+        osmKeys: ['amenity'],
+        osmValues: ['restaurant', 'fast_food', 'food_court', 'cafe'],
+        icon: '🍽️',
+        weight: 1
+    },
+    {
+        id: 'shopping',
+        name: { ja: '買い物', en: 'Shopping', 'zh-TW': '購物', 'zh-CN': '购物' },
+        osmKeys: ['shop'],
+        osmValues: ['department_store', 'mall', 'clothes', 'fashion', 'gift'],
+        icon: '🛍️',
+        weight: 3
+    },
+    {
+        id: 'finance',
+        name: { ja: '金融', en: 'Finance', 'zh-TW': '金融', 'zh-CN': '金融' },
+        osmKeys: ['amenity'],
+        osmValues: ['bank', 'atm', 'bureau_de_change'],
+        icon: '💰',
+        weight: 4
+    },
+    {
+        id: 'nature',
+        name: { ja: '自然', en: 'Nature', 'zh-TW': '自然', 'zh-CN': '自然' },
+        osmKeys: ['leisure', 'landuse', 'natural'],
+        osmValues: ['park', 'garden', 'forest', 'grass'],
+        icon: '🌳',
+        weight: 13
+    },
+    {
+        id: 'culture',
+        name: { ja: '文化', en: 'Culture', 'zh-TW': '文化', 'zh-CN': '文化' },
+        osmKeys: ['amenity', 'tourism'],
+        osmValues: ['arts_centre', 'library', 'theatre', 'museum', 'gallery'],
+        icon: '🎨',
+        weight: 13
     }
 ];
 
@@ -200,7 +240,7 @@ export function getCategoryFromOSMTags(tags: Record<string, string>): string {
     for (const [key, value] of priorityCombinations) {
         if (tags[key] === value) {
             for (const mapping of CATEGORY_MAPPINGS) {
-                if (mapping.osmKeys.includes(key) && 
+                if (mapping.osmKeys.includes(key) &&
                     mapping.osmValues?.includes(value)) {
                     return mapping.id;
                 }
@@ -243,7 +283,7 @@ export function getAllCategories(): CategoryMapping[] {
 export function getCategoryName(categoryId: string, locale: string = 'zh-TW'): string {
     const category = CATEGORY_BY_ID.get(categoryId);
     if (!category) return categoryId;
-    
+
     return category.name[locale] || category.name['en'] || category.name['ja'] || categoryId;
 }
 
@@ -253,9 +293,9 @@ export function getCategoryName(categoryId: string, locale: string = 'zh-TW'): s
 export function compareCategoriesByWeight(a: string, b: string): number {
     const catA = CATEGORY_BY_ID.get(a);
     const catB = CATEGORY_BY_ID.get(b);
-    
+
     const weightA = catA?.weight ?? 999;
     const weightB = catB?.weight ?? 999;
-    
+
     return weightA - weightB;
 }

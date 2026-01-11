@@ -11,8 +11,8 @@ import { useDifyChat } from '@/hooks/useDifyChat';
 
 import { hybridEngine } from '@/lib/l4/HybridEngine';
 
+import { ParsedMessageContent } from '../chat/ParsedMessageContent';
 import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
-import ReactMarkdown from 'react-markdown';
 
 interface L4_BambiProps {
     data: StationUIProfile;
@@ -31,7 +31,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     const tL4 = useTranslations('l4');
     const tCommon = useTranslations('common');
     const locale = useLocale();
-    const { zone } = useZoneAwareness();
+    const { zone, userLocation } = useZoneAwareness();
     const { id: stationId, name } = data || {};
     const setCurrentNode = useAppStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
@@ -58,6 +58,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     } = useDifyChat({
         stationId: stationId,
         stationName: displayName,
+        userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
         onComplete: () => { }
     });
 
@@ -339,8 +340,8 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                     {msg.role === 'user' ? tL4('userLabel') : tL4('bambiLabel')}
                                 </span>
                             </div>
-                            <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:font-black">
-                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            <div className="text-sm leading-relaxed">
+                                <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
                             </div>
                         </div>
                     </div>

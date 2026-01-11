@@ -86,8 +86,8 @@ async function main() {
     }
 
     // 2. Process each cluster
-    const TARGETS = ['Akihabara', 'Jimbocho', 'Jinbocho', 'Tokyo', 'Shinjuku', 'Shibuya', 'Ueno', 'Ginza', 'Asakusa'];
-    
+    const TARGETS = ['Akihabara', 'Jimbocho', 'Jinbocho', 'Tokyo', 'Shinjuku', 'Shibuya', 'Ueno', 'Ginza', 'Asakusa', 'Ikebukuro'];
+
     for (const cluster of clusters) {
         if (processedIds.has(cluster.primaryId)) { // || staticIds.has(cluster.primaryId)) {
             // console.log(`⏭️ Skipping ${cluster.primaryId} (Already processed)`);
@@ -96,7 +96,7 @@ async function main() {
 
         const nameEn = typeof cluster.stations[0].name === 'string' ? cluster.stations[0].name : cluster.stations[0].name.en;
         const isTarget = TARGETS.some(t => nameEn.includes(t));
-        
+
         if (!isTarget) continue;
 
         console.log(`\n📍 Processing Cluster: ${cluster.primaryId} (${cluster.ward})...`);

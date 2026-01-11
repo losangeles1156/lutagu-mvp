@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import { TrapCard } from './TrapCard';
 import { HackCard } from './HackCard';
 
-export type ActionType = 'navigate' | 'details' | 'trip' | 'transit' | 'taxi' | 'discovery' | 'trap' | 'hack';
+export type ActionType = 'navigate' | 'details' | 'trip' | 'transit' | 'taxi' | 'discovery' | 'trap' | 'hack' | 'poi';
 
 export interface Action {
     type: ActionType;
@@ -77,6 +77,67 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
     }
     if (action.type === 'hack') {
         return <HackCard action={action} onClick={onClick} />;
+    }
+
+    // New POI Card (Phase 3)
+    if (action.type === 'poi') {
+        const tags = action.metadata?.tags || [];
+        return (
+            <button
+                onClick={() => onClick(action)}
+                className="w-full text-left group relative overflow-hidden bg-white rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md transition-all duration-300 active:scale-95"
+            >
+                <div className="p-4 flex gap-4">
+                    {/* Icon Box */}
+                    <div className="shrink-0 w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm group-hover:bg-indigo-100 transition-colors">
+                        <MapPin size={20} strokeWidth={2.5} />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 opacity-80">
+                                RECOMMENDATION
+                            </span>
+                            {action.metadata?.score && action.metadata.score > 0.8 && (
+                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                    {(action.metadata.score * 100).toFixed(0)}% Match
+                                </span>
+                            )}
+                        </div>
+
+                        <h3 className="text-base font-black text-slate-800 leading-tight mb-1 truncate">
+                            {action.label}
+                        </h3>
+
+                        <p className="text-xs text-slate-500 font-medium mb-3 line-clamp-1">
+                            {action.description}
+                        </p>
+
+                        {/* Tags */}
+                        {tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {tags.slice(0, 3).map((tag: string, i: number) => (
+                                    <span key={i} className="text-[10px] font-bold text-slate-600 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+                                        {tag}
+                                    </span>
+                                ))}
+                                {tags.length > 3 && (
+                                    <span className="text-[10px] font-bold text-slate-400 px-1">
+                                        +{tags.length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Arrow */}
+                    <div className="self-center text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all">
+                        →
+                    </div>
+                </div>
+            </button>
+        );
     }
 
     // 2. Standard Cards (Legacy Logic)

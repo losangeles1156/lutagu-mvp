@@ -9,6 +9,8 @@ import { useDifyChat } from '@/hooks/useDifyChat';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { ParsedMessageContent } from '../chat/ParsedMessageContent';
 
+import { useZoneAwareness } from '@/hooks/useZoneAwareness';
+
 interface L4_ChatProps {
     data: StationUIProfile;
     variant?: 'bambi' | 'strategy';
@@ -35,6 +37,8 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
     const [input, setInput] = useState('');
     const [hasGreeted, setHasGreeted] = useState(false);
 
+    const { userLocation } = useZoneAwareness();
+
     const {
         messages,
         setMessages,
@@ -45,8 +49,9 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         clearMessages,
         messagesEndRef
     } = useDifyChat({
-        stationId: data.id, // Changed from stationId to data.id
-        stationName: displayName, // Kept displayName as getLocaleString is not defined
+        stationId: data.id,
+        stationName: displayName,
+        userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
         onComplete: () => {
             // Optional callback
         }
@@ -153,7 +158,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                                     </div>
                                 )}
                                 <div className="font-medium text-slate-900">
-                                    <ParsedMessageContent content={msg.content} role={msg.role} />
+                                    <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
                                 </div>
                             </div>
                         </motion.div>

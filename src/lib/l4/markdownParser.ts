@@ -18,6 +18,18 @@ const ENTITY_NAME_TO_ID: Record<string, string[]> = {
     '品川車站': ['odpt:Station:JR-East.Shinagawa', 'odpt:Station:Keikyu.Main.Shinagawa'],
     '六本木車站': ['odpt:Station:TokyoMetro.Hibiya.Roppongi', 'odpt:Station:Toei.Oedo.Roppongi'],
     '大手町車站': ['odpt:Station:TokyoMetro.Marunouchi.Otemachi', 'odpt:Station:TokyoMetro.Tozai.Otemachi', 'odpt:Station:TokyoMetro.Chiyoda.Otemachi', 'odpt:Station:TokyoMetro.Hanzomon.Otemachi', 'odpt:Station:Toei.Mita.Otemachi'],
+    '新橋車站': ['odpt:Station:JR-East.Shimbashi', 'odpt:Station:TokyoMetro.Shimbashi', 'odpt:Station:Toei.Shimbashi', 'odpt:Station:Yurikamome.Shimbashi'],
+    '濱松町車站': ['odpt:Station:JR-East.Hamamatsucho', 'odpt:Station:TokyoMonorail.Haneda.MonorailHamamatsucho', 'odpt:Station:Toei.Daimon'],
+    '日本橋車站': ['odpt:Station:TokyoMetro.Nihombashi', 'odpt:Station:Toei.Nihombashi'],
+    '神田車站': ['odpt:Station:JR-East.Kanda', 'odpt:Station:TokyoMetro.Kanda'],
+    '神保町車站': ['odpt:Station:Toei.Jimbocho', 'odpt:Station:TokyoMetro.Jimbocho'],
+    '市ケ谷車站': ['odpt:Station:JR-East.Ichigaya', 'odpt:Station:TokyoMetro.Ichigaya', 'odpt:Station:Toei.Ichigaya'],
+    '日比谷車站': ['odpt:Station:TokyoMetro.Hibiya', 'odpt:Station:Toei.Hibiya'],
+    '五反田車站': ['odpt:Station:JR-East.Gotanda', 'odpt:Station:Toei.Gotanda', 'odpt:Station:Tokyu.Gotanda'],
+    '淺草橋車站': ['odpt:Station:JR-East.Asakusabashi', 'odpt:Station:Toei.Asakusabashi'],
+    '目黑車站': ['odpt:Station:JR-East.Meguro', 'odpt:Station:TokyoMetro.Meguro', 'odpt:Station:Toei.Meguro', 'odpt:Station:Tokyu.Meguro'],
+    '御徒町車站': ['odpt:Station:JR-East.Okachimachi', 'odpt:Station:Toei.UenoOkachimachi', 'odpt:Station:TokyoMetro.UenoHirokoji', 'odpt:Station:TokyoMetro.NakaOkachimachi'],
+    '大崎車站': ['odpt:Station:JR-East.Osaki', 'odpt:Station:TWR.Osaki'],
     '東京地鐵通則': ['global'],
 
     // Railway Lines

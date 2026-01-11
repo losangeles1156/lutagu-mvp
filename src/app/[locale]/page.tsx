@@ -144,7 +144,7 @@ export default function Home() {
                 <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-200" aria-hidden="true">🦌</div>
                 <div className="hidden sm:block">
                     <h1 className="text-lg font-black text-slate-900 tracking-tight">LUTAGU</h1>
-                    <p className="text-[10px] font-bold text-slate-400">東京交通 AI 助手</p>
+                    <p className="text-[10px] font-bold text-slate-400">{tCommon('aiGuideSubtitle')}</p>
                 </div>
             </div>
             <SystemMenu />
@@ -171,7 +171,7 @@ export default function Home() {
                         <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center">
                             <MessageSquarePlus size={20} className="text-slate-500" />
                         </div>
-                        <span className="text-[10px] font-bold">回饋</span>
+                        <span className="text-[10px] font-bold">{tCommon('feedback')}</span>
                     </button>
                 </FeedbackHub>
 
@@ -185,8 +185,8 @@ export default function Home() {
                         <MessageSquare size={18} className="text-white" aria-hidden="true" />
                     </div>
                     <div className="flex flex-col items-start">
-                        <span className="text-base font-black tracking-wide">AI 嚮導</span>
-                        <span className="text-[10px] font-medium text-indigo-100 opacity-90">隨時詢問交通與行程</span>
+                        <span className="text-base font-black tracking-wide">{tCommon('aiGuide')}</span>
+                        <span className="text-[10px] font-medium text-indigo-100 opacity-90">{tCommon('aiGuideSubtitle')}</span>
                     </div>
                 </button>
             </div>

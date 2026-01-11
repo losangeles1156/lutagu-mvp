@@ -84,6 +84,9 @@ interface POIRecord {
     category_tags: CategoryTags | null;
     atmosphere_tags: AtmosphereTags | null;
     location: string | null;
+    tags_core: string[] | null;
+    tags_intent: string[] | null;
+    tags_visual: string[] | null;
 }
 
 interface UserContext {
@@ -117,6 +120,9 @@ interface POIDecisionResult {
     locationTags: LocationTags | null;
     categoryTags: CategoryTags | null;
     atmosphereTags: AtmosphereTags | null;
+    tags_core?: string[];
+    tags_intent?: string[];
+    tags_visual?: string[];
     relevanceScore: number;
     matchedCriteria: string[];
     alternative?: POIDecisionResult[];
@@ -231,10 +237,10 @@ export class POITaggedDecisionEngine {
         }
 
         let normalized = query.toLowerCase().trim();
-        
+
         // Remove extra whitespace
         normalized = normalized.replace(/\s+/g, ' ');
-        
+
         // Remove common fillers
         const fillers = ['我想', '我要', '想找', '要找', '請問', '幫我'];
         fillers.forEach(f => {
@@ -246,7 +252,7 @@ export class POITaggedDecisionEngine {
         normalized = keywords.join(' ');
 
         this.normalizationCache.set(query, normalized);
-        
+
         // Keep cache size bounded
         if (this.normalizationCache.size > 10000) {
             const keys = Array.from(this.normalizationCache.keys());
@@ -266,7 +272,7 @@ export class POITaggedDecisionEngine {
         query: string
     ): Promise<POIDecisionResult[]> {
         const startTime = Date.now();
-        
+
         // Normalize query if enabled
         const normalizedQuery = this.config.enableQueryNormalization
             ? this.normalizeQuery(query)
@@ -361,10 +367,10 @@ export class POITaggedDecisionEngine {
             const intent = this.parseQueryIntent(query);
             const candidates = await this.queryByTags({}, intent);
             const results = this.rankAndFilter(candidates, {}, intent);
-            
+
             const cacheKey = this.buildCacheKey({}, query);
             await this.cacheResults(cacheKey, results);
-            
+
             console.log(`[POITaggedEngine] Prefetched: ${query}`);
         } catch (error) {
             // Silent fail for prefetch
@@ -454,7 +460,7 @@ export class POITaggedDecisionEngine {
         userContext: UserContext,
         intent: QueryIntent
     ): Promise<POIDecisionResult[]> {
-        let query = this.supabase
+        let queryBuilder = this.supabase
             .from('l1_places')
             .select(`
                 id,
@@ -463,28 +469,33 @@ export class POITaggedDecisionEngine {
                 location_tags,
                 category_tags,
                 atmosphere_tags,
-                location
+                location,
+                tags_core,
+                tags_intent,
+                tags_visual
             `)
             .not('category', 'is', null);
 
         if (intent.category) {
-            query = query.eq('category', intent.category);
+            queryBuilder = queryBuilder.eq('category', intent.category);
+        } else if (intent.keywords.length > 0) {
+            // Flexible matching fallback (handled in memory or via array overlap if supported)
         }
 
         if (userContext.preferences?.categories?.length) {
-            query = query.in('category', userContext.preferences.categories);
+            queryBuilder = queryBuilder.in('category', userContext.preferences.categories);
         }
 
-        query = query.limit(200);
+        queryBuilder = queryBuilder.limit(200);
 
-        const { data, error } = await query;
+        const { data, error } = await queryBuilder;
 
         if (error) {
             console.error('[POITaggedEngine] Query error:', error);
             return [];
         }
 
-        return (data || []).map(poi => 
+        return (data || []).map(poi =>
             this.mapToDecisionResult(poi as POIRecord, intent)
         );
     }
@@ -495,9 +506,21 @@ export class POITaggedDecisionEngine {
     private mapToDecisionResult(poi: POIRecord, intent: QueryIntent): POIDecisionResult {
         const categoryTags = poi.category_tags;
         const atmosphereTags = poi.atmosphere_tags;
-
         const matchedCriteria: string[] = [];
+        const keywords = intent.keywords;
 
+        // --- 3-5-8 Matches (New) ---
+        if (poi.tags_core?.some(tag => keywords.some(k => tag.includes(k) || k.includes(tag)))) {
+            matchedCriteria.push('關鍵字匹配');
+        }
+        if (poi.tags_intent?.some(tag => keywords.some(k => tag.includes(k) || k.includes(tag)))) {
+            matchedCriteria.push('意圖符合');
+        }
+        if (poi.tags_visual?.some(tag => keywords.some(k => tag.includes(k) || k.includes(tag)))) {
+            matchedCriteria.push('風格符合');
+        }
+
+        // --- Original Criteria ---
         if (poi.category === intent.category) {
             matchedCriteria.push(`類別:${intent.category}`);
         }
@@ -528,8 +551,11 @@ export class POITaggedDecisionEngine {
             locationTags: poi.location_tags,
             categoryTags: categoryTags || null,
             atmosphereTags: atmosphereTags || null,
+            tags_core: poi.tags_core || [],
+            tags_intent: poi.tags_intent || [],
+            tags_visual: poi.tags_visual || [],
             relevanceScore,
-            matchedCriteria
+            matchedCriteria: [...new Set(matchedCriteria)]
         };
     }
 
@@ -544,10 +570,31 @@ export class POITaggedDecisionEngine {
     ): number {
         let score = 0;
 
-        if (poi.category === intent.category) score += 0.4;
-        if (atmosphereTags?.core?.energy === intent.energy) score += 0.3;
-        if (categoryTags?.characteristics?.price_range === intent.budget) score += 0.2;
-        if (categoryTags?.characteristics?.is_chain) score += 0.1;
+        // Base Score from Category (Reliable)
+        if (poi.category === intent.category) score += 0.3;
+
+        const keywords = intent.keywords;
+
+        // --- 3-5-8 Strategy Boosts ---
+        // Core Tags (The thing itself) - High confidence
+        if (poi.tags_core?.some(t => keywords.some(k => t.includes(k) || k.includes(t)))) {
+            score += 0.3;
+        }
+
+        // Intent Tags (Context/Action) - Medium confidence context
+        if (poi.tags_intent?.some(t => keywords.some(k => t.includes(k) || k.includes(t)))) {
+            score += 0.2;
+        }
+
+        // Visual Tags (Vibe) - Bonus
+        if (poi.tags_visual?.some(t => keywords.some(k => t.includes(k) || k.includes(t)))) {
+            score += 0.1;
+        }
+
+        // --- Original Attribute Boosts ---
+        if (atmosphereTags?.core?.energy === intent.energy) score += 0.1;
+        if (categoryTags?.characteristics?.price_range === intent.budget) score += 0.1;
+        if (categoryTags?.characteristics?.is_chain) score += 0.05;
 
         return Math.min(1, score);
     }
@@ -602,7 +649,7 @@ export class POITaggedDecisionEngine {
             .in('id', poiIds);
 
         const poiMap = new Map((pois || []).map(p => [p.id, p]));
-        
+
         return (data || []).map(item => {
             const poi = poiMap.get(item.similar_poi_id);
             const baseResult = poi ? this.mapToDecisionResult(poi as POIRecord, intent) : null;
@@ -691,7 +738,7 @@ export class POITaggedDecisionEngine {
         this.localCache.clear();
         this.queryStats.clear();
         this.normalizationCache.clear();
-        
+
         if (this.redis) {
             this.redis.flushdb().catch(console.error);
         }
@@ -703,23 +750,23 @@ export class POITaggedDecisionEngine {
     cleanupExpiredCache(): number {
         const now = Date.now();
         let cleaned = 0;
-        
+
         for (const [key, value] of this.localCache.entries()) {
             if (value.expiry <= now) {
                 this.localCache.delete(key);
                 cleaned++;
             }
         }
-        
+
         return cleaned;
     }
 
     /**
      * 獲取快取統計
      */
-    getCacheStats(): { 
-        localSize: number; 
-        statsSize: number; 
+    getCacheStats(): {
+        localSize: number;
+        statsSize: number;
         topQueries: [string, number][];
         hitRate?: number;
     } {

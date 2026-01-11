@@ -531,6 +531,9 @@
         "error": "エラーが発生しました",
         "station": "駅",
         "close": "閉じる",
+        "feedback": "フィードバック",
+        "aiGuide": "AI ガイド",
+        "aiGuideSubtitle": "交通や旅程について尋ねる",
         "languageSwitcherLabel": "言語を切り替える",
         "back": "戻る",
         "select": "選択",
@@ -542,6 +545,35 @@
         "feedbackSent": "フィードバックを受け付けました！",
         "noNodesInView": "このエリアに駅はありません",
         "noNodesHint": "地図を移動またはズームして他のエリアを表示してください"
+    },
+    "feedback": {
+        "title": "フィードバックを送る",
+        "openFeedback": "フィードバックを送る",
+        "thankYou": "フィードバックありがとうございます！",
+        "submittedMessage": "お送りいただいた内容はすべて大切に拝見いたします。",
+        "back": "戻る",
+        "ratingLabel": "総合評価",
+        "contentLabel": "詳細な説明",
+        "submit": "フィードバックを送信",
+        "submitting": "送信中...",
+        "types": {
+            "general": "一般的なご意見",
+            "bug": "不具合の報告",
+            "spot": "スポットの提案",
+            "tip": "ヒントを共有"
+        },
+        "descriptions": {
+            "general": "LUTAGU 全体の使い心地について",
+            "bug": "エラーや正常に動作しない機能について",
+            "spot": "新しい駅やスポット情報の推薦",
+            "tip": "あなたの交通ハックを共有"
+        },
+        "placeholders": {
+            "general": "ご意見や不具合などをご記入ください...",
+            "bug": "発生したエラーの内容や、どの画面で発生したかを教えてください...",
+            "spot": "おすすめの駅名やスポット名を教えてください...",
+            "tip": "交通のヒントやお得な情報を共有してください..."
+        }
     },
     "chat": {
         "aiName": "LUTAGU AI",

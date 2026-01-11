@@ -154,7 +154,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
             if (!stationId || !/^odpt[.:]Station:/.test(stationId)) return;
             setIsKnowledgeLoading(true);
             try {
-                const res = await fetch(`/api/l4/knowledge?type=station&id=${stationId}`);
+                const res = await fetch(`/api/l4/knowledge?type=station&id=${stationId}&locale=${uiLocale}`);
                 if (res.ok) {
                     const data = await res.json();
                     setMarkdownKnowledge(data.tips || []);
@@ -166,7 +166,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
             }
         };
         fetchMarkdownKnowledge();
-    }, [stationId]);
+    }, [stationId, uiLocale]);
 
     useEffect(() => {
         setActiveKind(null); setError(''); setFareData(null); setTimetableData(null); setSuggestion(null);

@@ -529,6 +529,9 @@
         "retry": "Retry",
         "station": "Station",
         "close": "Close",
+        "feedback": "Feedback",
+        "aiGuide": "AI Guide",
+        "aiGuideSubtitle": "Ask about transit and trips",
         "languageSwitcherLabel": "Change language",
         "back": "Back",
         "select": "Select",
@@ -540,6 +543,35 @@
         "feedbackSent": "Feedback received!",
         "noNodesInView": "No stations in this area",
         "noNodesHint": "Try moving or zooming the map to view other areas"
+    },
+    "feedback": {
+        "title": "Provide Feedback",
+        "openFeedback": "Provide Feedback",
+        "thankYou": "Thank you for your feedback!",
+        "submittedMessage": "We will carefully read every piece of feedback you provide.",
+        "back": "Back",
+        "ratingLabel": "Overall Rating",
+        "contentLabel": "Detailed Description",
+        "submit": "Submit Feedback",
+        "submitting": "Submitting...",
+        "types": {
+            "general": "General Suggestion",
+            "bug": "Report a Bug",
+            "spot": "Spot Suggestion",
+            "tip": "Share a Tip"
+        },
+        "descriptions": {
+            "general": "Your overall experience with LUTAGU",
+            "bug": "Encountered an error or malfunction",
+            "spot": "Recommend new spots or station info",
+            "tip": "Share your transit tips"
+        },
+        "placeholders": {
+            "general": "Write down your suggestions or issues...",
+            "bug": "Describe the error you encountered, including the page it occurred on...",
+            "spot": "Tell us the name of the station or spot you recommend...",
+            "tip": "Share your transit tips or money-saving hacks..."
+        }
     },
     "chat": {
         "aiName": "LUTAGU AI",

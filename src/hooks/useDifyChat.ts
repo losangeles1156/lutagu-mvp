@@ -12,11 +12,13 @@ export interface DifyMessage {
     isStrategy?: boolean;
     source?: 'template' | 'algorithm' | 'llm';
     data?: any;
+    thought?: string | null; // Added thought property
 }
 
 export interface UseDifyChatOptions {
     stationId?: string;
     stationName?: string;
+    userLocation?: { lat: number; lng: number };
     onMessage?: (message: DifyMessage) => void;
     onComplete?: () => void;
     onError?: (error: Error) => void;
@@ -70,9 +72,10 @@ export function useDifyChat(options: UseDifyChatOptions) {
             stationName: stationName || '',
             locale,
             user_profile: 'general', // This will be overridden by sendMessage if userProfile is passed
-            zone: zone || 'core'
+            zone: zone || 'core',
+            userLocation: options.userLocation // Added from options
         }
-    }), [stationId, stationName, locale, zone]);
+    }), [stationId, stationName, locale, zone, options.userLocation]);
 
     const {
         messages: aiMessages,
@@ -107,41 +110,21 @@ export function useDifyChat(options: UseDifyChatOptions) {
     const messages: DifyMessage[] = useMemo(() => {
         return aiMessages.map((m: any) => {
             let content = m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || '';
+            const rawContent = content;
 
             // Filter out ** symbols (Markdown bold) as per Dify prompt requirements
             content = content.replace(/\*\*/g, '');
 
             // Extract thinking markers from content
-            const thinkingMatch = content.match(/\[THINKING\](.*?)\[\/THINKING\]/g);
-            if (thinkingMatch && thinkingMatch.length > 0) {
-                // Get the last thinking message
-                const lastThinking = thinkingMatch[thinkingMatch.length - 1];
-                const thinkingText = lastThinking.replace(/\[THINKING\]|\[\/THINKING\]/g, '').trim();
-                // We use a separate useEffect to sync state to avoid update during render
+            let thought: string | null = null;
+            const thinkingMatch = content.match(/\[THINKING\]([\s\S]*?)(?:\[\/THINKING\]|$)/);
+            if (thinkingMatch) {
+                thought = thinkingMatch[1].trim();
+                content = content.replace(thinkingMatch[0], '').trim();
             }
 
             // Extract suggested questions - using [\s\S] instead of 's' flag for compatibility
             const suggestedMatch = content.match(/\[SUGGESTED_QUESTIONS\]([\s\S]*?)\[\/SUGGESTED_QUESTIONS\]/);
-
-            // Allow side-effects in render is bad practice, but common for this pattern. 
-            // Better to strip content here and update state in useEffect, but let's stick to this pattern for now
-            // and use a heuristic to avoid infinite loops (check content change)
-
-            // Actually, updating state during render is dangerous. 
-            // Let's just strip the content here, and rely on a separate effect to parse the raw content if needed.
-            // OR simpler: parse here but don't set state directly unless we are careful.
-
-            // Refactored approach: Strip tags for display, but use a separate effect for state updates?
-            // No, the previous code was trying to set state inside useMemo which causes React warnings.
-            // Let's just Return the content stripped, and handle extraction in an effect.
-
-            // Wait, to keep it simple and working:
-            // We will strip the tags for the UI.
-            // We need to extract the data.
-
-            if (thinkingMatch && thinkingMatch.length > 0) {
-                content = content.replace(/\n?\[THINKING\].*?\[\/THINKING\]\n?/g, '').trim();
-            }
 
             if (suggestedMatch) {
                 content = content.replace(/\n?\[SUGGESTED_QUESTIONS\][\s\S]*?\[\/SUGGESTED_QUESTIONS\]\n?/, '').trim();
@@ -151,8 +134,8 @@ export function useDifyChat(options: UseDifyChatOptions) {
                 role: m.role as 'user' | 'assistant',
                 content,
                 data: m.data,
-                // Pass raw content for effect to parse
-                rawContent: m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || ''
+                thought, // Now passing thought extracted from stream
+                rawContent: rawContent
             };
         });
     }, [aiMessages]);

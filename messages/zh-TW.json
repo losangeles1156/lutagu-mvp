@@ -477,7 +477,8 @@
                 "fareQueryFailed": "票價查詢失敗。",
                 "destinationRequired": "請選擇目的地。",
                 "noRouteFound": "找不到路線。",
-                "routePlanningFailed": "路線規劃失敗。"
+                "routePlanningFailed": "路線規劃失敗。",
+                "unknown": "發生未知錯誤。"
             },
             "fare": {
                 "to": "目的地",
@@ -543,11 +544,43 @@
         "clear": "清除",
         "cancel": "取消",
         "confirm": "確認",
-        "skipOnboardingTitle": "確定要跳過嗎？",
+        "feedback": "回饋",
+        "aiGuide": "AI 嚮導",
+        "aiGuideSubtitle": "隨時詢問交通與行程",
+        "skipOnboardingTitle": "跳過導覽？",
         "skipOnboardingDesc": "您可以稍後從功能表重新開啟新手引導。",
         "feedbackSent": "已收到您的回饋！",
         "noNodesInView": "此區域暫無車站資料",
         "noNodesHint": "嘗試移動地圖或縮放以查看其他區域"
+    },
+    "feedback": {
+        "title": "提供回饋",
+        "openFeedback": "提供回饋",
+        "thankYou": "感謝您的回饋！",
+        "submittedMessage": "我們會認真閱讀您的每一條回饋。",
+        "back": "返回",
+        "ratingLabel": "整體評分",
+        "contentLabel": "詳細描述",
+        "submit": "提交回饋",
+        "submitting": "提交中...",
+        "types": {
+            "general": "一般建議",
+            "bug": "回報問題",
+            "spot": "地點建議",
+            "tip": "分享貼士"
+        },
+        "descriptions": {
+            "general": "對 LUTAGU 的整體使用感受",
+            "bug": "遇到錯誤或功能運作異常",
+            "spot": "推薦新的站點或景點資訊",
+            "tip": "分享您的交通小貼士"
+        },
+        "placeholders": {
+            "general": "請寫下您的建議或遇到的問題...",
+            "bug": "請描述您遇到的錯誤，包含在哪個頁面發生...",
+            "spot": "請告訴我們您推薦的車站或景點名稱...",
+            "tip": "分享您的交通小秘訣或省錢方式..."
+        }
     },
     "chat": {
         "aiName": "LUTAGU AI",
@@ -652,33 +685,5 @@
             "accessibility": "無障礙"
         }
     },
-    "validation": "驗證",
-    "feedback": {
-        "title": "告訴我們您的想法",
-        "openFeedback": "提供回饋",
-        "thankYou": "感謝您的回饋！",
-        "submittedMessage": "我們會認真閱讀您的每一條回饋。",
-        "back": "返回",
-        "ratingLabel": "整體評分",
-        "contentLabel": "詳細描述",
-        "submit": "提交回饋",
-        "types": {
-            "general": "使用感受",
-            "bug": "問題回報",
-            "spot": "景點情報",
-            "tip": "經驗分享"
-        },
-        "descriptions": {
-            "general": "對 LUTAGU 的整體評價",
-            "bug": "回報錯誤或異常",
-            "spot": "分享您發現的好去處",
-            "tip": "分享乘車技巧與避坑指南"
-        },
-        "placeholders": {
-            "general": "請告訴我們您的使用體驗...",
-            "bug": "請描述您遇到的問題，包含發生時的操作步驟...",
-            "spot": "請描述這個景點的特色與位置...",
-            "tip": "請分享您的經驗或技巧..."
-        }
-    }
+    "validation": "驗證"
 }

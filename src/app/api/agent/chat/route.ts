@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
             user_profile: body.user_profile || 'general',
             response_language: getResponseLanguage(rawLocale), // 明確語言指示
             user_context: body.user_context || body.context || 'general',
+            user_location: body.userLocation ? `${body.userLocation.lat},${body.userLocation.lng}` : '', // Added user_location
             language_instruction: rawLocale === 'zh' || rawLocale === 'zh-TW'
                 ? '請務必使用繁體中文（台灣用語）回答，不要使用简体中文。'
                 : ''

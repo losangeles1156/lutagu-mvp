@@ -1,0 +1,1391 @@
+[
+  {
+    "name": "秋葉原",
+    "name_en": "Akihabara",
+    "ward": "Chiyoda",
+    "operators": [
+      "首都圏新都市鉄道",
+      "TokyoMetro",
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:首都圏新都市鉄道.Akihabara",
+      "odpt:Station:TokyoMetro.Akihabara",
+      "odpt:Station:JR-East.Akihabara"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "浅草",
+    "name_en": "Asakusa",
+    "ward": "Taito",
+    "operators": [
+      "Tobu",
+      "TokyoMetro",
+      "首都圏新都市鉄道",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Tobu.Asakusa",
+      "odpt:Station:TokyoMetro.Asakusa",
+      "odpt:Station:首都圏新都市鉄道.Asakusa",
+      "odpt:Station:Toei.Asakusa"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "浅草橋",
+    "name_en": "Asakusabashi",
+    "ward": "Taito",
+    "operators": [
+      "Toei",
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Asakusabashi",
+      "odpt:Station:JR-East.Asakusabashi"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "銀座",
+    "name_en": "Ginza",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Ginza"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "五反田",
+    "name_en": "Gotanda",
+    "ward": "Shinagawa",
+    "operators": [
+      "JR-East",
+      "Toei",
+      "Tokyu"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Gotanda",
+      "odpt:Station:Toei.Gotanda",
+      "odpt:Station:Tokyu.Gotanda"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "浜松町",
+    "name_en": "Hamamatsucho",
+    "ward": "Minato",
+    "operators": [
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Hamamatsucho"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "日比谷",
+    "name_en": "Hibiya",
+    "ward": "Chiyoda",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Hibiya"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "市ケ谷",
+    "name_en": "Ichigaya",
+    "ward": "Chiyoda",
+    "operators": [
+      "Unknown",
+      "TokyoMetro",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Ichigaya",
+      "odpt:Station:TokyoMetro.Ichigaya",
+      "odpt:Station:Toei.Ichigaya"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "池袋",
+    "name_en": "Ikebukuro",
+    "ward": "Toshima",
+    "operators": [
+      "Seibu",
+      "Unknown",
+      "TokyoMetro",
+      "JR-East",
+      "Tojoouter"
+    ],
+    "ids": [
+      "odpt:Station:Seibu.Ikebukuro",
+      "odpt:Station:Unknown.Ikebukuro",
+      "odpt:Station:TokyoMetro.Ikebukuro",
+      "odpt:Station:JR-East.Ikebukuro",
+      "odpt:Station:Tojoouter.Ikebukuro"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "神保町",
+    "name_en": "Jimbocho",
+    "ward": "Chiyoda",
+    "operators": [
+      "Toei",
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Jimbocho",
+      "odpt:Station:TokyoMetro.Jimbocho"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "神田",
+    "name_en": "Kanda",
+    "ward": "Chiyoda",
+    "operators": [
+      "JR-East",
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Kanda",
+      "odpt:Station:TokyoMetro.Kanda"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "目黒",
+    "name_en": "Meguro",
+    "ward": "Shinagawa",
+    "operators": [
+      "TokyoMetro",
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Meguro",
+      "odpt:Station:JR-East.Meguro"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "日本橋",
+    "name_en": "Nihombashi",
+    "ward": "Chuo",
+    "operators": [
+      "Unknown",
+      "TokyoMetro",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Nihombashi",
+      "odpt:Station:TokyoMetro.Nihombashi",
+      "odpt:Station:Toei.Nihombashi"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "御徒町",
+    "name_en": "Okachimachi",
+    "ward": "Taito",
+    "operators": [
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Okachimachi"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "大崎",
+    "name_en": "Osaki",
+    "ward": "Shinagawa",
+    "operators": [
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Osaki"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "六本木",
+    "name_en": "Roppongi",
+    "ward": "Minato",
+    "operators": [
+      "TokyoMetro",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Roppongi",
+      "odpt:Station:Toei.Roppongi"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "渋谷",
+    "name_en": "Shibuya",
+    "ward": "Shibuya",
+    "operators": [
+      "JR-East",
+      "Keio",
+      "TokyoMetro",
+      "Tokyu",
+      "Unknown"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Shibuya",
+      "odpt:Station:Keio.Shibuya",
+      "odpt:Station:TokyoMetro.Shibuya",
+      "odpt:Station:Tokyu.Shibuya",
+      "odpt:Station:Unknown.Shibuya"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "新橋",
+    "name_en": "Shimbashi",
+    "ward": "Minato",
+    "operators": [
+      "ゆりかもめ",
+      "JR-East",
+      "TokyoMetro",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:ゆりかもめ.Shimbashi",
+      "odpt:Station:JR-East.Shimbashi",
+      "odpt:Station:TokyoMetro.Shimbashi",
+      "odpt:Station:Toei.Shimbashi"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "品川",
+    "name_en": "Shinagawa",
+    "ward": "Minato",
+    "operators": [
+      "Keikyu",
+      "JR-East",
+      "JR-Central"
+    ],
+    "ids": [
+      "odpt:Station:Keikyu.Shinagawa",
+      "odpt:Station:JR-East.Shinagawa",
+      "odpt:Station:JR-Central.Shinagawa"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "新宿",
+    "name_en": "Shinjuku",
+    "ward": "Shinjuku",
+    "operators": [
+      "TokyoMetro",
+      "JR-East",
+      "Odakyu",
+      "Unknown"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Shinjuku",
+      "odpt:Station:JR-East.Shinjuku",
+      "odpt:Station:Odakyu.Shinjuku",
+      "odpt:Station:Unknown.Shinjuku"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "東京",
+    "name_en": "Tōkyō",
+    "ward": "Chiyoda",
+    "operators": [
+      "JR-East",
+      "TokyoMetro",
+      "JR-Central"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Tōkyō",
+      "odpt:Station:TokyoMetro.Tokyo",
+      "odpt:Station:JR-East.Tokyo",
+      "odpt:Station:JR-Central.Tokyo"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "上野",
+    "name_en": "Ueno",
+    "ward": "Taito",
+    "operators": [
+      "JR-East",
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Ueno",
+      "odpt:Station:TokyoMetro.Ueno"
+    ],
+    "inSeed": true,
+    "isHub": true
+  },
+  {
+    "name": "浜町",
+    "name_en": "Hamacho",
+    "ward": "Chuo",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Hamacho"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "飯田橋",
+    "name_en": "Iidabashi",
+    "ward": "Shinjuku",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Iidabashi"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "飯田橋",
+    "name_en": "Iidabashi",
+    "ward": "Chiyoda",
+    "operators": [
+      "Unknown",
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Iidabashi",
+      "odpt:Station:TokyoMetro.Iidabashi"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "稲荷町",
+    "name_en": "Inaricho",
+    "ward": "Taito",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Inaricho"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "入谷",
+    "name_en": "Iriya",
+    "ward": "Taito",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Iriya"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "岩本町",
+    "name_en": "Iwamotocho",
+    "ward": "Chiyoda",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Iwamotocho"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "勝どき",
+    "name_en": "Kachidoki",
+    "ward": "Chuo",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Kachidoki"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "霞ケ関",
+    "name_en": "Kasumigaseki",
+    "ward": "Chiyoda",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kasumigaseki"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "茅場町",
+    "name_en": "Kayabacho",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kayabacho"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "蔵前",
+    "name_en": "Kuramae",
+    "ward": "Taito",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Kuramae"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "京橋",
+    "name_en": "Kyobashi",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kyobashi"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "三ノ輪",
+    "name_en": "Minowa",
+    "ward": "Taito",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Minowa"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "三越前",
+    "name_en": "Mitsukoshimae",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Mitsukoshimae"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "小川町",
+    "name_en": "Ogawamachi",
+    "ward": "Chiyoda",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Ogawamachi"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "大手町",
+    "name_en": "Otemachi",
+    "ward": "Chiyoda",
+    "operators": [
+      "TokyoMetro",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Otemachi",
+      "odpt:Station:Toei.Otemachi"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "宝町",
+    "name_en": "Takaracho",
+    "ward": "Chuo",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Takaracho"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "田原町",
+    "name_en": "Tawaramachi",
+    "ward": "Taito",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Tawaramachi"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "築地",
+    "name_en": "Tsukiji",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Tsukiji"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "築地市場",
+    "name_en": "Tsukijishijo",
+    "ward": "Chuo",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Tsukijishijo"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "月島",
+    "name_en": "Tsukishima",
+    "ward": "Chuo",
+    "operators": [
+      "Toei",
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Tsukishima",
+      "odpt:Station:TokyoMetro.Tsukishima"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "内幸町",
+    "name_en": "Uchisaiwaicho",
+    "ward": "Minato",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Uchisaiwaicho"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "鶯谷",
+    "name_en": "Uguisudani",
+    "ward": "Taito",
+    "operators": [
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Uguisudani"
+    ],
+    "inSeed": true,
+    "isHub": false
+  },
+  {
+    "name": "赤羽橋",
+    "name_en": "Akabanebashi",
+    "ward": "Minato",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Akabanebashi"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "赤坂",
+    "name_en": "Akasaka",
+    "ward": "Minato",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Akasaka"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "赤坂見附",
+    "name_en": "Akasaka-mitsuke",
+    "ward": "Minato",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Akasaka-mitsuke"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "曙橋",
+    "name_en": "Akebonobashi",
+    "ward": "Shinjuku",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Akebonobashi"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "青物横丁",
+    "name_en": "Aomono-yokocho",
+    "ward": "Shinagawa",
+    "operators": [
+      "Keikyu"
+    ],
+    "ids": [
+      "odpt:Station:Keikyu.Aomono-yokocho"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "青山一丁目",
+    "name_en": "Aoyama-itchome",
+    "ward": "Minato",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Aoyama-itchome"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "淡路町",
+    "name_en": "Awajicho",
+    "ward": "Chiyoda",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Awajicho"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "麻布十番",
+    "name_en": "Azabu-juban",
+    "ward": "Minato",
+    "operators": [
+      "Toei",
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Azabu-juban",
+      "odpt:Station:TokyoMetro.Azabu-juban"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "馬喰町",
+    "name_en": "Bakurochō",
+    "ward": "Chuo",
+    "operators": [
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Bakurochō"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "馬喰横山",
+    "name_en": "Bakuroyokoyama",
+    "ward": "Chuo",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Bakuroyokoyama"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "台場",
+    "name_en": "Daiba",
+    "ward": "Minato",
+    "operators": [
+      "ゆりかもめ"
+    ],
+    "ids": [
+      "odpt:Station:ゆりかもめ.Daiba"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "代官山",
+    "name_en": "Daikan-yama",
+    "ward": "Shibuya",
+    "operators": [
+      "Tokyu"
+    ],
+    "ids": [
+      "odpt:Station:Tokyu.Daikan-yama"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "大門",
+    "name_en": "Daimon",
+    "ward": "Minato",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Daimon"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "荏原町",
+    "name_en": "Ebara-machi",
+    "ward": "Shinagawa",
+    "operators": [
+      "Tokyu"
+    ],
+    "ids": [
+      "odpt:Station:Tokyu.Ebara-machi"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "荏原中延",
+    "name_en": "Ebara-nakanobu",
+    "ward": "Shinagawa",
+    "operators": [
+      "Tokyu"
+    ],
+    "ids": [
+      "odpt:Station:Tokyu.Ebara-nakanobu"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "恵比寿",
+    "name_en": "Ebisu",
+    "ward": "Shibuya",
+    "operators": [
+      "TokyoMetro",
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Ebisu",
+      "odpt:Station:JR-East.Ebisu"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "不動前",
+    "name_en": "Fudo-mae",
+    "ward": "Shinagawa",
+    "operators": [
+      "Unknown"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Fudo-mae"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "外苑前",
+    "name_en": "Gaiemmae",
+    "ward": "Minato",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Gaiemmae"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "学習院下",
+    "name_en": "Gakushuinshita",
+    "ward": "Toshima",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Gakushuinshita"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "銀座一丁目",
+    "name_en": "Ginza-itchome",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Ginza-itchome"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "半蔵門",
+    "name_en": "Hanzomon",
+    "ward": "Chiyoda",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Hanzomon"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "原宿",
+    "name_en": "Harajuku",
+    "ward": "Shibuya",
+    "operators": [
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Harajuku"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "幡ヶ谷",
+    "name_en": "Hatagaya",
+    "ward": "Shibuya",
+    "operators": [
+      "Keio"
+    ],
+    "ids": [
+      "odpt:Station:Keio.Hatagaya"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "旗の台",
+    "name_en": "Hatanodai",
+    "ward": "Shinagawa",
+    "operators": [
+      "Unknown"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Hatanodai"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "八丁堀",
+    "name_en": "Hatchōbori",
+    "ward": "Chuo",
+    "operators": [
+      "JR-East",
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:JR-East.Hatchōbori",
+      "odpt:Station:TokyoMetro.Hatchobori"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "初台",
+    "name_en": "Hatsudai",
+    "ward": "Shibuya",
+    "operators": [
+      "Keio"
+    ],
+    "ids": [
+      "odpt:Station:Keio.Hatsudai"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東あずま",
+    "name_en": "Higashi-azuma",
+    "ward": "Sumida",
+    "operators": [
+      "Tobu"
+    ],
+    "ids": [
+      "odpt:Station:Tobu.Higashi-azuma"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東銀座",
+    "name_en": "Higashi-Ginza",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Higashi-Ginza",
+      "odpt:Station:Toei.Higashi-Ginza"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東花輪",
+    "name_en": "Higashi-Hanawa",
+    "ward": "Chuo",
+    "operators": [
+      "Unknown"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Higashi-Hanawa"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東池袋",
+    "name_en": "Higashi-ikebukuro",
+    "ward": "Toshima",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Higashi-ikebukuro"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東池袋四丁目",
+    "name_en": "Higashi-ikebukuro-yonchome",
+    "ward": "Toshima",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Higashi-ikebukuro-yonchome"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東向島",
+    "name_en": "Higashi-mukojima",
+    "ward": "Sumida",
+    "operators": [
+      "Tobu"
+    ],
+    "ids": [
+      "odpt:Station:Tobu.Higashi-mukojima"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東長崎",
+    "name_en": "Higashi-Nagasaki",
+    "ward": "Toshima",
+    "operators": [
+      "Seibu"
+    ],
+    "ids": [
+      "odpt:Station:Seibu.Higashi-Nagasaki"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東日本橋",
+    "name_en": "Higashi-nihombashi",
+    "ward": "Chuo",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Higashi-nihombashi"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "東新宿",
+    "name_en": "Higashi-shinjuku",
+    "ward": "Shinjuku",
+    "operators": [
+      "TokyoMetro",
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Higashi-shinjuku",
+      "odpt:Station:Toei.Higashi-shinjuku"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "曳舟",
+    "name_en": "Hikifune",
+    "ward": "Sumida",
+    "operators": [
+      "Tobu"
+    ],
+    "ids": [
+      "odpt:Station:Tobu.Hikifune"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "日の出",
+    "name_en": "Hinode",
+    "ward": "Minato",
+    "operators": [
+      "ゆりかもめ"
+    ],
+    "ids": [
+      "odpt:Station:ゆりかもめ.Hinode"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "広尾",
+    "name_en": "Hiro-o",
+    "ward": "Shibuya",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Hiro-o"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "本所吾妻橋",
+    "name_en": "Honjo-azumabashi",
+    "ward": "Sumida",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Honjo-azumabashi"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "市ケ谷",
+    "name_en": "Ichigaya",
+    "ward": "Shinjuku",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Ichigaya"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "神楽坂",
+    "name_en": "Kagurazaka",
+    "ward": "Shinjuku",
+    "operators": [
+      "Unknown"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Kagurazaka"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "神谷町",
+    "name_en": "Kamiyacho",
+    "ward": "Minato",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kamiyacho"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "要町",
+    "name_en": "Kanamecho",
+    "ward": "Toshima",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kanamecho"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "鐘ヶ淵",
+    "name_en": "Kanegafuchi",
+    "ward": "Sumida",
+    "operators": [
+      "Tobu"
+    ],
+    "ids": [
+      "odpt:Station:Tobu.Kanegafuchi"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "京成曳舟",
+    "name_en": "Keisei Hikifune",
+    "ward": "Sumida",
+    "operators": [
+      "Keisei"
+    ],
+    "ids": [
+      "odpt:Station:Keisei.Keisei Hikifune"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "京成上野",
+    "name_en": "Keisei-Ueno",
+    "ward": "Taito",
+    "operators": [
+      "Keisei"
+    ],
+    "ids": [
+      "odpt:Station:Keisei.Keisei-Ueno"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "菊川",
+    "name_en": "Kikukawa",
+    "ward": "Sumida",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Kikukawa"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "錦糸町",
+    "name_en": "Kinshicho",
+    "ward": "Sumida",
+    "operators": [
+      "TokyoMetro",
+      "JR-East"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kinshicho",
+      "odpt:Station:JR-East.Kinshicho"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "鬼子母神前",
+    "name_en": "Kishibojimmae",
+    "ward": "Toshima",
+    "operators": [
+      "Toei"
+    ],
+    "ids": [
+      "odpt:Station:Toei.Kishibojimmae"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "北池袋",
+    "name_en": "Kita-ikebukuro",
+    "ward": "Toshima",
+    "operators": [
+      "Tobu"
+    ],
+    "ids": [
+      "odpt:Station:Tobu.Kita-ikebukuro"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "北参道",
+    "name_en": "Kita-sando",
+    "ward": "Shibuya",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kita-sando"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "北品川",
+    "name_en": "Kitashinagawa",
+    "ward": "Shinagawa",
+    "operators": [
+      "Keikyu"
+    ],
+    "ids": [
+      "odpt:Station:Keikyu.Kitashinagawa"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "小伝馬町",
+    "name_en": "Kodemmacho",
+    "ward": "Chuo",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kodemmacho"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "小井川",
+    "name_en": "Koikawa",
+    "ward": "Chuo",
+    "operators": [
+      "Unknown"
+    ],
+    "ids": [
+      "odpt:Station:Unknown.Koikawa"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "麹町",
+    "name_en": "Kojimachi",
+    "ward": "Chiyoda",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kojimachi"
+    ],
+    "inSeed": false,
+    "isHub": false
+  },
+  {
+    "name": "国会議事堂前",
+    "name_en": "Kokkai-gijidomae",
+    "ward": "Chiyoda",
+    "operators": [
+      "TokyoMetro"
+    ],
+    "ids": [
+      "odpt:Station:TokyoMetro.Kokkai-gijidomae"
+    ],
+    "inSeed": false,
+    "isHub": false
+  }
+]

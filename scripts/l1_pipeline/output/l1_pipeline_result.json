@@ -43244,5 +43244,5241 @@
         "is_seasonal": false
       }
     ]
+  },
+  {
+    "clusterId": "odpt.Station:JR-East.Yamanote.Ikebukuro",
+    "name": {
+      "ja": "池袋",
+      "en": "Ikebukuro"
+    },
+    "ward": "Toshima",
+    "isHub": true,
+    "profileName": "池袋",
+    "location": {
+      "lat": 35.7295,
+      "lng": 139.7109
+    },
+    "wikiAnalysis": {
+      "summary": {
+        "ja": "【池袋】埼玉方面からの玄関口。西武・東武の巨大デパートと、乙女ロードなどのサブカル文化。 (Wiki: 池袋駅（いけぶくろえき）は、東京都豊島区にある、東日本旅客鉄道（JR東日本）・東武鉄道・西武鉄道・東京地下鉄（東京メトロ）の駅である。 東京3大副都心の一つである池袋に位置するターミナル駅。全体の1日平均の乗降人員数は約235万人で（2024年）、新宿駅、渋谷駅に次いで世界第3位の利用者数となってい...)",
+        "en": "Ikebukuro Station (Japanese: 池袋駅, romanized: Ikebukuro-eki) is a major railway station located in the Ikebukuro district of Toshima, Tokyo, Japan, sha...",
+        "zh": "池袋站（日语：池袋駅／いけぶくろえき Ikebukuro-eki）位於日本東京都豐島區，是東日本旅客鐵道（JR東日本）、東武鐵道（東武）、西武鐵道（西武）、東京地下鐵等業者共站的鐵路車站，為東京都心西北向的鐵道樞紐。 池袋站位於池袋的中央地帶，路線包括JR東日本的山手線、湘南新宿線（高崎線、宇都宮線..."
+      },
+      "title": {
+        "ja": "萌えと购物の天堂",
+        "en": "Subculture Paradise",
+        "zh": "動漫購物天堂"
+      },
+      "tagline": {
+        "ja": "百貨店激戦区×サブカル聖地",
+        "en": "Department store battleground & subculture holy land",
+        "zh": "百貨公司激戰區×動漫聖地"
+      },
+      "seasonalFlags": [],
+      "keywords": [
+        "Subcenter",
+        "Otome Road",
+        "Department Store Battleground",
+        "Student Area",
+        "High-end",
+        "Retro",
+        "Subculture",
+        "Nature",
+        "Family Friendly"
+      ],
+      "weightedKeywords": [
+        {
+          "word": "Subcenter",
+          "weight": 10
+        },
+        {
+          "word": "Otome Road",
+          "weight": 10
+        },
+        {
+          "word": "Department Store Battleground",
+          "weight": 10
+        },
+        {
+          "word": "Student Area",
+          "weight": 5
+        },
+        {
+          "word": "High-end",
+          "weight": 5
+        },
+        {
+          "word": "Retro",
+          "weight": 5
+        },
+        {
+          "word": "Subculture",
+          "weight": 3
+        },
+        {
+          "word": "Nature",
+          "weight": 4
+        },
+        {
+          "word": "Family Friendly",
+          "weight": 4
+        }
+      ]
+    },
+    "vibeTags": [
+      "Subcenter",
+      "Otome Road",
+      "Department Store Battleground",
+      "Student Area",
+      "High-end",
+      "Retro",
+      "Subculture",
+      "Nature",
+      "Family Friendly",
+      "Gourmet Battleground (激戦区)",
+      "Shoppers Heaven",
+      "Cultural Hub"
+    ],
+    "osmStats": [
+      {
+        "category": "dining",
+        "total": 349,
+        "saved": 50
+      },
+      {
+        "category": "shopping",
+        "total": 286,
+        "saved": 80
+      },
+      {
+        "category": "accommodation",
+        "total": 20,
+        "saved": 20
+      },
+      {
+        "category": "culture",
+        "total": 12,
+        "saved": 12
+      },
+      {
+        "category": "nature",
+        "total": 6,
+        "saved": 6
+      },
+      {
+        "category": "business",
+        "total": 22,
+        "saved": 22
+      },
+      {
+        "category": "medical",
+        "total": 32,
+        "saved": 30
+      },
+      {
+        "category": "leisure",
+        "total": 3,
+        "saved": 3
+      },
+      {
+        "category": "finance",
+        "total": 20,
+        "saved": 20
+      },
+      {
+        "category": "service",
+        "total": 18,
+        "saved": 18
+      }
+    ],
+    "poiSample": [
+      {
+        "osm_id": 1028198939,
+        "name": "マクドナルド",
+        "category": "dining",
+        "location": {
+          "lat": 35.7311766,
+          "lng": 139.7095705
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "マクドナルド",
+          "brand:en": "McDonald's",
+          "brand:ja": "マクドナルド",
+          "brand:wikidata": "Q38076",
+          "brand:wikipedia": "ja:マクドナルド",
+          "cuisine": "burger",
+          "levels": "-1~1",
+          "name": "マクドナルド",
+          "name:en": "McDonald's",
+          "name:ja": "マクドナルド",
+          "name:ja-Latn": "Makudonarudo",
+          "name:ko": "맥도날드",
+          "takeaway": "yes",
+          "wheelchair": "limited"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1028199578,
+        "name": "伯爵",
+        "category": "dining",
+        "location": {
+          "lat": 35.7316815,
+          "lng": 139.7111048
+        },
+        "tags": {
+          "amenity": "cafe",
+          "level": "1",
+          "name": "伯爵",
+          "name:en": "Hakushaku",
+          "wheelchair": "no"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1262280813,
+        "name": "サブウェイ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7264399,
+          "lng": 139.7124815
+        },
+        "tags": {
+          "addr:block_number": "14",
+          "addr:city": "豊島区",
+          "addr:housenumber": "5",
+          "addr:neighbourhood": "南池袋二丁目",
+          "addr:province": "東京都",
+          "amenity": "fast_food",
+          "branch": "南池袋あずま通り店",
+          "brand": "サブウェイ",
+          "brand:en": "Subway",
+          "brand:ja": "サブウェイ",
+          "brand:wikidata": "Q244457",
+          "brand:wikipedia": "ja:サブウェイ",
+          "cuisine": "sandwich",
+          "fax": "+81-3-39837887",
+          "int_name": "Subway",
+          "level": "0",
+          "name": "サブウェイ",
+          "name:en": "Subway",
+          "name:ja": "サブウェイ",
+          "name:ja_rm": "Sabuwei",
+          "opening_hours": "Mo-Su 10:00-22:00",
+          "operator": "日本サブウェイ",
+          "phone": "+81-3-39837887",
+          "takeaway": "yes",
+          "website": "https://www.subway.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146067,
+        "name": "スターバックス",
+        "category": "dining",
+        "location": {
+          "lat": 35.7279407,
+          "lng": 139.7118669
+        },
+        "tags": {
+          "addr:block_number": "18",
+          "addr:city": "豊島区",
+          "addr:floor": "1F",
+          "addr:housename": "I&Kビル",
+          "addr:housenumber": "17",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "amenity": "cafe",
+          "branch": "池袋明治通り店",
+          "brand": "スターバックス",
+          "brand:en": "Starbucks",
+          "brand:ja": "スターバックス",
+          "brand:wikidata": "Q37158",
+          "brand:wikipedia": "ja:スターバックス",
+          "cuisine": "coffee_shop",
+          "drive_through": "no",
+          "internet_access": "wlan",
+          "level": "0",
+          "name": "スターバックス",
+          "name:en": "Starbucks",
+          "name:ja": "スターバックス",
+          "name:ja_rm": "Sutah-bakkusu",
+          "official_name": "スターバックスコーヒー",
+          "official_name:en": "Starbucks Coffee",
+          "official_name:ja": "スターバックスコーヒー",
+          "opening_hours": "Mo-Th 07:00-22:30; Fr-Su,PH 07:00-22:00",
+          "operator": "スターバックスコーヒージャパン",
+          "phone": "+81 3-3590-0065",
+          "source": "(URL) 2015",
+          "takeaway": "yes",
+          "website": "https://www.starbucks.co.jp/",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146070,
+        "name": "マクドナルド",
+        "category": "dining",
+        "location": {
+          "lat": 35.729521,
+          "lng": 139.712921
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "マクドナルド",
+          "brand:en": "McDonald's",
+          "brand:ja": "マクドナルド",
+          "brand:wikidata": "Q38076",
+          "brand:wikipedia": "ja:マクドナルド",
+          "check_date": "2025-04-29",
+          "cuisine": "burger",
+          "int_name": "McDonald's",
+          "name": "マクドナルド",
+          "name:en": "McDonald's",
+          "name:ja": "マクドナルド",
+          "name:ja_rm": "Makudonarudo",
+          "name:ko": "맥도날드",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146071,
+        "name": "マクドナルド",
+        "category": "dining",
+        "location": {
+          "lat": 35.7314852,
+          "lng": 139.7128124
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "マクドナルド",
+          "brand:en": "McDonald's",
+          "brand:ja": "マクドナルド",
+          "brand:wikidata": "Q38076",
+          "capacity": "137",
+          "cuisine": "burger",
+          "level": "1",
+          "name": "マクドナルド",
+          "name:en": "McDonald's",
+          "name:ja": "マクドナルド",
+          "name:ja-Latn": "Makudonarudo",
+          "name:ko": "맥도날드",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146101,
+        "name": "モリバコーヒー",
+        "category": "dining",
+        "location": {
+          "lat": 35.7330679,
+          "lng": 139.7093577
+        },
+        "tags": {
+          "amenity": "cafe",
+          "branch": "池袋二丁目店",
+          "brand": "MORIVA COFFEE",
+          "name": "モリバコーヒー",
+          "name:en": "MORIVA COFFEE",
+          "name:ja": "モリバコーヒー",
+          "name:ja_rm": "Moriba Kohi",
+          "opening_hours": "Mo-Su 07:00-23:00",
+          "operator": "ゼンショー",
+          "source": "survey,2014-01; website"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316188052,
+        "name": "HUB",
+        "category": "dining",
+        "location": {
+          "lat": 35.7299162,
+          "lng": 139.7094133
+        },
+        "tags": {
+          "amenity": "pub",
+          "name": "HUB"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316188053,
+        "name": "春日亭",
+        "category": "dining",
+        "location": {
+          "lat": 35.7278855,
+          "lng": 139.7084181
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "cuisine": "japanese",
+          "int_name": "Kasugatei",
+          "name": "春日亭",
+          "name:en": "Kasugatei"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316188067,
+        "name": "油そば 東京油組総本店",
+        "category": "dining",
+        "location": {
+          "lat": 35.731681,
+          "lng": 139.710151
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "cuisine": "japanese",
+          "name": "油そば 東京油組総本店"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316188086,
+        "name": "松屋",
+        "category": "dining",
+        "location": {
+          "lat": 35.7314807,
+          "lng": 139.7097862
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "松屋",
+          "brand:en": "Matsuya",
+          "brand:ja": "松屋",
+          "brand:wikidata": "Q848773",
+          "brand:wikipedia": "ja:松屋フーズ",
+          "brand:zh": "松屋",
+          "cuisine": "beef_bowl",
+          "int_name": "Matsuya",
+          "name": "松屋",
+          "name:en": "Matsuya",
+          "name:ja": "松屋",
+          "name:ja_rm": "Matsuya",
+          "name:zh": "松屋",
+          "official_name": "松屋フーズ",
+          "official_name:en": "Matsuya Foods",
+          "official_name:ja": "松屋フーズ",
+          "operator": "松屋フーズ",
+          "operator:en": "Matsuya Foods",
+          "operator:ja": "松屋フーズ",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316260108,
+        "name": "一蘭",
+        "category": "dining",
+        "location": {
+          "lat": 35.7325561,
+          "lng": 139.7141695
+        },
+        "tags": {
+          "addr:block_number": "39",
+          "addr:city": "豊島区",
+          "addr:housenumber": "11",
+          "addr:neighbourhood": "東池袋一丁目",
+          "addr:postcode": "170-0013",
+          "addr:province": "東京都",
+          "amenity": "restaurant",
+          "branch": "池袋店",
+          "cuisine": "japanese;ramen",
+          "int_name": "Ichiran",
+          "name": "一蘭",
+          "name:en": "Ichiran",
+          "name:ja": "一蘭",
+          "opening_hours": "24/7",
+          "phone": "+81 3-3989-0871",
+          "website": "https://ichiran.com/",
+          "wikidata": "Q11266830",
+          "wikipedia": "ja:一蘭"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303076,
+        "name": "無敵家",
+        "category": "dining",
+        "location": {
+          "lat": 35.7269184,
+          "lng": 139.7116325
+        },
+        "tags": {
+          "addr:block_number": "17",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "amenity": "fast_food",
+          "check_date": "2025-04-29",
+          "cuisine": "noodle;ramen",
+          "int_name": "Mutekiya",
+          "name": "無敵家",
+          "name:en": "Muteki-ya",
+          "name:ja": "無敵家",
+          "name:ko": "무테케",
+          "name:zh": "無敵家"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303088,
+        "name": "ミスタードーナツ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7308168,
+          "lng": 139.7148218
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "ミスタードーナツ",
+          "brand:en": "Mister Donut",
+          "brand:ja": "ミスタードーナツ",
+          "brand:wikidata": "Q1065819",
+          "brand:wikipedia": "en:Mister Donut",
+          "cuisine": "donut",
+          "int_name": "Mr Donat's",
+          "name": "ミスタードーナツ",
+          "name:en": "Mister Donut",
+          "name:ja": "ミスタードーナツ",
+          "name:ja_rm": "Misuta Dohnatsu",
+          "takeaway": "yes",
+          "wheelchair": "limited",
+          "wheelchair:description": "入口は入れるがトイレは2階で無理。"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1317453431,
+        "name": "ロッテリア",
+        "category": "dining",
+        "location": {
+          "lat": 35.7296444,
+          "lng": 139.7142319
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "ロッテリア",
+          "brand:en": "Lotteria",
+          "brand:ja": "ロッテリア",
+          "brand:wikidata": "Q249525",
+          "brand:wikipedia": "ja:ロッテリア",
+          "cuisine": "burger",
+          "level": "1",
+          "name": "ロッテリア",
+          "name:en": "Lotteria",
+          "name:ja": "ロッテリア",
+          "name:ja_rm": "Rotteria",
+          "takeaway": "yes",
+          "wheelchair": "yes",
+          "wheelchair:description": "※"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1317453443,
+        "name": "えるびす",
+        "category": "dining",
+        "location": {
+          "lat": 35.7321794,
+          "lng": 139.7140949
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "cuisine": "japanese",
+          "int_name": "Eluvis",
+          "name": "えるびす",
+          "name:en": "Elvis"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1321272787,
+        "name": "一風堂",
+        "category": "dining",
+        "location": {
+          "lat": 35.7278807,
+          "lng": 139.7135955
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "brand": "一風堂",
+          "brand:en": "Ippudo",
+          "brand:ja": "一風堂",
+          "brand:wikidata": "Q6065417",
+          "brand:wikipedia": "ja:博多一風堂",
+          "brand:zh": "一風堂",
+          "cuisine": "ramen",
+          "name": "一風堂",
+          "name:en": "Ippudo",
+          "name:ja": "一風堂",
+          "name:zh": "一風堂"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935242,
+        "name": "富士そば",
+        "category": "dining",
+        "location": {
+          "lat": 35.7310226,
+          "lng": 139.7101731
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "富士そば",
+          "brand:en": "Fuji Soba",
+          "brand:ja": "富士そば",
+          "brand:wikidata": "Q11414722",
+          "brand:wikipedia": "ja:名代富士そば",
+          "cuisine": "soba",
+          "name": "富士そば",
+          "name:en": "Fuji Soba",
+          "name:ja": "富士そば",
+          "name:ja_rm": "Fuji-soba",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935248,
+        "name": "すし本陣",
+        "category": "dining",
+        "location": {
+          "lat": 35.7313798,
+          "lng": 139.7097199
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "name": "すし本陣"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935255,
+        "name": "ベックスコーヒーショップ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7310617,
+          "lng": 139.7102106
+        },
+        "tags": {
+          "alt_name": "ベックス・コーヒーショップ",
+          "amenity": "cafe",
+          "brand": "BECK'S COFFEE SHOP",
+          "brand:en": "BECK'S COFFEE SHOP",
+          "brand:ja": "ベックスコーヒーショップ",
+          "brand:wikidata": "Q11191008",
+          "brand:wikipedia": "ja:BECK'S COFFEE SHOP",
+          "cuisine": "coffee_shop",
+          "name": "BECK'S COFFEE SHOP",
+          "name:en": "BECK'S COFFEE SHOP",
+          "name:ja": "ベックスコーヒーショップ",
+          "takeaway": "yes",
+          "toilets:wheelchair": "no",
+          "wheelchair": "limited"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935266,
+        "name": "おりきん",
+        "category": "dining",
+        "location": {
+          "lat": 35.7315248,
+          "lng": 139.7096988
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "description": "つけ麺",
+          "name": "おりきん"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935272,
+        "name": "とり鉄",
+        "category": "dining",
+        "location": {
+          "lat": 35.7311524,
+          "lng": 139.7094333
+        },
+        "tags": {
+          "amenity": "pub",
+          "cuisine": "yakitori",
+          "name": "とり鉄"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935281,
+        "name": "かつや",
+        "category": "dining",
+        "location": {
+          "lat": 35.7311519,
+          "lng": 139.7094827
+        },
+        "tags": {
+          "addr:block_number": "19",
+          "addr:city": "豊島区",
+          "addr:housename": "西池袋39ビル",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "amenity": "fast_food",
+          "branch": "池袋西口店",
+          "brand": "かつや",
+          "brand:en": "Katsuya",
+          "brand:ja": "かつや",
+          "brand:wikidata": "Q2855257",
+          "brand:wikipedia": "ja:かつや",
+          "cuisine": "fried_food",
+          "name": "かつや",
+          "name:en": "Katsuya",
+          "name:ja": "かつや",
+          "name:ko": "카쯔야",
+          "name:zh": "吉豚屋",
+          "opening_hours": "07:00-03:00",
+          "phone": "+81 3-5949-5136",
+          "takeaway": "yes",
+          "website": "https://arclandservice.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935286,
+        "name": "だるまのめ",
+        "category": "dining",
+        "location": {
+          "lat": 35.731519,
+          "lng": 139.7095428
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "description": "つけ麺",
+          "name": "だるまのめ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420771630,
+        "name": "日本政策金融公庫",
+        "category": "dining",
+        "location": {
+          "lat": 35.728691,
+          "lng": 139.714157
+        },
+        "tags": {
+          "addr:block_number": "27",
+          "addr:city": "豊島区",
+          "addr:housename": "池袋室町ビル",
+          "addr:housenumber": "9",
+          "addr:neighbourhood": "南池袋二丁目",
+          "addr:province": "東京都",
+          "amenity": "public_building",
+          "branch": "池袋支店",
+          "name": "日本政策金融公庫",
+          "name:en": "Japan Finance Corporation",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1666762101,
+        "name": "マクドナルド",
+        "category": "dining",
+        "location": {
+          "lat": 35.7306098,
+          "lng": 139.7077166
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "マクドナルド",
+          "brand:en": "McDonald's",
+          "brand:ja": "マクドナルド",
+          "brand:wikidata": "Q38076",
+          "brand:wikipedia": "ja:マクドナルド",
+          "cuisine": "burger",
+          "int_name": "McDonald's",
+          "name": "マクドナルド",
+          "name:en": "McDonald's",
+          "name:ja": "マクドナルド",
+          "name:ja_rm": "Makudonarudo",
+          "name:ko": "맥도날드",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1666762107,
+        "name": "モスバーガー",
+        "category": "dining",
+        "location": {
+          "lat": 35.7284499,
+          "lng": 139.7087359
+        },
+        "tags": {
+          "addr:block_number": "4",
+          "addr:city": "豊島区",
+          "addr:housenumber": "6",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "amenity": "fast_food",
+          "branch": "東武池袋店",
+          "brand": "モスバーガー",
+          "brand:en": "MOS Burger",
+          "brand:ja": "モスバーガー",
+          "brand:wikidata": "Q1204169",
+          "brand:wikipedia": "ja:モスバーガー",
+          "cuisine": "burger",
+          "int_name": "MOS Burger",
+          "internet_access": "wlan",
+          "name": "モスバーガー",
+          "name:en": "MOS Burger",
+          "name:ja": "モスバーガー",
+          "name:ja_rm": "Mosu Bahga",
+          "opening_hours": "Mo-Su 07:00-23:00",
+          "operator": "モスフードサービス",
+          "phone": "+81 3-5952-8989",
+          "smoking": "separated",
+          "source": "(URL) 2015",
+          "takeaway": "yes",
+          "website": "https://www.mos.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1668466199,
+        "name": "matushima",
+        "category": "dining",
+        "location": {
+          "lat": 35.729223,
+          "lng": 139.7154635
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "cuisine": "japanese",
+          "name": "matushima"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1906927992,
+        "name": "さくら水産",
+        "category": "dining",
+        "location": {
+          "lat": 35.7317378,
+          "lng": 139.7079322
+        },
+        "tags": {
+          "amenity": "pub",
+          "brand": "さくら水産",
+          "name": "さくら水産",
+          "name:en": "Sakura Suisan",
+          "name:ja": "さくら水産",
+          "name:ja_rm": "Sakura Suisan",
+          "source": "image;Bing,2007-03-28"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1906927995,
+        "name": "エクセルシオール カフェ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7318647,
+          "lng": 139.7083135
+        },
+        "tags": {
+          "amenity": "cafe",
+          "brand": "エクセルシオール カフェ",
+          "brand:en": "EXCELSIOR CAFFÉ",
+          "brand:ja": "エクセルシオール カフェ",
+          "brand:wikidata": "Q11289828",
+          "brand:wikipedia": "ja:エクセルシオール カフェ",
+          "cuisine": "coffee_shop",
+          "level": "0",
+          "name": "エクセルシオール カフェ",
+          "name:en": "EXCELSIOR CAFE",
+          "name:ja": "エクセルシオール カフェ",
+          "name:ja_rm": "Ekuserusiohru Kafe",
+          "opening_hours": "wd 06:45-23:00; Sa 07:00-23:00; Su 07:00-22:00",
+          "operator": "ドトールコーヒー",
+          "phone": "+81-3-59791541",
+          "source": "image;Bing,2007-03-28",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1906928856,
+        "name": "ミラネーゼ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7318046,
+          "lng": 139.7081935
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "cuisine": "italian",
+          "layer": "1",
+          "level": "1",
+          "name": "ミラネーゼ",
+          "source": "image;Bing,2007-03-28"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1914788571,
+        "name": "カフェ・ド・クリエ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7305027,
+          "lng": 139.7145445
+        },
+        "tags": {
+          "addr:postcode": "170-0013",
+          "amenity": "cafe",
+          "branch": "サンシャイン通り",
+          "brand": "カフェ・ド・クリエ",
+          "brand:en": "CAFÉ de CRIÉ",
+          "brand:ja": "カフェ・ド・クリエ",
+          "brand:wikidata": "Q131692144",
+          "brand:wikipedia": "ja:ポッカクリエイト",
+          "cuisine": "coffee_shop",
+          "internet_access": "wlan",
+          "internet_access:fee": "no",
+          "name": "カフェ・ド・クリエ",
+          "name:en": "CAFE de CRIE",
+          "name:ja": "カフェ・ド・クリエ",
+          "name:ja_rm": "Kafe Do Kurie",
+          "opening_hours": "Mo-Su 07:00-22:30",
+          "operator": "ポッカ・クリエイト",
+          "phone": "+81-3-59280161",
+          "source": "(URL)",
+          "takeaway": "yes",
+          "website": "https://www.pokkacreate.co.jp/",
+          "wheelchair": "limited",
+          "wheelchair:description": "正面入り口段差有りだが、隣の店舗と店内で段差なしでつながっているので、隣店舗側から入店可能。 トイレは不可(入り口段差有り)。 二階は不可(階段のみ)"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1916548177,
+        "name": "カフェ・ド・クリエ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7279043,
+          "lng": 139.7155327
+        },
+        "tags": {
+          "addr:postcode": "171-0022",
+          "amenity": "cafe",
+          "branch": "京王プレッソイン池袋",
+          "brand": "カフェ・ド・クリエ",
+          "brand:en": "CAFÉ de CRIÉ",
+          "brand:ja": "カフェ・ド・クリエ",
+          "brand:wikidata": "Q131692144",
+          "brand:wikipedia": "ja:ポッカクリエイト",
+          "cuisine": "coffee_shop",
+          "internet_access": "wlan",
+          "internet_access:fee": "no",
+          "name": "カフェ・ド・クリエ",
+          "name:en": "CAFE de CRIE",
+          "name:ja": "カフェ・ド・クリエ",
+          "name:ja_rm": "Kafe Do Kurie",
+          "opening_hours": "Mo-Fr 06:45-21:00",
+          "operator": "ポッカ・クリエイト",
+          "phone": "+81 3 5391 1281",
+          "smoking": "separated",
+          "source": "(URL)",
+          "takeaway": "yes",
+          "website": "https://www.pokkacreate.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1917897218,
+        "name": "カフェ・ド・クリエ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7292534,
+          "lng": 139.7093701
+        },
+        "tags": {
+          "addr:postcode": "171-0021",
+          "amenity": "cafe",
+          "branch": "ルミネ池袋",
+          "brand": "カフェ・ド・クリエ",
+          "brand:en": "CAFÉ de CRIÉ",
+          "brand:ja": "カフェ・ド・クリエ",
+          "brand:wikidata": "Q131692144",
+          "brand:wikipedia": "ja:ポッカクリエイト",
+          "cuisine": "coffee_shop",
+          "internet_access": "wlan",
+          "internet_access:fee": "no",
+          "name": "カフェ・ド・クリエ",
+          "name:en": "CAFE de CRIE",
+          "name:ja": "カフェ・ド・クリエ",
+          "name:ja_rm": "Kafe Do Kurie",
+          "opening_hours": "wd 06:30-22:50; Sa,Su,PH 07:30-22:50",
+          "operator": "ポッカ・クリエイト",
+          "phone": "+81-3-59794335",
+          "source": "(URL)",
+          "takeaway": "yes",
+          "website": "https://www.pokkacreate.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1918595971,
+        "name": "カフェ・ド・クリエプラス",
+        "category": "dining",
+        "location": {
+          "lat": 35.7266226,
+          "lng": 139.7115444
+        },
+        "tags": {
+          "addr:postcode": "171-0022",
+          "amenity": "cafe",
+          "branch": "南池袋",
+          "brand": "Cafe de CRIE plus",
+          "check_date": "2025-04-29",
+          "cuisine": "coffee_shop",
+          "internet_access": "wlan",
+          "internet_access:fee": "no",
+          "name": "カフェ・ド・クリエプラス",
+          "name:en": "Cafe de CRIE plus",
+          "name:ja": "カフェ・ド・クリエプラス",
+          "name:ja_rm": "Kafe Do Kurie pulasu",
+          "opening_hours": "We 07:30-22:30; Sa,Su,PH 08:30-23:00",
+          "operator": "ポッカ・クリエイト",
+          "phone": "+81 3 5960 1217",
+          "source": "(URL)",
+          "website": "https://www.pokkacreate.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1944024906,
+        "name": "ケンタッキーフライドチキン",
+        "category": "dining",
+        "location": {
+          "lat": 35.7317577,
+          "lng": 139.7103182
+        },
+        "tags": {
+          "addr:block_number": "24",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "alt_name:en": "Kentucky Fried Chicken",
+          "amenity": "fast_food",
+          "branch": "池袋西口店",
+          "brand": "ケンタッキーフライドチキン",
+          "brand:en": "KFC",
+          "brand:ja": "ケンタッキーフライドチキン",
+          "brand:wikidata": "Q524757",
+          "brand:wikipedia": "ja:KFCコーポレーション",
+          "cuisine": "chicken",
+          "drive_through": "no",
+          "internet_access": "wlan",
+          "level": "0",
+          "name": "ケンタッキーフライドチキン",
+          "name:en": "KFC",
+          "name:ja": "ケンタッキーフライドチキン",
+          "name:ja_rm": "Kentakki Furaidochikin",
+          "opening_hours": "Mo-Th,Su 07:00-22:30; Fr,Sa 07:00-02:00",
+          "operator": "日本ケンタッキー・フライド・チキン",
+          "phone": "+81-3-59568488",
+          "source": "Bing 2010;(URL)",
+          "takeaway": "yes",
+          "website": "https://www.kfc.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2015989988,
+        "name": "コメダ珈琲店",
+        "category": "dining",
+        "location": {
+          "lat": 35.7317895,
+          "lng": 139.7104566
+        },
+        "tags": {
+          "addr:block_number": "24",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "amenity": "cafe",
+          "branch": "池袋西口店",
+          "brand": "コメダ珈琲店",
+          "brand:en": "KOMEDA'S Coffee",
+          "brand:ja": "コメダ珈琲店",
+          "brand:wikidata": "Q11302679",
+          "brand:wikipedia": "ja:コメダ",
+          "cuisine": "coffee_shop",
+          "name": "コメダ珈琲店",
+          "name:en": "Komeda's Coffee",
+          "name:ja": "コメダ珈琲店",
+          "name:ja_rm": "Komeda Kohi-ten",
+          "opening_hours": "Mo-Su 07:00-23:00",
+          "operator": "コメダ",
+          "phone": "+81-3-69152897",
+          "source": "(URL)",
+          "takeaway": "yes",
+          "website": "https://www.komeda.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2658019611,
+        "name": "サブウェイ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7312691,
+          "lng": 139.7096177
+        },
+        "tags": {
+          "amenity": "fast_food",
+          "brand": "サブウェイ",
+          "brand:en": "Subway",
+          "brand:ja": "サブウェイ",
+          "brand:wikidata": "Q244457",
+          "brand:wikipedia": "ja:サブウェイ",
+          "cuisine": "sandwich",
+          "name": "サブウェイ",
+          "name:en": "Subway",
+          "name:ja": "サブウェイ",
+          "name:ja_rm": "Sabuwei",
+          "takeaway": "yes",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3191450361,
+        "name": "赤鬼",
+        "category": "dining",
+        "location": {
+          "lat": 35.7284037,
+          "lng": 139.7140166
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "cuisine": "okonomiyaki",
+          "name": "赤鬼"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3257528280,
+        "name": "CoCo壱番屋",
+        "category": "dining",
+        "location": {
+          "lat": 35.726008,
+          "lng": 139.7131623
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "branch": "豊島区南池袋店",
+          "brand": "CoCo壱番屋",
+          "brand:en": "CoCo ICHIBANYA",
+          "brand:ja": "CoCo壱番屋",
+          "brand:wikidata": "Q5986105",
+          "brand:wikipedia": "en:Ichibanya",
+          "cuisine": "curry;japanese",
+          "level": "0",
+          "name": "CoCo壱番屋",
+          "name:en": "CoCo ICHIBANYA",
+          "name:ja": "CoCo壱番屋",
+          "name:ja_rm": "Koko Ichiban-ya",
+          "opening_hours": "11:00-23:00",
+          "short_name": "ココイチ",
+          "short_name:en": "CoCoICHI",
+          "short_name:ja": "ココイチ",
+          "smoking": "no",
+          "source": "survey, 2014-12-28",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3291170171,
+        "name": "モスバーガー",
+        "category": "dining",
+        "location": {
+          "lat": 35.7318078,
+          "lng": 139.7062373
+        },
+        "tags": {
+          "addr:block_number": "2",
+          "addr:city": "豊島区",
+          "addr:housename": "春谷ビル",
+          "addr:housenumber": "11",
+          "addr:neighbourhood": "西池袋五丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "amenity": "fast_food",
+          "branch": "池袋西口店",
+          "brand": "モスバーガー",
+          "brand:en": "MOS Burger",
+          "brand:ja": "モスバーガー",
+          "brand:wikidata": "Q1204169",
+          "brand:wikipedia": "ja:モスバーガー",
+          "cuisine": "burger",
+          "internet_access": "wlan",
+          "level": "0",
+          "name": "モスバーガー",
+          "name:en": "MOS Burger",
+          "name:ja": "モスバーガー",
+          "name:ja_rm": "Mosu Bāgā",
+          "opening_hours": "Mo-Su 07:00-02:00",
+          "operator": "モスフードサービス",
+          "phone": "+81 3-3590-3241",
+          "smoking": "separated",
+          "source": "(URL) 2015",
+          "takeaway": "yes",
+          "website": "https://www.mos.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3555054150,
+        "name": "紅とん",
+        "category": "dining",
+        "location": {
+          "lat": 35.7269462,
+          "lng": 139.7114749
+        },
+        "tags": {
+          "amenity": "pub",
+          "branch": "池袋ビックリガード店",
+          "name": "紅とん"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3555054151,
+        "name": "角煮屋",
+        "category": "dining",
+        "location": {
+          "lat": 35.7269904,
+          "lng": 139.7112824
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "cuisine": "japanese",
+          "name": "角煮屋",
+          "name:en": "Kakuniya-Bankara",
+          "phone": "+81 3-3983-4044",
+          "website": "http://www.ramen-bankara.com"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557023644,
+        "name": "サンマルクカフェ",
+        "category": "dining",
+        "location": {
+          "lat": 35.7282222,
+          "lng": 139.7130622
+        },
+        "tags": {
+          "addr:block_number": "20",
+          "addr:city": "豊島区",
+          "addr:floor": "1F",
+          "addr:housename": "第一中野ビル",
+          "addr:housenumber": "9",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "alt_name:en": "Saint Marc Café",
+          "amenity": "cafe",
+          "branch": "南池袋店",
+          "brand": "サンマルクカフェ",
+          "brand:en": "ST.MARC CAFÉ",
+          "brand:ja": "サンマルクカフェ",
+          "brand:wikidata": "Q11305988",
+          "brand:wikipedia": "ja:サンマルクホールディングス",
+          "check_date": "2025-04-29",
+          "cuisine": "coffee_shop",
+          "level": "0",
+          "name": "サンマルクカフェ",
+          "name:en": "Saint Marc Cafe",
+          "name:ja": "サンマルクカフェ",
+          "name:ja_rm": "Sanmaruku Kafe",
+          "opening_hours": "Mo-Su 07:00-22:30",
+          "operator": "サンマルクカフェ",
+          "phone": "+81 3-5960-6309",
+          "source": "(URL) 2015",
+          "takeaway": "yes",
+          "website": "http://www.saint-marc-hd.com/cafe/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557023645,
+        "name": "スターバックス",
+        "category": "dining",
+        "location": {
+          "lat": 35.7270572,
+          "lng": 139.712359
+        },
+        "tags": {
+          "addr:block_number": "16",
+          "addr:city": "豊島区",
+          "addr:housename": "SKビル",
+          "addr:housenumber": "4",
+          "addr:neighbourhood": "南池袋二丁目",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "air_conditioning": "yes",
+          "amenity": "cafe",
+          "branch": "南池袋店",
+          "brand": "スターバックス",
+          "brand:en": "Starbucks",
+          "brand:ja": "スターバックス",
+          "brand:wikidata": "Q37158",
+          "brand:wikipedia": "ja:スターバックス",
+          "cuisine": "coffee_shop",
+          "drive_through": "no",
+          "internet_access": "wlan",
+          "level": "0;1",
+          "name": "スターバックス",
+          "name:en": "Starbucks",
+          "name:ja": "スターバックス",
+          "name:ja_rm": "Sutah-bakkusu",
+          "official_name": "スターバックスコーヒー",
+          "official_name:en": "Starbucks Coffee",
+          "official_name:ja": "スターバックスコーヒー",
+          "opening_hours": "Mo-Fr 07:00-22:30; Sa,Su,PH 08:00-22:30",
+          "operator": "スターバックスコーヒージャパン",
+          "phone": "+81 3 5391 0089",
+          "source": "(URL) 2015",
+          "takeaway": "yes",
+          "website": "https://www.starbucks.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557024094,
+        "name": "味好屋",
+        "category": "dining",
+        "location": {
+          "lat": 35.7276332,
+          "lng": 139.7125022
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "check_date": "2025-04-29",
+          "cuisine": "おでん",
+          "cuisine:ja": "おでん",
+          "name": "味好屋",
+          "name:en": "Ajiyoshiya"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557024096,
+        "name": "浜焼太郎",
+        "category": "dining",
+        "location": {
+          "lat": 35.7281925,
+          "lng": 139.7130199
+        },
+        "tags": {
+          "amenity": "pub",
+          "branch": "池袋東口店",
+          "check_date": "2025-04-29",
+          "name": "浜焼太郎"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557024097,
+        "name": "牛角",
+        "category": "dining",
+        "location": {
+          "lat": 35.7273446,
+          "lng": 139.7120861
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "brand": "牛角",
+          "brand:en": "Gyū-Kaku",
+          "brand:ja": "牛角",
+          "brand:wikidata": "Q11349387",
+          "brand:wikipedia": "en:Gyu-Kaku",
+          "cuisine": "barbecue",
+          "name": "牛角",
+          "name:en": "Gyū-Kaku",
+          "name:ja": "牛角"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557024098,
+        "name": "魚金",
+        "category": "dining",
+        "location": {
+          "lat": 35.7278312,
+          "lng": 139.7126547
+        },
+        "tags": {
+          "amenity": "pub",
+          "check_date": "2025-04-29",
+          "name": "魚金",
+          "name:en": "Uokin"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557024099,
+        "name": "鳥良",
+        "category": "dining",
+        "location": {
+          "lat": 35.7279664,
+          "lng": 139.7127992
+        },
+        "tags": {
+          "amenity": "restaurant",
+          "branch": "南池袋店",
+          "capacity": "179",
+          "check_date": "2025-04-29",
+          "cuisine": "chicken",
+          "level": "0;1",
+          "name": "鳥良",
+          "name:en": "Toriyoshi",
+          "opening_hours": "24/7",
+          "operator": "クリエイト・レストランツ・ホールディングス",
+          "phone": "+81 3-5979-7766",
+          "takeaway": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1028199658,
+        "name": "セブン-イレブン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7327424,
+          "lng": 139.7104544
+        },
+        "tags": {
+          "addr:block_number": "41",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "atm": "yes",
+          "branch": "池袋西一番街",
+          "brand": "7-ELEVEN",
+          "brand:en": "7-ELEVEN",
+          "brand:ja": "セブン-イレブン",
+          "brand:wikidata": "Q259340",
+          "brand:wikipedia": "en:7-Eleven",
+          "int_name": "Seven Eleven",
+          "internet_access": "no",
+          "level": "0",
+          "name": "セブン-イレブン",
+          "name:en": "7-Eleven",
+          "name:ja": "セブン-イレブン",
+          "name:ja_rm": "Sebun Irebun",
+          "name:ko": "세븐일레븐",
+          "official_name:en": "Seven-Eleven",
+          "opening_hours": "24/7",
+          "operator": "セブンイレブン・ジャパン",
+          "phone": "+81 3-3983-8563",
+          "shop": "convenience",
+          "source": "(URL) 2015",
+          "website": "https://www.sej.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1028199672,
+        "name": "ファミリーマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7320705,
+          "lng": 139.7110266
+        },
+        "tags": {
+          "brand": "FamilyMart",
+          "brand:en": "FamilyMart",
+          "brand:ja": "ファミリーマート",
+          "brand:wikidata": "Q11247682",
+          "name": "ファミリーマート",
+          "name:en": "FamilyMart",
+          "name:ja": "ファミリーマート",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1262291400,
+        "name": "ジュンク堂書店",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7268795,
+          "lng": 139.7122352
+        },
+        "tags": {
+          "addr:postcode": "171-0022",
+          "air_conditioning": "yes",
+          "branch": "池袋本店",
+          "brand": "ジュンク堂書店",
+          "brand:en": "Junkudo",
+          "brand:ja": "ジュンク堂書店",
+          "brand:wikidata": "Q3190093",
+          "brand:wikipedia": "ja:ジュンク堂書店",
+          "level": "-1;0;1;2;3;4;5;6;7;8",
+          "name": "ジュンク堂書店",
+          "name:en": "Junkudo",
+          "name:ja": "ジュンク堂書店",
+          "name:ja_rm": "Junkudo Shoten",
+          "opening_hours": "Mo-Su 10:00-22:00",
+          "self_checkout": "yes",
+          "shop": "books",
+          "website": "https://www.maruzenjunkudo.co.jp/",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1273177479,
+        "name": "ローソン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7262177,
+          "lng": 139.7133792
+        },
+        "tags": {
+          "brand": "LAWSON",
+          "brand:en": "LAWSON",
+          "brand:ja": "ローソン",
+          "brand:wikidata": "Q1557223",
+          "brand:wikipedia": "ja:ローソン",
+          "level": "0",
+          "name": "ローソン",
+          "name:en": "Lawson",
+          "name:ja": "ローソン",
+          "name:ja_rm": "Rōson",
+          "name:ko": "로손",
+          "shop": "convenience",
+          "source": "survey, 2014-12-28"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1273177511,
+        "name": "ローソン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7274349,
+          "lng": 139.7087803
+        },
+        "tags": {
+          "brand": "LAWSON",
+          "brand:en": "LAWSON",
+          "brand:ja": "ローソン",
+          "brand:wikidata": "Q1557223",
+          "brand:wikipedia": "ja:ローソン",
+          "int_name": "LAWSON",
+          "name": "ローソン",
+          "name:en": "Lawson",
+          "name:ja": "ローソン",
+          "name:ja_rm": "Rōson",
+          "name:ko": "로손",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1273177520,
+        "name": "セブン-イレブン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7277288,
+          "lng": 139.708814
+        },
+        "tags": {
+          "addr:block_number": "5",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "atm": "yes",
+          "branch": "豊島西池袋1丁目",
+          "brand": "7-ELEVEN",
+          "brand:en": "7-ELEVEN",
+          "brand:ja": "セブン-イレブン",
+          "brand:wikidata": "Q259340",
+          "brand:wikipedia": "en:7-Eleven",
+          "int_name": "Seven Eleven",
+          "internet_access": "no",
+          "level": "0",
+          "name": "セブン-イレブン",
+          "name:en": "7-Eleven",
+          "name:ja": "セブン-イレブン",
+          "name:ja_rm": "Sebun Irebun",
+          "name:ko": "세븐일레븐",
+          "official_name:en": "Seven-Eleven",
+          "opening_hours": "24/7",
+          "operator": "セブンイレブン・ジャパン",
+          "phone": "+81 3-3590-7670",
+          "shop": "convenience",
+          "source": "(URL) 2015",
+          "website": "https://www.sej.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146106,
+        "name": "マツモトキヨシ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7314839,
+          "lng": 139.7103004
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "brand": "マツモトキヨシ",
+          "brand:en": "Matsumoto Kiyoshi",
+          "brand:ja": "マツモトキヨシ",
+          "brand:wikidata": "Q8014776",
+          "brand:wikipedia": "ja:マツモトキヨシ",
+          "healthcare": "pharmacy",
+          "int_name": "Matsumotokiyoshi",
+          "name": "マツモトキヨシ",
+          "name:en": "Matsumoto Kiyoshi",
+          "name:ja": "マツモトキヨシ",
+          "shop": "chemist",
+          "short_name": "マツキヨ",
+          "short_name:en": "Matsukiyo",
+          "short_name:ja": "マツキヨ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146109,
+        "name": "ファミリーマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7292227,
+          "lng": 139.7162127
+        },
+        "tags": {
+          "branch": "東池袋1丁目店",
+          "brand": "FamilyMart",
+          "brand:en": "FamilyMart",
+          "brand:ja": "ファミリーマート",
+          "brand:wikidata": "Q11247682",
+          "brand:wikipedia": "ja:ファミリーマート",
+          "int_name": "Family Mart",
+          "name": "ファミリーマート",
+          "name:en": "FamilyMart",
+          "name:ja": "ファミリーマート",
+          "name:ja-Hira": "ふぁみりーまーと",
+          "name:ja-Latn": "Famirī Māto",
+          "shop": "convenience",
+          "website": "https://www.family.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303073,
+        "name": "RINGO",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7312222,
+          "lng": 139.7126182
+        },
+        "tags": {
+          "level": "0",
+          "name": "RINGO",
+          "name:ja": "RINGO",
+          "shop": "bakery"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303082,
+        "name": "ABCマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7308233,
+          "lng": 139.7152373
+        },
+        "tags": {
+          "brand": "ABCマート",
+          "brand:ja": "ABCマート",
+          "name": "ABCマート",
+          "name:ja": "ABCマート",
+          "shop": "shoes",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303083,
+        "name": "ABC Mart",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7297854,
+          "lng": 139.7145988
+        },
+        "tags": {
+          "name": "ABC Mart",
+          "shop": "shoes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303094,
+        "name": "ジーンズメイト",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7305429,
+          "lng": 139.7155596
+        },
+        "tags": {
+          "brand": "ジーンズメイト",
+          "brand:en": "Jeans Mate",
+          "brand:ja": "ジーンズメイト",
+          "brand:wikidata": "Q11311071",
+          "brand:wikipedia": "ja:ジーンズメイト",
+          "name": "ジーンズメイト",
+          "name:en": "Jeans Mate",
+          "name:ja": "ジーンズメイト",
+          "name:ja_rm": "Jinzumeito",
+          "shop": "clothes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1317453437,
+        "name": "31アイスクリーム",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7297618,
+          "lng": 139.7139233
+        },
+        "tags": {
+          "name": "31アイスクリーム",
+          "name:en": "Baskin-Robbins",
+          "shop": "ice_cream"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935259,
+        "name": "ファミリーマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7316904,
+          "lng": 139.7095754
+        },
+        "tags": {
+          "brand": "FamilyMart",
+          "brand:en": "FamilyMart",
+          "brand:ja": "ファミリーマート",
+          "brand:wikidata": "Q11247682",
+          "brand:wikipedia": "ja:ファミリーマート",
+          "name": "ファミリーマート",
+          "name:en": "FamilyMart",
+          "name:ja": "ファミリーマート",
+          "name:ja_rm": "Famirī Mato",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935263,
+        "name": "フローリスト東武",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7312272,
+          "lng": 139.710318
+        },
+        "tags": {
+          "name": "フローリスト東武",
+          "name:en": "Florist Tobu",
+          "shop": "florist"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935292,
+        "name": "Sanyodo",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7315489,
+          "lng": 139.7103076
+        },
+        "tags": {
+          "name": "Sanyodo",
+          "shop": "clothes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1666762102,
+        "name": "ファミリーマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7283731,
+          "lng": 139.7091075
+        },
+        "tags": {
+          "brand": "FamilyMart",
+          "brand:en": "FamilyMart",
+          "brand:ja": "ファミリーマート",
+          "brand:wikidata": "Q11247682",
+          "brand:wikipedia": "ja:ファミリーマート",
+          "int_name": "Family Mart",
+          "name": "ファミリーマート",
+          "name:en": "FamilyMart",
+          "name:ja": "ファミリーマート",
+          "name:ja_rm": "Famirī Mato",
+          "shop": "convenience",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1666762103,
+        "name": "ファミリーマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7288266,
+          "lng": 139.7067832
+        },
+        "tags": {
+          "brand": "FamilyMart",
+          "brand:en": "FamilyMart",
+          "brand:ja": "ファミリーマート",
+          "brand:wikidata": "Q11247682",
+          "brand:wikipedia": "ja:ファミリーマート",
+          "int_name": "Family Mart",
+          "name": "ファミリーマート",
+          "name:en": "FamilyMart",
+          "name:ja": "ファミリーマート",
+          "name:ja_rm": "Famirī Mato",
+          "opening_hours": "24/7",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1666762105,
+        "name": "セブン-イレブン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7288745,
+          "lng": 139.7075638
+        },
+        "tags": {
+          "addr:block_number": "7",
+          "addr:city": "豊島区",
+          "addr:housenumber": "7",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "alt_name": "7 Eleven",
+          "atm": "yes",
+          "branch": "豊島劇場通り東",
+          "brand": "7-ELEVEN",
+          "brand:en": "7-ELEVEN",
+          "brand:ja": "セブン-イレブン",
+          "brand:wikidata": "Q259340",
+          "brand:wikipedia": "en:7-Eleven",
+          "int_name": "Seven Eleven",
+          "internet_access": "wlan",
+          "level": "0",
+          "name": "セブン-イレブン",
+          "name:en": "7-Eleven",
+          "name:ja": "セブン-イレブン",
+          "name:ja_rm": "Sebun Irebun",
+          "name:ko": "세븐일레븐",
+          "official_name:en": "Seven-Eleven",
+          "opening_hours": "24/7",
+          "operator": "セブンイレブン・ジャパン",
+          "phone": "+81 3-5954-6160",
+          "shop": "convenience",
+          "source": "(URL) 2015",
+          "website": "https://www.sej.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1666762106,
+        "name": "ローソン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7298304,
+          "lng": 139.7072781
+        },
+        "tags": {
+          "brand": "LAWSON",
+          "brand:en": "LAWSON",
+          "brand:ja": "ローソン",
+          "brand:wikidata": "Q1557223",
+          "brand:wikipedia": "ja:ローソン",
+          "int_name": "Lawson",
+          "name": "ローソン",
+          "name:en": "Lawson",
+          "name:ja": "ローソン",
+          "name:ja_rm": "Rōson",
+          "name:ko": "로손",
+          "shop": "convenience",
+          "wheelchair": "limited"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1685345140,
+        "name": "ビックカメラ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7308583,
+          "lng": 139.708934
+        },
+        "tags": {
+          "addr:block_number": "16",
+          "addr:city": "豊島区",
+          "addr:country": "JP",
+          "addr:housenumber": "3",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "branch": "池袋西口店",
+          "branch:en": "Ikebukuro West",
+          "brand": "ビックカメラ",
+          "brand:en": "Bic Camera",
+          "brand:ja": "ビックカメラ",
+          "brand:wikidata": "Q4903531",
+          "brand:wikipedia": "ja:ビックカメラ",
+          "name": "ビックカメラ",
+          "name:en": "Bic Camera",
+          "name:ja": "ビックカメラ",
+          "name:ja_rm": "Bikkukamera",
+          "opening_hours": "10:00-21:00",
+          "phone": "+81 3-5960-1111",
+          "shop": "electronics",
+          "website": "https://www.biccamera.co.jp/shoplist/shop-017.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1767274768,
+        "name": "建武堂",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7307947,
+          "lng": 139.7151493
+        },
+        "tags": {
+          "contact:phone": "+81 3-3971-4840",
+          "name": "建武堂",
+          "name:en": "Kembudo",
+          "shop": "sports",
+          "wheelchair": "no",
+          "wheelchair:description": "入り口が階段。"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1906927984,
+        "name": "ドコモショップ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.731811,
+          "lng": 139.7074278
+        },
+        "tags": {
+          "addr:block_number": "13",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "池袋二丁目",
+          "addr:postcode": "171-0014",
+          "addr:province": "東京都",
+          "branch": "池袋西口店",
+          "brand": "NTT docomo",
+          "brand:en": "NTT docomo",
+          "brand:ja": "NTTドコモ",
+          "brand:wikidata": "Q853958",
+          "brand:wikipedia": "ja:NTTドコモ",
+          "level": "0",
+          "name": "ドコモショップ",
+          "name:en": "docomo Shop",
+          "name:ja": "ドコモショップ",
+          "name:ja_rm": "Dokomo Shoppu",
+          "opening_hours": "Mo-Su 10:00-20:00",
+          "operator": "NTTドコモ",
+          "phone": "+81 3-5396-8092",
+          "shop": "mobile_phone",
+          "source": "image;Bing,2007-03-28; (URL) 2015",
+          "website": "https://www.nttdocomo.co.jp/",
+          "wheelchair": "no"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1906927988,
+        "name": "auショップ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7320188,
+          "lng": 139.706466
+        },
+        "tags": {
+          "addr:block_number": "14",
+          "addr:city": "豊島区",
+          "addr:housenumber": "4",
+          "addr:neighbourhood": "池袋二丁目",
+          "addr:postcode": "171-0014",
+          "addr:province": "東京都",
+          "branch": "池袋西口",
+          "brand": "au",
+          "brand:en": "au",
+          "brand:ja": "au",
+          "brand:wikidata": "Q307110",
+          "name": "auショップ",
+          "name:en": "au Shop",
+          "name:ja": "auショップ",
+          "name:ja_rm": "Eyu Shoppu",
+          "opening_hours": "Mo-Su 10:00-20:00",
+          "operator": "KDDI",
+          "phone": "+81 3-3590-3261",
+          "shop": "mobile_phone",
+          "source": "(URL) 2015",
+          "website": "http://www.au.kddi.com/",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1943842514,
+        "name": "メガネの三城",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7295525,
+          "lng": 139.7146403
+        },
+        "tags": {
+          "alt_name:en": "Megane no Miki",
+          "branch": "Ikebukuro",
+          "brand": "メガネの三城",
+          "brand:en": "Paris Miki",
+          "brand:ja": "メガネの三城",
+          "brand:wikidata": "Q11354808",
+          "name": "メガネの三城",
+          "name:en": "Paris Miki",
+          "name:ja": "メガネの三城",
+          "shop": "optician"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1954452194,
+        "name": "青山フラワーマーケット",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7296706,
+          "lng": 139.7118527
+        },
+        "tags": {
+          "addr:block_number": "28",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:province": "東京都",
+          "branch": "池袋西武店",
+          "brand": "青山フラワーマーケット",
+          "brand:en": "Aoyama Flower Market",
+          "brand:ja": "青山フラワーマーケット",
+          "brand:wikidata": "Q87743579",
+          "level": "-1",
+          "name": "青山フラワーマーケット",
+          "name:en": "Aoyama Flower Market",
+          "name:ja": "青山フラワーマーケット",
+          "name:ja_rm": "Aoyama Fulawa Maketo",
+          "opening_hours": "Mo-Sa 10:00-21:00; Su,PH 10:00-20:00",
+          "operator": "パーク・コーポレーション",
+          "phone": "+81-3-59532687",
+          "shop": "florist",
+          "source": "(URL)",
+          "website": "https://www.aoyamaflowermarket.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1954455514,
+        "name": "青山フラワーマーケット",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7302813,
+          "lng": 139.7106001
+        },
+        "tags": {
+          "addr:block_number": "1",
+          "addr:city": "豊島区",
+          "addr:housenumber": "25",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:province": "東京都",
+          "branch": "池袋東武店",
+          "brand": "青山フラワーマーケット",
+          "brand:en": "Aoyama Flower Market",
+          "brand:ja": "青山フラワーマーケット",
+          "brand:wikidata": "Q87743579",
+          "level": "1",
+          "name": "青山フラワーマーケット",
+          "name:en": "Aoyama Flower Market",
+          "name:ja": "青山フラワーマーケット",
+          "name:ja_rm": "Aoyama Fulawa Maketo",
+          "opening_hours": "Mo-Sa 10:00-21:00; Su 10:00-20:00",
+          "operator": "パーク・コーポレーション",
+          "phone": "+81-3-53913587",
+          "shop": "florist",
+          "source": "(URL)",
+          "website": "https://www.aoyamaflowermarket.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1954456202,
+        "name": "青山フラワーマーケット",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7285133,
+          "lng": 139.7098906
+        },
+        "tags": {
+          "addr:block_number": "1",
+          "addr:city": "豊島区",
+          "addr:housenumber": "25",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:province": "東京都",
+          "branch": "池袋東武プラザ館店",
+          "brand": "青山フラワーマーケット",
+          "brand:en": "Aoyama Flower Market",
+          "brand:ja": "青山フラワーマーケット",
+          "brand:wikidata": "Q87743579",
+          "level": "-1",
+          "name": "青山フラワーマーケット",
+          "name:en": "Aoyama Flower Market",
+          "name:ja": "青山フラワーマーケット",
+          "name:ja_rm": "Aoyama Fulawa Maketo",
+          "opening_hours": "Mo-Sa 10:00-21:00; Su,PH 10:00-20:00",
+          "operator": "パーク・コーポレーション",
+          "phone": "+81-3-39823987",
+          "shop": "florist",
+          "source": "(URL)",
+          "website": "https://www.aoyamaflowermarket.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1955937706,
+        "name": "池袋西武百貨店",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7294275,
+          "lng": 139.7118151
+        },
+        "tags": {
+          "name": "池袋西武百貨店",
+          "name:en": "Seibu Department Store",
+          "shop": "supermarket",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1955937785,
+        "name": "池袋東武百貨店",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7297846,
+          "lng": 139.7103398
+        },
+        "tags": {
+          "name": "池袋東武百貨店",
+          "name:en": "TOBU Department Store",
+          "shop": "supermarket",
+          "toilets:wheelchair": "yes",
+          "wheelchair": "yes",
+          "wikidata": "Q11235004"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2020421964,
+        "name": "東京メガネ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7286303,
+          "lng": 139.7117556
+        },
+        "tags": {
+          "addr:block_number": "28",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:province": "東京都",
+          "branch": "西武池袋店",
+          "brand": "東京メガネ",
+          "level": "5",
+          "name": "東京メガネ",
+          "name:en": "Tokyo Megane",
+          "name:ja": "東京メガネ",
+          "name:ja_rm": "Tokyomegane",
+          "opening_hours": "Mo-Su 10:00-21:00",
+          "operator": "東京メガネ",
+          "phone": "+81-3-59492670",
+          "shop": "optician",
+          "source": "(URL)",
+          "website": "https://www.tokyomegane.co.jp/",
+          "wikidata": "Q11524431",
+          "wikipedia": "ja:東京メガネ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2041267345,
+        "name": "Y's Road 池袋チャーリー店",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7329414,
+          "lng": 139.713461
+        },
+        "tags": {
+          "addr:housename": "D-BOXビル",
+          "level": "2",
+          "name": "Y's Road 池袋チャーリー店",
+          "name:en": "Y's Road Ikebukuro Charlie",
+          "opening_hours": "10:00-20:00",
+          "phone": "+81 3-3983-8694",
+          "shop": "bicycle",
+          "source": "bing,web",
+          "website": "https://ysroad.co.jp/charley/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2126064881,
+        "name": "QBHouse",
+        "category": "shopping",
+        "location": {
+          "lat": 35.727934,
+          "lng": 139.710983
+        },
+        "tags": {
+          "name": "QBHouse",
+          "shop": "hairdresser",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2126065245,
+        "name": "スィートポテト",
+        "category": "shopping",
+        "location": {
+          "lat": 35.727878,
+          "lng": 139.711
+        },
+        "tags": {
+          "name": "スィートポテト",
+          "name:en": "Sweet Potato",
+          "shop": "confectionery"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2238158805,
+        "name": "NewDays",
+        "category": "shopping",
+        "location": {
+          "lat": 35.730525,
+          "lng": 139.710728
+        },
+        "tags": {
+          "alt_name": "ニューデイズ",
+          "branch": "池袋西口店",
+          "brand": "NewDays",
+          "brand:wikidata": "Q11234763",
+          "brand:wikipedia": "ja:NewDays",
+          "name": "NewDays",
+          "opening_hours": "06:00-24:00",
+          "operator": "NEWDAYS",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2289978130,
+        "name": "ヤマダデンキ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7309293,
+          "lng": 139.713728
+        },
+        "tags": {
+          "addr:block_number": "5",
+          "addr:city": "豊島区",
+          "addr:housenumber": "7",
+          "addr:neighbourhood": "東池袋一丁目",
+          "addr:postcode": "170-0013",
+          "addr:province": "東京都",
+          "alt_name": "ヤマダ電機",
+          "branch": "LABI1 Life Select 池袋",
+          "brand": "ヤマダデンキ",
+          "brand:en": "Yamada Denki",
+          "brand:ja": "ヤマダデンキ",
+          "brand:wikidata": "Q1096390",
+          "brand:wikipedia": "en:Yamada Denki",
+          "contact:twitter": "labi1_sohonten",
+          "name": "ヤマダデンキ",
+          "name:en": "Yamada Denki",
+          "name:ja": "ヤマダデンキ",
+          "name:ja_rm": "Yamada Denki",
+          "phone": "03-5958-7770",
+          "shop": "electronics",
+          "website": "http://www.yamadalabi.com/i-souhonten/",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3166174415,
+        "name": "アニメイト",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7311468,
+          "lng": 139.7154494
+        },
+        "tags": {
+          "addr:block_number": "20",
+          "addr:city": "豊島区",
+          "addr:housenumber": "7",
+          "addr:neighbourhood": "東池袋一丁目",
+          "addr:postcode": "170-0013",
+          "addr:province": "東京都",
+          "branch": "池袋本店",
+          "branch:en": "Ikebukuro Main Store",
+          "branch:ja": "池袋本店",
+          "branch:zh": "池袋總店",
+          "brand": "アニメイト",
+          "brand:en": "Animate",
+          "brand:ja": "アニメイト",
+          "brand:wikidata": "Q1041890",
+          "brand:wikipedia": "ja:アニメイト",
+          "check_date": "2025-03-17",
+          "check_date:opening_hours": "2025-03-17",
+          "level": "0;1;2;3;4;5;6;7;8",
+          "name": "アニメイト",
+          "name:en": "Animate",
+          "name:ja": "アニメイト",
+          "name:zh": "安利美特",
+          "opening_hours": "Mo-Su 10:00-21:00",
+          "operator": "株式会社アニメイト",
+          "payment:au_PAY": "yes",
+          "payment:cash": "yes",
+          "payment:credit_cards": "yes",
+          "phone": "+81 3-3988-1351",
+          "shop": "hobby",
+          "shop:anime": "yes",
+          "shop:books": "yes",
+          "shop:comic_goods": "yes",
+          "shop:doujinshi": "yes",
+          "shop:figurines": "yes",
+          "shop:games": "yes",
+          "shop:manga": "yes",
+          "shop:music": "yes",
+          "shop:videos": "yes",
+          "start_date": "2023-03",
+          "website": "https://www.animate.co.jp/shop/ikebukuro/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3291170170,
+        "name": "セブン-イレブン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7316772,
+          "lng": 139.7061452
+        },
+        "tags": {
+          "branch": "西池袋二又店",
+          "brand": "7-ELEVEN",
+          "brand:en": "7-ELEVEN",
+          "brand:ja": "セブン-イレブン",
+          "brand:wikidata": "Q259340",
+          "brand:wikipedia": "en:7-Eleven",
+          "level": "0",
+          "name": "セブン-イレブン",
+          "name:en": "7-Eleven",
+          "name:ja": "セブン-イレブン",
+          "name:ja_rm": "Sebun Irebun",
+          "name:ko": "세븐일레븐",
+          "official_name:en": "Seven-Eleven",
+          "shop": "convenience",
+          "source": "survey, 2015-01-15"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3291170172,
+        "name": "八勝堂書店",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7317885,
+          "lng": 139.706163
+        },
+        "tags": {
+          "level": "0",
+          "name": "八勝堂書店",
+          "shop": "books",
+          "source": "survey, 2015-01-15"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3555049089,
+        "name": "SOCCER SHOP KAMO",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7271701,
+          "lng": 139.7116882
+        },
+        "tags": {
+          "check_date": "2025-04-29",
+          "name": "SOCCER SHOP KAMO",
+          "shop": "sports"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3555054147,
+        "name": "マツモトキヨシ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7270098,
+          "lng": 139.7116733
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "branch": "南池袋店",
+          "brand": "マツモトキヨシ",
+          "brand:en": "Matsumoto Kiyoshi",
+          "brand:ja": "マツモトキヨシ",
+          "brand:wikidata": "Q8014776",
+          "brand:wikipedia": "ja:マツモトキヨシ",
+          "check_date": "2025-04-29",
+          "healthcare": "pharmacy",
+          "name": "マツモトキヨシ",
+          "name:en": "Matsumoto Kiyoshi",
+          "name:ja": "マツモトキヨシ",
+          "ref": "1040",
+          "shop": "chemist",
+          "short_name": "マツキヨ",
+          "short_name:en": "Matsukiyo",
+          "short_name:ja": "マツキヨ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3555054148,
+        "name": "ローソン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7269625,
+          "lng": 139.7113871
+        },
+        "tags": {
+          "branch": "南池袋一丁目店",
+          "brand": "LAWSON",
+          "brand:en": "LAWSON",
+          "brand:ja": "ローソン",
+          "brand:wikidata": "Q1557223",
+          "brand:wikipedia": "ja:ローソン",
+          "name": "ローソン",
+          "name:en": "Lawson",
+          "name:ja": "ローソン",
+          "name:ja_rm": "Rōson",
+          "name:ko": "로손",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557023646,
+        "name": "ドコモショップ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7274133,
+          "lng": 139.7120968
+        },
+        "tags": {
+          "addr:block_number": "19",
+          "addr:city": "豊島区",
+          "addr:housenumber": "4",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "branch": "池袋東口店",
+          "brand": "NTT docomo",
+          "brand:en": "NTT docomo",
+          "brand:ja": "NTTドコモ",
+          "brand:wikidata": "Q853958",
+          "brand:wikipedia": "ja:NTTドコモ",
+          "level": "0",
+          "name": "ドコモショップ",
+          "name:en": "docomo Shop",
+          "name:ja": "ドコモショップ",
+          "name:ja_rm": "Dokomo Shoppu",
+          "opening_hours": "Mo-Su 10:00-20:00",
+          "operator": "NTTドコモ",
+          "phone": "+81 3-3986-9006",
+          "shop": "mobile_phone",
+          "source": "(URL) 2015",
+          "website": "https://www.nttdocomo.co.jp/",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557023692,
+        "name": "メガネドラッグ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7267334,
+          "lng": 139.7120638
+        },
+        "tags": {
+          "brand": "メガネドラッグ",
+          "brand:en": "Megane Drug",
+          "brand:ja": "メガネドラッグ",
+          "brand:wikidata": "Q11343507",
+          "name": "メガネドラッグ",
+          "name:en": "Megane Drug",
+          "name:ja": "メガネドラッグ",
+          "shop": "optician"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557073470,
+        "name": "auショップ",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7290009,
+          "lng": 139.713642
+        },
+        "tags": {
+          "addr:block_number": "26",
+          "addr:city": "豊島区",
+          "addr:housenumber": "10",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "branch": "池袋東口",
+          "brand": "au",
+          "brand:en": "au",
+          "brand:ja": "au",
+          "brand:wikidata": "Q307110",
+          "brand:wikipedia": "ja:Au (携帯電話)",
+          "name": "auショップ",
+          "name:en": "au Shop",
+          "name:ja": "auショップ",
+          "name:ja_rm": "Eyu Shoppu",
+          "opening_hours": "Mo-Su 10:00-20:00",
+          "operator": "KDDI",
+          "phone": "+81 3-5957-1623",
+          "shop": "mobile_phone",
+          "source": "(URL) 2015",
+          "website": "http://www.au.kddi.com/",
+          "wheelchair": "no"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557073471,
+        "name": "YAMAHA",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7285979,
+          "lng": 139.7133786
+        },
+        "tags": {
+          "addr:block_number": "25",
+          "addr:city": "豊島区",
+          "addr:housename": "第15野萩ビル",
+          "addr:housenumber": "11",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:province": "東京都",
+          "check_date": "2025-04-29",
+          "level": "1",
+          "name": "YAMAHA",
+          "shop": "musical_instrument"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557073472,
+        "name": "セブン-イレブン",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7288304,
+          "lng": 139.7136314
+        },
+        "tags": {
+          "addr:block_number": "26",
+          "addr:city": "豊島区",
+          "addr:housenumber": "2",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "atm": "yes",
+          "branch": "豊島南池袋1丁目",
+          "brand": "7-ELEVEN",
+          "brand:en": "7-ELEVEN",
+          "brand:ja": "セブン-イレブン",
+          "brand:wikidata": "Q259340",
+          "brand:wikipedia": "en:7-Eleven",
+          "internet_access": "wlan",
+          "level": "0",
+          "name": "セブン-イレブン",
+          "name:en": "7-Eleven",
+          "name:ja": "セブン-イレブン",
+          "name:ja_rm": "Sebun Irebun",
+          "name:ko": "세븐일레븐",
+          "official_name:en": "Seven-Eleven",
+          "opening_hours": "24/7",
+          "operator": "セブンイレブン・ジャパン",
+          "phone": "+81 3-3590-2268",
+          "shop": "convenience",
+          "source": "(URL) 2015",
+          "website": "https://www.sej.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557074026,
+        "name": "ファミリーマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7283676,
+          "lng": 139.7131689
+        },
+        "tags": {
+          "brand": "FamilyMart",
+          "brand:en": "FamilyMart",
+          "brand:ja": "ファミリーマート",
+          "brand:wikidata": "Q11247682",
+          "brand:wikipedia": "ja:ファミリーマート",
+          "check_date": "2025-04-29",
+          "name": "ファミリーマート",
+          "name:en": "FamilyMart",
+          "name:ja": "ファミリーマート",
+          "name:ja_rm": "Famirī Mato",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557074027,
+        "name": "宮田家具店",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7287466,
+          "lng": 139.7135422
+        },
+        "tags": {
+          "check_date": "2025-04-29",
+          "name": "宮田家具店",
+          "name:en": "Miyata's Furniture",
+          "shop": "bed"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557099993,
+        "name": "ファミリーマート",
+        "category": "shopping",
+        "location": {
+          "lat": 35.7289009,
+          "lng": 139.7147765
+        },
+        "tags": {
+          "branch": "池袋グリーン大通り店",
+          "brand": "FamilyMart",
+          "brand:en": "FamilyMart",
+          "brand:ja": "ファミリーマート",
+          "brand:wikidata": "Q11247682",
+          "brand:wikipedia": "ja:ファミリーマート",
+          "check_date": "2025-03-01",
+          "name": "ファミリーマート",
+          "name:en": "FamilyMart",
+          "name:ja": "ファミリーマート",
+          "name:ja_rm": "Famirī Mato",
+          "phone": "+81 359113421",
+          "shop": "convenience"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1028199574,
+        "name": "サンシティ池袋",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7317121,
+          "lng": 139.7111086
+        },
+        "tags": {
+          "name": "サンシティ池袋",
+          "tourism": "hotel",
+          "wheelchair": "no"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1916548178,
+        "name": "京王プレッソイン池袋",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.727818,
+          "lng": 139.7155508
+        },
+        "tags": {
+          "level": "0;13",
+          "name": "京王プレッソイン池袋",
+          "name:en": "Keio Presso Inn",
+          "name:ja": "京王プレッソイン池袋",
+          "source": "Bing 2010",
+          "tourism": "hotel",
+          "website": "https://www.presso-inn.com/",
+          "wikidata": "Q11374612",
+          "wikipedia": "ja:京王プレッソイン"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4337866290,
+        "name": "池袋中央宾馆",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7321555,
+          "lng": 139.7135569
+        },
+        "tags": {
+          "name": "池袋中央宾馆",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4721433999,
+        "name": "jonathons place",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7303455,
+          "lng": 139.7067162
+        },
+        "tags": {
+          "name:en": "jonathons place",
+          "tourism": "guest_house"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4940280623,
+        "name": "ホテル池袋サウナ＆カプセル",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7323812,
+          "lng": 139.7084396
+        },
+        "tags": {
+          "name": "ホテル池袋サウナ＆カプセル",
+          "name:en": "Hotel Ikebukuro Sauna & Capsule",
+          "name:es": "Hotel Ikebukuro Sauna & Capsule",
+          "name:ja": "ホテル池袋サウナ＆カプセル",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6390211886,
+        "name": "ホテルアーバン",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7305308,
+          "lng": 139.7075247
+        },
+        "tags": {
+          "name": "ホテルアーバン",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8829075649,
+        "name": "ホテル・ティファナ・イン",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7289949,
+          "lng": 139.7162622
+        },
+        "tags": {
+          "amenity": "love_hotel",
+          "name": "ホテル・ティファナ・イン",
+          "name:en": "Hotel Tijuana Inn",
+          "source": "Bing",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8829075874,
+        "name": "センチュリオンホテル",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7320383,
+          "lng": 139.7145409
+        },
+        "tags": {
+          "branch": "Ikebukuro",
+          "name": "Centurion Hotel",
+          "name:ja": "センチュリオンホテル",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8829084229,
+        "name": "パークサイドホテル",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7312795,
+          "lng": 139.7150445
+        },
+        "tags": {
+          "amenity": "love_hotel",
+          "name": "パークサイドホテル",
+          "name:en": "Hotel Park Side",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8989155338,
+        "name": "ホテル・チョコレート",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7329631,
+          "lng": 139.7142613
+        },
+        "tags": {
+          "amenity": "love_hotel",
+          "name": "ホテル・チョコレート",
+          "name:en": "HOTEL CHOCOLAT",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8989155339,
+        "name": "ホテル・ファースト",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7329664,
+          "lng": 139.7144135
+        },
+        "tags": {
+          "amenity": "love_hotel",
+          "name": "ホテル・ファースト",
+          "name:en": "HOTEL FIRST",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312283848,
+        "name": "the b ikebukuro",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7322708,
+          "lng": 139.71426
+        },
+        "tags": {
+          "name": "the b ikebukuro",
+          "operator": "Ishin Hotels",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312283887,
+        "name": "第一イン",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7320481,
+          "lng": 139.7128163
+        },
+        "tags": {
+          "branch": "池袋",
+          "branch:en": "Ikebukuro",
+          "branch:ja": "池袋",
+          "name": "第一イン",
+          "name:en": "Dai-Ichi In",
+          "name:ja": "第一イン",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312284357,
+        "name": "Daiwa Roynet Hotel",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7283243,
+          "lng": 139.7128585
+        },
+        "tags": {
+          "name": "Daiwa Roynet Hotel",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 155288972,
+        "name": "ホテルメトロポリタン",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7283824,
+          "lng": 139.7079999
+        },
+        "tags": {
+          "building": "hotel",
+          "check_date": "2024-11-27",
+          "internet_access": "wlan",
+          "internet_access:fee": "customers",
+          "name": "ホテルメトロポリタン",
+          "name:en": "Hotel Metropolitan Tokyo Ikebukuro",
+          "name:es": "Hotel Metropolitan Tokyo Ikebukuro",
+          "name:ja": "ホテルメトロポリタン",
+          "opening_hours": "24/7",
+          "payment:cash": "yes",
+          "payment:credit_cards": "yes",
+          "payment:debit_cards": "yes",
+          "phone": "+81 339801111",
+          "source": "Bing;survey",
+          "tourism": "hotel",
+          "website": "https://tokyo-ikebukuro.hotel-metropolitan.com/",
+          "wheelchair": "yes",
+          "wikidata": "Q11337901",
+          "wikipedia": "ja:ホテルメトロポリタン"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 200411471,
+        "name": "サクラホテル池袋",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7335821,
+          "lng": 139.7088448
+        },
+        "tags": {
+          "addr:housenumber": "2-40-7",
+          "addr:postcode": "171-0014",
+          "building": "yes",
+          "name": "サクラホテル池袋",
+          "name:en": "Sakura Hotel Ikebukuro",
+          "name:ja": "サクラホテル池袋",
+          "operator": "Sakura Group",
+          "phone": "+81 3 3971 2237",
+          "source": "Bing",
+          "tourism": "hostel",
+          "website": "https://www.sakura-hotel.co.jp/ikebukuro",
+          "wikidata": "Q111121654"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 200411487,
+        "name": "東横INN池袋北口2",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.734013,
+          "lng": 139.7102792
+        },
+        "tags": {
+          "building": "yes",
+          "name": "東横INN池袋北口2",
+          "name:en": "Higashiyoko INN Ikebukuro Kitaguchi 2",
+          "name:es": "Higashiyoko INN Ikebukuro Kitaguchi 2",
+          "source": "Bing",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 200421534,
+        "name": "ホテル・東急ステイ",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7323815,
+          "lng": 139.707194
+        },
+        "tags": {
+          "branch": "池袋",
+          "building": "yes",
+          "building:levels": "14",
+          "name": "ホテル・東急ステイ",
+          "name:en": "HOTEL Tokyu Stay",
+          "source": "Bing",
+          "tourism": "hotel",
+          "wikidata": "Q11526960",
+          "wikipedia": "ja:東急ステイ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 200421646,
+        "name": "池袋プラザカプセルホテル",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7323504,
+          "lng": 139.7070332
+        },
+        "tags": {
+          "building": "yes",
+          "building:levels": "6",
+          "name": "池袋プラザカプセルホテル",
+          "name:en": "Ikebukuro Plaza Capsule Hotel",
+          "source": "Bing",
+          "tourism": "hostel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 200433291,
+        "name": "スーパーホテル",
+        "category": "accommodation",
+        "location": {
+          "lat": 35.7321212,
+          "lng": 139.706993
+        },
+        "tags": {
+          "branch": "JR池袋西口",
+          "brand": "Super Hotel",
+          "brand:wikidata": "Q11313858",
+          "building": "yes",
+          "name": "スーパーホテル",
+          "name:en": "SUPER HOTEL",
+          "name:ja": "スーパーホテル",
+          "source": "Bing",
+          "tourism": "hotel"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 251055430,
+        "name": "伝統工芸 青山スクエア",
+        "category": "culture",
+        "location": {
+          "lat": 35.7288374,
+          "lng": 139.7093019
+        },
+        "tags": {
+          "name:en": "Japan Traditional Crafts Centre",
+          "name:ja": "伝統工芸 青山スクエア",
+          "opening_hours": "Mo-Su,PH 11:00-19:00",
+          "phone": "+81 03 7585 1301",
+          "tourism": "museum",
+          "website": "https://kougeihin.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303077,
+        "name": "池袋HUMAXシネマズ",
+        "category": "culture",
+        "location": {
+          "lat": 35.7298985,
+          "lng": 139.7158893
+        },
+        "tags": {
+          "addr:block_number": "22",
+          "addr:city": "豊島区",
+          "addr:housename": "ヒューマックスパビリオン池袋サンシャイン60通り",
+          "addr:housenumber": "10",
+          "addr:neighbourhood": "東池袋一丁目",
+          "addr:postcode": "170-0013",
+          "addr:province": "東京都",
+          "amenity": "cinema",
+          "brand": "HUMAX",
+          "contact:phone": "+81 3 5979 1660",
+          "level": "-2;5;7",
+          "name": "池袋HUMAXシネマズ",
+          "name:en": "Humax Cinema",
+          "name:es": "Humax Cinema",
+          "name:ja": "池袋HUMAXシネマズ",
+          "website": "https://www.humax-cinema.co.jp/ikebukuro/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420798090,
+        "name": "豊島区立郷土資料館",
+        "category": "culture",
+        "location": {
+          "lat": 35.727675,
+          "lng": 139.706721
+        },
+        "tags": {
+          "name": "豊島区立郷土資料館",
+          "name:en": "Toshima City Local Museum",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+          "tourism": "museum",
+          "wikidata": "Q104698258"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2635113521,
+        "name": "シネマロサ",
+        "category": "culture",
+        "location": {
+          "lat": 35.7324812,
+          "lng": 139.7091711
+        },
+        "tags": {
+          "amenity": "cinema",
+          "contact:phone": "+81-3-3986-3713",
+          "name": "シネマロサ",
+          "name:en": "Cinema Rosa",
+          "name:es": "Cinema Rosa",
+          "source": "survey,2014-01;website",
+          "website": "http://www.cinemarosa.net/",
+          "wikidata": "Q11350254",
+          "wikipedia": "ja:ロサ会館"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4233549091,
+        "name": "池袋演芸場",
+        "category": "culture",
+        "location": {
+          "lat": 35.7318588,
+          "lng": 139.7101362
+        },
+        "tags": {
+          "amenity": "theatre",
+          "name": "池袋演芸場",
+          "name:en": "Ikebukuro Engei Hall",
+          "name:es": "Ikebukuro Performing Arts",
+          "name:ja-Latn": "Ikebukuro Engei-jo"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4842752724,
+        "name": "自由学園明日館",
+        "category": "culture",
+        "location": {
+          "lat": 35.7264951,
+          "lng": 139.7072695
+        },
+        "tags": {
+          "name": "自由学園明日館",
+          "tourism": "museum"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 5939950285,
+        "name": "シアターグリーン",
+        "category": "culture",
+        "location": {
+          "lat": 35.7264168,
+          "lng": 139.714457
+        },
+        "tags": {
+          "amenity": "theatre",
+          "name": "シアターグリーン",
+          "name:en": "Theater Green",
+          "name:ja": "シアターグリーン",
+          "wikidata": "Q11306881",
+          "wikipedia": "ja:シアターグリーン"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6018196685,
+        "name": "池袋防災館",
+        "category": "culture",
+        "location": {
+          "lat": 35.7280356,
+          "lng": 139.706924
+        },
+        "tags": {
+          "name": "池袋防災館",
+          "name:en": "Life safety learning center",
+          "tourism": "museum"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6138077705,
+        "name": "池袋ミカド劇場",
+        "category": "culture",
+        "location": {
+          "lat": 35.7321417,
+          "lng": 139.713398
+        },
+        "tags": {
+          "amenity": "theatre",
+          "name": "池袋ミカド劇場",
+          "website": "http://www.mikadogekijyo.com/",
+          "wikidata": "Q11552234",
+          "wikipedia": "ja:池袋ミカド劇場"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6138081634,
+        "name": "新文芸坐",
+        "category": "culture",
+        "location": {
+          "lat": 35.7325827,
+          "lng": 139.7137059
+        },
+        "tags": {
+          "amenity": "cinema",
+          "name": "新文芸坐",
+          "name:en": "Shin-Bungeiza",
+          "website": "https://www.shin-bungeiza.com/",
+          "wikipedia": "ja:新文芸坐"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6296380374,
+        "name": "池袋EDGE",
+        "category": "culture",
+        "location": {
+          "lat": 35.729105,
+          "lng": 139.7129073
+        },
+        "tags": {
+          "amenity": "theatre",
+          "name": "池袋EDGE"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 13042719774,
+        "name": "Mixalive TOKYO",
+        "category": "culture",
+        "location": {
+          "lat": 35.7300091,
+          "lng": 139.714946
+        },
+        "tags": {
+          "amenity": "cinema",
+          "name": "Mixalive TOKYO"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8973688424,
+        "name": "フリーダムアーキテクツデザイン池袋スタジオ",
+        "category": "nature",
+        "location": {
+          "lat": 35.7267423,
+          "lng": 139.7120944
+        },
+        "tags": {
+          "leisure": "park",
+          "name": "フリーダムアーキテクツデザイン池袋スタジオ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 155289523,
+        "name": "南池袋公園",
+        "category": "nature",
+        "location": {
+          "lat": 35.7275478,
+          "lng": 139.7143509
+        },
+        "tags": {
+          "leisure": "park",
+          "name": "南池袋公園",
+          "source": "Bing",
+          "wikidata": "Q11408045",
+          "wikipedia": "ja:南池袋公園"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 595622641,
+        "name": "池袋西口公園",
+        "category": "nature",
+        "location": {
+          "lat": 35.7300938,
+          "lng": 139.7089354
+        },
+        "tags": {
+          "leisure": "park",
+          "name": "池袋西口公園",
+          "name:en": "Ikebukuro Nishiguchi Park",
+          "name:es": "Parque Ikebukuro Nishiguchi",
+          "name:ja": "池袋西口公園",
+          "wikidata": "Q11552247"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 595622665,
+        "name": "中池袋公園",
+        "category": "nature",
+        "location": {
+          "lat": 35.7315925,
+          "lng": 139.7150147
+        },
+        "tags": {
+          "addr:block_number": "16",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "東池袋一丁目",
+          "addr:postcode": "170-0013",
+          "addr:province": "東京都",
+          "leisure": "park",
+          "name": "中池袋公園",
+          "name:en": "Naka-Ikebukuro Park",
+          "name:ja": "中池袋公園",
+          "surface": "paving_stones"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 595622678,
+        "name": "池袋駅前公園",
+        "category": "nature",
+        "location": {
+          "lat": 35.7329007,
+          "lng": 139.7133874
+        },
+        "tags": {
+          "leisure": "park",
+          "name": "池袋駅前公園"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 716065126,
+        "name": "元池袋史跡公園",
+        "category": "nature",
+        "location": {
+          "lat": 35.7287788,
+          "lng": 139.7086196
+        },
+        "tags": {
+          "leisure": "park",
+          "name": "元池袋史跡公園"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420785302,
+        "name": "自動車税総合事務所",
+        "category": "business",
+        "location": {
+          "lat": 35.73098,
+          "lng": 139.708491
+        },
+        "tags": {
+          "addr:block_number": "17",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:province": "東京都",
+          "name": "自動車税総合事務所",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "office": "government",
+          "operator": "東京都主税局",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420785305,
+        "name": "豊島都税事務所",
+        "category": "business",
+        "location": {
+          "lat": 35.7309569,
+          "lng": 139.708553
+        },
+        "tags": {
+          "addr:block_number": "17",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:province": "東京都",
+          "name": "豊島都税事務所",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "office": "government",
+          "operator": "東京都主税局",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787789,
+        "name": "池袋社会保険事務所",
+        "category": "business",
+        "location": {
+          "lat": 35.726693,
+          "lng": 139.713058
+        },
+        "tags": {
+          "admin_level": "2",
+          "government": "pension_fund",
+          "name": "池袋社会保険事務所",
+          "name:en": "Ikebukuro Social Insurance Office",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "office": "government",
+          "operator": "日本年金機構",
+          "operator:wikidata": "Q11508070",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6225462365,
+        "name": "Lost and Found - Tokyo Metro",
+        "category": "business",
+        "location": {
+          "lat": 35.729758,
+          "lng": 139.709351
+        },
+        "tags": {
+          "amenity": "lost_property_office",
+          "level": "-2",
+          "name": "Lost and Found - Tokyo Metro",
+          "office": "lost_property"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6225499826,
+        "name": "Lost and Found - Tokyo Metro",
+        "category": "business",
+        "location": {
+          "lat": 35.7312964,
+          "lng": 139.7081358
+        },
+        "tags": {
+          "level": "-2",
+          "name": "Lost and Found - Tokyo Metro",
+          "office": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7007558019,
+        "name": "NHK営業局池袋営業センター",
+        "category": "business",
+        "location": {
+          "lat": 35.7290265,
+          "lng": 139.7092147
+        },
+        "tags": {
+          "addr:block_number": "11",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-8504",
+          "addr:province": "東京都",
+          "branch": "営業局池袋営業センター",
+          "level": "15",
+          "name": "NHK営業局池袋営業センター",
+          "name:en": "NHK Ikebukuro Business Centre",
+          "name:ja": "NHK営業局池袋営業センター",
+          "office": "company",
+          "website": "http://www.nhk.or.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205031484,
+        "name": "ほけんの窓口",
+        "category": "business",
+        "location": {
+          "lat": 35.7281624,
+          "lng": 139.7138586
+        },
+        "tags": {
+          "name": "ほけんの窓口",
+          "office": "insurance"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8365729648,
+        "name": "水都環境",
+        "category": "business",
+        "location": {
+          "lat": 35.7328924,
+          "lng": 139.7073253
+        },
+        "tags": {
+          "addr:block_number": "11",
+          "addr:city": "豊島区",
+          "addr:housenumber": "9",
+          "addr:neighbourhood": "池袋二丁目",
+          "addr:postcode": "171-0014",
+          "addr:province": "東京都",
+          "name": "水都環境",
+          "office": "company",
+          "opening_hours": "Mo-Fr 09:00-18:00",
+          "phone": "+81 3 5949 3122",
+          "website": "http://www.mnt-kankyo.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8365731954,
+        "name": "Civilユーザ会",
+        "category": "business",
+        "location": {
+          "lat": 35.7328657,
+          "lng": 139.7073548
+        },
+        "tags": {
+          "addr:block_number": "11",
+          "addr:city": "豊島区",
+          "addr:housenumber": "9",
+          "addr:neighbourhood": "池袋二丁目",
+          "addr:postcode": "171-0014",
+          "addr:province": "東京都",
+          "name": "Civilユーザ会",
+          "office": "company",
+          "opening_hours": "Mo-Fr 09:00-18:00",
+          "website": "https://cim-cug.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8829169272,
+        "name": "A3",
+        "category": "business",
+        "location": {
+          "lat": 35.7251333,
+          "lng": 139.7110453
+        },
+        "tags": {
+          "addr:block_number": "11",
+          "addr:housename": "山種池袋ビル",
+          "addr:housenumber": "22",
+          "addr:neighbourhood": "1",
+          "addr:postcode": "171-0022",
+          "addr:province": "東京都",
+          "addr:quarter": "南池袋",
+          "addr:suburb": "豊島区",
+          "alt_name": "A3 Market Online",
+          "email": "support@athree3.com",
+          "level": "2",
+          "name": "A3",
+          "office": "company",
+          "website": "https://kyaragoods.shop-pro.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312201798,
+        "name": "京和不動產",
+        "category": "business",
+        "location": {
+          "lat": 35.7320291,
+          "lng": 139.7151207
+        },
+        "tags": {
+          "name": "京和不動產",
+          "office": "estate_agent",
+          "phone": "971-4311"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312284121,
+        "name": "グローバルキッズトラストネットワークス",
+        "category": "business",
+        "location": {
+          "lat": 35.7305784,
+          "lng": 139.7155588
+        },
+        "tags": {
+          "level": "2",
+          "name": "Global Trust Networks",
+          "name:en": "Global Trust Networks",
+          "name:ja": "グローバルキッズトラストネットワークス",
+          "office": "company"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312284159,
+        "name": "ちゃおちゃおハウス",
+        "category": "business",
+        "location": {
+          "lat": 35.7304968,
+          "lng": 139.7135834
+        },
+        "tags": {
+          "branch": "池袋支店",
+          "name": "ちゃおちゃおハウス",
+          "office": "estate_agent"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 11687188538,
+        "name": "ファイナール東京営業所",
+        "category": "business",
+        "location": {
+          "lat": 35.7290263,
+          "lng": 139.7072841
+        },
+        "tags": {
+          "addr:block_number": "7",
+          "addr:city": "豊島区",
+          "addr:housenumber": "10",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "name": "ファイナール東京営業所",
+          "office": "company",
+          "opening_hours": "Mo-Fr 09:00-18:00",
+          "phone": "+81-3-3980-3344",
+          "website": "https://finarl.co.jp"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12065021928,
+        "name": "みずべや",
+        "category": "business",
+        "location": {
+          "lat": 35.7322992,
+          "lng": 139.7076545
+        },
+        "tags": {
+          "name": "みずべや",
+          "office": "estate_agent",
+          "phone": "+81362792032",
+          "website": "http://ikebukuro.mizubeya.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12466540740,
+        "name": "池袋消防団第一分団本部",
+        "category": "business",
+        "location": {
+          "lat": 35.7334805,
+          "lng": 139.7104637
+        },
+        "tags": {
+          "name": "池袋消防団第一分団本部",
+          "office": "association"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12853222225,
+        "name": "株式会社ヒト・コミュニケーションズ",
+        "category": "business",
+        "location": {
+          "lat": 35.7309598,
+          "lng": 139.7143589
+        },
+        "tags": {
+          "name": "株式会社ヒト・コミュニケーションズ",
+          "office": "company"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12915038964,
+        "name": "ライフプロモーション",
+        "category": "business",
+        "location": {
+          "lat": 35.7321821,
+          "lng": 139.7111448
+        },
+        "tags": {
+          "addr:housename": "山の手ビル",
+          "contact:instagram": "https://www.instagram.com/lifepromotion/",
+          "contact:youtube": "https://www.youtube.com/c/LifePromotionCom",
+          "level": "8",
+          "name": "ライフプロモーション",
+          "name:en": "LIFE PROMOTION",
+          "office": "company",
+          "official_name": "株式会社LPH",
+          "twitter": "lifepromotion",
+          "website": "https://life-promotion.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12998514398,
+        "name": "株式会社ダイトク",
+        "category": "business",
+        "location": {
+          "lat": 35.7319269,
+          "lng": 139.7072602
+        },
+        "tags": {
+          "addr:block_number": "13",
+          "addr:city": "豊島区",
+          "addr:housenumber": "2",
+          "addr:neighbourhood": "池袋二丁目",
+          "addr:postcode": "171-0014",
+          "addr:province": "東京都",
+          "name": "株式会社ダイトク",
+          "office": "company"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 13010413184,
+        "name": "プログレス監査法人",
+        "category": "business",
+        "location": {
+          "lat": 35.7289351,
+          "lng": 139.7087089
+        },
+        "tags": {
+          "name": "プログレス監査法人",
+          "office": "accountant"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 13108097621,
+        "name": "SoloTime",
+        "category": "business",
+        "location": {
+          "lat": 35.7315552,
+          "lng": 139.7127928
+        },
+        "tags": {
+          "branch": "池袋",
+          "name": "SoloTime",
+          "office": "coworking"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 159135048,
+        "name": "豊島税務署",
+        "category": "business",
+        "location": {
+          "lat": 35.7302421,
+          "lng": 139.7051958
+        },
+        "tags": {
+          "building": "public",
+          "government": "tax",
+          "int_name": "Toshima-ku local Tax Office",
+          "name": "豊島税務署",
+          "office": "government",
+          "operator": "東京国税局"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146106,
+        "name": "マツモトキヨシ",
+        "category": "medical",
+        "location": {
+          "lat": 35.7314839,
+          "lng": 139.7103004
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "brand": "マツモトキヨシ",
+          "brand:en": "Matsumoto Kiyoshi",
+          "brand:ja": "マツモトキヨシ",
+          "brand:wikidata": "Q8014776",
+          "brand:wikipedia": "ja:マツモトキヨシ",
+          "healthcare": "pharmacy",
+          "int_name": "Matsumotokiyoshi",
+          "name": "マツモトキヨシ",
+          "name:en": "Matsumoto Kiyoshi",
+          "name:ja": "マツモトキヨシ",
+          "shop": "chemist",
+          "short_name": "マツキヨ",
+          "short_name:en": "Matsukiyo",
+          "short_name:ja": "マツキヨ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316303085,
+        "name": "マツモトキヨシ",
+        "category": "medical",
+        "location": {
+          "lat": 35.7295756,
+          "lng": 139.7126628
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "brand": "マツモトキヨシ",
+          "brand:en": "Matsukiyo",
+          "brand:ja": "マツモトキヨシ",
+          "brand:wikidata": "Q8014776",
+          "brand:wikipedia": "ja:マツモトキヨシ",
+          "healthcare": "pharmacy",
+          "int_name": "Matsumotokiyoshi",
+          "name": "マツモトキヨシ",
+          "name:en": "Matsukiyo",
+          "name:ja": "マツモトキヨシ",
+          "opening_hours": "PH,Mo-Su 09:00-23:00"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420774889,
+        "name": "宏明会池袋大久保病院",
+        "category": "medical",
+        "location": {
+          "lat": 35.732897,
+          "lng": 139.71113
+        },
+        "tags": {
+          "amenity": "hospital",
+          "healthcare": "hospital",
+          "name": "宏明会池袋大久保病院",
+          "name:en": "Ikebukuro Okubo Hospital",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420779761,
+        "name": "平塚胃腸病院",
+        "category": "medical",
+        "location": {
+          "lat": 35.728675,
+          "lng": 139.706103
+        },
+        "tags": {
+          "amenity": "hospital",
+          "healthcare": "hospital",
+          "name": "平塚胃腸病院",
+          "name:en": "Hiratsuka Gastrointestinal Clinic",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420796551,
+        "name": "芳精会ぬかりや病院",
+        "category": "medical",
+        "location": {
+          "lat": 35.7264049,
+          "lng": 139.7114787
+        },
+        "tags": {
+          "amenity": "hospital",
+          "name": "芳精会ぬかりや病院",
+          "name:en": "Nukariya Hospital",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3555054147,
+        "name": "マツモトキヨシ",
+        "category": "medical",
+        "location": {
+          "lat": 35.7270098,
+          "lng": 139.7116733
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "branch": "南池袋店",
+          "brand": "マツモトキヨシ",
+          "brand:en": "Matsumoto Kiyoshi",
+          "brand:ja": "マツモトキヨシ",
+          "brand:wikidata": "Q8014776",
+          "brand:wikipedia": "ja:マツモトキヨシ",
+          "check_date": "2025-04-29",
+          "healthcare": "pharmacy",
+          "name": "マツモトキヨシ",
+          "name:en": "Matsumoto Kiyoshi",
+          "name:ja": "マツモトキヨシ",
+          "ref": "1040",
+          "shop": "chemist",
+          "short_name": "マツキヨ",
+          "short_name:en": "Matsukiyo",
+          "short_name:ja": "マツキヨ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3555054149,
+        "name": "池袋ファースト歯科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7270053,
+          "lng": 139.7112086
+        },
+        "tags": {
+          "addr:block_number": "17",
+          "addr:city": "豊島区",
+          "addr:housenumber": "3",
+          "amenity": "dentist",
+          "check_date": "2025-10-29",
+          "healthcare": "dentist",
+          "level": "0",
+          "name": "池袋ファースト歯科",
+          "name:en": "IKEBUKURO First Dental Clinic"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557024095,
+        "name": "山の手デンタル歯科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7278027,
+          "lng": 139.7126005
+        },
+        "tags": {
+          "amenity": "dentist",
+          "check_date": "2025-04-29",
+          "name": "山の手デンタル歯科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4201808289,
+        "name": "大黒屋",
+        "category": "medical",
+        "location": {
+          "lat": 35.7288824,
+          "lng": 139.7123146
+        },
+        "tags": {
+          "addr:block_number": "22",
+          "addr:city": "豊島区",
+          "addr:housenumber": "1",
+          "addr:neighbourhood": "南池袋一丁目",
+          "addr:province": "東京都",
+          "amenity": "pharmacy",
+          "branch": "質池袋西武前店",
+          "brand": "大黒屋",
+          "brand:en": "Daikokuya",
+          "brand:ja": "大黒屋",
+          "brand:wikidata": "Q11442068",
+          "level": "-1;1",
+          "name": "大黒屋;",
+          "name:en": "Daikokuya",
+          "name:ja": "大黒屋",
+          "opening_hours": "Mo-Su 10:00-19:00",
+          "phone": "+81 3-5949-5301",
+          "shop": "pawnbroker",
+          "website": "https://shichi.e-daikoku.com/shop/ikebukuro_seibumae.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 5939950287,
+        "name": "木村整形外科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7278236,
+          "lng": 139.715177
+        },
+        "tags": {
+          "amenity": "hospital",
+          "name": "木村整形外科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6017699588,
+        "name": "榎本クリニック",
+        "category": "medical",
+        "location": {
+          "lat": 35.7277691,
+          "lng": 139.7090324
+        },
+        "tags": {
+          "amenity": "hospital",
+          "healthcare": "hospital",
+          "name": "榎本クリニック"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6070213421,
+        "name": "大松矯正歯科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7318832,
+          "lng": 139.7072212
+        },
+        "tags": {
+          "amenity": "dentist",
+          "name": "大松矯正歯科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6070213429,
+        "name": "池袋アゼリア通り歯科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7320503,
+          "lng": 139.7063582
+        },
+        "tags": {
+          "amenity": "dentist",
+          "name": "池袋アゼリア通り歯科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205031452,
+        "name": "池袋皮膚科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7278802,
+          "lng": 139.7153922
+        },
+        "tags": {
+          "amenity": "doctors",
+          "healthcare": "doctor",
+          "level": "4",
+          "name": "池袋皮膚科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205031466,
+        "name": "池袋ヤマヤ歯科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7279043,
+          "lng": 139.7154077
+        },
+        "tags": {
+          "amenity": "dentist",
+          "healthcare": "dentist",
+          "level": "3",
+          "name": "池袋ヤマヤ歯科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205031474,
+        "name": "よつば薬局",
+        "category": "medical",
+        "location": {
+          "lat": 35.727856,
+          "lng": 139.7153603
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "dispensing": "yes",
+          "healthcare": "pharmacy",
+          "level": "6",
+          "name": "よつば薬局"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8309238895,
+        "name": "ライフサポートクリニック",
+        "category": "medical",
+        "location": {
+          "lat": 35.7314912,
+          "lng": 139.7069768
+        },
+        "tags": {
+          "addr:block_number": "29",
+          "addr:city": "豊島区",
+          "addr:housenumber": "12",
+          "addr:neighbourhood": "西池袋三丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "amenity": "doctors",
+          "healthcare": "doctor",
+          "healthcare:speciality": "psychiatry;psycotherapy",
+          "name": "ライフサポートクリニック",
+          "opening_hours": "Mo-Sa 10:00-19:30",
+          "payment:cash": "yes",
+          "phone": "+81-3-6384-7607",
+          "website": "https://life-support-clinic.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8829201754,
+        "name": "マツモトキヨシ",
+        "category": "medical",
+        "location": {
+          "lat": 35.729794,
+          "lng": 139.7155494
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "brand": "マツモトキヨシ",
+          "brand:en": "Matsumoto Kiyoshi",
+          "brand:ja": "マツモトキヨシ",
+          "brand:wikidata": "Q8014776",
+          "healthcare": "pharmacy",
+          "name": "マツモトキヨシ",
+          "name:en": "Matsumoto Kiyoshi",
+          "name:ja": "マツモトキヨシ",
+          "name:ja-Hira": "まつもときよし",
+          "name:ja-Latn": "MatsumotoKiyoshi",
+          "name:ja_rm": "MatsumotoKiyoshi",
+          "short_name": "マツキヨ",
+          "short_name:en": "Matsukiyo",
+          "short_name:ja": "マツキヨ",
+          "website": "https://www.matsukiyo.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8829201777,
+        "name": "サンドラッグ",
+        "category": "medical",
+        "location": {
+          "lat": 35.7295268,
+          "lng": 139.7145342
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "brand": "サンドラッグ",
+          "brand:en": "Sundrug",
+          "brand:ja": "サンドラッグ",
+          "brand:wikidata": "Q11305867",
+          "brand:wikipedia": "ja:サンドラッグ",
+          "healthcare": "pharmacy",
+          "name": "サンドラッグ",
+          "name:en": "Sundrug",
+          "name:ja": "サンドラッグ",
+          "name:ja-Hira": "さんどらっぐ",
+          "name:ja-Latn": "San Doraggu",
+          "name:ja_rm": "San Doraggu",
+          "operator": "サンドラッグ",
+          "website": "http://www.sundrug.co.jp/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 9411802820,
+        "name": "萩原歯科医院",
+        "category": "medical",
+        "location": {
+          "lat": 35.7277559,
+          "lng": 139.71305
+        },
+        "tags": {
+          "addr:floor": "2F",
+          "addr:housename": "南池袋平成ビル",
+          "amenity": "dentist",
+          "level": "1",
+          "name": "萩原歯科医院",
+          "name:en": "Hagiwara Dental Clinic"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312201785,
+        "name": "サンドラッグ",
+        "category": "medical",
+        "location": {
+          "lat": 35.7301288,
+          "lng": 139.7159021
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "brand": "サンドラッグ",
+          "brand:en": "Sundrug",
+          "brand:ja": "サンドラッグ",
+          "brand:wikidata": "Q11305867",
+          "fixme": "1-2F",
+          "healthcare": "pharmacy",
+          "level": "0",
+          "name": "サンドラッグ",
+          "name:en": "Sundrug",
+          "name:ja": "サンドラッグ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312224895,
+        "name": "サンドラッグ",
+        "category": "medical",
+        "location": {
+          "lat": 35.7304238,
+          "lng": 139.713179
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "branch": "池袋東口駅前店",
+          "level": "0;1;2",
+          "name": "サンドラッグ",
+          "name:en": "Sundrug",
+          "name:ja": "サンドラッグ"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312284363,
+        "name": "たかしん薬局",
+        "category": "medical",
+        "location": {
+          "lat": 35.7281044,
+          "lng": 139.7135881
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "branch:ja": "池袋店",
+          "level": "1",
+          "name": "たかしん薬局"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10573893708,
+        "name": "立教通り皮膚科整形外科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7312219,
+          "lng": 139.70648
+        },
+        "tags": {
+          "amenity": "doctors",
+          "check_date": "2023-01-22",
+          "healthcare": "doctor",
+          "level": "0",
+          "name": "立教通り皮膚科整形外科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 11508135590,
+        "name": "小川原デンタルクリニック",
+        "category": "medical",
+        "location": {
+          "lat": 35.7328909,
+          "lng": 139.7096872
+        },
+        "tags": {
+          "amenity": "dentist",
+          "healthcare": "dentist",
+          "name": "小川原デンタルクリニック"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 11508135591,
+        "name": "池袋心療内科",
+        "category": "medical",
+        "location": {
+          "lat": 35.7329038,
+          "lng": 139.7097084
+        },
+        "tags": {
+          "amenity": "doctors",
+          "healthcare": "doctor",
+          "healthcare:speciality": "internal",
+          "name": "池袋心療内科"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 11508135592,
+        "name": "ふくろう皮膚科クリニック",
+        "category": "medical",
+        "location": {
+          "lat": 35.7329001,
+          "lng": 139.709721
+        },
+        "tags": {
+          "amenity": "doctors",
+          "healthcare": "doctor",
+          "healthcare:speciality": "dermatology",
+          "name": "ふくろう皮膚科クリニック"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 11508135593,
+        "name": "池袋大谷クリニック",
+        "category": "medical",
+        "location": {
+          "lat": 35.7328909,
+          "lng": 139.7097111
+        },
+        "tags": {
+          "amenity": "doctors",
+          "healthcare": "doctor",
+          "healthcare:speciality": "pulmonology;allergology;internal",
+          "name": "池袋大谷クリニック"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12691271511,
+        "name": "ウエルシア薬局",
+        "category": "medical",
+        "location": {
+          "lat": 35.7305961,
+          "lng": 139.7119842
+        },
+        "tags": {
+          "amenity": "pharmacy",
+          "brand": "welcia",
+          "brand:en": "welcia",
+          "brand:ja": "ウエルシア薬局",
+          "brand:wikidata": "Q11288687",
+          "healthcare": "pharmacy",
+          "name": "ウエルシア薬局",
+          "name:en": "Welcia",
+          "name:ja": "ウエルシア薬局"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12905236101,
+        "name": "ゆうメンタルクリニック",
+        "category": "medical",
+        "location": {
+          "lat": 35.7305779,
+          "lng": 139.7096433
+        },
+        "tags": {
+          "amenity": "doctors",
+          "check_date": "2025-06-11",
+          "healthcare": "doctor",
+          "healthcare:speciality": "psychiatry",
+          "internet_access": "wlan",
+          "internet_access:fee": "customers",
+          "level": "6",
+          "name": "ゆうメンタルクリニック",
+          "payment:cash": "yes",
+          "payment:credit_cards": "yes",
+          "payment:debit_cards": "yes",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4379340492,
+        "name": "ハイパーレーン",
+        "category": "leisure",
+        "location": {
+          "lat": 35.7327694,
+          "lng": 139.7135437
+        },
+        "tags": {
+          "name": "ハイパーレーン",
+          "name:en": "Hyperlane",
+          "opening_hours": "24/7",
+          "phone": "03-3987-1631",
+          "tourism": "attraction",
+          "website": "https://hyperlane.com/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4434538192,
+        "name": "アウル",
+        "category": "leisure",
+        "location": {
+          "lat": 35.7334991,
+          "lng": 139.7112121
+        },
+        "tags": {
+          "name": "アウル",
+          "name:en": "OWL",
+          "name:ja": "アウル",
+          "tourism": "attraction"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 8828795450,
+        "name": "オトメイトスクエア",
+        "category": "leisure",
+        "location": {
+          "lat": 35.7291861,
+          "lng": 139.715647
+        },
+        "tags": {
+          "addr:city": "豊島区",
+          "addr:country": "JP",
+          "addr:housename": "オトメイトビル",
+          "addr:housenumber": "5",
+          "addr:neighbourhood": "東池袋一丁目",
+          "addr:postcode": "170-0013",
+          "addr:province": "東京都",
+          "level": "6",
+          "name": "オトメイトスクエア",
+          "name:en": "Otomate Square",
+          "name:ja": "オトメイトスクエア",
+          "tourism": "attraction"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1316160570,
+        "name": "SBI新生銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7310463,
+          "lng": 139.7087294
+        },
+        "tags": {
+          "amenity": "bank",
+          "atm": "yes",
+          "brand": "SBI新生銀行",
+          "brand:en": "SBI SHINSEI BANK",
+          "brand:ja": "SBI新生銀行",
+          "brand:wikidata": "Q571997",
+          "brand:wikipedia": "ja:新生銀行",
+          "int_name": "Shinsei Bank",
+          "name": "SBI新生銀行",
+          "name:en": "SBI Shinsei Bank",
+          "name:ja": "SBI新生銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1385935279,
+        "name": "三菱UFJ銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.731733,
+          "lng": 139.7097843
+        },
+        "tags": {
+          "amenity": "bank",
+          "brand": "三菱UFJ銀行",
+          "brand:en": "MUFG Bank",
+          "brand:ja": "三菱UFJ銀行",
+          "brand:wikidata": "Q988284",
+          "brand:wikipedia": "en:MUFG Bank",
+          "name": "三菱UFJ銀行",
+          "name:en": "MUFG Bank",
+          "name:ja": "三菱UFJ銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420771396,
+        "name": "商工中金",
+        "category": "finance",
+        "location": {
+          "lat": 35.728438,
+          "lng": 139.712532
+        },
+        "tags": {
+          "amenity": "bank",
+          "branch": "池袋支店",
+          "brand": "商工中金",
+          "brand:en": "Shoko Chukin Bank",
+          "brand:ja": "商工中金",
+          "brand:wikidata": "Q11418759",
+          "name": "商工中金",
+          "name:en": "Shoko Chukin Bank",
+          "name:ja": "商工中金",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1749378865,
+        "name": "三井住友信託銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7306343,
+          "lng": 139.7096813
+        },
+        "tags": {
+          "amenity": "bank",
+          "branch": "池袋支店",
+          "brand": "三井住友信託銀行",
+          "brand:en": "Sumitomo Mitsui Trust Bank",
+          "brand:ja": "三井住友信託銀行",
+          "brand:wikidata": "Q5215421",
+          "brand:wikipedia": "jp:三井住友信託銀行",
+          "name": "三井住友信託銀行",
+          "name:en": "Sumitomo Mitsui Trust Bank",
+          "name:ja": "三井住友信託銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1749378868,
+        "name": "三井住友信託銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7314016,
+          "lng": 139.7126912
+        },
+        "tags": {
+          "amenity": "bank",
+          "branch": "池袋支店;池袋東口支店",
+          "brand": "三井住友信託銀行",
+          "brand:en": "Sumitomo Mitsui Trust Bank",
+          "brand:ja": "三井住友信託銀行",
+          "brand:wikidata": "Q5215421",
+          "brand:wikipedia": "jp:三井住友信託銀行",
+          "name": "三井住友信託銀行",
+          "name:en": "Sumitomo Mitsui Trust Bank",
+          "name:ja": "三井住友信託銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2001676458,
+        "name": "みずほ銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7301754,
+          "lng": 139.7131851
+        },
+        "tags": {
+          "addr:block_number": "1",
+          "addr:city": "豊島区",
+          "addr:housenumber": "6",
+          "addr:neighbourhood": "東池袋一丁目",
+          "addr:postcode": "170-0013",
+          "addr:province": "東京都",
+          "amenity": "bank",
+          "atm": "yes",
+          "branch": "池袋支店",
+          "brand": "みずほ銀行",
+          "brand:en": "Mizuho Bank",
+          "brand:ja": "みずほ銀行",
+          "brand:wikidata": "Q2882956",
+          "brand:wikipedia": "en:Mizuho Bank",
+          "name": "みずほ銀行",
+          "name:en": "Mizuho Bank",
+          "name:ja": "みずほ銀行",
+          "name:ja_rm": "Mizuho Ginkou",
+          "opening_hours": "Mo-Fr 09:00-15:00",
+          "operator": "みずほ銀行",
+          "phone": "+81-3-39837221",
+          "ref": "230",
+          "source": "Bing 2010; (URL)",
+          "website": "https://www.mizuhobank.co.jp/",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 2001677606,
+        "name": "みずほ銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7304662,
+          "lng": 139.7097865
+        },
+        "tags": {
+          "addr:block_number": "15",
+          "addr:city": "豊島区",
+          "addr:housenumber": "2",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "amenity": "bank",
+          "atm": "yes",
+          "branch": "池袋西口支店",
+          "brand": "みずほ銀行",
+          "brand:en": "Mizuho Bank",
+          "brand:ja": "みずほ銀行",
+          "brand:wikidata": "Q2882956",
+          "name": "みずほ銀行",
+          "name:en": "Mizuho Bank",
+          "name:ja": "みずほ銀行",
+          "name:ja_rm": "Mizuho Ginkou",
+          "opening_hours": "Mo-Fr 09:00-15:00",
+          "operator": "みずほ銀行",
+          "phone": "+81-3-39847111",
+          "ref": "229",
+          "source": "Bing 2010; (URL)",
+          "website": "https://www.mizuhobank.co.jp/",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3557099994,
+        "name": "東京信用金庫",
+        "category": "finance",
+        "location": {
+          "lat": 35.7290848,
+          "lng": 139.7145243
+        },
+        "tags": {
+          "amenity": "bank",
+          "atm": "yes",
+          "branch": "本店",
+          "name": "東京信用金庫",
+          "name:en": "Tokyo Shinkin"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3693616539,
+        "name": "三井住友銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.728723,
+          "lng": 139.714071
+        },
+        "tags": {
+          "amenity": "bank",
+          "atm": "yes",
+          "brand": "三井住友銀行",
+          "brand:en": "Sumitomo Mitsui Banking Corporation",
+          "brand:ja": "三井住友銀行",
+          "brand:wikidata": "Q2660418",
+          "brand:wikipedia": "en:Sumitomo Mitsui Banking Corporation",
+          "name": "三井住友銀行",
+          "name:en": "Sumitomo Mitsui Banking Corporation",
+          "name:ja": "三井住友銀行",
+          "short_name:en": "SMBC"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 5010603523,
+        "name": "あおぞら銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7282784,
+          "lng": 139.7148735
+        },
+        "tags": {
+          "amenity": "bank",
+          "branch": "池袋支店",
+          "name": "あおぞら銀行",
+          "name:ja": "あおぞら銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 5010645221,
+        "name": "三菱UFJ銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7284875,
+          "lng": 139.7144609
+        },
+        "tags": {
+          "amenity": "bank",
+          "branch": "池袋東口支店",
+          "brand": "三菱UFJ銀行",
+          "brand:en": "MUFG Bank",
+          "brand:ja": "三菱UFJ銀行",
+          "brand:wikidata": "Q988284",
+          "brand:wikipedia": "en:MUFG Bank",
+          "name": "三菱UFJ銀行",
+          "name:en": "MUFG Bank",
+          "name:ja": "三菱UFJ銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 6106123333,
+        "name": "巣鴨信用金庫",
+        "category": "finance",
+        "location": {
+          "lat": 35.7281341,
+          "lng": 139.7160963
+        },
+        "tags": {
+          "amenity": "bank",
+          "name": "巣鴨信用金庫"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205031455,
+        "name": "常陽銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7288846,
+          "lng": 139.7148642
+        },
+        "tags": {
+          "amenity": "bank",
+          "brand": "常陽銀行",
+          "brand:en": "Joyo Bank",
+          "brand:wikidata": "Q6297774",
+          "brand:wikipedia": "en:Joyo Bank",
+          "name": "常陽銀行",
+          "name:en": "Joyo Bank"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205031469,
+        "name": "西武信用金庫",
+        "category": "finance",
+        "location": {
+          "lat": 35.7282399,
+          "lng": 139.714841
+        },
+        "tags": {
+          "amenity": "bank",
+          "name": "西武信用金庫"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205031477,
+        "name": "SMBC信託銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7286758,
+          "lng": 139.7140729
+        },
+        "tags": {
+          "amenity": "bank",
+          "branch": "池袋支店",
+          "brand": "SMBC信託銀行",
+          "brand:en": "SMBC Trust Bank",
+          "brand:wikidata": "Q17218805",
+          "brand:wikipedia": "jp:SMBC信託銀行",
+          "level": "4",
+          "name": "SMBC信託銀行",
+          "name:en": "SMBC Trust Bank"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 7205167125,
+        "name": "西京信用金庫",
+        "category": "finance",
+        "location": {
+          "lat": 35.7328056,
+          "lng": 139.7119192
+        },
+        "tags": {
+          "addr:block_number": "44",
+          "addr:city": "豊島区",
+          "addr:neighbourhood": "西池袋一丁目",
+          "addr:postcode": "171-0021",
+          "addr:province": "東京都",
+          "amenity": "bank",
+          "name": "西京信用金庫"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312284134,
+        "name": "りそな銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7286493,
+          "lng": 139.712261
+        },
+        "tags": {
+          "amenity": "bank",
+          "brand": "りそな銀行",
+          "brand:en": "Resona Bank",
+          "brand:ja": "りそな銀行",
+          "brand:wikidata": "Q11281447",
+          "level": "2",
+          "name": "りそな銀行",
+          "name:en": "Resona Bank",
+          "name:ja": "りそな銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10312284177,
+        "name": "東京スター銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.730395,
+          "lng": 139.7142787
+        },
+        "tags": {
+          "amenity": "bank",
+          "atm": "yes",
+          "brand:wikidata": "Q7813998",
+          "level": "0",
+          "name": "東京スター銀行",
+          "name:en": "Tokyo Star Bank",
+          "name:ja": "東京スター銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 12389728121,
+        "name": "あすか信用組合",
+        "category": "finance",
+        "location": {
+          "lat": 35.7294189,
+          "lng": 139.715998
+        },
+        "tags": {
+          "amenity": "bank",
+          "atm": "yes",
+          "branch": "池袋支店",
+          "name": "あすか信用組合"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 13399243871,
+        "name": "三菱UFJ信託銀行",
+        "category": "finance",
+        "location": {
+          "lat": 35.7301227,
+          "lng": 139.7098595
+        },
+        "tags": {
+          "addr:floor": "1",
+          "amenity": "bank",
+          "brand": "三菱UFJ信託銀行",
+          "brand:en": "Mitsubishi UFJ Trust and Banking Corporation",
+          "brand:ja": "三菱UFJ信託銀行",
+          "brand:wikidata": "Q6883178",
+          "check_date": "2025-12-24",
+          "level": "0",
+          "name": "三菱UFJ信託銀行",
+          "name:en": "Mitsubishi UFJ Trust and Banking Corporation",
+          "name:ja": "三菱UFJ信託銀行"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1315146056,
+        "name": "池袋駅西口交番",
+        "category": "service",
+        "location": {
+          "lat": 35.7315641,
+          "lng": 139.7100957
+        },
+        "tags": {
+          "amenity": "police",
+          "name": "池袋駅西口交番",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420765383,
+        "name": "メトロポリタンプラザ内郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.728831,
+          "lng": 139.709636
+        },
+        "tags": {
+          "amenity": "post_office",
+          "name": "メトロポリタンプラザ内郵便局",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420770784,
+        "name": "南池袋郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.72712,
+          "lng": 139.713213
+        },
+        "tags": {
+          "amenity": "post_office",
+          "name": "南池袋郵便局",
+          "name:en": "Minami Ikebukuro Post Office",
+          "name:ja": "南池袋郵便局",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787776,
+        "name": "池袋サンシャイン通郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.7307868,
+          "lng": 139.7156006
+        },
+        "tags": {
+          "amenity": "post_office",
+          "level": "2",
+          "name": "池袋サンシャイン通郵便局",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "operator": "日本郵便",
+          "operator:en": "Japan Post",
+          "operator:ja": "日本郵便",
+          "operator:short": "郵便局",
+          "operator:short:en": "JP",
+          "operator:short:ja": "郵便局",
+          "operator:wikidata": "Q11509260",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787786,
+        "name": "池袋消防署",
+        "category": "service",
+        "location": {
+          "lat": 35.7279633,
+          "lng": 139.7069646
+        },
+        "tags": {
+          "addr:postcode": "171-0021",
+          "amenity": "fire_station",
+          "fax": "+81-3-39880130",
+          "name": "池袋消防署",
+          "name:en": "Ikebukuro Fire Station",
+          "name:es": "Estación de bomberos de Ikebukuro",
+          "name:ja": "池袋消防署",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "operator": "東京消防庁第五消防方面本部",
+          "phone": "+81-3-39880119",
+          "source": "KSJ2;(URL)",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+          "website": "http://www.tfd.metro.tokyo.jp/hp-ikebukuro/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787796,
+        "name": "池袋西武簡易郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.728975,
+          "lng": 139.71162
+        },
+        "tags": {
+          "amenity": "post_office",
+          "name": "池袋西武簡易郵便局",
+          "name:en": "Post Office",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787801,
+        "name": "池袋警察署平和通交番",
+        "category": "service",
+        "location": {
+          "lat": 35.7333576,
+          "lng": 139.7116356
+        },
+        "tags": {
+          "amenity": "police",
+          "name": "池袋警察署平和通交番",
+          "name:en": "Koban",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787803,
+        "name": "池袋警察署 池袋二又交番",
+        "category": "service",
+        "location": {
+          "lat": 35.7316561,
+          "lng": 139.7068437
+        },
+        "tags": {
+          "amenity": "police",
+          "name": "池袋警察署 池袋二又交番",
+          "name:en": "Koban",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787808,
+        "name": "池袋郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.73323,
+          "lng": 139.708936
+        },
+        "tags": {
+          "amenity": "post_office",
+          "name": "池袋郵便局",
+          "name:en": "Ikebukuro Post Office",
+          "name:ja": "池袋郵便局",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "operator": "日本郵便",
+          "operator:en": "Japan Post",
+          "operator:ja": "日本郵便",
+          "operator:short": "郵便局",
+          "operator:short:en": "JP",
+          "operator:short:ja": "郵便局",
+          "operator:wikidata": "Q11509260",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420787809,
+        "name": "池袋駅前郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.7319255,
+          "lng": 139.7150467
+        },
+        "tags": {
+          "amenity": "post_office",
+          "atm": "separate",
+          "name": "池袋駅前郵便局",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "operator": "日本郵便",
+          "operator:en": "Japan Post",
+          "operator:ja": "日本郵便",
+          "operator:short": "郵便局",
+          "operator:short:en": "JP",
+          "operator:short:ja": "郵便局",
+          "operator:wikidata": "Q11509260",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420790422,
+        "name": "目白警察署南池袋交番",
+        "category": "service",
+        "location": {
+          "lat": 35.7264157,
+          "lng": 139.711838
+        },
+        "tags": {
+          "amenity": "police",
+          "name": "目白警察署南池袋交番",
+          "name:en": "Koban",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420797851,
+        "name": "西池袋児童館",
+        "category": "service",
+        "location": {
+          "lat": 35.727786,
+          "lng": 139.706797
+        },
+        "tags": {
+          "amenity": "community_centre",
+          "name": "西池袋児童館",
+          "name:en": "Nishi-Ikebukuro Children's Hall",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1420797854,
+        "name": "西池袋郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.730193,
+          "lng": 139.706589
+        },
+        "tags": {
+          "amenity": "post_office",
+          "name": "西池袋郵便局",
+          "name:en": "Nishi Ikebukuro Post Office",
+          "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+          "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+          "operator": "日本郵便",
+          "operator:en": "Japan Post",
+          "operator:ja": "日本郵便",
+          "operator:short": "郵便局",
+          "operator:short:en": "JP",
+          "operator:short:ja": "郵便局",
+          "operator:wikidata": "Q11509260",
+          "source": "KSJ2",
+          "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 3904475291,
+        "name": "池袋通告センター",
+        "category": "service",
+        "location": {
+          "lat": 35.7283379,
+          "lng": 139.7072395
+        },
+        "tags": {
+          "amenity": "police",
+          "name": "池袋通告センター"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 4085799348,
+        "name": "池袋警察署",
+        "category": "service",
+        "location": {
+          "lat": 35.7284736,
+          "lng": 139.7071556
+        },
+        "tags": {
+          "amenity": "police",
+          "name": "池袋警察署",
+          "name:en": "Ikebukuro Police Station",
+          "wikidata": "Q11552248"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 10173885320,
+        "name": "東京芸術劇場郵便局",
+        "category": "service",
+        "location": {
+          "lat": 35.7298877,
+          "lng": 139.7078186
+        },
+        "tags": {
+          "amenity": "post_office",
+          "name": "東京芸術劇場郵便局",
+          "name:en": "Tokyo Metropolitan Theatre Post Office",
+          "name:ja": "東京芸術劇場郵便局",
+          "website": "https://map.japanpost.jp/p/search/dtl/300101510000/"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 99293083,
+        "name": "豊島区民センター",
+        "category": "service",
+        "location": {
+          "lat": 35.7314907,
+          "lng": 139.7155704
+        },
+        "tags": {
+          "amenity": "townhall",
+          "building": "yes",
+          "name": "豊島区民センター",
+          "name:en": "Toshima Civic Center",
+          "source": "Bing",
+          "toilets:wheelchair": "no",
+          "wheelchair": "yes"
+        },
+        "is_seasonal": false
+      },
+      {
+        "osm_id": 1127932836,
+        "name": "池袋駅東口交番",
+        "category": "service",
+        "location": {
+          "lat": 35.7296481,
+          "lng": 139.7129269
+        },
+        "tags": {
+          "amenity": "police",
+          "building": "yes",
+          "building:levels": "2",
+          "name": "池袋駅東口交番"
+        },
+        "is_seasonal": false
+      }
+    ]
   }
 ]

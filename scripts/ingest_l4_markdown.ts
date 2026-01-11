@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import { IdMatcher } from '../src/lib/utils/idMatcher';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
@@ -43,8 +44,8 @@ async function findNodeIds(searchId: string): Promise<string[]> {
     console.log(`[ID] Resolving nodes for: ${searchId}...`);
     let results: string[] = [];
 
-    // Normalize searchId for mapping
-    const fullSearchId = searchId.startsWith('odpt') ? searchId : `odpt:Station:${searchId}`;
+    // Use IdMatcher to get all potential variants
+    const variants = IdMatcher.getVariants(searchId);
 
     // Manual overrides
     const manualMappings: Record<string, string[]> = {
@@ -54,43 +55,31 @@ async function findNodeIds(searchId: string): Promise<string[]> {
         'odpt:Station:JR 機場第1航廈站 / JR 機場第2航廈站': ['odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal1'],
         'odpt:Station:JR-East 成田機場第1航廈站': ['odpt.Station:JR-East.NaritaAirport.NaritaAirportTerminal1'],
         'odpt:Station:JR-East 成田機場第2航廈站': ['odpt.Station:JR-East.NaritaAirport.NaritaAirportTerminal23'],
-        'odpt:Station:JR-East.Yamanote.Ebisu': ['odpt:Station:TokyoMetro.Ebisu', 'odpt:Station:JR-East.u'],
-        'odpt:Station:JR-East.Meguro': ['odpt:Station:JR-East.Meguro', 'odpt:Station:TokyoMetro.Meguro', 'odpt:Station:Toei.Meguro'],
-        'odpt:Station:JR-East.Nakano': ['odpt:Station:JR-East.Nakano', 'odpt:Station:TokyoMetro.Nakano'],
-        'odpt:Station:Tokyu.Meguro': ['odpt:Station:JR-East.Meguro', 'odpt:Station:TokyoMetro.Meguro', 'odpt:Station:Toei.Meguro'],
     };
 
-    if (manualMappings[fullSearchId]) {
-        results = manualMappings[fullSearchId];
+    const canonicalId = IdMatcher.normalize(searchId);
+    if (manualMappings[canonicalId] || manualMappings[searchId]) {
+        results = manualMappings[canonicalId] || manualMappings[searchId];
     } else {
-        // 1. Try exact match
-        let { data: node } = await supabase.from('nodes').select('id').eq('id', searchId).maybeSingle();
-        if (node) {
-            results.push(node.id);
+        // Try exact match for all variants
+        const { data: nodes } = await supabase
+            .from('nodes')
+            .select('id')
+            .in('id', variants);
+
+        if (nodes && nodes.length > 0) {
+            results = nodes.map(n => n.id);
         } else {
-            // 2. Try swapping separators
-            const altId = searchId.includes('odpt:Station:')
-                ? searchId.replace('odpt:Station:', 'odpt.Station:')
-                : searchId.replace('odpt.Station:', 'odpt:Station:');
+            // Fuzzy search by station name if variants fail
+            const stationName = IdMatcher.getCoreName(searchId);
+            const { data: fuzzyNodes } = await supabase
+                .from('nodes')
+                .select('id')
+                .ilike('id', `%${stationName}`)
+                .limit(5);
 
-            ({ data: node } = await supabase.from('nodes').select('id').eq('id', altId).maybeSingle());
-            if (node) {
-                results.push(node.id);
-            } else {
-                // 3. Fuzzy search
-                const parts = searchId.split(/[:.]/);
-                const stationName = parts[parts.length - 1];
-                const operator = parts.find(p => p.includes('JR') || p.includes('TokyoMetro') || p.includes('Toei') || p.includes('Keisei'));
-
-                if (stationName && operator) {
-                    const { data: nodes } = await supabase
-                        .from('nodes')
-                        .select('id')
-                        .ilike('id', `%${operator}%${stationName}%`)
-                        .limit(1);
-
-                    if (nodes && nodes.length > 0) results.push(nodes[0].id);
-                }
+            if (fuzzyNodes && fuzzyNodes.length > 0) {
+                results = fuzzyNodes.map(n => n.id);
             }
         }
     }
@@ -143,7 +132,7 @@ async function ingestFile(filePath: string) {
                 stations.push({ id: searchId, data: knowledge });
             }
         }
-    } else if (filename.includes('metro_toei')) {
+    } else if (filename.includes('metro_toei') || filename.includes('metro_remaining')) {
         const sections = content.split(/^### Station Context: /m).slice(1);
         for (const section of sections) {
             const lines = section.split('\n');

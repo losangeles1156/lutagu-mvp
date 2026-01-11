@@ -20,6 +20,7 @@ import {
     getCrowdTips
 } from '@/lib/l4/expertKnowledgeBase';
 import { knowledgeService } from '@/lib/l4/knowledgeService';
+import { translateKnowledgeItems, SupportedLocale } from '@/lib/ai/llmService';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -27,6 +28,13 @@ export async function GET(request: NextRequest) {
     const id = searchParams.get('id');
     const minPriority = parseInt(searchParams.get('min_priority') || '0', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
+    let locale = (searchParams.get('locale') || 'zh-TW') as string;
+
+    // Normalize locale for LLM service
+    if (locale === 'zh') locale = 'zh-TW';
+    if (!['zh-TW', 'en', 'ja'].includes(locale)) locale = 'zh-TW';
+    
+    const targetLocale = locale as SupportedLocale;
 
     try {
         switch (type) {
@@ -67,9 +75,12 @@ export async function GET(request: NextRequest) {
                 // Merge (prioritize markdown if available)
                 const combinedTips = markdownTips.length > 0 ? formattedMarkdownTips : hardcodedTipsFormatted;
 
+                // Translate if needed
+                const translatedTips = await translateKnowledgeItems(combinedTips, targetLocale);
+
                 return NextResponse.json({
                     railway_id: id,
-                    tips: combinedTips
+                    tips: translatedTips
                 });
             }
 
@@ -110,10 +121,30 @@ export async function GET(request: NextRequest) {
                     priority: 50 // Default legacy priority
                 }));
 
+                // Translate tips
+                const translatedTips = await translateKnowledgeItems(tips, targetLocale);
+
+                // Translate accessibility advice
+                let translatedAccessibility = hardcodedAccessibility;
+                if (hardcodedAccessibility && targetLocale !== 'zh-TW') {
+                    const accEntries = Object.entries(hardcodedAccessibility);
+                    const accItems = accEntries.map(([key, value]) => ({
+                        id: `acc-${key}`,
+                        content: value as string,
+                        section: 'Accessibility'
+                    }));
+                    const translatedAccItems = await translateKnowledgeItems(accItems, targetLocale);
+                    translatedAccessibility = {} as any;
+                    translatedAccItems.forEach((item, idx) => {
+                        const originalKey = accEntries[idx][0];
+                        (translatedAccessibility as any)[originalKey] = item.content;
+                    });
+                }
+                
                 return NextResponse.json({
                     station_id: id,
-                    tips: tips,
-                    accessibility: hardcodedAccessibility
+                    tips: translatedTips,
+                    accessibility: translatedAccessibility
                 });
             }
 
@@ -129,9 +160,27 @@ export async function GET(request: NextRequest) {
                         message: 'No accessibility data available for this station'
                     });
                 }
+
+                // Translate advice
+                let translatedAdvice = advice;
+                if (targetLocale !== 'zh-TW') {
+                    const accEntries = Object.entries(advice);
+                    const accItems = accEntries.map(([key, value]) => ({
+                        id: `acc-${key}`,
+                        content: value as string,
+                        section: 'Accessibility'
+                    }));
+                    const translatedAccItems = await translateKnowledgeItems(accItems, targetLocale);
+                    translatedAdvice = {} as any;
+                    translatedAccItems.forEach((item, idx) => {
+                        const originalKey = accEntries[idx][0];
+                        (translatedAdvice as any)[originalKey] = item.content;
+                    });
+                }
+
                 return NextResponse.json({
                     station_id: id,
-                    advice
+                    advice: translatedAdvice
                 });
             }
 
@@ -140,17 +189,40 @@ export async function GET(request: NextRequest) {
                     return NextResponse.json({ error: 'Missing location ID' }, { status: 400 });
                 }
                 const tips = getSpecialLocationTips(id);
+                const translatedTips = await translateKnowledgeItems(
+                    tips.map((t, i) => ({ id: `loc-${id}-${i}`, content: t.text, section: 'Location' })),
+                    targetLocale
+                );
+                const resultTips = tips.map((t, i) => ({ ...t, text: translatedTips[i].content }));
+                
                 return NextResponse.json({
                     location_id: id,
-                    tips,
+                    tips: resultTips,
                     count: tips.length
                 });
             }
 
             case 'passes': {
                 const passes = getPassRecommendations();
+                const passItems = passes.flatMap((p, i) => [
+                    { id: `pass-name-${i}`, content: p.name, section: 'Pass Name' },
+                    { id: `pass-cov-${i}`, content: p.coverage, section: 'Pass Coverage' },
+                    { id: `pass-use-${i}`, content: p.whenToUse, section: 'Pass Usage' }
+                ]);
+                const translatedPassItems = await translateKnowledgeItems(passItems, targetLocale);
+                
+                const resultPasses = passes.map((p, i) => {
+                    const baseIdx = i * 3;
+                    return {
+                        ...p,
+                        name: translatedPassItems[baseIdx].content,
+                        coverage: translatedPassItems[baseIdx + 1].content,
+                        whenToUse: translatedPassItems[baseIdx + 2].content
+                    };
+                });
+
                 return NextResponse.json({
-                    passes,
+                    passes: resultPasses,
                     count: passes.length
                 });
             }
@@ -158,9 +230,15 @@ export async function GET(request: NextRequest) {
             case 'crowd': {
                 const period = id as 'weekday-morning' | 'weekday-evening' | 'weekend' | 'holiday' || 'weekday-morning';
                 const tips = getCrowdTips(period);
+                const translatedTips = await translateKnowledgeItems(
+                    tips.map((t, i) => ({ id: `crowd-${period}-${i}`, content: t.advice, section: 'Crowd' })),
+                    targetLocale
+                );
+                const resultTips = tips.map((t, i) => ({ ...t, advice: translatedTips[i].content }));
+
                 return NextResponse.json({
                     period,
-                    tips,
+                    tips: resultTips,
                     count: tips.length
                 });
             }
