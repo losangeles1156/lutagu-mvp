@@ -1,0 +1,326 @@
+openapi: 3.0.0
+info:
+  title: Lutagu Dify Tools API
+  description: Real-time data APIs for Lutagu Dify Agent - Top 5 Core Tools
+  version: 2.0.0
+servers:
+  - url: https://lutagu.vercel.app
+paths:
+  /api/station/context:
+    get:
+      operationId: get_station_context
+      summary: 取得車站完整資訊 (L1-L3)
+      description: |
+        Returns comprehensive station information including:
+        - L1: Nearby POIs, vibe tags, categories
+        - L2: Train lines, crowd levels
+        - L3: Facilities (toilets, lockers, elevators)
+        - Transit tips and accessibility notes
+      parameters:
+        - name: stationId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Station ID (e.g., 'ueno', 'tokyo', 'asakusa')"
+          example: "ueno"
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ja, en, zh-TW]
+            default: ja
+          description: "Response language"
+      responses:
+        '200':
+          description: Station context with L1-L3 data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stationId:
+                    type: string
+                  name:
+                    type: object
+                    properties:
+                      ja:
+                        type: string
+                      en:
+                        type: string
+                  l1:
+                    type: object
+                    description: "POIs and vibe tags"
+                  l2:
+                    type: object
+                    description: "Train lines and crowd info"
+                  l3:
+                    type: array
+                    description: "Facilities list"
+                  transitTips:
+                    type: array
+                    items:
+                      type: string
+
+  /api/odpt/route:
+    get:
+      operationId: search_route
+      summary: 路線搜尋 (起點到終點)
+      description: |
+        Search for transit routes between two stations using ODPT API.
+        Returns multiple route options with fare, duration, and transfers.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Origin station name (Japanese or English)"
+          example: "上野"
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Destination station name"
+          example: "浅草"
+        - name: datetime
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: "Departure time (ISO 8601 format)"
+      responses:
+        '200':
+          description: Route search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  routes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        duration:
+                          type: integer
+                          description: "Total minutes"
+                        fare:
+                          type: integer
+                          description: "Yen"
+                        transfers:
+                          type: integer
+                        legs:
+                          type: array
+                          items:
+                            type: object
+
+  /api/weather:
+    get:
+      operationId: get_jma_alerts
+      summary: 取得 JMA 氣象警報
+      description: |
+        Returns current JMA weather alerts for Tokyo area.
+        Includes severity classification: critical, warning, advisory, info.
+      responses:
+        '200':
+          description: Weather alerts from JMA
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        summary:
+                          type: object
+                          properties:
+                            ja:
+                              type: string
+                            en:
+                              type: string
+                            zh:
+                              type: string
+                        severity:
+                          type: string
+                          enum: [critical, warning, advisory, info]
+                        alert_type:
+                          type: string
+                        region:
+                          type: string
+                  source:
+                    type: string
+                  fetchedAt:
+                    type: string
+
+  /api/l4/knowledge:
+    get:
+      operationId: search_expert_knowledge
+      summary: 專家知識搜尋
+      description: |
+        Search the expert knowledge base for transit tips, accessibility guidance,
+        and seasonal/event-specific advice. Returns matching rules and recommendations.
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Search query (keywords or natural language)"
+          example: "wheelchair access ueno"
+        - name: tags
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Comma-separated tags to filter (e.g., 'accessibility,locker')"
+        - name: stationId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Filter to specific station"
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ja, en, zh-TW]
+            default: ja
+      responses:
+        '200':
+          description: Matching knowledge entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        content:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        relevance:
+                          type: number
+                  total:
+                    type: integer
+
+  /api/tools/hub-info:
+    get:
+      operationId: get_hub_info
+      summary: 取得 Hub 節點資訊
+      description: |
+        Returns Hub node information including:
+        - Member stations (spoke nodes)
+        - Transfer complexity
+        - Walking distance between platforms
+        - Indoor connection notes
+      parameters:
+        - name: hubId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Hub node ID (e.g., 'hub:ueno', 'hub:tokyo')"
+          example: "hub:ueno"
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ja, en, zh-TW]
+            default: ja
+      responses:
+        '200':
+          description: Hub node details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hubId:
+                    type: string
+                  hubName:
+                    type: object
+                    properties:
+                      ja:
+                        type: string
+                      en:
+                        type: string
+                  memberCount:
+                    type: integer
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        memberId:
+                          type: string
+                        memberName:
+                          type: object
+                        operator:
+                          type: string
+                        lineName:
+                          type: string
+                        walkingSeconds:
+                          type: integer
+                  transferType:
+                    type: string
+                    enum: [direct, underground, surface, mixed]
+                  transferComplexity:
+                    type: string
+                    enum: [easy, moderate, complex]
+                  indoorConnectionNotes:
+                    type: string
+
+  /api/util/time:
+    get:
+      operationId: get_japan_time
+      summary: 取得日本現在時間
+      description: |
+        Returns current Japan Standard Time (JST) with:
+        - Formatted date/time string
+        - Hour (0-23)
+        - Period classification (morning_rush, evening_rush, late_night, day)
+        - Day of week
+        Use this to determine if it's rush hour, late night (limited train service), or weekday/weekend.
+      responses:
+        '200':
+          description: Current Japan time data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jst_time:
+                    type: string
+                    description: "Human-readable JST time (e.g., '2026年1月4日土曜日 22:38:50')"
+                  iso_timestamp:
+                    type: string
+                    description: "ISO 8601 timestamp"
+                  hour_jst:
+                    type: integer
+                    description: "Current hour in JST (0-23)"
+                  period:
+                    type: string
+                    enum: [morning_rush, evening_rush, late_night, day]
+                    description: "Current time period for crowd estimation"
+                  day_of_week:
+                    type: string
+                    description: "Day of week in English"

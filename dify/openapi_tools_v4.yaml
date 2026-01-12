@@ -1,0 +1,132 @@
+openapi: 3.1.0
+info:
+  title: LUTAGU API Tools
+  description: Lutagu transit data tools for Dify Agent
+  version: 4.0.0
+servers:
+  - url: https://lutagu.vercel.app
+paths:
+  /api/util/time:
+    get:
+      operationId: get_japan_time
+      summary: Get current Japan time
+      description: Returns JST time with period classification and day of week
+      responses:
+        "200":
+          description: Japan time data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/weather:
+    get:
+      operationId: get_jma_alerts
+      summary: Get JMA weather alerts
+      description: Returns JMA weather alerts for Tokyo area
+      responses:
+        "200":
+          description: Weather alerts
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/station/context:
+    get:
+      operationId: get_station_context
+      summary: Get station information
+      description: Returns full station info including facilities and transfers
+      parameters:
+        - name: station_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Station ID like ueno, tokyo, asakusa
+      responses:
+        "200":
+          description: Station data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/odpt/route:
+    get:
+      operationId: search_route
+      summary: Search transit route
+      description: Search routes between two stations
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Origin station name
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Destination station name
+      responses:
+        "200":
+          description: Route results
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/l4/knowledge:
+    get:
+      operationId: search_expert_knowledge
+      summary: Search transit knowledge
+      description: Get expert tips for railway, station, or accessibility
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - railway
+              - station
+              - accessibility
+              - location
+              - passes
+              - crowd
+          description: Knowledge type
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Station or railway ID
+      responses:
+        "200":
+          description: Knowledge entries
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/tools/hub-info:
+    get:
+      operationId: get_hub_info
+      summary: Get Hub station info
+      description: Returns Hub info including member stations
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Station or Hub name to search
+      responses:
+        "200":
+          description: Hub details
+          content:
+            application/json:
+              schema:
+                type: object

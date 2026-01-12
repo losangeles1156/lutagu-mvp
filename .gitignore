@@ -38,6 +38,14 @@ scripts/*.json
 !scripts/extract_key_updates.ts
 !scripts/verify_odpt.ts
 !scripts/verify_coverage.ts
+!scripts/test_l1_new_categories.ts
+!scripts/debug_railway_fetch.ts
+!scripts/verify_workflow_logic.ts
+!scripts/check_live_yahoo.ts
+!scripts/check_supabase_yahoo.ts
+!scripts/check_live_status_monitor.ts
+!scripts/update_railway_status.ts
+!scripts/inspect_schema.ts
 
 # Local env files
 .env*.local

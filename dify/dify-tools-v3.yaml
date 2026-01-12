@@ -1,0 +1,394 @@
+openapi: 3.0.0
+info:
+  title: LUTAGU Dify Tools
+  description: OpenAPI specification for LUTAGU Dify Agent tools
+  version: 1.1.0
+servers:
+  - url: https://lutagu.vercel.app
+    description: Production server
+
+paths:
+  /api/util/time:
+    get:
+      operationId: get_japan_time
+      summary: Get Japan Time and Period
+      description: Returns current date, time, and period (morning_rush, evening_rush, day, late_night) in Tokyo. Use this to check if user is travelling during rush hour.
+      tags:
+        - Utility
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jst_time:
+                    type: string
+                    example: "2026-01-05 11:35:00"
+                    description: Human readable time string
+                  hour_jst:
+                    type: integer
+                    example: 11
+                    description: Hour in JST (0-23)
+                  period:
+                    type: string
+                    enum:
+                      - morning_rush
+                      - day
+                      - evening_rush
+                      - late_night
+                    example: "day"
+                    description: Time period context
+                  day_of_week:
+                    type: string
+                    example: "Monday"
+                    description: Day of week in English
+
+  /api/weather/live:
+    get:
+      operationId: get_weather
+      summary: Get Tokyo Real-time Weather
+      description: Returns current weather condition and temperature in Tokyo. Use this to provide weather-aware recommendations.
+      tags:
+        - Utility
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  weather:
+                    type: string
+                    example: "晴れ"
+                    description: Weather condition in Japanese
+                  temp:
+                    type: number
+                    example: 12.5
+                    description: Temperature in Celsius
+                  humidity:
+                    type: integer
+                    example: 45
+                    description: Humidity percentage
+                  icon:
+                    type: string
+                    example: "sunny"
+                    description: Weather icon identifier
+
+  /api/odpt/route:
+    get:
+      operationId: search_route
+      summary: Search Transit Route with Fare
+      description: Finds route between two stations using ODPT data. Returns multiple route options including duration, transfers, and fare. This is the CORE tool for route planning.
+      tags:
+        - Transit
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Origin station name (Japanese or English)
+          schema:
+            type: string
+            example: "上野"
+        - name: to
+          in: query
+          required: true
+          description: Destination station name
+          schema:
+            type: string
+            example: "銀座"
+        - name: datetime
+          in: query
+          required: false
+          description: Departure time in ISO 8601 format
+          schema:
+            type: string
+            format: date-time
+            example: "2026-01-05T11:00:00Z"
+      responses:
+        '200':
+          description: Successful response with route options
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  routes:
+                    type: array
+                    description: List of route options
+                    items:
+                      type: object
+                      properties:
+                        distance:
+                          type: number
+                          example: 15.2
+                          description: Distance in kilometers
+                        duration:
+                          type: integer
+                          example: 35
+                          description: Travel duration in minutes
+                        transfers:
+                          type: integer
+                          example: 1
+                          description: Number of transfers
+                        fare:
+                          type: integer
+                          example: 210
+                          description: Fare in Japanese Yen
+                        from:
+                          type: string
+                          example: "上野"
+                        to:
+                          type: string
+                          example: "銀座"
+                        legs:
+                          type: array
+                          description: Individual route segments
+                          items:
+                            type: object
+                            properties:
+                              line:
+                                type: string
+                                example: "東京地鐵銀座線"
+                              from:
+                                type: string
+                                example: "上野"
+                              to:
+                                type: string
+                                example: "銀座"
+                              departure_time:
+                                type: string
+                                example: "11:40"
+                              arrival_time:
+                                type: string
+                                example: "11:50"
+
+  /api/odpt/train-status:
+    get:
+      operationId: get_train_status
+      summary: Get Train Operation Status
+      description: Returns delay and suspension information for major Tokyo train lines. Use this when user asks about current train status.
+      tags:
+        - Transit
+      parameters:
+        - name: operator
+          in: query
+          required: false
+          description: Filter by operator (e.g., "JR-East", "TokyoMetro")
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        operator:
+                          type: string
+                          example: "JR-East"
+                        line:
+                          type: string
+                          example: "山手線"
+                        status:
+                          type: string
+                          enum:
+                            - normal
+                            - delay
+                            - suspended
+                          example: "normal"
+                        delay_minutes:
+                          type: integer
+                          nullable: true
+                          example: null
+                        description:
+                          type: string
+                          nullable: true
+                          example: null
+
+  /api/station/context:
+    get:
+      operationId: get_station_context
+      summary: Get Station Context
+      description: Returns comprehensive station information including facilities, POIs, vibe tags, and busy level. Use this for station-specific questions.
+      tags:
+        - Station
+      parameters:
+        - name: station_id
+          in: query
+          required: true
+          description: Station ID in ODPT format (e.g., odpt.Station:JR-East.Ueno)
+          schema:
+            type: string
+            example: "odpt.Station:JR-East.Ueno"
+        - name: locale
+          in: query
+          required: false
+          description: Response language
+          schema:
+            type: string
+            enum:
+              - ja
+              - en
+              - zh-TW
+            default: "ja"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  station_id:
+                    type: string
+                    example: "odpt.Station:JR-East.Ueno"
+                  busy_level:
+                    type: string
+                    enum:
+                      - Quiet
+                      - Moderate
+                      - Busy
+                      - Very Busy
+                    example: "Moderate"
+                  annual_journeys:
+                    type: integer
+                    nullable: true
+                    example: 180000000
+                  vibe_tags:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+                    example:
+                      zh-TW: ["文化", "購物"]
+                      ja: ["文化", "アメ横"]
+                  facilities:
+                    type: object
+                    properties:
+                      toilets:
+                        type: array
+                        items:
+                          type: string
+                      elevators:
+                        type: array
+                        items:
+                          type: string
+                      lockers:
+                        type: array
+                        items:
+                          type: string
+                  nearby_pois:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        distance:
+                          type: string
+                        type:
+                          type: string
+                  active_alerts:
+                    type: array
+                    items:
+                      type: object
+
+  /api/l4/knowledge:
+    get:
+      operationId: search_expert_knowledge
+      summary: Search Expert Knowledge Base
+      description: Searches the expert knowledge base for transit tips, accessibility advice, pass recommendations, and crowd avoidance strategies. Use this for "pro tips" and special recommendations.
+      tags:
+        - Knowledge
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: Type of knowledge to search
+          schema:
+            type: string
+            enum:
+              - railway
+              - station
+              - accessibility
+              - location
+              - passes
+              - crowd
+        - name: id
+          in: query
+          required: false
+          description: Station or railway ID to filter by
+          schema:
+            type: string
+        - name: tags
+          in: query
+          required: false
+          description: Comma-separated tags to filter
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: Response language
+          schema:
+            type: string
+            enum:
+              - ja
+              - en
+              - zh-TW
+            default: "ja"
+      responses:
+        '200':
+          description: Successful response with expert tips
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: "station"
+                  station_id:
+                    type: string
+                    nullable: true
+                    example: "odpt.Station:JR-East.Tokyo"
+                  tips:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                          example: "京葉線月台位置"
+                        content:
+                          type: string
+                          example: "京葉線月台在地下 B1F..."
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        accessibility_note:
+                          type: string
+                          nullable: true
+                  count:
+                    type: integer
+
+tags:
+  - name: Utility
+    description: General utility tools (time, weather)
+  - name: Transit
+    description: Transit-related tools (routes, status)
+  - name: Station
+    description: Station-specific information
+  - name: Knowledge
+    description: Expert knowledge base
