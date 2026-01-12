@@ -12,6 +12,8 @@ if (!API_TOKEN) {
     process.exit(1);
 }
 
+const safeToken = API_TOKEN as string;
+
 const endpoints = [
     {
         name: 'HND Flight Schedule',

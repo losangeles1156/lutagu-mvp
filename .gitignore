@@ -46,6 +46,8 @@ scripts/*.json
 !scripts/check_live_status_monitor.ts
 !scripts/update_railway_status.ts
 !scripts/inspect_schema.ts
+!scripts/research_flight_data.ts
+!scripts/scrapers/airport_haneda.ts
 
 # Local env files
 .env*.local

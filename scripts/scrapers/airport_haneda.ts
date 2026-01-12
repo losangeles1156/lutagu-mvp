@@ -211,7 +211,7 @@ async function scrapeHanedaFacilities(page: any) {
 
         // Extract text content specifically from main area
         const mainText = await page.evaluate(() => {
-            const main = document.querySelector('.layout') || document.body;
+            const main = (document.querySelector('.layout') || document.body) as HTMLElement;
             return main.innerText;
         });
 
