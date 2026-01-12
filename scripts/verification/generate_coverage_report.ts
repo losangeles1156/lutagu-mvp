@@ -58,8 +58,8 @@ top100Stations.forEach((s: any) => {
     const hasL1Index = !!clusterId;
     const hasL1Full = !!(clusterId && staticL1Ids.has(clusterId));
     
-    if (name === '上野' || name === '東京') {
-        console.log(`Debug ${name}: clusterId=${clusterId}, hasL1Full=${hasL1Full}`);
+    if (name === '上野' || name === '東京' || name === '鶯谷') {
+        console.log(`Debug ${name}: clusterId=${clusterId}, hasL1Full=${hasL1Full}, staticL1IdsHas=${staticL1Ids.has(clusterId || '')}`);
     }
     
     // Check L4 coverage (ID or Name)
@@ -85,6 +85,14 @@ top100Stations.forEach((s: any) => {
     if (name === '恵比寿') nameVariations.push('惠比壽', '惠比壽車站');
     if (name === '目黒') nameVariations.push('目黑', '目黑車站');
     if (name === '五反田') nameVariations.push('五反田車站');
+    if (name === '市ケ谷') nameVariations.push('市谷', '市谷車站', '市ヶ谷', '市ヶ谷車站');
+    if (name === '霞ケ関') nameVariations.push('霞關', '霞關車站', '霞ヶ関', '霞ヶ関車站');
+    if (name === '九段下') nameVariations.push('九段下車站');
+    if (name === '三越前') nameVariations.push('三越前車站');
+    if (name === '日比谷') nameVariations.push('日比谷車站');
+    if (name === '大崎') nameVariations.push('大崎車站');
+    if (name === '神田') nameVariations.push('神田車站');
+    if (name === '品川') nameVariations.push('品川車站');
 
     const hasL4Name = nameVariations.some(v => knowledgeNames.has(v));
     const hasL4 = hasL4Id || hasL4Name;

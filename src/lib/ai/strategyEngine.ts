@@ -25,6 +25,7 @@ export interface StrategyContext {
     commercialActions: any[];
     wisdomSummary?: string;
     wisdom?: any;
+    nodeLocation?: { lat: number; lng: number };
 }
 
 /**
@@ -110,7 +111,8 @@ export const StrategyEngine = {
             l2Status,
             commercialActions: commercialActions.sort((a, b) => b.priority - a.priority),
             wisdomSummary,
-            wisdom: resolvedWisdom
+            wisdom: resolvedWisdom,
+            nodeLocation: (identityNode.lat && identityNode.lon) ? { lat: identityNode.lat, lng: identityNode.lon } : undefined
         };
     }
 };

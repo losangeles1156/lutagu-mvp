@@ -1,0 +1,522 @@
+-- Update for odpt:Station:TokyoMetro.Ginza
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🤝","title":"與日比谷線轉乘 (Ginza to Hibiya)","description":"雖然這兩條線路共享銀座站，但轉乘需要經過漫長的地下通道，特別是如果你在車廂兩端下山。","advice":"️ 建議：跟隨藍色（日比谷線）或橙色（銀座線）的地面指示箭頭，並注意不要誤出站。"},{"icon":"🎯","title":"出口分散","description":"銀座站有 A1-A15 等多個出口，通往不同方向的購物區和商業大樓。","advice":"確認目的地後再選擇出口。前往「銀座三越」建議 A3 或 A5 出口；前往「松屋銀座」建議 A8 出口。"},{"icon":"🏪","title":"地下迷宮","description":"銀座站地下與多個商場直結（銀座三越、松屋銀座、銀座Plaza），地下通道非常複雜。","advice":"跟隨指標前進，或使用車站內的地圖確認位置。"}],"hacks":[{"icon":"💎","title":"出口陷阱","description":"如果你要去銀座四丁目的三越百貨，請尋找 A7 或 A8 出口，這比走 A1 快得多。"},{"icon":"🎨","title":"藝術地下道","description":"地下道內常有藝術展覽，轉乘時不妨放慢腳步欣賞。銀座站的地下藝術走廊非常著名。"},{"icon":"🛍️","title":"中央通","description":"從 A1 出口出來就是著名的中央通，是東京最繁華的購物街之一。"},{"icon":"🍜","title":"銀座美食","description":"銀座是日本最高級的美食區，有許多米其林餐廳和高級甜點店。推薦「空也」和「武士男子」。"},{"icon":"🌸","title":"鮪魚拍賣","description":"凌晨可在築地市場觀看鮪魚拍賣，步行從銀座站約 15 分鐘。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"A5、A8、A11 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"B5、B6、B7 出口","tags":["Wheelchair"]},{"type":"elevator","location":"A1、A2、A3、A4、A5、A6、A7、A8 出口","tags":["Wheelchair"]},{"type":"toilet","location":"A1、A5、A8 出口附近","tags":["BabyRoom"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Ginza';
+
+
+-- Update for odpt:Station:TokyoMetro.HigashiGinza
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🤝","title":"與日比谷線轉乘 (Ginza to Hibiya)","description":"雖然這兩條線路共享銀座站，但轉乘需要經過漫長的地下通道，特別是如果你在車廂兩端下山。","advice":"️ 建議：跟隨藍色（日比谷線）或橙色（銀座線）的地面指示箭頭，並注意不要誤出站。"},{"icon":"🎯","title":"出口分散","description":"銀座站有 A1-A15 等多個出口，通往不同方向的購物區和商業大樓。","advice":"確認目的地後再選擇出口。前往「銀座三越」建議 A3 或 A5 出口；前往「松屋銀座」建議 A8 出口。"},{"icon":"🏪","title":"地下迷宮","description":"銀座站地下與多個商場直結（銀座三越、松屋銀座、銀座Plaza），地下通道非常複雜。","advice":"跟隨指標前進，或使用車站內的地圖確認位置。"},{"icon":"🚅","title":"列車過站不停警示 (Skip Stop)","description":"注意！都營淺草線的「Airport快特 (Airport Kaitoku)」列車"},{"icon":"🎭","title":"與銀座站關係","description":"東銀座站與東京Metro銀座站是兩個不同的車站，步行約 5 分鐘。","advice":"從東銀座站 A1 出口出站，步行約 5 分鐘可達銀座站。"},{"icon":"🏮","title":"歌舞伎座直結","description":"東銀座站與歌舞伎座直結，演出結束後人潮會瞬間爆發。","advice":"️ 建議：避開演出散場時間進入車站。"}],"hacks":[{"icon":"💎","title":"出口陷阱","description":"如果你要去銀座四丁目的三越百貨，請尋找 A7 或 A8 出口，這比走 A1 快得多。"},{"icon":"🎨","title":"藝術地下道","description":"地下道內常有藝術展覽，轉乘時不妨放慢腳步欣賞。銀座站的地下藝術走廊非常著名。"},{"icon":"🛍️","title":"中央通","description":"從 A1 出口出來就是著名的中央通，是東京最繁華的購物街之一。"},{"icon":"🍜","title":"銀座美食","description":"銀座是日本最高級的美食區，有許多米其林餐廳和高級甜點店。推薦「空也」和「武士男子」。"},{"icon":"🌸","title":"鮪魚拍賣","description":"凌晨可在築地市場觀看鮪魚拍賣，步行從銀座站約 15 分鐘。"},{"icon":"🎭","title":"歌舞伎座直結","description":"3號出口直接連通歌舞伎座地下廣場，那裡有許多特色伴手禮與便當店（不用買票也能逛）。"},{"icon":"🚶","title":"銀座地下連通","description":"從這裡可以沿著地下道一路走到銀座站甚至有樂町，雨天完全不用淋雨。"},{"icon":"🍵","title":"木挽町廣場","description":"地下 2 樓的廣場即使不進場看戲也能買到歌舞伎主題的伴手禮。"},{"icon":"🏪","title":"築地場外市場","description":"從東銀座站步行約 10 分鐘可達築地場外市場，是品嚐海鮮美食的好去處。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"A5、A8、A11 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"A1、A2、A3、A4 出口","tags":["Wheelchair"]},{"type":"elevator","location":"B5、B6、B7 出口","tags":["Wheelchair"]},{"type":"elevator","location":"A1、A2、A3、A4、A5、A6、A7、A8 出口","tags":["Wheelchair"]},{"type":"toilet","location":"A1、A5、A8 出口附近","tags":["BabyRoom"]},{"type":"toilet","location":"歌舞伎座方面改札外","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.HigashiGinza';
+
+
+-- Update for odpt:Station:TokyoMetro.Toranomon
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Toranomon';
+
+
+-- Update for odpt:Station:TokyoMetro.AoyamaItchome
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"0、1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.AoyamaItchome';
+
+
+-- Update for odpt:Station:TokyoMetro.Omotesando
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"雙重身份陷阱","description":"表參道站有兩個營運單位：千代田線（地下三樓）和銀座線（地下四樓），兩者之間需要轉乘，但通道較短。","advice":"若要從千代田線轉乘銀座線，跟隨「銀座線」指標即可，步行約 3-5 分鐘。"},{"icon":"🏔️","title":"表參道 Hills 迷宮","description":"表參道 Hills 的入口眾多，從車站不同出口進入會抵達不同樓層，容易在商場內迷路。","advice":"從表參道站 3 号口出站可直接進入表參道 Hills 的「West」樓層；從 2 号口出站可進入「East」樓層。"},{"icon":"🚶","title":"表參道漫長步行","description":"表參道是一條筆直的大道，但從車站走到表參道 Hills 或青山通需要約 5-10 分鐘，途中沒有遮陽設施。","advice":"️ 夏天非常炎熱，建議攜帶陽傘或帽子。冬天則要注意保暖，表參道風大。"},{"icon":"🎨","title":"根津美術館排隊","description":"附近的「根津美術館」是表參道的人氣景點，經常需要排隊入場。","advice":"美術館門票 1300 日幣，建議平日前往。館內的咖啡廳「Nezu Cafe」也很有名，需要預約。"},{"icon":"🎯","title":"最深月台","description":"表參道站銀座線月台位於地下四層，是東京地鐵中較深的月台之一。進站時需要搭乘很長的電扶梯。","advice":"若攜帶大型行李，建議使用電梯。電梯位於 2 号口附近，尖峰時段可能需要排隊。"},{"icon":"🔄","title":"與千代田線轉乘","description":"銀座線和千代田線雖然同站轉乘，但需要上下樓梯，攜帶行李時不太方便。","advice":"轉乘時間約 3-5 分鐘。建議轉乘前先確認目的地方向，避免在月台上走回頭路。"},{"icon":"🚪","title":"出口分布複雜","description":"表參道站銀座線有 1、2、3、4 号等多個出口，通往表參道不同的路段。","advice":"前往表參道東側（青山方向）推薦 1 号或 2 号出口；前往表參道西側（原宿方向）推薦 3 号或 4 号出口。"},{"icon":"🛍️","title":"資生堂旗艦店迷宮","description":"附近的「資生堂旗艦店」是一棟複合式建築，裡面有化妝品、餐廳和畫廊，空間複雜容易迷路。","advice":"旗艦店免費參觀，但部分設施需要預約。「資生堂 Parlour」餐廳是東京老字號，需要提前預約。"}],"hacks":[{"icon":"🛍️","title":"表參道奢侈品巡禮","description":"表參道是東京最時尚的地區之一，道路兩側聚集了國際奢侈品牌旗艦店，如 Dior、Tiffany、Louis Vuitton 等。","advice":"建築本身就是藝術品，建議放慢腳步欣賞每家店的獨特設計。"},{"icon":"🏛️","title":"表參道 Hills 攻略","description":"表參道 Hills 是由安藤忠雄設計的購物中心，內有約 100 家商店和餐廳，涵蓋時尚、美食和生活雜貨。","advice":"推薦「The Strings」餐廳（32樓）的法國料理，可俯瞰東京夜景。需提前預約。"},{"icon":"🌳","title":"表參道林蔭大道","description":"表參道兩側種植了整齊的櫸木，秋天樹葉變色時景色非常美麗，是東京著名的賞楓景點。","advice":"最佳賞楓時間是 11 月中旬至 12 月上旬。建議清晨或傍晚前往，可避開人潮並欣賞光影變化。"},{"icon":"🍵","title":"青山咖啡廳巡禮","description":"表參道站附近（步行約 10-15 分鐘）就是青山地區，有許多高檔咖啡廳和法式餐廳。","advice":"「Blue Bottle Coffee」青山店是網紅打卡熱點，「Café de l''Ambre」則是東京最古老的咖啡廳之一，適合喜歡懷舊氛圍的人。夏季炎熱時建議搭乘計程車或使用共享單車 LUUP 前往。"},{"icon":"💄","title":"資生堂旗艦店朝聖","description":"表參道站附近的「資生堂旗艦店」是全球最大的資生堂門市，裡面有最新的化妝品體驗和限定商品。","advice":"推薦到頂樓的「資生堂 Parlour」品嚐甜點和紅豆湯，價格合理且味道正宗。"},{"icon":"🎨","title":"根津美術館","description":"從表參道站 4 号口步行約 5 分鐘可達根津美術館，館內收藏日本和中國古美術品，庭院也非常美麗。","advice":"美術館門票 1300 日幣，每週一休館。館內禁止拍照，但庭院可以自由拍攝。"},{"icon":"🏪","title":"青山墓地散步","description":"表參道站附近有一個有趣的景點「青山墓地」，這裡是許多日本名人長眠的地方，環境優美，經常有人來此散步。","advice":"墓地內有「乃木神社」，供奉乃木希典大將夫婦。附近還有許多時尚咖啡廳，形成有趣的對比。"},{"icon":"🌸","title":"榉樹黃金楓","description":"表參道的榉樹在秋天會變成金黃色，與街道上的時尚店面形成獨特景觀，是東京秋季限定的美景。","advice":"最佳賞楓時間是 11 月中旬至 12 月上旬。建議從表參道站沿著榸樹步道步行至青山方向。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"2、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"2、3、4 出口","tags":["Wheelchair"]},{"type":"toilet","location":"表參道 Hills 內","tags":["BabyRoom"]},{"type":"elevator","location":"2、3、4 号口","tags":["Wheelchair"]},{"type":"toilet","location":"改札外（1、2、3、4 号口附近）","tags":["BabyRoom"]},{"type":"elevator","location":"2、4 号口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Omotesando';
+
+
+-- Update for odpt:Station:TokyoMetro.OmoteSando
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"雙重身份陷阱","description":"表參道站有兩個營運單位：千代田線（地下三樓）和銀座線（地下四樓），兩者之間需要轉乘，但通道較短。","advice":"若要從千代田線轉乘銀座線，跟隨「銀座線」指標即可，步行約 3-5 分鐘。"},{"icon":"🏔️","title":"表參道 Hills 迷宮","description":"表參道 Hills 的入口眾多，從車站不同出口進入會抵達不同樓層，容易在商場內迷路。","advice":"從表參道站 3 号口出站可直接進入表參道 Hills 的「West」樓層；從 2 号口出站可進入「East」樓層。"},{"icon":"🚶","title":"表參道漫長步行","description":"表參道是一條筆直的大道，但從車站走到表參道 Hills 或青山通需要約 5-10 分鐘，途中沒有遮陽設施。","advice":"️ 夏天非常炎熱，建議攜帶陽傘或帽子。冬天則要注意保暖，表參道風大。"},{"icon":"🎨","title":"根津美術館排隊","description":"附近的「根津美術館」是表參道的人氣景點，經常需要排隊入場。","advice":"美術館門票 1300 日幣，建議平日前往。館內的咖啡廳「Nezu Cafe」也很有名，需要預約。"},{"icon":"🎯","title":"最深月台","description":"表參道站銀座線月台位於地下四層，是東京地鐵中較深的月台之一。進站時需要搭乘很長的電扶梯。","advice":"若攜帶大型行李，建議使用電梯。電梯位於 2 号口附近，尖峰時段可能需要排隊。"},{"icon":"🔄","title":"與千代田線轉乘","description":"銀座線和千代田線雖然同站轉乘，但需要上下樓梯，攜帶行李時不太方便。","advice":"轉乘時間約 3-5 分鐘。建議轉乘前先確認目的地方向，避免在月台上走回頭路。"},{"icon":"🚪","title":"出口分布複雜","description":"表參道站銀座線有 1、2、3、4 号等多個出口，通往表參道不同的路段。","advice":"前往表參道東側（青山方向）推薦 1 号或 2 号出口；前往表參道西側（原宿方向）推薦 3 号或 4 号出口。"},{"icon":"🛍️","title":"資生堂旗艦店迷宮","description":"附近的「資生堂旗艦店」是一棟複合式建築，裡面有化妝品、餐廳和畫廊，空間複雜容易迷路。","advice":"旗艦店免費參觀，但部分設施需要預約。「資生堂 Parlour」餐廳是東京老字號，需要提前預約。"}],"hacks":[{"icon":"🛍️","title":"表參道奢侈品巡禮","description":"表參道是東京最時尚的地區之一，道路兩側聚集了國際奢侈品牌旗艦店，如 Dior、Tiffany、Louis Vuitton 等。","advice":"建築本身就是藝術品，建議放慢腳步欣賞每家店的獨特設計。"},{"icon":"🏛️","title":"表參道 Hills 攻略","description":"表參道 Hills 是由安藤忠雄設計的購物中心，內有約 100 家商店和餐廳，涵蓋時尚、美食和生活雜貨。","advice":"推薦「The Strings」餐廳（32樓）的法國料理，可俯瞰東京夜景。需提前預約。"},{"icon":"🌳","title":"表參道林蔭大道","description":"表參道兩側種植了整齊的櫸木，秋天樹葉變色時景色非常美麗，是東京著名的賞楓景點。","advice":"最佳賞楓時間是 11 月中旬至 12 月上旬。建議清晨或傍晚前往，可避開人潮並欣賞光影變化。"},{"icon":"🍵","title":"青山咖啡廳巡禮","description":"表參道站附近（步行約 10-15 分鐘）就是青山地區，有許多高檔咖啡廳和法式餐廳。","advice":"「Blue Bottle Coffee」青山店是網紅打卡熱點，「Café de l''Ambre」則是東京最古老的咖啡廳之一，適合喜歡懷舊氛圍的人。夏季炎熱時建議搭乘計程車或使用共享單車 LUUP 前往。"},{"icon":"💄","title":"資生堂旗艦店朝聖","description":"表參道站附近的「資生堂旗艦店」是全球最大的資生堂門市，裡面有最新的化妝品體驗和限定商品。","advice":"推薦到頂樓的「資生堂 Parlour」品嚐甜點和紅豆湯，價格合理且味道正宗。"},{"icon":"🎨","title":"根津美術館","description":"從表參道站 4 号口步行約 5 分鐘可達根津美術館，館內收藏日本和中國古美術品，庭院也非常美麗。","advice":"美術館門票 1300 日幣，每週一休館。館內禁止拍照，但庭院可以自由拍攝。"},{"icon":"🏪","title":"青山墓地散步","description":"表參道站附近有一個有趣的景點「青山墓地」，這裡是許多日本名人長眠的地方，環境優美，經常有人來此散步。","advice":"墓地內有「乃木神社」，供奉乃木希典大將夫婦。附近還有許多時尚咖啡廳，形成有趣的對比。"},{"icon":"🌸","title":"榉樹黃金楓","description":"表參道的榉樹在秋天會變成金黃色，與街道上的時尚店面形成獨特景觀，是東京秋季限定的美景。","advice":"最佳賞楓時間是 11 月中旬至 12 月上旬。建議從表參道站沿著榸樹步道步行至青山方向。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"2、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"2、3、4 出口","tags":["Wheelchair"]},{"type":"toilet","location":"表參道 Hills 內","tags":["BabyRoom"]},{"type":"elevator","location":"2、3、4 号口","tags":["Wheelchair"]},{"type":"toilet","location":"改札外（1、2、3、4 号口附近）","tags":["BabyRoom"]},{"type":"elevator","location":"2、4 号口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.OmoteSando';
+
+
+-- Update for odpt:Station:TokyoMetro.MeijiJingumae
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🏢","title":"與原宿站不完全相通","description":"明治神宮前站（千代田線）與 JR 原宿站雖然都在同一區域，但兩站之間的地下通道複雜，需要步行約 5-10 分鐘，且有樓梯。","advice":"若要轉乘 JR 山手線，建議直接使用原宿站。明治神宮前站主要服務千代田線乘客。"},{"icon":"🎭","title":"副都心線直通迷宮","description":"明治神宮前站是千代田線和副都心線的轉乘站，但兩條線的月台位置不同，需要上下樓梯。","advice":"️ 轉乘時請跟隨「副都心線」或「千代田線」的指示牌，別走錯月台。副都心線月台在地下三樓，千代田線在地下二樓。"},{"icon":"🛒","title":"表參道迷宮出口","description":"明治神宮前站有多個出口（2、3、4、5、6、7、8 号口），通往不同方向的表參道和原宿。","advice":"前往竹下通推薦 3 號或 4 號出口；前往表參道推薦 5 號或 6 號出口；前往明治神宮推薦 5 號或 6 號出口。"},{"icon":"🚇","title":"LINE FRENCHERY 排隊人潮","description":"站附近的「LINE FRIENDS STORE」和「LINE FRENCHERY」咖啡廳經常大排長龍，尖峰時段可能需要排隊 1 小時以上。","advice":"若想避開人潮，建議平日上午前往，或使用 LINE APP 預約排隊。"}],"hacks":[{"icon":"🎀","title":"原宿系潮流聖地","description":"明治神宮前站周邊是「原宿系」時尚的發源地，有許多專門販售Lolita服裝、動漫周邊和潮牌的店鋪。","advice":"「Kiddy Land」原宿店（5 號出口步行 1 分鐘）是購買動漫周邊的好去處。「WEGO」則是平價潮流服飾的代表。"},{"icon":"🏬","title":"表參道奢侈品大道","description":"從明治神宮前站沿表參道步行約 10 分鐘，即可抵達表參道 Hills。這裡集結了國際奢侈品牌旗艦店。","advice":"表參道 Hills 的「Hillside」樓層有許多設計師品牌，適合喜歡獨特風格的消費者。"},{"icon":"☕","title":"LINE FRIENS 咖啡廳","description":"站附近有全球唯一的「LINE FRIENDS STORE」旗艦店和「LINE FRENCHERY」咖啡廳，店內充滿可爱的熊大、兔兔等角色。","advice":"建議平日上午前往，人潮較少。可以買到限定商品和品嚐角色主題飲品。"},{"icon":"🏛️","title":"表參道之丘","description":"從明治神宮前站 5 號出口步行約 5 分鐘可達「表參道 Hills」，這是由建築大師安藤忠雄設計的購物中心。","advice":"表參道 Hills 的建築特色是螺旋式斜坡，頂樓有免費觀景台，可俯瞰表參道街景。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"2、5、6 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"toilet","location":"改札外（2、3、4、5、6、7、8 号口附近）","tags":["BabyRoom"]},{"type":"elevator","location":"2、5、6 号口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.MeijiJingumae';
+
+
+-- Update for odpt:Station:TokyoMetro.Nihombashi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"B1、B2、B3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"B1、B2、B3、B4 出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Nihombashi';
+
+
+-- Update for odpt:Station:TokyoMetro.Tsukiji
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Tsukiji';
+
+
+-- Update for odpt:Station:TokyoMetro.Shimbashi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4、5 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Shimbashi';
+
+
+-- Update for odpt:Station:TokyoMetro.NakanoShimbashi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4、5 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.NakanoShimbashi';
+
+
+-- Update for odpt:Station:TokyoMetro.NakanoSakaue
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.NakanoSakaue';
+
+
+-- Update for odpt:Station:TokyoMetro.MinamiAsagaya
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.MinamiAsagaya';
+
+
+-- Update for odpt:Station:TokyoMetro.HigashiKoenji
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.HigashiKoenji';
+
+
+-- Update for odpt:Station:TokyoMetro.ShinKoenji
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.ShinKoenji';
+
+
+-- Update for odpt:Station:TokyoMetro.ShinNakano
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"與JR站關係","description":"東西線中野站位於 JR 中野站的東側，步行約 3-5 分鐘。","advice":"站內有地下通道連通，跟隨「JR」指標前進即可。"},{"icon":"🚃","title":"九段下方向","description":"東西線可直達九段下站，是前往日本武道館和千鳥之淵的便捷路線。","advice":"確認看板上的目的地，避免搭錯方向。"}],"hacks":[{"icon":"🏢","title":"日本女子大學","description":"步行可達日本女子大學校園，氛圍寧靜。"},{"icon":"🌸","title":"季節景點","description":"中野站周邊在春天有美麗的櫻花，秋天有紅葉。"},{"icon":"🛍️","title":"購物推薦","description":"周邊有許多平價服飾店和超市，適合日常購物。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"北口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.ShinNakano';
+
+
+-- Update for odpt:Station:TokyoMetro.Nakano
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"與JR站關係","description":"東西線中野站位於 JR 中野站的東側，步行約 3-5 分鐘。","advice":"站內有地下通道連通，跟隨「JR」指標前進即可。"},{"icon":"🚃","title":"九段下方向","description":"東西線可直達九段下站，是前往日本武道館和千鳥之淵的便捷路線。","advice":"確認看板上的目的地，避免搭錯方向。"}],"hacks":[{"icon":"🏢","title":"日本女子大學","description":"步行可達日本女子大學校園，氛圍寧靜。"},{"icon":"🌸","title":"季節景點","description":"中野站周邊在春天有美麗的櫻花，秋天有紅葉。"},{"icon":"🛍️","title":"購物推薦","description":"周邊有許多平價服飾店和超市，適合日常購物。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"北口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Nakano';
+
+
+-- Update for odpt:Station:TokyoMetro.ShinOchanomizu
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.ShinOchanomizu';
+
+
+-- Update for odpt:Station:TokyoMetro.Ochanomizu
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Ochanomizu';
+
+
+-- Update for odpt:Station:TokyoMetro.Awajicho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Awajicho';
+
+
+-- Update for odpt:Station:TokyoMetro.Kanda
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kanda';
+
+
+-- Update for odpt:Station:TokyoMetro.Iidabashi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎢","title":"五線交匯長廊 (Five-Line Corridor)","description":"飯田橋站匯集了東西線、有楽町線、南北線、大江戶線與 JR，轉乘路徑極長。","advice":"️ 注意：東西線與其他線路轉乘需步行 5-10 分鐘，請務必跟隨地面顏色指引指標。"},{"icon":"🔄","title":"與其他線距離","description":"東西線飯田橋站位於較深的位置，與大江戶線、JR 站的轉乘需要步行較長距離。","advice":"跟隨「○色」的地面指標前進，可加快轉乘速度。"},{"icon":"🎯","title":"位置","description":"南北線飯田橋站與東西線站相鄰，但屬於不同月台。","advice":"兩站之間有地下通道連通，步行約 3 分鐘。"},{"icon":"🚃","title":"直通","description":"南北線與三田線直通運行，可直達目黑、白金方向。","advice":"確認看板上的直通運行資訊。"},{"icon":"🌀","title":"地下六層","description":"大江戶線飯田橋站位於地下六層，是東京較深的月台之一。","advice":"需要搭乘電扶梯或電梯才能抵達地面，請預留充裕時間。"},{"icon":"🔄","title":"轉乘距離","description":"大江戶線站與東京Metro站的轉乘需要步行較長距離。","advice":"跟隨「東京Metro」指標前進，會經過多段電扶梯。"}],"hacks":[{"icon":"⛩️","title":"東京大神宮","description":"從西口出站步行約 5 分鐘，是東京最具代表性的戀愛結緣神社。單身者必訪！"},{"icon":"🚢","title":"Canal Cafe","description":"位於神田川邊的景觀咖啡廳，特別是櫻花季時美不勝收。建議預約靠窗座位。"},{"icon":"🌸","title":"千鳥之淵","description":"從 B1 出口步行約 5 分鐘可達，是東京著名的賞櫻景點。划船體驗非常受歡迎。"},{"icon":"🏛️","title":"日本武道館","description":"步行約 10 分鐘可達，是舉辦演唱會和武術比賽的著名場地。"},{"icon":"🏞️","title":"自然環境","description":"飯田橋站周邊有許多公園和河流，適合散步和運動。"},{"icon":"🍜","title":"美食推薦","description":"周邊有許多餐廳和咖啡廳，適合用餐和休息。"},{"icon":"🏛️","title":"皇居參觀","description":"從飯田橋站可步行至皇居東御苑，是參觀日本皇室住所的好去處。"},{"icon":"🏸","title":"運動設施","description":"周邊有許多運動設施和公園，適合運動愛好者。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"A1、A2、A3、A4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]},{"type":"elevator","location":"主要出入口及各月台","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Iidabashi';
+
+
+-- Update for odpt:Station:TokyoMetro.Korakuen
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Korakuen';
+
+
+-- Update for odpt:Station:TokyoMetro.HongoSanchome
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.HongoSanchome';
+
+
+-- Update for odpt:Station:TokyoMetro.Ueno
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🏃","title":"與JR上野站距離","description":"銀座線上野站位於 JR 上野站的西側，步行約 3-5 分鐘。站內有地下通道連通，但指標有時不太清楚。","advice":"️ 建議：跟著「JR上野」指標走，會經過一個小型付費區連通道。"},{"icon":"🔄","title":"與日比谷線不直結","description":"銀座線和日比谷線的上野站雖然很近，但屬於不同月台，需要出站步行約 3 分鐘。兩站之間有地下通道連通。","advice":"小技巧：使用 Suica/PASMO 可直接刷卡通過連通道，無需另外購票。"},{"icon":"🎫","title":"與銀座線分開","description":"日比谷線上野站和銀座線上野站是兩個不同的車站建築，雖然都在上野地區，但步行需要約 3-5 分鐘。","advice":"️ 注意：若要從日比谷線轉乘銀座線，請跟隨「銀座線」指標前進，會經過一段地下通道。"},{"icon":"🚃","title":"中目黑方向乘車位置","description":"日比谷線是複式月台結構，往中目黑方向（北行）和往秋葉原方向（南行）在不同樓層。","advice":"小提醒：進站前請確認方向看板，避免走錯月台。"}],"hacks":[{"icon":"🎨","title":"東京國立博物館","description":"從 1a 或 1b 出口出站，步行約 5 分鐘即可抵達。是參觀日本古代文物的好去處。"},{"icon":"🐼","title":"上野恩賜公園熊貓館","description":"從 JR 上野站公園口出站步行約 5 分鐘。建議平日上午前往以避開人潮。"},{"icon":"🍜","title":"業務超市","description":"附近有多家業務超市，可以購買便宜的日本零食和飲料。"},{"icon":"🎭","title":"不忍池","description":"從 1 號出口出站步行約 5 分鐘可達不忍池，夏季有蓮花盛開，冬季可賞候鳥。"},{"icon":"⛩️","title":"上野東照宮","description":"步行約 10 分鐘可達，是德川家康的祭祀神社， golden 的殿宇非常壯觀。"},{"icon":"🌸","title":"賞櫻名所","description":"上野恩賜公園是東京最著名的賞櫻地點，櫻花季（3月下旬至4月上旬）人潮洶湧，建議平日前往或清晨搶位。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"4、5 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"1a、1b 出口","tags":["Wheelchair"]},{"type":"toilet","location":"改札外 1 號出口附近","tags":["BabyRoom"]},{"type":"elevator","location":"1 號出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Ueno';
+
+
+-- Update for odpt:Station:TokyoMetro.Yotsuya
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Yotsuya';
+
+
+-- Update for odpt:Station:TokyoMetro.AkabaneIwabuchi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.AkabaneIwabuchi';
+
+
+-- Update for odpt:Station:TokyoMetro.Yurakucho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"D1、D2、D3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Yurakucho';
+
+
+-- Update for odpt:Station:TokyoMetro.Kyobashi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kyobashi';
+
+
+-- Update for odpt:Station:TokyoMetro.Tokyo
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"與 JR 站關係","description":"丸之內線東京站位於 JR 東京站丸之內側的地下，步行約 3-5 分鐘。","advice":"跟隨「丸之內線」指標前進。"},{"icon":"🔄","title":"與東西線關係","description":"丸之內線和東西線的東京站是兩個不同的車站，需要步行轉乘。","advice":"兩站步行約 5-8 分鐘，有地下通道連通。"},{"icon":"🏔️","title":"地下深層","description":"東西線東京站位於較深的位置，需要搭乘電扶梯或電梯。","advice":"預留充裕的垂直移動時間。"},{"icon":"🎯","title":"與丸之內線關係","description":"東西線和丸之內線的東京站距離較遠，轉乘需要步行約 5-8 分鐘。","advice":"跟隨「丸之內線」指標前進。"},{"icon":"🚶","title":"京葉線轉乘","description":"從中央月台步行至京葉線月台約 15-20 分鐘，需穿越地下通道。","advice":"前往迪士尼的乘客請預留 25 分鐘轉乘時間。"},{"icon":"⚠️","title":"丸之內側vs八重洲側完全分離","description":"兩側由地下通道連接但步行需 5-10 分鐘，皇居位於丸之內側，新幹線の搭乘則在八重洲側。","advice":"確認目的地後選擇正確出站口。"},{"icon":"🚌","title":"巴士站位置","description":"所有高速巴士站位於八重洲側，丸之內側無巴士站。","advice":"前往巴士站的乘客請從八重洲側出站。"},{"icon":"🔀","title":"地下迷宮","description":"B1F 地下通道連接 JR、地鐵、誤差約 10 條以上路線，指標混亂。","advice":"跟隨藍色標示前往 JR，紅色標示前往地下鐵。"}],"hacks":[{"icon":"🏛️","title":"丸之內大樓","description":"車站直結的著名辦公大樓，內有許多高級餐廳和商店。聖誕節期間的点灯活動非常著名。"},{"icon":"🏢","title":"東京國際論壇","description":"步行可達東京國際論壇，是東京著名的現代建築之一，內有藝術展覽和餐廳。"},{"icon":"🌸","title":"皇居外苑","description":"從東京站步行約 10 分鐘可達皇居外苑，是散步和賞櫻的好去處。"},{"icon":"🚃","title":"直達日本橋","description":"東西線可直達日本橋站，是前往東京站和銀座方向的便捷路線。"},{"icon":"🏢","title":"金融區","description":"東京站周邊是東京的金融中心，有許多銀行和企業總部。"},{"icon":"🛍️","title":"大手町","description":"步行可達大手町站，那裡有許多商業大樓和餐廳。"},{"icon":"👑","title":"皇居近道","description":"從丸之內北口出站後步行 200m 即可抵達皇居東御苑入口。","advice":"搭乘電車至二重橋前站需多付運費。"},{"icon":"🚄","title":"新幹線を逃す捷徑","description":"趕不上新幹線の乘客可前往 20-22 番線月台，從檢票口步行僅需 2 分鐘。","advice":"利用最近的電梯前往地下 1 層月台。"},{"icon":"🧳","title":"行李寄存","description":"八重洲中央口附近 B1F 有大型行李寄存櫃，營業至深夜 12 點。","advice":"適合輕裝遊覽皇居。"},{"icon":"🍜","title":"拉麵一番街","description":"車站地下 1 層集結 10 家人氣拉麵店，營業至凌晨 1 點。","advice":"深夜覓食首選。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"丸之內南口、 地下北口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Tokyo';
+
+
+-- Update for odpt:Station:JR-East.Tokyo
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🏃","title":"京葉線轉乘陷阱 (Far Transfer)","description":"京葉線（去迪士尼的路線）月臺距離山手線非常遠，實際上接近「有樂町站」。","advice":"️ 心理建設：轉乘通道長達 800 公尺，步行需 15-20 分鐘。請把它當作是「走到下一站」的距離感。"},{"icon":"🎯","title":"丸之內 vs 八重洲 (East vs West)","description":"東京站被鐵路分成「丸之內側」（西側）和「八重洲側」（東側），兩個方向在地下不完全互通。","advice":"確認目的地後再選擇出口。丸之內側主要是辦公大樓和車站大樓；八重洲側有許多購物中心和餐廳。"},{"icon":"🚇","title":"丸之內線入口","description":"東京Metro丸之內線的入口位於 JR 站丸之內側的地下，步行需要一定時間。","advice":"跟隨「東京Metro」指標前進。"},{"icon":"🏃","title":"東北・山形・秋田・上越・北陸","description":"這些新幹線の月台位於車站的不同位置，與東海道線分開。","advice":"確認看板上的新幹線種類和月台位置。"},{"icon":"🎯","title":"與 JR 站關係","description":"丸之內線東京站位於 JR 東京站丸之內側的地下，步行約 3-5 分鐘。","advice":"跟隨「丸之內線」指標前進。"},{"icon":"🔄","title":"與東西線關係","description":"丸之內線和東西線的東京站是兩個不同的車站，需要步行轉乘。","advice":"兩站步行約 5-8 分鐘，有地下通道連通。"},{"icon":"🏔️","title":"地下深層","description":"東西線東京站位於較深的位置，需要搭乘電扶梯或電梯。","advice":"預留充裕的垂直移動時間。"},{"icon":"🎯","title":"與丸之內線關係","description":"東西線和丸之內線的東京站距離較遠，轉乘需要步行約 5-8 分鐘。","advice":"跟隨「丸之內線」指標前進。"},{"icon":"🚶","title":"京葉線轉乘","description":"從中央月台步行至京葉線月台約 15-20 分鐘，需穿越地下通道。","advice":"前往迪士尼的乘客請預留 25 分鐘轉乘時間。"},{"icon":"⚠️","title":"丸之內側vs八重洲側完全分離","description":"兩側由地下通道連接但步行需 5-10 分鐘，皇居位於丸之內側，新幹線の搭乘則在八重洲側。","advice":"確認目的地後選擇正確出站口。"},{"icon":"🚌","title":"巴士站位置","description":"所有高速巴士站位於八重洲側，丸之內側無巴士站。","advice":"前往巴士站的乘客請從八重洲側出站。"},{"icon":"🔀","title":"地下迷宮","description":"B1F 地下通道連接 JR、地鐵、誤差約 10 條以上路線，指標混亂。","advice":"跟隨藍色標示前往 JR，紅色標示前往地下鐵。"}],"hacks":[{"icon":"⚡️","title":"京葉線隱藏捷徑 (Yurakucho Shortcut)","description":"要去迪士尼？與其在站內走 20 分鐘，不如"},{"icon":"🎫","title":"丸之內南口紅磚站舍","description":"國家重要文化財，必拍照點！從丸之內地下廣場搭電梯上 1F 即可抵達。"},{"icon":"🍱","title":"駅弁屋 祭","description":"中央通路有超過 200 種車站便當，建議發車前 30 分鐘來選購。"},{"icon":"🔄","title":"北自由通路","description":"想在「丸之內」與「八重洲」之間移動但不進站？請走「北自由通路」，這是免費的穿梭捷徑。"},{"icon":"🎨","title":"顏色辨識法","description":"迷路時看地板顏色——紅色系往丸之內（西），藍/綠色系往八重洲（東）。"},{"icon":"🛍️","title":"KITTE","description":"從丸之內南口出站即可抵達，這是日本郵局改裝的購物中心，頂樓有免費觀景台，可俯瞰東京站。"},{"icon":"🍜","title":"拉麵街","description":"八重洲口地下有「東京拉麵街」，有多家知名拉麵店。"},{"icon":"🏛️","title":"丸之內大樓","description":"車站直結的著名辦公大樓，內有許多高級餐廳和商店。聖誕節期間的点灯活動非常著名。"},{"icon":"🏢","title":"東京國際論壇","description":"步行可達東京國際論壇，是東京著名的現代建築之一，內有藝術展覽和餐廳。"},{"icon":"🌸","title":"皇居外苑","description":"從東京站步行約 10 分鐘可達皇居外苑，是散步和賞櫻的好去處。"},{"icon":"🚃","title":"直達日本橋","description":"東西線可直達日本橋站，是前往東京站和銀座方向的便捷路線。"},{"icon":"🏢","title":"金融區","description":"東京站周邊是東京的金融中心，有許多銀行和企業總部。"},{"icon":"🛍️","title":"大手町","description":"步行可達大手町站，那裡有許多商業大樓和餐廳。"},{"icon":"👑","title":"皇居近道","description":"從丸之內北口出站後步行 200m 即可抵達皇居東御苑入口。","advice":"搭乘電車至二重橋前站需多付運費。"},{"icon":"🚄","title":"新幹線を逃す捷徑","description":"趕不上新幹線の乘客可前往 20-22 番線月台，從檢票口步行僅需 2 分鐘。","advice":"利用最近的電梯前往地下 1 層月台。"},{"icon":"🧳","title":"行李寄存","description":"八重洲中央口附近 B1F 有大型行李寄存櫃，營業至深夜 12 點。","advice":"適合輕裝遊覽皇居。"},{"icon":"🍜","title":"拉麵一番街","description":"車站地下 1 層集結 10 家人氣拉麵店，營業至凌晨 1 點。","advice":"深夜覓食首選。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"丸之內南口、 地下北口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"toilet","location":"中央改札內","tags":["Wheelchair","BabyRoom"]},{"type":"toilet","location":"丸之內改札內","tags":["Wheelchair","BabyRoom"]},{"type":"toilet","location":"八重洲改札內","tags":["Wheelchair","BabyRoom"]},{"type":"toilet","location":"京葉線改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"各主要改札口","tags":["Wheelchair"]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:JR-East.Tokyo';
+
+
+-- Update for odpt:Station:TokyoMetro.NakaMeguro
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"與其他目黑站關係","description":"南北線目黑站與 JR 目黑站相鄰，但屬於不同車站。步行約 3 分鐘可達。","advice":"從 JR 目黑站西口出站，跟隨「東京Metro」指標前進即可。"},{"icon":"🚃","title":"直通","description":"南北線與三田線直通運行，可直達白金高輪方向。","advice":"確認看板上的直通運行資訊。"},{"icon":"🎯","title":"位置","description":"三田線目黑站位於 JR 目黑站的北側，步行約 5 分鐘。","advice":"從 JR 目黑站西口出站，跟隨「都營三田線」指標前進。"},{"icon":"🚃","title":"與南北線直通","description":"三田線與南北線直通運行，但時刻表需要確認。","advice":"並非所有列車都直通，請注意看板指示。"},{"icon":"🎯","title":"最偏遠","description":"東急目黑站是四個「目黑站」中位置最偏遠的一個，與其他三站距離較遠。","advice":"從 JR 目黑站步行約 10-15 分鐘，建議搭乘計程車或公車。"},{"icon":"🚃","title":"日吉方向","description":"東急目黑線主要運行於目黑站和日吉站之間，是一條支線。","advice":"若要前往東京市區，需要在日吉站轉乘其他路線。"},{"icon":"🎨","title":"美麗街景","description":"中目黑是東京著名的時尚地區，車站周邊有許多精品店和咖啡廳。","advice":"建議週末前來感受悠閒的氛圍。"},{"icon":"🌸","title":"賞櫻名所","description":"目黑川沿岸是中目黑最著名的賞櫻景點，春天人潮洶湧。","advice":"️ 賞櫻季節（3月下旬至4月上旬）建議平日前往，或清晨搶位。"},{"icon":"🚇","title":"多線轉乘複雜性","description":"此站由東急電鐵主導經營，但同時有都營三田線與東京Metro南北線停靠。售票系統各自獨立，IC卡無法互通補貼，須於各線售票機分別購票。","advice":"轉乘前先確認各線閘門位置，避免走回頭路。"},{"icon":"🚶","title":"轉乘步行距離","description":"東急線與都營三田線間轉乘需步行約 300m，經過聯絡通道約 4-5 分鐘。南北線月台位於地下 B2 層，與東急淺草 meguro線月台（地面層）垂直距離約 15m。","advice":"攜帶大型行李者建議使用東口電梯。"},{"icon":"⛰️","title":"站外陡坡","description":"目黑站周圍為知名陡坡地形，站前向西延伸的斜坡坡度達 8-12%，往「目黑區民中心」方向步行 200m 平均耗時比平地多 2 分鐘。","advice":"避免拖行李箱於下雨天前往西側住宿，路面濕滑危險。"}],"hacks":[{"icon":"🏢","title":"東京首都大學","description":"步行可達東京首都大學校園，氛圍寧靜。"},{"icon":"🌸","title":"季節景點","description":"目黑川沿岸在春天有美麗的櫻花，秋天有紅葉。"},{"icon":"🏙️","title":"白金","description":"從三田線可直達白金站，那裡有著名的白金神社和購物中心。"},{"icon":"🍜","title":"美食推薦","description":"目黑站周邊有許多知名餐廳和咖啡廳。"},{"icon":"🏞️","title":"自然環境","description":"目黑線沿線有許多公園和自然景點，適合週末郊遊。"},{"icon":"🏫","title":"東京工業大學","description":"步行可達東京工業大學校園，氛圍學術。"},{"icon":"🏪","title":"目黑川沿岸","description":"沿著目黑川散步，兩岸有許多精品店、咖啡廳和餐廳。是東京最適合散步的地區之一。"},{"icon":"☕","title":"咖啡廳激戰區","description":"中目黑是東京咖啡廳密度最高的地區之一，有許多網紅咖啡廳。"},{"icon":"🏪","title":"自由之丘","description":"從中目黑搭乘東橫線一站即可抵達自由之丘，是東京著名的甜點激戰區。"},{"icon":"🛍️","title":"蔦屋書店","description":"中目黑站附近有著名的「蔦屋書店」，被譽為世界最美的書店之一。"},{"icon":"🚪","title":"最佳進出站選擇","description":"東急線乘車使用「東口」或「西口」，兩者相距 80m。前往「目黑銀杏並木」（賞楓名所）建議從西口出站，步行 150m 即達。前往「四季劇場」從東口出站，步行 100m。","advice":"先確認目的地方位再選擇出口。"},{"icon":"🛗","title":"電梯位置","description":"東口設有電梯可達所有樓層（地面→地下B1→B2），服務時間 05:00-24:00。大型行李或輪椅使用者須使用東口，西口僅有樓梯。","advice":"西口無電梯，攜帶行李者勿從西口進出。"},{"icon":"🚃","title":"首末班車差異","description":"東急目黑線首班車 05:04、末班車 00:38。都營三田線首班車 05:29、末班車 23:54。南北線首班車 05:17、末班車 00:09。南北線末班車最早結束。","advice":"深夜活動者優先選擇東急線離站。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"東口、 西口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]},{"type":"toilet","location":"東急線月台（1F）東側、西側各 1 間；都營/南北線閘內 B2 層東側 1 間","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"東口 1 處（1F↔B2）","tags":["Wheelchair"]},{"type":"locker","location":"東口站前廣場投幣式行李櫃","tags":["L-size","M-size"]},{"type":"wifi","location":"站內 Tokyo Free Wi-Fi","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.NakaMeguro';
+
+
+-- Update for odpt:Station:TokyoMetro.Ebisu
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🚶","title":"JR↔日比谷線轉乘","description":"兩站相距約 400m，步行需 5-8 分鐘，無直達通道。","advice":"攜帶行李時建議使用計程車或巴士。"},{"icon":"🌧️","title":"戶外轉乘","description":"日比谷線位於山下通(山手通り)北側，需穿越戶外馬路，雨天極不便。","advice":"攜帶雨具或使用地下商場入口。"}],"hacks":[{"icon":"🌁","title":"惠比壽花園廣場天空步道","description":"JR惠比壽站東口出站後，右側即為天空步道入口，全程室內步行約 5 分鐘直達惠比壽花園廣場。","advice":"回程需原路返回或繞行地面道路。"},{"icon":"🚇","title":"日比谷線最近入口","description":"從JR站沿山下通向北步行約 300m，日比谷線 2 號出口位於右手邊。","advice":"2 號出口設有電梯。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"toilet","location":"JR東口站內、JR西口站內、月台層","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"JR東口電梯塔、月台層電梯","tags":["Wheelchair"]},{"type":"atm","location":"JR站內(三菱UFJ、郵貯)、East廣場","tags":[]},{"type":"locker","location":"JR東口站外 (大型42個、中型192個)、JR西口站外","tags":["Large"]},{"type":"wifi","location":"JR站內免費Wi-Fi、惠比壽花園廣場全域","tags":[]},{"type":"toilet","location":"View Altte旁 (9:00-18:00)","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Ebisu';
+
+
+-- Update for odpt:Station:TokyoMetro.Roppongi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Roppongi';
+
+
+-- Update for odpt:Station:TokyoMetro.Kamiyacho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3、4、5 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kamiyacho';
+
+
+-- Update for odpt:Station:TokyoMetro.Hatchobori
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"A1、A2、A3、A4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Hatchobori';
+
+
+-- Update for odpt:Station:TokyoMetro.Kayabacho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kayabacho';
+
+
+-- Update for odpt:Station:TokyoMetro.Kodemmacho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kodemmacho';
+
+
+-- Update for odpt:Station:TokyoMetro.Ningyocho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"A1、A2、A3、A4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Ningyocho';
+
+
+-- Update for odpt:Station:TokyoMetro.Iriya
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Iriya';
+
+
+-- Update for odpt:Station:TokyoMetro.MinamiSenju
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"出口","tags":["Wheelchair"]},{"type":"wifi","location":"部分區域","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.MinamiSenju';
+
+
+-- Update for odpt:Station:TokyoMetro.YoyogiUehara
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.YoyogiUehara';
+
+
+-- Update for odpt:Station:TokyoMetro.Takadanobaba
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Takadanobaba';
+
+
+-- Update for odpt:Station:TokyoMetro.NishiWaseda
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.NishiWaseda';
+
+
+-- Update for odpt:Station:TokyoMetro.Waseda
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Waseda';
+
+
+-- Update for odpt:Station:TokyoMetro.Kagurazaka
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kagurazaka';
+
+
+-- Update for odpt:Station:TokyoMetro.Takebashi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Takebashi';
+
+
+-- Update for odpt:Station:TokyoMetro.Otemachi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"出口分散","description":"丸之內線大手町站有多個出口，通往不同方向的商業大樓。","advice":"確認目的地後再選擇出口，不同出口可能距離較遠。"},{"icon":"🔄","title":"與其他線關係","description":"丸之內線大手町站與其他 Metro 線路站相鄰，但步行需要一定時間。","advice":"跟隨「○色」指標前進，可加快轉乘速度。"},{"icon":"🏔️","title":"地下深層","description":"東西線大手町站位於較深的位置，需要搭乘電扶梯或電梯。","advice":"預留充裕的垂直移動時間，尤其是攜帶行李時。"},{"icon":"🔄","title":"轉乘","description":"東西線與其他線路的轉乘需要步行，但有地下通道連通。","advice":"跟隨「○色」指標前進，可加快轉乘速度。"},{"icon":"🎯","title":"位置","description":"千代田線大手町站位於其他線路站的下方，屬於較深層。","advice":"需要搭乘電扶梯或電梯才能抵達其他線路。"},{"icon":"🚃","title":"綾瀨方向","description":"千代田線有「綾瀨方向」和「代代木上原方向」，月台在不同樓層。","advice":"確認看板上的目的地，避免走錯月台。"},{"icon":"🎯","title":"位置偏遠","description":"半藏門線大手町站與其他線路站的距離較遠，轉乘需要步行較長時間。","advice":"跟隨「半藏門線」指標前進。"},{"icon":"🚃","title":"直通","description":"半藏門線與東武線直通運行，可直達押上站。","advice":"確認看板上的直通運行資訊。"},{"icon":"🎯","title":"與 Metro 站關係","description":"三田線大手町站與東京Metro站的轉乘需要步行，但有地下通道連通。","advice":"跟隨「東京Metro」指標前進。"}],"hacks":[{"icon":"🏢","title":"丸之內大樓","description":"車站直結的著名辦公大樓，內有許多高級餐廳和商店。"},{"icon":"🌸","title":"東京站賞櫻","description":"從大手町站步行約 10 分鐘可達東京站，那裡的櫻花在春天非常美麗。"},{"icon":"🚃","title":"直達日本橋","description":"東西線可直達日本橋站，是前往東京站和銀座方向的便捷路線。"},{"icon":"🏢","title":"金融區","description":"大手町是東京的金融中心，周邊有許多銀行和企業總部。"},{"icon":"🏛️","title":"皇居東御苑","description":"從 C13b 出口出來就是皇居的大手門，是離皇居最近的入口。免費參觀，需要事先預約。"},{"icon":"🌳","title":"北之丸公園","description":"步行可達北之丸公園，是散步和賞櫻的好去處。"},{"icon":"🚃","title":"直通押上","description":"半藏門線直通東武線，可直達押上站和晴空塔方向。"},{"icon":"🏢","title":"辦公區","description":"周邊是辦公區，有許多商務餐廳和咖啡廳。"},{"icon":"🚃","title":"直通目黑","description":"三田線直通南北線，可直達目黑站和白金站。"},{"icon":"🏢","title":"水道橋","description":"步行可達水道橋站，那裡有東京巨蛋和後樂園遊樂園。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"A5、B2c、C14 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]},{"type":"toilet","location":"中央改札內","tags":["Wheelchair","BabyRoom"]},{"type":"toilet","location":"往綾瀨方向月台","tags":["Wheelchair"]},{"type":"elevator","location":"C14 出口 (千代田線側)","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Otemachi';
+
+
+-- Update for odpt:Station:TokyoMetro.MonzenNakacho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.MonzenNakacho';
+
+
+-- Update for odpt:Station:TokyoMetro.NishiKasai
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.NishiKasai';
+
+
+-- Update for odpt:Station:TokyoMetro.Kasai
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kasai';
+
+
+-- Update for odpt:Station:TokyoMetro.Urayasu
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Urayasu';
+
+
+-- Update for odpt:Station:TokyoMetro.Gyotoku
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Gyotoku';
+
+
+-- Update for odpt:Station:TokyoMetro.MinamiGyotoku
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.MinamiGyotoku';
+
+
+-- Update for odpt:Station:TokyoMetro.Myoden
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Myoden';
+
+
+-- Update for odpt:Station:TokyoMetro.BarakiNakayama
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.BarakiNakayama';
+
+
+-- Update for odpt:Station:TokyoMetro.Oshiage
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🗼","title":"晴空塔人潮 (Skytree Crowds)","description":"押上站是前往晴空塔的主要車站，假日與連假期間人潮非常洶湧。出站可能需要排隊 10-15 分鐘。","advice":"建議：若要前往晴空塔，建議平日上午前往或預先購買晴空塔門票以節省排隊時間。回程若遇人潮管制，可考慮步行至鄰近車站搭乘。"},{"icon":"🔀","title":"京急線分歧點","description":"押上站是都營淺草線和京急線的分歧點。若要往品川、羽田機場方向，需要在押上站轉乘京急線。請注意列車的行先看板。","advice":"️ 注意：前往機場的旅客，請確認搭乘的是「京急機場線」或「機場快特」，普通京急線可能需要在中途轉乘。"}],"hacks":[{"icon":"✈️","title":"直通成田","description":"此站直通京成線往成田機場，是個非常方便的轉運點。京成 Skyliner 和 ACCESS 特快都可在此搭乘。"},{"icon":"🗼","title":"晴空塔最近站","description":"押上站是距離東京晴空塔最近的車站，步行約 5 分鐘即可抵達。站內有明確的指標引導。"},{"icon":"🍜","title":"晴空塔美食街","description":"晴空塔內和周邊有多家餐廳和咖啡廳，適合用餐休息。建議預先訂位以避免等候。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"A1、A2、A3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"出口","tags":["Wheelchair"]},{"type":"wifi","location":"部分區域","tags":[]},{"type":"toilet","location":"改札外","tags":["BabyRoom"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Oshiage';
+
+
+-- Update for odpt:Station:TokyoMetro.Asakusa
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🚇","title":"淺草站大迷宮 (Asakusa Station Maze)","description":"淺草站有都營淺草線、東京Metro銀座線、東武線三條路線交會，但彼此並非直結。從都營淺草線轉乘銀座線需要出站再入站，步行約 5-8 分鐘。記得先跟站務員確認最短路徑。","advice":"️ 建議：使用「連絡乘車券」可免費出站轉乘，請在售票窗口索取。"},{"icon":"🧳","title":"電梯陷阱 (Elevator Trap)","description":"淺草站出口雖多，但直通地面的電梯"},{"icon":"🚧","title":"四個淺草站混淆 (The 4 Asakusas)","description":"地鐵銀座線、都營淺草線、東武鐵道、筑波快線 (TX) 都有「淺草站」。筑波快線的淺草站距離其他三站約 600 公尺（步行10分），轉乘極不方便，請勿安排在此站轉乘 TX。","advice":"️ 絕對注意：要去筑波或機場，請直接搭 TX 從「淺草站 TX」上車，不需要轉乘。若要轉乘其他線，請走到「本所吾妻橋站」比較近。"},{"icon":"🗼","title":"晴空塔方向誤導","description":"銀座線淺草站的 A3、A4 出口都寫著「淺草寺方面」，但晴空塔在反方向。想去晴空塔請走"},{"icon":"🔄","title":"與都營淺草線不直結","description":"銀座線和都營淺草線雖然站名相同，但轉乘需要出站步行約 5 分鐘。沿著雷門大道的地下通道前進，會看到指標引導至都營淺草線。","advice":"️ 建議：若有 Suica/PASMO，可直接刷卡出站轉乘，無需另外購票。"},{"icon":"🎫","title":"與地鐵系統分開","description":"東武鐵道是獨立的公司，票券系統與東京Metro、都營不同。若使用 Suica/PASMO 需確保有足够餘額，或在東武售票窗口購買車票。","advice":"️ 注意：東武的「東武晴空塔線」是從淺草到東京晴空塔站，不是直通東京Metro銀座線。"},{"icon":"🚃","title":"方向指示複雜","description":"東武線的月台分為「東京天空樹方向」和「其他方向」，上車前請確認目的地看板。前往東京晴空塔站只需搭一站。","advice":"小提醒：東武淺草站內的指標有英文和中文，不用擔心看不懂。"},{"icon":"📍","title":"位置偏遠陷阱","description":"TX 淺草站位於其他三個淺草站的東南方約 600 公尺處，步行需要 10-15 分鐘。若要轉乘東京Metro銀座線或都營淺草線，強烈建議直接在 TX 淺草站上車，不需要走到其他淺草站。","advice":"️ 絕對守則：TX 淺草站是「筑波快線專用站」，千萬不要以為可以在這裡轉乘銀座線！"},{"icon":"🕐","title":"班距較長","description":"筑波快線的班距比東京Metro長，尖峰時段約 3-5 分鐘一班，離峰時段可能長達 10 分鐘以上。請預留充裕的候車時間。","advice":"建議：可以使用 TX 的官方 APP 查詢即時時刻表。"},{"icon":"🎫","title":"票價較高","description":"筑波快線的票價比其他路線高，尤其是往市中心的區間。若預算有限，建議搭到「秋葉原站」再轉乘其他路線，可能會便宜一些。","advice":"小技巧：TX 有推出外國人專用的優惠票券，可在機場或主要車站購買。"}],"hacks":[{"icon":"⛩️","title":"雷門最近出口","description":"A4 出口步行 1 分鐘即可抵達著名的雷門，是前往淺草寺的最佳入口。"},{"icon":"🍡","title":"仲見世通り","description":"雷門到淺草寺之間的參道商店街，約 250 公尺長，可以邊吃邊逛。建議從 A4 出口進入仲見世通り，反方向人潮較少。"},{"icon":"🚤","title":"水上巴士","description":"從吾妻橋可以搭水上巴士到御台場和葛西臨海公園。乘船處在 1 號出口附近，步行約 3 分鐘。"},{"icon":"🌙","title":"夜遊路線","description":"淺草寺夜間參拜開放至 22:00，建議傍晚從 A4 出口進來，先逛仲見世通り吃小吃，天黑後再參拜，避開人潮。"},{"icon":"🎎","title":"和服體驗捷徑","description":"這一帶的和服租借店林立，建議從 A4 出口出站後往雷門方向走，很多店家提供隔夜歸還服務。"},{"icon":"🍜","title":"大黑家天麩羅","description":"著名的大黑家天麩羅在本店就在附近，但排隊人潮多。建議避開正午餐廳時段，或改去「並木座」分店。"},{"icon":"📸","title":"隅田川拍攝點","description":"從 2b 出口步行到吾妻橋，可以拍到晴空塔和朝日啤酒大樓的經典同框畫面。"},{"icon":"🎫","title":"東武Pass優惠","description":"如果計劃搭乘東武線前往日光、鬼怒川，建議在淺草站購買「東武鐵道周遊券」，可在窗口諮詢。"},{"icon":"🍵","title":"淺草觀光文化中心","description":"站外的「淺草觀光文化中心」8樓有免費觀景台，可俯瞰整個淺草寺和晴空塔，是拍照的好去處。"},{"icon":"🚄","title":"機場直達","description":"從 TX 淺草站可以直達成田機場第1・第2航站樓和成田機場第3航站樓，無需轉乘，是前往機場的方便選擇。"},{"icon":"🌸","title":"筑波山展望","description":"TX 的「TX New Shuttle」觀光列車在特定季節會運行，可從車上欣賞筑波山的風景。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"A2b、1 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"出口","tags":["Wheelchair"]},{"type":"wifi","location":"部分區域","tags":[]},{"type":"toilet","location":"淺草線改札內","tags":["Wheelchair"]},{"type":"toilet","location":"1號出口附近","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"A2b 出口（駒形橋方面）","tags":["Wheelchair"]},{"type":"elevator","location":"A4 出口","tags":["Wheelchair"]},{"type":"elevator","location":"A5 出口","tags":["Wheelchair"]},{"type":"elevator","location":"A1 出口","tags":["Wheelchair"]},{"type":"elevator","location":"2b 出口","tags":["Wheelchair"]},{"type":"toilet","location":"改札外","tags":["BabyRoom"]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Asakusa';
+
+
+-- Update for odpt:Station:TokyoMetro.Tawaramachi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Tawaramachi';
+
+
+-- Update for odpt:Station:TokyoMetro.Hibiya
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"A1、A2、A3、A4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Hibiya';
+
+
+-- Update for odpt:Station:TokyoMetro.Jimbocho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"A1、A2、A3、A4、A5、A6 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Jimbocho';
+
+
+-- Update for odpt:Station:TokyoMetro.Ichigaya
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Ichigaya';
+
+
+-- Update for odpt:Station:TokyoMetro.Sumiyoshi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"A1、A2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Sumiyoshi';
+
+
+-- Update for odpt:Station:TokyoMetro.Tsukishima
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Tsukishima';
+
+
+-- Update for odpt:Station:TokyoMetro.Toyosu
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Toyosu';
+
+
+-- Update for odpt:Station:TokyoMetro.NishiNippori
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🚄","title":"月台較短","description":"京成日暮里站的月台相對較短，尖峰時段列車擁擠時可能需要等下一班車。","advice":"建議避開早上 7:30-9:00 的通勤尖峰。"},{"icon":"🎫","title":"與 JR 站連通複雜","description":"京成日暮里站與 JR 日暮里站的連通通道指標有時不太清楚，第一次轉乘可能會迷路。","advice":"小提醒：跟隨「JR」綠色指標走，付費區內有明確的轉乘通道。"},{"icon":"💰","title":"票價分岔","description":"同樣是從日暮里前往機場，Skyliner 和 ACCESS 特快的票價和時間差異很大。Skyliner 較貴但更快，ACCESS 較便宜但需停靠較多站。","advice":"建議：趕時間選 Skyliner，預算有限選 ACCESS。"}],"hacks":[{"icon":"✈️","title":"機場交通備案","description":"若上野的 Skyliner 客滿，可從日暮里站搭乘京成電鐵前往機場。票價比上野出發略便宜，且人潮較少。"},{"icon":"🎫","title":"外國人優惠套票","description":"京成電鐵提供外國人專用的優惠票券，可在網上預訂 Skyliner+Tokyo Subway Ticket 的組合套票，省錢又方便。"},{"icon":"🍜","title":"日暮里站周邊美食","description":"站前有多家歷史悠久的拉麵店和蕎麥麵店，價格實惠且味道道地。推薦嘗試「日暮里名物」特製拉麵。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"北改札、 西口","tags":["Wheelchair"]},{"type":"toilet","location":"改札外","tags":["BabyRoom"]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.NishiNippori';
+
+
+-- Update for odpt:Station:TokyoMetro.Machiya
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"部分區域","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Machiya';
+
+
+-- Update for odpt:Station:TokyoMetro.KitaSenju
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"與 JR 站關係","description":"日比谷線北千住站與 JR 站相鄰，但屬於不同車站。","advice":"站內有地下通道連通，跟隨「JR」指標前進即可。"},{"icon":"🚃","title":"與東武線","description":"日比谷線和東武線的轉乘需要出站步行約 5 分鐘。","advice":"使用 Suica/PASMO 可直接刷卡通過連通道。"},{"icon":"🎫","title":"與 JR 分隔","description":"東武北千住站位於 JR 站的西側，步行約 5 分鐘。","advice":"從 JR 西口出站，跟隨「東武」指標前進即可。"},{"icon":"🚃","title":"天空樹線","description":"東武的「東京天空樹線」是從北千住到押上站的支線，與主線不同。","advice":"確認看板上的目的地，避免搭錯車。"},{"icon":"🎯","title":"位置偏遠","description":"TX 北千住站位於其他三個車站的北側，步行需要較長時間。","advice":"TX 站的位置與 JR、日比谷線、東武站有一段距離，請預留充裕時間。"},{"icon":"🎫","title":"票價較高","description":"筑波快線的票價比一般地鐵高，尤其是往東京方向的區間。","advice":"若預算有限，建議使用其他路線前往東京。"},{"icon":"🕐","title":"班距較長","description":"TX 的班距比東京 Metro 長，尖峰時段約 3-5 分鐘，離峰時段可能長達 10 分鐘以上。","advice":"建議查詢 TX 官方 APP 確認時刻表。"}],"hacks":[{"icon":"🚃","title":"直達東京","description":"日比谷線可直達銀座、日比谷、六本木、赤坂方向的東京市中心。"},{"icon":"🏙️","title":"便利交通","description":"從北千住搭乘日比谷線可快速抵達東京各大景點。"},{"icon":"🗼","title":"晴空塔直達","description":"東武天空樹線可直達東京晴空塔站，是前往晴空塔的便捷選擇。"},{"icon":"🚃","title":"日光・鬼怒川","description":"東武線可直達日光站和鬼怒川溫泉，是東京近郊溫泉和賞楓的熱門目的地。"},{"icon":"🛍️","title":"購物推薦","description":"東武車站內有許多商店和餐廳，適合用餐和購物。"},{"icon":"🚄","title":"筑波直達","description":"TX 是前往筑波科學城的便捷方式，約 45 分鐘可達。"},{"icon":"✈️","title":"機場交通","description":"TX 可從秋葉原直達成田機場，是前往機場的替代選擇。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"出口","tags":["Wheelchair"]},{"type":"wifi","location":"部分區域","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.KitaSenju';
+
+
+-- Update for odpt:Station:TokyoMetro.Inaricho
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Inaricho';
+
+
+-- Update for odpt:Station:TokyoMetro.YoyogiKoen
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.YoyogiKoen';
+
+
+-- Update for odpt:Station:TokyoMetro.Sendagi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🏠","title":"隱藏住宅區出口","description":"千駄木站只有一個主要驗票口，但有時指標會讓人以為還需要走很久才能出站。實際上驗票口出來就是住宅區街道。","advice":"小提醒：出站後隨便走都是千駄木的住宅區，沒有明確的「正門」概念。"},{"icon":"🎋","title":"前往谷中需步行","description":"千駄木站不在谷中銀座附近，從車站步行至谷中銀座需要約 10-15 分鐘。沿途都是住宅區，可能會迷路。","advice":"建議：使用 Google Maps 導航，或跟著「谷中銀座」的路牌走。"},{"icon":"🚃","title":"列車方向確認","description":"千代田線有「直通運行」至小田原線和常磐線，列車目的地可能會讓人困惑。進站前務必確認列車的行駛方向。","advice":"小技巧：看板上會顯示「經由○○站」，確認你的目的地在該路線上。"}],"hacks":[{"icon":"📚","title":"文人散步路線","description":"千駄木是著名的文人住宅區，保留了許多作家和藝術家的舊居。推薦「明治文士散步路線」，可參觀夏目漱石、森鷗外等文人的故居。"},{"icon":"⛩️","title":"不忍寺","description":"從車站步行約 5 分鐘可達「不忍寺」，這是一座相對清幽的寺廟，沒有過多的觀光客，非常適合想要避開人群的旅客。"},{"icon":"☕","title":"古民家咖啡廳","description":"千駄木有許多改造自老宅的咖啡廳，裝潢充滿懷舊風情。推薦「ayana」和「谷中茶屋」，可以悠閒地度過一個下午。"},{"icon":"🌸","title":"隅田川支流散步","description":"車站附近有隅田川的支流「千駄木川」，沿岸有步道可以散步，春季櫻花盛開時景色優美。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"toilet","location":"改札外","tags":["BabyRoom"]},{"type":"elevator","location":"1 號出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Sendagi';
+
+
+-- Update for odpt:Station:TokyoMetro.Nezu
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"⛩️","title":"根津神社隱藏入口","description":"根津神社的正式入口比較低調，第一次前往可能會錯過。神社入口位於一片樹林後方，需要走一段小路才能抵達。","advice":"建議：跟著「根津神社」的大紅色鳥居走，不要懷疑一直前進。"},{"icon":"🍂","title":"紅葉季人潮","description":"根津神社是東京著名的紅葉名所，11 月中旬至 12 月上旬的紅葉季期間人潮洶湧，建議早上 8 點前抵達以避開人潮。","advice":"️ 週末人特別多，平日早晨是最佳參觀時段。"},{"icon":"🚶","title":"車站到神社有距離","description":"根津站距離根津神社約 10-15 分鐘步行距離，不是出站即達。","advice":"小提醒：建議穿舒適的鞋子前往，途中有一些小上坡。"}],"hacks":[{"icon":"🏯","title":"千年古社根津神社","description":"根津神社創建於 1900 多年前，是東京最古老的神社之一。神社內的「乙女稻荷」千本鳥居非常夢幻，是 IG 熱門打卡點。"},{"icon":"🌲","title":"自然療癒森林","description":"根津神社周圍被茂密的森林包圍，稱為「根津千棵樹」。在神社參拜後，可以在森林中散步，感受都市中難得的自然氣息。"},{"icon":"🎋","title":"九品佛寺","description":"從根津站步行約 10 分鐘可達「九品佛寺」，這是一座供奉觀音像的寺廟，以境內的苔蘚庭園聞名，非常清幽。"},{"icon":"🍵","title":"根津名物糰子","description":"根津神社參道上有許多販售傳統和果子的店鋪，特別是「豆大福」和「醬油糰子」深受當地人喜愛。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"toilet","location":"改札外 1 號出口附近","tags":["BabyRoom"]},{"type":"elevator","location":"1 號出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Nezu';
+
+
+-- Update for odpt:Station:TokyoMetro.Nishigahara
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Nishigahara';
+
+
+-- Update for odpt:Station:TokyoMetro.KitaAyase
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.KitaAyase';
+
+
+-- Update for odpt:Station:TokyoMetro.Meguro
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"與其他目黑站關係","description":"南北線目黑站與 JR 目黑站相鄰，但屬於不同車站。步行約 3 分鐘可達。","advice":"從 JR 目黑站西口出站，跟隨「東京Metro」指標前進即可。"},{"icon":"🚃","title":"直通","description":"南北線與三田線直通運行，可直達白金高輪方向。","advice":"確認看板上的直通運行資訊。"},{"icon":"🎯","title":"位置","description":"三田線目黑站位於 JR 目黑站的北側，步行約 5 分鐘。","advice":"從 JR 目黑站西口出站，跟隨「都營三田線」指標前進。"},{"icon":"🚃","title":"與南北線直通","description":"三田線與南北線直通運行，但時刻表需要確認。","advice":"並非所有列車都直通，請注意看板指示。"},{"icon":"🎯","title":"最偏遠","description":"東急目黑站是四個「目黑站」中位置最偏遠的一個，與其他三站距離較遠。","advice":"從 JR 目黑站步行約 10-15 分鐘，建議搭乘計程車或公車。"},{"icon":"🚃","title":"日吉方向","description":"東急目黑線主要運行於目黑站和日吉站之間，是一條支線。","advice":"若要前往東京市區，需要在日吉站轉乘其他路線。"},{"icon":"🚇","title":"多線轉乘複雜性","description":"此站由東急電鐵主導經營，但同時有都營三田線與東京Metro南北線停靠。售票系統各自獨立，IC卡無法互通補貼，須於各線售票機分別購票。","advice":"轉乘前先確認各線閘門位置，避免走回頭路。"},{"icon":"🚶","title":"轉乘步行距離","description":"東急線與都營三田線間轉乘需步行約 300m，經過聯絡通道約 4-5 分鐘。南北線月台位於地下 B2 層，與東急淺草 meguro線月台（地面層）垂直距離約 15m。","advice":"攜帶大型行李者建議使用東口電梯。"},{"icon":"⛰️","title":"站外陡坡","description":"目黑站周圍為知名陡坡地形，站前向西延伸的斜坡坡度達 8-12%，往「目黑區民中心」方向步行 200m 平均耗時比平地多 2 分鐘。","advice":"避免拖行李箱於下雨天前往西側住宿，路面濕滑危險。"}],"hacks":[{"icon":"🏢","title":"東京首都大學","description":"步行可達東京首都大學校園，氛圍寧靜。"},{"icon":"🌸","title":"季節景點","description":"目黑川沿岸在春天有美麗的櫻花，秋天有紅葉。"},{"icon":"🏙️","title":"白金","description":"從三田線可直達白金站，那裡有著名的白金神社和購物中心。"},{"icon":"🍜","title":"美食推薦","description":"目黑站周邊有許多知名餐廳和咖啡廳。"},{"icon":"🏞️","title":"自然環境","description":"目黑線沿線有許多公園和自然景點，適合週末郊遊。"},{"icon":"🏫","title":"東京工業大學","description":"步行可達東京工業大學校園，氛圍學術。"},{"icon":"🚪","title":"最佳進出站選擇","description":"東急線乘車使用「東口」或「西口」，兩者相距 80m。前往「目黑銀杏並木」（賞楓名所）建議從西口出站，步行 150m 即達。前往「四季劇場」從東口出站，步行 100m。","advice":"先確認目的地方位再選擇出口。"},{"icon":"🛗","title":"電梯位置","description":"東口設有電梯可達所有樓層（地面→地下B1→B2），服務時間 05:00-24:00。大型行李或輪椅使用者須使用東口，西口僅有樓梯。","advice":"西口無電梯，攜帶行李者勿從西口進出。"},{"icon":"🚃","title":"首末班車差異","description":"東急目黑線首班車 05:04、末班車 00:38。都營三田線首班車 05:29、末班車 23:54。南北線首班車 05:17、末班車 00:09。南北線末班車最早結束。","advice":"深夜活動者優先選擇東急線離站。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]},{"type":"toilet","location":"東急線月台（1F）東側、西側各 1 間；都營/南北線閘內 B2 層東側 1 間","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"東口 1 處（1F↔B2）","tags":["Wheelchair"]},{"type":"locker","location":"東口站前廣場投幣式行李櫃","tags":["L-size","M-size"]},{"type":"wifi","location":"站內 Tokyo Free Wi-Fi","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Meguro';
+
+
+-- Update for odpt:Station:TokyoMetro.Shirokanedai
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Shirokanedai';
+
+
+-- Update for odpt:Station:TokyoMetro.ShirokaneTakanawa
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎯","title":"與南北線直通","description":"三田線與南北線直通運行，可直達目黑、白金方向。","advice":"確認看板上的直通運行資訊。"},{"icon":"🔄","title":"轉乘複雜","description":"白金高輪站是三田線和南北線的轉乘站，但月台配置複雜。","advice":"跟隨「南北線」或「三田線」指標前進。"}],"hacks":[{"icon":"🏛️","title":"白金","description":"白金地區是東京的高級住宅區，有許多外國大使館和時尚餐廳。"},{"icon":"🏪","title":"白金購物中心","description":"周邊有許多精品店和咖啡廳，適合散步和購物。"},{"icon":"🌳","title":"自然環境","description":"白金地區綠化良好，有許多公園和自然景點。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"主要出入口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.ShirokaneTakanawa';
+
+
+-- Update for odpt:Station:TokyoMetro.Kasumigaseki
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"A1、A2、A3、A4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Kasumigaseki';
+
+
+-- Update for odpt:Station:TokyoMetro.RoppongiItchome
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.RoppongiItchome';
+
+
+-- Update for odpt:Station:TokyoMetro.AzabuJuban
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.AzabuJuban';
+
+
+-- Update for odpt:Station:TokyoMetro.KotakeMukaihara
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"1、2、3、4 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.KotakeMukaihara';
+
+
+-- Update for odpt:Station:TokyoMetro.Wakoshi
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"南口、 北口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Wakoshi';
+
+
+-- Update for odpt:Station:TokyoMetro.ShinOtsuka
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"北口、 南口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.ShinOtsuka';
+
+
+-- Update for odpt:Station:TokyoMetro.Zoshigaya
+UPDATE nodes
+SET riding_knowledge = '{"traps":[],"hacks":[],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair"]},{"type":"elevator","location":"1、2 出口","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Zoshigaya';
+
+
+-- Update for odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal3
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🎫","title":"票價較高","description":"東京單軌電車的票價比京急電鐵略高，但直達濱松町和山手線沿線，轉乘次數較少。","advice":"若目的地是澀谷、新宿方向，使用東京單軌電車可能更省時。"},{"icon":"🔄","title":"與京急站分開","description":"東京單軌電車的站廳與京急電鐵的站廳不相通，需要步行約 5-10 分鐘或搭乘站外接駁巴士。","advice":"️ 入境時根據指標選擇正確的電車公司。"},{"icon":"🕐","title":"首末班車時間","description":"東京單軌電車的首班車約 05:10，末班車約 23:10，紅眼航班旅客需提前確認。","advice":"深夜或凌晨航班建議使用京急電鐵或計程車。"}],"hacks":[{"icon":"🚃","title":"直通山手線","description":"從濱松町站可直通山手線，前往東京站、新宿站、澀谷站等主要轉乘站。"},{"icon":"🌉","title":"濱松町步行","description":"濱松町站距離東京鐵塔步行約 10 分鐘，可安排在機場交通途中參觀。"},{"icon":"🎢","title":"台場方向","description":"從濱松町站轉乘百合海鷗號可直達台場地區，適合安排機場往返的台場一日遊。"},{"icon":"💺","title":"座位指定","description":"東京單軌電車提供對號座位服務（需額外付費），適合攜帶大型行李的旅客。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"toilet","location":"月台層","tags":["BabyRoom"]},{"type":"elevator","location":"各月台及出入口","tags":["Wheelchair"]},{"type":"wifi","location":"全站免費 Wi-Fi","tags":[]}]}'
+WHERE id = 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal3';
+
+
+-- Update for odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal1
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🚃","title":"班次較少","description":"JR 機場支線的班次比京急或單軌電車少，尖峰時段約 10-15 分鐘一班。","advice":"建議使用 Google Maps 或乘換案内 APP 確認即時發車時間。"},{"icon":"🎫","title":"僅限特定範圍","description":"JR 機場支線的車票只能在機場支線內使用，若需轉乘其他 JR 線需要在特定站點重新購票或刷卡。","advice":"使用 Suica/PASMO 刷卡最方便，可直通所有JR線。"},{"icon":"🔄","title":"與京急線關係","description":"JR 機場支線和京急線在機場內是不同的系統，轉乘時需要出站步行。","advice":"️ 若已購買 JR 車票，建議全程使用 JR 系統，避免出站後車票失效。"}],"hacks":[{"icon":"🚃","title":"直通東京站","description":"JR 機場支線直通京濱東北線，可直達東京站、上野站方向，無需轉乘。"},{"icon":"🛫","title":"前往成田機場","description":"從 JR 機場站可搭乘 JR 成田特快 N''EX 直達成田機場，但需要轉乘且票價較高。"},{"icon":"🎫","title":"外國人優惠","description":"JR 發行的「機場套票」對外國人有優惠，可在機場服務中心購買。"}],"facilities":[{"type":"toilet","location":"改札內","tags":["Wheelchair","BabyRoom"]},{"type":"toilet","location":"第1・第2航廈聯絡通道附近","tags":["BabyRoom"]},{"type":"elevator","location":"各月台及出入口","tags":["Wheelchair"]},{"type":"wifi","location":"部分區域","tags":[]}]}'
+WHERE id = 'odpt.Station:TokyoMonorail.HanedaAirport.HanedaAirportTerminal1';
+
+
+-- Update for odpt:Station:TokyoMetro.Akihabara
+UPDATE nodes
+SET riding_knowledge = '{"traps":[{"icon":"🔄","title":"總武線空中轉乘 (Sky High Sobu)","description":"總武線月台位於 6 樓，山手線/京濱東北線位於 2 樓。轉乘時需搭乘極長的電扶梯。","advice":"️ 注意：人潮眾多時電扶梯會大排長龍，轉乘請預留 5-8 分鐘。"},{"icon":"⚡","title":"電器街 vs 昭和通 (West vs East)","description":"秋葉原站被 JR 線路切分為二，西側是「電器街/動漫區」，東側是「Yodobashi Camera/日比谷線」。","advice":"️ 注意：若走錯邊要繞一大圈。請記住：看動漫走「電器街口」，買家電走「中央改札」或「昭和通口」。"},{"icon":"🚇","title":"日比谷線轉乘地雷 (Hibiya Trap)","description":"日比谷線月台位於車站極東側，距離電器街核心區較遠。","advice":"️ 建議：若搭日比谷線要去電器街，請走「3號出口」，或利用 JR 中央改札旁的「東西自由通路」穿越。"},{"icon":"🎯","title":"位置偏東","description":"日比谷線秋葉原站位於車站東側，與 JR 秋葉原站有一段距離。","advice":"從 JR 秋葉原站昭和通口出站，步行約 3 分鐘可達。"},{"icon":"🔄","title":"與 JR 站轉乘","description":"日比谷線和 JR 線的轉乘需要出站步行，但使用 Suica/PASMO 可直接刷卡通過。","advice":"跟隨「JR秋葉原」指標前進即可。"}],"hacks":[{"icon":"🛍️","title":"Yodobashi Akiba","description":"昭和通口直結，全日本最大的電器百貨，B1-8F 應有盡有。買電器來這裡就對了。"},{"icon":"🥛","title":"牛奶小站","description":"總武線月台上有專賣日本各地玻璃瓶牛奶的販賣部，非常受歡迎。推薦嘗試北海道牛奶。"},{"icon":"🌉","title":"東西自由通路","description":"這是唯一不需進站即可穿越車站東西兩側的捷徑，位於中央改札口旁。免費使用，非常方便。"},{"icon":"🚶","title":"末廣町捷徑","description":"若要去電器街北側（女僕店、唐吉訶德），搭銀座線到「末廣町站」其實比秋葉原站更近。步行約 3 分鐘。"},{"icon":"🎮","title":"GAMERS","description":"動漫遊戲迷必逛的店鋪，有各種遊戲、動漫周邊和二手商品。"},{"icon":"🏪","title":"唐吉訶德","description":"折扣店，有各種零食、藥妝和電器，營業到深夜。"},{"icon":"🚶","title":"前往電器街","description":"從日比谷線 3 號出口出站，步行約 3 分鐘可達電器街核心區。"},{"icon":"🍜","title":"拉麵推薦","description":"附近有「拉麵二郎」秋葉原店，份量超大，是挑戰大食量的好去處。"}],"facilities":[{"type":"toilet","location":"電氣街口 改札內","tags":["Wheelchair"]},{"type":"toilet","location":"中央改札內","tags":["Wheelchair"]},{"type":"toilet","location":"昭和通口 改札內","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"中央改札口、3號出口","tags":["Wheelchair"]},{"type":"wifi","location":"部分區域","tags":[]},{"type":"toilet","location":"站務室旁 (改札外)","tags":["Wheelchair","BabyRoom"]},{"type":"elevator","location":"3號出口 (昭和通口)","tags":["Wheelchair"]},{"type":"wifi","location":"全站","tags":[]}]}'
+WHERE id = 'odpt:Station:TokyoMetro.Akihabara';
+
+

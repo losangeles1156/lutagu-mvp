@@ -1021,14 +1021,15 @@
     "isHub": false
   },
   {
-    "name": "東花輪",
-    "name_en": "Higashi-Hanawa",
-    "ward": "Chuo",
+    "name": "溜池山王",
+    "name_en": "Tameike-sanno",
+    "ward": "Minato",
     "operators": [
-      "Unknown"
+      "TokyoMetro"
     ],
     "ids": [
-      "odpt:Station:Unknown.Higashi-Hanawa"
+      "odpt.Station:TokyoMetro.Ginza.TameikeSanno",
+      "odpt.Station:TokyoMetro.Namboku.TameikeSanno"
     ],
     "inSeed": false,
     "isHub": false
@@ -1350,17 +1351,19 @@
     "isHub": false
   },
   {
-    "name": "小井川",
-    "name_en": "Koikawa",
-    "ward": "Chuo",
+    "name": "表参道",
+    "name_en": "Omote-sando",
+    "ward": "Minato",
     "operators": [
-      "Unknown"
+      "TokyoMetro"
     ],
     "ids": [
-      "odpt:Station:Unknown.Koikawa"
+      "odpt.Station:TokyoMetro.Ginza.OmoteSando",
+      "odpt.Station:TokyoMetro.Chiyoda.OmoteSando",
+      "odpt.Station:TokyoMetro.Hanzomon.OmoteSando"
     ],
     "inSeed": false,
-    "isHub": false
+    "isHub": true
   },
   {
     "name": "麹町",

@@ -38,7 +38,7 @@ interface RidingKnowledge {
 }
 
 const KNOWLEDGE_DIR = path.resolve(__dirname, '../knowledge/stations/riding_knowledge');
-const EXCLUDE_FILES = ['metro_toei_all_stations.md', 'metro_toei_remaining.md', 'metro_remaining_lines_universal.md']; // Handle these separately or skip if redundant
+const OUTPUT_SQL = path.resolve(__dirname, '../supabase/migrations/20260106_ingest_markdown_knowledge.sql');
 
 async function findNodeIds(searchId: string): Promise<string[]> {
     console.log(`[ID] Resolving nodes for: ${searchId}...`);
@@ -88,31 +88,26 @@ async function findNodeIds(searchId: string): Promise<string[]> {
     return results;
 }
 
-// Output file path
-const OUTPUT_SQL = path.resolve(__dirname, '../supabase/migrations/20260106_ingest_markdown_knowledge.sql');
+// Map to store aggregated knowledge keyed by Node ID
+const globalKnowledge: Map<string, RidingKnowledge> = new Map();
 
 async function ingestFile(filePath: string) {
     const content = fs.readFileSync(filePath, 'utf-8');
     const filename = path.basename(filePath);
     console.log(`\n--- Processing ${filename} ---`);
 
-    const stations: { id: string; data: RidingKnowledge }[] = [];
+    const rawStations: { id: string; data: RidingKnowledge }[] = [];
 
     if (filename.startsWith('area') || filename === 'expansion_minimax.md') {
         const sections = content.split(/^## /m).slice(1);
-
         for (const section of sections) {
             const lines = section.split('\n');
             const header = lines[0].trim();
-
-            let idPart = header.split('（')[0].split('(')[0].trim(); // Remove ()
-
-            // Heuristic Construction
+            let idPart = header.split('（')[0].split('(')[0].trim();
             let searchId = '';
             if (idPart.includes('Station Context')) {
                 searchId = idPart.replace('Station Context:', '').trim();
             } else {
-                // Basic normalization
                 if (!idPart.startsWith('odpt')) {
                     if (idPart.includes('TokyoMetro') || idPart.includes('Toei')) {
                         searchId = `odpt.Station:${idPart}`;
@@ -126,58 +121,62 @@ async function ingestFile(filePath: string) {
                     searchId = idPart;
                 }
             }
-
             const knowledge = parseSectionBody(lines.slice(1));
-            if (knowledge.traps.length > 0 || knowledge.hacks.length > 0 || knowledge.facilities.length > 0) {
-                stations.push({ id: searchId, data: knowledge });
-            }
+            if (hasContent(knowledge)) rawStations.push({ id: searchId, data: knowledge });
         }
     } else if (filename.includes('metro_toei') || filename.includes('metro_remaining')) {
         const sections = content.split(/^### Station Context: /m).slice(1);
         for (const section of sections) {
             const lines = section.split('\n');
             let stationId = lines[0].trim();
-
             if (!stationId.startsWith('odpt')) {
                 if (stationId.includes('JR-East')) stationId = `odpt:Station:${stationId}`;
                 else stationId = `odpt.Station:${stationId}`;
             }
-
             const knowledge = parseSectionBody(lines.slice(1));
-            if (knowledge.traps.length > 0 || knowledge.facilities.length > 0) {
-                stations.push({ id: stationId, data: knowledge });
-            }
+            if (hasContent(knowledge)) rawStations.push({ id: stationId, data: knowledge });
         }
     }
 
-    for (const station of stations) {
+    // Resolve IDs and Aggregate
+    for (const station of rawStations) {
         const nodeIds = await findNodeIds(station.id);
-
-        if (nodeIds.length > 0) {
-            const rawData = JSON.parse(JSON.stringify(station.data));
-            // Sanitize: Remove empty advice
-            const safeData: any = {
-                traps: rawData.traps.map((t: any) => ({ ...t, advice: t.advice || undefined })),
-                hacks: rawData.hacks.map((h: any) => ({ ...h, advice: h.advice || undefined })),
-                facilities: rawData.facilities || []
-            };
-
-            // Escape single quotes in JSON for SQL
-            const jsonStr = JSON.stringify(safeData).replace(/'/g, "''");
-
-            for (const nodeId of nodeIds) {
-                const sql = `
--- Update for ${nodeId} (${station.id})
-UPDATE nodes
-SET riding_knowledge = '${jsonStr}'
-WHERE id = '${nodeId}';
-                `;
-                fs.appendFileSync(OUTPUT_SQL, sql + '\n');
-                console.log(`[SQL] Generated for ${nodeId}`);
-            }
-        } else {
+        if (nodeIds.length === 0) {
             console.warn(`[SKIP] ID resolution failed for: ${station.id}`);
-            fs.appendFileSync(OUTPUT_SQL, `-- [SKIP] ID resolution failed for: ${station.id}\n`);
+            continue;
+        }
+
+        for (const nodeId of nodeIds) {
+            if (!globalKnowledge.has(nodeId)) {
+                globalKnowledge.set(nodeId, { traps: [], hacks: [], facilities: [] });
+            }
+            const agg = globalKnowledge.get(nodeId)!;
+
+            // Merge and Dedup (by title for items, by type+location for facilities)
+            mergeItems(agg.traps, station.data.traps);
+            mergeItems(agg.hacks, station.data.hacks);
+            mergeFacilities(agg.facilities, station.data.facilities);
+        }
+    }
+}
+
+function hasContent(k: RidingKnowledge) {
+    return k.traps.length > 0 || k.hacks.length > 0 || k.facilities.length > 0;
+}
+
+function mergeItems(target: L4Item[], source: L4Item[]) {
+    for (const s of source) {
+        if (!target.some(t => t.title === s.title)) {
+            target.push(s);
+        }
+    }
+}
+
+function mergeFacilities(target: L4Facility[], source: L4Facility[]) {
+    for (const s of source) {
+        // Simple dedup based on type and location
+        if (!target.some(t => t.type === s.type && t.location === s.location)) {
+            target.push(s);
         }
     }
 }
@@ -193,7 +192,6 @@ function parseSectionBody(lines: string[]): RidingKnowledge {
         else if (trimmed.includes('### Facilities') || trimmed.includes('**Facilities')) currentSection = 'Facilities';
 
         if (trimmed.startsWith('- [Trap]')) {
-            // Format: - [Trap] ICON **TITLE**: DESCRIPTION (Advice: ADVICE)
             const content = trimmed.replace('- [Trap] ', '');
             const parts = parseItemLine(content);
             if (parts) knowledge.traps.push(parts);
@@ -202,22 +200,14 @@ function parseSectionBody(lines: string[]): RidingKnowledge {
             const parts = parseItemLine(content);
             if (parts) knowledge.hacks.push(parts);
         } else if (trimmed.match(/^- \[(toilet|elevator|wifi|atm|locker)\]/)) {
-            // Facility line
-            // Format: - [type] Location [Tag1] [Tag2]
             const typeMatch = trimmed.match(/^-\s*\[(.*?)\]/);
             if (typeMatch) {
                 const type = typeMatch[1];
                 let rest = trimmed.substring(typeMatch[0].length).trim();
-
                 const tags: string[] = [];
                 const tagMatches = rest.matchAll(/\[(.*?)\]/g);
-                for (const m of tagMatches) {
-                    tags.push(m[1]);
-                }
-
-                // Remove tags from location string
+                for (const m of tagMatches) tags.push(m[1]);
                 const location = rest.replace(/\[.*?\]/g, '').trim();
-
                 knowledge.facilities.push({ type, location, tags });
             }
         }
@@ -226,54 +216,59 @@ function parseSectionBody(lines: string[]): RidingKnowledge {
 }
 
 function parseItemLine(line: string): L4Item | null {
-    // Regex to extract Icon, Title, Description, Advice
-    // Attempt 1: ICON **TITLE**: DESCRIPTION (Advice: ADVICE)
-    // Note: Icon might be missing or fused.
-
-    // Split by ** to find title
     const parts = line.split('**');
-    if (parts.length < 3) return null; // Need pre (icon), title, post (desc)
-
-    const icon = parts[0].trim(); // Usually the emoji
+    if (parts.length < 3) return null;
+    const icon = parts[0].trim();
     const title = parts[1].trim();
     let rest = parts[2].trim();
-
-    // Remove leading ":" if present
     if (rest.startsWith(':')) rest = rest.substring(1).trim();
-
-    // Extract Advice
     let advice = '';
     const adviceMatch = rest.match(/\(Advice:\s*(.*?)\)$/);
     if (adviceMatch) {
-        advice = adviceMatch[1].replace(/^[⚠️💡]\s*/, '').trim(); // Remove leading emoji in advice
+        advice = adviceMatch[1].replace(/^[⚠️💡]\s*/u, '').trim();
         rest = rest.replace(adviceMatch[0], '').trim();
     }
-
     return { icon, title, description: rest, advice };
 }
 
-// Main execution
 async function main() {
     // Clear output file
     if (fs.existsSync(OUTPUT_SQL)) fs.unlinkSync(OUTPUT_SQL);
-    fs.writeFileSync(OUTPUT_SQL, '-- Auto-generated L4 Knowledge Ingestion\n\n');
+    fs.writeFileSync(OUTPUT_SQL, '-- Auto-generated L4 Knowledge Ingestion (Aggregated)\n\n');
 
-    // 1. Process bulk files FIRST
-    console.log('Processing bulk Metro/Toei file...');
+    // 1. Process bulk files
     const bulkFiles = ['metro_toei_all_stations.md', 'metro_toei_remaining.md', 'metro_remaining_lines_universal.md'];
     for (const bf of bulkFiles) {
         const fullPath = path.join(KNOWLEDGE_DIR, bf);
-        if (fs.existsSync(fullPath)) {
-            await ingestFile(fullPath);
-        }
+        if (fs.existsSync(fullPath)) await ingestFile(fullPath);
     }
 
-    // 2. Process area/specialized files SECOND (to allow overwriting bulk with more specific info)
+    // 2. Process area/specialized files
     const files = fs.readdirSync(KNOWLEDGE_DIR);
     for (const f of files) {
-        if (bulkFiles.includes(f)) continue;
-        if (!f.endsWith('.md')) continue;
+        if (bulkFiles.includes(f) || !f.endsWith('.md')) continue;
         await ingestFile(path.join(KNOWLEDGE_DIR, f));
+    }
+
+    console.log(`\n--- Generating SQL for ${globalKnowledge.size} unique nodes ---`);
+
+    // Generate SQL
+    for (const [nodeId, data] of globalKnowledge.entries()) {
+        const safeData: any = {
+            traps: data.traps.map((t: any) => ({ ...t, advice: t.advice || undefined })),
+            hacks: data.hacks.map((h: any) => ({ ...h, advice: h.advice || undefined })),
+            facilities: data.facilities || []
+        };
+
+        const jsonStr = JSON.stringify(safeData).replace(/'/g, "''");
+
+        const sql = `
+-- Update for ${nodeId}
+UPDATE nodes
+SET riding_knowledge = '${jsonStr}'
+WHERE id = '${nodeId}';
+`;
+        fs.appendFileSync(OUTPUT_SQL, sql + '\n');
     }
 
     console.log(`\nDone! SQL written to ${OUTPUT_SQL}`);

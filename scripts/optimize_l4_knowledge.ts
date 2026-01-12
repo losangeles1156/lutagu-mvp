@@ -22,6 +22,22 @@ const TARGET_STATIONS = [
     {
         name: 'odpt:Station:JR-East.Nakano (中野站)',
         context: 'Focus on the Tozai line and Chuo line direct connection (Through Service). Explain why some Tozai line trains stop here and others continue to Mitaka.'
+    },
+    {
+        name: 'odpt:Station:JR-East.Yamanote.Shinjuku (新宿站)',
+        context: 'The busiest station. Explain West Exit (Skyscrapers) vs East Exit (Kabukicho). WARNING about Oedo Line transfer (very deep/confusing). Mention "Busta Shinjuku" (New South Exit) for buses.'
+    },
+    {
+        name: 'odpt:Station:JR-East.Yamanote.Shibuya (澀谷站)',
+        context: 'The Dungeon. Explain Ginza Line (3F) vs Fukutoshin/Toyoko Line (Deep Underground B5). Warn about Hachiko Exit crowding. Scramble Crossing orientation.'
+    },
+    {
+        name: 'odpt:Station:JR-East.Yamanote.Ikebukuro (池袋站)',
+        context: 'Seibu (East) vs Tobu (West) department store paradox. Fukutoshin line is far from JR. Mention the underground shopping connectivity.'
+    },
+    {
+        name: 'odpt:Station:JR-East.Yamanote.Tokyo (東京站)',
+        context: 'Marunouchi (Imperial Palace/Retro) vs Yaesu (Shinkansen/Bus/Modern). WARNING: Keiyo Line transfer (Disney) takes 15-20 mins walk.'
     }
 ];
 

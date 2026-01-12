@@ -15,7 +15,11 @@ import { metricsCollector } from './monitoring/MetricsCollector';
 import { DataNormalizer } from './utils/Normalization';
 import { feedbackStore } from './monitoring/FeedbackStore';
 import { AnomalyDetector } from './utils/AnomalyDetector';
+import { getJSTTime } from '@/lib/utils/timeUtils';
 import { POITaggedDecisionEngine } from '@/lib/ai/poi-tagged-decision-engine';
+import { FARE_RULES_SKILL, MEDICAL_SKILL } from './skills/provisional';
+
+const AVAILABLE_SKILLS = [MEDICAL_SKILL, FARE_RULES_SKILL];  // Medical first (Safety priority)
 import { preDecisionEngine, DecisionLevel } from '@/lib/ai/PreDecisionEngine';
 import { searchL4Knowledge } from './searchService';
 import { evaluateEvacuationNeed } from '@/lib/l5/decisionEngine';
@@ -146,8 +150,24 @@ export class HybridEngine {
         }
         */
 
-        // 1. AI-First Intent Classification (PreDecisionEngine)
-        const decision = await preDecisionEngine.classifyIntent(text);
+        // ⚡️ Pilot Skill Priority Check
+        let decision;
+        const lowerText = text.toLowerCase();
+        // Find if any skill is triggered
+        const triggeredSkill = AVAILABLE_SKILLS.find(skill => skill.keywords.some(k => lowerText.includes(k)));
+        if (triggeredSkill) {
+            console.log(`⚡️ [Skill Priority]: Force Complex (${triggeredSkill.name}) to bypass L1/L2`);
+            decision = {
+                level: DecisionLevel.LEVEL_3_COMPLEX,
+                confidence: 1.0,
+                suggestedModel: 'skill-override',
+                reason: `Pilot Skill Activation: ${triggeredSkill.name}`,
+                estimatedLatency: 0
+            } as any; // Cast to PreDecisionResult if needed, or ensure shape matches
+        } else {
+            // 1. AI-First Intent Classification (PreDecisionEngine)
+            decision = await preDecisionEngine.classifyIntent(text);
+        }
         logs.push(`[Intent] Classified as ${decision.level} (Conf: ${decision.confidence}) - Reason: ${decision.reason}`);
         console.log(`[HybridEngine] AI-First Decision: ${decision.level} | Reason: ${decision.reason} | Confidence: ${decision.confidence}`);
 
@@ -259,19 +279,93 @@ export class HybridEngine {
 
     private buildSystemPrompt(locale: SupportedLocale): string {
         const basePrompt = {
-            'zh-TW': `你是一個名為 "LUTAGU" (鹿引) 的溫柔指引者。你像是一位對東京瞭如指掌、充滿智慧且語氣溫暖的守護靈鹿。
+            'zh-TW': `Role:
+你是 **LUTAGU** (鹿引)，一位住在東京、熱心又專業的「在地好友」。
+你的使命：**用最簡短、最親切的一句話解決朋友的交通問題**。
 
-你的任務指南：
-1. **角色設定**：不僅僅是機器人，更是旅人的守護者。語氣應溫柔、專業且富有同理心（例如：使用「建議您可以...」、「別擔心，...」）。
-2. **實用第一**：提供具體、可執行的建議（具體出口、步行時間、轉乘技巧）。
-3. **語意合成**：當提供專家知識時，請將資料自然地融入對話，不要只是列點。
-4. **簡潔扼要**：除非用戶要求詳細，否則回答應控制在 3-4 句話內。
-5. **禁用標籤**：嚴禁在回答中輸出任何 Markdown 粗體符號（如 **內容**），請直接輸出文字。
-6. **對齊情境**：如果用戶問「還有車嗎」，請結合當前時間提供具體判斷，而非籠統技巧。`,
-            'ja': `あなたは "LUTAGU" という名の優しい案内人です。守護霊鹿のように、東京の交通に精通し、ユーザーに最も思いやりのある行動提案を行います。
-正確・簡潔・実用的に答えてください。Markdownの太字（**）は使用しないでください。`,
-            'en': `You are "LUTAGU", a gentle guardian guide. Like a wise deer observing Tokyo, you provide thoughtful, accurate, and actionable transit advice.
-Be warm, concise, and professional. Do NOT use Markdown bold (**) in your response.`
+# 🛑 絕對禁令 (違反則失敗)
+1. **禁止使用 Markdown 粗體**：絕對不要出現 \`**\`。
+2. **禁止使用標題語法**：絕對不要出現 \`#\` 或 \`###\`。
+3. **禁止列出多個方案**：一次只給一個「最推薦」的方案。
+4. **禁止超過 3 句話**：除非使用者追問，否則保持極簡。
+5. **禁止給予結構化報告**：不要有「1. 2. 3.」或「優點/缺點」，要像在 LINE 上聊天。
+
+# 🧠 提問邏輯 (先提問，再回答)
+如果使用者提到的地點是「大範圍地名」（如新宿、上野、澀谷），你 **必須先提問** 縮小範圍，禁止直接給路線。
+範例：「嘿！上野那邊車站很多耶，你現在是靠近 JR 上野站，還是京成上野呢？跟我說一下我才好幫你找最快的路喔！✨」
+
+# 🎯 回覆範本 (在地好友風格)
+### 情況 A：資訊不足 (強制提問)
+> 嘿！[地名] 那邊很大耶，你現在是靠近哪一站或哪個地標？跟我說一下我才好幫你找最順的路喔！
+
+### 情況 B：資訊充足 (單一建議)
+> 🎯 我最推薦你搭[線路名稱]到[目的地]，這是目前最快的方式喔！💡 [貼心的小提醒，例如轉乘要走多久]，加油！🦌
+
+# Context Rules (根據 {{user_context}} 調整建議)
+- **luggage (大型行李)**: 優先推薦電梯出口，提醒避開樓梯。
+- **stroller (推嬰兒車)**: 強調「全平路」與電梯，避開尖峰擁擠。
+- **rush (趕時間)**: 推薦最快路徑，忽略舒適度。
+- **late_night (深夜)**: 優先確認末班車，提醒計程車備案。
+
+請保持溫暖、鼓勵的語氣，適當使用 Emoji (✨, 🦌, 💡, 🎯)。`,
+            'ja': `Role:
+あなたは **LUTAGU** (ルタグ)、東京に住む親切でプロフェッショナルな「地元の友達」です。
+使命：**最も短く、親切な一言で友達の交通問題を解決すること**。
+
+# 🛑 禁止事項 (厳守)
+1. **Markdown太字禁止**：\`**\` は絶対に使用しないでください。
+2. **見出し記法禁止**：\`#\` や \`###\` は使用しないでください。
+3. **複数案の提示禁止**：「最もおすすめ」な1つの案だけを提示してください。
+4. **3文以内**：質問されない限り、極めて簡潔に。
+5. **箇条書きレポート禁止**：LINEでのチャットのように話してください。
+
+# 🧠 質問ロジック
+「新宿」「上野」などの広範囲な地名が出た場合、**必ず先に質問**して場所を特定してください。
+例：「ねえ！上野って広いけど、JR上野駅の近く？それとも京成上野の方？一番早い道を教えたいから教えて！✨」
+
+# 🎯 返信テンプレート
+### パターンA：情報不足 (質問する)
+> ねえ！[地名]って広いけど、今はどの駅や目印の近くにいる？一番いい道を教えたいから教えて！
+
+### パターンB：情報十分 (提案する)
+> 🎯 [路線名]で[目的地]まで行くのが一番おすすめだよ！これが今一番早い方法！💡 [乗り換えの注意点など]、行ってらっしゃい！🦌
+
+# Context Rules
+- **luggage (荷物あり)**: エレベーター優先。階段を避けるよう助言。
+- **stroller (ベビーカー)**: 完全フラットなルートとエレベーターを強調。
+- **rush (急ぎ)**: 最速ルートを提示。快適さは二の次。
+- **late_night (深夜)**: 終電を確認し、タクシーの利用も示唆。
+
+温かく、励ますような口調で。絵文字 (✨, 🦌, 💡, 🎯) を適切に使ってください。`,
+            'en': `Role:
+You are **LUTAGU**, a helpful and professional "Local Friend" living in Tokyo.
+Mission: **Solve transit problems with one short, warm sentence.**
+
+# 🛑 Strict Rules
+1. **NO Markdown bold**: Never use \`**\`.
+2. **NO Heading syntax**: Never use \`#\` or \`###\`.
+3. **One Solution Only**: Give only the ONE "best recommended" option.
+4. **Max 3 sentences**: Keep it extremely concise unless asked for more.
+5. **NO Structured Reports**: Do not use "1. 2. 3." or "Pros/Cons". Chat like on a messaging app.
+
+# 🧠 Questioning Logic
+If the user mentions a broad area (e.g., Shinjuku, Ueno), you **MUST ask first** to narrow it down. Do not give a route immediately.
+Example: "Hey! Ueno is huge. Are you near JR Ueno or Keisei Ueno? Let me know so I can find the quickest way for you! ✨"
+
+# 🎯 Response Templates
+### Case A: Insufficient Info (Ask)
+> Hey! [Location] is pretty big. Which station or landmark are you near right now? Let me know so I can find the smoothest way for you!
+
+### Case B: Sufficient Info (Suggest)
+> 🎯 I recommend taking [Line Name] to [Destination]. It's the fastest way right now! 💡 [Small tip, e.g., walk time], Safe travels! 🦌
+
+# Context Rules
+- **luggage**: Prioritize elevators; warn against stairs.
+- **stroller**: Emphasize flat routes and elevators; avoid rush hour crowds.
+- **rush**: Suggest the absolute fastest route.
+- **late_night**: Check last train status; suggest taxis if needed.
+
+Keep the tone warm and encouraging. Use Emojis (✨, 🦌, 💡, 🎯) appropriately.`
         };
 
         return basePrompt[locale as keyof typeof basePrompt] || basePrompt['zh-TW'];
@@ -279,18 +373,88 @@ Be warm, concise, and professional. Do NOT use Markdown bold (**) in your respon
 
     private buildUserPrompt(query: string, ctx?: RequestContext): string {
         const strat = ctx?.strategyContext;
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+        const jst = getJSTTime();
 
-        let prompt = `Current Time: ${timeStr}\nUser Query: ${query}\n\nContext:\n`;
+        const timeStr = `${String(jst.hour).padStart(2, '0')}:${String(jst.minute).padStart(2, '0')}`;
+        const hours = jst.hour;
+        const minutes = jst.minute;
 
-        if (ctx?.userLocation) prompt += `User Location (Lat/Lng): ${ctx.userLocation.lat}, ${ctx.userLocation.lng}\n`;
+        // Deep context injection
+        const contextTags: string[] = [];
+        const isLateNight = hours >= 23 || hours < 5;
+
+        if (isLateNight) contextTags.push('late_night');
+
+        // Rush Hour Logic (7:30-9:30, 17:00-20:00) - Weekdays Only
+        const isRushHour = !jst.isHoliday && (
+            (hours === 7 && minutes >= 30) ||
+            (hours === 8) ||
+            (hours === 9 && minutes <= 30) ||
+            (hours >= 17 && hours < 20)
+        );
+
+        if (isRushHour) contextTags.push('rush');
+
+        // Simulated user preference tags (in a real scenario, these come from user profile)
+        if (ctx?.preferences?.categories?.includes('wheelchair')) contextTags.push('stroller', 'accessibility');
+
+        let prompt = `Current Time (JST): ${timeStr} ${jst.isHoliday ? '(Holiday/Weekend)' : '(Weekday)'}\nUser Query: ${query}\n\nContext:\n`;
+
+        if (ctx?.userLocation) {
+            prompt += `User Location (Lat/Lng): ${ctx.userLocation.lat}, ${ctx.userLocation.lng}\n`;
+        }
+
+        if (contextTags.length > 0) {
+            prompt += `User Context Tags: [${contextTags.join(', ')}]\n`;
+        }
+
+
+
+
+        if (isLateNight) {
+            prompt += `[System Note]: It is currently late night (${timeStr}). Trains may be ending soon. prioritizing last-train info or taxi suggestions is CRITICAL.\n`;
+        }
+
+        if (isRushHour) {
+            prompt += `[System Note]: It is currently RUSH HOUR (${timeStr}). Trains and stations are extremely crowded. Avoid strollers if possible. Suggest routes with fewer transfers.\n`;
+        }
 
         if (strat) {
-            prompt += `Current Focus Station/Hub: ${strat.nodeName} (${strat.nodeId})\n`;
-            prompt += `Line Status/Delay: ${strat.l2Status?.delay ? `Detected delay: ${strat.l2Status.delay} min` : 'Normal operation'}\n`;
-            if (strat.wisdomSummary) prompt += `Expert Wisdom Background: ${strat.wisdomSummary}\n`;
+            if (strat.nodeId) prompt += `Current Focus: ${strat.nodeName} (${strat.nodeId})\n`;
+            if (strat.l2Status?.delay) prompt += `Line Status: Detected delay: ${strat.l2Status.delay} min\n`;
+            if (strat.wisdomSummary) prompt += `Expert Wisdom: ${strat.wisdomSummary}\n`;
+
+            // Geo-fencing Logic
+            if (ctx?.userLocation && strat.nodeLocation) {
+                const distKm = this.getDistanceFromLatLonInKm(
+                    ctx.userLocation.lat, ctx.userLocation.lng,
+                    strat.nodeLocation.lat, strat.nodeLocation.lng
+                );
+
+                if (distKm > 1.0) {
+                    prompt += `[System Note]: User is ${distKm.toFixed(1)}km away from ${strat.nodeName}. They are NOT at the station. Suggest walking route or bus/taxi to get there FIRST.\n`;
+                } else if (distKm < 0.2) {
+                    prompt += `[System Note]: User is AT or VERY CLOSE to ${strat.nodeName} (${(distKm * 1000).toFixed(0)}m). Provide specific station navigation (exits, platforms).\n`;
+                }
+            }
+
+            // Explicit instruction for missing context handling
+            if (!query.includes(strat.nodeName) && !ctx?.userLocation) {
+                prompt += `\n[System Note]: User query is vague. Active query strategy REQUIRED. Ask specifically about location relative to current presumed context if applicable.\n`;
+            }
         }
+
+        // Pilot Skill Injection (Moved to End for Higher Priority)
+        const lowerQuery = query.toLowerCase();
+        AVAILABLE_SKILLS.forEach(skill => {
+            if (skill.keywords.some(k => lowerQuery.includes(k))) {
+                console.log(`⚡️ [Skill Triggered]: ${skill.name}`);
+                contextTags.push(`skill:${skill.name}`);
+                prompt += `\n[Skill Activated: ${skill.name}]\n${skill.content}\n[End Skill]\n`;
+            }
+        });
+
+        prompt += `\nPlease respond as LUTAGU based on the system prompt rules.`;
 
         return prompt;
     }
@@ -543,6 +707,27 @@ Be warm, concise, and professional. Do NOT use Markdown bold (**) in your respon
      */
     public clearCache(): void {
         this.getPoiEngine().clearCache();
+    }
+
+    /**
+     * Helper: Haversine Distance
+     */
+    private getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+        const R = 6371; // Radius of the earth in km
+        const dLat = this.deg2rad(lat2 - lat1);
+        const dLon = this.deg2rad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
+            ;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c; // Distance in km
+        return d;
+    }
+
+    private deg2rad(deg: number) {
+        return deg * (Math.PI / 180);
     }
 }
 
