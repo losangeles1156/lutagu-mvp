@@ -44,9 +44,9 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
   } = useUIStateMachine();
 
   const {
-    difyConversationId,
-    setDifyConversationId,
-    difyUserId,
+    agentConversationId,
+    setAgentConversationId,
+    agentUserId,
     currentNodeId,
     userContext,
     userProfile,
@@ -176,8 +176,8 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
   const handleRestart = useCallback(() => {
     backupMessages();
     clearMessages();
-    setDifyConversationId(null);
-  }, [backupMessages, clearMessages, setDifyConversationId]);
+    setAgentConversationId(null);
+  }, [backupMessages, clearMessages, setAgentConversationId]);
 
   const handleExploreMode = useCallback(() => {
     transitionTo('explore');

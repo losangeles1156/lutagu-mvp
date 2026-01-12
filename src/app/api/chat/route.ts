@@ -91,7 +91,39 @@ export async function POST(req: NextRequest) {
                             tags: r.tags || [],
                             score: r.relevanceScore
                         }
-                    })) : [])
+                    })) : []),
+                    // L4 Knowledge Card Mapping
+                    ...(decision.source === 'knowledge' && decision.data?.results ? decision.data.results.map((k: any) => {
+                        // Map Knowledge Types to Action Types for Icons
+                        let actionType = 'details';
+                        if (['transfer_hack', 'exit_guide', 'short_transfer'].includes(k.knowledge_type)) actionType = 'navigation';
+                        if (['anomaly_alert', 'crowd_warning'].includes(k.knowledge_type)) actionType = 'alert';
+                        if (['photo_spot', 'food_guide'].includes(k.knowledge_type)) actionType = 'recommendation';
+
+                        // Create localized title based on knowledge type
+                        const titles: Record<string, any> = {
+                            'transfer_hack': { 'zh-TW': '轉乘密技', 'en': 'Transfer Hack', 'ja': '乗換ハック' },
+                            'exit_guide': { 'zh-TW': '出口攻略', 'en': 'Exit Guide', 'ja': '出口ガイド' },
+                            'short_transfer': { 'zh-TW': '快速轉乘', 'en': 'Quick Transfer', 'ja': '乗換短縮' },
+                            'anomaly_alert': { 'zh-TW': '異常注意', 'en': 'Alert', 'ja': '注意' },
+                            'photo_spot': { 'zh-TW': '打卡熱點', 'en': 'Photo Spot', 'ja': '撮影スポット' }
+                        };
+                        const displayTitle = titles[k.knowledge_type] || { 'zh-TW': k.knowledge_type, 'en': k.knowledge_type, 'ja': k.knowledge_type };
+
+                        return {
+                            type: actionType,
+                            title: displayTitle,
+                            content: k.content, // Raw content from knowledge base
+                            label: k.station_id, // TODO: Map to station name if available
+                            target: k.station_id,
+                            description: k.tags?.join(' · ') || '',
+                            metadata: {
+                                category: actionType,
+                                score: k.similarity,
+                                original_type: k.knowledge_type
+                            }
+                        };
+                    }) : [])
                 ],
                 context: {
                     hub: strategyContext?.nodeName,

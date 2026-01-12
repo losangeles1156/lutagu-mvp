@@ -60,7 +60,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 
         // "replace" to switch language in-place (no history push usually preferred for lang switch, or push is fine)
         // router.replace takes the PATH (without locale) and adds the new locale prefix automatically
-        router.replace(url, { locale: newLocale as any });
+        router.replace(url, { locale: newLocale as any, scroll: false });
         setIsOpen(false);
     };
 

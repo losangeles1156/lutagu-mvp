@@ -177,6 +177,8 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
         requestAbortRef.current?.abort();
     }, [stationId]);
 
+
+
     // Handle click outside for templates
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent | TouchEvent) => {
@@ -389,6 +391,16 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
         if (!timetableData) return [];
         return Array.from(new Set(timetableData.map(t => t['odpt:railDirection']).filter(Boolean))) as string[];
     }, [timetableData]);
+
+
+    // Prevent rendering with unknown/invalid station ID
+    if (!currentNodeId || currentNodeId === 'unknown' || currentNodeId === 'undefined') {
+        return (
+            <div className="w-full h-full bg-slate-50 p-4">
+                <RecommendationSkeleton />
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-full flex flex-col bg-slate-50/50 overflow-hidden">

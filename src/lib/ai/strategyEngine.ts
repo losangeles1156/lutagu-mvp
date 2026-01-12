@@ -60,7 +60,7 @@ export const StrategyEngine = {
             .eq('key', `l2:${identityNode.id}`)
             .maybeSingle();
 
-        const l2Status = l2Cache?.value || { delay: 0, congestion: 1 };
+        const l2Status = l2Cache?.value || { delay: 0, congestion: 1, transferIntensity: 0 };
 
         // 3. Process Commercial Rules
         const commercialActions: any[] = [];

@@ -48,6 +48,21 @@ scripts/*.json
 !scripts/inspect_schema.ts
 !scripts/research_flight_data.ts
 !scripts/scrapers/airport_haneda.ts
+!scripts/verify_models_and_rules.ts
+!scripts/verify_l4_stations.ts
+!scripts/audit_l4_19_stations.ts
+!scripts/cleanup_corrupted_l4.ts
+!scripts/verify_l2_dynamic.ts
+!scripts/apply_l4_sql.ts
+!scripts/apply_deep_research_l4.ts
+!scripts/test_deep_research_search.ts
+!scripts/verify_vector_search.ts
+!scripts/debug_api_key.ts
+!scripts/debug_api_key.ts
+!scripts/ingest_expert_knowledge.ts
+!scripts/test_agentic_flow.ts
+!scripts/verify_minimax_direct.ts
+!scripts/aggregate_knowledge.ts
 
 # Local env files
 .env*.local

@@ -76,7 +76,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
     // 如果是從全螢幕（演示模式）關閉，清除訊息與會話以進入「全新對話」狀態
     if (uiState === 'fullscreen') {
       useUIStateMachine.setState({ messages: [] });
-      useAppStore.getState().resetDifyConversation();
+      useAppStore.getState().resetAgentConversation();
       useAppStore.setState({ messages: [] });
     } else {
       backupMessages();
@@ -104,13 +104,6 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
     return (
       <div className="fixed inset-0 z-50 bg-white">
         {chatPanel}
-        {/* 關閉按鈕 */}
-        <button
-          onClick={handleChatClose}
-          className="absolute top-4 right-4 z-50 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
-        >
-          <MessageSquare size={20} className="text-indigo-600" />
-        </button>
       </div>
     );
   }
@@ -270,7 +263,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
 
       {/* Bottom Bar */}
       {bottomBar && (
-        <div className="shrink-0 z-20 relative bg-white">
+        <div className="shrink-0 z-40 relative bg-white border-t border-slate-100/50 shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
           {bottomBar}
         </div>
       )}

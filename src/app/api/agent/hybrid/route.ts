@@ -10,11 +10,15 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { text, locale = 'zh-TW', userLocation, context } = body;
 
-        // 1. Get Strategy Synthesis (L4) - mimicking prod flow for context
+        // 1. Determine Context Priority
+        // GPS (StrategyEngine) is a guess; Frontend (nodeId) is explicit.
         let strategyContext = null;
         if (userLocation?.lat && userLocation?.lon) {
             strategyContext = await StrategyEngine.getSynthesis(userLocation.lat, userLocation.lon, locale);
         }
+
+        const effectiveNodeId = body.nodeId || body.current_station || strategyContext?.nodeId;
+        const effectiveStationName = body.stationName || strategyContext?.nodeName;
 
         // 2. Hybrid Engine Execution
         const hybridMatch = await hybridEngine.processRequest({
@@ -23,22 +27,25 @@ export async function POST(req: NextRequest) {
             context: {
                 ...context,
                 userLocation: userLocation?.lat ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
-                currentStation: strategyContext?.nodeId
+                currentStation: effectiveNodeId
             }
         });
 
-        // 3. Return structured response with Audit Info
-
+        // 3. MiniMax Fallback with strict Anomaly Instruction
         let finalResult = hybridMatch;
         let modelUsed: string | undefined = hybridMatch?.source;
 
-        // Fallback: If HybridEngine returned null, use MiniMax (Reasoning Brain)
         if (!hybridMatch) {
             const { generateLLMResponse } = await import('@/lib/ai/llmClient');
             const reasoningContent = await generateLLMResponse({
                 systemPrompt: `Role:
 你是 **LUTAGU** (鹿引)，一位住在東京、熱心又專業的「在地好友」。
-使命：**用最簡短、最親切的一句話解決朋友的交通問題**。
+
+# 核心使命 (Priority)
+你會收到當前車站資訊：【${effectiveStationName || '未知車站'}】(ID: ${effectiveNodeId || '無'})。
+1. **地點優先**：優先處理此車站相關的交通、轉乘或周邊資訊。
+2. **異常報警**：如果有效車站 ID 為「無」或「未知」，代表系統偵測不到使用者所在的地點節點。此時，請在回覆中禮貌提醒：「系統目前偵測不到您所在的車站位置，但我仍會盡力就您提到的地點提供資訊。」
+3. **資訊完整度**：如果該車站沒有任何 L4 專家建議，請誠實告知，並根據您的東京在地知識給予通用建議。
 
 # 絕對禁令
 1. **禁止使用 Markdown 粗體**。
@@ -48,14 +55,14 @@ export async function POST(req: NextRequest) {
 # 🎯 回覆風格
 - 親切、溫暖、像在 LINE 聊天。
 - 使用 Emoji (✨, 🦌, 💡)。
-- 若資訊不足，請先提問。
 
-上下文資訊: ${JSON.stringify({
+上下文補充: ${JSON.stringify({
                     userLocation,
+                    station_id: effectiveNodeId,
                     strategy_context: strategyContext
                 })}`,
                 userPrompt: text,
-                taskType: 'reasoning', // Triggers MiniMax
+                taskType: 'reasoning', // MiniMax
                 temperature: 0.4
             });
 
@@ -74,11 +81,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             result: finalResult,
-            // Audit/Debug Info
             audit: {
                 model_used: modelUsed || 'mistral_fallback',
-                strategy_context: strategyContext ? 'enriched' : 'none',
-                node_id: strategyContext?.nodeId
+                effective_node: effectiveNodeId,
+                found_via: body.nodeId ? 'frontend_id' : (strategyContext ? 'gps' : 'none')
             }
         });
 

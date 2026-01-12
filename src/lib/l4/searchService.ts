@@ -50,6 +50,11 @@ export async function searchL4Knowledge(params: {
         filter_time_context: timeContext ? [timeContext] : null
       });
 
+    console.log(`[L4Search] Query: "${query}", Station: "${stationId}", Found: ${data?.length || 0} items`);
+    if (data && data.length > 0) {
+      console.log(`[L4Search] Top similarity: ${data[0].similarity}`);
+    }
+
     if (error) {
       if (error.code === 'PGRST202' || error.message?.includes('not found')) {
         // Fallback

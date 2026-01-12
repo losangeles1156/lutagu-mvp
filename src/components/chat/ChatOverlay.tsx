@@ -6,6 +6,7 @@ import { DefaultChatTransport } from 'ai';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useLocale, useTranslations } from 'next-intl';
+import { useAgentChat } from '@/hooks/useAgentChat';
 import { ActionCard, Action as ChatAction } from './ActionCard';
 import { ContextSelector } from './ContextSelector';
 import { demoScripts } from '@/data/demoScripts';
@@ -24,9 +25,9 @@ export function ChatOverlay() {
         currentNodeId,
         setCurrentNode,
         setBottomSheetOpen,
-        difyUserId,
-        difyConversationId,
-        setDifyConversationId,
+        agentUserId,
+        agentConversationId,
+        setAgentConversationId,
         userContext,
         userProfile,
         pendingChatInput,
@@ -36,47 +37,34 @@ export function ChatOverlay() {
         activeDemoId,
         setDemoMode
     } = useAppStore();
-    const { zone } = useZoneAwareness();
-    const [input, setInput] = useState('');
-    const [l2Status, setL2Status] = useState<any>(null);
-    const [isOffline, setIsOffline] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    const { zone } = useZoneAwareness();
+    const [l2Status, setL2Status] = useState<any>(null);
+    const prevContextRef = useRef<string[]>(userContext);
     const hasBootstrappedRef = useRef(false);
+    const [input, setInput] = useState('');
+    const [isOfflineLocal, setIsOfflineLocal] = useState(false);
 
     // AI SDK v6 transport-based architecture
-    const transport = useMemo(() => new DefaultChatTransport({
-        api: '/api/agent/chat',
-        body: {
-            nodeId: currentNodeId || '',
-            locale,
-            user_profile: userProfile || 'general',
-            zone: zone || 'core'
-        }
-    }), [currentNodeId, locale, userProfile, zone]);
-
     const {
-        messages: aiMessages,
-        sendMessage: sendAiMessage,
-        status,
-        setMessages: setAiMessages,
-    } = useChat({
-        transport,
-        onError: (error: Error) => {
-            console.error('Chat Error:', error);
-            setIsOffline(true);
-        }
+        messages,
+        setMessages,
+        isLoading,
+        thinkingStep,
+        sendMessage,
+        clearMessages,
+        messagesEndRef,
+        isOffline: isOfflineFromHook,
+    } = useAgentChat({
+        stationId: currentNodeId || '',
+        userLocation: undefined, // Add if needed
     });
 
-    const isLoading = status === 'streaming' || status === 'submitted';
+    const isOffline = isOfflineLocal || isOfflineFromHook;
 
-    // Display Messages Logic: Demo Mode vs AI Mode
-    // We treat storeMessages as the source of truth for Demo Mode (legacy)
-    // and aiMessages as the source for the new Real AI mode.
-    const displayMessages = isDemoMode ? storeMessages : aiMessages;
+    const displayMessages = messages;
 
     const [statusMessage, setStatusMessage] = useState<string | null>(null);
-    const prevContextRef = useRef<string[]>(userContext);
 
     // Monitor context changes for UI feedback
     useEffect(() => {
@@ -86,8 +74,8 @@ export function ChatOverlay() {
         if (JSON.stringify(prev) === JSON.stringify(userContext)) return;
 
         // Find what changed
-        const added = userContext.filter(x => !prev.includes(x));
-        const removed = prev.filter(x => !userContext.includes(x));
+        const added = userContext.filter((x: string) => !prev.includes(x));
+        const removed = prev.filter((x: string) => !userContext.includes(x));
 
         const contextLabels: Record<string, string> = {
             'luggage': tChat('contextLuggage', { defaultValue: '大型行李' }),
@@ -97,7 +85,7 @@ export function ChatOverlay() {
         };
 
         if (added.length > 0) {
-            setStatusMessage(`✨ AI 已同步您的需求：${added.map(id => contextLabels[id] || id).join(', ')}`);
+            setStatusMessage(`✨ AI 已同步您的需求：${added.map((id: string) => contextLabels[id] || id).join(', ')}`);
         } else if (removed.length > 0) {
             setStatusMessage(`🔄 AI 已更新您的需求`);
         }
@@ -108,11 +96,11 @@ export function ChatOverlay() {
         return () => clearTimeout(timer);
     }, [userContext, isChatOpen, tChat]);
 
-    const sendMessage = useCallback(async (text: string) => {
+    const handleSendMessage = useCallback(async (text: string) => {
         if (!text.trim()) return;
-        setIsOffline(false);
-        await sendAiMessage({ text });
-    }, [sendAiMessage]);
+        setIsOfflineLocal(false);
+        await sendMessage(text);
+    }, [sendMessage]);
 
     useEffect(() => {
         if (!isChatOpen) {
@@ -185,7 +173,7 @@ export function ChatOverlay() {
         }
 
         // 如果目前沒有訊息，強制初始化歡迎訊息
-        const currentMessages = isDemoMode ? storeMessages : (aiMessages as any[]);
+        const currentMessages = messages;
 
         // Skip if: already has messages, pending input, or already bootstrapped
         if (currentMessages.length > 0 && hasBootstrappedRef.current) return;
@@ -226,9 +214,9 @@ export function ChatOverlay() {
             clearStoreMessages();
             addStoreMessage(welcomeMessage);
         } else {
-            setAiMessages([welcomeMessage]);
+            setMessages([welcomeMessage]);
         }
-    }, [isChatOpen, storeMessages, aiMessages, locale, addStoreMessage, clearStoreMessages, isDemoMode, activeDemoId, pendingChatInput, setAiMessages, tChat]);
+    }, [isChatOpen, storeMessages, messages, locale, addStoreMessage, clearStoreMessages, isDemoMode, activeDemoId, pendingChatInput, setMessages, tChat]);
 
     useEffect(() => {
         const fetchL2 = async () => {
@@ -287,7 +275,7 @@ export function ChatOverlay() {
         // Handle internal restart action for demo mode
         if (action.target === 'internal:restart') {
             setDemoMode(false);
-            useAppStore.setState({ messages: [] });
+            clearMessages();
             hasBootstrappedRef.current = false;
             return;
         }
@@ -312,14 +300,14 @@ export function ChatOverlay() {
             if (isDemoMode) {
                 addStoreMessage({ role: 'assistant', content });
             } else {
-                setAiMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content, parts: [{ type: 'text', text: content }] } as any]);
+                setMessages((prev: any[]) => [...prev, { id: Date.now().toString(), role: 'assistant', content, parts: [{ type: 'text', text: content }] } as any]);
             }
         } else if (action.type === 'taxi') {
             window.open(`https://go.mo-t.com/`, '_blank');
         } else if (action.type === 'discovery') {
             if (action.target?.startsWith('chat:')) {
                 const q = decodeURIComponent(action.target.slice('chat:'.length));
-                sendMessage(q);
+                handleSendMessage(q);
             } else if (action.target?.startsWith('http')) {
                 window.open(action.target, '_blank');
             } else {
@@ -333,7 +321,7 @@ export function ChatOverlay() {
                 if (isDemoMode) {
                     addStoreMessage({ role: 'assistant', content });
                 } else {
-                    setAiMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content, parts: [{ type: 'text', text: content }] } as any]);
+                    setMessages((prev: any[]) => [...prev, { id: Date.now().toString(), role: 'assistant', content, parts: [{ type: 'text', text: content }] } as any]);
                 }
             }
         }
@@ -353,7 +341,7 @@ export function ChatOverlay() {
                 return { messages: newMessages };
             });
         } else {
-            setAiMessages(prev => {
+            setMessages((prev: any[]) => {
                 const next = [...prev];
                 next[index] = { ...msg, feedback: { score } } as any;
                 return next;

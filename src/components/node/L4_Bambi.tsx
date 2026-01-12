@@ -7,7 +7,7 @@ import { getLocaleString } from '@/lib/utils/localeUtils';
 import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2, Mic, Maximize2, Layout, LayoutPanelTop, Square } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
-import { useDifyChat } from '@/hooks/useDifyChat';
+import { useAgentChat } from '@/hooks/useAgentChat';
 
 import { hybridEngine } from '@/lib/l4/HybridEngine';
 
@@ -55,7 +55,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         sendMessage,
         clearMessages,
         messagesEndRef
-    } = useDifyChat({
+    } = useAgentChat({
         stationId: stationId,
         stationName: displayName,
         userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,

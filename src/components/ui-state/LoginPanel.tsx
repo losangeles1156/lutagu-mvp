@@ -17,12 +17,12 @@ export function LoginPanel() {
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
-  
+
   const { transitionTo, setPendingInput, clearMessages, isMobile } = useUIStateMachine();
-  const { 
-    setDifyConversationId, 
-    setMapCenter, 
-    setCurrentNode, 
+  const {
+    setAgentConversationId,
+    setMapCenter,
+    setCurrentNode,
     setBottomSheetOpen,
     setNodeActiveTab
   } = useAppStore();
@@ -32,19 +32,19 @@ export function LoginPanel() {
   // 1. 最近節點邏輯
   const handleNearestNode = useCallback(async () => {
     setIsLoading(true);
-    
+
     // 匿名登入初始化
-    let difyUserId = '';
+    let agentUserId = '';
     if (typeof window !== 'undefined') {
-      difyUserId = localStorage.getItem('difyUserId') || '';
-      if (!difyUserId) {
-        difyUserId = globalThis.crypto?.randomUUID?.() || 
+      agentUserId = localStorage.getItem('agentUserId') || '';
+      if (!agentUserId) {
+        agentUserId = globalThis.crypto?.randomUUID?.() ||
           `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-        localStorage.setItem('difyUserId', difyUserId);
+        localStorage.setItem('agentUserId', agentUserId);
       }
     }
-    useAppStore.setState({ difyUserId });
-    setDifyConversationId(null);
+    useAppStore.setState({ agentUserId });
+    setAgentConversationId(null);
     clearMessages();
     setPendingInput('');
 
@@ -66,7 +66,7 @@ export function LoginPanel() {
       async (pos) => {
         const center = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         setMapCenter(center);
-        
+
         try {
           // 獲取最近的節點
           const nearby = await fetchNearbyNodes(center.lat, center.lon, 1000);
@@ -80,7 +80,7 @@ export function LoginPanel() {
           console.warn('[LoginPanel] Failed to fetch nearest node:', err);
         }
 
-        transitionTo(targetState); 
+        transitionTo(targetState);
         setIsLoading(false);
       },
       () => {
@@ -93,14 +93,14 @@ export function LoginPanel() {
         setIsLoading(false);
       }
     );
-  }, [transitionTo, setDifyConversationId, setPendingInput, clearMessages, isMobile, setMapCenter, setCurrentNode, setBottomSheetOpen, setNodeActiveTab]);
+  }, [transitionTo, setAgentConversationId, setPendingInput, clearMessages, isMobile, setMapCenter, setCurrentNode, setBottomSheetOpen, setNodeActiveTab]);
 
   // 2. 先逛逛邏輯
   const handleBrowse = useCallback(() => {
-    setDifyConversationId(null);
+    setAgentConversationId(null);
     clearMessages();
     setPendingInput('');
-    
+
     const targetState = isMobile ? 'collapsed_mobile' : 'collapsed_desktop';
 
     if (!navigator.geolocation) {
@@ -120,7 +120,7 @@ export function LoginPanel() {
         transitionTo(targetState);
       }
     );
-  }, [transitionTo, setMapCenter, setDifyConversationId, clearMessages, setPendingInput, isMobile]);
+  }, [transitionTo, setMapCenter, setAgentConversationId, clearMessages, setPendingInput, isMobile]);
 
   // 3. 演示範例點擊
   const handleDemoClick = useCallback((node: string, text: string) => {
@@ -156,7 +156,7 @@ export function LoginPanel() {
       </motion.div>
 
       {/* 演示範例區域 */}
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
@@ -188,6 +188,45 @@ export function LoginPanel() {
         </div>
       </motion.div>
 
+      {/* 熱門樞紐區域 (新增) */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.15 }}
+        className="w-full max-w-md mb-10 space-y-3"
+      >
+        <h3 className="text-[11px] font-black text-slate-400 mb-2 uppercase tracking-wider px-2">
+          {tOnboarding('hubTitle')}
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { id: 'ueno', name: tOnboarding('hubs.ueno'), node: 'odpt.Station:TokyoMetro.Ginza.Ueno', color: 'from-orange-400 to-orange-500' },
+            { id: 'asakusa', name: tOnboarding('hubs.asakusa'), node: 'odpt.Station:TokyoMetro.Ginza.Asakusa', color: 'from-red-500 to-red-600' },
+            { id: 'akihabara', name: tOnboarding('hubs.akihabara'), node: 'odpt.Station:TokyoMetro.Hibiya.Akihabara', color: 'from-gray-500 to-gray-600' },
+            { id: 'tokyo', name: tOnboarding('hubs.tokyo'), node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo', color: 'from-red-500 to-red-600' }
+          ].map((hub) => (
+            <button
+              key={hub.id}
+              onClick={() => {
+                // 直接導航至該節點，不開啟對話演示
+                setMapCenter(null); // Let map auto-center on node
+                setCurrentNode(hub.node);
+                setNodeActiveTab('lutagu'); // Open L4 functionality tab
+                setBottomSheetOpen(true);
+                transitionTo(isMobile ? 'collapsed_mobile' : 'collapsed_desktop');
+              }}
+              className="group relative overflow-hidden p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all active:scale-[0.98]"
+            >
+              <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${hub.color}`} />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-700 group-hover:text-indigo-700 transition-colors pl-2">{hub.name}</span>
+                <Compass size={16} className="text-slate-300 group-hover:text-indigo-400 transition-colors" />
+              </div>
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
       {/* 主操作按鈕 */}
       <motion.div
         initial={{ y: 20, opacity: 0 }}
@@ -203,7 +242,7 @@ export function LoginPanel() {
           <MapPin size={24} className="text-indigo-400" />
           <span className="text-sm font-black">{tOnboarding('enableLocation')}</span>
         </button>
-        
+
         <button
           onClick={handleBrowse}
           className="flex flex-col items-center justify-center gap-2 py-6 bg-white text-slate-600 rounded-[32px] border border-slate-200 shadow-sm hover:bg-slate-50 transition-all active:scale-95"

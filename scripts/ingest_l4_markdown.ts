@@ -72,14 +72,26 @@ async function findNodeIds(searchId: string): Promise<string[]> {
         } else {
             // Fuzzy search by station name if variants fail
             const stationName = IdMatcher.getCoreName(searchId);
-            const { data: fuzzyNodes } = await supabase
+
+            // Try name-based match first (more reliable for weird IDs like .a, .u)
+            const { data: nameNodes } = await supabase
                 .from('nodes')
                 .select('id')
-                .ilike('id', `%${stationName}`)
-                .limit(5);
+                .or(`name->>'ja'.eq.${stationName},name->>'en'.ilike.${stationName}`);
 
-            if (fuzzyNodes && fuzzyNodes.length > 0) {
-                results = fuzzyNodes.map(n => n.id);
+            if (nameNodes && nameNodes.length > 0) {
+                results = nameNodes.map(n => n.id);
+            } else {
+                // Last resort: ID suffix match
+                const { data: fuzzyNodes } = await supabase
+                    .from('nodes')
+                    .select('id')
+                    .ilike('id', `%${stationName}`)
+                    .limit(10);
+
+                if (fuzzyNodes && fuzzyNodes.length > 0) {
+                    results = fuzzyNodes.map(n => n.id);
+                }
             }
         }
     }

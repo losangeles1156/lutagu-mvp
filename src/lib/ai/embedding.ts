@@ -38,7 +38,10 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     }
 
     return data.data[0].embedding;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message?.includes('429')) {
+      throw error; // Let the caller handle 429 (retry)
+    }
     console.error('Error generating embedding:', error);
     return fallbackEmbedding(text);
   }

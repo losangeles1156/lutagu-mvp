@@ -5,9 +5,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { Send, Bot, Loader2, Maximize2, Minimize2, X, RotateCcw } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
-import { useDifyChat } from '@/hooks/useDifyChat';
+import { useAgentChat } from '@/hooks/useAgentChat';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import { ParsedMessageContent } from '../chat/ParsedMessageContent';
+import { MessageBubble } from '../chat/MessageBubble';
 
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 
@@ -48,7 +48,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         sendMessage,
         clearMessages,
         messagesEndRef
-    } = useDifyChat({
+    } = useAgentChat({
         stationId: data.id,
         stationName: displayName,
         userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
@@ -141,27 +141,13 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
             <div className="flex-1 overflow-y-auto p-5 space-y-6 bg-slate-50/50 scrollbar-hide">
                 <AnimatePresence initial={false}>
                     {messages.map((msg, idx) => (
-                        <motion.div
+                        <MessageBubble
                             key={idx}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm text-sm leading-relaxed break-words ${msg.role === 'user'
-                                ? 'bg-slate-900 text-white rounded-tr-none'
-                                : 'bg-white text-slate-700 rounded-tl-none border border-slate-200/50'
-                                }`}>
-                                {msg.role !== 'user' && (
-                                    <div className="flex items-center gap-1.5 mb-1.5 opacity-40">
-                                        <Bot size={12} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">LUTAGU</span>
-                                    </div>
-                                )}
-                                <div className="font-medium text-slate-900">
-                                    <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
-                                </div>
-                            </div>
-                        </motion.div>
+                            msg={msg}
+                            idx={idx}
+                            handleAction={(action) => handleSend(action.target)}
+                            variant="l4"
+                        />
                     ))}
                 </AnimatePresence>
 

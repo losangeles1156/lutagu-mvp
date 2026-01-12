@@ -38,9 +38,14 @@ async function ingest() {
 
     console.log(`Found ${nodes.length} nodes with knowledge.`);
 
+    let i = 0;
     let count = 0;
 
     for (const node of nodes) {
+        if (i % 10 === 0) {
+            console.log(`Progress: ${Math.round(i / nodes.length * 100)}% (${i}/${nodes.length}) - Current: ${node.id}`);
+        }
+        i++;
         // riding_knowledge is JSON string or object? Supabase returns object if column is jsonb.
         const knowledge: any = typeof node.riding_knowledge === 'string'
             ? JSON.parse(node.riding_knowledge)
@@ -63,18 +68,43 @@ async function ingest() {
         // We'll skip raw facilities list for now unless they have descriptions.
 
         for (const item of items) {
-            const content = `${item.title || ''}\n${item.description || ''}\n${item.advice || ''}`.trim();
-            if (!content) continue;
+            // Helper to flatten i18n objects or strings
+            const flatten = (val: any) => {
+                if (!val) return '';
+                if (typeof val === 'string') return val;
+                if (typeof val === 'object') {
+                    // Include all languages for embedding coverage
+                    return Object.values(val).join(' ');
+                }
+                return String(val);
+            };
 
-            // Simple rate limit avoidance
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const content = `${flatten(item.title)}\n${flatten(item.description)}\n${flatten(item.advice)}`.trim();
+            if (!content || content.includes('[object Object]')) continue;
 
-            const embedding = await generateEmbedding(content);
+            // Rate limit avoidance (Mistral allows ~5-10 RPS usually, we'll stay safe at 300ms)
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            let embedding: number[] | null = null;
+            let retries = 0;
+            while (retries < 3) {
+                try {
+                    embedding = await generateEmbedding(content);
+                    if (embedding) break;
+                } catch (e: any) {
+                    if (e.message?.includes('429')) {
+                        console.log(`Rate limited, waiting ${2 ** retries}s...`);
+                        await new Promise(resolve => setTimeout(resolve, 2000 * (2 ** retries)));
+                        retries++;
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+
             if (!embedding || embedding.length !== 1024) {
-                // Fallback embedding might be 1024.
-                // If embedding() calls fallback, it returns 1024 zeros?
-                // embedding.ts fallback uses 1024 dim.
-                // Good.
+                console.warn(`Failed to generate embedding for ${node.id}`);
+                continue;
             }
 
             // Insert into l4_knowledge_embeddings

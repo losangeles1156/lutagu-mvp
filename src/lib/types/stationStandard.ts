@@ -151,4 +151,5 @@ export interface StationUIProfile {
     // L4: Strategy
     l4_cards: ActionCard[];
     l4_knowledge?: L4Knowledge;
+    summary?: string; // AI Synthesized Summary
 }

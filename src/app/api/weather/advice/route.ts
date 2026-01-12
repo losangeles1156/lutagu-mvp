@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { Mistral } from '@mistralai/mistralai';
 import { supabase } from '@/lib/supabase';
-
-const mistral = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
+import { generateLLMResponse } from '@/lib/ai/llmClient';
 
 // Cache TTL
 const NORMAL_TTL_HOURS = 1;
@@ -155,16 +153,19 @@ export async function GET(request: Request) {
     }
 
     try {
-        const result = await mistral.chat.complete({
-            model: 'mistral-small-latest',
-            messages: [
-                { role: 'system', content: template.systemPrompt },
-                { role: 'user', content: prompt }
-            ],
+        const adviceContent = await generateLLMResponse({
+            systemPrompt: template.systemPrompt,
+            userPrompt: prompt,
+            taskType: 'reasoning', // Use MiniMax-M2.1
+            temperature: 0.2
         });
 
-        let advice = (result.choices[0].message.content as string).trim();
+        let advice = (adviceContent || '').trim();
         advice = advice.replace(/^["']|["']$/g, '').replace(/^以下是.*?:/, '').trim();
+
+        if (!advice) {
+            throw new Error('Empty response from LLM');
+        }
 
         const expiresAt = new Date();
         if (isEmergency) {
@@ -200,7 +201,7 @@ export async function GET(request: Request) {
 
     } catch (error: any) {
         console.error('Weather Advice LLM Error:', error.message);
-        
+
         const fallbacks: Record<string, Record<string, string>> = {
             critical: { 'zh-TW': '請關注官方警報，確保安全。', 'zh': '请关注官方警报，确保安全。', 'ja': '公式警報に注意してください。', 'en': 'Please follow official advisories.' },
             warning: { 'zh-TW': '請留意天氣變化。', 'zh': '请留意天气变化。', 'ja': '天候の変化に注意してください。', 'en': 'Please be aware of weather.' },

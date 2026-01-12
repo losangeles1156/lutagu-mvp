@@ -5,8 +5,8 @@ interface AppState {
     currentNodeId: string | null;
     currentZone: 'core' | 'buffer' | 'outer';
 
-    difyUserId: string;
-    difyConversationId: string | null;
+    agentUserId: string;
+    agentConversationId: string | null;
 
     isBottomSheetOpen: boolean;
     isChatOpen: boolean;
@@ -46,8 +46,8 @@ interface AppState {
     setIsOnboardingOpen: (isOpen: boolean) => void;
     setChatOpen: (isOpen: boolean) => void;
     setChatDisplayMode: (mode: 'mini' | 'split' | 'full') => void;
-    setDifyConversationId: (id: string | null) => void;
-    resetDifyConversation: () => void;
+    setAgentConversationId: (id: string | null) => void;
+    resetAgentConversation: () => void;
     addMessage: (message: {
         role: 'user' | 'assistant';
         content: string;
@@ -108,8 +108,8 @@ export const useAppStore = create<AppState>()(
 
             // [FIX] Initialize with empty string to avoid hydration mismatch
             // The actual UUID will be generated on first client-side access
-            difyUserId: '',
-            difyConversationId: null,
+            agentUserId: '',
+            agentConversationId: null,
 
             isBottomSheetOpen: false,
             isChatOpen: false,
@@ -154,8 +154,8 @@ export const useAppStore = create<AppState>()(
             setIsOnboardingOpen: (isOpen) => set({ isOnboardingOpen: isOpen }),
             setChatOpen: (isOpen) => set({ isChatOpen: isOpen }),
             setChatDisplayMode: (mode) => set({ chatDisplayMode: mode }),
-            setDifyConversationId: (id) => set({ difyConversationId: id }),
-            resetDifyConversation: () => set({ difyConversationId: null }),
+            setAgentConversationId: (id) => set({ agentConversationId: id }),
+            resetAgentConversation: () => set({ agentConversationId: null }),
             addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
             updateLastMessage: (updates) => set((state) => {
                 if (state.messages.length === 0) return state;
@@ -211,7 +211,7 @@ export const useAppStore = create<AppState>()(
         {
             name: 'lutagu-storage',
             partialize: (state) => ({
-                difyUserId: state.difyUserId,
+                agentUserId: state.agentUserId,
                 locale: state.locale,
                 accessibilityMode: state.accessibilityMode,
                 userContext: state.userContext,

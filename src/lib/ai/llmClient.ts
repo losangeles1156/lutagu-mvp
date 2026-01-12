@@ -15,16 +15,14 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return generateMiniMaxResponse(params);
     }
 
-    // 2. 分類/快速任務交給 Gemini 2.5 Flash Lite (if avail) or Gemini 3
-    if (taskType === 'classification' && process.env.GEMINI_API_KEY) {
-        // TODO: Add separate function for 2.5 if needed, for now use generic Gemini function
-        // which defaults to 3-flash-preview, but we can make it configurable
+    // 2. 分類/快速任務或 DataMux 彙整交給 Gemini 2.5 Flash Lite
+    if ((taskType === 'classification' || taskType === 'synthesis') && process.env.GEMINI_API_KEY) {
         return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
     }
 
-    // 3. 彙整型或海量數據任務交給 Gemini 3 Flash
+    // 3. 彙整型或海量數據任務交給 Gemini 3 Flash Preview
     if ((taskType === 'synthesis' || taskType === 'context_heavy') && process.env.GEMINI_API_KEY) {
-        return generateGeminiResponse(params);
+        return generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
     }
 
     // 3. 備援：Mistral
@@ -43,6 +41,9 @@ async function generateMiniMaxResponse(params: LLMParams): Promise<string | null
     // International endpoint: api.minimax.io
     const endpoint = 'https://api.minimax.io/v1/chat/completions';
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Timeout
+
     try {
         const res = await fetch(endpoint, {
             method: 'POST',
@@ -58,8 +59,10 @@ async function generateMiniMaxResponse(params: LLMParams): Promise<string | null
                 ],
                 reasoning_split: true,
                 temperature
-            })
+            }),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
             const errorText = await res.text();
@@ -84,16 +87,18 @@ interface GeminiParams extends LLMParams {
 }
 
 async function generateGeminiResponse(params: GeminiParams): Promise<string | null> {
-    const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-2.5-flash-lite' } = params;
+    const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-3-flash-preview' } = params;
 
-    // Fallback: If 1.5 is requested but not supported, swap to 2.5-lite
+    // Strict model mapping based on user preference
     let targetModel = model;
-    if (model === 'gemini-1.5-flash') targetModel = 'gemini-2.5-flash-lite';
-    if (model === 'gemini-3-flash-preview') targetModel = 'gemini-2.5-flash'; // Fallback if 3 is unstable
+    if (model === 'gemini-1.5-flash') targetModel = 'gemini-2.5-flash-lite'; // Upgrade obsolete model
 
     try {
         // Zeabur AI Hub (Tokyo Node) - OpenAI Compatible
         const endpoint = `https://hnd1.aihub.zeabur.ai/v1/chat/completions`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Timeout
 
         const res = await fetch(endpoint, {
             method: 'POST',
@@ -108,8 +113,10 @@ async function generateGeminiResponse(params: GeminiParams): Promise<string | nu
                     { role: 'user', content: userPrompt }
                 ],
                 temperature
-            })
+            }),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
             const errText = await res.text();

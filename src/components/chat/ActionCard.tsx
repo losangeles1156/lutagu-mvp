@@ -140,6 +140,14 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
         );
     }
 
+    // Helper to resolve localized string or object
+    const resolveText = (text: string | Record<string, string> | undefined): string => {
+        if (!text) return '';
+        if (typeof text === 'string') return text;
+        // @ts-ignore
+        return text[t('locale') || 'zh-TW'] || text['en'] || text['zh-TW'] || Object.values(text)[0] || '';
+    };
+
     // 2. Standard Cards (Legacy Logic)
     const config = CONFIG[action.type] || CONFIG.details;
     const Icon = config.icon;
@@ -165,12 +173,12 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                             {action.timeSaved && (
                                 <span className="flex items-center gap-1 text-[10px] font-black bg-white/60 px-2 py-0.5 rounded-full text-green-700 uppercase tracking-tighter shadow-sm">
                                     <Zap size={10} fill="currentColor" />
-                                    {t('saveTime', { time: action.timeSaved })}
+                                    {t('saveTime', { time: resolveText(action.timeSaved) })}
                                 </span>
                             )}
                         </div>
                         <h3 className="text-lg font-black text-gray-900 leading-tight">
-                            {action.title}
+                            {resolveText(action.title)}
                         </h3>
                     </div>
                 </div>
@@ -178,7 +186,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                 {/* (B) Traffic Knowledge Tips (Expert Advice) */}
                 <div className="p-5 pt-4">
                     <p className="text-sm font-bold text-gray-600 leading-relaxed mb-3">
-                        {action.content}
+                        {resolveText(action.content)}
                     </p>
 
                     {/* Visual Separator */}
@@ -188,16 +196,16 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                         <div className="flex items-center gap-2">
                             {action.price ? (
                                 <span className="text-xs font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded-lg">
-                                    {action.price}
+                                    {resolveText(action.price)}
                                 </span>
                             ) : (
                                 <span className="text-xs font-bold text-gray-400">
-                                    點擊查看詳情
+                                    {t('tapDetails')}
                                 </span>
                             )}
                         </div>
                         <div className={`text-sm font-black ${config.textColor} flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity`}>
-                            {action.label} <span className="text-lg">→</span>
+                            {resolveText(action.label)} <span className="text-lg">→</span>
                         </div>
                     </div>
                 </div>
@@ -219,19 +227,19 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                         <div className={`font-bold text-base ${config.textColor} truncate`}>
-                            {action.label}
+                            {resolveText(action.label)}
                         </div>
                         {action.timeSaved && (
                             <span className="flex items-center gap-1 text-[10px] font-black bg-white/80 px-2 py-0.5 rounded-full text-green-600 uppercase tracking-tighter shadow-sm whitespace-nowrap">
                                 <Zap size={10} fill="currentColor" />
-                                {t('saveTime', { time: action.timeSaved })}
+                                {resolveText(action.timeSaved)}
                             </span>
                         )}
                     </div>
 
                     {action.description && (
                         <div className="text-xs text-black/50 mt-0.5 leading-relaxed font-medium">
-                            {action.description}
+                            {resolveText(action.description)}
                         </div>
                     )}
 
@@ -240,7 +248,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                             {action.price && (
                                 <div className="flex items-center gap-1 text-[11px] font-bold text-black/60 bg-white/40 px-2.5 py-1 rounded-lg border border-white/50">
                                     <Banknote size={12} className="opacity-50" />
-                                    {action.price}
+                                    {resolveText(action.price)}
                                 </div>
                             )}
                         </div>

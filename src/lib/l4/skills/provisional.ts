@@ -1,6 +1,6 @@
 export const FARE_RULES_SKILL = {
     name: 'check-fare-rules',
-    keywords: ['票', '錢', 'suica', 'pasmo', '優惠', 'fare', 'cost', 'price', 'ticket', 'ic card'],
+    keywords: ['票', '錢', 'suica', 'pasmo', '優惠', 'fare', 'cost', 'price', 'ticket', 'ic card', 'pass', 'jr pass', 'tokyo subway ticket', 'day pass'],
     content: `
 # Check Fare Rules Skill (Active)
 
@@ -88,5 +88,156 @@ A: 🛑 **等等！先不要去大醫院！** 如果沒有診所介紹信，去�
 
 Q: 小孩突然呼吸困難！
 A: 🚑 **這是緊急狀況！請立刻撥打 119！** 不要猶豫，告訴接線員「Medical, Emergency」。救護車是免費的，請保持冷靜等待救援！🙏
+`
+};
+
+export const VIBE_MATCHER_SKILL = {
+    name: 'vibe-matcher',
+    keywords: ['crowded', 'people', 'busy', 'quiet', 'calm', 'vibe', 'atmosphere', 'similar', 'like', '人多', '擁擠', '吵', '安靜', '氣氛', '類似', '像', '人潮'],
+    content: `
+# Vibe Matcher Skill (Deep Research)
+
+## 🎯 Goal
+Find places with a similar "vibe" (atmosphere/category) but less crowded, based on vector similarity search.
+
+## 🧠 Logic
+1. Analyze the "vibe embedding" of the current location.
+2. Search for L1 places within 2km with cosine similarity > 0.85.
+3. Filter out places with high crowd density.
+4. Suggest the best matches.
+
+## 🧠 Response Style
+- "If you like [Current Place], you'll love [Recommendation]! It has the same [Vibe Adjectives] atmosphere but is much more relaxing."
+`
+};
+
+export const SPATIAL_REASONER_SKILL = {
+    name: 'spatial-reasoner',
+    keywords: ['delay', 'stopped', 'late', 'accident', 'suspended', 'alternative', 'detour', 'walk', 'route', '延遲', '停駛', '事故', '見合', '替代', '繞路', '走過去', '怎麼去'],
+    content: `
+# Spatial Reasoner Skill (Deep Research)
+
+## 🎯 Goal
+Provide actionable alternative routes during transit anomalies by calculating cross-station walking distances and transfer feasibility.
+
+## 🧠 Logic
+1. Identify the disrupted line and user's specific destination.
+2. Scan for nearby stations (Successor/Alternative Lines) within walking distance.
+3. Calculate "Transfer Time + Wait Time" vs "Walk Time + New Line Time".
+4. Recommend the optimal path with exit-to-exit guidance.
+
+## 🧠 Response Style
+- "Since [Line A] is delayed, I recommend walking to [Station B] (5 mins). Take exit A2 for the smoothest transfer to [Line C]. It'll get you to [Dest] faster!"
+`
+};
+
+export const FACILITY_PATHFINDER_SKILL = {
+    name: 'facility-pathfinder',
+    keywords: ['stroller', 'wheelchair', 'elevator', 'lift', 'ramp', 'stairs', 'heavy', 'luggage', 'baby', 'accessible', '嬰兒車', '輪椅', '電梯', '行李', '無障礙', '寶寶'],
+    content: `
+# Facility Pathfinder Skill (Deep Research)
+
+## 🎯 Goal
+Provide detailed, step-by-step navigation for users with specific mobility needs (Stroller, Wheelchair, Luggage).
+
+## 🧠 Logic
+1. Check station facility graph for "Step-Free" paths.
+2. Identify specific elevators/exits connecting platform to ground.
+3. Warn about transfers requiring special assistance.
+
+## 🧠 Response Style
+- "For the stroller, use **Exit C4**. Take the elevator from the platform to B1 Concourse, then turn left to find the ground-level elevator near the park entrance."
+`
+};
+
+export const LAST_MILE_CONNECTOR_SKILL = {
+    name: 'last-mile-connector',
+    keywords: ['far', 'walk', 'bus', 'remote', 'taxi', 'luup', 'scooter', '遠', '走路', '公車', '巴士', '交通不便', '難去', '計程車', '電動滑板車', 'last mile'],
+    content: `
+# Last Mile Connector Skill (Policy: Traffic Vacuum)
+
+## 🎯 Goal
+Bridge the gap between stations and final destinations that are outside comfortable walking distance (>800m).
+
+## 🧠 Logic
+1. Analyze distance: If walk > 15min (>1.2km), flag as "Traffic Vacuum".
+2. Search Micro-Mobility: Community Bus, Luup, Taxi.
+3. Formulate Hybrid Route: Train + [Bus/Luup] + Walk.
+
+## 📡 Demand Signal
+- Record 'traffic_vacuum' signal.
+- If no options found, mark 'unmet_need=true'.
+
+## 🧠 Response Style
+- "To reach [Dest], it's a 20-min walk. I recommend the **Hachiko Bus** (¥100) from Exit South or a **Luup** scooter. Saves 15 mins!"
+`
+};
+
+export const CROWD_DISPATCHER_SKILL = {
+    name: 'crowd-dispatcher', // Renamed from vibe-matcher
+    keywords: ['crowded', 'people', 'busy', 'quiet', 'calm', 'vibe', 'atmosphere', 'similar', 'like', '人多', '擁擠', '吵', '安靜', '氣氛', '類似', '像', '人潮', 'overtourism'],
+    content: `
+# Crowd Dispatcher Skill (Policy: Overtourism)
+
+## 🎯 Goal
+Disperse tourist crowds by recommending "Hidden Gem" alternatives with similar vibes but lower density.
+
+## 🧠 Logic
+1. Analyze current location's Vibe Vector.
+2. Find similar spots (Cosine Sim > 0.85) with Low Crowd Level.
+3. Highlight unique selling points of the alternative.
+
+## 📡 Demand Signal
+- Record 'overtourism' signal (User felt crowded at X).
+- usage: Mark 'unmet_need=false' if user accepts alternative.
+
+## 🧠 Response Style
+- "Asakusa is very crowded now! For a similar 'Old Tokyo' vibe but much quieter, I recommend **Shibamata**. It has a beautiful temple and retro street!"
+`
+};
+
+export const LUGGAGE_LOGISTICS_SKILL = {
+    name: 'luggage-logistics',
+    keywords: ['locker', 'coin locker', 'baggage', 'luggage', 'heavy', 'store', 'keep', 'yamato', 'sagawa', 'hands-free', '寄物', '置物櫃', '行李', '重', '寄放', '宅急便'],
+    content: `
+# Luggage Logistics Skill (Policy: Hands-Free Tourism)
+
+## 🎯 Goal
+Promote "Hands-Free Travel" by finding optimal storage or forwarding solutions.
+
+## 🧠 Logic
+1. Check Station Locker Status (Simulated Real-time).
+2. If full, search nearby "Baggage Storage Counters" (Sagawa/Yamato).
+3. Suggest "Hotel Delivery" if strictly hands-free needed.
+
+## 📡 Demand Signal
+- Record 'hands_free' signal.
+- If Lockers Full -> 'unmet_need=true'.
+
+## 🧠 Response Style
+- "Large coin lockers at Exit East are FULL 🔴. Please go to the **Sagawa Hand-Free Center** at Exit South (Open until 20:00). They can also ship to your hotel!"
+`
+};
+
+export const ACCESSIBILITY_MASTER_SKILL = {
+    name: 'accessibility-master', // Enhanced from facility-pathfinder
+    keywords: ['stroller', 'wheelchair', 'elevator', 'lift', 'ramp', 'stairs', 'barrier-free', 'baby', 'accessible', '嬰兒車', '輪椅', '電梯', '行李', '無障礙', '寶寶', '斜坡'],
+    content: `
+# Accessibility Master Skill (Policy: Barrier-Free)
+
+## 🎯 Goal
+Ensure seamless movement for mobility-impaired users by identifying "Step-Free" routes and broken links.
+
+## 🧠 Logic
+1. Construct "Elevator Graph" from Platform to Ground.
+2. Check for "Broken Links" (e.g. Stair-only transfers).
+3. Suggest "Detour Station" if current one is inaccessible.
+
+## 📡 Demand Signal
+- Record 'barrier_free' signal.
+- If route fails (Broken Link) -> 'unmet_need=true' (Critical feedback for Station Admin).
+
+## 🧠 Response Style
+- "For the stroller, **Exit C4** is the ONLY Step-Free route. Note: The transfer to Ginza Line here has 10 stairs. I recommend transferring at [Next Station] instead for full elevator access."
 `
 };

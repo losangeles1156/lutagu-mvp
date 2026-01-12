@@ -32,7 +32,7 @@ export function useIntentClassifier(options: UseIntentClassifierOptions): UseInt
     const { stationId, stationName, onIntentRecognized, onError } = options;
     const locale = useLocale();
     const t = useTranslations('l4');
-    
+
     const [isClassifying, setIsClassifying] = useState(false);
     const [lastResult, setLastResult] = useState<IntentClassificationResult | null>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -44,16 +44,16 @@ export function useIntentClassifier(options: UseIntentClassifierOptions): UseInt
 
     const classifyIntent = useCallback(async (text: string): Promise<IntentClassificationResult | null> => {
         if (!text.trim()) return null;
-        
+
         // Abort any ongoing classification
         abortClassification();
-        
+
         const controller = new AbortController();
         abortControllerRef.current = controller;
         setIsClassifying(true);
 
         try {
-            const response = await fetch('/api/dify/classify-intent', {
+            const response = await fetch('/api/agent/classify-intent', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -74,7 +74,7 @@ export function useIntentClassifier(options: UseIntentClassifierOptions): UseInt
             }
 
             const data = await response.json();
-            
+
             const result: IntentClassificationResult = {
                 kind: data.kind || 'unknown',
                 confidence: data.confidence || 0,

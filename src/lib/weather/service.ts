@@ -54,6 +54,7 @@ Keep it concise.
         const jsonStr = await generateLLMResponse({
             systemPrompt: 'Output raw JSON only.',
             userPrompt: prompt,
+            taskType: 'classification', // Use Flash Lite for speed
             temperature: 0.1
         });
 
@@ -94,6 +95,8 @@ export async function fetchWeatherAlerts(locale: string = 'zh') {
         const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
         let match;
 
+        const validEntries: any[] = [];
+
         while ((match = entryRegex.exec(xml)) !== null) {
             const content = match[1];
             const title = content.match(/<title>(.*?)<\/title>/)?.[1] || '';
@@ -101,41 +104,41 @@ export async function fetchWeatherAlerts(locale: string = 'zh') {
                 content.match(/<summary>([\s\S]*?)<\/summary>/)?.[1] || '';
             const updated = content.match(/<updated>(.*?)<\/updated>/)?.[1] || '';
 
-            if (!WEATHER_REGION_POLICY.isTargetRegion(title, summary)) {
-                continue;
-            }
+            if (!WEATHER_REGION_POLICY.isTargetRegion(title, summary)) continue;
 
-            const severity = WEATHER_REGION_POLICY.getSeverity(title, summary);
-            const severityLabel = WEATHER_REGION_POLICY.getSeverityLabel(severity);
-            const cleanSummary = summary.replace(/<br \/>/g, '\n').trim();
-
-            const polyglotSummary = await getTranslatedAlert(title, cleanSummary, updated, severity);
-
-            let displaySummary = polyglotSummary.zh;
-            if (locale === 'en') displaySummary = polyglotSummary.en;
-            if (locale === 'ja') displaySummary = polyglotSummary.ja;
-
-            const region = WEATHER_REGION_POLICY.extractRegion(title, cleanSummary);
-
-            // [Filter] Double check: Explicitly exclude unwanted regions even if they passed isTargetRegion
+            // Extract region and check exclusions early
+            const region = WEATHER_REGION_POLICY.extractRegion(title, summary.replace(/<br \/>/g, '\n').trim());
             const isExcluded = WEATHER_REGION_POLICY.excludedRegions.some(ex => region.includes(ex)) ||
                 region === '千葉南部' ||
                 region === '千葉北東部' ||
                 region === '神奈川西部';
 
-            if (isExcluded) {
-                continue;
-            }
+            if (isExcluded) continue;
 
-            entries.push({
-                title,
-                summary: displaySummary,
-                severity: severityLabel,
-                region
-            });
+            validEntries.push({ title, summary, updated, region });
         }
 
-        return entries;
+        // Process in parallel with faster model
+        const results = await Promise.all(validEntries.map(async (entry) => {
+            const cleanSummary = entry.summary.replace(/<br \/>/g, '\n').trim();
+            const severity = WEATHER_REGION_POLICY.getSeverity(entry.title, cleanSummary);
+            const severityLabel = WEATHER_REGION_POLICY.getSeverityLabel(severity);
+
+            const polyglotSummary = await getTranslatedAlert(entry.title, cleanSummary, entry.updated, severity);
+
+            let displaySummary = polyglotSummary.zh;
+            if (locale === 'en') displaySummary = polyglotSummary.en;
+            if (locale === 'ja') displaySummary = polyglotSummary.ja;
+
+            return {
+                title: entry.title,
+                summary: displaySummary,
+                severity: severityLabel,
+                region: entry.region
+            };
+        }));
+
+        return results;
 
     } catch (error: any) {
         console.error('Weather Service Error:', error.message);

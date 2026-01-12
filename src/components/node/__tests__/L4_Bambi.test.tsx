@@ -14,9 +14,9 @@ jest.mock('@/hooks/useZoneAwareness', () => ({
   useZoneAwareness: () => ({ zone: 'core' })
 }));
 
-// Mock useDifyChat hook
-jest.mock('@/hooks/useDifyChat', () => ({
-  useDifyChat: jest.fn(() => ({
+// Mock useAgentChat hook
+jest.mock('@/hooks/useAgentChat', () => ({
+  useAgentChat: jest.fn(() => ({
     messages: [
       { role: 'assistant', content: 'initialMessage' }
     ],
@@ -34,16 +34,16 @@ jest.mock('@/hooks/useDifyChat', () => ({
   })),
 }));
 
-// Mock fetch for Dify API
+// Mock fetch for Agent API
 global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
     body: {
       getReader: () => ({
         read: jest.fn()
-          .mockResolvedValueOnce({ 
-            done: false, 
-            value: new TextEncoder().encode('data: {"event":"message","answer":"Hello"}\n') 
+          .mockResolvedValueOnce({
+            done: false,
+            value: new TextEncoder().encode('data: {"event":"message","answer":"Hello"}\n')
           })
           .mockResolvedValueOnce({ done: true })
       })
@@ -77,12 +77,12 @@ describe('L4_Chat Component (Bambi Variant)', () => {
 
   it('renders correctly with bambi variant', () => {
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="bambi"
       />
     );
-    
+
     // Check for static elements (keys from translation mock)
     expect(screen.getByText('bambiStrategy')).toBeTruthy();
     expect(screen.getByText('subtitle')).toBeTruthy();
@@ -90,20 +90,20 @@ describe('L4_Chat Component (Bambi Variant)', () => {
 
   it('renders correctly with strategy variant', () => {
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="strategy"
       />
     );
-    
+
     // Strategy variant should show station name instead
     expect(screen.getByText('測試車站')).toBeTruthy();
   });
 
   it('injects core params for Fastest Route quick button', async () => {
-    const { useDifyChat } = require('@/hooks/useDifyChat');
+    const { useAgentChat } = require('@/hooks/useAgentChat');
     const mockSendMessage = jest.fn();
-    (useDifyChat as jest.Mock).mockReturnValue({
+    (useAgentChat as jest.Mock).mockReturnValue({
       messages: [{ role: 'assistant', content: 'initialMessage' }],
       setMessages: jest.fn(),
       isLoading: false,
@@ -117,8 +117,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
     });
 
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="bambi"
       />
     );
@@ -131,9 +131,9 @@ describe('L4_Chat Component (Bambi Variant)', () => {
   });
 
   it('injects accessibility params for Accessibility quick button', async () => {
-    const { useDifyChat } = require('@/hooks/useDifyChat');
+    const { useAgentChat } = require('@/hooks/useAgentChat');
     const mockSendMessage = jest.fn();
-    (useDifyChat as jest.Mock).mockReturnValue({
+    (useAgentChat as jest.Mock).mockReturnValue({
       messages: [{ role: 'assistant', content: 'initialMessage' }],
       setMessages: jest.fn(),
       isLoading: false,
@@ -147,8 +147,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
     });
 
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="bambi"
       />
     );
@@ -161,9 +161,9 @@ describe('L4_Chat Component (Bambi Variant)', () => {
   });
 
   it('injects disruption params for Delays & Backup quick button', async () => {
-    const { useDifyChat } = require('@/hooks/useDifyChat');
+    const { useAgentChat } = require('@/hooks/useAgentChat');
     const mockSendMessage = jest.fn();
-    (useDifyChat as jest.Mock).mockReturnValue({
+    (useAgentChat as jest.Mock).mockReturnValue({
       messages: [{ role: 'assistant', content: 'initialMessage' }],
       setMessages: jest.fn(),
       isLoading: false,
@@ -177,8 +177,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
     });
 
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="bambi"
       />
     );
@@ -191,8 +191,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
   });
 
   it('shows loading state when sending message', () => {
-    const { useDifyChat } = require('@/hooks/useDifyChat');
-    (useDifyChat as jest.Mock).mockReturnValue({
+    const { useAgentChat } = require('@/hooks/useAgentChat');
+    (useAgentChat as jest.Mock).mockReturnValue({
       messages: [{ role: 'assistant', content: 'initialMessage' }],
       setMessages: jest.fn(),
       isLoading: true,
@@ -204,8 +204,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
     });
 
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="bambi"
       />
     );
@@ -215,8 +215,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
   });
 
   it('handles offline state gracefully', () => {
-    const { useDifyChat } = require('@/hooks/useDifyChat');
-    (useDifyChat as jest.Mock).mockReturnValue({
+    const { useAgentChat } = require('@/hooks/useAgentChat');
+    (useAgentChat as jest.Mock).mockReturnValue({
       messages: [{ role: 'assistant', content: 'initialMessage' }],
       setMessages: jest.fn(),
       isLoading: false,
@@ -228,8 +228,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
     });
 
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="bambi"
       />
     );
@@ -239,9 +239,9 @@ describe('L4_Chat Component (Bambi Variant)', () => {
   });
 
   it('handles seed question prop', () => {
-    const { useDifyChat } = require('@/hooks/useDifyChat');
+    const { useAgentChat } = require('@/hooks/useAgentChat');
     const mockSendMessage = jest.fn();
-    (useDifyChat as jest.Mock).mockReturnValue({
+    (useAgentChat as jest.Mock).mockReturnValue({
       messages: [{ role: 'assistant', content: 'initialMessage' }],
       setMessages: jest.fn(),
       isLoading: false,
@@ -253,8 +253,8 @@ describe('L4_Chat Component (Bambi Variant)', () => {
     });
 
     render(
-      <L4_Chat 
-        data={mockData} 
+      <L4_Chat
+        data={mockData}
         variant="strategy"
         seedQuestion="Test question"
         seedUserProfile="general"

@@ -1,61 +1,43 @@
 {
-  "timestamp": "2026-01-10T15:26:22.302Z",
+  "timestamp": "2026-01-12T14:21:15.571Z",
   "metrics": {
-    "avgLatency": 1431.9034895,
-    "p90Latency": 5293.017374999999,
-    "accuracyRate": 62.5
+    "avgLatency": 6965.3635677500015,
+    "p90Latency": 12440.558667,
+    "accuracyRate": 50
   },
   "results": [
     {
       "id": "l1_greeting_zh",
       "text": "你好",
       "category": "L1 (Greeting)",
-      "latencyMs": 375.1707920000001,
+      "latencyMs": 3260.7512499999993,
       "accuracy": true,
       "actualSource": "template",
       "expectedSource": "template"
     },
     {
-      "id": "l3_poi_sushi_zh",
-      "text": "附近的壽司",
-      "category": "L3 (POI)",
-      "latencyMs": 469.36150000000043,
-      "accuracy": true,
-      "actualSource": "poi_tagged",
-      "expectedSource": "poi_tagged"
-    },
-    {
       "id": "l3_poi_shopping_zh",
       "text": "哪裡有便宜的藥妝店",
       "category": "L3 (POI)",
-      "latencyMs": 521.1380409999992,
+      "latencyMs": 5246.637749999994,
       "accuracy": true,
       "actualSource": "poi_tagged",
       "expectedSource": "poi_tagged"
     },
     {
-      "id": "l2_fare_zh",
-      "text": "去新宿多少錢",
-      "category": "L2 (Fare)",
-      "latencyMs": 840.7434170000001,
-      "accuracy": false,
-      "actualSource": "llm_fallback_unexpected",
-      "expectedSource": "algorithm"
-    },
-    {
-      "id": "l2_route_zh",
-      "text": "從東京車站怎麼去上野",
-      "category": "L2 (Route)",
-      "latencyMs": 1112.735333,
-      "accuracy": false,
-      "actualSource": "llm_fallback_unexpected",
-      "expectedSource": "algorithm"
+      "id": "l3_poi_sushi_zh",
+      "text": "附近的壽司",
+      "category": "L3 (POI)",
+      "latencyMs": 5488.248958000004,
+      "accuracy": true,
+      "actualSource": "poi_tagged",
+      "expectedSource": "poi_tagged"
     },
     {
       "id": "fallback_joke_zh",
       "text": "講一個關於電車的笑話",
       "category": "Fallback (LLM)",
-      "latencyMs": 1244.4117079999996,
+      "latencyMs": 5954.185209000003,
       "accuracy": true,
       "actualSource": "llm",
       "expectedSource": "llm"
@@ -64,19 +46,37 @@
       "id": "complex_reasoning_zh",
       "text": "帶小孩去哪裡玩比較好？要安靜一點的",
       "category": "Complex (Reasoning)",
-      "latencyMs": 1598.6497500000005,
-      "accuracy": true,
-      "actualSource": "llm",
+      "latencyMs": 6378.508458000004,
+      "accuracy": false,
+      "actualSource": "knowledge",
       "expectedSource": "llm"
+    },
+    {
+      "id": "l2_route_zh",
+      "text": "從東京車站怎麼去上野",
+      "category": "L2 (Route)",
+      "latencyMs": 6598.419334000002,
+      "accuracy": false,
+      "actualSource": "knowledge",
+      "expectedSource": "algorithm"
     },
     {
       "id": "l4_knowledge_zh",
       "text": "新宿站有什麼要注意的",
       "category": "L4 (Knowledge)",
-      "latencyMs": 5293.017374999999,
+      "latencyMs": 10355.598916000003,
       "accuracy": false,
-      "actualSource": "llm_fallback_unexpected",
+      "actualSource": "llm",
       "expectedSource": "knowledge"
+    },
+    {
+      "id": "l2_fare_zh",
+      "text": "去新宿多少錢",
+      "category": "L2 (Fare)",
+      "latencyMs": 12440.558667,
+      "accuracy": false,
+      "actualSource": "knowledge",
+      "expectedSource": "algorithm"
     }
   ]
 }

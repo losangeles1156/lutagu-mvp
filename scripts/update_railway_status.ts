@@ -54,7 +54,12 @@ async function fetchODPTAll(): Promise<TransitAlert[]> {
             const data = await res.json();
             for (const item of data) {
                 const status = item['odpt:trainInformationStatus']?.ja || 'Unknown';
-                if (status === '平常運転' || status === 'Normal') continue;
+                const message = item['odpt:trainInformationText']?.ja || '';
+
+                // Strict skip for normal operations (including both Simplified and Traditional Chinese variants if they appear)
+                if (status === '平常運転' || status === 'Normal' ||
+                    message === '平常運転' || message.includes('平常通り運転') ||
+                    message === '平常運轉' || message.includes('平常通り運轉')) continue;
 
                 allResults.push({
                     id: item['owl:sameAs'] || `odpt:${item['odpt:railway']}`,

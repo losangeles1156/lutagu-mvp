@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
+import { useAgentChat } from '@/hooks/useAgentChat';
 import { useLocale, useTranslations } from 'next-intl';
 import {
     Minus,
@@ -19,12 +20,13 @@ import {
     Loader2,
     Brain
 } from 'lucide-react';
-import { Action as ChatAction } from './ActionCard';
+import { Action as ChatAction, ActionCard } from './ActionCard';
 import { EmptyState } from './EmptyState';
 import { useToast } from '@/components/ui/Toast';
 import { ThinkingBubble } from './ThinkingBubble';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { demoScripts } from '@/data/demoScripts';
+import { MessageBubble } from './MessageBubble'; // Moved import to top
 
 const MIN_HEIGHT = 200;
 const MAX_HEIGHT = 600;
@@ -57,18 +59,18 @@ export function ChatPanel() {
         setDemoMode,
         activeDemoId,
 
-        setDifyConversationId,
-        difyConversationId,
-        difyUserId
+        setAgentConversationId,
+        agentConversationId,
+        agentUserId
     } = useAppStore(state => ({
         isDemoMode: state.isDemoMode,
         activeDemoId: state.activeDemoId,
         setDemoMode: state.setDemoMode,
         currentNodeId: state.currentNodeId,
         setCurrentNode: state.setCurrentNode,
-        difyUserId: state.difyUserId,
-        difyConversationId: state.difyConversationId,
-        setDifyConversationId: state.setDifyConversationId,
+        agentUserId: state.agentUserId,
+        agentConversationId: state.agentConversationId,
+        setAgentConversationId: state.setAgentConversationId,
         storeMessages: state.messages,
         addMessage: state.addMessage,
         clearMessages: state.clearMessages,
@@ -80,86 +82,35 @@ export function ChatPanel() {
     // Toast
     const showToast = useToast();
 
-    // Manage input state manually 
+    // Manage input state
     const [input, setInput] = useState('');
-    const [aiMessages, setAiMessages] = useState<any[]>([]);
 
-    // Manual Chat Implementation (Bypassing broken SDK hook)
-    const [isLoading, setIsLoading] = useState(false);
+    // Agent Chat Hook Integration
+    const {
+        messages,
+        setMessages,
+        isLoading,
+        thinkingStep,
+        sendMessage,
+        clearMessages,
+        messagesEndRef
+    } = useAgentChat({
+        stationId: currentNodeId || '',
+        userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
+    });
 
-    const sendMessage = useCallback(async (payload: { role: string; content: string } | string, options?: any) => {
-        const text = typeof payload === 'string' ? payload : payload.content;
-        if (!text.trim()) return;
-
-        setIsLoading(true);
-        const userMsg = { id: Date.now().toString(), role: 'user', content: text };
-
-        // Optimistic Update
-        setAiMessages(prev => [...prev, userMsg]);
-
-        try {
-            // Updated to use Hybrid Engine API (Phase 3)
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    messages: [userMsg],
-                    userLocation: userLocation || undefined, // Access location from hook
-                    nodeId: currentNodeId || '',
-                    locale,
-                    zone: 'core'
-                })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`API Error: ${response.status} ${errorText}`);
-            }
-
-            const data = await response.json();
-
-            // Construct AI Message with Thinking Process
-            const aiMsg = {
-                id: (Date.now() + 1).toString(),
-                role: 'assistant',
-                content: data.answer || '',
-                actions: data.actions || [],
-                thought: data.context?.reasoning_log ? data.context.reasoning_log.join('\n') : null, // Map log to thought
-                metadata: data.context // Store full context
-            };
-
-            setAiMessages(prev => [...prev, aiMsg]);
-
-        } catch (error: any) {
-            console.error('Chat Error:', error);
-            const msg = error.message || 'Connection Failed';
-            showToast?.(msg, 'error');
-            setAiMessages(prev => [...prev, {
-                id: (Date.now() + 2).toString(),
-                role: 'assistant',
-                content: `⚠️ **Error**: ${msg}`
-            }]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [currentNodeId, locale, showToast, userLocation]);
-
-    // Alias for compatibility (stable reference)
+    // Compatibility alias
     const append = useCallback(async (msg: { role: string; content: string }) => {
-        await sendMessage(msg);
+        await sendMessage(msg.content);
     }, [sendMessage]);
 
-    // Display Messages Logic: Demo Mode vs AI Mode
-    // We treat storeMessages as the source of truth for Demo Mode (legacy)
-    // and aiMessages as the source for the new Real AI mode.
-    const displayMessages = isDemoMode ? storeMessages : aiMessages;
+    const displayMessages = messages;
 
     // Panel UI State
     const [isMinimized, setIsMinimized] = useState(false);
     const [height, setHeight] = useState(DEFAULT_HEIGHT);
     const [isResizing, setIsResizing] = useState(false);
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const resizeStartY = useRef(0);
     const resizeStartHeight = useRef(DEFAULT_HEIGHT);
@@ -181,21 +132,31 @@ export function ChatPanel() {
             const script = demoScripts[activeDemoId];
             const lang = (locale === 'ja' || locale === 'en' || locale === 'zh-TW') ? locale : 'zh';
 
-            // Clear messages and add user message
-            useAppStore.setState({
-                messages: [{
-                    role: 'user',
-                    content: script.userMessage[lang]
-                }]
-            });
+            // 1. Initial User Message
+            const initialUserMsg = {
+                id: `demo-user-${Date.now()}`,
+                role: 'user',
+                content: script.userMessage[lang],
+                parts: [{ type: 'text', text: script.userMessage[lang] }]
+            };
+
+            // Update hook state (for rendering) AND store (for persistence if needed)
+            setMessages([initialUserMsg] as any);
+            useAppStore.setState({ messages: [initialUserMsg] as any });
 
             // Simulate Assistant Response
             setTimeout(async () => {
-                addStoreMessage({
+                const assistantMsgId = `demo-assistant-${Date.now()}`;
+                const initialAssistantMsg = {
+                    id: assistantMsgId,
                     role: 'assistant',
-                    content: '',
-                    isLoading: true
-                });
+                    content: '', // Start empty
+                    parts: [{ type: 'text', text: '' }],
+                    isLoading: true // Custom flag (might not directly affect AI SDK but useful for custom logic)
+                };
+
+                // Add empty assistant message
+                setMessages((prev: any[]) => [...prev, initialAssistantMsg] as any);
 
                 const responseText = script.assistantResponse[lang];
                 let displayedText = '';
@@ -205,23 +166,31 @@ export function ChatPanel() {
                     await new Promise(r => setTimeout(r, 30));
                     displayedText += responseText.slice(i, i + chunkSize);
 
-                    useAppStore.setState(state => {
-                        const newMessages = [...state.messages];
-                        const lastMsg = newMessages[newMessages.length - 1];
-                        if (lastMsg && lastMsg.role === 'assistant') {
+                    // Update streaming text
+                    setMessages((prev: any[]) => {
+                        const newMessages = [...prev] as any[]; // Cast to any[]
+                        const lastMsg = { ...newMessages[newMessages.length - 1] };
+
+                        if (lastMsg.role === 'assistant') {
                             lastMsg.content = displayedText;
+                            // AI SDK uses parts for structure sometimes, keep it consistent
+                            if (lastMsg.parts && lastMsg.parts[0]) {
+                                lastMsg.parts = [{ type: 'text', text: displayedText }];
+                            }
                         }
-                        return { messages: newMessages };
+                        newMessages[newMessages.length - 1] = lastMsg;
+                        return newMessages;
                     });
                 }
 
                 // Finish stream, add actions
-                useAppStore.setState(state => {
-                    const newMessages = [...state.messages];
-                    const lastMsg = newMessages[newMessages.length - 1];
-                    if (lastMsg && lastMsg.role === 'assistant') {
-                        lastMsg.isLoading = false;
-                        lastMsg.actions = [
+                setMessages((prev: any[]) => {
+                    const newMessages = [...prev] as any[]; // Cast to any[]
+                    const lastMsg = { ...newMessages[newMessages.length - 1] };
+
+                    if (lastMsg.role === 'assistant') {
+                        // Attach actions as data (AgentMessage interface supports data)
+                        const demoActions = [
                             ...script.actions.map((a: any) => ({
                                 ...a,
                                 label: a.label[lang]
@@ -232,9 +201,13 @@ export function ChatPanel() {
                                 target: 'internal:restart'
                             }
                         ];
+                        // Store actions in 'data' property for MessageBubble to pick up
+                        lastMsg.data = { actions: demoActions };
                     }
-                    return { messages: newMessages };
+                    newMessages[newMessages.length - 1] = lastMsg;
+                    return newMessages;
                 });
+
             }, 600);
             return;
         }
@@ -248,10 +221,10 @@ export function ChatPanel() {
         }
 
         // Only bootstrap if completely empty and not in demo mode
-        if (aiMessages.length === 0 && !isDemoMode) {
+        if (messages.length === 0 && !isDemoMode) {
             hasBootstrappedRef.current = true;
         }
-    }, [uiState, isDemoMode, pendingChatInput, pendingChatAutoSend, append, setPendingChat, aiMessages.length, activeDemoId, locale, addStoreMessage, tChat, setDemoMode]);
+    }, [uiState, isDemoMode, pendingChatInput, pendingChatAutoSend, append, setPendingChat, messages.length, activeDemoId, locale, addStoreMessage, tChat, setDemoMode]);
 
     // Handle Resize
     const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -300,7 +273,7 @@ export function ChatPanel() {
     };
 
     const handleRestart = () => {
-        setAiMessages([]);
+        clearMessages();
         clearStoreMessages();
         setDemoMode(false);
         hasBootstrappedRef.current = false;
@@ -357,23 +330,27 @@ export function ChatPanel() {
                             />
                         ))}
 
-                        {/* Loading Indicator for Streaming */}
-                        {isLoading && displayMessages[displayMessages.length - 1]?.role !== 'assistant' && (
-                            <div className="flex justify-start">
-                                <div className="bg-white border border-slate-100 p-3 rounded-2xl rounded-bl-lg shadow-sm flex items-center gap-2">
-                                    <Brain size={14} className="animate-pulse text-indigo-500" />
-                                    <span className="text-xs text-indigo-500 font-medium">{tL4('thinking.initializing')}</span>
-                                    <Loader2 className="w-3 h-3 animate-spin text-slate-300" />
+                        {/* Loading Indicator for Streaming or Thinking */}
+                        {/* We show this if:
+                            1. System is loading (isLoading) AND last message is NOT assistant (waiting for start)
+                            2. OR we have an explicit thinkingStep (e.g. from hook or hybrid engine)
+                        */}
+                        {(isLoading || thinkingStep) && (
+                            displayMessages.length === 0 ||
+                            displayMessages[displayMessages.length - 1]?.role !== 'assistant' ||
+                            !displayMessages[displayMessages.length - 1]?.content
+                        ) && (
+                                <div className="flex justify-start">
+                                    <ThinkingBubble content={thinkingStep || tL4('thinking.initializing')} isThinking={true} />
                                 </div>
-                            </div>
-                        )}
+                            )}
 
                         <div ref={messagesEndRef} />
                     </div>
 
                     {/* Input Area */}
                     <div className="shrink-0 p-4 border-t border-slate-100 bg-white/95 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]">
-                        <form onSubmit={(e) => { console.log('Form Submit:', input); e.preventDefault(); if (input.trim()) { sendMessage({ role: 'user', content: input } as any); setInput(''); } }} className="flex gap-2">
+                        <form onSubmit={(e) => { e.preventDefault(); if (input.trim()) { sendMessage(input); setInput(''); } }} className="flex gap-2">
                             <input
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
@@ -398,170 +375,5 @@ export function ChatPanel() {
     );
 }
 
-// Component moved to ./ParsedMessageContent
-import { ParsedMessageContent } from './ParsedMessageContent';
-
-// Updated MessageBubble to handle Vercel AI SDK Tool Invocations
-const MessageBubble = memo(({
-    msg,
-    idx,
-    handleAction,
-    handleFeedback
-}: {
-    msg: any;
-    idx: number;
-    handleAction: (action: any) => void;
-    handleFeedback: (index: number, score: number) => void;
-}) => {
-    // Check for Tool Invocations
-    const toolInvocations = msg.toolInvocations;
-
-    // Legacy actions support (for Demo Mode)
-    const legacyActions = msg.actions;
-
-    return (
-        <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`
-                max-w-[85%] p-4 rounded-2xl shadow-sm
-                ${msg.role === 'user'
-                    ? 'bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-br-lg'
-                    : 'bg-white text-slate-800 rounded-bl-lg border border-slate-100'
-                }
-            `}>
-                {/* Message Content with Markdown and Thinking Process */}
-                <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
-
-                {/* Render Legacy Actions (Demo Mode) */}
-                {legacyActions && legacyActions.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        {legacyActions.map((action: any, i: number) => (
-                            <button
-                                key={i}
-                                onClick={() => handleAction(action)}
-                                className="px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-full text-xs font-medium hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm"
-                            >
-                                {action.label}
-                            </button>
-                        ))}
-                    </div>
-                )}
-
-                {/* Render Tools - Phase 4 Logic */}
-                {toolInvocations && toolInvocations.map((toolInvocation: any) => {
-                    const { toolName, toolCallId, state, result } = toolInvocation;
-
-                    if (state === 'result') {
-                        // Render Result Card
-                        if (toolName === 'calculate_tpi') {
-                            return (
-                                <div key={toolCallId} className="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                                    <div className="text-xs font-bold text-slate-500 mb-1">TRANSFER PAIN INDEX</div>
-                                    <div className="text-lg font-black text-indigo-600">{result.score || 'N/A'} <span className="text-xs text-slate-400 font-normal">/ 100</span></div>
-                                    <div className="text-sm font-bold text-slate-700">{result.recommendation}</div>
-                                </div>
-                            );
-                        }
-                        if (toolName === 'evaluate_delay_risk') {
-                            return (
-                                <div key={toolCallId} className="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                                    <div className="text-xs font-bold text-amber-600 mb-1">DELAY RISK (CDR)</div>
-                                    <div className="text-sm font-bold text-slate-800">{result.recommendation || 'Low Risk'}</div>
-                                </div>
-                            );
-                        }
-                        if (toolName === 'find_waiting_spots') {
-                            return (
-                                <div key={toolCallId} className="mt-2 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                                    <div className="text-xs font-bold text-emerald-600 mb-1">WAITING SPOTS</div>
-                                    <div className="text-sm font-bold text-slate-800">{result.reasoning || 'Recommendation available'}</div>
-                                    {result.suggestedAction && (
-                                        <button onClick={() => handleAction({ type: 'navigate', target: 'chat:' + result.suggestedAction.location })} className="mt-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded">
-                                            Go to {result.suggestedAction.location}
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        }
-                        if (toolName === 'check_safety') {
-                            const levelColors = {
-                                green: 'bg-emerald-50 border-emerald-200 text-emerald-600',
-                                yellow: 'bg-amber-50 border-amber-200 text-amber-600',
-                                orange: 'bg-orange-50 border-orange-200 text-orange-600',
-                                red: 'bg-rose-50 border-rose-200 text-rose-600'
-                            };
-                            const theme = levelColors[result.triggerLevel as keyof typeof levelColors] || levelColors.green;
-                            const isEmergency = result.triggerLevel === 'red' || result.triggerLevel === 'orange';
-
-                            return (
-                                <div key={toolCallId} className={`mt-2 p-3 rounded-lg border ${theme}`}>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="text-xs font-bold uppercase">L5 SAFETY CHECK</div>
-                                        {isEmergency && <div className="animate-pulse w-2 h-2 rounded-full bg-current" />}
-                                    </div>
-
-                                    {/* Headline Message */}
-                                    <div className="text-sm font-bold mb-2">
-                                        {result.localizedMessage?.zh || result.localizedMessage?.en || 'Safety Checked'}
-                                    </div>
-
-                                    {/* Active Alerts */}
-                                    {result.activeAlerts?.length > 0 && (
-                                        <div className="mb-2 space-y-1">
-                                            {result.activeAlerts.map((alert: any, i: number) => (
-                                                <div key={i} className="text-xs bg-white/50 px-2 py-1 rounded flex justify-between">
-                                                    <span>{alert.headline}</span>
-                                                    <span className="font-mono">{alert.level}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Warnings */}
-                                    {result.warnings?.length > 0 && (
-                                        <div className="text-xs font-medium opacity-90 mb-2">
-                                            ⚠️ {result.warnings.join(', ')}
-                                        </div>
-                                    )}
-
-                                    {/* Recommended Route */}
-                                    {result.recommendedRoutes?.[0] && (
-                                        <div className="mt-2 border-t border-current/20 pt-2">
-                                            <div className="text-xs font-bold opacity-75 mb-1">RECOMMENDED EVACUATION ROUTE</div>
-                                            <div className="text-sm font-bold flex items-center gap-1">
-                                                <span>🏃‍♂️</span>
-                                                <span>To: {result.recommendedRoutes[0].toShelter?.name?.ja || 'Safe Zone'}</span>
-                                            </div>
-                                            <div className="text-xs mt-1 opacity-75">
-                                                {Math.round(result.recommendedRoutes[0].distanceMeters)}m · {result.recommendedRoutes[0].estimatedMinutes} min
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        }
-                        return null;
-                    } else {
-                        // Loading State for Tool
-                        return (
-                            <div key={toolCallId} className="mt-2 flex items-center gap-2 text-xs text-slate-400">
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                <span>Using {toolName}...</span>
-                            </div>
-                        );
-                    }
-                })}
-
-                {/* Feedback Buttons (Only for AI messages) */}
-                {msg.role === 'assistant' && !msg.toolInvocations && !msg.isLoading && (
-                    <div className="mt-3 flex items-center gap-2 pt-2 border-t border-slate-100/50">
-                        <button onClick={() => handleFeedback(idx, 1)} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-300 hover:text-emerald-500"><ThumbsUp size={14} /></button>
-                        <button onClick={() => handleFeedback(idx, -1)} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-300 hover:text-rose-500"><ThumbsDown size={14} /></button>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-});
-MessageBubble.displayName = 'MessageBubble';
 
 export default ChatPanel;
