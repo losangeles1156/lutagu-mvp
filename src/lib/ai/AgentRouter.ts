@@ -1,11 +1,34 @@
 
 import { generateLLMResponse } from './llmClient';
 import { ToolDefinition } from '@/lib/l4/skills/schemas';
+import { CacheService, getCache } from '@/lib/cache/cacheService';
 
 export interface ToolSelection {
     toolName: string;
     reasoning: string;
     parameters: any;
+}
+
+type CachedToolSelection = { t: 'null' } | { t: 'sel'; v: ToolSelection };
+
+const agentRouterCache = getCache<CachedToolSelection>('agent_router', {
+    maxSize: 500,
+    ttlMs: 2 * 60 * 1000,
+    evictionRatio: 0.1
+});
+
+function clampString(value: string, maxChars: number): string {
+    if (!value) return '';
+    if (value.length <= maxChars) return value;
+    return value.slice(0, maxChars);
+}
+
+function buildAgentRouterCacheKey(input: string, tools: { definition: ToolDefinition }[]): string {
+    const toolNames = tools.map(t => t.definition?.name).filter(Boolean).sort();
+    return CacheService.generateKey('agent_router', {
+        input: clampString(String(input || '').trim(), 600),
+        tools: toolNames
+    });
 }
 
 export class AgentRouter {
@@ -17,6 +40,12 @@ export class AgentRouter {
         input: string,
         tools: { name: string, definition: ToolDefinition }[]
     ): Promise<ToolSelection | null> {
+        const cacheKey = buildAgentRouterCacheKey(input, tools);
+        const cached = agentRouterCache.get(cacheKey);
+        if (cached) {
+            return cached.t === 'null' ? null : cached.v;
+        }
+
         // 1. Construct Tool Definitions Block
         const toolsBlock = tools.map(t => JSON.stringify(t.definition)).join('\n');
 
@@ -44,8 +73,8 @@ Rules:
             const response = await generateLLMResponse({
                 systemPrompt,
                 userPrompt: input,
-                taskType: 'reasoning', // Use MiniMax M2.1
-                temperature: 0.1
+                taskType: 'classification',
+                temperature: 0.0
             });
 
             if (!response) return null;
@@ -53,19 +82,26 @@ Rules:
             // Clean response (remove markdown code blocks if any)
             const cleanJson = response.replace(/```json/g, '').replace(/```/g, '').trim();
 
-            if (cleanJson.toLowerCase() === 'null') return null;
+            if (cleanJson.toLowerCase() === 'null') {
+                agentRouterCache.set(cacheKey, { t: 'null' });
+                return null;
+            }
 
             const parsed = JSON.parse(cleanJson);
 
             if (parsed.toolName && tools.some(t => t.definition.name === parsed.toolName)) {
-                return parsed as ToolSelection;
+                const out = parsed as ToolSelection;
+                agentRouterCache.set(cacheKey, { t: 'sel', v: out });
+                return out;
             }
 
             console.warn('[AgentRouter] Invalid tool selection:', parsed.toolName);
+            agentRouterCache.set(cacheKey, { t: 'null' });
             return null;
 
         } catch (error) {
             console.error('[AgentRouter] Failed to route intent:', error);
+            agentRouterCache.set(cacheKey, { t: 'null' });
             return null;
         }
     }

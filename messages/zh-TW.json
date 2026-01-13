@@ -338,6 +338,7 @@
         }
     },
     "l4": {
+        "suggestedQuestions": "建議問題",
         "viewModes": {
             "recommendations": "智能建議",
             "planner": "行程規劃",

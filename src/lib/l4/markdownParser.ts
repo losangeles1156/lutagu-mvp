@@ -95,7 +95,12 @@ export function parseKnowledgeMarkdown(filePath: string): ParsedKnowledge[] {
         if (currentEntity && currentSection && currentBuffer.length > 0) {
             const sectionContent = currentBuffer.join('\n').trim();
             if (sectionContent) {
-                const entityIds = ENTITY_NAME_TO_ID[currentEntity] || [];
+                let entityIds = ENTITY_NAME_TO_ID[currentEntity] || [];
+
+                // Fallback: If header matches an ODPT ID format, use it directly
+                if (entityIds.length === 0 && (currentEntity.startsWith('odpt:') || currentEntity.startsWith('odpt.'))) {
+                    entityIds = [currentEntity];
+                }
 
                 // Determine type and icon
                 let type: ParsedKnowledge['type'] = 'tip';

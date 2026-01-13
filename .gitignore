@@ -63,10 +63,19 @@ scripts/*.json
 !scripts/test_agentic_flow.ts
 !scripts/verify_minimax_direct.ts
 !scripts/aggregate_knowledge.ts
+!scripts/verify_unified_status.ts
+!scripts/cron_weather_update.ts
+!scripts/verify_l2_optimization.ts
+!scripts/verify_l2_optimization.ts
+!scripts/serialize_topology.ts
+!scripts/check_llm_health.ts
 
 # Local env files
 .env*.local
 .env
+
+# n8n exported workflows (never include real credentials)
+n8n/lutagu_L2_Hybrid_Workflow.json
 
 # Typescript
 *.tsbuildinfo

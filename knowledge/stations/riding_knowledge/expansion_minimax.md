@@ -195,3 +195,22 @@
 - [type] elevator [丸之內:北口、南口] [八重洲:中央口] (電梯通往各月台)
 - [type] atm [丸之內:售票廳、南口] [八重洲:中央口附近] (三大銀行 24 小時)
 - [type] wifi [車站全區] (免費 Wi-Fi)
+
+---
+
+## odpt:Station:JR-East.Yamanote.Ueno (上野站)
+
+---
+
+## odpt:Station:JR-East.Yamanote.Shinagawa (品川站)
+
+### Tra
+
+---
+
+10分鐘。)
+        *   [Trap] 🚶 **日比谷線轉乘**: 日
+
+---
+
+## odpt:Station:Toei.Oedo.Roppongi (六本木站)

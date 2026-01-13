@@ -1,5 +1,6 @@
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { hybridEngine, RequestContext } from '@/lib/l4/HybridEngine';
 
 export const maxDuration = 60;
@@ -14,10 +15,43 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
+        const extractText = (value: any): string => {
+            if (!value) return '';
+            if (typeof value === 'string') return value;
+            if (Array.isArray(value)) {
+                return value
+                    .map((part) => {
+                        if (!part) return '';
+                        if (typeof part === 'string') return part;
+                        if (typeof part?.text === 'string') return part.text;
+                        if (typeof part?.content === 'string') return part.content;
+                        if (Array.isArray(part?.content)) return extractText(part.content);
+                        return '';
+                    })
+                    .join('')
+                    .trim();
+            }
+            if (typeof value?.text === 'string') return value.text;
+            if (typeof value?.content === 'string') return value.content;
+            if (Array.isArray(value?.content)) return extractText(value.content);
+            return '';
+        };
+
+        const extractQuery = (payload: any): string => {
+            const directText = extractText(payload?.text) || extractText(payload?.input) || extractText(payload?.query) || extractText(payload?.prompt);
+            if (directText) return directText;
+
+            const messages = Array.isArray(payload?.messages) ? payload.messages : [];
+            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+            const lastContent = extractText(lastMessage?.content) || extractText(lastMessage?.parts);
+            if (lastContent) return lastContent;
+
+            const nestedMessage = payload?.message;
+            return extractText(nestedMessage?.content) || extractText(nestedMessage?.parts);
+        };
+
         // 1. Parse Request
-        const messages = body.messages || [];
-        const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-        const query = lastMessage ? lastMessage.content : '';
+        const query = extractQuery(body);
         const locale = body.locale || 'zh-TW';
 
         if (!query) {
@@ -35,23 +69,23 @@ export async function POST(req: NextRequest) {
             strategyContext: null
         };
 
-        // 3. Create Stream
-        const encoder = new TextEncoder();
-        const stream = new ReadableStream({
-            async start(controller) {
-                const sendUpdate = (text: string) => {
-                    controller.enqueue(encoder.encode(text));
+        const stream = createUIMessageStream({
+            execute: async ({ writer }) => {
+                const textId = 'text-1';
+
+                const sendUpdate = (delta: string) => {
+                    writer.write({ type: 'text-delta', id: textId, delta });
                 };
 
                 const sendThinking = (step: string) => {
                     sendUpdate(`[THINKING]${step}[/THINKING]\n`);
                 };
 
+                writer.write({ type: 'text-start', id: textId });
+
                 try {
-                    // Initial step
                     sendThinking(locale === 'en' ? 'Thinking...' : '思考中...');
 
-                    // 4. Call Hybrid Engine with onProgress hook
                     const result = await hybridEngine.processRequest({
                         text: query,
                         locale,
@@ -61,40 +95,31 @@ export async function POST(req: NextRequest) {
                         }
                     });
 
-                    // 5. Finalize Thinking and send Content
                     if (result) {
-                        // Close thinking if any reasoning is provided
                         if (result.reasoning) {
                             sendUpdate(`[THINKING]${result.reasoning}[/THINKING]\n`);
                         }
 
-                        // Send main content
                         sendUpdate(result.content);
                     } else {
-                        sendUpdate(locale === 'en' ? "I'm not sure, could you clarify?" : "抱歉，我不太理解您的意思。");
+                        sendUpdate(locale === 'en' ? "I'm not sure, could you clarify?" : '抱歉，我不太理解您的意思。');
                     }
-
                 } catch (error: any) {
                     console.error('[Chat API] Processing Error:', error);
-                    // If it's an Abort error (Timeout from llmClient)
                     const isTimeout = error.name === 'AbortError' || error.message?.includes('aborted');
                     const errorMsg = isTimeout
-                        ? (locale === 'en' ? "Request timed out, please try again." : "請求逾時，請稍後再試。")
+                        ? (locale === 'en' ? 'Request timed out, please try again.' : '請求逾時，請稍後再試。')
                         : `\n[ERROR] ${error.message}`;
 
                     sendUpdate(errorMsg);
                 } finally {
-                    controller.close();
+                    writer.write({ type: 'text-end', id: textId });
                 }
             }
         });
 
-        return new Response(stream, {
-            headers: {
-                'Content-Type': 'text/plain; charset=utf-8',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive'
-            }
+        return createUIMessageStreamResponse({
+            stream,
         });
 
     } catch (error: any) {

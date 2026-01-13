@@ -13,7 +13,7 @@ if (!apiKey) {
     process.exit(1);
 }
 
-console.log(`🔑 Debugging API Key: ${apiKey.substring(0, 8)}...`);
+console.log(`🔑 Debugging API Key loaded (length: ${apiKey.length})`);
 
 const targetUrl = 'https://api.minimax.io/v1/embeddings';
 

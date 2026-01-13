@@ -212,7 +212,7 @@ export class PreDecisionEngine {
             };
             this.setCache(cacheKey, result);
             logPreDecision('level1_keyword', Date.now() - startTime);
-            return { ...result, _fromCache: false };
+            return result;
         }
 
         // 3. Level 2 快速匹配 (0-1ms) - 在 Level 1 不匹配時才檢查
@@ -227,14 +227,14 @@ export class PreDecisionEngine {
             };
             this.setCache(cacheKey, result);
             logPreDecision('level2_keyword', Date.now() - startTime);
-            return { ...result, _fromCache: false };
+            return result;
         }
 
         // 4. Level 3: 需要 ML/LLM 分類 (5-50ms)
         const result = await this.mlClassifyIntent(text);
         this.setCache(cacheKey, result);
         logPreDecision('level3_ml', Date.now() - startTime);
-        return { _fromCache: false, ...result };
+        return result;
     }
 
     /**
@@ -304,12 +304,18 @@ reason 必須在 10 個中文字以內，格式：
 
             const parsed = this.parseClassificationResult(result);
 
-            // 根據分類結果設定建議模型
+            // 根據分類結果設定建議模型 (Trinity Architecture Strategy)
             let suggestedModel = 'none';
             if (parsed.level === DecisionLevel.LEVEL_3_COMPLEX) {
-                suggestedModel = process.env.AI_SLM_MODEL || 'mistral-small-latest';
+                // 複雜推理預設使用 Gemini 3 Flash Preview
+                suggestedModel = 'gemini-3-flash-preview';
             } else if (parsed.level === DecisionLevel.LEVEL_2_MEDIUM) {
                 suggestedModel = 'algorithm';
+            }
+
+            // 若為長文/閒聊 (可在 parsed.reason 中偵測關鍵字擴充邏輯)
+            if (parsed.reason.includes('閒聊') || parsed.reason.includes('創作')) {
+                suggestedModel = 'deepseek-v3.2';
             }
 
             return {
@@ -465,7 +471,7 @@ reason 必須在 10 個中文字以內，格式：
      * 啟動週期性清理任務
      */
     private startCleanupTask(): void {
-        setInterval(() => {
+        const timer = setInterval(() => {
             const now = Date.now();
             for (const [key, entry] of this.cache.entries()) {
                 if (now - entry.timestamp > DECISION_CACHE_TTL_MS) {
@@ -474,6 +480,7 @@ reason 必須在 10 個中文字以內，格式：
                 }
             }
         }, 60 * 1000); // 每分鐘清理一次
+        timer.unref?.();
     }
 
     /**

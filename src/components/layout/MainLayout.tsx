@@ -102,7 +102,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
   // 渲染全螢幕對話
   if (uiState === 'fullscreen') {
     return (
-      <div className="fixed inset-0 z-50 bg-white">
+      <div className="fixed inset-0 z-[9998] bg-white isolate pointer-events-auto">
         {chatPanel}
       </div>
     );
@@ -126,13 +126,13 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
           {/* Floating Chat Trigger Button */}
           <button
             onClick={handleBackToCollapsed}
-            className="absolute bottom-6 right-6 z-30 px-5 py-3 
+            className="absolute bottom-6 right-6 z-30 px-5 py-3
               bg-white text-indigo-600 rounded-2xl shadow-2xl
               flex items-center gap-2 font-bold text-sm
               active:scale-95 transition-all min-h-[56px] border border-indigo-100/50"
           >
             <MessageSquare size={20} className="text-indigo-600" />
-            <span>{tChat('aiName', { defaultValue: 'AI 助手' })}</span>
+            <span>{tChat('aiName')}</span>
           </button>
         </div>
 
@@ -167,13 +167,13 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
             {!isCollapsedState(uiState) && (
               <button
                 onClick={handleChatClose}
-                className="absolute bottom-6 right-6 z-10 px-6 py-4 
+                className="absolute bottom-6 right-6 z-10 px-6 py-4
                   bg-indigo-600 text-white rounded-2xl shadow-2xl
                   flex items-center gap-2 font-bold text-sm
                   active:scale-95 transition-all min-h-[56px]"
               >
                 <Sparkles size={20} />
-                <span>{tChat('aiName', { defaultValue: 'AI 助手' })}</span>
+                <span>{tChat('aiName')}</span>
               </button>
             )}
           </div>
@@ -231,13 +231,13 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
         {!isCollapsedState(uiState) && (
           <button
             onClick={handleChatClose}
-            className="absolute bottom-6 right-6 z-10 px-6 py-4 
+            className="absolute bottom-6 right-6 z-10 px-6 py-4
               bg-indigo-600 text-white rounded-2xl shadow-2xl
               flex items-center gap-2 font-bold text-sm
               active:scale-95 transition-all min-h-[56px]"
           >
             <span className="text-xl">🤖</span>
-            <span>AI 助手</span>
+            <span>{tChat('aiName')}</span>
           </button>
         )}
       </div>

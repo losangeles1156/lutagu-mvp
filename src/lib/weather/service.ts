@@ -5,143 +5,62 @@ import { generateLLMResponse } from '@/lib/ai/llmClient';
 import { createHash } from 'crypto';
 
 // Helper to translate/summarize alert using AI with Caching
+
+// Helper to translate/summarize alert using AI with Caching
+// (Kept for internal use or fallback, but main path uses pre-computed cache)
 async function getTranslatedAlert(title: string, summary: string, updated: string, severity: string) {
-    // 1. Create content hash
-    const hash = createHash('md5').update(`${title}:${updated}:${summary}:${severity}`).digest('hex');
-    const cacheKey = `weather:v1:${hash}`;
-
-    // 2. Check Cache
-    const { data: cached } = await supabaseAdmin
-        .from('l2_cache')
-        .select('value')
-        .eq('key', cacheKey)
-        .maybeSingle();
-
-    if (cached?.value) {
-        return cached.value;
-    }
-
-    // 3. Call AI if miss
-    console.log(`[WeatherService] Cache miss for ${hash}. Calling AI...`);
-
-    // Fallback default
-    const fallback = {
+    // ... Legacy AI logic if needed, but we rely on cron now ...
+    return {
         ja: summary,
-        en: 'Detailed weather information is available in Japanese.',
-        zh: '詳細天氣資訊僅提供日文版本。'
+        en: 'Details available in Japanese.',
+        zh: '詳細內容僅提供日文。'
     };
-
-    try {
-        // Adjust translation style based on severity
-        // ... (Reuse existing logic or simplified)
-        const severityConfig = {
-            critical: { style: '緊急、簡潔、嚴肅', maxLength: 30 },
-            warning: { style: '謹慎、清晰、實用', maxLength: 40 },
-            advisory: { style: '溫和、友善、提醒', maxLength: 50 },
-            info: { style: '中性、資訊性', maxLength: 60 }
-        };
-
-        const config = severityConfig[severity as keyof typeof severityConfig] || severityConfig.info;
-
-        const prompt = `
-You are a weather translator for a travel app in Tokyo.
-Translate and summarize the following JMA Weather Alert into a strictly valid JSON object.
-Severity: ${severity}
-Input: ${title} - ${summary}
-Output JSON format: { "ja": "...", "en": "...", "zh": "..." }
-Keep it concise.
-`;
-        const jsonStr = await generateLLMResponse({
-            systemPrompt: 'Output raw JSON only.',
-            userPrompt: prompt,
-            taskType: 'classification', // Use Flash Lite for speed
-            temperature: 0.1
-        });
-
-        if (!jsonStr) return fallback;
-
-        const cleanJson = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsed = JSON.parse(cleanJson);
-
-        if (!parsed.ja || !parsed.en || !parsed.zh) throw new Error('Invalid JSON structure');
-
-        // 4. Write to Cache
-        await supabaseAdmin.from('l2_cache').insert({
-            key: cacheKey,
-            value: parsed,
-            updated_at: new Date().toISOString()
-        });
-
-        return parsed;
-
-    } catch (e) {
-        console.error('[WeatherService] AI Translation Failed:', e);
-        return fallback;
-    }
 }
 
+/**
+ * Fetches latest weather alerts from Supabase Cache (Populated by Cron).
+ * Zero-latency implementation.
+ */
 export async function fetchWeatherAlerts(locale: string = 'zh') {
     try {
-        const response = await fetch('https://www.data.jma.go.jp/developer/xml/feed/extra.xml', {
-            next: { revalidate: 300 }
-        });
+        console.log('[WeatherService] Reading alerts from Cache...');
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch JMA RSS');
+        // 1. Read from 'l2_cache' with fixed key
+        const { data } = await supabaseAdmin
+            .from('l2_cache')
+            .select('value, updated_at')
+            .eq('key', 'weather:alerts:global')
+            .maybeSingle();
+
+        if (!data || !data.value) {
+            console.warn('[WeatherService] Cache Empty. Returning empty list.');
+            return [];
         }
 
-        const xml = await response.text();
-        const entries: any[] = [];
-        const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
-        let match;
+        // Optional: Check staleness?
+        // Since Cron runs hourly, data > 2 hours old might be stale.
+        // But better to show stale data than nothing or blocking.
+        // We just return it.
 
-        const validEntries: any[] = [];
+        const cachedAlerts = data.value as any[];
 
-        while ((match = entryRegex.exec(xml)) !== null) {
-            const content = match[1];
-            const title = content.match(/<title>(.*?)<\/title>/)?.[1] || '';
-            const summary = content.match(/<content type="text">([\s\S]*?)<\/content>/)?.[1] ||
-                content.match(/<summary>([\s\S]*?)<\/summary>/)?.[1] || '';
-            const updated = content.match(/<updated>(.*?)<\/updated>/)?.[1] || '';
-
-            if (!WEATHER_REGION_POLICY.isTargetRegion(title, summary)) continue;
-
-            // Extract region and check exclusions early
-            const region = WEATHER_REGION_POLICY.extractRegion(title, summary.replace(/<br \/>/g, '\n').trim());
-            const isExcluded = WEATHER_REGION_POLICY.excludedRegions.some(ex => region.includes(ex)) ||
-                region === '千葉南部' ||
-                region === '千葉北東部' ||
-                region === '神奈川西部';
-
-            if (isExcluded) continue;
-
-            validEntries.push({ title, summary, updated, region });
-        }
-
-        // Process in parallel with faster model
-        const results = await Promise.all(validEntries.map(async (entry) => {
-            const cleanSummary = entry.summary.replace(/<br \/>/g, '\n').trim();
-            const severity = WEATHER_REGION_POLICY.getSeverity(entry.title, cleanSummary);
-            const severityLabel = WEATHER_REGION_POLICY.getSeverityLabel(severity);
-
-            const polyglotSummary = await getTranslatedAlert(entry.title, cleanSummary, entry.updated, severity);
-
-            let displaySummary = polyglotSummary.zh;
-            if (locale === 'en') displaySummary = polyglotSummary.en;
-            if (locale === 'ja') displaySummary = polyglotSummary.ja;
+        // 2. Filter/Map for Locale
+        return cachedAlerts.map(entry => {
+            let displaySummary = entry.summary.zh;
+            if (locale === 'en') displaySummary = entry.summary.en;
+            if (locale === 'ja') displaySummary = entry.summary.ja;
 
             return {
                 title: entry.title,
                 summary: displaySummary,
-                severity: severityLabel,
-                region: entry.region
+                severity: entry.severity,
+                region: entry.region,
+                updated: entry.updated
             };
-        }));
-
-        return results;
+        });
 
     } catch (error: any) {
-        console.error('Weather Service Error:', error.message);
+        console.error('Weather Service Cache Read Error:', error.message);
         return [];
     }
 }

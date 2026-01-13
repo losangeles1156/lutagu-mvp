@@ -3,7 +3,9 @@
  * Phase 4: AI 混合型智慧引擎整合測試
  */
 
-import { POITaggedDecisionEngine, createPOITaggedEngine } from '@/lib/ai/poi-tagged-decision-engine';
+import { POITaggedDecisionEngine } from '@/lib/ai/poi-tagged-decision-engine';
+import { describe, it, beforeEach, afterEach } from 'node:test';
+import assert from 'node:assert/strict';
 
 // Mock Supabase client
 const mockSupabaseData: Record<string, any[]> = {
@@ -70,44 +72,62 @@ const mockSupabaseData: Record<string, any[]> = {
                 environment: { indoor: true, outdoor: false, smoking: 'prohibited', noise_level: 4 },
                 time特性: { breakfast: false, lunch: true, dinner: true, late_night: true, all_day: false },
                 confidence: 0.85
-            }
+            },
+            tags_core: ['安靜', '拉麵'],
+            tags_intent: ['用餐'],
+            tags_visual: ['溫馨']
+        },
+        {
+            id: 'poi_006',
+            name: '安靜咖啡角落',
+            category: 'cafe',
+            location_tags: { station_id: 'ueno_station', station_name: '上野車站', ward: '台東區' },
+            category_tags: { primary: 'dining', secondary: 'cafe', characteristics: { is_chain: false, price_range: 2 } },
+            atmosphere_tags: {
+                core: { energy: 'quiet', style: 'minimal', crowd_level: 'low' },
+                scenes: { business: true, dating: false, family: false, solo: true, friends: false, tourist: false },
+                environment: { indoor: true, outdoor: false, smoking: 'prohibited', noise_level: 1 },
+                time特性: { breakfast: true, lunch: true, dinner: false, late_night: false, all_day: true },
+                confidence: 0.9
+            },
+            tags_core: ['安靜', '咖啡'],
+            tags_intent: ['讀書', '放鬆'],
+            tags_visual: ['安靜']
         }
     ]
 };
 
 // Mock Supabase client factory
 function createMockSupabaseClient() {
+    const createQueryBuilder = (table: string) => {
+        const buildResult = () => ({
+            data: mockSupabaseData[table] ?? [],
+            error: null
+        });
+
+        const builder: any = {
+            select: (_columns?: string) => builder,
+            not: (_field: string, _op: string, _value?: any) => builder,
+            eq: (_field: string, _value: any) => builder,
+            in: (_field: string, _values: any[]) => builder,
+            gte: (_field: string, _value: any) => builder,
+            lte: (_field: string, _value: any) => builder,
+            order: (_field: string, _opts?: { ascending?: boolean }) => builder,
+            limit: (_n: number) => builder,
+            range: (_from: number, _to: number) => builder,
+            contains: (_field: string, _value: any) => builder,
+            ilike: (_field: string, _pattern: string) => builder,
+            then: (onFulfilled: any, onRejected: any) =>
+                Promise.resolve(buildResult()).then(onFulfilled, onRejected),
+            catch: (onRejected: any) => Promise.resolve(buildResult()).catch(onRejected),
+            finally: (onFinally: any) => Promise.resolve(buildResult()).finally(onFinally)
+        };
+
+        return builder;
+    };
+
     return {
-        from: (table: string) => ({
-            select: (columns: string) => ({
-                eq: (field: string, value: string) => ({
-                    gte: (field: string, value: string) => ({
-                        lte: (field: string, value: string) => ({
-                            order: (field: string, opts: { ascending: boolean }) => ({
-                                limit: (n: number) => ({
-                                    in: (field: string, values: string[]) => Promise.resolve({ 
-                                        data: mockSupabaseData[table], 
-                                        error: null 
-                                    })
-                                })
-                            }),
-                            limit: (n: number) => Promise.resolve({ 
-                                data: mockSupabaseData[table], 
-                                error: null 
-                            })
-                        })
-                    }),
-                    not: (field: string, op: string) => Promise.resolve({ 
-                        data: mockSupabaseData[table], 
-                        error: null 
-                    })
-                }),
-                in: (field: string, values: string[]) => Promise.resolve({ 
-                    data: mockSupabaseData[table], 
-                    error: null 
-                })
-            })
-        })
+        from: (table: string) => createQueryBuilder(table)
     };
 }
 
@@ -144,48 +164,48 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             const results1 = await engine.decide({}, '我想 吃 日本料理');
             const results2 = await engine.decide({}, '我想吃日本料理');
             
-            expect(results1.length).toBe(results2.length);
+            assert.equal(results1.length, results2.length);
             
             // Check cache stats
             const stats = engine.getCacheStats();
-            expect(stats.localSize).toBeGreaterThan(0);
+            assert.ok(stats.localSize > 0);
         });
 
         it('should remove filler words', async () => {
             const results = await engine.decide({}, '我想找一個好吃的餐廳');
-            expect(results.length).toBeGreaterThanOrEqual(0);
+            assert.ok(results.length >= 0);
         });
     });
 
     describe('Query Parsing', () => {
         it('should parse dining category query', async () => {
             const results = await engine.decide({}, '我想吃日本料理');
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
 
         it('should parse cafe category query', async () => {
             const results = await engine.decide({}, '找咖啡廳');
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
 
         it('should parse shopping category query', async () => {
             const results = await engine.decide({}, '想去購物');
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
 
         it('should parse energy preference', async () => {
             const results = await engine.decide({}, '想找安靜的地方');
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
 
         it('should parse time of day', async () => {
             const results = await engine.decide({}, '早上吃早餐');
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
 
         it('should parse budget preference', async () => {
             const results = await engine.decide({}, '找便宜的餐廳');
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
     });
 
@@ -194,8 +214,8 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             const results = await engine.decide({}, '餐廳');
             
             results.forEach((result: any) => {
-                expect(result.relevanceScore).toBeGreaterThanOrEqual(0);
-                expect(result.relevanceScore).toBeLessThanOrEqual(1);
+                assert.ok(result.relevanceScore >= 0);
+                assert.ok(result.relevanceScore <= 1);
             });
         });
 
@@ -203,7 +223,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             const results = await engine.decide({}, '日本料理');
             
             results.forEach((result: any) => {
-                expect(Array.isArray(result.matchedCriteria)).toBe(true);
+                assert.ok(Array.isArray(result.matchedCriteria));
             });
         });
 
@@ -211,7 +231,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             const results = await engine.decide({}, '餐廳');
             
             results.forEach((result: any) => {
-                expect(result.locationTags).toBeDefined();
+                assert.ok(result.locationTags !== undefined);
             });
         });
 
@@ -219,7 +239,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             const results = await engine.decide({}, '餐廳');
             
             results.forEach((result: any) => {
-                expect(result.categoryTags).toBeDefined();
+                assert.ok(result.categoryTags !== undefined);
             });
         });
     });
@@ -233,7 +253,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             
             // Check cache has entries
             const stats = engine.getCacheStats();
-            expect(stats.localSize).toBeGreaterThan(0);
+            assert.ok(stats.localSize > 0);
         });
 
         it('should clear cache correctly', async () => {
@@ -242,7 +262,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             engine.clearCache();
             
             const stats = engine.getCacheStats();
-            expect(stats.localSize).toBe(0);
+            assert.equal(stats.localSize, 0);
         });
 
         it('should track popular queries', async () => {
@@ -251,7 +271,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             await engine.decide({}, '餐廳');
             
             const stats = engine.getCacheStats();
-            expect(stats.topQueries.length).toBeGreaterThan(0);
+            assert.ok(stats.topQueries.length > 0);
         });
     });
 
@@ -264,7 +284,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
                 }
             }, '吃飯');
             
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
 
         it('should handle location context', async () => {
@@ -272,37 +292,37 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
                 location: { lat: 35.6762, lng: 139.6503 }
             }, '餐廳');
             
-            expect(results.length).toBeGreaterThan(0);
+            assert.ok(results.length > 0);
         });
     });
 
     describe('Edge Cases', () => {
         it('should handle empty query', async () => {
             const results = await engine.decide({}, '');
-            expect(Array.isArray(results)).toBe(true);
+            assert.ok(Array.isArray(results));
         });
 
         it('should handle very short query', async () => {
             const results = await engine.decide({}, '吃');
-            expect(results.length).toBeGreaterThanOrEqual(0);
+            assert.ok(results.length >= 0);
         });
 
         it('should handle long query', async () => {
             const longQuery = '我想找一個好吃的餐廳，最好是日本料理，環境要安靜';
             const results = await engine.decide({}, longQuery);
-            expect(Array.isArray(results)).toBe(true);
+            assert.ok(Array.isArray(results));
         });
     });
 });
 
 describe('Engine Configuration', () => {
     it('should use default configuration', () => {
-        const engine = new POITaggedDecisionEngine('url', 'key');
-        expect(engine).toBeDefined();
+        const engine = new POITaggedDecisionEngine('https://test.supabase.co', 'test-key');
+        assert.ok(engine);
     });
 
     it('should accept custom configuration', () => {
-        const engine = new POITaggedDecisionEngine('url', 'key', undefined, {
+        const engine = new POITaggedDecisionEngine('https://test.supabase.co', 'test-key', undefined, {
             enableRedisCache: false,
             enableQueryNormalization: true,
             enablePrefetch: false,
@@ -310,7 +330,7 @@ describe('Engine Configuration', () => {
             cacheTTLSeconds: 7200,
             similarityThreshold: 0.7
         });
-        expect(engine).toBeDefined();
+        assert.ok(engine);
     });
 });
 
@@ -338,8 +358,8 @@ describe('Query Statistics', () => {
         await engine.decide({}, '咖啡廳');
         
         const popular = engine.getPopularQueries(5);
-        expect(popular.length).toBeGreaterThan(0);
-        expect(popular[0]).toBe('日本料理');
+        assert.ok(popular.length > 0);
+        assert.equal(popular[0], '日本料理');
     });
 
     it('should return top queries with counts', async () => {
@@ -348,6 +368,6 @@ describe('Query Statistics', () => {
         await engine.decide({}, '壽司');
         
         const stats = engine.getCacheStats();
-        expect(stats.topQueries.length).toBeGreaterThan(0);
+        assert.ok(stats.topQueries.length > 0);
     });
 });

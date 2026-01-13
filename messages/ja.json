@@ -202,6 +202,7 @@
         "noHighlights": "周辺スポットなし",
         "menuTitle": "カテゴリ詳細",
         "navTo": "ナビ",
+        "items": "件",
         "categories": {
             "shopping": "買い物",
             "dining": "グルメ",
@@ -217,7 +218,10 @@
             "historic": "歴史",
             "mall": "ショッピングモール",
             "souvenir": "お土産",
-            "bento": "弁当"
+            "bento": "弁当",
+            "park": "公園",
+            "market": "市場/商店街",
+            "museum": "博物館"
         }
     },
     "l2": {
@@ -341,6 +345,7 @@
         }
     },
     "l4": {
+        "suggestedQuestions": "おすすめ",
         "viewModes": {
             "recommendations": "スマートヒント",
             "planner": "プランナー",
@@ -544,7 +549,8 @@
         "skipOnboardingDesc": "後からメニューからオンボーディングを再開できます。",
         "feedbackSent": "フィードバックを受け付けました！",
         "noNodesInView": "このエリアに駅はありません",
-        "noNodesHint": "地図を移動またはズームして他のエリアを表示してください"
+        "noNodesHint": "地図を移動またはズームして他のエリアを表示してください",
+        "retry": "再試行"
     },
     "feedback": {
         "title": "フィードバックを送る",

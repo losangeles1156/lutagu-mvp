@@ -62,7 +62,7 @@ export async function generateWeatherAdvice(
     const result = await generateLLMResponse({
         systemPrompt,
         userPrompt,
-        taskType: 'reasoning',
+        taskType: 'simple', // Trinity: Gemini 2.5 Flash Lite
         temperature: 0.4
     });
 
@@ -117,8 +117,9 @@ export async function generateL1DNA(
     const result = await generateLLMResponse({
         systemPrompt,
         userPrompt,
-        taskType: 'reasoning',
-        temperature: 0.5
+        taskType: 'chat', // Trinity: DeepSeek V3 (Creative)
+        temperature: 0.7,
+        model: 'deepseek-v3.2' // Explicitly request DeepSeek
     });
 
     // Parse result
@@ -184,8 +185,9 @@ export async function translateKnowledgeItems(
         const result = await generateLLMResponse({
             systemPrompt,
             userPrompt,
-            taskType: 'reasoning',
-            temperature: 0.1 // Low temperature for factual translation
+            taskType: 'reasoning', // Trinity: Gemini 3 Flash Preview (Precision)
+            temperature: 0.1, // Low temperature for factual translation
+            model: 'gemini-3-flash-preview'
         });
 
         if (result) {
@@ -236,7 +238,7 @@ export async function generateL4Advice(
     const result = await generateLLMResponse({
         systemPrompt,
         userPrompt,
-        taskType: 'reasoning',
+        taskType: 'simple', // Trinity: Gemini 2.5 Flash Lite (Fast Logic)
         temperature: 0.3
     });
 
@@ -309,7 +311,7 @@ export async function rerankL4Cards(
     const result = await generateLLMResponse({
         systemPrompt,
         userPrompt,
-        taskType: 'reasoning',
+        taskType: 'simple', // Trinity: Gemini 2.5 Flash Lite (Fast Logic)
         temperature: 0.1 // Specificity is key
     });
 

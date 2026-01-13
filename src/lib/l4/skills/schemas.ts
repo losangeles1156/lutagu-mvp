@@ -97,3 +97,71 @@ export const CROWD_DISPATCHER_SCHEMA: ToolDefinition = {
         }
     }
 };
+// ... existing code ...
+
+export const EXIT_STRATEGIST_SCHEMA: ToolDefinition = {
+    name: "find_best_exit",
+    description: "Determine the optimal station exit for a specific destination (landmark, hotel, etc.) to minimize walking or avoid crowds.",
+    parameters: {
+        type: "object",
+        properties: {
+            destination: {
+                type: "string",
+                description: "The name of the destination (e.g. 'Kabukicho Tower', 'Ichiran Ramen')."
+            },
+            station_id: {
+                type: "string",
+                description: "The station ID. Defaults to current station."
+            },
+            needs_elevator: {
+                type: "boolean",
+                description: "Whether an elevator exit is required."
+            }
+        },
+        required: ["destination"]
+    }
+};
+
+export const LOCAL_GUIDE_SCHEMA: ToolDefinition = {
+    name: "local_guide_recommendation",
+    description: "Provide personalized recommendations for food, shopping, or spots near a station.",
+    parameters: {
+        type: "object",
+        properties: {
+            category: {
+                type: "string",
+                description: "Type of recommendation (e.g. 'ramen', 'cafe', 'shopping', 'hidden gem')."
+            },
+            station_id: {
+                type: "string",
+                description: "The station to search around."
+            },
+            vibe: {
+                type: "string",
+                description: "Desired atmosphere (e.g. 'quiet', 'lively', 'cheap', 'fancy')."
+            }
+        },
+        required: ["category"]
+    }
+};
+
+export const MEDICAL_SCHEMA: ToolDefinition = {
+    name: "find_medical_assistance",
+    description: "Provide medical assistance info, emergency numbers, or nearby clinic types based on symptoms.",
+    parameters: {
+        type: "object",
+        properties: {
+            symptom: {
+                type: "string",
+                description: "User's described symptom (e.g. 'fever', 'stomach ache', 'lost medicine')."
+            },
+            urgency: {
+                type: "string",
+                enum: ["high", "medium", "low"],
+                description: "Estimated urgency."
+            }
+        },
+        required: ["symptom"]
+    }
+};
+

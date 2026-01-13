@@ -1,20 +1,18 @@
 'use client';
 
 import { useCallback, useRef, useEffect, useState, type MouseEvent } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useUIStateMachine, type ChatMessage } from '@/stores/uiStateMachine';
-import { useDeviceType } from '@/hooks/useDeviceType';
+import { motion } from 'framer-motion';
+import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { useAppStore } from '@/stores/appStore';
+import { useAgentChat } from '@/hooks/useAgentChat';
 import { useTranslations } from 'next-intl';
 import {
   MessageSquare,
   X,
-  ChevronUp,
   Send,
   Maximize2,
   RotateCcw
 } from 'lucide-react';
-import { ParsedMessageContent } from '../chat/ParsedMessageContent';
 
 const MAX_INPUT_LENGTH = 500;
 
@@ -27,36 +25,28 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
   const tChat = useTranslations('chat');
   const tCommon = useTranslations('common');
 
-  const { deviceType } = useDeviceType();
-  const isMobile = deviceType === 'mobile';
-
   const {
     uiState,
     messages,
     pendingInput,
-    isAnimating,
     transitionTo,
-    addMessage,
-    updateLastMessage,
     setPendingInput,
-    clearMessages,
     backupMessages
   } = useUIStateMachine();
 
   const {
-    agentConversationId,
     setAgentConversationId,
-    agentUserId,
     currentNodeId,
-    userContext,
     userProfile,
   } = useAppStore();
 
-  // 使用 'core' 作為 zone 預設值
-  const zoneValue = 'core';
+  const { sendMessage, isLoading, clearMessages: clearAgentMessages } = useAgentChat({
+    stationId: currentNodeId || '',
+    userLocation: undefined,
+    syncToUIStateMachine: true,
+  });
 
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -77,107 +67,19 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Send message to Hybrid Agent
-  const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return;
-
-    // Add user message immediately
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: text,
-      timestamp: Date.now()
-    };
-    addMessage(userMsg);
-    setInput('');
-    setIsLoading(true);
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-      // Prepare messages for the orchestrator (stateless)
-      const clientMessages = messages.map((m: any) => ({
-        role: m.role,
-        content: m.content
-      }));
-      // Append the new message
-      clientMessages.push({ role: 'user', content: text });
-
-      const response = await fetch('/api/agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          messages: clientMessages,
-          nodeId: currentNodeId || '',
-          inputs: {
-            locale: 'zh-TW', // Force traditional chinese or use locale from props
-            user_profile: userProfile || 'general'
-          }
-        })
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        let errorMsg = 'API Error';
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.error || errorData.message || 'Unknown API Error';
-        } catch (e) {
-          errorMsg = await response.text();
-        }
-        throw new Error(errorMsg || `Server Error (${response.status})`);
-      }
-      if (!response.body) throw new Error('No response body');
-
-      // Add placeholder for assistant response
-      addMessage({
-        role: 'assistant',
-        content: '',
-      });
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedAnswer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        accumulatedAnswer += chunk;
-
-        // Update the last message in the store
-        updateLastMessage(accumulatedAnswer);
-      }
-
-    } catch (error) {
-      console.error('Chat Error', error);
-      // If error occurs during stream, we might want to append error or replace content
-      // For now, if we have content, keep it but append error? Or just replace if empty?
-      // Simple fallback:
-      addMessage({
-        role: 'assistant',
-        content: `⚠️ ${(error as any).message || tChat('connectionError') || '連線失敗，請稍後再試'}`,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [addMessage, updateLastMessage, currentNodeId, userProfile, isLoading, tChat, messages]);
-
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-    await sendMessage(input);
-  }, [input, isLoading, sendMessage]);
+    const text = input;
+    setInput('');
+    await sendMessage(text, userProfile || 'general');
+  }, [input, isLoading, sendMessage, userProfile]);
 
   const handleRestart = useCallback(() => {
     backupMessages();
-    clearMessages();
+    clearAgentMessages();
     setAgentConversationId(null);
-  }, [backupMessages, clearMessages, setAgentConversationId]);
+  }, [backupMessages, clearAgentMessages, setAgentConversationId]);
 
   const handleExploreMode = useCallback(() => {
     transitionTo('explore');

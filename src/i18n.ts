@@ -30,6 +30,19 @@ export default getRequestConfig(async (params) => {
 
     return {
         locale,
-        messages
+        messages,
+        onError(error) {
+            if ((error as any)?.code === 'MISSING_MESSAGE') {
+                console.warn('[i18n] Missing message:', (error as any)?.message);
+                return;
+            }
+            console.error('[i18n] Intl error:', error);
+        },
+        getMessageFallback({ namespace, key }) {
+            const fullKey = namespace ? `${namespace}.${key}` : key;
+            const parts = fullKey.split('.');
+            const last = parts[parts.length - 1] || fullKey;
+            return last.replace(/_/g, ' ');
+        }
     };
 });

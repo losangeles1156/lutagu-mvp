@@ -6,22 +6,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { POITaggedDecisionEngine } from '@/lib/ai/poi-tagged-decision-engine';
 
-// Initialize the decision engine with Redis support
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY!;
-const redisUrl = process.env.REDIS_URL;
+let poiEngine: POITaggedDecisionEngine | null = null;
 
-const poiEngine = new POITaggedDecisionEngine(supabaseUrl, supabaseKey, redisUrl, {
-    enableRedisCache: !!redisUrl,
-    enableQueryNormalization: true,
-    enablePrefetch: true,
-    enableSimilarityFallback: true,
-    maxSimilarResults: 5,
-    similarityThreshold: 0.6,
-    cacheTTLSeconds: 3600,
-    maxResults: 10,
-    redisPrefix: 'poi:decisions'
-});
+function getPoiEngine(): POITaggedDecisionEngine {
+    if (poiEngine) return poiEngine;
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+    const redisUrl = process.env.REDIS_URL;
+
+    if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Missing Supabase credentials');
+    }
+
+    poiEngine = new POITaggedDecisionEngine(supabaseUrl, supabaseKey, redisUrl, {
+        enableRedisCache: !!redisUrl,
+        enableQueryNormalization: true,
+        enablePrefetch: true,
+        enableSimilarityFallback: true,
+        maxSimilarResults: 5,
+        similarityThreshold: 0.6,
+        cacheTTLSeconds: 3600,
+        maxResults: 10,
+        redisPrefix: 'poi:decisions'
+    });
+
+    return poiEngine;
+}
 
 // POST /api/poi/recommend
 export async function POST(request: NextRequest) {
@@ -70,7 +81,7 @@ export async function POST(request: NextRequest) {
             time: new Date()
         };
 
-        const results = await poiEngine.decide(userContext, query);
+        const results = await getPoiEngine().decide(userContext, query);
         const limitedResults = results.slice(0, limit);
 
         const response = {
@@ -141,7 +152,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const results = await poiEngine.decide(
+        const results = await getPoiEngine().decide(
             { userId: userId || undefined },
             query
         );

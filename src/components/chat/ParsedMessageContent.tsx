@@ -25,17 +25,19 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
         if (!thinking) {
             // Match ALL thinking blocks (global) to handle multiple or nested tags
             // Also handle unclosed tags at the end
-            const closedRegex = /\[THINKING\]\s*([\s\S]*?)\s*\[\/THINKING\]/g;
+            // Regex to find closed thinking blocks [THINKING]...[/THINKING] (Global, Case Insensitive, Multiline)
+            const closedRegex = /\[THINKING\]([\s\S]*?)\[\/THINKING\]/gi;
             const matches = Array.from(text.matchAll(closedRegex));
 
             if (matches.length > 0) {
-                // Combine all thinking content if there are multiple blocks
+                // Combine all thinking content
                 thinking = matches.map(m => m[1].trim()).join('\n---\n');
+                // Remove all matched blocks from text
                 text = text.replace(closedRegex, '').trim();
             }
 
-            // Handle trailing open tag
-            const openMatch = text.match(/\[THINKING\]([\s\S]*)$/);
+            // Handle trailing open tag [THINKING]... (end of string)
+            const openMatch = text.match(/\[THINKING\]([\s\S]*)$/i);
             if (openMatch) {
                 const openContent = openMatch[1].trim();
                 thinking = thinking ? `${thinking}\n---\n${openContent}` : openContent;

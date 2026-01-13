@@ -13,49 +13,53 @@ import { streamText, LanguageModel, ModelMessage, ToolSet } from 'ai';
 
 // Zeabur AI Hub (for gemini-2.5-flash-lite, replacing rate-limited Mistral)
 const zeabur = createOpenAI({
-    baseURL: 'https://hnd1.aihub.zeabur.ai/',
+    baseURL: 'https://hnd1.aihub.zeabur.ai/v1', // Standard OpenAI-compatible endpoint
     apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
 });
 
-// MiniMax (for Brain reasoning)
+// DeepSeek (via Zeabur or Direct)
+const deepseek = createOpenAI({
+    baseURL: 'https://hnd1.aihub.zeabur.ai/v1',
+    apiKey: process.env.DEEPSEEK_API_KEY || process.env.GEMINI_API_KEY
+});
+
+// MiniMax (Fallback for Brain)
 const minimax = createOpenAI({
-    baseURL: 'https://api.minimax.chat/v1',
+    baseURL: 'https://api.minimax.io/v1', // International
     apiKey: process.env.MINIMAX_API_KEY
 });
 
 // =============================================================================
-// Model Instances
+// Model Instances (Trinity Architecture)
 // =============================================================================
 
-// 1. Gatekeeper: Gemini 2.5 Flash Lite via Zeabur (replacing rate-limited Mistral Small)
+// 1. Gatekeeper / Router: Gemini 2.5 Flash Lite
 export const geminiFlashLite = zeabur('gemini-2.5-flash-lite');
 export const mistralSmall = geminiFlashLite; // Legacy alias
 
-// 2. Synthesizer (Voice): Gemini 3 Flash Preview via Zeabur
-export const geminiFlash = zeabur('gemini-3-flash-preview');
+// 2. Brain / Logic: Gemini 3 Flash Preview (Primary), MiniMax M2.1 (Backup)
+export const geminiBrain = zeabur('gemini-3-flash-preview');
+export const minimaxBrain = minimax('MiniMax-M2.1');
 
-// 3. Brain: MiniMax M2.1 (original - for complex reasoning)
-export const minimaxBrain = minimax('minimax-m2.1');
-
-// 4. Fallback: Gemini 2.5 Flash via Zeabur (replacing rate-limited Mistral Large)
-export const geminiFlashFull = zeabur('gemini-2.5-flash');
-export const mistralLarge = geminiFlashFull; // Legacy alias
+// 3. Synthesizer / Chat: DeepSeek V3.2
+export const deepseekChat = deepseek('deepseek-v3.2');
+export const geminiFlashFull = zeabur('gemini-2.5-flash'); // Fallback
 
 // =============================================================================
 // Model Roles Definition
 // =============================================================================
 export const AGENT_ROLES = {
-    gatekeeper: geminiFlashLite,      // Was: mistralSmall
-    brain: minimaxBrain,               // Unchanged: MiniMax M2.1
-    synthesizer: geminiFlash,          // Unchanged: gemini-3-flash-preview
-    fallback: geminiFlashFull          // Was: mistralLarge
+    gatekeeper: geminiFlashLite,      // High Speed (Router)
+    brain: geminiBrain,               // High IQ (Logic)
+    synthesizer: deepseekChat,        // Creative/Long Output (Chat)
+    fallback: minimaxBrain            // Reliable Backup
 } as const;
 
 // Legacy export for backward compatibility
 export const AGENT_MODELS = {
-    primary: geminiFlash,
-    backup: geminiFlashFull,
-    reasoner: minimaxBrain
+    primary: geminiBrain,
+    backup: minimaxBrain,
+    reasoner: geminiBrain
 } as const;
 
 // =============================================================================

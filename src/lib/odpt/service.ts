@@ -18,6 +18,17 @@ const OPERATOR_MAP: Record<string, string[]> = {
     'MIR': ['odpt.Operator:MIR']
 };
 
+// Global Request Cache to prevent concurrent fetch storms
+declare global {
+    var __odptRequestCache: Map<string, { promise: Promise<any[]>, expiresAt: number }> | undefined;
+}
+
+if (!globalThis.__odptRequestCache) {
+    globalThis.__odptRequestCache = new Map();
+}
+
+const CACHE_TTL_MS = 20 * 1000; // 20 seconds deduplication window
+
 async function fetchForOperator(key: string, ids: string[]) {
     // Challenge API operators
     const challengeOperators = ['JR-East', 'Keikyu', 'Seibu', 'Tobu', 'Tokyu'];
@@ -25,43 +36,109 @@ async function fetchForOperator(key: string, ids: string[]) {
     const token = challengeOperators.includes(key) ? TOKEN_CHALLENGE : TOKEN_STANDARD;
     if (!token) return [];
 
-    const fetchPromises = ids.map(async (id) => {
-        const odptSearchParams = new URLSearchParams({
-            'odpt:operator': id,
-            'acl:consumerKey': token
-        });
-        const apiUrl = `${baseUrl}/odpt:TrainInformation?${odptSearchParams.toString()}`;
+    // Cache Key: Operator + Token Type (Standard/Challenge)
+    const cacheKey = `op:${key}`;
+    const now = Date.now();
 
-        try {
-            const res = await fetch(apiUrl, { next: { revalidate: 60 } }); // Cache 60s
-            if (!res.ok) return [];
-            return await res.json();
-        } catch (e) {
-            console.error(`Fetch failed for ${key} (ID: ${id})`, e);
-            return [];
+    // Check Cache
+    const cached = globalThis.__odptRequestCache?.get(cacheKey);
+    if (cached && cached.expiresAt > now) {
+        return cached.promise;
+    }
+
+    // Create new fetch promise
+    const fetchPromise = (async () => {
+        // Optimization: Fetch all IDs in parallel but consider batching if API supports it (currently via loop)
+        // ODPT v4 supports ?odpt:operator=ID,ID but usually per-railway queries are safer standard
+        // We stick to parallel fetch for now, but strictly cached.
+
+        const fetchPromises = ids.map(async (id) => {
+            const odptSearchParams = new URLSearchParams({
+                'odpt:operator': id,
+                'acl:consumerKey': token
+            });
+            const apiUrl = `${baseUrl}/odpt:TrainInformation?${odptSearchParams.toString()}`;
+
+            try {
+                // Remove Next.js excessive revalidate if we are manually caching in RAM
+                const res = await fetch(apiUrl);
+                if (!res.ok) return [];
+                return await res.json();
+            } catch (e) {
+                console.error(`Fetch failed for ${key} (ID: ${id})`, e);
+                return [];
+            }
+        });
+
+        const results = await Promise.all(fetchPromises);
+        return results.flat();
+    })();
+
+    // Store in Cache
+    globalThis.__odptRequestCache?.set(cacheKey, {
+        promise: fetchPromise,
+        expiresAt: now + CACHE_TTL_MS
+    });
+
+    return fetchPromise;
+}
+
+import { fetchYahooStatus, YAHOO_TO_ODPT_MAP } from '@/lib/external/yahooService';
+
+/**
+ * Enhanced getTrainStatus with centralized caching
+ */
+export async function getTrainStatus(operator?: string) {
+    if (!TOKEN_STANDARD && !TOKEN_CHALLENGE) {
+        // Non-blocking warning instead of throw to allow graceful degradation
+        console.warn('Missing ODPT API Key, returning empty status');
+        return [];
+    }
+
+    // 1. Fetch ODPT Data (Parallel, Cached)
+    let odptPromise: Promise<any[]>;
+    if (operator && OPERATOR_MAP[operator]) {
+        odptPromise = fetchForOperator(operator, OPERATOR_MAP[operator]);
+    } else {
+        const promises = Object.entries(OPERATOR_MAP).map(([key, ids]) => fetchForOperator(key, ids));
+        odptPromise = Promise.all(promises).then(r => r.flat());
+    }
+
+    // 2. Fetch Yahoo Data (Parallel) - only scrape if we are fetching all or relevant operators
+    // For simplicity, we always fetch Yahoo as it's cached globally
+    const yahooPromise = fetchYahooStatus();
+
+    const [odptResults, yahooResults] = await Promise.all([odptPromise, yahooPromise]);
+
+    // 3. Merge Yahoo Data into ODPT Results
+    // We create a map of ODPT Railway IDs to Yahoo Status
+    const yahooStatusMap = new Map<string, string>();
+    yahooResults.forEach(y => {
+        // Normalize Yahoo name usually involves full width chars, map handles exact matches
+        // But we might need fuzzy match later. For now, try direct map.
+        const mappedId = YAHOO_TO_ODPT_MAP[y.name];
+        if (mappedId) {
+            yahooStatusMap.set(mappedId, y.status);
         }
     });
 
-    const results = await Promise.all(fetchPromises);
-    return results.flat();
-}
+    // 4. Enhance ODPT items
+    const enhancedResults = odptResults.map(item => {
+        const railwayId = item['odpt:railway'];
+        if (railwayId && yahooStatusMap.has(railwayId)) {
+            return {
+                ...item,
+                'odpt:trainInformationText': {
+                    ...item['odpt:trainInformationText'],
+                    // Append Yahoo warning to English text or add a specific field
+                    en: (item['odpt:trainInformationText']?.en || 'Normal') + ` [Yahoo: ${yahooStatusMap.get(railwayId)}]`
+                },
+                'secondary_source': 'Yahoo Transit',
+                'secondary_status': yahooStatusMap.get(railwayId)
+            };
+        }
+        return item;
+    });
 
-export async function getTrainStatus(operator?: string) {
-    if (!TOKEN_STANDARD && !TOKEN_CHALLENGE) {
-        throw new Error('Missing ODPT API Key');
-    }
-
-    let results = [];
-
-    if (operator && OPERATOR_MAP[operator]) {
-        // Single Operator
-        results = await fetchForOperator(operator, OPERATOR_MAP[operator]);
-    } else {
-        // Fetch All
-        const promises = Object.entries(OPERATOR_MAP).map(([key, ids]) => fetchForOperator(key, ids));
-        const allData = await Promise.all(promises);
-        results = allData.flat();
-    }
-
-    return results;
+    return enhancedResults;
 }

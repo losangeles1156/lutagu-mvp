@@ -323,6 +323,7 @@ export class CacheService<T = any> {
     private startCleanup(): void {
         if (typeof window === 'undefined') {
             this.cleanupTimer = setInterval(() => this.cleanup(), this.config.cleanupIntervalMs);
+            this.cleanupTimer.unref?.();
         }
     }
 

@@ -653,22 +653,70 @@ export const TOOL_HANDLERS = {
      * Now with caching for improved performance (15min TTL)
      */
     get_timetable: async (params: { stationId: string; operator?: string }, context: any) => {
-        // Resolve station alias if needed
+        const locale = context?.locale || 'zh-TW';
         const resolvedStationId = resolveStationAlias(params.stationId);
         const operator = params.operator || 'all';
+        const cacheKey = `${CACHE_KEYS.TIMETABLE}:${hashString(`${resolvedStationId}:${operator}:${locale}`)}`;
 
-        // Generate cache key
-        const cacheKey = `${CACHE_KEYS.TIMETABLE}:${hashString(`${resolvedStationId}:${operator}`)}`;
+        return await cached(getTimetableDataCache(), cacheKey, async () => {
+            try {
+                const timetables = await odptClient.getStationTimetable(resolvedStationId, params.operator);
+                if (!timetables || timetables.length === 0) {
+                    return locale === 'ja'
+                        ? '⚠️ 時刻表が見つかりませんでした。'
+                        : locale === 'en'
+                            ? '⚠️ Timetable not found.'
+                            : '⚠️ 找不到該站時刻表資料。';
+                }
 
-        // Try cache first
-        return await cached(
-            getTimetableDataCache(),
-            cacheKey,
-            async () => {
-                const tool = new TimetableTool();
-                return await tool.execute({ station: resolvedStationId, operator: params.operator }, context);
+                const jst = getJSTTime();
+                const nowMin = jst.hour * 60 + jst.minute;
+                const wantCalendarKey = jst.isHoliday ? 'SaturdayHoliday' : 'Weekday';
+                const chosen =
+                    timetables.find((t: any) => String(t['odpt:calendar'] || '').includes(wantCalendarKey)) ||
+                    timetables[0];
+
+                const trips = Array.isArray(chosen?.['odpt:stationTimetableObject']) ? chosen['odpt:stationTimetableObject'] : [];
+                const normalizedTrips = trips
+                    .map((it: any) => {
+                        const time = String(it?.['odpt:departureTime'] || '');
+                        const m = time.match(/^(\d{1,2}):(\d{2})$/);
+                        if (!m) return null;
+                        const h = Number(m[1]);
+                        const mm = Number(m[2]);
+                        if (!Number.isFinite(h) || !Number.isFinite(mm)) return null;
+                        const mins = h * 60 + mm;
+                        const dest = Array.isArray(it?.['odpt:destinationStation']) ? it['odpt:destinationStation'][0] : '';
+                        const destName = String(dest).split('.').pop() || '';
+                        return { time: `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`, mins, destName };
+                    })
+                    .filter(Boolean) as { time: string; mins: number; destName: string }[];
+
+                normalizedTrips.sort((a, b) => a.mins - b.mins);
+
+                const upcoming = normalizedTrips.filter(t => t.mins >= nowMin).slice(0, 3);
+                const next = upcoming.length > 0 ? upcoming : normalizedTrips.slice(0, 3);
+
+                const line = String(chosen?.['odpt:railway'] || '').split('.').pop() || String(chosen?.['odpt:railway'] || '');
+                const direction = String(chosen?.['odpt:railwayDirection'] || '').split('.').pop() || '';
+                const station = resolvedStationId.split('.').pop() || resolvedStationId;
+
+                if (locale === 'ja') {
+                    return `🕒 ${station} 時刻表 (${line})\n方向: ${direction}\n次の電車: ${next.map(t => `${t.time} → ${t.destName || direction}`).join(', ')}`;
+                }
+                if (locale === 'en') {
+                    return `🕒 ${station} Timetable (${line})\nDirection: ${direction}\nNext trains: ${next.map(t => `${t.time} → ${t.destName || direction}`).join(', ')}`;
+                }
+
+                return `🕒 ${station} 時刻表 (${line})\n方向: ${direction}\n下一班: ${next.map(t => `${t.time} → ${t.destName || direction}`).join(', ')}`;
+            } catch (e: any) {
+                return locale === 'ja'
+                    ? '⚠️ 時刻表取得に失敗しました。'
+                    : locale === 'en'
+                        ? '⚠️ Failed to fetch timetable.'
+                        : '⚠️ 時刻表取得失敗，請稍後再試。';
             }
-        );
+        });
     },
 
     /**
@@ -680,18 +728,37 @@ export const TOOL_HANDLERS = {
         const resolvedFrom = resolveStationAlias(params.fromStation);
         const resolvedTo = resolveStationAlias(params.toStation);
 
+        const locale = context?.locale || 'zh-TW';
+
         // Generate cache key
-        const cacheKey = `${CACHE_KEYS.FARE}:${hashString(`${resolvedFrom}:${resolvedTo}`)}`;
+        const cacheKey = `${CACHE_KEYS.FARE}:${hashString(`${resolvedFrom}:${resolvedTo}:${locale}`)}`;
 
         // Try cache first
-        return await cached(
-            getFareDataCache(),
-            cacheKey,
-            async () => {
-                const tool = new FareTool();
-                return await tool.execute({ from: resolvedFrom, to: resolvedTo }, context);
+        return await cached(getFareDataCache(), cacheKey, async () => {
+            const tool = new FareTool();
+            const out = await tool.execute({ from: resolvedFrom, to: resolvedTo }, context);
+
+            if (Array.isArray(out) && out.length > 0) {
+                const f = out[0] as any;
+                const stationFrom = String(f.from || resolvedFrom).split('.').pop() || f.from || resolvedFrom;
+                const stationTo = String(f.to || resolvedTo).split('.').pop() || f.to || resolvedTo;
+                const ticket = f.ticket;
+                const ic = f.ic;
+
+                if (locale === 'ja') {
+                    return `💴 運賃: ${stationFrom} → ${stationTo}\nIC: ${ic}円 / 切符: ${ticket}円`;
+                }
+                if (locale === 'en') {
+                    return `💴 Fare: ${stationFrom} → ${stationTo}\nIC: ¥${ic} / Ticket: ¥${ticket}`;
+                }
+                return `💴 票價: ${stationFrom} → ${stationTo}\nIC: ${ic}円 / 單程票: ${ticket}円`;
             }
-        );
+
+            const errMsg = typeof out?.error === 'string' ? out.error : 'Fare not found';
+            if (locale === 'ja') return `⚠️ 運賃を取得できませんでした: ${errMsg}`;
+            if (locale === 'en') return `⚠️ Unable to fetch fare: ${errMsg}`;
+            return `⚠️ 無法取得票價資訊: ${errMsg}`;
+        });
     },
 
     /**
@@ -740,6 +807,8 @@ export const TOOL_HANDLERS = {
                     } else {
                         response = `🗺️ Route Planning\n━━━━━━━━━━━━━━━━\n`;
                     }
+
+                    response += `🔎 ODPT: ${resolvedFrom} → ${resolvedTo}\n`;
 
                     routes.slice(0, 2).forEach((route, idx) => {
                         const label = locale === 'zh-TW'

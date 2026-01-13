@@ -4,45 +4,79 @@ export interface LLMParams {
     systemPrompt: string;
     userPrompt: string;
     temperature?: number;
-    taskType?: 'reasoning' | 'synthesis' | 'context_heavy' | 'classification';
+    // Expanded task types for Trinity Architecture
+    taskType?: 'reasoning' | 'synthesis' | 'context_heavy' | 'classification' | 'simple' | 'chat';
+    model?: string; // Explicit model override
+    maxTokens?: number;
+}
+
+function resolveTimeoutMs(taskType: LLMParams['taskType'] | undefined) {
+    if (taskType === 'classification' || taskType === 'simple') return 8000;
+    if (taskType === 'chat' || taskType === 'synthesis') return 15000;
+    if (taskType === 'reasoning' || taskType === 'context_heavy') return 20000;
+    return 15000;
+}
+
+function resolveMaxTokens(params: LLMParams) {
+    if (typeof params.maxTokens === 'number' && Number.isFinite(params.maxTokens) && params.maxTokens > 0) {
+        return Math.floor(params.maxTokens);
+    }
+    const taskType = params.taskType;
+    if (taskType === 'classification' || taskType === 'simple') return 200;
+    if (taskType === 'chat' || taskType === 'synthesis') return 700;
+    if (taskType === 'reasoning' || taskType === 'context_heavy') return 600;
+    return 400;
 }
 
 export async function generateLLMResponse(params: LLMParams): Promise<string | null> {
-    const { taskType = 'reasoning' } = params;
+    const { taskType = 'reasoning', model: explicitModel } = params;
 
-    // 1. 推理型任務優先交給 MiniMax-M2.1
-    if (taskType === 'reasoning' && process.env.MINIMAX_API_KEY) {
-        return generateMiniMaxResponse(params);
+    // 0. Explicit model override (highest priority)
+    if (explicitModel) {
+        if (explicitModel.includes('deepseek')) return generateDeepSeekResponse(params);
+        if (explicitModel.includes('gemini')) return generateGeminiResponse(params);
+        if (explicitModel.includes('minimax')) return generateMiniMaxResponse(params);
     }
 
-    // 2. 分類/快速任務或 DataMux 彙整交給 Gemini 2.5 Flash Lite
-    if ((taskType === 'classification' || taskType === 'synthesis') && process.env.GEMINI_API_KEY) {
+    // --- Trinity Architecture Strategy ---
+
+    // 1. Router / Simple / Classification -> Gemini 2.5 Flash-Lite (Fastest & Cheapest)
+    if (taskType === 'classification' || taskType === 'simple') {
         return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
     }
 
-    // 3. 彙整型或海量數據任務交給 Gemini 3 Flash Preview
-    if ((taskType === 'synthesis' || taskType === 'context_heavy') && process.env.GEMINI_API_KEY) {
+    // 2. Logic / Reasoning / Precision -> Gemini 3 Flash Preview (Pro-level Brain)
+    if (taskType === 'reasoning' || taskType === 'context_heavy') {
+        const result = await generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
+        // Fallback to MiniMax-M2.1 if Gemini 3 fails (User Request: backup role)
+        if (!result && process.env.MINIMAX_API_KEY) {
+            console.warn('[LLM] Gemini 3 Flash failed, falling back to MiniMax M2.1');
+            return generateMiniMaxResponse(params);
+        }
+        return result;
+    }
+
+    // 3. Chat / Creative / Long Output -> DeepSeek V3 (High Output CP value)
+    if (taskType === 'synthesis' || taskType === 'chat') {
+        // Fallback to Gemini 3 if DeepSeek key missing (DeepSeek is optional optimization)
+        if (process.env.DEEPSEEK_API_KEY) {
+            return generateDeepSeekResponse(params);
+        }
         return generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
     }
 
-    // 3. 備援：Mistral
-    const apiKey = process.env.MISTRAL_API_KEY;
-    if (apiKey) {
-        return generateMistralResponse(params);
-    }
-
-    console.warn('No available AI API Keys for task:', taskType);
-    return null;
+    // 4. Default Fallback
+    return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
 }
 
+// ... existing MiniMax function ...
 async function generateMiniMaxResponse(params: LLMParams): Promise<string | null> {
+    // ... keep existing code ...
     const { systemPrompt, userPrompt, temperature = 0.2 } = params;
-
-    // International endpoint: api.minimax.io
     const endpoint = 'https://api.minimax.io/v1/chat/completions';
-
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Timeout
+    const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
+    const maxTokens = resolveMaxTokens(params);
 
     try {
         const res = await fetch(endpoint, {
@@ -58,23 +92,18 @@ async function generateMiniMaxResponse(params: LLMParams): Promise<string | null
                     { role: 'user', content: userPrompt }
                 ],
                 reasoning_split: true,
-                temperature
+                temperature,
+                max_tokens: maxTokens
             }),
             signal: controller.signal
         });
         clearTimeout(timeoutId);
 
         if (!res.ok) {
-            const errorText = await res.text();
-            console.error(`[MiniMax] API Error ${res.status}:`, errorText);
+            console.error(`[MiniMax] API Error ${res.status}`);
             return null;
         }
-
         const data: any = await res.json();
-        if (data?.choices?.[0]?.reasoning_details) {
-            console.log('💭 MiniMax Thinking:', data.choices[0].reasoning_details);
-        }
-
         return data?.choices?.[0]?.message?.content || null;
     } catch (error) {
         console.error('[MiniMax] API Call Failed:', error);
@@ -87,24 +116,31 @@ interface GeminiParams extends LLMParams {
 }
 
 async function generateGeminiResponse(params: GeminiParams): Promise<string | null> {
-    const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-3-flash-preview' } = params;
+    const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-2.5-flash-lite' } = params;
 
-    // Strict model mapping based on user preference
+    // Strict model mapping for Zeabur AI Hub
+    // Supported: gemini-3-flash-preview, gemini-2.5-flash-lite, gemini-2.5-flash, gemini-2.5-pro, gemini-1.5-pro
     let targetModel = model;
-    if (model === 'gemini-1.5-flash') targetModel = 'gemini-2.5-flash-lite'; // Upgrade obsolete model
+
+    // Legacy mapping (just in case)
+    if (model.includes('1.5-flash')) targetModel = 'gemini-2.5-flash-lite';
 
     try {
-        // Zeabur AI Hub (Tokyo Node) - OpenAI Compatible
+        // Zeabur AI Hub (Tokyo Node)
         const endpoint = `https://hnd1.aihub.zeabur.ai/v1/chat/completions`;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Timeout
+        const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
+        const maxTokens = resolveMaxTokens(params);
+
+        // Use Zeabur Key for Zeabur Endpoint
+        const apiKey = process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
         const res = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`
+                'Authorization': `Bearer ${apiKey}` // Zeabur requires sk-...
             },
             body: JSON.stringify({
                 model: targetModel,
@@ -112,7 +148,8 @@ async function generateGeminiResponse(params: GeminiParams): Promise<string | nu
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature
+                temperature,
+                max_tokens: maxTokens
             }),
             signal: controller.signal
         });
@@ -121,49 +158,63 @@ async function generateGeminiResponse(params: GeminiParams): Promise<string | nu
         if (!res.ok) {
             const errText = await res.text();
             console.error(`Gemini API Error (${targetModel}):`, res.status, errText);
+
+            // Fallback for 429 to Lite if using heavy model
+            if (res.status === 429 && targetModel !== 'gemini-2.5-flash-lite') {
+                console.warn('Rate limit hit, retrying with Flash Lite...');
+                return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
+            }
             return null;
         }
 
         const data: any = await res.json();
-        return data?.choices?.[0]?.message?.content || null;
+        let content = data?.choices?.[0]?.message?.content || null;
+        if (content) content = content.replace(/\[THINKING\][\s\S]*?\[\/THINKING\]/g, '').trim();
+        return content;
     } catch (error) {
         console.error('Gemini API Failed:', error);
         return null;
     }
 }
 
-async function generateMistralResponse(params: LLMParams): Promise<string | null> {
-    const apiKey = process.env.MISTRAL_API_KEY;
-    const model = process.env.AI_SLM_MODEL || 'mistral-small-latest';
-    const { systemPrompt, userPrompt, temperature = 0.2 } = params;
+async function generateDeepSeekResponse(params: LLMParams): Promise<string | null> {
+    const { systemPrompt, userPrompt, temperature = 0.4 } = params;
+
+    // Zeabur AI Hub supports DeepSeek via same endpoint
+    const endpoint = `https://hnd1.aihub.zeabur.ai/v1/chat/completions`;
+    const apiKey = process.env.ZEABUR_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.GEMINI_API_KEY;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
+    const maxTokens = resolveMaxTokens(params);
 
     try {
-        const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+        const res = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${apiKey}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
             body: JSON.stringify({
-                model,
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature
-            })
+                model: 'deepseek-v3.2', // or deepseek-chat
+                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+                temperature,
+                max_tokens: maxTokens
+            }),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
-            console.error(`Mistral API Error: ${res.statusText}`);
+            console.error(`[DeepSeek] API Error ${res.status}`);
             return null;
         }
-
         const data: any = await res.json();
-        const content = data?.choices?.[0]?.message?.content;
-        return String(content || '').trim();
-    } catch (error) {
-        console.error('Mistral API Call Failed:', error);
+        let content = data?.choices?.[0]?.message?.content || null;
+        if (content) content = content.replace(/\[THINKING\][\s\S]*?\[\/THINKING\]/g, '').trim();
+        return content;
+    } catch (e) {
+        console.error('[DeepSeek] API Call Failed:', e);
         return null;
     }
 }
+
+// Remove Mistral legacy function to save space if not used, or keep as dead code.
+// Keeping strictly requested changes.

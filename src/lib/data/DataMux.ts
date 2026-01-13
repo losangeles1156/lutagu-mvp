@@ -38,20 +38,15 @@ export class DataMux {
     /**
      * Enriches raw station data with Context-Aware Intelligence (MiniMax)
      */
+
     static async enrichStationData(
         stationId: string,
         context: DataMuxContext
     ): Promise<Partial<StationUIProfile>> {
-        console.log(`[DataMux] Enriching data for ${stationId} with context:`, context);
-
-        // 0. Check Cache (MiniMax "Coding Plan" Optimization)
-        const cached = await this.checkCache(stationId, context.locale, context.userProfile || 'general');
-        if (cached) {
-            console.log(`[DataMux] Cache Hit for ${stationId}`);
-            return { id: stationId, ...cached };
-        }
+        console.log(`[DataMux] Fast Aggregation for ${stationId}`);
 
         // 1. Parallel Fetch of Raw Data
+        // We skip the heavy "Brain" LLM synthesis in favor of speed (Optimistic UI)
         const [l2Data, l3Data, l4Knowledge] = await Promise.all([
             fetchL2Status(stationId),
             fetchL3Facilities(stationId),
@@ -59,65 +54,47 @@ export class DataMux {
                 query: `Important tips for ${stationId}`,
                 stationId: stationId,
                 topK: 5
-            }) // Get top knowledge cards
+            })
         ]);
 
-        // 2. Prepare Context for Brain
-        const systemPrompt = `
-You are the "DataMux Brain" (powered by MiniMax). 
-Your validated goal is to select the MOST RELEVANT information for a traveler at a specific station.
+        // 2. Direct Aggregation (No LLM Latency)
+        // We construct the UI Profile directly from raw signals.
+        // Frontend will handle the "Brain" or "Insight" visualization if needed via separate stream.
 
-Input Data:
-- L2 Status: ${JSON.stringify(l2Data)}
-- L3 Facilities: ${JSON.stringify(l3Data)}
-- L4 Knowledge Candidates: ${JSON.stringify(l4Knowledge.map(k => ({ type: k.knowledge_type, content: k.content, tags: k.tags })))}
+        const enrichedData: any = {
+            // L2: Weather & Crowd
+            weather_condition: l2Data.weather_info?.condition || 'Unknown',
+            crowd_level: l2Data.crowd_level || 'low',
 
-User Context:
-- Locale: ${context.locale}
-- Profile: ${context.userProfile || 'General Tourist'}
-- Time: ${context.time || new Date().toISOString()}
+            // L3: Facilities
+            facilities: {
+                has_elevator: l3Data.has_elevator || false,
+                has_escalator: l3Data.has_escalator || false,
+                has_waiting_room: l3Data.has_waiting_room || false,
+                toilet_location: l3Data.toilet_location || 'Unknown'
+            },
 
-Task:
-1. Filter L4 Knowledge: Select only 2-3 most critical items based on user profile (e.g., if wheelchair, prioritize elevators; if rush hour, prioritize crowd hacks).
-2. Summarize Status: If L2 shows delay, highlight it.
-3. Output JSON format only.
-`;
+            // L4: Knowledge Cards (Top 3)
+            // We return raw cards so frontend can render them immediately
+            l4_cards: l4Knowledge.slice(0, 3).map(k => ({
+                id: k.id,
+                title: 'Travel Tip', // Generic title, or extract from content
+                content: k.content,
+                type: k.knowledge_type,
+                tags: k.tags
+            })),
 
-        const userPrompt = `Generate enriched UI profile for ${stationId}.`;
+            // Metadata
+            last_updated: new Date().toISOString()
+        };
 
-        // 3. Call Brain (MiniMax)
-        let enrichedData: any = {};
-        try {
-            const raw = await generateLLMResponse({
-                systemPrompt,
-                userPrompt,
-                taskType: 'synthesis', // Switch to Gemini-Flash-Lite (Faster)
-                temperature: 0.1
-            });
-
-            if (raw) {
-                // Parse JSON from MiniMax response (handling potential markdown blocks)
-                const cleanJson = raw.replace(/```json/g, '').replace(/```/g, '').trim();
-                enrichedData = JSON.parse(cleanJson);
-
-                // Save to Cache
-                await this.saveCache(stationId, context.locale, context.userProfile || 'general', enrichedData);
-            }
-        } catch (e) {
-            console.error('[DataMux] MiniMax formatting failed, using raw data fallback.', e);
-            // Fallback: Just return raw L4 list
-            enrichedData = {
-                l4_cards: l4Knowledge
-            };
-        }
-
-        // 4. Merge and Return
+        // 3. Return immediately
         return {
             id: stationId,
-            // ... map enriched data to StationUIProfile fields
             ...enrichedData
         };
     }
+
 
 
     /**

@@ -12,49 +12,74 @@ if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath });
 }
 
-// Knowledge Base Data
-const KNOWLEDGE_BASE = [
-    {
-        category: 'fare',
-        tags: ['fare', 'child', 'toddler', 'baby', 'price', 'ticket'],
-        content: 'Child Fare (6-11 yo) is 50% of Adult Fare. Toddlers (1-5 yo) are FREE (up to 2 per adult). Infants (<1 yo) are always FREE.'
-    },
-    {
-        category: 'access',
-        tags: ['pass', 'jr', 'subway', 'metro', 'ticket', 'validity'],
-        content: 'The Japan Rail Pass (JR Pass) is VALID on JR Lines (Yamanote, Chuo, etc.) and Tokyo Monorail. It is NOT valid on Tokyo Metro or Toei Subway lines.'
-    },
-    {
-        category: 'fare',
-        tags: ['transfer', 'discount', 'metro', 'toei', 'price'],
-        content: 'Transferring between Tokyo Metro and Toei Subway within 60 minutes grants a 70 JPY discount on the total fare (Adult).'
-    },
-    {
-        category: 'payment',
-        tags: ['ic card', 'suica', 'pasmo', 'compatibility', 'refund'],
-        content: 'Suica and Pasmo are fully interchangeable. You can use either card on almost all trains, subways, and buses in Tokyo. Refund is possible at issuing operator stations.'
-    },
-    {
-        category: 'crowd',
-        tags: ['rush', 'hour', 'crowd', 'time', 'peak', 'luggage'],
-        content: 'Tokyo Rush Hour is typically 7:30-9:30 AM and 5:30-7:30 PM on weekdays. Avoid bulky luggage and strollers during these times if possible.'
-    },
-    {
-        category: 'access',
-        tags: ['elevator', 'accessibility', 'transfer', 'path'],
-        content: 'For easier elevator access at major stations like Shinjuku or Tokyo, look for "Access" routes marked with wheelchair icons. These are often longer but step-free.'
-    },
-    {
-        category: 'luggage',
-        tags: ['locker', 'coin locker', 'storage', 'luggage', 'size'],
-        content: 'Large coin lockers (for suitcases) are often full by 10 AM at major stations. Use "Ecbo Cloak" or manned baggage counters as a backup.'
-    }
+// Config
+const SKILL_ROOTS = [
+    '.agent/skills/tokyo-expert-knowledge',
+    '.agent/skills/strategies/deep-research'
 ];
 
-const DELAY_MS = 2000; // 2 seconds delay to avoid 1002 Rate Limit
+// ✅ Reduced delay: Gemini supports 1500 RPM (vs MiniMax 10 RPM)
+const DELAY_MS = 500; // Was 3500ms for MiniMax rate limits
+
+interface IngestionItem {
+    id: string; // Deterministic ID based on file+section
+    content: string;
+    category: string;
+    tags: string[];
+    source: string;
+}
+
+function parseFrontmatter(content: string): { data: Record<string, any>; content: string } {
+    const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    if (!match) return { data: {}, content };
+
+    const yaml = match[1];
+    const body = match[2];
+    const data: Record<string, any> = {};
+
+    yaml.split('\n').forEach(line => {
+        const [key, ...values] = line.split(':');
+        if (key && values.length) {
+            const val = values.join(':').trim();
+            if (val.startsWith('[') && val.endsWith(']')) {
+                // Simple array parse
+                data[key.trim()] = val.slice(1, -1).split(',').map(s => s.trim());
+            } else {
+                data[key.trim()] = val;
+            }
+        }
+    });
+
+    return { data, content: body.trim() };
+}
+
+function getSkillTags(dir: string): string[] {
+    const skillPath = path.join(process.cwd(), dir, 'SKILL.md');
+    if (fs.existsSync(skillPath)) {
+        const raw = fs.readFileSync(skillPath, 'utf-8');
+        const { data } = parseFrontmatter(raw);
+        return data.tags || [];
+    }
+    return [];
+}
+
+function crawlFiles(dir: string): string[] {
+    let results: string[] = [];
+    const list = fs.readdirSync(dir);
+    list.forEach(file => {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+            results = results.concat(crawlFiles(filePath));
+        } else if (file.endsWith('.md') && file !== 'SKILL.md') {
+            results.push(filePath);
+        }
+    });
+    return results;
+}
 
 async function main() {
-    console.log('📚 Starting Knowledge Ingestion...');
+    console.log('📚 Starting Dynamic Skill Ingestion...');
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -66,47 +91,109 @@ async function main() {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    for (const [index, item] of KNOWLEDGE_BASE.entries()) {
-        console.log(`\n[${index + 1}/${KNOWLEDGE_BASE.length}] Processing: "${item.content.substring(0, 30)}..."`);
+    const items: IngestionItem[] = [];
+
+    // 1. Crawl & Parse
+    for (const rootRelative of SKILL_ROOTS) {
+        const rootDir = path.join(process.cwd(), rootRelative);
+        if (!fs.existsSync(rootDir)) {
+            console.warn(`⚠️  Directory not found: ${rootDir}`);
+            continue;
+        }
+
+        const baseTags = getSkillTags(rootRelative);
+        const category = path.basename(rootRelative); // e.g., 'deep-research'
+        const files = crawlFiles(rootDir);
+
+        for (const file of files) {
+            const raw = fs.readFileSync(file, 'utf-8');
+            const { content } = parseFrontmatter(raw);
+            const fileName = path.basename(file, '.md');
+
+            // Chunk by Header 2 (##)
+            const sections = content.split(/\n## /);
+
+            sections.forEach((section, idx) => {
+                const cleanSection = section.trim();
+                let sectionTitle = 'Intro';
+                let body = cleanSection;
+
+                if (idx > 0 || cleanSection.startsWith('## ')) {
+                    // Re-add ## if stripped by split (split consumes separator)
+                    // The split separator is `\n## `, so the next chunk starts with the title text
+                    const firstLineEnd = cleanSection.indexOf('\n');
+                    if (firstLineEnd > -1) {
+                        sectionTitle = cleanSection.substring(0, firstLineEnd).trim();
+                        // Keep full content including title for context
+                        body = `## ${cleanSection}`;
+                    } else {
+                        sectionTitle = cleanSection;
+                        body = `## ${cleanSection}`;
+                    }
+                } else {
+                    // First chunk (Intro) often has Title (# X)
+                    const titleMatch = cleanSection.match(/^# (.*)/);
+                    if (titleMatch) sectionTitle = titleMatch[1];
+                }
+
+                if (body.length < 50) return; // Skip too short
+
+                items.push({
+                    id: `${category}-${fileName}-${idx}`,
+                    content: body,
+                    category: category,
+                    tags: [...baseTags, fileName, sectionTitle.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()],
+                    source: path.relative(process.cwd(), file)
+                });
+            });
+        }
+    }
+
+    console.log(`Found ${items.length} chunks to ingest.`);
+
+    // 2. Embed & Ingest
+    for (const [i, item] of items.entries()) {
+        console.log(`[${i + 1}/${items.length}] Embedding: ${item.id}`);
 
         try {
-            // Use type: 'db' as verified in debug script
             const vector = await EmbeddingService.generateEmbedding(item.content, 'db');
 
-            // Check for mock vector
             const isZero = vector.every(v => v === 0);
             if (isZero) {
-                console.warn('⚠️ Got Zero Vector (Mock). Skipping DB insert to prevent pollution.');
-                // continue; // Allow insert for now to test flow, or skip? Skip is safer for prod.
-                // But for first run, let's skip.
+                console.warn('  ⚠️ Got Zero Vector. Skipping.');
+                await new Promise(r => setTimeout(r, DELAY_MS));
                 continue;
             }
 
+            // Upsert (using delete+insert or real upsert if ID supported? Table uses UUID usually)
+            // We use randomUUID content-based hashing simulation or just insert new ones?
+            // The table likely has `id` uuid. We should check if we can dedup.
+            // For now, we proceed with insert (duplicate content might occur if we run multiple times without cleanup)
+            // Ideally: Delete by category first? Or check content existence?
+            // Simple approach: Delete all where category IN target_categories
+
+            // NOTE: Safe mode - just insert. User can clear table manually if needed.
+            // Or better: Upsert based on content hash? No column for that.
+
+            // Let's rely on standard insert.
+
             const { error } = await supabase.from('expert_knowledge').insert({
-                id: randomUUID(),
                 content: item.content,
                 embedding: vector,
                 category: item.category,
                 tags: item.tags,
-                created_at: new Date().toISOString()
+                // metadata: { source: item.source, version: 'dynamic-v1' } // if metadata col exists
             });
 
-            if (error) {
-                console.error('❌ DB Insert Failed:', error.message);
-            } else {
-                console.log('✅ Ingested successfully.');
-            }
+            if (error) console.error('  ❌ DB Error:', error.message);
+            else console.log('  ✅ Ingested');
 
         } catch (e: any) {
-            console.error('❌ Processing Error:', e.message);
+            console.error('  ❌ Failed:', e.message);
         }
 
-        // Wait to be nice to API
-        console.log(`⏳ Waiting ${DELAY_MS}ms...`);
         await new Promise(r => setTimeout(r, DELAY_MS));
     }
-
-    console.log('\n🎉 Ingestion Complete!');
 }
 
 main().catch(console.error);

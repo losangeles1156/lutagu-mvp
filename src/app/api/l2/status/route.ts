@@ -9,6 +9,8 @@ const API_KEY_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN;
 const API_KEY_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP; // Temporary (JR East)
 const ODPT_BASE_URL = 'https://api.odpt.org/api/v4';
 
+import { getTrainStatus } from '@/lib/odpt/service';
+
 function cleanLineName(id: string): string {
     let name = id
         .replace(/^odpt\.Railway:/, '')
@@ -28,19 +30,14 @@ function cleanLineName(id: string): string {
 }
 
 // Dynamic line lookup from nodes.transit_lines as fallback
-async function getNodeTransitLines(stationId: string): Promise<StationLineDef[]> {
+async function getNodeTransitLines(stationId: string, transitLines?: unknown): Promise<StationLineDef[]> {
     try {
-        const { data, error } = await supabaseAdmin
-            .from('nodes')
-            .select('transit_lines')
-            .eq('id', stationId)
-            .maybeSingle();
-
-        if (error || !data?.transit_lines || !Array.isArray(data.transit_lines)) {
+        const linesValue = transitLines;
+        if (!Array.isArray(linesValue)) {
             return [];
         }
 
-        return data.transit_lines.map((lineId: string) => {
+        return linesValue.map((lineId: string) => {
             const lineNameLower = lineId.toLowerCase();
 
             // 1. Strict Match against LINES constant (Preferred)
@@ -168,83 +165,7 @@ function matchDisruptionToLine(lineDef: any, disruption: any) {
     return false;
 }
 
-// Fetch helper
-async function fetchFromKey(key: string | undefined, label: string) {
-    if (!key) return [];
-    try {
-        const url = `${ODPT_BASE_URL}/odpt:TrainInformation?acl:consumerKey=${key}`;
-        const res = await fetch(url, { next: { revalidate: 30 } }); // 30s cache
-        if (!res.ok) {
-            console.warn(`[L2 API] ${label} Key fetch failed: ${res.status}`);
-            return [];
-        }
-        return await res.json();
-    } catch (e) {
-        console.error(`[L2 API] ${label} Key exception`, e);
-        return [];
-    }
-}
 
-// Fetch Live Train Information from BOTH keys
-async function fetchLiveTrainInfo() {
-    // Parallel fetch from Standard and Challenge keys
-    const [standardData, challengeData] = await Promise.all([
-        fetchFromKey(API_KEY_STANDARD, 'Standard'),
-        fetchFromKey(API_KEY_CHALLENGE, 'Challenge')
-    ]);
-
-    // Merge and Deduplicate by 'owl:sameAs' or 'odpt:railway'
-    const allData = [...standardData, ...challengeData];
-    const uniqueMap = new Map();
-
-    // Prefer Challenge data if present? Or just keep first? usually same data.
-    // We iterate entire combined list and key by railway ID
-    allData.forEach((item: any) => {
-        const id = item['owl:sameAs'] || item['odpt:railway'];
-        if (id && !uniqueMap.has(id)) {
-            uniqueMap.set(id, item);
-        }
-    });
-
-    const validItems = Array.from(uniqueMap.values());
-
-    return validItems.filter((item: any) => {
-        const statusObj = item['odpt:trainInformationStatus'];
-        const statusText = (typeof statusObj === 'object' && statusObj) ? (statusObj.ja || statusObj.en) : statusObj;
-
-        if (statusText) {
-            return statusText !== '平常運転' && !statusText.includes('平常通り');
-        }
-        if (item['odpt:trainInformationText']) return true;
-        return false;
-    }).map((item: any) => {
-        const statusObj = item['odpt:trainInformationStatus'];
-        const statusText = (typeof statusObj === 'object' && statusObj) ? (statusObj.ja || statusObj.en) : statusObj;
-
-        const textObj = item['odpt:trainInformationText'];
-        const textJa = (typeof textObj === 'object' && textObj) ? textObj.ja : textObj;
-        const textEn = (typeof textObj === 'object' && textObj) ? textObj.en : '';
-
-        return {
-            severity: 'minor',
-            railway_id: item['odpt:railway'],
-            line_name: {
-                en: (item['odpt:railway'] || '').split('.').pop(),
-                ja: ''
-            },
-            status_label: {
-                ja: statusText || '運行情報',
-                en: 'Service Update',
-                zh: '營運調整'
-            },
-            message: {
-                ja: textJa || '',
-                en: textEn || '',
-                zh: textJa || ''
-            }
-        };
-    });
-}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -255,7 +176,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        const [snapshotRes, historyRes, liveTrainInfo, crowdReportsRes] = await Promise.all([
+        const [snapshotRes, historyRes, crowdReportsRes, nodeRes] = await Promise.all([
             supabaseAdmin
                 .from('transit_dynamic_snapshot')
                 .select(`
@@ -276,12 +197,17 @@ export async function GET(request: Request) {
                 .gt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
                 .order('created_at', { ascending: false })
                 .limit(20),
-            fetchLiveTrainInfo(),
             supabaseAdmin
                 .from('transit_crowd_reports')
                 .select('crowd_level')
                 .eq('station_id', stationId)
                 .gt('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString()) // Last 30 mins
+            ,
+            supabaseAdmin
+                .from('nodes')
+                .select('transit_lines, coordinates')
+                .eq('id', stationId)
+                .maybeSingle()
         ]);
 
         const { data, error } = snapshotRes;
@@ -348,11 +274,50 @@ export async function GET(request: Request) {
 
         // Step 5: Final fallback - dynamically fetch from nodes.transit_lines
         if (lines.length === 0) {
-            lines = await getNodeTransitLines(stationId);
+            lines = await getNodeTransitLines(stationId, nodeRes.data?.transit_lines);
             if (lines.length > 0) {
                 console.log(`[L2 API] Resolved ${lines.length} lines from nodes.transit_lines for ${stationId}`);
             }
         }
+
+        const trainStatus = await getTrainStatus(); // Fetches all lines cached
+
+        // Transform simplified getTrainStatus response to expected format for matching
+        const liveTrainInfo = trainStatus.map((item: any) => {
+            const statusObj = item['odpt:trainInformationStatus'];
+            const statusText = (typeof statusObj === 'object' && statusObj) ? (statusObj.ja || statusObj.en) : statusObj;
+
+            // Skip normal operation
+            if (!statusText || statusText === '平常運転' || statusText.includes('平常通り')) {
+                // Check if text says normal
+                const textObj = item['odpt:trainInformationText'];
+                const textJa = (typeof textObj === 'object' && textObj) ? textObj.ja : textObj;
+                if (!textJa || textJa.includes('平常') || textJa.includes('通常')) return null;
+            }
+
+            const textObj = item['odpt:trainInformationText'];
+            const textJa = (typeof textObj === 'object' && textObj) ? textObj.ja : textObj;
+            const textEn = (typeof textObj === 'object' && textObj) ? textObj.en : '';
+
+            return {
+                severity: (item.secondary_status && item.secondary_status !== 'normal') ? 'major' : 'minor',
+                railway_id: item['odpt:railway'],
+                line_name: {
+                    en: (item['odpt:railway'] || '').split('.').pop(),
+                    ja: ''
+                },
+                status_label: {
+                    ja: statusText || '運行情報',
+                    en: 'Service Update',
+                    zh: '營運調整'
+                },
+                message: {
+                    ja: textJa || '',
+                    en: textEn || '',
+                    zh: textJa || ''
+                }
+            };
+        }).filter(Boolean);
 
         // Mix DB disruptions with Live API disruptions
         // CRITICAL FIX: Filter out DB disruptions that mention "Normal" or "平常"
@@ -430,17 +395,11 @@ export async function GET(request: Request) {
             // Otherwise, try to fetch live
             try {
                 // Try to get coords from nodes table if not in baseData
-                const { data: nodeData } = await supabaseAdmin
-                    .from('nodes')
-                    .select('coordinates')
-                    .eq('id', stationId)
-                    .maybeSingle();
-
                 let lat = 35.6895; // Default Tokyo Center
                 let lon = 139.6917;
 
-                if (nodeData?.coordinates) {
-                    const coords = nodeData.coordinates as any;
+                if (nodeRes.data?.coordinates) {
+                    const coords = nodeRes.data.coordinates as any;
                     if (coords.coordinates && Array.isArray(coords.coordinates)) {
                         // PostGIS geojson format: { type: "Point", coordinates: [lon, lat] }
                         lon = coords.coordinates[0];

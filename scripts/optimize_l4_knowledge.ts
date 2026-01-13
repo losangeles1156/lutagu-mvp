@@ -38,6 +38,22 @@ const TARGET_STATIONS = [
     {
         name: 'odpt:Station:JR-East.Yamanote.Tokyo (東京站)',
         context: 'Marunouchi (Imperial Palace/Retro) vs Yaesu (Shinkansen/Bus/Modern). WARNING: Keiyo Line transfer (Disney) takes 15-20 mins walk.'
+    },
+    {
+        name: 'odpt:Station:JR-East.Yamanote.Ueno (上野站)',
+        context: 'Panda Bridge / Park Exit (Zoo/Museums) vs Hirokoji Exit (Ameyoko Market). Keisei Skinner transfer is distinct from JR. Ginza line transfer is historically confusing.'
+    },
+    {
+        name: 'odpt:Station:JR-East.Yamanote.Shinagawa (品川站)',
+        context: 'Gateway to Haneda (Keikyu). Takanawa Exit (Aquarium/Hotels) vs Konan Exit (Business/Shinkansen). Warning: Very busy corridor during rush hour.'
+    },
+    {
+        name: 'odpt:Station:JR-East.Yamanote.Akihabara (秋葉原站)',
+        context: 'Electric Town Exit (Anime/Maid Cafes) vs Central Exit (Yodobashi). Tsukuba Express is deep underground. Hibiya Line is slightly separated.'
+    },
+    {
+        name: 'odpt:Station:Toei.Oedo.Roppongi (六本木站)',
+        context: 'Deepest subway station in Tokyo (B7, 42m deep). Warning: Escalator ride takes forever. Access to Roppongi Hills vs Midtown (different exits).'
     }
 ];
 

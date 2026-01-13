@@ -22,7 +22,7 @@ import { generateLLMResponse } from '@/lib/ai/llmService';
 import { DataMux } from '@/lib/data/DataMux';
 import { StrategyContext } from '@/lib/ai/strategyEngine';
 import { AgentRouter } from '@/lib/ai/AgentRouter';
-import { skillRegistry } from './skills/SkillRegistry';
+import { executeSkill, skillRegistry } from './skills/SkillRegistry';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -106,7 +106,8 @@ export class HybridEngine {
         const locale = (inputLocale || 'zh-TW') as SupportedLocale;
         const logs: string[] = [];
 
-        logs.push(`[Input] Text: "${text}", Locale: ${locale}`);
+        const safeText = typeof text === 'string' && text.length > 500 ? `${text.slice(0, 500)}…` : text;
+        logs.push(`[Input] Text: "${safeText}", Locale: ${locale}`);
 
         try {
             // 0. Anomaly Detection
@@ -127,38 +128,12 @@ export class HybridEngine {
                 };
             }
 
-            // 1. Agentic Skill Router (Phase 8 Upgrade)
-            // Use LLM to intelligently select tools based on schema
-            try {
-                if (params.onProgress) params.onProgress(locale === 'en' ? "Analyzing intent..." : "正在分析意圖...");
-                const agentDecision = await AgentRouter.selectTool(text, skillRegistry.getSkills());
-                if (agentDecision) {
-                    if (params.onProgress) params.onProgress(locale === 'en' ? `Using tool: ${agentDecision.toolName}` : `正在調用工具：${agentDecision.toolName}`);
-                    logs.push(`[Deep Research] Agent Decision: ${agentDecision.toolName} (Reason: ${agentDecision.reasoning})`);
-                    const skill = skillRegistry.getSkills().find(s => s.name === agentDecision.toolName);
-                    if (skill) {
-                        const skillResult = await skill.execute(text, context || {}, agentDecision.parameters);
-                        if (skillResult) {
-                            const finalResult = {
-                                ...skillResult,
-                                reasoningLog: [...logs, `Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
-                            };
-                            metricsCollector.recordRequest(finalResult.source, Date.now() - startTime);
-                            return finalResult;
-                        }
-                    }
-                }
-            } catch (agentError) {
-                console.error('[HybridEngine] Agent Router Failed:', agentError);
-                logs.push(`[Error] Agent Router: ${agentError}`);
-            }
-
-            // 1.5 Legacy Regex Fallback (Keep this for robustness / fast path)
-            // Skills take high priority for specific domain queries
+            // 1. Legacy Regex Skill (Fast Path)
             const matchedSkill = skillRegistry.findMatchingSkill(text, context || {});
             if (matchedSkill) {
                 logs.push(`[Deep Research] Legacy Skill Triggered: ${matchedSkill.name}`);
-                const skillResult = await matchedSkill.execute(text, context || {});
+                const { result: skillResult, meta } = await executeSkill(matchedSkill, text, context || {});
+                logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
                 if (skillResult) {
                     const finalResult = { ...skillResult, reasoningLog: [...logs, ...(skillResult.reasoningLog || [])] };
                     metricsCollector.recordRequest(finalResult.source, Date.now() - startTime);
@@ -170,16 +145,44 @@ export class HybridEngine {
             const decision = await preDecisionEngine.classifyIntent(text);
             logs.push(`[Intent] Classified Level: ${decision.level} (Conf: ${decision.confidence})`);
 
+            // 3. Agentic Skill Router (Complex Queries Only)
+            if (decision.level === DecisionLevel.LEVEL_3_COMPLEX) {
+                try {
+                    if (params.onProgress) params.onProgress(locale === 'en' ? "Analyzing intent..." : "正在分析意圖...");
+                    const agentDecision = await AgentRouter.selectTool(text, skillRegistry.getSkills());
+                    if (agentDecision) {
+                        if (params.onProgress) params.onProgress(locale === 'en' ? `Using tool: ${agentDecision.toolName}` : `正在調用工具：${agentDecision.toolName}`);
+                        logs.push(`[Deep Research] Agent Decision: ${agentDecision.toolName} (Reason: ${agentDecision.reasoning})`);
+                        const skill = skillRegistry.findByToolName(agentDecision.toolName);
+                        if (skill) {
+                            const { result: skillResult, meta } = await executeSkill(skill, text, context || {}, agentDecision.parameters);
+                            logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
+                            if (skillResult) {
+                                const finalResult = {
+                                    ...skillResult,
+                                    reasoningLog: [...logs, `Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
+                                };
+                                metricsCollector.recordRequest(finalResult.source, Date.now() - startTime);
+                                return finalResult;
+                            }
+                        }
+                    }
+                } catch (agentError) {
+                    console.error('[HybridEngine] Agent Router Failed:', agentError);
+                    logs.push(`[Error] Agent Router: ${agentError}`);
+                }
+            }
+
             let bestMatch: HybridResponse | null = null;
 
-            // 3. Level 1: Template Engine
+            // 4. Level 1: Template Engine
             if (decision.level === DecisionLevel.LEVEL_1_SIMPLE) {
                 if (params.onProgress) params.onProgress(locale === 'en' ? "Checking templates..." : "正在比對範本...");
                 logs.push(`[L1] Checking Templates...`);
                 bestMatch = await this.checkTemplates(text, locale);
             }
 
-            // 4. Level 2: Algorithm Provider + POI Search
+            // 5. Level 2: Algorithm Provider + POI Search
             if (!bestMatch && (decision.level === DecisionLevel.LEVEL_2_MEDIUM || decision.level === DecisionLevel.LEVEL_1_SIMPLE)) {
                 if (params.onProgress) params.onProgress(locale === 'en' ? "Searching algorithms & POI..." : "正在搜尋大數據與地點資訊...");
                 logs.push(`[L2] Checking Algorithms & POI Tags...`);
@@ -195,7 +198,7 @@ export class HybridEngine {
                 }
             }
 
-            // 5. Level 3/4: DataMux Enrichment Fallback
+            // 6. Level 3/4: DataMux Enrichment Fallback
             let enrichedData: any = null;
             if (!bestMatch && context?.currentStation) {
                 logs.push(`[L3/L4] Checking DataMux Enrichment...`);
@@ -225,14 +228,14 @@ export class HybridEngine {
                 }
             }
 
-            // 6. Post-processing and Metrics
+            // 7. Post-processing and Metrics
             if (bestMatch) {
                 metricsCollector.recordRequest(bestMatch.source, Date.now() - startTime);
                 feedbackStore.logRequest({ text, source: bestMatch.source, timestamp: startTime });
                 return { ...bestMatch, reasoningLog: logs };
             }
 
-            // 7. Fallback (LLM Orchestrator)
+            // 8. Fallback (LLM Orchestrator)
             if (params.onProgress) params.onProgress(locale === 'en' ? "Synthesizing expert advice..." : "正在彙整專家建議...");
             logs.push(`[Fallback] Delegating to LLM Service with Context...`);
 
@@ -248,8 +251,9 @@ export class HybridEngine {
             const llmResponse = await generateLLMResponse({
                 systemPrompt: this.buildSystemPrompt(locale),
                 userPrompt: this.buildUserPrompt(text, { ...context, wisdomSummary: activeKnowledgeSnippet } as any),
-                taskType: 'synthesis',
-                temperature: 0.3
+                taskType: 'chat', // Trinity: DeepSeek V3 (High Output CP)
+                temperature: 0.7, // Higher temp for chat
+                model: 'deepseek-v3.2'
             });
 
             if (llmResponse) {
@@ -337,8 +341,11 @@ export class HybridEngine {
         const lowerText = text.toLowerCase();
 
         // Route Intent
-        if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去)/)) {
-            const zhMatch = text.match(/從?\s*([^到\s]+)\s*到\s*([^?\s]+)/) || text.match(/([^从\s]+)\s*到\s*([^?\s]+)/);
+        if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
+            // Regex handles: [From] Origin [To/WalkTo/GoTo] Dest
+            // Excludes "步行", "走路" from station name capture
+            // Order sensitive: Match longer separators (步行到) before shorter ones (到)
+            const zhMatch = text.match(/(?:從|from)?\s*([^到去前往步行走路\s]+)\s*(?:步行到|走路去|到|去|前往|to)\s*([^?\s？！!，,。]+)/) || text.match(/([^从\s]+)\s*到\s*([^?\s？！!，,。]+)/);
             const enMatch = text.match(/from\s+([a-zA-Z\s]+)\s+to\s+([a-zA-Z\s]+)/i);
             const origin = zhMatch?.[1] || enMatch?.[1];
             const dest = zhMatch?.[2] || enMatch?.[2];
@@ -392,6 +399,7 @@ export class HybridEngine {
 你的使命：用溫暖、口語且像真實朋友對話的方式，提供東京交通決策。
 請善用提供給你的「攻略 (Hacks)」與「陷阱 (Traps)」資訊。
 ✅ 格式要求：可以使用 Markdown 加粗關鍵字 (如 **平台號碼**、**出口名稱**)。可以使用條列式說明多個步驟。
+⚠️ 邏輯安全守則：若無確切數據，請優先建議搭乘電車/地鐵。**嚴禁** 建議用戶步行超過 1.5 公里 (除非用戶明確要求健行)。
 🛑 限制：回覆不超過 5 句話。保持語氣自然親切，不要像機器人。`,
             'ja': `あなたは LUTAGU (ルタグ)、東京に住む親切でプロフェッショナルな「地元の友達」です。
 使命：温かく、親しみやすい口調で、実用的な東京の交通アドバイスを提供すること。

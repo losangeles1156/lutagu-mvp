@@ -359,7 +359,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
 
                 {suggestedQuestions.length > 0 && !thinkingStep && (
                     <div className="flex flex-col gap-2 mt-2 px-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Suggested</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">{tL4('suggestedQuestions')}</p>
                         <div className="flex flex-wrap gap-2">
                             {suggestedQuestions.map((q, i) => (
                                 <button

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Cloud, Sun, CloudRain, CloudSnow, Wind, Droplets, AlertTriangle, ShieldAlert, ExternalLink, Umbrella } from 'lucide-react';
 
@@ -32,6 +32,12 @@ interface SmartWeatherCardProps {
 export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCardProps) {
     const tL2 = useTranslations('l2');
     const locale = useLocale();
+
+    const onAdviceUpdateRef = useRef(onAdviceUpdate);
+
+    useEffect(() => {
+        onAdviceUpdateRef.current = onAdviceUpdate;
+    }, [onAdviceUpdate]);
 
     // Initialize with prop data if available to avoid loading state
     const [weather, setWeather] = useState<WeatherData | null>(() => {
@@ -67,7 +73,7 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
         async function fetchAll() {
             // If we didn't have initial data, we show loading. 
             // If we did, we still fetch in background to update/hydrate details.
-            if (!weather) setLoading(true);
+            if (!initialData) setLoading(true);
 
             try {
                 // 1. Fetch Live Weather (Full Data)
@@ -110,7 +116,7 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
                     if (isMounted) {
                         setAdvice(adviceData.advice);
                         if (adviceData.jma_link) setJmaLink(adviceData.jma_link);
-                        onAdviceUpdate?.(adviceData.advice);
+                        onAdviceUpdateRef.current?.(adviceData.advice);
                     }
                 }
             } catch (e) {
@@ -121,7 +127,7 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
         }
         fetchAll();
         return () => { isMounted = false; };
-    }, [locale, onAdviceUpdate, weather]);
+    }, [locale, initialData]);
 
     if (loading || !weather) {
         return (

@@ -198,6 +198,7 @@
         "dnaTitle": "Location DNA",
         "lutaguInsight": "LUTAGU Insight",
         "nearbyHighlights": "Highlights (300m)",
+        "noHighlights": "No nearby highlights",
         "menuTitle": "Category Details",
         "navTo": "Nav",
         "items": "Items",
@@ -338,6 +339,7 @@
         }
     },
     "l4": {
+        "suggestedQuestions": "Suggested",
         "viewModes": {
             "recommendations": "Smart Tips",
             "planner": "Planner",

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 // Simple in-memory cache for viewport requests
 const cache = new Map<string, { data: any, timestamp: number }>();
-const CACHE_TTL = 15000; // 15 seconds
+const CACHE_TTL = 300000; // 5 minutes
 
 function getCacheKey(params: any) {
     return JSON.stringify(params);
@@ -309,11 +309,11 @@ export async function GET(req: Request) {
     const zoom = clamp(Math.round(zoomRaw), 1, 22);
     const page = clamp(Math.floor(toNumber(url.searchParams.get('page')) ?? 0), 0, 1000);
 
-    const maxDataSizeKb = clamp(Math.floor(toNumber(url.searchParams.get('max_kb')) ?? 350), 50, 2000);
+    const maxDataSizeKb = clamp(Math.floor(toNumber(url.searchParams.get('max_kb')) ?? 250), 50, 1000);
 
-    const defaultPageSize = zoom < 11 ? 200 : zoom < 14 ? 500 : 900;
+    const defaultPageSize = zoom < 11 ? 200 : zoom < 14 ? 350 : 500;
     const requestedPageSize = Math.floor(toNumber(url.searchParams.get('page_size')) ?? defaultPageSize);
-    const pageSize = clamp(requestedPageSize, 50, 1000);
+    const pageSize = clamp(requestedPageSize, 50, 500);
 
     // [RESTORED] hubsOnly filter: show only hubs at low zoom for performance and visual clarity
     // This ensures same-operator stations are grouped as single nodes
@@ -348,8 +348,8 @@ export async function GET(req: Request) {
     const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const envKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    const supabaseUrl = envUrl || 'https://evubeqeaafdjnuocyhmb.supabase.co';
-    const supabaseKey = envKey || 'sb_publishable_qskNmAdUYEk4r80N6cFJXg_mAS5sZZB';
+    const supabaseUrl = envUrl || '';
+    const supabaseKey = envKey || '';
 
     // Check if we should use fallback due to missing config (only if both Env and Fallback are missing, effectively never now)
     // But we might want 'fallback' manual override
@@ -369,6 +369,10 @@ export async function GET(req: Request) {
         }
     } else {
         try {
+            if (!supabaseUrl || !supabaseKey) {
+                console.error('[Viewport] Missing Supabase Credentials for fallback ingestion');
+                return NextResponse.json({ error: 'Missing configuration' }, { status: 500 });
+            }
             supabaseClient = createClient(supabaseUrl, supabaseKey);
             let data: any = null;
             let error: any = null;
@@ -377,7 +381,7 @@ export async function GET(req: Request) {
                 center_lat: center.lat,
                 center_lon: center.lon,
                 radius_meters: Math.round(radiusMeters),
-                max_results: 1000
+                max_results: 700
             }));
 
             if (error) {
@@ -452,7 +456,7 @@ export async function GET(req: Request) {
                     return false;
                 }
             }
-
+    
             if (coreOnly) {
                 const isAirport = n.ward_id === 'ward:airport';
                 const isCoreWard = n.ward_id && [
@@ -482,26 +486,8 @@ export async function GET(req: Request) {
 
     // [FIX] Do NOT merge fallback nodes if we successfully fetched from Supabase
     // Only use fallback nodes if we are in degraded mode or strictly using fallback source
-    const supplementalSeed = (source === 'fallback' && candidates.length === 0)
-        ? getFallbackNodes()
-            .map((n) => ({
-                ...n,
-                ward_id: (n as any).ward_id ?? null
-            }))
-            .filter((n) => {
-                const [lon, lat] = n.location.coordinates;
-                if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
-                if (lat === 0 && lon === 0) return false;
-                if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
-
-                const nodeType = String((n as any).type ?? '').toLowerCase();
-                const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
-                if (excludedTypes.includes(nodeType)) return false;
-                if (showStationsOnly && nodeType !== 'station') return false;
-                if (hubsOnly && !(n as any).is_hub) return false;
-                return true;
-            })
-        : [];
+    // The previous logic for supplementalSeed was causing zombie nodes and is removed.
+    const supplementalSeed: any[] = [];
 
     // If source is supabase, filteredBase contains our DB nodes. 
     // If source is fallback, filteredBase contains fallback nodes (assigned to candidates earlier).

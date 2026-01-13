@@ -1006,25 +1006,29 @@ export async function fetchNodeConfig(nodeId: string) {
                 ].filter(Boolean))
             ) as string[];
 
-            for (const stationId of candidates) {
-                const { data: l2Data } = await supabase
-                    .from('transit_dynamic_snapshot')
-                    .select('*')
-                    .eq('station_id', stationId)
-                    .maybeSingle();
+            const { data: l2Rows } = await supabase
+                .from('transit_dynamic_snapshot')
+                .select('*')
+                .in('station_id', candidates)
+                .order('updated_at', { ascending: false });
 
-                if (!l2Data) continue;
+            const rowMap = new Map<string, any>();
+            for (const row of (l2Rows || [])) {
+                const id = row?.station_id;
+                if (!id || rowMap.has(id)) continue;
+                rowMap.set(id, row);
+            }
 
-                const reasonJa = l2Data.reason_ja || '';
-                const isStationDelay = l2Data.status_code === 'DELAY' &&
+            const picked = candidates.map((id) => rowMap.get(id)).find(Boolean);
+            if (picked) {
+                const reasonJa = picked.reason_ja || '';
+                const isStationDelay = picked.status_code === 'DELAY' &&
                     !reasonJa.includes('平常') &&
                     !reasonJa.includes('通常');
 
                 enrichedProfile.l2_status = {
-                    congestion: isStationDelay ? 4 : (l2Data.crowd_level || 2),
+                    congestion: isStationDelay ? 4 : (picked.crowd_level || 2),
                     line_status: servedLines.map(line => {
-                        // More granular check: only mark as delay if it's a station-wide delay 
-                        // or if the line name (English or Japanese) is mentioned in the reason.
                         const lineMatchesReason = reasonJa.includes(line.name.ja) ||
                             (line.name.en && reasonJa.includes(line.name.en));
 
@@ -1036,17 +1040,15 @@ export async function fetchNodeConfig(nodeId: string) {
                             operator: line.operator,
                             color: line.color,
                             status: shouldShowDelay ? 'delay' : 'normal',
-                            message: shouldShowDelay ? l2Data.reason_ja : undefined
+                            message: shouldShowDelay ? picked.reason_ja : undefined
                         };
                     }),
                     weather: {
-                        temp: l2Data.weather_info?.temp || 0,
-                        condition: l2Data.weather_info?.condition || 'Unknown'
+                        temp: picked.weather_info?.temp || 0,
+                        condition: picked.weather_info?.condition || 'Unknown'
                     },
-                    updated_at: l2Data.updated_at
+                    updated_at: picked.updated_at
                 };
-
-                break;
             }
         }
     } catch (e) {

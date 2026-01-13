@@ -11,6 +11,10 @@ import { ActionCard, Action as ChatAction } from './ActionCard';
 import { ContextSelector } from './ContextSelector';
 import { demoScripts } from '@/data/demoScripts';
 
+export function buildL2StatusUrl(stationId: string) {
+    return `/api/l2/status?station_id=${encodeURIComponent(stationId)}`;
+}
+
 export function ChatOverlay() {
     const locale = useLocale();
     const tChat = useTranslations('chat');
@@ -219,24 +223,37 @@ export function ChatOverlay() {
     }, [isChatOpen, storeMessages, messages, locale, addStoreMessage, clearStoreMessages, isDemoMode, activeDemoId, pendingChatInput, setMessages, tChat]);
 
     useEffect(() => {
+        if (!isChatOpen) return;
+        if (!currentNodeId) return;
+
+        const controller = new AbortController();
+        const timeoutId: ReturnType<typeof setTimeout> = setTimeout(() => controller.abort(), 15000);
+
         const fetchL2 = async () => {
-            if (!currentNodeId) return;
             try {
-                const res = await fetch(`/api/l2/status?station_id=${currentNodeId}`);
+                const res = await fetch(buildL2StatusUrl(currentNodeId), {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
+
                 if (res.ok) {
                     const data = await res.json();
-                    if (data) {
-                        setL2Status(data);
-                    }
-                } else {
-                    console.error('[ChatOverlay] L2 Fetch Failed', res.status, res.statusText);
+                    if (data) setL2Status(data);
+                    return;
                 }
-            } catch (e) {
-                console.error('L2 Fetch Error', e);
+
+                console.error('[ChatOverlay] L2 Fetch Failed', res.status, res.statusText);
+            } catch (e: any) {
+                if (e?.name === 'AbortError') return;
+                console.error('[ChatOverlay] L2 Fetch Error', e);
             }
         };
-        // Skip L2 fetch in demo mode if we want to keep it simple, or keep it. Keeping it is fine.
-        if (isChatOpen) fetchL2();
+
+        fetchL2();
+        return () => {
+            clearTimeout(timeoutId);
+            controller.abort();
+        };
     }, [isChatOpen, currentNodeId]);
 
     useEffect(() => {

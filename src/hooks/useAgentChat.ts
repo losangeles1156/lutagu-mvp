@@ -2,17 +2,20 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport, UIMessage } from 'ai';
+import { DefaultChatTransport } from 'ai';
 import { useTranslations, useLocale } from 'next-intl';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
+import { useUIStateMachine } from '@/stores/uiStateMachine';
 
 export interface AgentMessage {
+    id?: string;
     role: 'user' | 'assistant';
     content: string;
     isStrategy?: boolean;
     source?: 'template' | 'algorithm' | 'llm';
     data?: any;
     thought?: string | null; // Added thought property
+    rawContent?: string;
 }
 
 export interface UseAgentChatOptions {
@@ -22,6 +25,7 @@ export interface UseAgentChatOptions {
     onMessage?: (message: AgentMessage) => void;
     onComplete?: () => void;
     onError?: (error: Error) => void;
+    syncToUIStateMachine?: boolean;
 }
 
 export interface UseAgentChatReturn {
@@ -48,7 +52,7 @@ export interface QuickButton {
 import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
 
 export function useAgentChat(options: UseAgentChatOptions) {
-    const { stationId, stationName, onMessage, onComplete, onError } = options;
+    const { stationId, stationName, onMessage, onComplete, onError, syncToUIStateMachine = false } = options;
 
     const tL4 = useTranslations('l4');
     const locale = useLocale();
@@ -63,6 +67,9 @@ export function useAgentChat(options: UseAgentChatOptions) {
         globalThis.crypto?.randomUUID?.() ||
         `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
     );
+
+    const hasHydratedFromStoreRef = useRef(false);
+    const lastStoreSyncSignatureRef = useRef<string>('');
 
     // AI SDK v6 transport-based architecture
     const transport = useMemo(() => new DefaultChatTransport({
@@ -79,8 +86,8 @@ export function useAgentChat(options: UseAgentChatOptions) {
 
     const {
         messages: aiMessages,
-        append: sendAiMessage,
-        status,
+        sendMessage: sendAiMessage,
+        status: chatStatus,
         setMessages: setAiMessages,
     } = useChat({
         transport,
@@ -90,9 +97,17 @@ export function useAgentChat(options: UseAgentChatOptions) {
             setThinkingStep('');
             onError?.(error);
         }
-    } as any) as any;
+    });
 
-    const isLoading = status === 'streaming' || status === 'submitted';
+    const isLoading = chatStatus === 'submitted' || chatStatus === 'streaming';
+
+    const [status, setStatus] = useState<'ready' | 'streaming' | 'error'>('ready');
+
+    useEffect(() => {
+        if (isLoading) setStatus('streaming');
+        else if (isOffline) setStatus('error');
+        else setStatus('ready');
+    }, [isLoading, isOffline]);
 
     // Clear thinking step when streaming completes
     useEffect(() => {
@@ -144,6 +159,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
             content = content.replace(/\[\/?THINKING\]/gi, '').trim();
 
             return {
+                id: m.id,
                 role: m.role as 'user' | 'assistant',
                 content,
                 data: m.data,
@@ -152,6 +168,53 @@ export function useAgentChat(options: UseAgentChatOptions) {
             };
         });
     }, [aiMessages]);
+
+    useEffect(() => {
+        if (!syncToUIStateMachine) return;
+        if (hasHydratedFromStoreRef.current) return;
+        if (aiMessages.length > 0) {
+            hasHydratedFromStoreRef.current = true;
+            return;
+        }
+
+        const storeMessages = useUIStateMachine.getState().messages;
+        if (storeMessages.length === 0) {
+            hasHydratedFromStoreRef.current = true;
+            return;
+        }
+
+        setAiMessages(
+            storeMessages.map((m) => ({
+                id: m.id,
+                role: m.role,
+                content: m.content,
+                parts: [{ type: 'text', text: m.content }]
+            })) as any
+        );
+        hasHydratedFromStoreRef.current = true;
+    }, [syncToUIStateMachine, aiMessages.length, setAiMessages]);
+
+    useEffect(() => {
+        if (!syncToUIStateMachine) return;
+
+        const nextStoreMessages = messages.map((m, idx) => {
+            const fallbackId = (aiMessages[idx] as any)?.id || `msg-${idx}`;
+            const previous = useUIStateMachine.getState().messages[idx];
+
+            return {
+                id: m.id || fallbackId,
+                role: m.role,
+                content: m.content,
+                timestamp: previous?.timestamp || Date.now(),
+            };
+        });
+
+        const signature = nextStoreMessages.map((m) => `${m.role}:${m.content}`).join('|');
+        if (signature === lastStoreSyncSignatureRef.current) return;
+        lastStoreSyncSignatureRef.current = signature;
+
+        useUIStateMachine.getState().setMessages(nextStoreMessages as any);
+    }, [syncToUIStateMachine, messages, aiMessages]);
 
     // Effect to extract side-channel data (Thinking, Suggested Questions) from raw messages
     useEffect(() => {
@@ -346,7 +409,15 @@ export function useAgentChat(options: UseAgentChatOptions) {
         const startTime = Date.now();
 
         try {
-            await sendAiMessage({ role: 'user', content: text });
+            await sendAiMessage(
+                { text },
+                {
+                    body: {
+                        userId: userIdRef.current,
+                        user_profile: userProfile,
+                    }
+                }
+            );
             setThinkingStep('');
             onComplete?.();
             metricsCollector.recordRequest('llm', Date.now() - startTime);
@@ -357,11 +428,14 @@ export function useAgentChat(options: UseAgentChatOptions) {
         }
     }, [isLoading, locale, stationId, zone, tL4, sendAiMessage, setAiMessages, onMessage, onComplete]);
 
-    const clearMessages = useCallback(() => {
+    const clearMessagesHandler = useCallback(() => {
         setAiMessages([]);
-    }, [setAiMessages]);
+        if (syncToUIStateMachine) {
+            useUIStateMachine.getState().clearMessages();
+        }
+    }, [setAiMessages, syncToUIStateMachine]);
 
-    return {
+    return useMemo(() => ({
         messages,
         setMessages: setAiMessages,
         isLoading,
@@ -369,9 +443,19 @@ export function useAgentChat(options: UseAgentChatOptions) {
         thinkingStep,
         suggestedQuestions,
         sendMessage,
-        clearMessages: () => setAiMessages([]),
+        clearMessages: clearMessagesHandler,
         quickButtons,
         messagesEndRef,
         userId: userIdRef.current
-    };
+    }), [
+        messages,
+        setAiMessages,
+        isLoading,
+        isOffline,
+        thinkingStep,
+        suggestedQuestions,
+        sendMessage,
+        clearMessagesHandler,
+        quickButtons
+    ]);
 }

@@ -6,10 +6,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!
-);
+type AnySupabase = ReturnType<typeof createClient<any>>;
+
+let supabase: AnySupabase | null = null;
+
+function getSupabase(): AnySupabase {
+    if (supabase) return supabase;
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Missing Supabase credentials');
+    }
+
+    supabase = createClient<any>(supabaseUrl, supabaseKey);
+    return supabase;
+}
 
 // GET /api/poi/similar/[id]
 export async function GET(
@@ -25,7 +38,7 @@ export async function GET(
 
     try {
         // First get similar POI IDs
-        const { data: similarities, error } = await supabase
+        const { data: similarities, error } = await getSupabase()
             .from('l1_poi_similarities')
             .select(`
                 similar_poi_id,
@@ -57,7 +70,7 @@ export async function GET(
 
         // Get POI details
         const poiIds = similarities.map(s => s.similar_poi_id);
-        const { data: pois, error: poiError } = await supabase
+        const { data: pois, error: poiError } = await getSupabase()
             .from('l1_places')
             .select('id, name, category, location')
             .in('id', poiIds);

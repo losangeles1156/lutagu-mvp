@@ -144,7 +144,7 @@ interface EngineConfig {
 const DEFAULT_CONFIG: EngineConfig = {
     enableRedisCache: true,
     enableQueryNormalization: true,
-    enablePrefetch: true,
+    enablePrefetch: false,
     enableSimilarityFallback: true,
     maxSimilarResults: 5,
     similarityThreshold: 0.6,
@@ -191,6 +191,8 @@ export class POITaggedDecisionEngine {
     private localCache: Map<string, { data: POIDecisionResult[]; expiry: number }>;
     private queryStats: Map<string, number>;
     private normalizationCache: Map<string, string>;
+    private prefetchStartupTimer: NodeJS.Timeout | null;
+    private prefetchIntervalTimer: NodeJS.Timeout | null;
 
     constructor(
         supabaseUrl: string,
@@ -203,6 +205,8 @@ export class POITaggedDecisionEngine {
         this.localCache = new Map();
         this.queryStats = new Map();
         this.normalizationCache = new Map();
+        this.prefetchStartupTimer = null;
+        this.prefetchIntervalTimer = null;
 
         // Initialize Redis if URL provided
         if (redisUrl && this.config.enableRedisCache) {
@@ -381,20 +385,34 @@ export class POITaggedDecisionEngine {
      * 排程預取熱門查詢
      */
     private schedulePrefetch(): void {
-        // Prefetch on startup
-        setTimeout(async () => {
+        if (this.prefetchStartupTimer) clearTimeout(this.prefetchStartupTimer);
+        if (this.prefetchIntervalTimer) clearInterval(this.prefetchIntervalTimer);
+
+        this.prefetchStartupTimer = setTimeout(async () => {
             for (const query of POPULAR_QUERIES) {
                 await this.prefetchQuery(query);
             }
             console.log('[POITaggedEngine] Prefetched popular queries');
         }, 1000);
+        this.prefetchStartupTimer.unref?.();
 
-        // Periodic refresh every 5 minutes
-        setInterval(async () => {
+        this.prefetchIntervalTimer = setInterval(async () => {
             for (const query of POPULAR_QUERIES) {
                 await this.prefetchQuery(query);
             }
         }, 5 * 60 * 1000);
+        this.prefetchIntervalTimer.unref?.();
+    }
+
+    private clearPrefetchTimers(): void {
+        if (this.prefetchStartupTimer) {
+            clearTimeout(this.prefetchStartupTimer);
+            this.prefetchStartupTimer = null;
+        }
+        if (this.prefetchIntervalTimer) {
+            clearInterval(this.prefetchIntervalTimer);
+            this.prefetchIntervalTimer = null;
+        }
     }
 
     /**
@@ -795,6 +813,7 @@ export class POITaggedDecisionEngine {
      * 關閉連接
      */
     async close(): Promise<void> {
+        this.clearPrefetchTimers();
         if (this.redis) {
             await this.redis.quit();
         }

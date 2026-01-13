@@ -1345,6 +1345,11 @@ export function findRankedRoutes(params: {
             score: (c) => c.time + c.transfers * 3, // 極度追求時間，轉乘懲罰極低
         },
         {
+            key: 'fewest_transfers',
+            label: t('最少轉乘', '乗換最少', 'Fewest transfers'),
+            score: (c) => c.transfers * 1000 + c.time,
+        },
+        {
             key: 'comfort',
             label: t('最舒適', 'らくらく', 'Comfortable'),
             score: (c) => c.transfers * 60 + c.transferDistance * 0.3 + c.time, // 極度厭惡轉乘與步行
@@ -1352,7 +1357,8 @@ export function findRankedRoutes(params: {
     ];
 
     const results: RouteOption[] = [];
-    const seen = new Set<string>();
+    const signatureToIndex = new Map<string, number>();
+    const usedLabels = new Set<string>();
     const adj = getAdjacency(railways);
 
     for (const cand of candidates) {
@@ -1365,8 +1371,19 @@ export function findRankedRoutes(params: {
         });
         if (!found) continue;
         const signature = `${found.path.join('>')}|${found.edgeRailways.join(',')}`;
-        if (seen.has(signature)) continue;
-        seen.add(signature);
+        const existingIndex = signatureToIndex.get(signature);
+        if (typeof existingIndex === 'number') {
+            if (results.length < 2 && !usedLabels.has(cand.label)) {
+                const base = results[existingIndex];
+                results.push({
+                    ...base,
+                    label: cand.label,
+                });
+                usedLabels.add(cand.label);
+            }
+            continue;
+        }
+
         results.push(
             buildRouteOptionFromPath({
                 path: found.path,
@@ -1377,6 +1394,8 @@ export function findRankedRoutes(params: {
                 costs: found.costs,
             })
         );
+        signatureToIndex.set(signature, results.length - 1);
+        usedLabels.add(cand.label);
     }
 
     if (results.length === 0) {

@@ -12,8 +12,8 @@ function getEnvConfig() {
 
     // Choose the best available key for general purpose
     // Choose the best available key for general purpose
-    const supabaseKey = supabaseServiceKey || supabaseAnonKey || 'sb_publishable_qskNmAdUYEk4r80N6cFJXg_mAS5sZZB';
-    const finalUrl = supabaseUrl || 'https://evubeqeaafdjnuocyhmb.supabase.co';
+    const supabaseKey = supabaseServiceKey || supabaseAnonKey;
+    const finalUrl = supabaseUrl;
 
     console.log('[SupabaseConfig] Loading Env:', {
         hasUrl: !!supabaseUrl,
