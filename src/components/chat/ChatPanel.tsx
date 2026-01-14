@@ -84,6 +84,7 @@ export function ChatPanel() {
 
     // Manage input state
     const [input, setInput] = useState('');
+    const [isDemoPlaying, setIsDemoPlaying] = useState(false);
 
     // Agent Chat Hook Integration
     const {
@@ -115,6 +116,140 @@ export function ChatPanel() {
     const resizeStartY = useRef(0);
     const resizeStartHeight = useRef(DEFAULT_HEIGHT);
     const hasBootstrappedRef = useRef(false);
+    const demoRunTokenRef = useRef(0);
+
+    const sleep = useCallback((ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms)), []);
+
+    const resolveLang = useCallback(() => {
+        return (locale === 'ja' || locale === 'en' || locale === 'zh-TW') ? locale : 'zh';
+    }, [locale]);
+
+    const renderDemoTemplate = useCallback((template: string, vars: Record<string, string>) => {
+        return template
+            .replace(/\{\{\s*time\s*\}\}/g, vars.time ?? '')
+            .replace(/\{\{\s*weather\s*\}\}/g, vars.weather ?? '');
+    }, []);
+
+    const updateAssistantMessage = useCallback((assistantMsgId: string, content: string, isLoading: boolean, data?: any) => {
+        setMessages((prev: any[]) => {
+            const next = prev.map((m: any) => {
+                if (m.id !== assistantMsgId) return m;
+                const nextMsg = { ...m, content, isLoading };
+                if (nextMsg.parts && nextMsg.parts[0]) {
+                    nextMsg.parts = [{ type: 'text', text: content }];
+                }
+                if (data) nextMsg.data = data;
+                return nextMsg;
+            });
+            return next as any;
+        });
+    }, [setMessages]);
+
+    const runDemoPlayback = useCallback(async (demoId: string) => {
+        const script = demoScripts[demoId];
+        if (!script) return;
+
+        const lang = resolveLang();
+        const token = ++demoRunTokenRef.current;
+
+        setIsDemoPlaying(true);
+        setMessages([] as any);
+        useAppStore.setState({ messages: [] as any });
+
+        const vars = {
+            time: script.mockContext?.time?.[lang] ?? '',
+            weather: script.mockContext?.weather?.[lang] ?? ''
+        };
+
+        const rounds = Array.isArray((script as any).rounds) ? (script as any).rounds : [];
+
+        for (const round of rounds) {
+            if (demoRunTokenRef.current !== token) return;
+
+            const userText = round.userMessage?.[lang] ?? '';
+            const userMsg = {
+                id: `demo-${demoId}-r${round.roundNumber}-user-${Date.now()}`,
+                role: 'user',
+                content: userText,
+                parts: [{ type: 'text', text: userText }]
+            };
+
+            setMessages((prev: any[]) => [...prev, userMsg] as any);
+            await sleep(450);
+            if (demoRunTokenRef.current !== token) return;
+
+            const assistantMsgId = `demo-${demoId}-r${round.roundNumber}-assistant-${Date.now()}`;
+            const assistantMsg = {
+                id: assistantMsgId,
+                role: 'assistant',
+                content: '',
+                parts: [{ type: 'text', text: '' }],
+                isLoading: true
+            };
+            setMessages((prev: any[]) => [...prev, assistantMsg] as any);
+
+            const responseTemplate = round.assistantResponse?.[lang] ?? '';
+            const responseText = renderDemoTemplate(responseTemplate, vars);
+            let displayedText = '';
+            const chunkSize = 2;
+
+            for (let i = 0; i < responseText.length; i += chunkSize) {
+                if (demoRunTokenRef.current !== token) return;
+                await sleep(30);
+                displayedText += responseText.slice(i, i + chunkSize);
+                updateAssistantMessage(assistantMsgId, displayedText, true);
+            }
+
+            const roundActions = Array.isArray(round.actions) ? round.actions : [];
+            const localizedRoundActions = roundActions.map((a: any) => ({
+                ...a,
+                label: a.label?.[lang] ?? a.label
+            }));
+
+            const isLastRound = round.roundNumber === 3;
+            const endActions = isLastRound ? [
+                {
+                    type: 'discovery',
+                    label: lang === 'ja'
+                        ? 'この条件で旅を始める'
+                        : lang === 'en'
+                            ? 'Start planning with LUTAGU'
+                            : lang === 'zh-TW'
+                                ? '用這個情境開始規劃'
+                                : '用这个情境开始规划',
+                    target: 'internal:end-demo',
+                    metadata: { category: 'cta' }
+                },
+                {
+                    type: 'discovery',
+                    label: lang === 'ja'
+                        ? 'デモをもう一度見る'
+                        : lang === 'en'
+                            ? 'Replay demo'
+                            : lang === 'zh-TW'
+                                ? '重新播放示範'
+                                : '重新播放示范',
+                    target: 'internal:restart-demo',
+                    metadata: { category: 'cta' }
+                }
+            ] : [];
+
+            updateAssistantMessage(
+                assistantMsgId,
+                displayedText,
+                false,
+                (localizedRoundActions.length > 0 || endActions.length > 0)
+                    ? { actions: [...localizedRoundActions, ...endActions] }
+                    : undefined
+            );
+
+            await sleep(typeof round.pauseAfterMs === 'number' ? round.pauseAfterMs : 650);
+        }
+
+        if (demoRunTokenRef.current === token) {
+            setIsDemoPlaying(false);
+        }
+    }, [renderDemoTemplate, resolveLang, setMessages, sleep, updateAssistantMessage]);
 
     // Auto-scroll
     useEffect(() => {
@@ -129,86 +264,7 @@ export function ChatPanel() {
         // Demo Mode Logic
         if (isDemoMode && activeDemoId && demoScripts[activeDemoId]) {
             hasBootstrappedRef.current = true;
-            const script = demoScripts[activeDemoId];
-            const lang = (locale === 'ja' || locale === 'en' || locale === 'zh-TW') ? locale : 'zh';
-
-            // 1. Initial User Message
-            const initialUserMsg = {
-                id: `demo-user-${Date.now()}`,
-                role: 'user',
-                content: script.userMessage[lang],
-                parts: [{ type: 'text', text: script.userMessage[lang] }]
-            };
-
-            // Update hook state (for rendering) AND store (for persistence if needed)
-            setMessages([initialUserMsg] as any);
-            useAppStore.setState({ messages: [initialUserMsg] as any });
-
-            // Simulate Assistant Response
-            setTimeout(async () => {
-                const assistantMsgId = `demo-assistant-${Date.now()}`;
-                const initialAssistantMsg = {
-                    id: assistantMsgId,
-                    role: 'assistant',
-                    content: '', // Start empty
-                    parts: [{ type: 'text', text: '' }],
-                    isLoading: true // Custom flag (might not directly affect AI SDK but useful for custom logic)
-                };
-
-                // Add empty assistant message
-                setMessages((prev: any[]) => [...prev, initialAssistantMsg] as any);
-
-                const responseText = script.assistantResponse[lang];
-                let displayedText = '';
-                const chunkSize = 2; // Char per tick
-
-                for (let i = 0; i < responseText.length; i += chunkSize) {
-                    await new Promise(r => setTimeout(r, 30));
-                    displayedText += responseText.slice(i, i + chunkSize);
-
-                    // Update streaming text
-                    setMessages((prev: any[]) => {
-                        const newMessages = [...prev] as any[]; // Cast to any[]
-                        const lastMsg = { ...newMessages[newMessages.length - 1] };
-
-                        if (lastMsg.role === 'assistant') {
-                            lastMsg.content = displayedText;
-                            // AI SDK uses parts for structure sometimes, keep it consistent
-                            if (lastMsg.parts && lastMsg.parts[0]) {
-                                lastMsg.parts = [{ type: 'text', text: displayedText }];
-                            }
-                        }
-                        newMessages[newMessages.length - 1] = lastMsg;
-                        return newMessages;
-                    });
-                }
-
-                // Finish stream, add actions
-                setMessages((prev: any[]) => {
-                    const newMessages = [...prev] as any[]; // Cast to any[]
-                    const lastMsg = { ...newMessages[newMessages.length - 1] };
-
-                    if (lastMsg.role === 'assistant') {
-                        // Attach actions as data (AgentMessage interface supports data)
-                        const demoActions = [
-                            ...script.actions.map((a: any) => ({
-                                ...a,
-                                label: a.label[lang]
-                            })),
-                            {
-                                type: 'discovery',
-                                label: tChat('restartChat', { defaultValue: 'Restart Chat' }),
-                                target: 'internal:restart'
-                            }
-                        ];
-                        // Store actions in 'data' property for MessageBubble to pick up
-                        lastMsg.data = { actions: demoActions };
-                    }
-                    newMessages[newMessages.length - 1] = lastMsg;
-                    return newMessages;
-                });
-
-            }, 600);
+            runDemoPlayback(activeDemoId);
             return;
         }
 
@@ -224,7 +280,7 @@ export function ChatPanel() {
         if (messages.length === 0 && !isDemoMode) {
             hasBootstrappedRef.current = true;
         }
-    }, [uiState, isDemoMode, pendingChatInput, pendingChatAutoSend, append, setPendingChat, messages.length, activeDemoId, locale, addStoreMessage, tChat, setDemoMode]);
+    }, [uiState, isDemoMode, activeDemoId, pendingChatInput, pendingChatAutoSend, append, setPendingChat, messages.length, runDemoPlayback]);
 
     // Handle Resize
     const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -262,6 +318,17 @@ export function ChatPanel() {
             transitionTo('collapsed_desktop');
         } else if (action.target === 'internal:restart') {
             handleRestart();
+        } else if (action.target === 'internal:end-demo') {
+            demoRunTokenRef.current++;
+            setIsDemoPlaying(false);
+            clearMessages();
+            clearStoreMessages();
+            setDemoMode(false);
+            hasBootstrappedRef.current = false;
+        } else if (action.target === 'internal:restart-demo') {
+            demoRunTokenRef.current++;
+            hasBootstrappedRef.current = true;
+            if (activeDemoId) runDemoPlayback(activeDemoId);
         } else if (action.target?.startsWith('chat:')) {
             const q = decodeURIComponent(action.target.slice('chat:'.length));
             append({ role: 'user', content: q });
@@ -273,6 +340,8 @@ export function ChatPanel() {
     };
 
     const handleRestart = () => {
+        demoRunTokenRef.current++;
+        setIsDemoPlaying(false);
         clearMessages();
         clearStoreMessages();
         setDemoMode(false);
@@ -350,17 +419,18 @@ export function ChatPanel() {
 
                     {/* Input Area */}
                     <div className="shrink-0 p-4 border-t border-slate-100 bg-white/95 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]">
-                        <form onSubmit={(e) => { e.preventDefault(); if (input.trim()) { sendMessage(input); setInput(''); } }} className="flex gap-2">
+                        <form onSubmit={(e) => { e.preventDefault(); if (isDemoPlaying) return; if (input.trim()) { sendMessage(input); setInput(''); } }} className="flex gap-2">
                             <input
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder={tChat('placeholder')}
                                 maxLength={MAX_INPUT_LENGTH}
+                                disabled={isDemoPlaying}
                                 className="flex-1 px-4 py-3 bg-slate-50 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 font-bold"
                             />
                             <button
                                 type="submit"
-                                disabled={!input.trim() || isLoading}
+                                disabled={isDemoPlaying || !input.trim() || isLoading}
                                 className="px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center justify-center"
                             >
                                 {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}

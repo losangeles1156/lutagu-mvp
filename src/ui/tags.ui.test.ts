@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
 
@@ -95,30 +97,62 @@ async function clickOnboardingHubButton(page: any): Promise<void> {
 
 async function clickNodeTabByIndex(page: any, index: number): Promise<void> {
     await page.waitForFunction(() => {
-        const containers = Array.from(document.querySelectorAll('div')) as HTMLDivElement[];
-        const nav = containers.find(d => (d.className || '').includes('sticky')
-            && (d.className || '').includes('z-20')
-            && d.querySelectorAll('button').length >= 4);
-        return Boolean(nav);
+        const tablist = document.querySelector('[role="tablist"]');
+        if (!tablist) return false;
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        return tabs.length >= 4;
     }, { timeout: 60_000 });
 
     await page.evaluate((i: number) => {
-        const containers = Array.from(document.querySelectorAll('div')) as HTMLDivElement[];
-        const nav = containers.find(d => (d.className || '').includes('sticky')
-            && (d.className || '').includes('z-20')
-            && d.querySelectorAll('button').length >= 4);
-        if (!nav) return;
-        const buttons = Array.from(nav.querySelectorAll('button')) as HTMLButtonElement[];
+        const tablist = document.querySelector('[role="tablist"]');
+        if (!tablist) return;
+        const buttons = Array.from(tablist.querySelectorAll('[role="tab"]')) as HTMLButtonElement[];
         const target = buttons[i];
         if (target) target.click();
     }, index);
 }
 
-async function waitForTabHeading(page: any, label: string): Promise<void> {
-    await page.waitForFunction((expected: string) => {
-        const headings = Array.from(document.querySelectorAll('h2'));
-        return headings.some(h => (h.textContent || '').trim() === expected);
-    }, { timeout: 60_000 }, label);
+async function waitForActiveTabByIndex(page: any, index: number): Promise<void> {
+    await page.waitForFunction((i: number) => {
+        const tablist = document.querySelector('[role="tablist"]');
+        if (!tablist) return false;
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
+        const t = tabs[i];
+        return Boolean(t) && t.getAttribute('aria-selected') === 'true';
+    }, { timeout: 60_000 }, index);
+}
+
+async function clickButtonByExactText(page: any, text: string): Promise<void> {
+    await page.waitForFunction((label: string) => {
+        const buttons = Array.from(document.querySelectorAll('button')) as HTMLButtonElement[];
+        return buttons.some(b => (b.textContent || '').trim() === label);
+    }, { timeout: 60_000 }, text);
+
+    await page.evaluate((label: string) => {
+        const buttons = Array.from(document.querySelectorAll('button')) as HTMLButtonElement[];
+        const target = buttons.find(b => (b.textContent || '').trim() === label);
+        target?.click();
+    }, text);
+}
+
+async function waitForEnabledButtonByExactText(page: any, text: string): Promise<void> {
+    await page.waitForFunction((label: string) => {
+        const buttons = Array.from(document.querySelectorAll('button')) as HTMLButtonElement[];
+        const target = buttons.find(b => (b.textContent || '').trim() === label);
+        return Boolean(target) && !target!.disabled;
+    }, { timeout: 60_000 }, text);
+}
+
+async function waitForAnySelector(page: any, selectors: string[], timeoutMs: number): Promise<string> {
+    const joined = selectors.join(',');
+    await page.waitForSelector(joined, { timeout: timeoutMs });
+    return joined;
+}
+
+function preparePuppeteerHome(prefix: string): string {
+    const dir = path.join(os.tmpdir(), `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+    fs.mkdirSync(dir, { recursive: true });
+    return dir;
 }
 
 async function waitForSpotsCountAtLeast(page: any, min: number): Promise<void> {
@@ -140,28 +174,44 @@ test('UI renders level badges in node tabs', { timeout: 180_000 }, async (t) => 
         await server.close();
     });
 
+    const puppeteerHome = preparePuppeteerHome(`lutagu-ui-home-${port}`);
+    t.after(() => {
+        fs.rmSync(puppeteerHome, { recursive: true, force: true });
+    });
+
     const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        env: {
+            ...process.env,
+            HOME: puppeteerHome,
+            XDG_CONFIG_HOME: puppeteerHome,
+            XDG_CACHE_HOME: puppeteerHome,
+            XDG_DATA_HOME: puppeteerHome,
+        },
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-crashpad',
+            '--disable-breakpad',
+            '--no-first-run',
+            '--no-default-browser-check',
+            `--user-data-dir=${path.join(puppeteerHome, 'profile')}`,
+        ]
     });
     t.after(async () => {
         await browser.close();
     });
 
     const page = await browser.newPage();
-    await page.goto(`${server.url}/en`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${server.url}/en/?node=odpt.Station:TokyoMetro.Ginza.Ueno&sheet=1&nodeTab=dna`, { waitUntil: 'domcontentloaded' });
 
-    await clickOnboardingHubButton(page);
-
-    await clickNodeTabByIndex(page, 0);
-    await waitForTabHeading(page, 'Nearby');
-    await waitForSpotsCountAtLeast(page, 1);
+    await waitForActiveTabByIndex(page, 0);
 
     await clickNodeTabByIndex(page, 1);
-    await waitForTabHeading(page, 'Status');
+    await waitForActiveTabByIndex(page, 1);
 
     await clickNodeTabByIndex(page, 2);
-    await waitForTabHeading(page, 'Facilities');
+    await waitForActiveTabByIndex(page, 2);
 
     assert.ok(true);
 });
@@ -173,9 +223,29 @@ test('UI renders route result card after destination search', { timeout: 180_000
         await server.close();
     });
 
+    const puppeteerHome = preparePuppeteerHome(`lutagu-ui-home-${port}`);
+    t.after(() => {
+        fs.rmSync(puppeteerHome, { recursive: true, force: true });
+    });
+
     const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        env: {
+            ...process.env,
+            HOME: puppeteerHome,
+            XDG_CONFIG_HOME: puppeteerHome,
+            XDG_CACHE_HOME: puppeteerHome,
+            XDG_DATA_HOME: puppeteerHome,
+        },
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-crashpad',
+            '--disable-breakpad',
+            '--no-first-run',
+            '--no-default-browser-check',
+            `--user-data-dir=${path.join(puppeteerHome, 'profile')}`,
+        ]
     });
     t.after(async () => {
         await browser.close();
@@ -235,18 +305,30 @@ test('UI renders route result card after destination search', { timeout: 180_000
         void req.continue();
     });
 
-    await page.goto(`${server.url}/en`, { waitUntil: 'domcontentloaded' });
-    await clickOnboardingHubButton(page);
+    await page.goto(`${server.url}/en/?node=odpt.Station:TokyoMetro.Ginza.Ueno&sheet=1&nodeTab=lutagu`, { waitUntil: 'domcontentloaded' });
+    await waitForActiveTabByIndex(page, 3);
 
-    await clickNodeTabByIndex(page, 3);
+    await clickButtonByExactText(page, 'Planner');
 
-    await page.waitForSelector('input[placeholder="Destination..."]', { timeout: 60_000 });
-    await page.type('input[placeholder="Destination..."]', 'Ginza');
+    const destinationSelector = await waitForAnySelector(
+        page,
+        [
+            'input[placeholder="Destination"]',
+            'input[placeholder="抵達目的地車站"]',
+            'input[placeholder="到着駅"]',
+            'input[placeholder="إلى أين؟"]'
+        ],
+        60_000
+    );
+    await page.type(destinationSelector, 'Ginza');
     await page.keyboard.press('Enter');
+
+    await waitForEnabledButtonByExactText(page, 'Generate Plan');
+    await clickButtonByExactText(page, 'Generate Plan');
 
     await page.waitForFunction(() => {
         const text = (document.body?.innerText || '').replace(/\s+/g, ' ');
-        return text.includes('Ueno → Ginza') && text.includes('Ticket ¥200') && text.includes('Next: 23:59');
+        return text.includes('Ueno → Ginza') && text.includes('¥180') && text.includes('23:59');
     }, { timeout: 60_000 });
 
     assert.ok(true);

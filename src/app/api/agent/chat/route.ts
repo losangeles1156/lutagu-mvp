@@ -4,15 +4,36 @@ import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { hybridEngine, RequestContext } from '@/lib/l4/HybridEngine';
 
 export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 
 /**
  * Chat API - Agentic Streaming Endpoint
- * 
+ *
  * Calls HybridEngine (AgentRouter > Regex) and streams the response
  * in a format compatible with the Frontend (useAgentChat).
  */
 export async function POST(req: NextRequest) {
     try {
+        // Environment check (for debugging Vercel deployment issues)
+        const hasApiKey = !!(
+            process.env.ZEABUR_API_KEY ||
+            process.env.GEMINI_API_KEY ||
+            process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+            process.env.MINIMAX_API_KEY ||
+            process.env.DEEPSEEK_API_KEY
+        );
+
+        if (!hasApiKey) {
+            console.error('[Chat API] Missing API keys - check Vercel environment variables');
+            return new Response(JSON.stringify({
+                error: 'Service temporarily unavailable - missing configuration',
+                code: 'MISSING_API_KEY'
+            }), {
+                status: 503,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         const body = await req.json();
 
         const extractText = (value: any): string => {
@@ -106,10 +127,28 @@ export async function POST(req: NextRequest) {
                     }
                 } catch (error: any) {
                     console.error('[Chat API] Processing Error:', error);
-                    const isTimeout = error.name === 'AbortError' || error.message?.includes('aborted');
-                    const errorMsg = isTimeout
-                        ? (locale === 'en' ? 'Request timed out, please try again.' : '請求逾時，請稍後再試。')
-                        : `\n[ERROR] ${error.message}`;
+                    const isTimeout = error.name === 'AbortError' || error.message?.includes('aborted') || error.message?.includes('timeout');
+                    const isRateLimit = error.status === 429 || error.message?.includes('429') || error.message?.includes('rate limit');
+                    const isNetworkError = error.message?.includes('fetch failed') || error.message?.includes('ECONNREFUSED') || error.message?.includes('network');
+
+                    let errorMsg = '';
+                    if (isTimeout) {
+                        errorMsg = locale === 'en'
+                            ? 'Request timed out. Please try a simpler question or try again later.'
+                            : '請求逾時。請嘗試更簡單的問題或稍後再試。';
+                    } else if (isRateLimit) {
+                        errorMsg = locale === 'en'
+                            ? 'Too many requests. Please wait a moment and try again.'
+                            : '請求過於頻繁。請稍候片刻後再試。';
+                    } else if (isNetworkError) {
+                        errorMsg = locale === 'en'
+                            ? 'Network connection error. Please check your internet connection.'
+                            : '網路連線錯誤。請檢查您的網路連線。';
+                    } else {
+                        errorMsg = locale === 'en'
+                            ? `Service temporarily unavailable. Please try again later.`
+                            : `服務暫時無法使用。請稍後再試。`;
+                    }
 
                     sendUpdate(errorMsg);
                 } finally {

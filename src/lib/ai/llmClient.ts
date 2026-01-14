@@ -11,10 +11,10 @@ export interface LLMParams {
 }
 
 function resolveTimeoutMs(taskType: LLMParams['taskType'] | undefined) {
-    if (taskType === 'classification' || taskType === 'simple') return 8000;
-    if (taskType === 'chat' || taskType === 'synthesis') return 15000;
-    if (taskType === 'reasoning' || taskType === 'context_heavy') return 20000;
-    return 15000;
+    if (taskType === 'classification' || taskType === 'simple') return 10000;
+    if (taskType === 'chat' || taskType === 'synthesis') return 20000;
+    if (taskType === 'reasoning' || taskType === 'context_heavy') return 30000;
+    return 20000;
 }
 
 function resolveMaxTokens(params: LLMParams) {
@@ -133,7 +133,7 @@ async function generateGeminiResponse(params: GeminiParams): Promise<string | nu
         const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
         const maxTokens = resolveMaxTokens(params);
 
-        // Use Zeabur Key for Zeabur Endpoint
+        // Use Zeabur Key for Gemini LLM models (avoid free API rate limits), fallback to Google AI
         const apiKey = process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
         const res = await fetch(endpoint, {
@@ -182,7 +182,8 @@ async function generateDeepSeekResponse(params: LLMParams): Promise<string | nul
 
     // Zeabur AI Hub supports DeepSeek via same endpoint
     const endpoint = `https://hnd1.aihub.zeabur.ai/v1/chat/completions`;
-    const apiKey = process.env.ZEABUR_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.GEMINI_API_KEY;
+    // Use dedicated DeepSeek key (lutagu-mvp) or fallback to main Zeabur key
+    const apiKey = process.env.DEEPSEEK_API_KEY || process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
@@ -193,7 +194,7 @@ async function generateDeepSeekResponse(params: LLMParams): Promise<string | nul
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
             body: JSON.stringify({
-                model: 'deepseek-v3.2', // or deepseek-chat
+                model: 'deepseek-v3', // Standard name for V3
                 messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
                 temperature,
                 max_tokens: maxTokens
@@ -203,15 +204,26 @@ async function generateDeepSeekResponse(params: LLMParams): Promise<string | nul
         clearTimeout(timeoutId);
 
         if (!res.ok) {
-            console.error(`[DeepSeek] API Error ${res.status}`);
+            const errText = await res.text();
+            console.error('[DeepSeek] API Error:', res.status, errText);
+            // Fallback for 429/Error
+            if (res.status === 429 || res.status >= 500) {
+                console.warn('[DeepSeek] Falling back to Gemini 3 due to server error/limit');
+                return generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
+            }
             return null;
         }
+
         const data: any = await res.json();
         let content = data?.choices?.[0]?.message?.content || null;
         if (content) content = content.replace(/\[THINKING\][\s\S]*?\[\/THINKING\]/g, '').trim();
         return content;
-    } catch (e) {
-        console.error('[DeepSeek] API Call Failed:', e);
+    } catch (error: any) {
+        if (error.name === 'AbortError') {
+            console.error('[DeepSeek] Request Timeout');
+        } else {
+            console.error('[DeepSeek] API Call Failed:', error);
+        }
         return null;
     }
 }
