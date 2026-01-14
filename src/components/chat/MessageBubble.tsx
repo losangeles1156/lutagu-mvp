@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Bot, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ParsedMessageContent } from './ParsedMessageContent';
@@ -21,6 +21,9 @@ export const MessageBubble = memo(({
     handleFeedback,
     variant = 'default'
 }: MessageBubbleProps) => {
+    // Feedback state to prevent duplicate clicks
+    const [feedbackGiven, setFeedbackGiven] = useState<number | null>(null);
+
     // Check for Tool Invocations
     const toolInvocations = msg.toolInvocations;
 

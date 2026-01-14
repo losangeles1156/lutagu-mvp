@@ -170,6 +170,9 @@ function matchDisruptionToLine(lineDef: any, disruption: any) {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const stationId = searchParams.get('station_id') || searchParams.get('stationId');
+    const refreshRequested = searchParams.get('refresh') === '1' || searchParams.get('refresh') === 'true';
+    const refreshSecret = process.env.L2_REFRESH_SECRET || process.env.N8N_WEBHOOK_SECRET;
+    const refresh = refreshRequested && Boolean(refreshSecret) && request.headers.get('x-l2-refresh-secret') === refreshSecret;
 
     if (!stationId) {
         return NextResponse.json({ error: 'Missing station_id or stationId' }, { status: 400 });
@@ -488,6 +491,74 @@ export async function GET(request: Request) {
             is_stale: false,
             disruption_history: Array.isArray(historyRows) ? historyRows : []
         };
+
+        const dbFresh = (() => {
+            if (!data) return false;
+            const updatedAt = (baseData as any)?.updated_at;
+            const t = updatedAt ? Date.parse(String(updatedAt)) : NaN;
+            if (!Number.isFinite(t)) return false;
+            return Date.now() - t <= 2 * 60 * 1000;
+        })();
+
+        const shouldUpsertDb = !dbFresh;
+        const shouldUpsertCache = refresh || shouldUpsertDb;
+
+        if (shouldUpsertDb || shouldUpsertCache) {
+            const nowIso = new Date().toISOString();
+            const reasonJa = (() => {
+                const firstIssue = lineStatusArray.find(l => l.status !== 'normal');
+                if (!firstIssue) return '運行正常';
+                const msg = firstIssue.message?.ja || '';
+                return msg || '運行情報あり';
+            })();
+
+            const disruptionData = {
+                disruptions: combinedDisruptions,
+                fetched_at: nowIso
+            };
+
+            try {
+                const tasks: PromiseLike<any>[] = [];
+
+                if (shouldUpsertDb) {
+                    tasks.push(
+                        supabaseAdmin
+                            .from('transit_dynamic_snapshot')
+                            .upsert(
+                                {
+                                    station_id: stationId,
+                                    status_code: stationHasDelay ? 'DELAY' : 'NORMAL',
+                                    reason_ja: reasonJa,
+                                    reason_zh_tw: '',
+                                    weather_info: weatherInfo,
+                                    disruption_data: disruptionData,
+                                    updated_at: nowIso
+                                },
+                                { onConflict: 'station_id' }
+                            )
+                    );
+                }
+
+                if (shouldUpsertCache) {
+                    tasks.push(
+                        supabaseAdmin
+                            .from('l2_cache')
+                            .upsert(
+                                {
+                                    key: `l2:${stationId}`,
+                                    value: l2Status,
+                                    expires_at: new Date(Date.now() + 20 * 60 * 1000).toISOString()
+                                },
+                                { onConflict: 'key' }
+                            )
+                    );
+                }
+
+                await Promise.all(tasks);
+            } catch (e) {
+                console.warn('[L2 API] Persist failed:', e);
+            }
+        }
 
         return NextResponse.json(l2Status, {
             headers: {

@@ -455,6 +455,42 @@ function LoginPanel({ onClose }: LoginPanelProps) {
                     >
                         {tOnboarding('browseFirst')}
                     </button>
+
+                    <div className="mt-3 text-[10px] font-bold text-slate-400 text-center">
+                        <div>{t('privacyNote')}</div>
+                        <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    router.push(`/${locale}/terms`);
+                                }}
+                                className="text-slate-500 hover:text-slate-700 underline underline-offset-2"
+                                type="button"
+                            >
+                                Terms
+                            </button>
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    router.push(`/${locale}/privacy`);
+                                }}
+                                className="text-slate-500 hover:text-slate-700 underline underline-offset-2"
+                                type="button"
+                            >
+                                Privacy
+                            </button>
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    router.push(`/${locale}/data-licenses`);
+                                }}
+                                className="text-slate-500 hover:text-slate-700 underline underline-offset-2"
+                                type="button"
+                            >
+                                Data & Licenses
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

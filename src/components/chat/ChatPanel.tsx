@@ -94,7 +94,8 @@ export function ChatPanel() {
         thinkingStep,
         sendMessage,
         clearMessages,
-        messagesEndRef
+        messagesEndRef,
+        sessionId
     } = useAgentChat({
         stationId: currentNodeId || '',
         userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
@@ -335,8 +336,29 @@ export function ChatPanel() {
         }
     };
 
-    const handleFeedback = (index: number, score: number) => {
-        showToast?.(tChat('feedbackSent', { defaultValue: 'Feedback sent!' }), 'success');
+    const handleFeedback = async (index: number, score: number) => {
+        const msg = displayMessages[index];
+
+        try {
+            const response = await fetch('/api/agent/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    score,
+                    messageId: msg.id || `msg-${index}`,
+                    sessionId: sessionId,
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit feedback');
+            }
+
+            showToast?.(tChat('feedbackSent', { defaultValue: 'Feedback sent!' }), 'success');
+        } catch (error) {
+            console.error('Feedback submission failed:', error);
+            showToast?.(tChat('feedbackError', { defaultValue: 'Failed to send feedback' }), 'error');
+        }
     };
 
     const handleRestart = () => {

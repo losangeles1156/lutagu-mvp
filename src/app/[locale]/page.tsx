@@ -30,6 +30,8 @@ export default function Home() {
     const [hydrated, setHydrated] = useState(false);
     useEffect(() => { setHydrated(true); }, []);
 
+    const nodeRequestSeqRef = useRef(0);
+
     const locale = useLocale();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -125,11 +127,20 @@ export default function Home() {
     // Node data
     useEffect(() => {
         if (currentNodeId) {
-            fetchNodeConfig(currentNodeId).then(({ node, profile }) => {
-                setNodeData(node);
-                setProfile(profile);
-            });
+            const seq = ++nodeRequestSeqRef.current;
+            fetchNodeConfig(currentNodeId)
+                .then(({ node, profile }) => {
+                    if (seq !== nodeRequestSeqRef.current) return;
+                    setNodeData(node);
+                    setProfile(profile);
+                })
+                .catch(() => {
+                    if (seq !== nodeRequestSeqRef.current) return;
+                    setNodeData(null);
+                    setProfile(null);
+                });
         } else {
+            nodeRequestSeqRef.current += 1;
             setNodeData(null);
             setProfile(null);
         }

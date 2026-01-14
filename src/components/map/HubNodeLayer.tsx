@@ -32,6 +32,8 @@ interface HubNodeLayerProps {
     locale: string;
     showAllNodes?: boolean;  // Show all nodes when in Ward Mode
     currentNodeId?: string | null;  // Currently selected node for highlighting
+    expandedHubId?: string | null;
+    expandedNodeIds?: string[] | null;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -52,7 +54,9 @@ export function HubNodeLayer({
     zone,
     locale,
     showAllNodes = false,
-    currentNodeId = null
+    currentNodeId = null,
+    expandedHubId = null,
+    expandedNodeIds = null
 }: HubNodeLayerProps) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
@@ -96,7 +100,8 @@ export function HubNodeLayer({
     const visibleNodes = useMemo(() => {
         if (!nodes || nodes.length === 0) return [];
 
-        // Step 1: Filter by activity and hub status
+        const expandedSet = expandedNodeIds ? new Set(expandedNodeIds) : null;
+
         const eligibleNodes = nodes.filter(n => {
             // Skip if is_active = false (from node_hierarchy)
             const isActive = (n as any).is_active ??
@@ -107,11 +112,12 @@ export function HubNodeLayer({
 
             if (showAllNodes) return true;
 
-            // Only show hubs (parent_hub_id IS NULL)
-            return n.parent_hub_id === null;
+            if (n.parent_hub_id === null) return true;
+            if (expandedHubId && n.parent_hub_id === expandedHubId) return true;
+            if (expandedSet && expandedSet.has(n.id)) return true;
+            return false;
         });
 
-        // Step 2: Viewport culling - only keep nodes within current view
         const inViewNodes = eligibleNodes.filter(n => {
             const [lon, lat] = n.location.coordinates;
             return lat >= viewportBounds.swLat &&
@@ -120,16 +126,36 @@ export function HubNodeLayer({
                 lon <= viewportBounds.neLng;
         });
 
-        // Step 3: Prioritize nodes with hub members (more important)
-        const prioritized = [...inViewNodes].sort((a, b) => {
-            const aCount = hubDetails[a.id]?.member_count || 0;
-            const bCount = hubDetails[b.id]?.member_count || 0;
-            return bCount - aCount;  // Higher member count first
-        });
+        if (!expandedHubId) {
+            const prioritized = [...inViewNodes].sort((a, b) => {
+                const aCount = hubDetails[a.id]?.member_count || 0;
+                const bCount = hubDetails[b.id]?.member_count || 0;
+                return bCount - aCount;
+            });
+            return prioritized.slice(0, maxNodes);
+        }
 
-        // Step 4: Limit to maxNodes for performance
-        return prioritized.slice(0, maxNodes);
-    }, [nodes, showAllNodes, viewportBounds, hubDetails, maxNodes]);
+        const expandedGroup = inViewNodes
+            .filter(n => n.id === expandedHubId || n.parent_hub_id === expandedHubId || (expandedSet && expandedSet.has(n.id)))
+            .sort((a, b) => {
+                if (a.id === expandedHubId && b.id !== expandedHubId) return -1;
+                if (b.id === expandedHubId && a.id !== expandedHubId) return 1;
+                const aName = String((a as any).name?.[locale] || (a as any).name?.['zh-TW'] || (a as any).name?.en || a.id);
+                const bName = String((b as any).name?.[locale] || (b as any).name?.['zh-TW'] || (b as any).name?.en || b.id);
+                return aName.localeCompare(bName);
+            });
+
+        const otherHubs = inViewNodes
+            .filter(n => n.parent_hub_id === null && n.id !== expandedHubId)
+            .sort((a, b) => {
+                const aCount = hubDetails[a.id]?.member_count || 0;
+                const bCount = hubDetails[b.id]?.member_count || 0;
+                return bCount - aCount;
+            });
+
+        if (expandedGroup.length >= maxNodes) return expandedGroup.slice(0, maxNodes);
+        return [...expandedGroup, ...otherHubs.slice(0, Math.max(0, maxNodes - expandedGroup.length))];
+    }, [nodes, showAllNodes, viewportBounds, hubDetails, maxNodes, expandedHubId, expandedNodeIds, locale]);
 
     return (
         <>
@@ -143,7 +169,7 @@ export function HubNodeLayer({
                         zone={zone}
                         locale={locale}
                         zoom={clampedZoom}
-                        isSelected={node.id === currentNodeId}
+                        isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
                     />
                 );
             })}

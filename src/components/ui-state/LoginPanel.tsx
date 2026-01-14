@@ -8,6 +8,7 @@ import { useAppStore } from '@/stores/appStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { Sparkles, MapPin, Compass, X, Bot, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { fetchNearbyNodes } from '@/lib/api/nodes';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
@@ -262,6 +263,20 @@ export function LoginPanel() {
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
           LUTAGU v3.0 • Empowering Transit
         </p>
+        <div className="mt-3 text-[10px] font-bold text-slate-400">
+          <span>{t('privacyNote')}</span>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <Link href={`/${locale}/terms`} className="text-slate-500 hover:text-slate-700 underline underline-offset-2">
+              Terms
+            </Link>
+            <Link href={`/${locale}/privacy`} className="text-slate-500 hover:text-slate-700 underline underline-offset-2">
+              Privacy
+            </Link>
+            <Link href={`/${locale}/data-licenses`} className="text-slate-500 hover:text-slate-700 underline underline-offset-2">
+              Data & Licenses
+            </Link>
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   );

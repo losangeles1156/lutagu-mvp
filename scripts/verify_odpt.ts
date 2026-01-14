@@ -9,7 +9,7 @@ const ODPT_API_TOKEN = process.env.ODPT_API_TOKEN;
 
 console.log('--- ODPT Verification Script ---');
 if (ODPT_API_TOKEN) {
-    console.log(`Token found: ${ODPT_API_TOKEN.substring(0, 5)}...`);
+    console.log('Token found.');
 } else {
     console.error('ERROR: ODPT_API_TOKEN is missing in .env.local');
     process.exit(1);

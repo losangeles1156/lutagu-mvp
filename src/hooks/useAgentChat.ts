@@ -67,6 +67,10 @@ export function useAgentChat(options: UseAgentChatOptions) {
         globalThis.crypto?.randomUUID?.() ||
         `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
     );
+    const sessionIdRef = useRef<string>(
+        globalThis.crypto?.randomUUID?.() ||
+        `session-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+    );
 
     const hasHydratedFromStoreRef = useRef(false);
     const lastStoreSyncSignatureRef = useRef<string>('');
@@ -446,7 +450,8 @@ export function useAgentChat(options: UseAgentChatOptions) {
         clearMessages: clearMessagesHandler,
         quickButtons,
         messagesEndRef,
-        userId: userIdRef.current
+        userId: userIdRef.current,
+        sessionId: sessionIdRef.current
     }), [
         messages,
         setAiMessages,

@@ -239,7 +239,23 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
 
                     {/* Attribution Footer moved outside inner div if needed, or kept here */}
                     <div className="px-3 py-2 bg-gray-50/50 text-[8px] text-gray-400 text-center font-medium rounded-b-xl">
-                        Data provided by Open Data Challenge for Public Transportation
+                        <span>
+                            Data: ODPT / Open Data Challenge for Public Transportation ·
+                            <a
+                                href={`/${locale}/data-licenses`}
+                                className="ml-1 underline underline-offset-2 hover:text-gray-500"
+                            >
+                                Licenses
+                            </a>
+                            <a
+                                href="https://developer.odpt.org/terms"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-2 underline underline-offset-2 hover:text-gray-500"
+                            >
+                                ODPT Terms
+                            </a>
+                        </span>
                     </div>
                 </div>
             </div>

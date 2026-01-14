@@ -61,6 +61,7 @@ export function PedestrianLayer() {
     const [loading, setLoading] = useState(false);
     
     const abortControllerRef = useRef<AbortController | null>(null);
+    const routeAbortControllerRef = useRef<AbortController | null>(null);
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
     const lastQueryKeyRef = useRef<string | null>(null);
     const cacheRef = useRef<Map<string, { nodes: GraphNode[]; links: GraphLink[]; ts: number }>>(new Map());
@@ -89,6 +90,10 @@ export function PedestrianLayer() {
         setIsRouteCalculating(true);
         map.closePopup();
 
+        routeAbortControllerRef.current?.abort();
+        const controller = new AbortController();
+        routeAbortControllerRef.current = controller;
+
         try {
             const res = await fetch('/api/navigation/route', {
                 method: 'POST',
@@ -99,7 +104,8 @@ export function PedestrianLayer() {
                     endNodeId: node.id,
                     userProfile,
                     weather: 'clear'
-                })
+                }),
+                signal: controller.signal
             });
 
             if (!res.ok) {
@@ -114,6 +120,7 @@ export function PedestrianLayer() {
             toast.success(`Route found: ${data.summary.estimated_duration_minutes} min`);
 
         } catch (err: any) {
+            if (controller.signal.aborted || err?.name === 'AbortError') return;
             console.error(err);
             toast.error(err.message);
             setRoutePath(null);
@@ -196,10 +203,7 @@ export function PedestrianLayer() {
             setNodes(nextNodes);
             setLinks(nextLinks);
         } catch (e: any) {
-            if (e.name === 'AbortError') {
-                // Ignore intentional aborts
-                return;
-            }
+            if (controller.signal.aborted || e?.name === 'AbortError') return;
             console.error("Failed to fetch graph", e);
         } finally {
             if (abortControllerRef.current === controller) {
@@ -225,6 +229,9 @@ export function PedestrianLayer() {
             map.off('moveend', onMoveEnd);
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
+            }
+            if (routeAbortControllerRef.current) {
+                routeAbortControllerRef.current.abort();
             }
             if (debounceTimerRef.current) {
                 clearTimeout(debounceTimerRef.current);

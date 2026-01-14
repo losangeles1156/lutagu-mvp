@@ -173,8 +173,10 @@ function MapController({ center, isTooFar, fallback, nodes }: {
                 return;
             }
 
+            let cancelled = false;
             fetchNodeConfig(currentNodeId)
                 .then(res => {
+                    if (cancelled) return;
                     if (res?.node?.location?.coordinates) {
                         const [lon, lat] = res.node.location.coordinates;
                         map.flyTo([lat, lon], 16, { animate: true, duration: 1.2 });
@@ -183,6 +185,10 @@ function MapController({ center, isTooFar, fallback, nodes }: {
                 })
                 .catch(() => {
                 });
+
+            return () => {
+                cancelled = true;
+            };
             return;
         }
 
@@ -423,7 +429,7 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
             console.log(`[ViewportNodeLoader] Finished loading. Total nodes: ${combined.length}`);
             onData(combined, allHubDetails);
         } catch (e: any) {
-            if (e?.name === 'AbortError') {
+            if (controller.signal.aborted || e?.name === 'AbortError') {
                 console.log(`[ViewportNodeLoader] Fetch ABORTED for key ${key}`);
                 return;
             }
@@ -711,7 +717,7 @@ function AppMap() {
 
             {/* L4: Empty nodes state message (Transient) */}
             {!loadingNodes && !nodesError && nodes.length === 0 && showEmptyAlert && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[900] flex flex-col items-center px-6 animate-out fade-out duration-1000 delay-[2000ms] fill-mode-forwards">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[900] flex flex-col items-center px-6 animate-out fade-out [animation-duration:1000ms] [animation-delay:2000ms] fill-mode-forwards">
                     <div className="w-16 h-16 mb-4 bg-slate-100 rounded-full flex items-center justify-center">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
                             <circle cx="12" cy="12" r="10" />

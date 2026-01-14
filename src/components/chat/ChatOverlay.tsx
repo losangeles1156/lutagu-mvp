@@ -244,7 +244,7 @@ export function ChatOverlay() {
 
                 console.error('[ChatOverlay] L2 Fetch Failed', res.status, res.statusText);
             } catch (e: any) {
-                if (e?.name === 'AbortError') return;
+                if (controller.signal.aborted || e?.name === 'AbortError') return;
                 console.error('[ChatOverlay] L2 Fetch Error', e);
             }
         };

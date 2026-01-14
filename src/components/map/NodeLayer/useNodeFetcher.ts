@@ -174,7 +174,7 @@ export function useNodeFetcher() {
 
             setNodes(combined, allHubDetails);
         } catch (e: any) {
-            if (e?.name === 'AbortError') return;
+            if (controller.signal.aborted || e?.name === 'AbortError') return;
             console.error('[useNodeFetcher] Error:', e?.message);
             setError(String(e?.message || 'Failed to load nodes'));
         } finally {

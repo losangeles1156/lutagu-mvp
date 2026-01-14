@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, ReactNode, useEffect } from 'react';
 
 // Types
 export interface NodeDatum {
@@ -104,6 +104,47 @@ const NodeDisplayContext = createContext<NodeDisplayContextValue | null>(null);
 // Provider component
 export function NodeDisplayProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(nodeDisplayReducer, initialState);
+
+    useEffect(() => {
+        if (process.env.NODE_ENV !== 'development') return;
+        if (typeof window === 'undefined') return;
+
+        try {
+            const key = '__lutagu_dev_sw_cleanup_done__';
+            if (window.sessionStorage.getItem(key) === '1') return;
+            window.sessionStorage.setItem(key, '1');
+        } catch {
+        }
+
+        const hasSw = typeof navigator !== 'undefined' && 'serviceWorker' in navigator;
+
+        const run = async () => {
+            let didWork = false;
+            if (hasSw) {
+                try {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    if (regs.length > 0) didWork = true;
+                    await Promise.all(regs.map(r => r.unregister().catch(() => false)));
+                } catch {
+                }
+            }
+
+            if ('caches' in window) {
+                try {
+                    const keys = await caches.keys();
+                    if (keys.length > 0) didWork = true;
+                    await Promise.all(keys.map(k => caches.delete(k).catch(() => false)));
+                } catch {
+                }
+            }
+
+            if (didWork) {
+                window.location.reload();
+            }
+        };
+
+        void run();
+    }, []);
 
     const setNodes = useCallback((nodes: NodeDatum[], hubDetails: Record<string, HubDetails>) => {
         dispatch({ type: 'SET_NODES', nodes, hubDetails });

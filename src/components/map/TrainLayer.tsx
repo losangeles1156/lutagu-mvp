@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -27,11 +27,16 @@ const LINE_COLORS: Record<string, string> = {
 
 export function TrainLayer() {
     const [trains, setTrains] = useState<Train[]>([]);
+    const abortRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
         const fetchTrains = async () => {
+            abortRef.current?.abort();
+            const controller = new AbortController();
+            abortRef.current = controller;
+
             try {
-                const res = await fetch('/api/train?mode=position');
+                const res = await fetch('/api/train?mode=position', { signal: controller.signal });
                 if (res.ok) {
                     const data = await res.json();
                     // Filter trains that are in our recognized stations
@@ -41,13 +46,17 @@ export function TrainLayer() {
                     setTrains(activeTrains);
                 }
             } catch (e) {
+                if (controller.signal.aborted || (e instanceof Error && e.name === 'AbortError')) return;
                 console.error('Failed to fetch trains:', e);
             }
         };
 
         fetchTrains();
         const interval = setInterval(fetchTrains, 30000); // 30s update
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            abortRef.current?.abort();
+        };
     }, []);
 
     return (
