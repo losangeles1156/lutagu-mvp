@@ -67,10 +67,18 @@ export class ExitStrategistSkill extends BaseSkill {
         const destination = params?.destination || input;
         const station = params?.station_id || context.currentStation || 'Current Station';
 
+        // 1. Fetch Exit Rules (Accessibility & Strategy)
+        const rules = await DataMux.searchExpertRules("exit selection accessibility traps");
+        const ruleContext = rules.map(r => `- ${r.content}`).join('\n');
+
         // Real implementation would query mapped Exit DB. For now, use Gemini 3's reasoning.
         const synthesis = await generateLLMResponse({
             systemPrompt: `You are a Tokyo Station Exit Expert.
 The user is at ${station} and wants to go to: "${destination}".
+
+Strategic Rules (Must Follow):
+${ruleContext}
+
 Identify the BEST Exit (e.g. East Exit, B13, A4) to minimize walking.
 If you are unsure, give the general direction (e.g. "East Side").
 Format:
@@ -146,15 +154,23 @@ export class MedicalSkill extends BaseSkill {
         console.log(`[Deep Research] Triggering Medical Skill... Params:`, params);
         const symptom = params?.symptom || input;
 
+        // 1. Fetch Medical Rules (Triage & Penalty Fee)
+        const rules = await DataMux.searchExpertRules("medical triage penalty fee clinic hospital");
+        const ruleContext = rules.map(r => `- ${r.content}`).join('\n');
+
         const synthesis = await generateLLMResponse({
             systemPrompt: `You are a Japan Travel Medical Assistant.
 User Status: "${symptom}".
-Task: Provide immediate, safe guidance.
-include:
-1. Emergency Number: 119 (Ambulance), #7119 (Consultation).
-2. Japanese phrasing for seeking help (e.g. "Byoin wa doko desu ka?").
-3. Disclaimer: "I am AI, not a doctor. Call 119 if critical."
-Be concise and calm.`,
+
+Medical Rules (CRITICAL):
+${ruleContext}
+
+Task: Provide immediate, safe guidance based on Triage Rules.
+1. EMERGENCY CHECK: If critical (breathing, chest pain), DIRECT TO 119.
+2. TRIAGE: For minor issues (fever, cold), recommend CLINICS, NOT Hospitals (warn about Penalty Fee).
+3. Include clear Japanese phrasing for help.
+
+Output in Traditional Chinese.`,
             userPrompt: `Description: ${symptom}`,
             taskType: 'reasoning', // Uses Gemini 3 Flash Preview (Logic/Safety)
             temperature: 0.1 // High precision for medical
@@ -411,16 +427,28 @@ export class SpatialReasonerSkill extends BaseSkill {
             if (match) dest = match[1];
         }
 
+        // 1. Fetch Alternative Stations (Spatial)
         const alts = await DataMux.getAlternativeStations(context.currentStation || '', dest);
+
+        // 2. Fetch Strategic Knowledge (WVC, TPI, Anomaly Rules)
+        // We explicitly search for "delay strategy" and "wait value" to pull in anomaly-response.md content
+        const strategies = await DataMux.searchExpertRules("delay strategy wait value route planning");
+        const strategyContext = strategies.map(s => `- ${s.content}`).join('\n');
+
         if (alts.length > 0) {
             let synthesis;
             try {
                 synthesis = await generateLLMResponse({
                     systemPrompt: `Alternative Routes: ${JSON.stringify(alts)}.
+Strategic Rules (Apply these!):
+${strategyContext}
+
 User wants to go to: ${dest}. Current Station: ${context.currentStation}.
-Task: Suggest these alternatives clearly. Explain that direct route might be delayed/crowded.`,
+Task: Suggest alternatives.
+CRITICAL: Use the "Wait Value Coefficient" (WVC) formula to advise whether to WAIT or DETOUR.
+If WVC < 1, strongly recommend detour.`,
                     userPrompt: input,
-                    taskType: 'classification'
+                    taskType: 'reasoning' // Upgrade to Reasoning (Gemini 3) for Math/Logic
                 });
             } catch (e) { }
 

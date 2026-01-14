@@ -45,4 +45,4 @@ interface NodeTags {
 ## 🔗 詳細資源
 
 - [3-5-8 策略與分類表](./reference/l1-taxonomy.md)
-- [Tag Generator Logic (TBD)](./reference/tag-generator.md)
+- [Tag Generator Logic](./reference/tag-generator.md)

@@ -25,6 +25,26 @@ function calculateTPI(route: Route, userState: UserState): number {
 }
 ```
 
+## 1.1 路線規劃權重邏輯 (Route Planning Weighting)
+
+**應用場景**: 當 AI 需自行計算 A 到 B 的最佳路徑時 (Graph Search)。
+**核心權重函數**: $Cost = W_t \times Time + W_p \times Price + W_e \times Effort$
+
+### 權重係數表 (Weighting Coefficients)
+
+| 用戶模式 (Persona) | $W_t$ (時間) | $W_p$ (價格) | $W_e$ (輕鬆度) | 策略說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Business (商務)** | **2.0** | 0.1 | 0.8 | 時間就是金錢，只求最快。 |
+| **Budget (小資)** | 0.5 | **2.5** | 0.5 | 願意轉乘 3 次只為省 100 円。 (Pass 優先) |
+| **Family (親子)** | 0.8 | 0.2 | **3.0** | 絕對避開樓梯與長通道，只要有電梯遠一點也行。 |
+| **Tourist (一般)** | 1.0 | 1.0 | 1.0 | 平衡模式 (預設)。 |
+
+### 節點懲罰 (Node Penalties)
+在 Graph 搜索中，特定節點需加上額外 Cost：
+*   **轉乘懲罰 (Transfer Penalty)**: 每次轉乘 base cost +5 mins。
+*   **迷宮懲罰 (Maze Penalty)**: 新宿/澀谷/東京轉乘 +10 mins (模擬迷路風險)。
+*   **天氣懲罰 (Weather Penalty)**: 雨天時，非地下連鎖轉乘 +15 mins (避免濕身)。
+
 ---
 
 ## 2. 月台相對位置 (Platform & Car Positioning)
