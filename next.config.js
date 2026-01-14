@@ -6,6 +6,17 @@ const isProd = process.env.NODE_ENV === 'production';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  async rewrites() {
+    const cdnBase = process.env.NEXT_PUBLIC_DATA_CDN_BASE_URL;
+    if (!isProd || !cdnBase) return [];
+    const base = cdnBase.replace(/\/$/, '');
+    return [
+      {
+        source: '/data/:path*',
+        destination: `${base}/data/:path*`
+      }
+    ];
+  },
   async headers() {
     return [
       {

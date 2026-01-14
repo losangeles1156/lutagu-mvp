@@ -90,6 +90,10 @@ export class RedisCacheService<T = any> {
         } as RedisCacheConfig;
     }
 
+    isRemoteConnected(): boolean {
+        return Boolean(this.client && this.isConnected);
+    }
+
     /**
      * 連線到 Redis
      */
@@ -100,9 +104,7 @@ export class RedisCacheService<T = any> {
             // 嘗試載入 ioredis
             const Redis = await import('ioredis');
             
-            const redisOptions: any = {
-                host: config.host,
-                port: config.port,
+            const redisOptionsBase: any = {
                 db: config.db,
                 connectTimeout: config.connectTimeout,
                 maxRetriesPerRequest: config.maxRetriesPerRequest,
@@ -113,11 +115,21 @@ export class RedisCacheService<T = any> {
                 }
             };
 
+            const redisOptions: any = config.url
+                ? redisOptionsBase
+                : {
+                    ...redisOptionsBase,
+                    host: config.host,
+                    port: config.port
+                };
+
             if (config.password) {
                 redisOptions.password = config.password;
             }
 
-            const redisInstance = new Redis.default(config.url || `${config.host}:${config.port}`, redisOptions);
+            const redisInstance = config.url
+                ? new Redis.default(config.url, redisOptions)
+                : new Redis.default(redisOptions);
             
             // 確保 client 不為 null
             this.client = redisInstance as unknown as RedisClient;
@@ -406,6 +418,30 @@ export async function initRedisCache(config?: Partial<RedisConfig>): Promise<Red
     const cache = getRedisCache();
     await cache.connect(config);
     return cache;
+}
+
+let envInitPromise: Promise<RedisCacheService | null> | null = null;
+
+export function getRedisUrlFromEnv(): string | undefined {
+    return process.env.REDIS_URL || process.env.UPSTASH_REDIS_URL || process.env.KV_URL;
+}
+
+export async function initRedisCacheFromEnv(): Promise<RedisCacheService | null> {
+    if (envInitPromise) return envInitPromise;
+
+    envInitPromise = (async () => {
+        const url = getRedisUrlFromEnv();
+        if (!url) return null;
+
+        try {
+            const cache = await initRedisCache({ url });
+            return cache;
+        } catch {
+            return null;
+        }
+    })();
+
+    return envInitPromise;
 }
 
 export default RedisCacheService;

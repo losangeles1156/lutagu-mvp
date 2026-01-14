@@ -23,6 +23,7 @@ import { DataMux } from '@/lib/data/DataMux';
 import { StrategyContext } from '@/lib/ai/strategyEngine';
 import { AgentRouter } from '@/lib/ai/AgentRouter';
 import { executeSkill, skillRegistry } from './skills/SkillRegistry';
+import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -100,6 +101,7 @@ export class HybridEngine {
         locale: string;
         context?: RequestContext;
         onProgress?: (step: string) => void;
+        onToken?: (delta: string) => void;
     }): Promise<HybridResponse | null> {
         const startTime = Date.now();
         const { text, locale: inputLocale, context } = params;
@@ -232,6 +234,7 @@ export class HybridEngine {
             if (bestMatch) {
                 metricsCollector.recordRequest(bestMatch.source, Date.now() - startTime);
                 feedbackStore.logRequest({ text, source: bestMatch.source, timestamp: startTime });
+                if (params.onToken) params.onToken(bestMatch.content);
                 return { ...bestMatch, reasoningLog: logs };
             }
 
@@ -248,13 +251,39 @@ export class HybridEngine {
                 activeKnowledgeSnippet = `Station Knowledge:\n${t}\n${h}`;
             }
 
-            const llmResponse = await generateLLMResponse({
-                systemPrompt: this.buildSystemPrompt(locale),
-                userPrompt: this.buildUserPrompt(text, { ...context, wisdomSummary: activeKnowledgeSnippet } as any),
-                taskType: 'chat', // Trinity: DeepSeek V3 (High Output CP)
-                temperature: 0.7, // Higher temp for chat
-                model: 'deepseek-v3.2'
-            });
+            const systemPrompt = this.buildSystemPrompt(locale);
+            const userPrompt = this.buildUserPrompt(text, { ...context, wisdomSummary: activeKnowledgeSnippet } as any);
+
+            let llmResponse: string | null = null;
+            if (params.onToken) {
+                const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
+                const result: any = streamWithFallback({
+                    model,
+                    system: systemPrompt,
+                    messages: [{ role: 'user', content: userPrompt }]
+                });
+
+                let acc = '';
+                const textStream: any = result?.textStream;
+                if (textStream && typeof textStream[Symbol.asyncIterator] === 'function') {
+                    for await (const delta of textStream as AsyncIterable<string>) {
+                        acc += delta;
+                        params.onToken(delta);
+                    }
+                    llmResponse = acc;
+                } else {
+                    llmResponse = (await result.text) || null;
+                    if (llmResponse) params.onToken(llmResponse);
+                }
+            } else {
+                llmResponse = await generateLLMResponse({
+                    systemPrompt,
+                    userPrompt,
+                    taskType: 'chat',
+                    temperature: 0.7,
+                    model: 'deepseek-v3.2'
+                });
+            }
 
             if (llmResponse) {
                 metricsCollector.recordRequest('llm', Date.now() - startTime);

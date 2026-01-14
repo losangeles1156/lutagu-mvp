@@ -18,6 +18,18 @@ const OPERATOR_MAP: Record<string, string[]> = {
     'MIR': ['odpt.Operator:MIR']
 };
 
+import { getRedisCache, initRedisCacheFromEnv } from '@/lib/cache/redisCacheService';
+
+const redisCache = getRedisCache<any[]>('odpt');
+let redisInit: Promise<any> | null = null;
+
+async function ensureRedis() {
+    if (!redisInit) {
+        redisInit = initRedisCacheFromEnv();
+    }
+    return redisInit;
+}
+
 // Global Request Cache to prevent concurrent fetch storms
 declare global {
     var __odptRequestCache: Map<string, { promise: Promise<any[]>, expiresAt: number }> | undefined;
@@ -36,7 +48,7 @@ async function fetchForOperator(key: string, ids: string[]) {
     const token = challengeOperators.includes(key) ? TOKEN_CHALLENGE : TOKEN_STANDARD;
     if (!token) return [];
 
-    // Cache Key: Operator + Token Type (Standard/Challenge)
+    // Cache Key: Operator
     const cacheKey = `op:${key}`;
     const now = Date.now();
 
@@ -44,6 +56,20 @@ async function fetchForOperator(key: string, ids: string[]) {
     const cached = globalThis.__odptRequestCache?.get(cacheKey);
     if (cached && cached.expiresAt > now) {
         return cached.promise;
+    }
+
+    await ensureRedis();
+    const sharedKey = `odpt:train-info:${cacheKey}`;
+    try {
+        const sharedCached = await redisCache.get(sharedKey);
+        if (sharedCached) {
+            globalThis.__odptRequestCache?.set(cacheKey, {
+                promise: Promise.resolve(sharedCached),
+                expiresAt: now + CACHE_TTL_MS
+            });
+            return sharedCached;
+        }
+    } catch {
     }
 
     // Create new fetch promise
@@ -71,7 +97,12 @@ async function fetchForOperator(key: string, ids: string[]) {
         });
 
         const results = await Promise.all(fetchPromises);
-        return results.flat();
+        const flattened = results.flat();
+        try {
+            await redisCache.set(sharedKey, flattened, CACHE_TTL_MS);
+        } catch {
+        }
+        return flattened;
     })();
 
     // Store in Cache

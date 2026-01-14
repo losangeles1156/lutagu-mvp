@@ -14,13 +14,13 @@ import { streamText, LanguageModel, ModelMessage, ToolSet } from 'ai';
 // Zeabur AI Hub (for gemini-2.5-flash-lite, replacing rate-limited Mistral)
 const zeabur = createOpenAI({
     baseURL: 'https://hnd1.aihub.zeabur.ai/v1', // Standard OpenAI-compatible endpoint
-    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
+    apiKey: process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
 });
 
 // DeepSeek (via Zeabur or Direct)
 const deepseek = createOpenAI({
     baseURL: 'https://hnd1.aihub.zeabur.ai/v1',
-    apiKey: process.env.DEEPSEEK_API_KEY || process.env.GEMINI_API_KEY
+    apiKey: process.env.DEEPSEEK_API_KEY || process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
 });
 
 // MiniMax (Fallback for Brain)

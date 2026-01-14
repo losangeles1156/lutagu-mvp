@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { SEED_NODES } from '@/lib/nodes/seedNodes';
+import { getRedisCache, initRedisCacheFromEnv } from '@/lib/cache/redisCacheService';
+import { generateRequestId, getElapsedMs, logPerformanceMetric } from '@/lib/monitoring/performanceLogger';
 
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +10,16 @@ export const dynamic = 'force-dynamic';
 // Simple in-memory cache for viewport requests
 const cache = new Map<string, { data: any, timestamp: number }>();
 const CACHE_TTL = 300000; // 5 minutes
+
+const redisCache = getRedisCache<any>('viewport');
+let redisInit: Promise<any> | null = null;
+
+async function ensureRedis() {
+    if (!redisInit) {
+        redisInit = initRedisCacheFromEnv();
+    }
+    return redisInit;
+}
 
 function getCacheKey(params: any) {
     return JSON.stringify(params);
@@ -294,7 +306,13 @@ async function fetchHubMembers(supabase: any, hubIds: string[]): Promise<Map<str
 }
 
 export async function GET(req: Request) {
-    const url = new URL(req.url);
+    const requestId = generateRequestId();
+    const startedAt = Date.now();
+    let statusCode = 200;
+    let cacheLayer: string | undefined;
+
+    try {
+        const url = new URL(req.url);
 
     const swLat = toNumber(url.searchParams.get('swLat'));
     const swLon = toNumber(url.searchParams.get('swLon'));
@@ -303,6 +321,7 @@ export async function GET(req: Request) {
     const zoomRaw = toNumber(url.searchParams.get('zoom'));
 
     if (swLat === null || swLon === null || neLat === null || neLon === null || zoomRaw === null) {
+        statusCode = 400;
         return NextResponse.json({ error: 'Missing or invalid viewport parameters' }, { status: 400 });
     }
 
@@ -334,8 +353,18 @@ export async function GET(req: Request) {
     const cacheKey = getCacheKey({ swLat, swLon, neLat, neLon, zoomRaw });
     const cached = cache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+        cacheLayer = 'memory';
         console.log('[api/nodes/viewport] Cache Hit:', cacheKey.substring(0, 50) + '...');
         return NextResponse.json(cached.data);
+    }
+
+    await ensureRedis();
+    const sharedKey = `viewport:${cacheKey}`;
+    const sharedCached = await redisCache.get(sharedKey);
+    if (sharedCached) {
+        cacheLayer = 'redis';
+        cache.set(cacheKey, { data: sharedCached, timestamp: Date.now() });
+        return NextResponse.json(sharedCached);
     }
 
     const center = { lat: (minLat + maxLat) / 2, lon: (minLon + maxLon) / 2 };
@@ -371,6 +400,7 @@ export async function GET(req: Request) {
         try {
             if (!supabaseUrl || !supabaseKey) {
                 console.error('[Viewport] Missing Supabase Credentials for fallback ingestion');
+                statusCode = 500;
                 return NextResponse.json({ error: 'Missing configuration' }, { status: 500 });
             }
             supabaseClient = createClient(supabaseUrl, supabaseKey);
@@ -603,6 +633,7 @@ export async function GET(req: Request) {
 
     // [CACHE] Store for future requests
     cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+    await redisCache.set(sharedKey, responseData, CACHE_TTL);
 
     // Prevent cache from growing too large
     if (cache.size > 100) {
@@ -610,5 +641,20 @@ export async function GET(req: Request) {
         if (oldestKey) cache.delete(oldestKey);
     }
 
-    return NextResponse.json(responseData);
+        return NextResponse.json(responseData);
+    } catch (error: any) {
+        statusCode = 500;
+        console.error('[api/nodes/viewport] Unexpected error:', error);
+        return NextResponse.json({ error: error?.message || 'Internal Server Error' }, { status: 500 });
+    } finally {
+        logPerformanceMetric({
+            requestId,
+            endpoint: '/api/nodes/viewport',
+            method: 'GET',
+            responseTimeMs: getElapsedMs(startedAt),
+            statusCode,
+            userAgent: req.headers.get('user-agent') || undefined,
+            metadata: { cacheLayer }
+        });
+    }
 }

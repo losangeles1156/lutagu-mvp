@@ -2,6 +2,7 @@
 import { NextRequest } from 'next/server';
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { hybridEngine, RequestContext } from '@/lib/l4/HybridEngine';
+import { generateRequestId, getElapsedMs, logAIChatMetric, logPerformanceMetric } from '@/lib/monitoring/performanceLogger';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
     try {
+        const requestId = generateRequestId();
+        const startedAt = Date.now();
         // Environment check (for debugging Vercel deployment issues)
         const hasApiKey = !!(
             process.env.ZEABUR_API_KEY ||
@@ -93,9 +96,14 @@ export async function POST(req: NextRequest) {
         const stream = createUIMessageStream({
             execute: async ({ writer }) => {
                 const textId = 'text-1';
+                let outputLen = 0;
+                let streamedAny = false;
+                let hadError = false;
+                let errorMessage: string | undefined;
 
                 const sendUpdate = (delta: string) => {
                     writer.write({ type: 'text-delta', id: textId, delta });
+                    outputLen += delta.length;
                 };
 
                 const sendThinking = (step: string) => {
@@ -113,6 +121,10 @@ export async function POST(req: NextRequest) {
                         context,
                         onProgress: (step) => {
                             sendThinking(step);
+                        },
+                        onToken: (delta) => {
+                            streamedAny = true;
+                            sendUpdate(delta);
                         }
                     });
 
@@ -121,12 +133,16 @@ export async function POST(req: NextRequest) {
                             sendUpdate(`[THINKING]${result.reasoning}[/THINKING]\n`);
                         }
 
-                        sendUpdate(result.content);
+                        if (!streamedAny) {
+                            sendUpdate(result.content);
+                        }
                     } else {
                         sendUpdate(locale === 'en' ? "I'm not sure, could you clarify?" : '抱歉，我不太理解您的意思。');
                     }
                 } catch (error: any) {
                     console.error('[Chat API] Processing Error:', error);
+                    hadError = true;
+                    errorMessage = typeof error?.message === 'string' ? error.message : String(error);
                     const isTimeout = error.name === 'AbortError' || error.message?.includes('aborted') || error.message?.includes('timeout');
                     const isRateLimit = error.status === 429 || error.message?.includes('429') || error.message?.includes('rate limit');
                     const isNetworkError = error.message?.includes('fetch failed') || error.message?.includes('ECONNREFUSED') || error.message?.includes('network');
@@ -153,6 +169,31 @@ export async function POST(req: NextRequest) {
                     sendUpdate(errorMsg);
                 } finally {
                     writer.write({ type: 'text-end', id: textId });
+
+                    const elapsed = getElapsedMs(startedAt);
+                    logAIChatMetric({
+                        requestId,
+                        sessionId: body.userId || body.sessionId,
+                        nodeId: body.nodeId || body.current_station,
+                        locale,
+                        responseTimeMs: elapsed,
+                        toolsCalled: [],
+                        inputLength: query.length,
+                        outputLength: outputLen,
+                        hadError,
+                        errorMessage,
+                        metadata: { streamed: true }
+                    });
+                    logPerformanceMetric({
+                        requestId,
+                        endpoint: '/api/agent/chat',
+                        method: 'POST',
+                        responseTimeMs: elapsed,
+                        statusCode: hadError ? 500 : 200,
+                        userAgent: req.headers.get('user-agent') || undefined,
+                        locale,
+                        metadata: { streamed: true }
+                    });
                 }
             }
         });
