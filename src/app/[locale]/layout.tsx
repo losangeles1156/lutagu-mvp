@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     manifest: '/manifest.json',
 };
 
+// ... imports
+import Script from 'next/script';
+
+// ...
+
 export default async function RootLayout({
     children,
     params: { locale }
@@ -22,6 +27,7 @@ export default async function RootLayout({
     params: { locale: string };
 }) {
     const messages = await getMessages();
+    const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
     return (
         <html lang={locale}>
@@ -35,6 +41,28 @@ export default async function RootLayout({
                 <link rel="apple-touch-icon" href="/icons/icon-192.png" />
             </head>
             <body className={inter.className}>
+                {gaId && (
+                    <>
+                        <Script
+                            strategy="afterInteractive"
+                            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+                        />
+                        <Script
+                            id="gtag-init"
+                            strategy="afterInteractive"
+                            dangerouslySetInnerHTML={{
+                                __html: `
+                                    window.dataLayer = window.dataLayer || [];
+                                    function gtag(){dataLayer.push(arguments);}
+                                    gtag('js', new Date());
+                                    gtag('config', '${gaId}', {
+                                        page_path: window.location.pathname,
+                                    });
+                                `,
+                            }}
+                        />
+                    </>
+                )}
                 <NextIntlClientProvider messages={messages}>
                     <ErrorBoundary>
                         <NodeDisplayProvider>

@@ -69,14 +69,29 @@ const CONFIG: Record<string, any> = {
     }
 };
 
+import { trackPartnerClick } from '@/lib/analytics/partner';
+
 export function ActionCard({ action, onClick }: ActionCardProps) {
     const t = useTranslations('chat');
+
+    const handleCardClick = () => {
+        // Partner Tracking
+        if (action.metadata?.partner_id && action.metadata?.nudge_log_id) {
+            trackPartnerClick(
+                action.metadata.nudge_log_id,
+                action.metadata.partner_id,
+                action.target || ''
+            );
+        }
+        onClick(action);
+    };
+
     // 1. Specialized Cards
     if (action.type === 'trap') {
-        return <TrapCard action={action} onClick={onClick} />;
+        return <TrapCard action={action} onClick={handleCardClick} />;
     }
     if (action.type === 'hack') {
-        return <HackCard action={action} onClick={onClick} />;
+        return <HackCard action={action} onClick={handleCardClick} />;
     }
 
     // New POI Card (Phase 3)
@@ -84,7 +99,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
         const tags = action.metadata?.tags || [];
         return (
             <button
-                onClick={() => onClick(action)}
+                onClick={handleCardClick}
                 className="w-full text-left group relative overflow-hidden bg-white rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md transition-all duration-300 active:scale-95"
             >
                 <div className="p-4 flex gap-4">
@@ -157,7 +172,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
     if (action.title && action.content) {
         return (
             <button
-                onClick={() => onClick(action)}
+                onClick={handleCardClick}
                 className="w-full text-left group relative overflow-hidden bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 active:scale-95"
             >
                 {/* (A) Decision Instruction */}
@@ -216,7 +231,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
     // Fallback to minimal card for simple actions
     return (
         <button
-            onClick={() => onClick(action)}
+            onClick={handleCardClick}
             className={`w-full group relative overflow-hidden flex flex-col p-4 rounded-2xl border transition-all duration-300 active:scale-95 text-left shadow-sm hover:shadow-md ${config.bgColor} ${config.borderColor} ${config.hoverColor}`}
         >
             <div className="flex items-start gap-4">
