@@ -31,11 +31,48 @@ const CONTENT: Record<SupportedLocale, {
         ]
       },
       {
+        heading: '共享單車（GBFS / ODPT）',
+        items: [
+          '本服務可能使用 ODPT 提供之 GBFS 共享單車資訊（例如站點位置、可借/可還狀態等）。',
+          'ドコモ・バイクシェア（東京エリア）：CC BY 4.0。歸屬表示：株式会社ドコモ・バイクシェア / 公共交通オープンデータ協議会。',
+          { label: 'ODPT Dataset: ドコモ・バイクシェア（東京エリア）', href: 'https://ckan.odpt.org/dataset/c_bikeshare_gbfs-d-bikeshare' },
+          'OpenStreet（HELLO CYCLING）：CC BY 4.0 / ODC BY 1.0 / ODbL 1.0（依資料集公告）。歸屬表示：OpenStreet株式会社 / 公共交通オープンデータ協議会。',
+          { label: 'ODPT Dataset: OpenStreet（ハローサイクリング）', href: 'https://ckan.odpt.org/dataset/c_bikeshare_gbfs-openstreet' }
+        ]
+      },
+      {
         heading: 'OpenStreetMap（OSM）',
         items: [
           '本服務的地圖顯示與部分 POI/設施資料可能使用 OSM 與其衍生資料。',
           { label: 'OSM Copyright', href: 'https://www.openstreetmap.org/copyright' },
           '如對 OSM 資料做出改作並公開再散佈，通常需遵守 ODbL 1.0 的歸屬與分享相同方式（share-alike）要求。'
+        ]
+      },
+      {
+        heading: '天氣資料（Open-Meteo / 氣象警報）',
+        items: [
+          '本服務的即時天氣資訊由 Open-Meteo 提供，依其公告屬 CC BY 4.0，須在顯示天氣資料處提供可點擊歸屬連結。',
+          { label: 'Open-Meteo Licence', href: 'https://open-meteo.com/en/licence' },
+          { label: 'Weather data by Open-Meteo.com', href: 'https://open-meteo.com/' },
+          '部分氣象警報/注意報資訊來源為日本氣象廳（JMA）發布資訊；詳細以官方公告為準。',
+          { label: 'Japan Meteorological Agency (JMA)', href: 'https://www.jma.go.jp/jma/index.html' }
+        ]
+      },
+      {
+        heading: '百科摘要（Wikipedia）',
+        items: [
+          '部分站點介紹/摘要文字可能取自或改作自 Wikipedia 內容；Wikipedia 文字內容一般以 CC BY-SA 4.0（另含 GFDL 兼容條款）提供。',
+          { label: 'Wikipedia Copyrights', href: 'https://en.wikipedia.org/wiki/Wikipedia:Copyrights' },
+          { label: 'CC BY-SA 4.0', href: 'https://creativecommons.org/licenses/by-sa/4.0/' }
+        ]
+      },
+      {
+        heading: '外部服務連結（LUUP / GO / ecbo cloak 等）',
+        items: [
+          '本服務可能提供第三方服務的外部連結；點擊後之服務/內容由第三方提供並適用其條款與隱私政策。',
+          { label: 'LUUP', href: 'https://luup.sc/' },
+          { label: 'GO', href: 'https://go.mo-t.com/' },
+          { label: 'ecbo cloak', href: 'https://cloak.ecbo.io/' }
         ]
       },
       {
@@ -66,11 +103,48 @@ const CONTENT: Record<SupportedLocale, {
         ]
       },
       {
+        heading: 'Bike Share (GBFS via ODPT)',
+        items: [
+          'We may use GBFS-formatted bike-share information provided via ODPT (e.g., station locations and availability).',
+          'DOCOMO Bike Share (Tokyo area): licensed under CC BY 4.0. Crediting: DOCOMO BIKESHARE, INC. / Association for Open Data of Public Transportation.',
+          { label: 'ODPT Dataset: DOCOMO Bike Share (Tokyo area)', href: 'https://ckan.odpt.org/dataset/c_bikeshare_gbfs-d-bikeshare' },
+          'OpenStreet (HELLO CYCLING): licensed under CC BY 4.0 / ODC BY 1.0 / ODbL 1.0 (per dataset notice). Crediting: OpenStreet Corp. / Association for Open Data of Public Transportation.',
+          { label: 'ODPT Dataset: OpenStreet (HELLO CYCLING)', href: 'https://ckan.odpt.org/dataset/c_bikeshare_gbfs-openstreet' }
+        ]
+      },
+      {
         heading: 'OpenStreetMap (OSM)',
         items: [
           'Maps and certain POI/facility data may be derived from OpenStreetMap.',
           { label: 'OSM Copyright', href: 'https://www.openstreetmap.org/copyright' },
           'If you publish a derived database, ODbL 1.0 attribution and share-alike obligations may apply.'
+        ]
+      },
+      {
+        heading: 'Weather (Open-Meteo / Alerts)',
+        items: [
+          'Live weather data is provided by Open-Meteo and is published under CC BY 4.0; attribution links should appear next to where weather data is displayed.',
+          { label: 'Open-Meteo Licence', href: 'https://open-meteo.com/en/licence' },
+          { label: 'Weather data by Open-Meteo.com', href: 'https://open-meteo.com/' },
+          'Some weather alerts are based on information published by the Japan Meteorological Agency (JMA).',
+          { label: 'Japan Meteorological Agency (JMA)', href: 'https://www.jma.go.jp/jma/index.html' }
+        ]
+      },
+      {
+        heading: 'Encyclopedia Summaries (Wikipedia)',
+        items: [
+          'Some station descriptions/summaries may be derived from Wikipedia content, which is generally available under CC BY-SA 4.0 (also compatible with GFDL in some cases).',
+          { label: 'Wikipedia Copyrights', href: 'https://en.wikipedia.org/wiki/Wikipedia:Copyrights' },
+          { label: 'CC BY-SA 4.0', href: 'https://creativecommons.org/licenses/by-sa/4.0/' }
+        ]
+      },
+      {
+        heading: 'External Service Links (LUUP / GO / ecbo cloak)',
+        items: [
+          'We may show outbound links to third-party services. Third-party services and content are provided by their respective operators under their own terms and privacy policies.',
+          { label: 'LUUP', href: 'https://luup.sc/' },
+          { label: 'GO', href: 'https://go.mo-t.com/' },
+          { label: 'ecbo cloak', href: 'https://cloak.ecbo.io/' }
         ]
       },
       {
@@ -101,11 +175,48 @@ const CONTENT: Record<SupportedLocale, {
         ]
       },
       {
+        heading: 'シェアサイクル（GBFS / ODPT）',
+        items: [
+          '本サービスは、ODPT 経由で提供される GBFS 形式のシェアサイクル情報（例：ポート位置、稼働状況等）を利用する場合があります。',
+          'ドコモ・バイクシェア（東京エリア）：CC BY 4.0。クレジット表示：株式会社ドコモ・バイクシェア / 公共交通オープンデータ協議会。',
+          { label: 'ODPT Dataset: ドコモ・バイクシェア（東京エリア）', href: 'https://ckan.odpt.org/dataset/c_bikeshare_gbfs-d-bikeshare' },
+          'OpenStreet（ハローサイクリング）：CC BY 4.0 / ODC BY 1.0 / ODbL 1.0（データセット表示に従う）。クレジット表示：OpenStreet株式会社 / 公共交通オープンデータ協議会。',
+          { label: 'ODPT Dataset: OpenStreet（ハローサイクリング）', href: 'https://ckan.odpt.org/dataset/c_bikeshare_gbfs-openstreet' }
+        ]
+      },
+      {
         heading: 'OpenStreetMap（OSM）',
         items: [
           '地図表示および一部の POI/施設情報は OpenStreetMap を利用する場合があります。',
           { label: 'OSM Copyright', href: 'https://www.openstreetmap.org/copyright' },
           '派生データベースを公開・配布する場合、ODbL 1.0 の帰属表示および share-alike が求められる可能性があります。'
+        ]
+      },
+      {
+        heading: '天気（Open-Meteo / 警報）',
+        items: [
+          '現在の天気情報は Open-Meteo により提供され、CC BY 4.0 として公開されています。天気データの表示箇所の近くにリンク付きの帰属表示が必要です。',
+          { label: 'Open-Meteo Licence', href: 'https://open-meteo.com/en/licence' },
+          { label: 'Weather data by Open-Meteo.com', href: 'https://open-meteo.com/' },
+          '一部の気象警報・注意報は気象庁（JMA）が公開する情報に基づきます。',
+          { label: '気象庁 (JMA)', href: 'https://www.jma.go.jp/jma/index.html' }
+        ]
+      },
+      {
+        heading: '百科要約（Wikipedia）',
+        items: [
+          '一部の駅紹介・要約文は Wikipedia コンテンツを参照・改変している場合があります。Wikipedia のテキストは一般に CC BY-SA 4.0（場合により GFDL 互換）で提供されます。',
+          { label: 'Wikipedia:Copyrights', href: 'https://en.wikipedia.org/wiki/Wikipedia:Copyrights' },
+          { label: 'CC BY-SA 4.0', href: 'https://creativecommons.org/licenses/by-sa/4.0/' }
+        ]
+      },
+      {
+        heading: '外部サービスリンク（LUUP / GO / ecbo cloak 等）',
+        items: [
+          '本サービスは第三者サービスへの外部リンクを表示する場合があります。第三者のサービスおよびコンテンツは各提供者の規約・プライバシーポリシーが適用されます。',
+          { label: 'LUUP', href: 'https://luup.sc/' },
+          { label: 'GO', href: 'https://go.mo-t.com/' },
+          { label: 'ecbo cloak', href: 'https://cloak.ecbo.io/' }
         ]
       },
       {
@@ -181,4 +292,3 @@ export default function DataLicensesPage({ params }: { params: { locale: string 
     </main>
   );
 }
-

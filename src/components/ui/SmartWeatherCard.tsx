@@ -213,8 +213,33 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
 
                 {/* Source Attribution */}
                 <div className="pt-2 border-t border-white/10 text-[8px] font-bold opacity-50 flex justify-between uppercase">
-                    <span>Data: Open-Meteo</span>
-                    <span>Alert: JMA</span>
+                    <span className="flex items-center gap-2">
+                        <span>Data:</span>
+                        <a
+                            href="https://open-meteo.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:opacity-80"
+                        >
+                            Open-Meteo
+                        </a>
+                        <a
+                            href="https://open-meteo.com/en/licence"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:opacity-80"
+                        >
+                            CC BY 4.0
+                        </a>
+                    </span>
+                    <a
+                        href="https://www.jma.go.jp/jma/index.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-2 hover:opacity-80"
+                    >
+                        Alert: JMA
+                    </a>
                 </div>
             </div>
         </div>

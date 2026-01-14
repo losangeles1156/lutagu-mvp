@@ -133,8 +133,34 @@ export const MessageBubble = memo(({
                 {/* Feedback Buttons (Only for assistant messages, and if handler provided) */}
                 {msg.role === 'assistant' && !msg.isLoading && handleFeedback && (
                     <div className="mt-3 flex items-center gap-2 pt-2 border-t border-slate-100/50">
-                        <button onClick={() => handleFeedback(idx, 1)} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-300 hover:text-emerald-500"><ThumbsUp size={14} /></button>
-                        <button onClick={() => handleFeedback(idx, -1)} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-300 hover:text-rose-500"><ThumbsDown size={14} /></button>
+                        <button
+                            onClick={() => {
+                                if (feedbackGiven === null) {
+                                    setFeedbackGiven(1);
+                                    handleFeedback(idx, 1);
+                                }
+                            }}
+                            disabled={feedbackGiven !== null}
+                            className={`p-1.5 hover:bg-slate-100 rounded-full transition-colors ${
+                                feedbackGiven === 1 ? 'text-emerald-500 bg-emerald-50' : 'text-slate-300 hover:text-emerald-500'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                            <ThumbsUp size={14} />
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (feedbackGiven === null) {
+                                    setFeedbackGiven(-1);
+                                    handleFeedback(idx, -1);
+                                }
+                            }}
+                            disabled={feedbackGiven !== null}
+                            className={`p-1.5 hover:bg-slate-100 rounded-full transition-colors ${
+                                feedbackGiven === -1 ? 'text-rose-500 bg-rose-50' : 'text-slate-300 hover:text-rose-500'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                            <ThumbsDown size={14} />
+                        </button>
                     </div>
                 )}
             </div>
