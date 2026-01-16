@@ -25,6 +25,7 @@ allowed-tools: [view_file, search_web]
 | **Disaster** | 防災避難 | 暴雨/地震/大雪應對、車廂受困 SOP、熱中症預防 | [Disaster Guide](./reference/disaster-guide.md) |
 | **Fare** | 票務運賃 | 跨系統計價、Pass 適用範圍、IC 卡規則 | [Fare Rules](./reference/fare-rules.md) |
 | **Medical** | 醫療看診 | 檢傷分類、選定療養費(大醫院懲罰金)、科別對照 | [Medical Guide](./reference/medical-guide.md) |
+| **Airport** | 機場交通 | 機場交通策略 (巴士 vs 鐵路) | [Airport Access](./reference/airport-access.md) |
 
 ## 💡 使用原則
 
