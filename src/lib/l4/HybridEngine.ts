@@ -10,13 +10,14 @@
 
 import { templateEngine } from './intent/TemplateEngine';
 import { algorithmProvider } from './algorithms/AlgorithmProvider';
-import { type SupportedLocale } from './assistantEngine';
+import { extractRouteEndpointsFromText, type SupportedLocale } from './assistantEngine';
 import { metricsCollector } from './monitoring/MetricsCollector';
 import { DataNormalizer } from './utils/Normalization';
 import { feedbackStore } from './monitoring/FeedbackStore';
 import { AnomalyDetector } from './utils/AnomalyDetector';
 import { getJSTTime } from '@/lib/utils/timeUtils';
 import { POITaggedDecisionEngine } from '@/lib/ai/poi-tagged-decision-engine';
+import { translateDisruption } from '@/lib/odpt/odptDisruptionTranslations';
 import { preDecisionEngine, DecisionLevel } from '@/lib/ai/PreDecisionEngine';
 import { generateLLMResponse } from '@/lib/ai/llmService';
 import { DataMux } from '@/lib/data/DataMux';
@@ -24,6 +25,8 @@ import { StrategyContext } from '@/lib/ai/strategyEngine';
 import { AgentRouter } from '@/lib/ai/AgentRouter';
 import { executeSkill, skillRegistry } from './skills/SkillRegistry';
 import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
+import { getPartnerUrl } from '@/config/partners';
+import { STATION_MAP } from '@/lib/api/nodes';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -34,7 +37,7 @@ import {
 } from './skills/implementations';
 
 export interface HybridResponse {
-    source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge';
+    source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge' | 'l2_disruption';
     type: 'text' | 'card' | 'route' | 'fare' | 'action' | 'recommendation' | 'expert_tip';
     content: string;
     data?: any;
@@ -128,6 +131,31 @@ export class HybridEngine {
                     reasoning: `Anomaly detection: ${anomaly.reason}`,
                     reasoningLog: logs
                 };
+            }
+
+            // Proactive L2 Warning: If critical, force L2 advice even if not explicitly asked
+            const l2Status = (context?.strategyContext as any)?.l2Status;
+            const isSevere = this.isSevereDisruption(l2Status);
+
+            const l2DisruptionEarly = this.tryBuildL2DisruptionResponse(text, locale, context, isSevere);
+            if (l2DisruptionEarly) {
+                logs.push(`[L2] Live disruption detected (Severe=${isSevere}), returning disruption-first guidance`);
+                metricsCollector.recordRequest(l2DisruptionEarly.source, Date.now() - startTime);
+                feedbackStore.logRequest({ text, source: l2DisruptionEarly.source, timestamp: startTime });
+                if (params.onToken) params.onToken(l2DisruptionEarly.content);
+                return { ...l2DisruptionEarly, reasoningLog: logs };
+            }
+
+            const routeEndpoints = extractRouteEndpointsFromText(text);
+            if (routeEndpoints) {
+                logs.push('[L2] Route endpoints detected, prefer algorithm routes');
+                const routeMatch = await this.checkAlgorithms(text, locale, context);
+                if (routeMatch && (routeMatch.type === 'route' || routeMatch.type === 'action')) {
+                    metricsCollector.recordRequest(routeMatch.source, Date.now() - startTime);
+                    feedbackStore.logRequest({ text, source: routeMatch.source, timestamp: startTime });
+                    if (params.onToken) params.onToken(routeMatch.content);
+                    return { ...routeMatch, reasoningLog: logs };
+                }
             }
 
             // 1. Legacy Regex Skill (Fast Path)
@@ -368,31 +396,76 @@ export class HybridEngine {
 
     private async checkAlgorithms(text: string, locale: SupportedLocale, context?: RequestContext): Promise<HybridResponse | null> {
         const lowerText = text.toLowerCase();
+        const l2Status = (context?.strategyContext as any)?.l2Status;
 
         // Route Intent
         if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
-            // Regex handles: [From] Origin [To/WalkTo/GoTo] Dest
-            // Excludes "步行", "走路" from station name capture
-            // Order sensitive: Match longer separators (步行到) before shorter ones (到)
-            const zhMatch = text.match(/(?:從|from)?\s*([^到去前往步行走路\s]+)\s*(?:步行到|走路去|到|去|前往|to)\s*([^?\s？！!，,。]+)/) || text.match(/([^从\s]+)\s*到\s*([^?\s？！!，,。]+)/);
-            const enMatch = text.match(/from\s+([a-zA-Z\s]+)\s+to\s+([a-zA-Z\s]+)/i);
-            const origin = zhMatch?.[1] || enMatch?.[1];
-            const dest = zhMatch?.[2] || enMatch?.[2];
+            const endpoints = extractRouteEndpointsFromText(text);
+            if (endpoints) {
+                const originLabel = endpoints.originText || endpoints.originIds[0]?.split('.').pop() || endpoints.originIds[0];
+                const destLabel = endpoints.destinationText || endpoints.destinationIds[0]?.split('.').pop() || endpoints.destinationIds[0];
 
-            if (origin && dest) {
-                try {
-                    const routes = await algorithmProvider.findRoutes({ originName: origin, destinationName: dest, locale });
-                    if (routes && routes.length > 0) {
-                        return {
-                            source: 'algorithm',
-                            type: 'route',
-                            content: locale.startsWith('zh') ? `為您找到從 ${origin} 到 ${dest} 的路線建議。` : `Found routes from ${origin} to ${dest}.`,
-                            data: { routes },
-                            confidence: 0.95,
-                            reasoning: 'Calculated route via algorithm.'
-                        };
+                for (const originId of endpoints.originIds) {
+                    for (const destinationId of endpoints.destinationIds) {
+                        try {
+                            const routes = await algorithmProvider.findRoutes({ originId, destinationId, locale, l2Status });
+                            if (routes && routes.length > 0) {
+                                return {
+                                    source: 'algorithm',
+                                    type: 'route',
+                                    content: locale.startsWith('zh') ? `為您找到從 ${originLabel} 到 ${destLabel} 的路線建議。` : `Found routes from ${originLabel} to ${destLabel}.`,
+                                    data: { routes, originId, destinationId },
+                                    confidence: 0.95,
+                                    reasoning: 'Calculated route via algorithm.'
+                                };
+                            }
+
+                            if (l2Status && this.hasL2Issues(l2Status)) {
+                                const originCoord = this.getStationCoord(originId);
+                                const destCoord = this.getStationCoord(destinationId);
+                                const originParam = originCoord ? `${originCoord.lat},${originCoord.lon}` : originLabel;
+                                const destParam = destCoord ? `${destCoord.lat},${destCoord.lon}` : destLabel;
+
+                                const gmapsTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=transit`;
+                                const gmapsDrivingUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=driving`;
+                                const gmapsBikeUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=bicycling`;
+
+                                const distanceKm = originCoord && destCoord
+                                    ? this.getDistanceFromLatLonInKm(originCoord.lat, originCoord.lon, destCoord.lat, destCoord.lon)
+                                    : null;
+                                const taxiEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'taxi') : null;
+                                const bikeEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'bike') : null;
+                                const etaSuffixTaxi = taxiEta ? this.formatEtaLabel(taxiEta.min, taxiEta.max, locale) : '';
+                                const etaSuffixBike = bikeEta ? this.formatEtaLabel(bikeEta.min, bikeEta.max, locale) : '';
+
+                                const luupUrl = 'https://luup.sc/';
+
+                                const content = locale.startsWith('ja')
+                                    ? `いま運行が乱れているため、この区間の「乗れる経路」だけに絞るとルートが見つかりませんでした。まずは **Google Maps（公共交通）** で地下鉄／バスの迂回を確認してください。`
+                                    : locale.startsWith('en')
+                                        ? `Live disruption is affecting service, so I couldn't find a usable route for this segment right now. Open **Google Maps (Transit)** to follow a subway/bus detour.`
+                                        : `因為目前有即時運行異常，我把「不能搭乘的路線」排除後，這段暫時找不到可用路線。先開 **Google Maps（大眾運輸）** 看地鐵／公車的繞行最穩。`;
+
+                                return {
+                                    source: 'algorithm',
+                                    type: 'action',
+                                    content,
+                                    data: {
+                                        l2_summary: this.summarizeL2Status(l2Status),
+                                        l2_status: l2Status,
+                                        actions: [
+                                            { type: 'discovery', label: locale.startsWith('ja') ? 'A→B 迂回（Google Maps）' : locale.startsWith('en') ? 'A→B detour (Google Maps)' : 'A→B 迂回（Google Maps）', target: gmapsTransitUrl, metadata: { category: 'navigation', origin: originLabel, destination: destLabel, distance_km: distanceKm ?? undefined } },
+                                            { type: 'taxi', label: locale.startsWith('ja') ? `タクシー（急ぐ場合）${etaSuffixTaxi}` : locale.startsWith('en') ? `Taxi (if urgent)${etaSuffixTaxi}` : `計程車（趕時間）${etaSuffixTaxi}`, target: gmapsDrivingUrl, metadata: { category: 'mobility', partner_id: 'go_taxi', eta_min: taxiEta?.min, eta_max: taxiEta?.max } },
+                                            { type: 'bike', label: locale.startsWith('ja') ? `シェアサイクル（LUUP）${etaSuffixBike}` : locale.startsWith('en') ? `Shared bike (LUUP)${etaSuffixBike}` : `共享單車（LUUP）${etaSuffixBike}`, target: gmapsBikeUrl, metadata: { category: 'mobility', partner_id: 'luup', eta_min: bikeEta?.min, eta_max: bikeEta?.max } }
+                                        ]
+                                    },
+                                    confidence: 0.88,
+                                    reasoning: 'No usable route after filtering suspended lines.'
+                                };
+                            }
+                        } catch (e) { }
                     }
-                } catch (e) { }
+                }
             }
         }
 
@@ -427,18 +500,33 @@ export class HybridEngine {
             'zh-TW': `你是 LUTAGU (鹿引)，一位住在東京、熱心又專業的「在地好友」。
 你的使命：用溫暖、口語且像真實朋友對話的方式，提供東京交通決策。
 請善用提供給你的「攻略 (Hacks)」與「陷阱 (Traps)」資訊。
+若提供了 L2 即時運行資訊（延誤/停駛/原因/影響路線），你必須在回覆中清楚引用並轉成可執行的建議。
 ✅ 格式要求：可以使用 Markdown 加粗關鍵字 (如 **平台號碼**、**出口名稱**)。可以使用條列式說明多個步驟。
+⚠️ 核心原則【一個建議 (One Suggestion)】：
+   - 除非用戶明確要求比較，否則 **只提供一個最佳建議**。
+   - 不要說「你可以搭 A 也可以搭 B」，直接說「我建議搭 A，因為...」。
+   - 幫助用戶做決定，而不是給予更多選項。
 ⚠️ 邏輯安全守則：若無確切數據，請優先建議搭乘電車/地鐵。**嚴禁** 建議用戶步行超過 1.5 公里 (除非用戶明確要求健行)。
 🛑 限制：回覆不超過 5 句話。保持語氣自然親切，不要像機器人。`,
             'ja': `あなたは LUTAGU (ルタグ)、東京に住む親切でプロフェッショナルな「地元の友達」です。
 使命：温かく、親しみやすい口調で、実用的な東京の交通アドバイスを提供すること。
 提供された「攻略 (Hacks)」や「罠 (Traps)」の情報を活用してください。
+L2のリアルタイム運行情報（遅延/運休/原因/影響路線）が提供されている場合、必ずそれを引用して実行可能な提案に変換してください。
 ✅ 形式：Markdown太字（**ホーム番号**、**出口名**など）や箇条書きを使用して見やすくしてください。
+⚠️ ガイドライン【一つの提案 (One Suggestion)】：
+   - 比較を求められない限り、**最適な一つだけ**を提案してください。
+   - 「AもBも可能です」ではなく、「Aがおすすめです。理由は...」と伝えてください。
+   - ユーザーの決断を助けることが目的です。
 🛑 制限：5文以内。ロボットのような堅苦しい口調は避けてください。`,
             'en': `You are LUTAGU, a helpful and professional "Local Friend" in Tokyo.
 Mission: Provide practical transit advice with a warm, conversational tone.
 Use the provided "Hacks" and "Traps" context whenever relevant.
+If L2 live operation info (delay/suspension/cause/affected lines) is provided, explicitly cite it and turn it into an actionable recommendation.
 ✅ Format: You MAY use Markdown bold (**platforms**, **exit names**) and bullet points for clarity.
+⚠️ Core Principle【One Suggestion】:
+   - Unless explicitly asked to compare, provide **ONLY ONE best recommendation**.
+   - Do not say "You can take A or B". Say "I recommend taking A because...".
+   - Help the user make a decision, do not burden them with choices.
 🛑 Constraint: Max 5 sentences. Keep it natural and friendly.`
         };
         return prompts[locale] || prompts['zh-TW'];
@@ -451,11 +539,452 @@ Use the provided "Hacks" and "Traps" context whenever relevant.
         if (ctx?.userLocation) prompt += `Location: ${ctx.userLocation.lat}, ${ctx.userLocation.lng}\n`;
         if (ctx?.currentStation) prompt += `Station: ${ctx.currentStation}\n`;
 
+        const strategy = ctx?.strategyContext as any;
+        if (strategy?.nodeName) prompt += `Node: ${strategy.nodeName}\n`;
+
+        const l2 = strategy?.l2Status;
+        const l2Summary = this.summarizeL2Status(l2);
+        if (l2Summary) {
+            prompt += `L2 Live Status Summary: ${l2Summary}\n`;
+        }
+        if (l2) {
+            const s = this.safeJson(l2, 2500);
+            if (s) prompt += `L2 Live Status (JSON): ${s}\n`;
+        }
+        const actions = Array.isArray(strategy?.commercialActions) ? strategy.commercialActions : [];
+        if (actions.length > 0) {
+            const s = this.safeJson(actions.slice(0, 5), 1500);
+            if (s) prompt += `Commercial Actions: ${s}\n`;
+        }
+
         // Inject rich knowledge
         const knowledge = ctx?.wisdomSummary || (ctx?.strategyContext as any)?.wisdomSummary;
         if (knowledge) prompt += `Context Info:\n${knowledge}\n`;
 
         return prompt + `\nPlease respond as LUTAGU based on the system prompt.`;
+    }
+
+    private isStatusQuery(text: string): boolean {
+        const t = String(text || '').trim();
+        const lower = t.toLowerCase();
+
+        const statusKeywords = /運行|運轉|復舊|恢復|恢复|改善|延誤|誤點|遲延|停駛|停運|停電|見合わせ|運休|遅延|影響|振替|狀態|狀況|異常|better|improve|delay|delayed|status|suspend|suspended|stopp|power outage|blackout|disruption/i;
+        if (statusKeywords.test(t)) return true;
+
+        const jrMention = /jr|山手|中央線|京浜東北|総武|埼京|湘南新宿|yamanote|chuo|keihin|sobu|saikyo/i.test(lower);
+
+        // If specific line mentioned + question cue, treat as status
+        const questionCues = /怎樣|如何|怎麼|現在|還|正常|有沒有|有無|是否|情況|狀況|大丈夫|動いて|動いてる|能搭|可以|開了|running|ok|fine|any issue|issue/i;
+
+        if (jrMention && questionCues.test(t)) return true;
+
+        // Also if simply "JR" + "Status" combo which might have been caught by statusKeywords but let's be safe
+        return false;
+    }
+
+    private summarizeL2Status(l2: any): string {
+        if (!l2 || typeof l2 !== 'object') return '';
+
+        const parts: string[] = [];
+
+        const statusCode = typeof (l2 as any).status_code === 'string' ? (l2 as any).status_code : '';
+        const severity = typeof (l2 as any).severity === 'string' ? (l2 as any).severity : '';
+        const hasIssues = Boolean((l2 as any).has_issues);
+        const delay = Number((l2 as any).delay || (l2 as any).delay_minutes || 0);
+
+        let cause =
+            (typeof (l2 as any).cause === 'string' ? (l2 as any).cause : '') ||
+            (typeof (l2 as any).reason_zh === 'string' ? (l2 as any).reason_zh : '') ||
+            (typeof (l2 as any).reason_ja === 'string' ? (l2 as any).reason_ja : '') ||
+            (typeof (l2 as any).reason_en === 'string' ? (l2 as any).reason_en : '') ||
+            (typeof (l2 as any).reason === 'string' ? (l2 as any).reason : '');
+
+        // Translate cause for summary context
+        if (cause) {
+            // Default to zh-TW for system prompt context unless specifically handled per-locale context,
+            // but here we just want a readable string for the LLM mainly.
+            // Actually, buildUserPrompt context might be locale-specific?
+            // summarizeL2Status does not take locale. Let's assume zh-TW or en.
+            // Since this function returns a string used in prompt, and system prompt is multilingual but persona is established.
+            // Providing zh-TW translation helps the model understand.
+            cause = translateDisruption(cause, 'zh-TW');
+        }
+
+        let affected = '';
+        const affectedLines = Array.isArray((l2 as any).affected_lines) ? (l2 as any).affected_lines : [];
+        if (affectedLines.length > 0) {
+            affected = affectedLines.map((x: any) => String(x)).filter(Boolean).slice(0, 6).join(', ');
+        } else if (Array.isArray((l2 as any).line_status)) {
+            const ls = (l2 as any).line_status
+                .filter((x: any) => x && x.status && x.status !== 'normal')
+                .map((x: any) => x.line || x.name?.en || x.name?.ja || '')
+                .filter(Boolean)
+                .slice(0, 6);
+            if (ls.length > 0) affected = ls.join(', ');
+        }
+
+        if (hasIssues) parts.push('has_issues');
+        if (statusCode) parts.push(`status_code=${statusCode}`);
+        if (severity) parts.push(`severity=${severity}`);
+        if (delay > 0) parts.push(`delay=${delay}min`);
+        if (cause) parts.push(`cause=${cause}`);
+        if (affected) parts.push(`affected_lines=${affected}`);
+
+        return parts.join(' | ');
+    }
+
+    private safeJson(value: any, maxChars: number): string {
+        try {
+            const s = JSON.stringify(value);
+            if (!s) return '';
+            if (s.length <= maxChars) return s;
+            return s.slice(0, Math.max(0, maxChars - 1)) + '…';
+        } catch {
+            return '';
+        }
+    }
+
+    private hasL2Issues(l2: any): boolean {
+        if (!l2 || typeof l2 !== 'object') return false;
+        if (Boolean((l2 as any).has_issues)) return true;
+
+        const statusCode = String((l2 as any).status_code || '').toUpperCase();
+        if (statusCode && statusCode !== 'NORMAL' && statusCode !== 'OK') return true;
+
+        const delay = Number((l2 as any).delay || (l2 as any).delay_minutes || 0);
+        if (delay >= 5) return true;
+
+        const lineStatus = Array.isArray((l2 as any).line_status) ? (l2 as any).line_status : null;
+        if (lineStatus && lineStatus.some((x: any) => x && x.status && x.status !== 'normal')) return true;
+
+        const reason = String((l2 as any).reason_ja || (l2 as any).reason_en || (l2 as any).reason || '').trim();
+        if (reason) return true;
+        return false;
+    }
+
+    private isSevereDisruption(l2: any): boolean {
+        if (!l2) return false;
+        const statusCode = String((l2 as any).status_code || '').toUpperCase();
+        if (statusCode === 'SUSPENDED' || statusCode === 'CRITICAL') return true;
+
+        const lineStatus = Array.isArray((l2 as any).line_status) ? (l2 as any).line_status : null;
+        if (lineStatus && lineStatus.some((x: any) => x && (x.status_detail === 'halt' || x.status_detail === 'canceled' || x.status === 'suspended'))) return true;
+
+        // Keyword detection for natural disasters (severe even if status code lag)
+        const combinedText = JSON.stringify(l2);
+        const disasterKeywords = /大雪|暴雨|豪雨|台風|地震|津波|typhoon|heavy rain|heavy snow|earthquake|tsunami/i;
+        if (disasterKeywords.test(combinedText)) return true;
+
+        return false;
+    }
+
+    private tryBuildL2DisruptionResponse(text: string, locale: SupportedLocale, context?: RequestContext, forceTrigger: boolean = false): HybridResponse | null {
+        if (!forceTrigger && !this.isStatusQuery(text)) return null;
+        const strategy = (context?.strategyContext as any) || null;
+        const l2 = strategy?.l2Status;
+        if (!l2 || typeof l2 !== 'object') return null;
+
+        const summary = this.summarizeL2Status(l2);
+        const nodeName = strategy?.nodeName || '';
+
+        let causeText =
+            String((l2 as any)?.cause || (l2 as any)?.reason_zh || (l2 as any)?.reason_ja || (l2 as any)?.reason_en || (l2 as any)?.reason || '').trim();
+
+        // Translate cause in correct locale
+        causeText = translateDisruption(causeText, locale);
+
+        const affectedLines = Array.isArray((l2 as any)?.affected_lines) ? (l2 as any).affected_lines.map((x: any) => String(x)).filter(Boolean) : [];
+        const affected = affectedLines.length > 0 ? affectedLines.slice(0, 5).join('、') : '';
+        const delay = Number((l2 as any)?.delay || (l2 as any)?.delay_minutes || 0);
+
+        const hasIssues = this.hasL2Issues(l2);
+
+        // Power outage or severe cause detection
+        const hasPower = /停電|power outage|blackout|変電所|substation/i.test(causeText) || /停電|変電所/.test(JSON.stringify(l2));
+
+        const rawText = String(text || '');
+        const wantsLuggage = /行李|大行李|luggage|suitcase|荷物|スーツケース/i.test(rawText);
+        const wantsWheelchair = /輪椅|wheelchair|車椅子/i.test(rawText);
+        const wantsStroller = /嬰兒車|baby stroller|stroller|ベビーカー/i.test(rawText);
+        const wantsLastTrain = /末班車|終電|last train|last subway|終電車/i.test(rawText);
+        const wantsUrgent = /趕|來不及|急|urgent|asap|hurry|急いで/i.test(rawText);
+        const secondaryLink = wantsLuggage
+            ? { label: locale.startsWith('ja') ? '行李寄放（ecbo cloak）' : locale.startsWith('en') ? 'Luggage storage (ecbo cloak)' : '行李寄放（ecbo cloak）', url: getPartnerUrl('ecbo_cloak') }
+            : { label: locale.startsWith('ja') ? '混雑の少ない場所を探す（Vacan）' : locale.startsWith('en') ? 'Find a less crowded place (Vacan)' : '找不擠的地方等（Vacan）', url: getPartnerUrl('vacan') };
+
+        if (!hasIssues) {
+            const normalBase = locale.startsWith('ja')
+                ? `${nodeName ? `${nodeName}周辺で` : ''}いまのところ大きな遅延は見当たりません。${delay > 0 ? `（遅れ目安：${delay}分）` : ''}`
+                : locale.startsWith('en')
+                    ? `${nodeName ? `Around ${nodeName}, ` : ''}no major delays detected right now.${delay > 0 ? ` (Delay: ~${delay} min)` : ''}`
+                    : `${nodeName ? `${nodeName}附近` : ''}目前看起來沒有明顯延誤。${delay > 0 ? `（延誤約 ${delay} 分）` : ''}`;
+
+            const nextStep = locale.startsWith('ja')
+                ? '目的地（駅名/観光地）を言ってくれれば、最短か乗換少なめで2案出します。'
+                : locale.startsWith('en')
+                    ? 'Tell me your destination (station/POI) and I’ll give 2 route options.'
+                    : '你告訴我目的地（站名/景點），我就給你 2 個路線選項。';
+
+            const content = `${normalBase}\n${nextStep}`.trim();
+
+            return {
+                source: 'algorithm',
+                type: 'text',
+                content,
+                data: {
+                    l2_summary: summary,
+                    l2_status: l2
+                },
+                confidence: 0.85,
+                reasoning: 'L2 live status (normal)'
+            };
+        }
+
+        const base = locale.startsWith('ja')
+            ? `${nodeName ? `${nodeName}周辺で` : ''}現在、運行に乱れがあります。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`
+            : locale.startsWith('en')
+                ? `${nodeName ? `Around ${nodeName}, ` : ''}there is a live service disruption. ${causeText ? `Cause: ${causeText}. ` : ''}${affected ? `Affected: ${affected}. ` : ''}`
+                : `${nodeName ? `${nodeName}附近` : ''}目前出現即時運行異常。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`;
+
+        // Disaster specific advice
+        const isTyphoon = /台風|typhoon/i.test(causeText);
+        const isSnow = /大雪|積雪|snow/i.test(causeText);
+        const isEarthquake = /地震|earthquake|tsunami/i.test(causeText);
+        const isRain = /大雨|豪雨|rain/i.test(causeText);
+
+        let safetyAdvice = '';
+        if (locale.startsWith('ja')) {
+            if (isTyphoon) safetyAdvice = '台風接近時は運休が広がる恐れがあります。早めの帰宅を検討してください。';
+            else if (isSnow) safetyAdvice = '降雪時は到着が大幅に遅れるほか、転倒にも注意が必要です。';
+            else if (isEarthquake) safetyAdvice = '地震発生時はエレベーターを使わず、係員の指示に従ってください。余震に注意。';
+            else if (isRain) safetyAdvice = '大雨の影響で運転見合わせの可能性があります。地下街など安全な場所へ。';
+        } else if (locale.startsWith('en')) {
+            if (isTyphoon) safetyAdvice = 'Typhoons may cause widespread suspension. Plan to return early.';
+            else if (isSnow) safetyAdvice = 'Heavy snow causes major delays. Watch your step for slippery floors.';
+            else if (isEarthquake) safetyAdvice = 'During earthquakes, avoid elevators. Follow staff instructions and beware of aftershocks.';
+            else if (isRain) safetyAdvice = 'Heavy rain may suspend services. Stay safe indoors or underground.';
+        } else {
+            // Default zh-TW
+            if (isTyphoon) safetyAdvice = '颱風接近時可能會擴大停駛範圍，建議儘早安排回程。';
+            else if (isSnow) safetyAdvice = '大雪除造成大幅延誤外，地面濕滑請小心行走，建議預留2倍移動時間。';
+            else if (isEarthquake) safetyAdvice = '地震發生時請勿使用電梯，遵從站務員指示。請注意餘震。';
+            else if (isRain) safetyAdvice = '豪雨可能導致運轉暫停，請待在地下街等安全室內場所。';
+        }
+
+        const primary = locale.startsWith('ja')
+            ? `まずは東京メトロ／都営に切り替えて迂回し、JRを無理に待たないのが安全です。${hasPower ? '停電は復旧見込みが読めないことが多いです。' : ''} ${safetyAdvice}`
+            : locale.startsWith('en')
+                ? `Primary: switch to Tokyo Metro/Toei routes and avoid waiting on JR right now. ${hasPower ? 'Power outages often have uncertain recovery times.' : ''} ${safetyAdvice}`
+                : `建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。${hasPower ? '停電通常恢復時間不穩。' : ''} ${safetyAdvice}`;
+
+        const needsAdviceParts: string[] = [];
+        if (locale.startsWith('ja')) {
+            if (wantsWheelchair) needsAdviceParts.push('バリアフリー優先：エレベーター経路・乗換少なめを選びましょう。');
+            if (wantsStroller) needsAdviceParts.push('ベビーカーは段差が多いので、乗換少なめ＋エレベーター優先が安心です。');
+            if (wantsLastTrain) needsAdviceParts.push('終電が近い場合は待たずに迂回 or タクシーへ切り替えを。');
+            if (wantsUrgent) needsAdviceParts.push('急ぎならタクシーが最短です。');
+        } else if (locale.startsWith('en')) {
+            if (wantsWheelchair) needsAdviceParts.push('Accessibility: choose elevator routes and fewer transfers.');
+            if (wantsStroller) needsAdviceParts.push('Stroller: fewer transfers + elevator routes are safer.');
+            if (wantsLastTrain) needsAdviceParts.push('If it’s close to the last train, don’t wait—detour or take a taxi.');
+            if (wantsUrgent) needsAdviceParts.push('If you’re in a hurry, taxi is the fastest fallback.');
+        } else {
+            if (wantsWheelchair) needsAdviceParts.push('無障礙優先：挑電梯路線、少轉乘。');
+            if (wantsStroller) needsAdviceParts.push('嬰兒車建議少轉乘＋電梯優先。');
+            if (wantsLastTrain) needsAdviceParts.push('若接近末班車，別等延誤線，直接改繞行或計程車。');
+            if (wantsUrgent) needsAdviceParts.push('趕時間的話，計程車通常最快。');
+        }
+
+        const needsAdvice = needsAdviceParts.length > 0 ? needsAdviceParts.join(' ') : '';
+
+        // Transfer Transport Knowledge (Furikae Yuso)
+        const isSuspended = (l2 as any).status_code === 'SUSPENDED' || /運転を見合わせ|suspended|halt/i.test(causeText);
+        const mentionsTransfer = /振替輸送|transfer transport/i.test(causeText) || isSuspended; // Show if suspended or explicitly mentioned
+
+        let transferInfo = '';
+        if (mentionsTransfer) {
+            if (locale.startsWith('ja')) {
+                transferInfo = '\n💡 豆知識：対象路線の切符・定期券をお持ちの方は「振替輸送」により、追加運賃なしで指定の他社線を利用できます。';
+            } else if (locale.startsWith('en')) {
+                transferInfo = '\n💡 Tip: If you have a ticket/pass for the suspended line, you can use "Transfer Transport" (Furikae Yuso) to take alternative subway/private lines for free.';
+            } else {
+                transferInfo = '\n💡 小知識：持有該路線車票/定期票的旅客，可利用「振替輸送」機制，免費搭乘其他替代的地鐵或私鐵路線。';
+            }
+        }
+
+        const endpoints = extractRouteEndpointsFromText(text);
+        const originLabel = endpoints?.originText || endpoints?.originIds?.[0]?.split('.').pop() || context?.currentStation?.split('.').pop() || nodeName || 'Tokyo';
+        const destLabel = endpoints?.destinationText || endpoints?.destinationIds?.[0]?.split('.').pop() || '';
+
+        const originIdForCoord = endpoints?.originIds?.[0] || context?.currentStation || '';
+        const destIdForCoord = endpoints?.destinationIds?.[0] || '';
+
+        const originCoord = this.getStationCoord(originIdForCoord);
+        const destCoord = this.getStationCoord(destIdForCoord);
+
+        const hasRoutePair = Boolean(destLabel);
+
+        const originParam = originCoord ? `${originCoord.lat},${originCoord.lon}` : originLabel;
+        const destParam = destCoord ? `${destCoord.lat},${destCoord.lon}` : destLabel;
+
+        const queryBase = nodeName ? `${nodeName}` : 'Tokyo';
+        const mapsTransitUrl = hasRoutePair
+            ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=transit`
+            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${queryBase} metro bus`)}`;
+
+        const mapsDrivingUrl = hasRoutePair
+            ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=driving`
+            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${queryBase} taxi`)}`;
+
+        const mapsBikeUrl = hasRoutePair
+            ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=bicycling`
+            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${queryBase} bicycle share`)}`;
+
+        const distanceKm = originCoord && destCoord
+            ? this.getDistanceFromLatLonInKm(originCoord.lat, originCoord.lon, destCoord.lat, destCoord.lon)
+            : null;
+
+        const taxiEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'taxi') : null;
+        const bikeEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'bike') : null;
+        const walkEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'walk') : null;
+
+        const etaSuffixTaxi = taxiEta ? this.formatEtaLabel(taxiEta.min, taxiEta.max, locale) : '';
+        const etaSuffixBike = bikeEta ? this.formatEtaLabel(bikeEta.min, bikeEta.max, locale) : '';
+        const etaSuffixWalk = walkEta ? this.formatEtaLabel(walkEta.min, walkEta.max, locale) : '';
+
+        const content = [
+            base,
+            primary,
+            needsAdvice,
+            hasRoutePair && (etaSuffixTaxi || etaSuffixBike || etaSuffixWalk)
+                ? (locale.startsWith('ja')
+                    ? `目安：タクシー${etaSuffixTaxi}／自転車${etaSuffixBike}／徒歩${etaSuffixWalk}`
+                    : locale.startsWith('en')
+                        ? `Rough ETA: taxi${etaSuffixTaxi} / bike${etaSuffixBike} / walk${etaSuffixWalk}`
+                        : `粗估：計程車${etaSuffixTaxi}／單車${etaSuffixBike}／步行${etaSuffixWalk}`)
+                : '',
+            transferInfo
+        ].filter(Boolean).join('\n').trim();
+
+        const luupUrl = 'https://luup.sc/';
+
+        return {
+            source: 'l2_disruption',
+            type: 'action',
+            content,
+            data: {
+                l2_summary: summary,
+                l2_status: l2,
+                actions: (() => {
+                    const primaryAction = {
+                        type: 'discovery',
+                        label: hasRoutePair
+                            ? (locale.startsWith('ja') ? 'A→B 迂回（Google Maps）' : locale.startsWith('en') ? 'A→B detour (Google Maps)' : 'A→B 迂回（Google Maps）')
+                            : (locale.startsWith('ja') ? '地下鉄/バス迂回（Google Maps）' : locale.startsWith('en') ? 'Subway/Bus detour (Google Maps)' : '地鐵/公車迂回（Google Maps）'),
+                        target: mapsTransitUrl,
+                        metadata: {
+                            category: 'navigation',
+                            origin: hasRoutePair ? originLabel : undefined,
+                            destination: hasRoutePair ? destLabel : undefined,
+                            distance_km: distanceKm ?? undefined
+                        }
+                    };
+
+                    const taxiAction = {
+                        type: 'taxi',
+                        label: locale.startsWith('ja')
+                            ? `タクシー（GO）${etaSuffixTaxi}`
+                            : locale.startsWith('en')
+                                ? `Taxi (GO)${etaSuffixTaxi}`
+                                : `計程車（GO）${etaSuffixTaxi}`,
+                        target: mapsDrivingUrl,
+                        metadata: { category: 'mobility', partner_id: 'go_taxi', eta_min: taxiEta?.min, eta_max: taxiEta?.max }
+                    };
+
+                    const bikeAction = {
+                        type: 'bike',
+                        label: locale.startsWith('ja')
+                            ? `シェアサイクル（LUUP）${etaSuffixBike}`
+                            : locale.startsWith('en')
+                                ? `Shared bike (LUUP)${etaSuffixBike}`
+                                : `共享單車（LUUP）${etaSuffixBike}`,
+                        target: mapsBikeUrl,
+                        metadata: { category: 'mobility', partner_id: 'luup', eta_min: bikeEta?.min, eta_max: bikeEta?.max }
+                    };
+
+                    const secondaryAction = wantsLuggage && secondaryLink.url
+                        ? { type: 'discovery', label: secondaryLink.label, target: secondaryLink.url, metadata: { category: 'storage', partner_id: 'ecbo_cloak' } }
+                        : (!hasRoutePair && secondaryLink.url
+                            ? { type: 'discovery', label: secondaryLink.label, target: secondaryLink.url, metadata: { category: 'crowd', partner_id: 'vacan' } }
+                            : bikeAction);
+
+                    return [primaryAction, taxiAction, secondaryAction];
+                })()
+            },
+            confidence: 0.9,
+            reasoning: 'L2 live disruption response'
+        };
+    }
+
+    private getStationCoord(stationId: string): { lat: number; lon: number } | null {
+        const key = String(stationId || '').trim();
+        if (!key) return null;
+        const direct = (STATION_MAP as any)[key];
+        if (direct && typeof direct.lat === 'number' && typeof direct.lon === 'number') return direct;
+
+        const normalized = key.replace('odpt:Station:', 'odpt.Station:');
+        const normalized2 = key.replace('odpt.Station:', 'odpt:Station:');
+
+        const a = (STATION_MAP as any)[normalized];
+        if (a && typeof a.lat === 'number' && typeof a.lon === 'number') return a;
+
+        const matches = (STATION_MAP as any)[normalized2];
+        if (matches && typeof matches.lat === 'number' && typeof matches.lon === 'number') return matches;
+
+        // Name-based fallback (e.g. "Tokyo", "東京")
+        // Try to verify if input looks like a simple name or just strip operator parts
+        const simpleName = key.split('.').pop()?.split(':').pop() || key;
+        if (simpleName && simpleName.length > 1) {
+            // Fix: STATION_MAP values are {lat, lon}, keys contain the name.
+            const foundEntry = Object.entries(STATION_MAP).find(([k, v]) =>
+                k.endsWith(`.${simpleName}`) || k.includes(`.${simpleName}.`)
+            );
+            if (foundEntry) return foundEntry[1] as { lat: number, lon: number };
+        }
+
+        return null;
+    }
+
+    private estimateEtaMinutes(distanceKm: number, mode: 'taxi' | 'bike' | 'walk'): { min: number; max: number } {
+        const d = Math.max(0, distanceKm);
+
+        if (mode === 'walk') {
+            const base = d * 13.3;
+            return this.makeEtaRange(base, 0.2, 2);
+        }
+
+        if (mode === 'bike') {
+            const base = d * 5.0;
+            return this.makeEtaRange(base, 0.25, 2);
+        }
+
+        const base = d * 3.5 + 5;
+        return this.makeEtaRange(base, 0.3, 3);
+    }
+
+    private makeEtaRange(baseMinutes: number, ratio: number, minFloor: number): { min: number; max: number } {
+        const base = Math.max(0, baseMinutes);
+        const min = Math.max(minFloor, Math.round(base * (1 - ratio)));
+        const max = Math.max(min + 1, Math.round(base * (1 + ratio)));
+        return { min, max };
+    }
+
+    private formatEtaLabel(min: number, max: number, locale: SupportedLocale): string {
+        const a = Math.max(1, Math.round(min));
+        const b = Math.max(a, Math.round(max));
+        if (locale.startsWith('en')) return ` (~${a}-${b} min)`;
+        if (locale.startsWith('ja')) return `（約${a}〜${b}分）`;
+        return `（約 ${a}-${b} 分）`;
     }
 
     public getStats() { return { poiEngine: this.getPoiEngine().getCacheStats() }; }

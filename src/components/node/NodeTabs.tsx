@@ -74,11 +74,14 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
 
         return {
             lines: (source.line_status || []).map((l: any, idx: number) => ({
-                id: `line-${idx}`,
+                id: l.railway_id || l.id || `${l.operator || 'unknown'}:${l.line || idx}`,
                 name: getLocaleString(l.name, locale) || l.line || l.name,
                 operator: l.operator || 'Metro',
                 color: l.color || '#999999',
                 status: l.status || 'normal',
+                status_detail: l.status_detail || undefined,
+                delay_minutes: typeof l.delay_minutes === 'number' ? l.delay_minutes : null,
+                severity: l.severity || undefined,
                 message: getLocaleString(l.message, locale)
             })),
             weather: {

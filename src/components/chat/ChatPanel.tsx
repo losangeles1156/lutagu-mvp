@@ -27,6 +27,7 @@ import { ThinkingBubble } from './ThinkingBubble';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { demoScripts } from '@/data/demoScripts';
 import { MessageBubble } from './MessageBubble'; // Moved import to top
+import { trackFunnelEvent } from '@/lib/tracking';
 
 const MIN_HEIGHT = 200;
 const MAX_HEIGHT = 600;
@@ -100,6 +101,8 @@ export function ChatPanel() {
         stationId: currentNodeId || '',
         userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
     });
+
+    useAiResponseTracking(messages, isLoading);
 
     // Compatibility alias
     const append = useCallback(async (msg: { role: string; content: string }) => {
@@ -255,7 +258,7 @@ export function ChatPanel() {
     // Auto-scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [displayMessages, isLoading]);
+    }, [displayMessages, isLoading, messagesEndRef]);
 
     // Initialize (Welcome Message or Pending Chat or Demo Script)
     useEffect(() => {
@@ -317,6 +320,12 @@ export function ChatPanel() {
             const coords = action.metadata?.coordinates || targets[action.target] || [35.6895, 139.6917];
             useAppStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
             transitionTo('collapsed_desktop');
+            trackFunnelEvent({
+                step_name: 'location_selected',
+                step_number: 3,
+                path: '/chat',
+                metadata: { target: action.target }
+            });
         } else if (action.target === 'internal:restart') {
             handleRestart();
         } else if (action.target === 'internal:end-demo') {
@@ -441,7 +450,21 @@ export function ChatPanel() {
 
                     {/* Input Area */}
                     <div className="shrink-0 p-4 border-t border-slate-100 bg-white/95 backdrop-blur-sm pb-[calc(1rem+env(safe-area-inset-bottom))]">
-                        <form onSubmit={(e) => { e.preventDefault(); if (isDemoPlaying) return; if (input.trim()) { sendMessage(input); setInput(''); } }} className="flex gap-2">
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            if (isDemoPlaying) return;
+                            if (input.trim()) {
+                                const query = input;
+                                sendMessage(input);
+                                setInput('');
+                                trackFunnelEvent({
+                                    step_name: 'query_input',
+                                    step_number: 1,
+                                    path: '/chat',
+                                    metadata: { query_length: query.length }
+                                });
+                            }
+                        }} className="flex gap-2">
                             <input
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
@@ -467,5 +490,28 @@ export function ChatPanel() {
     );
 }
 
+// Effect for tracking AI response
+const useAiResponseTracking = (messages: any[], isLoading: boolean) => {
+    const lastMsgRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (messages.length === 0) return;
+        const lastMsg = messages[messages.length - 1];
+
+        // Track when assistant message is done loading
+        if (lastMsg.role === 'assistant' && !isLoading && !lastMsg.isLoading && lastMsg.id !== lastMsgRef.current) {
+            lastMsgRef.current = lastMsg.id;
+            trackFunnelEvent({
+                step_name: 'ai_response_received',
+                step_number: 2,
+                path: '/chat',
+                metadata: {
+                    message_id: lastMsg.id,
+                    has_actions: !!lastMsg.data?.actions
+                }
+            });
+        }
+    }, [messages, isLoading]);
+};
 
 export default ChatPanel;

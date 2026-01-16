@@ -3,11 +3,18 @@
 import { useState, useEffect, memo, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Zap, AlertTriangle, AlertOctagon, Cloud, Sun, Users, Wind, ArrowRight, Plane, ExternalLink } from 'lucide-react';
+import { translateDisruption } from '@/lib/odpt/odptDisruptionTranslations';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { SmartWeatherCard } from '@/components/ui/SmartWeatherCard';
 import { HubInfoHeader, HubMembersList } from '@/components/map/HubMembersList';
 import { LiveFlightBoard } from '@/components/node/LiveFlightBoard';
+import { trackFunnelEvent } from '@/lib/tracking';
+import { PartnerNudgeCard } from '@/components/marketing/PartnerNudgeCard';
+import { PARTNER_REGISTRY } from '@/config/partners';
+import { DisruptionBanner } from '@/components/guard/DisruptionBanner';
+import { useTripGuardStore } from '@/stores/tripGuardStore';
+import { Bell } from 'lucide-react';
 
 // Types for Hub information
 interface HubMemberInfo {
@@ -30,7 +37,22 @@ interface HubDetails {
 }
 
 // Memoized Train Line Item with Compact Mode support
-const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { line: any, isDelay: boolean, tL2: any, locale: string, compact?: boolean }) => {
+const TrainLineItem = memo(({ line, tL2, locale, compact = false }: { line: any, tL2: any, locale: string, compact?: boolean }) => {
+    const isMonitoring = useTripGuardStore(state => state.isMonitoring(line.id || line.name)); // Fallback to name if ID missing
+    const addLine = useTripGuardStore(state => state.addLine);
+    const removeLine = useTripGuardStore(state => state.removeLine);
+
+    // Helper to toggle
+    const toggleMonitor = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const lineId = line.id || line.name;
+        if (isMonitoring) {
+            removeLine(lineId);
+        } else {
+            addLine({ id: lineId, name: getLocaleString(line.name, locale), operator: line.operator });
+        }
+    };
+
     // Compact Layout (for Normal status in busy hubs)
     if (compact) {
         return (
@@ -49,13 +71,96 @@ const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { l
                         {line.operator}
                     </p>
                 </div>
+                {/* Compact Monitor Toggle */}
+                <button
+                    onClick={toggleMonitor}
+                    className={`p-1.5 rounded-full transition-colors ${isMonitoring ? 'text-indigo-600 bg-indigo-50' : 'text-gray-300 hover:text-gray-500'}`}
+                >
+                    {isMonitoring ? <Bell size={12} className="fill-current" /> : <Bell size={12} />}
+                </button>
             </div>
         );
     }
 
+    const statusDetail = String(line.status_detail || '');
+    const delayMinutes = typeof line.delay_minutes === 'number' ? line.delay_minutes : null;
+
+    const statusTheme = (() => {
+        if (statusDetail === 'canceled') {
+            return {
+                wrapper: 'bg-slate-50 border-l-4 border-slate-400',
+                badge: 'bg-slate-600 text-white',
+                badgeText: locale === 'ja' ? '運休' : locale === 'en' ? 'Cancelled' : '運休',
+                defaultText: locale === 'ja' ? '一部または全区間で運休' : locale === 'en' ? 'Some services are cancelled' : '停駛／取消班次'
+            };
+        }
+        if (statusDetail === 'halt') {
+            return {
+                wrapper: 'bg-rose-50 border-l-4 border-rose-500',
+                badge: 'bg-rose-600 text-white',
+                badgeText: locale === 'ja' ? '運転見合わせ' : locale === 'en' ? 'Suspended' : '運転見合わせ',
+                defaultText: locale === 'ja' ? '運転を見合わせています' : locale === 'en' ? 'Service is suspended' : '暫停運行'
+            };
+        }
+        if (statusDetail === 'delay_major') {
+            return {
+                wrapper: 'bg-orange-50 border-l-4 border-orange-500',
+                badge: 'bg-orange-600 text-white',
+                badgeText: locale === 'ja'
+                    ? `遅延${delayMinutes !== null ? ` ${delayMinutes}分` : ''}`
+                    : locale === 'en'
+                        ? `Delay${delayMinutes !== null ? ` ${delayMinutes} min` : ''}`
+                        : `延誤${delayMinutes !== null ? ` ${delayMinutes} 分` : ''}`,
+                defaultText: locale === 'ja'
+                    ? `30分以上の遅れ${delayMinutes !== null ? `（${delayMinutes}分）` : ''}`
+                    : locale === 'en'
+                        ? `Delay 30+ min${delayMinutes !== null ? ` (${delayMinutes} min)` : ''}`
+                        : `延誤 30 分鐘以上${delayMinutes !== null ? `（${delayMinutes} 分）` : ''}`
+            };
+        }
+        if (statusDetail === 'delay_minor') {
+            return {
+                wrapper: 'bg-amber-50 border-l-4 border-amber-400',
+                badge: 'bg-amber-500 text-white',
+                badgeText: locale === 'ja'
+                    ? `遅延${delayMinutes !== null ? ` ${delayMinutes}分` : ''}`
+                    : locale === 'en'
+                        ? `Delay${delayMinutes !== null ? ` ${delayMinutes} min` : ''}`
+                        : `延誤${delayMinutes !== null ? ` ${delayMinutes} 分` : ''}`,
+                defaultText: locale === 'ja'
+                    ? `30分未満の遅れ${delayMinutes !== null ? `（${delayMinutes}分）` : ''}`
+                    : locale === 'en'
+                        ? `Delay under 30 min${delayMinutes !== null ? ` (${delayMinutes} min)` : ''}`
+                        : `延誤 30 分鐘以內${delayMinutes !== null ? `（${delayMinutes} 分）` : ''}`
+            };
+        }
+        if (line.status === 'suspended') {
+            return {
+                wrapper: 'bg-rose-50 border-l-4 border-rose-500',
+                badge: 'bg-rose-600 text-white',
+                badgeText: locale === 'ja' ? '運行停止' : locale === 'en' ? 'Suspended' : '運行停止',
+                defaultText: locale === 'ja' ? '運行に影響があります' : locale === 'en' ? 'Service disruption' : '運行受影響'
+            };
+        }
+        if (line.status === 'delay') {
+            return {
+                wrapper: 'bg-amber-50 border-l-4 border-amber-400',
+                badge: 'bg-amber-500 text-white',
+                badgeText: locale === 'ja' ? '遅延' : locale === 'en' ? 'Delay' : '延誤',
+                defaultText: tL2('status.delay')
+            };
+        }
+        return {
+            wrapper: '',
+            badge: '',
+            badgeText: '',
+            defaultText: tL2('status.normal')
+        };
+    })();
+
     // Full Layout (Existing style for Delays or sparse lists)
     return (
-        <div className={`p-4 flex items-center gap-3 touch-manipulation min-h-[64px] ${isDelay ? 'bg-rose-50/30' : ''}`}>
+        <div className={`p-4 flex items-center gap-3 touch-manipulation min-h-[64px] ${statusTheme.wrapper}`}>
             <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-lg text-white shadow-sm shrink-0"
                 style={{ backgroundColor: line.color }}
@@ -72,19 +177,33 @@ const TrainLineItem = memo(({ line, isDelay, tL2, locale, compact = false }: { l
                         </span>
                     </h4>
 
-                    {isDelay && (
-                        <span className="px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded-full animate-pulse shrink-0">DELAY</span>
+                    {line.status !== 'normal' && statusTheme.badgeText && (
+                        <span className={`px-2 py-0.5 text-[9px] font-black rounded-full shrink-0 ${statusTheme.badge}`}>
+                            {statusTheme.badgeText}
+                        </span>
                     )}
                 </div>
                 <div className="flex justify-between items-center">
                     <p className="text-[10px] text-gray-500 truncate pr-2">
                         {line.message
-                            ? getLocaleString(line.message, locale)
-                            : (isDelay ? tL2('status.delay') : tL2('status.normal'))
+                            ? translateDisruption(getLocaleString(line.message, locale), locale)
+                            : statusTheme.defaultText
                         }
                     </p>
                 </div>
             </div>
+
+            {/* Full Layout Monitor Toggle */}
+            <button
+                onClick={toggleMonitor}
+                className={`p-2 rounded-full transition-all active:scale-95 ${isMonitoring
+                    ? 'text-indigo-600 bg-indigo-50 shadow-sm'
+                    : 'text-gray-300 hover:text-indigo-400 hover:bg-gray-50'
+                    }`}
+                title="Trip Guard: Monitor this line"
+            >
+                {isMonitoring ? <Bell size={18} className="fill-current" /> : <Bell size={18} />}
+            </button>
         </div>
     );
 });
@@ -113,6 +232,21 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
     const isAirport = isHaneda || isNarita;
     const airportCode = isHaneda ? 'HND' : 'NRT';
 
+    // Track Facility View (Funnel Step 4)
+    useEffect(() => {
+        if (data.id) {
+            trackFunnelEvent({
+                step_name: 'facility_viewed',
+                step_number: 4,
+                path: '/l2',
+                metadata: {
+                    facility_id: data.id,
+                    facility_type: isAirport ? 'airport' : 'station'
+                }
+            });
+        }
+    }, [data.id, isAirport]);
+
     // Filter Lines for Airport (Show express preferentially)
     const displayLines = useMemo(() => {
         if (!isAirport) return lines;
@@ -125,14 +259,17 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
     }, [lines, isAirport]);
 
     // Re-derive for layout with sorted lines
-    const delayedLines = displayLines.filter((l: any) => l.status !== 'normal');
-    const normalLines = displayLines.filter((l: any) => l.status === 'normal');
+    const delayedLines = displayLines.filter((l: any) => String(l.status_detail || (l.status === 'normal' ? 'normal' : 'unknown')) !== 'normal');
+    const normalLines = displayLines.filter((l: any) => String(l.status_detail || (l.status === 'normal' ? 'normal' : 'unknown')) === 'normal');
     const isBusyHub = displayLines.length > 4;
 
 
 
     return (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom duration-500">
+            {/* [New] Trip Guard Banner (Sticky/Top) */}
+            <DisruptionBanner />
+
             {/* [New] Realtime Flight Board (Airport Only) */}
             {isAirport && (
                 <div className="space-y-2">
@@ -213,7 +350,6 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                                 <div key={line.id} className="border-b border-gray-50 last:border-0">
                                     <TrainLineItem
                                         line={line}
-                                        isDelay={true}
                                         tL2={tL2}
                                         locale={locale}
                                         compact={false} // Always full for delays
@@ -227,7 +363,6 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                                     <TrainLineItem
                                         key={line.id}
                                         line={line}
-                                        isDelay={false}
                                         tL2={tL2}
                                         locale={locale}
                                         compact={isBusyHub} // Compact if busy
@@ -274,41 +409,12 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                     </div>
 
 
-                    {/* VACAN Real-time Map Card */}
-                    <a
-                        href="https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&areaName=chiyoda-ku"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block relative bg-white rounded-2xl border border-gray-100 p-3 shadow-sm hover:shadow-md transition-all active:scale-[0.98] group overflow-hidden touch-manipulation min-h-[100px]"
-                    >
-                        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-orange-100 via-transparent to-transparent opacity-50 rounded-tr-2xl"></div>
-
-                        <div className="flex items-center gap-2 mb-2 relative z-10">
-                            <div className="p-1.5 bg-orange-100 rounded-lg text-orange-600">
-                                <Users size={14} />
-                            </div>
-                            <div>
-                                <h4 className="text-xs font-black text-gray-900 leading-none">
-                                    {tL2('vacanTitle', { defaultValue: 'Crowd Map' })}
-                                </h4>
-                                <span className="text-[9px] text-orange-600 font-bold bg-orange-50 px-1 py-0.5 rounded mt-0.5 inline-block border border-orange-100">
-                                    {tL2('vacanSub', { defaultValue: 'Live Availability' })}
-                                </span>
-                            </div>
-                        </div>
-
-                        <p className="text-[10px] text-gray-500 font-medium leading-tight mb-3 relative z-10">
-                            {tL2('vacanDesc', { defaultValue: 'Check real-time availability of nearby shops & restaurants' })}
-                        </p>
-
-                        <div className="flex items-center justify-between mt-auto">
-                            <span className="text-[10px] font-bold text-gray-400 group-hover:text-orange-500 transition-colors flex items-center gap-1">
-                                {tL2('vacanCta', { defaultValue: 'Open Map' })}
-                                <ArrowRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
-                            </span>
-                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shadow-sm"></div>
-                        </div>
-                    </a>
+                    {/* [MODIFIED] Dynamic Partner Nudge Cards */}
+                    {/* Currently checking for "Crowd" data to trigger Vacan, but can be generic */}
+                    <PartnerNudgeCard
+                        offer={PARTNER_REGISTRY.vacan}
+                        dynamicParams={{}}
+                    />
 
                     {/* User Crowd Report Section */}
                     <CrowdFeedbackCard

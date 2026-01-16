@@ -3,10 +3,12 @@ import {
     findRankedRoutes,
     findStationIdsByName,
     normalizeOdptStationId,
+    filterRoutesByL2Status,
     type RailwayTopology,
     type RouteStep,
 } from '@/lib/l4/assistantEngine';
 import CORE_TOPOLOGY from '@/lib/l4/generated/coreTopology.json';
+import { supabaseAdmin } from '@/lib/supabase';
 
 interface RouteResponse {
     routes: Array<{
@@ -20,6 +22,7 @@ interface RouteResponse {
         sources: Array<{ type: string; verified: boolean }>;
     }>;
     error?: string;
+    error_code?: string;
 }
 
 export async function GET(req: Request) {
@@ -28,8 +31,39 @@ export async function GET(req: Request) {
     const toStation = searchParams.get('to');
     const locale = (searchParams.get('locale') || 'zh-TW') as any;
 
+    const getErrorText = (kind: 'missing_params' | 'station_not_found' | 'no_usable_due_to_disruption' | 'no_direct_route' | 'failed') => {
+        const l = String(locale || 'zh-TW');
+        const isJa = l.startsWith('ja');
+        const isEn = l.startsWith('en');
+
+        if (kind === 'missing_params') {
+            return isJa ? 'from/to の指定が必要です。' : isEn ? 'Missing from/to station parameters.' : '缺少 from/to 站點參數。';
+        }
+        if (kind === 'station_not_found') {
+            return isJa ? '駅が見つかりませんでした。' : isEn ? 'Station not found.' : '找不到車站。';
+        }
+        if (kind === 'no_usable_due_to_disruption') {
+            return isJa
+                ? '現在の運行乱れにより、利用できない路線を除外するとルートが見つかりませんでした。迂回は Google Maps（公共交通）で確認するのが早いです。'
+                : isEn
+                    ? "Live disruption is affecting service, so I couldn't find a usable route after removing suspended lines. The fastest workaround is Google Maps (Transit) detours."
+                    : '因為目前有即時運行異常，我已排除不能搭乘的路線，但暫時找不到可用路線。建議先用 Google Maps（大眾運輸）確認繞行。';
+        }
+        if (kind === 'no_direct_route') {
+            return isJa
+                ? '直通ルートが見つかりませんでした。事業者をまたぐ乗換が必要な可能性があります。'
+                : isEn
+                    ? 'No direct route found. Cross-operator transfer may be required.'
+                    : '找不到直達路線，可能需要跨營運商轉乘。';
+        }
+        return isJa ? 'ルートの作成に失敗しました。' : isEn ? 'Failed to plan route.' : '路線規劃失敗。';
+    };
+
     if (!fromStation || !toStation) {
-        return NextResponse.json({ error: 'Missing from/to station parameters', routes: [] }, { status: 400 });
+        return NextResponse.json(
+            { error_code: 'missing_params', error: getErrorText('missing_params'), routes: [] },
+            { status: 400, headers: { 'Cache-Control': 'no-store' } }
+        );
     }
 
     // Helper to resolve station IDs from user input
@@ -84,15 +118,16 @@ export async function GET(req: Request) {
 
     if (fromIds.length === 0 || toIds.length === 0) {
         return NextResponse.json({
-            error: 'Station not found',
+            error_code: 'station_not_found',
+            error: getErrorText('station_not_found'),
             routes: []
-        }, { status: 404 });
+        }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
     }
 
     try {
         const railways: RailwayTopology[] = CORE_TOPOLOGY as unknown as RailwayTopology[];
 
-        const routeOptions = findRankedRoutes({
+        const routeOptionsBase = findRankedRoutes({
             originStationId: fromIds,
             destinationStationId: toIds,
             railways,
@@ -100,10 +135,62 @@ export async function GET(req: Request) {
             locale,
         });
 
+        let routeOptions = routeOptionsBase;
+        let removedDueToL2 = 0;
+
+        if (routeOptionsBase.length > 0) {
+            let l2Status: any = null;
+
+            try {
+                const keys = fromIds.map((id) => `l2:${id}`);
+                const { data } = await supabaseAdmin
+                    .from('l2_cache')
+                    .select('key,value')
+                    .in('key', keys);
+                const rows = Array.isArray(data) ? data : [];
+                l2Status = rows.find((r: any) => r && r.value)?.value || null;
+            } catch {
+                for (const fromId of fromIds) {
+                    try {
+                        const { data } = await supabaseAdmin
+                            .from('l2_cache')
+                            .select('value')
+                            .eq('key', `l2:${fromId}`)
+                            .maybeSingle();
+
+                        const val = (data as any)?.value || null;
+                        if (val) {
+                            l2Status = val;
+                            break;
+                        }
+                    } catch {
+                        continue;
+                    }
+                }
+            }
+
+            if (l2Status) {
+                const filtered = filterRoutesByL2Status({ routes: routeOptionsBase, l2Status });
+                routeOptions = filtered.routes as unknown as typeof routeOptionsBase;
+                removedDueToL2 = filtered.removed.length;
+            }
+        }
+
         if (routeOptions.length === 0) {
+            const isDisruption = routeOptionsBase.length > 0 && removedDueToL2 > 0;
+            const errorCode = isDisruption ? 'no_usable_due_to_disruption' : 'no_direct_route';
+            const cacheControl = isDisruption
+                ? 'public, s-maxage=30, stale-while-revalidate=30'
+                : 'public, s-maxage=300, stale-while-revalidate=60';
+
             return NextResponse.json({
-                error: 'No direct route found. Cross-operator transfer may be required.',
+                error_code: errorCode,
+                error: getErrorText(errorCode as any),
                 routes: []
+            }, {
+                headers: {
+                    'Cache-Control': cacheControl
+                }
             });
         }
 
@@ -123,17 +210,22 @@ export async function GET(req: Request) {
             };
         });
 
+        const cacheControl = removedDueToL2 > 0
+            ? 'public, s-maxage=30, stale-while-revalidate=30'
+            : 'public, s-maxage=300, stale-while-revalidate=60';
+
         return NextResponse.json({ routes }, {
             headers: {
-                'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60'
+                'Cache-Control': cacheControl
             }
         });
 
     } catch (error) {
         console.error('Route API Error:', error);
         return NextResponse.json({
-            error: 'Failed to plan route',
+            error_code: 'failed',
+            error: getErrorText('failed'),
             routes: []
-        }, { status: 500 });
+        }, { status: 500, headers: { 'Cache-Control': 'no-store' } });
     }
 }

@@ -78,6 +78,25 @@ function crawlFiles(dir: string): string[] {
     return results;
 }
 
+// 🛡️ Security: Risk Pattern Matcher
+function containsSensitiveData(text: string): { hasRisk: boolean; type?: string } {
+    // 1. Specific API Key Patterns
+    const patterns = [
+        { type: 'OpenAI/Zeabur Key', regex: /sk-[a-zA-Z0-9]{20,}/ },
+        { type: 'Google API Key', regex: /AIza[0-9A-Za-z-_]{35}/ },
+        { type: 'Supabase Key', regex: /sb_[a-z]+_[a-zA-Z0-9]{20,}/ },
+        { type: 'Private Key', regex: /-----BEGIN PRIVATE KEY-----/ },
+        { type: 'Generic Token', regex: /(?:api_key|access_token|secret)[\s=:"']+([a-zA-Z0-9_\-]{16,})/i }
+    ];
+
+    for (const p of patterns) {
+        if (p.regex.test(text)) {
+            return { hasRisk: true, type: p.type };
+        }
+    }
+    return { hasRisk: false };
+}
+
 async function main() {
     console.log('📚 Starting Dynamic Skill Ingestion...');
 
@@ -137,6 +156,15 @@ async function main() {
                 }
 
                 if (body.length < 50) return; // Skip too short
+
+
+
+                // 🛡️ Security Check
+                const risk = containsSensitiveData(body);
+                if (risk.hasRisk) {
+                    console.error(`  🚨 SECURITY ALERT: Skipped "${sectionTitle}" in ${fileName}.md - Detected ${risk.type}`);
+                    return;
+                }
 
                 items.push({
                     id: `${category}-${fileName}-${idx}`,

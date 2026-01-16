@@ -390,7 +390,16 @@ export const STATION_MAP: Record<string, { lat: number; lon: number }> = {
     'odpt.Station:TokyoMetro.Hibiya.Ningyocho': { lat: 35.6861, lon: 139.7822 },
     'odpt.Station:Toei.Asakusa.Ningyocho': { lat: 35.6861, lon: 139.7822 },
     'odpt.Station:TokyoMetro.Ginza.Nihombashi': { lat: 35.6817, lon: 139.7745 },
-    'odpt.Station:Toei.Asakusa.Nihombashi': { lat: 35.6817, lon: 139.7745 }
+    'odpt.Station:Toei.Asakusa.Nihombashi': { lat: 35.6817, lon: 139.7745 },
+    'odpt.Station:JR-East.Yamanote.Shinjuku': { lat: 35.6909, lon: 139.7003 },
+    'odpt.Station:JR-East.Shinjuku': { lat: 35.6909, lon: 139.7003 },
+    'odpt.Station:JR-East.Yamanote.Shibuya': { lat: 35.658, lon: 139.7016 },
+    'odpt.Station:JR-East.Shibuya': { lat: 35.658, lon: 139.7016 },
+    'odpt.Station:JR-East.Yamanote.Ikebukuro': { lat: 35.7289, lon: 139.7100 },
+    'odpt.Station:JR-East.Ikebukuro': { lat: 35.7289, lon: 139.7100 },
+    'odpt.Station:JR-East.Yamanote.Shinagawa': { lat: 35.6285, lon: 139.7388 },
+    'odpt.Station:JR-East.Tokaido.Shinagawa': { lat: 35.6285, lon: 139.7388 },
+    'odpt.Station:JR-East.Shinagawa': { lat: 35.6285, lon: 139.7388 }
 };
 
 // Helper to determine operator from ID

@@ -1,0 +1,2966 @@
+{
+  "summary": {
+    "generated_at": "2026-01-16T04:41:14.933Z",
+    "total": 20,
+    "avg_score": 4,
+    "score_distribution": {
+      "4": 20
+    },
+    "recognition_rate": 1,
+    "translation_rate": 1,
+    "actions_rate": 1,
+    "time_estimate_rate": 0
+  },
+  "runs": [
+    {
+      "caseId": "JR-DIS-01",
+      "timestamp": "2026-01-16T04:41:14.929Z",
+      "scenario": {
+        "id": "JR-DIS-01",
+        "timeOfDay": "早高峰",
+        "userGroup": "通勤者",
+        "disruptionType": "全線停駛",
+        "origin": {
+          "label": "渋谷",
+          "odptStationId": "odpt.Station:JR-East.Yamanote.Shibuya"
+        },
+        "destination": {
+          "label": "新宿",
+          "odptStationId": "odpt.Station:JR-East.Yamanote.Shinjuku"
+        },
+        "constraints": [
+          "趕時間"
+        ],
+        "queryZhTw": "早高峰通勤：我在渋谷站要去新宿站。現在山手線全線停駛，請給我一個可行替代方案，並估算大概時間。"
+      },
+      "l2Status": {
+        "status_code": "SUSPENDED",
+        "has_issues": true,
+        "cause": "変電所の電気設備故障",
+        "affected_lines": [
+          "JR Yamanote"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Yamanote Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "変電所の電気設備故障"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "早高峰通勤：我在渋谷站要去新宿站。現在山手線全線停駛，請給我一個可行替代方案，並估算大概時間。"
+        },
+        {
+          "role": "assistant",
+          "content": "渋谷附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "渋谷附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。",
+        "data": {
+          "l2_summary": "has_issues | status_code=SUSPENDED | cause=變電站設備故障 | affected_lines=JR Yamanote",
+          "l2_status": {
+            "status_code": "SUSPENDED",
+            "has_issues": true,
+            "cause": "変電所の電気設備故障",
+            "affected_lines": [
+              "JR Yamanote"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Yamanote Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "変電所の電気設備故障"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%B8%8B%E8%B0%B7%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%B8%8B%E8%B0%B7%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"早高峰通勤：我在渋谷站要去新宿站。現在山手線全線停駛，請給我一個可行替代方案，並估算大概時間。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-02",
+      "timestamp": "2026-01-16T04:41:14.931Z",
+      "scenario": {
+        "id": "JR-DIS-02",
+        "timeOfDay": "早高峰",
+        "userGroup": "外國遊客",
+        "disruptionType": "部分停運",
+        "origin": {
+          "label": "上野",
+          "odptStationId": "odpt.Station:JR-East.Ueno"
+        },
+        "destination": {
+          "label": "秋葉原",
+          "odptStationId": "odpt.Station:JR-East.Akihabara"
+        },
+        "constraints": [
+          "第一次來東京",
+          "希望少走路"
+        ],
+        "queryZhTw": "早高峰外國遊客：我從上野站要去秋葉原站，聽說有部分停運或延誤。請先告訴我影響與原因，再給我一個最穩、少走路的走法（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 25,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Keihin-Tohoku"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Keihin-Tohoku Line",
+            "status": "delay",
+            "status_detail": "delay_major",
+            "delay_minutes": 25,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "早高峰外國遊客：我從上野站要去秋葉原站，聽說有部分停運或延誤。請先告訴我影響與原因，再給我一個最穩、少走路的走法（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "上野附近目前出現即時運行異常。原因：信號故障。影響：JR Keihin-Tohoku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "上野附近目前出現即時運行異常。原因：信號故障。影響：JR Keihin-Tohoku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=25min | cause=信號故障 | affected_lines=JR Keihin-Tohoku",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 25,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Keihin-Tohoku"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Keihin-Tohoku Line",
+                "status": "delay",
+                "status_detail": "delay_major",
+                "delay_minutes": 25,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E4%B8%8A%E9%87%8E%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E4%B8%8A%E9%87%8E%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"早高峰外國遊客：我從上野站要去秋葉原站，聽說有部分停運或延誤。請先告訴我影響與原因，再給我一個最穩、少走路的走法（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-03",
+      "timestamp": "2026-01-16T04:41:14.931Z",
+      "scenario": {
+        "id": "JR-DIS-03",
+        "timeOfDay": "早高峰",
+        "userGroup": "行動不便",
+        "disruptionType": "班次減少",
+        "origin": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "destination": {
+          "label": "品川",
+          "odptStationId": "odpt.Station:JR-East.Shinagawa"
+        },
+        "constraints": [
+          "輪椅",
+          "需要電梯動線"
+        ],
+        "queryZhTw": "早高峰輪椅使用者：我從東京站到品川站。現在班次減少、延誤約 10–15 分。請先提醒我延誤狀況，再給我無障礙優先的替代建議（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 12,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Tokaido"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Tokaido Line",
+            "status": "delay",
+            "status_detail": "delay_minor",
+            "delay_minutes": 12,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "早高峰輪椅使用者：我從東京站到品川站。現在班次減少、延誤約 10–15 分。請先提醒我延誤狀況，再給我無障礙優先的替代建議（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "東京附近目前出現即時運行異常。原因：信號故障。影響：JR Tokaido。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "東京附近目前出現即時運行異常。原因：信號故障。影響：JR Tokaido。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=12min | cause=信號故障 | affected_lines=JR Tokaido",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 12,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Tokaido"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Tokaido Line",
+                "status": "delay",
+                "status_detail": "delay_minor",
+                "delay_minutes": 12,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"早高峰輪椅使用者：我從東京站到品川站。現在班次減少、延誤約 10–15 分。請先提醒我延誤狀況，再給我無障礙優先的替代建議（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-04",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-04",
+        "timeOfDay": "日間",
+        "userGroup": "外國遊客",
+        "disruptionType": "全線停駛",
+        "origin": {
+          "label": "池袋",
+          "odptStationId": "odpt.Station:JR-East.Ikebukuro"
+        },
+        "destination": {
+          "label": "秋葉原",
+          "odptStationId": "odpt.Station:JR-East.Akihabara"
+        },
+        "constraints": [
+          "有大件行李",
+          "不想迷路"
+        ],
+        "queryZhTw": "日間外國遊客：我帶 28 吋行李，從池袋站到秋葉原站。現在埼京線／湘南新宿線停駛，請給我一個最穩替代方案（少轉乘、少走路，含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "CRITICAL",
+        "has_issues": true,
+        "cause": "人身事故",
+        "affected_lines": [
+          "JR Saikyo",
+          "JR Shonan-Shinjuku"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Saikyo Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "人身事故"
+          },
+          {
+            "operator": "JR-East",
+            "line": "Shonan-Shinjuku Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "人身事故"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間外國遊客：我帶 28 吋行李，從池袋站到秋葉原站。現在埼京線／湘南新宿線停駛，請給我一個最穩替代方案（少轉乘、少走路，含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "池袋附近目前出現即時運行異常。原因：人身事故。影響：JR Saikyo、JR Shonan-Shinjuku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "池袋附近目前出現即時運行異常。原因：人身事故。影響：JR Saikyo、JR Shonan-Shinjuku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=CRITICAL | cause=人身事故 | affected_lines=JR Saikyo, JR Shonan-Shinjuku",
+          "l2_status": {
+            "status_code": "CRITICAL",
+            "has_issues": true,
+            "cause": "人身事故",
+            "affected_lines": [
+              "JR Saikyo",
+              "JR Shonan-Shinjuku"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Saikyo Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "人身事故"
+              },
+              {
+                "operator": "JR-East",
+                "line": "Shonan-Shinjuku Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "人身事故"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%B1%A0%E8%A2%8B%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%B1%A0%E8%A2%8B%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "行李寄放（ecbo cloak）",
+              "target": "https://cloak.ecbo.io/?utm_source=lutagu",
+              "metadata": {
+                "category": "storage",
+                "partner_id": "ecbo_cloak"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間外國遊客：我帶 28 吋行李，從池袋站到秋葉原站。現在埼京線／湘南新宿線停駛，請給我一個最穩替代方案（少轉乘、少走路，含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-05",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-05",
+        "timeOfDay": "日間",
+        "userGroup": "機場旅客",
+        "disruptionType": "班次減少",
+        "origin": {
+          "label": "成田第一航廈",
+          "odptStationId": "odpt.Station:Airport.Narita"
+        },
+        "destination": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "constraints": [
+          "趕飛機/轉機",
+          "大件行李"
+        ],
+        "queryZhTw": "日間機場旅客：我從成田第一航廈到東京站，總武快速延誤且班次減少。我有大行李而且要準時，請給我最保險的走法與大概時間。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 20,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Sobu Rapid",
+          "Narita Express"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Sobu Rapid Line",
+            "status": "delay",
+            "status_detail": "delay_major",
+            "delay_minutes": 20,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間機場旅客：我從成田第一航廈到東京站，總武快速延誤且班次減少。我有大行李而且要準時，請給我最保險的走法與大概時間。"
+        },
+        {
+          "role": "assistant",
+          "content": "成田第一航廈附近目前出現即時運行異常。原因：信號故障。影響：JR Sobu Rapid、Narita Express。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "成田第一航廈附近目前出現即時運行異常。原因：信號故障。影響：JR Sobu Rapid、Narita Express。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=20min | cause=信號故障 | affected_lines=JR Sobu Rapid, Narita Express",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 20,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Sobu Rapid",
+              "Narita Express"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Sobu Rapid Line",
+                "status": "delay",
+                "status_detail": "delay_major",
+                "delay_minutes": 20,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%88%90%E7%94%B0%E7%AC%AC%E4%B8%80%E8%88%AA%E5%BB%88%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%88%90%E7%94%B0%E7%AC%AC%E4%B8%80%E8%88%AA%E5%BB%88%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "行李寄放（ecbo cloak）",
+              "target": "https://cloak.ecbo.io/?utm_source=lutagu",
+              "metadata": {
+                "category": "storage",
+                "partner_id": "ecbo_cloak"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間機場旅客：我從成田第一航廈到東京站，總武快速延誤且班次減少。我有大行李而且要準時，請給我最保險的走法與大概時間。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-06",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-06",
+        "timeOfDay": "日間",
+        "userGroup": "長者",
+        "disruptionType": "部分停運",
+        "origin": {
+          "label": "三鷹",
+          "odptStationId": "odpt.Station:JR-East.Chuo.Mitaka"
+        },
+        "destination": {
+          "label": "御茶ノ水",
+          "odptStationId": "odpt.Station:JR-East.Chuo.Ochanomizu"
+        },
+        "constraints": [
+          "避免樓梯",
+          "走路距離越短越好"
+        ],
+        "queryZhTw": "日間長者：我從三鷹站到御茶ノ水站，中央線有部分停運或誤點。請先提醒延誤情況，再給我走路最少的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 8,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Chuo Rapid"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Chuo Rapid Line",
+            "status": "delay",
+            "status_detail": "delay_minor",
+            "delay_minutes": 8,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間長者：我從三鷹站到御茶ノ水站，中央線有部分停運或誤點。請先提醒延誤情況，再給我走路最少的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "三鷹附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "三鷹附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=8min | cause=信號故障 | affected_lines=JR Chuo Rapid",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 8,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Chuo Rapid"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Chuo Rapid Line",
+                "status": "delay",
+                "status_detail": "delay_minor",
+                "delay_minutes": 8,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E4%B8%89%E9%B7%B9%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E4%B8%89%E9%B7%B9%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間長者：我從三鷹站到御茶ノ水站，中央線有部分停運或誤點。請先提醒延誤情況，再給我走路最少的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-07",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-07",
+        "timeOfDay": "晚間",
+        "userGroup": "通勤者",
+        "disruptionType": "全線停駛",
+        "origin": {
+          "label": "新橋",
+          "odptStationId": "odpt.Station:JR-East.Shinbashi"
+        },
+        "destination": {
+          "label": "新宿",
+          "odptStationId": "odpt.Station:JR-East.Shinjuku"
+        },
+        "constraints": [
+          "末班車壓力",
+          "要回家"
+        ],
+        "queryZhTw": "晚間通勤：我從新橋站回新宿站，山手線全線停駛。請給我一個今晚最穩能到的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "SUSPENDED",
+        "has_issues": true,
+        "cause": "変電所の電気設備故障",
+        "affected_lines": [
+          "JR Yamanote"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Yamanote Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "変電所の電気設備故障"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "晚間通勤：我從新橋站回新宿站，山手線全線停駛。請給我一個今晚最穩能到的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "新橋附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "新橋附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。",
+        "data": {
+          "l2_summary": "has_issues | status_code=SUSPENDED | cause=變電站設備故障 | affected_lines=JR Yamanote",
+          "l2_status": {
+            "status_code": "SUSPENDED",
+            "has_issues": true,
+            "cause": "変電所の電気設備故障",
+            "affected_lines": [
+              "JR Yamanote"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Yamanote Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "変電所の電気設備故障"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%96%B0%E6%A9%8B%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%96%B0%E6%A9%8B%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"晚間通勤：我從新橋站回新宿站，山手線全線停駛。請給我一個今晚最穩能到的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-08",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-08",
+        "timeOfDay": "晚間",
+        "userGroup": "親子",
+        "disruptionType": "班次減少",
+        "origin": {
+          "label": "錦糸町",
+          "odptStationId": "odpt.Station:JR-East.Sobu.Kinshicho"
+        },
+        "destination": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "constraints": [
+          "推嬰兒車",
+          "不想走太久"
+        ],
+        "queryZhTw": "晚間親子：我推嬰兒車從錦糸町站到東京站，總武快速班次減少且延誤。請給我一個最省力的替代建議（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 18,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Sobu Rapid"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Sobu Rapid Line",
+            "status": "delay",
+            "status_detail": "delay_major",
+            "delay_minutes": 18,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "晚間親子：我推嬰兒車從錦糸町站到東京站，總武快速班次減少且延誤。請給我一個最省力的替代建議（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "錦糸町附近目前出現即時運行異常。原因：信號故障。影響：JR Sobu Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "錦糸町附近目前出現即時運行異常。原因：信號故障。影響：JR Sobu Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=18min | cause=信號故障 | affected_lines=JR Sobu Rapid",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 18,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Sobu Rapid"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Sobu Rapid Line",
+                "status": "delay",
+                "status_detail": "delay_major",
+                "delay_minutes": 18,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E9%8C%A6%E7%B3%B8%E7%94%BA%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E9%8C%A6%E7%B3%B8%E7%94%BA%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"晚間親子：我推嬰兒車從錦糸町站到東京站，總武快速班次減少且延誤。請給我一個最省力的替代建議（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-09",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-09",
+        "timeOfDay": "早高峰",
+        "userGroup": "外國遊客",
+        "disruptionType": "部分停運",
+        "origin": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "destination": {
+          "label": "上野",
+          "odptStationId": "odpt.Station:JR-East.Ueno"
+        },
+        "constraints": [
+          "怕迷路",
+          "希望站內換乘少"
+        ],
+        "queryZhTw": "早高峰外國遊客：我從東京站到上野站，聽說京浜東北線部分停運或大幅延誤。請先告訴我原因與影響，再給我一個最穩方案（站內換乘少，含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 35,
+        "cause": "人身事故",
+        "affected_lines": [
+          "JR Keihin-Tohoku",
+          "JR Ueno-Tokyo"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Keihin-Tohoku Line",
+            "status": "delay",
+            "status_detail": "delay_major",
+            "delay_minutes": 35,
+            "message": "人身事故"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "早高峰外國遊客：我從東京站到上野站，聽說京浜東北線部分停運或大幅延誤。請先告訴我原因與影響，再給我一個最穩方案（站內換乘少，含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "東京附近目前出現即時運行異常。原因：人身事故。影響：JR Keihin-Tohoku、JR Ueno-Tokyo。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "東京附近目前出現即時運行異常。原因：人身事故。影響：JR Keihin-Tohoku、JR Ueno-Tokyo。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=35min | cause=人身事故 | affected_lines=JR Keihin-Tohoku, JR Ueno-Tokyo",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 35,
+            "cause": "人身事故",
+            "affected_lines": [
+              "JR Keihin-Tohoku",
+              "JR Ueno-Tokyo"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Keihin-Tohoku Line",
+                "status": "delay",
+                "status_detail": "delay_major",
+                "delay_minutes": 35,
+                "message": "人身事故"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"早高峰外國遊客：我從東京站到上野站，聽說京浜東北線部分停運或大幅延誤。請先告訴我原因與影響，再給我一個最穩方案（站內換乘少，含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-10",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-10",
+        "timeOfDay": "日間",
+        "userGroup": "通勤者",
+        "disruptionType": "班次減少",
+        "origin": {
+          "label": "中野",
+          "odptStationId": "odpt.Station:JR-East.Chuo.Nakano"
+        },
+        "destination": {
+          "label": "四ツ谷",
+          "odptStationId": "odpt.Station:JR-East.Chuo.Yotsuya"
+        },
+        "constraints": [
+          "趕會議",
+          "少轉乘"
+        ],
+        "queryZhTw": "日間通勤：我從中野站到四ツ谷站，中央總武線班次減少且延誤。我趕會議，請給我一個少轉乘的替代路線與大概時間。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 14,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Chuo-Sobu Local"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Chuo-Sobu Local Line",
+            "status": "delay",
+            "status_detail": "delay_minor",
+            "delay_minutes": 14,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間通勤：我從中野站到四ツ谷站，中央總武線班次減少且延誤。我趕會議，請給我一個少轉乘的替代路線與大概時間。"
+        },
+        {
+          "role": "assistant",
+          "content": "中野附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo-Sobu Local。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "中野附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo-Sobu Local。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=14min | cause=信號故障 | affected_lines=JR Chuo-Sobu Local",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 14,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Chuo-Sobu Local"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Chuo-Sobu Local Line",
+                "status": "delay",
+                "status_detail": "delay_minor",
+                "delay_minutes": 14,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E4%B8%AD%E9%87%8E%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E4%B8%AD%E9%87%8E%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間通勤：我從中野站到四ツ谷站，中央總武線班次減少且延誤。我趕會議，請給我一個少轉乘的替代路線與大概時間。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-11",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-11",
+        "timeOfDay": "晚間",
+        "userGroup": "外國遊客",
+        "disruptionType": "全線停駛",
+        "origin": {
+          "label": "秋葉原",
+          "odptStationId": "odpt.Station:JR-East.Akihabara"
+        },
+        "destination": {
+          "label": "上野",
+          "odptStationId": "odpt.Station:JR-East.Ueno"
+        },
+        "constraints": [
+          "深夜",
+          "想走最安全的路線"
+        ],
+        "queryZhTw": "晚間外國遊客：我從秋葉原站到上野站，山手線停駛。請給我最安全、最不會走錯的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "SUSPENDED",
+        "has_issues": true,
+        "cause": "変電所の電気設備故障",
+        "affected_lines": [
+          "JR Yamanote"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Yamanote Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "変電所の電気設備故障"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "晚間外國遊客：我從秋葉原站到上野站，山手線停駛。請給我最安全、最不會走錯的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "秋葉原附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "秋葉原附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。",
+        "data": {
+          "l2_summary": "has_issues | status_code=SUSPENDED | cause=變電站設備故障 | affected_lines=JR Yamanote",
+          "l2_status": {
+            "status_code": "SUSPENDED",
+            "has_issues": true,
+            "cause": "変電所の電気設備故障",
+            "affected_lines": [
+              "JR Yamanote"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Yamanote Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "変電所の電気設備故障"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E7%A7%8B%E8%91%89%E5%8E%9F%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E7%A7%8B%E8%91%89%E5%8E%9F%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"晚間外國遊客：我從秋葉原站到上野站，山手線停駛。請給我最安全、最不會走錯的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-12",
+      "timestamp": "2026-01-16T04:41:14.932Z",
+      "scenario": {
+        "id": "JR-DIS-12",
+        "timeOfDay": "早高峰",
+        "userGroup": "機場旅客",
+        "disruptionType": "部分停運",
+        "origin": {
+          "label": "品川",
+          "odptStationId": "odpt.Station:JR-East.Shinagawa"
+        },
+        "destination": {
+          "label": "羽田",
+          "odptStationId": "odpt.Station:Airport.Haneda"
+        },
+        "constraints": [
+          "趕飛機",
+          "行李多"
+        ],
+        "queryZhTw": "早高峰機場旅客：我從品川站到羽田機場，JR 這邊延誤很嚴重。請先提示延誤狀況與原因，然後給我一個能準時到的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 30,
+        "cause": "人身事故",
+        "affected_lines": [
+          "JR Keikyu Transfer"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Yamanote Line",
+            "status": "delay",
+            "status_detail": "delay_major",
+            "delay_minutes": 30,
+            "message": "人身事故"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "早高峰機場旅客：我從品川站到羽田機場，JR 這邊延誤很嚴重。請先提示延誤狀況與原因，然後給我一個能準時到的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "品川附近目前出現即時運行異常。原因：人身事故。影響：JR Keikyu Transfer。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "品川附近目前出現即時運行異常。原因：人身事故。影響：JR Keikyu Transfer。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=30min | cause=人身事故 | affected_lines=JR Keikyu Transfer",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 30,
+            "cause": "人身事故",
+            "affected_lines": [
+              "JR Keikyu Transfer"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Yamanote Line",
+                "status": "delay",
+                "status_detail": "delay_major",
+                "delay_minutes": 30,
+                "message": "人身事故"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%93%81%E5%B7%9D%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%93%81%E5%B7%9D%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"早高峰機場旅客：我從品川站到羽田機場，JR 這邊延誤很嚴重。請先提示延誤狀況與原因，然後給我一個能準時到的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-13",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-13",
+        "timeOfDay": "日間",
+        "userGroup": "長者",
+        "disruptionType": "全線停駛",
+        "origin": {
+          "label": "有楽町",
+          "odptStationId": "odpt.Station:JR-East.Yurakucho"
+        },
+        "destination": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "constraints": [
+          "走路要短",
+          "不想轉乘太多"
+        ],
+        "queryZhTw": "日間長者：我從有楽町站到東京站，山手線停駛。請給我走路最短、轉乘不要太多的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "SUSPENDED",
+        "has_issues": true,
+        "cause": "変電所の電気設備故障",
+        "affected_lines": [
+          "JR Yamanote"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Yamanote Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "変電所の電気設備故障"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間長者：我從有楽町站到東京站，山手線停駛。請給我走路最短、轉乘不要太多的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "有楽町附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "有楽町附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Yamanote。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。",
+        "data": {
+          "l2_summary": "has_issues | status_code=SUSPENDED | cause=變電站設備故障 | affected_lines=JR Yamanote",
+          "l2_status": {
+            "status_code": "SUSPENDED",
+            "has_issues": true,
+            "cause": "変電所の電気設備故障",
+            "affected_lines": [
+              "JR Yamanote"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Yamanote Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "変電所の電気設備故障"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9C%89%E6%A5%BD%E7%94%BA%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9C%89%E6%A5%BD%E7%94%BA%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間長者：我從有楽町站到東京站，山手線停駛。請給我走路最短、轉乘不要太多的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-14",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-14",
+        "timeOfDay": "早高峰",
+        "userGroup": "通勤者",
+        "disruptionType": "部分停運",
+        "origin": {
+          "label": "大崎",
+          "odptStationId": "odpt.Station:JR-East.Osaki"
+        },
+        "destination": {
+          "label": "池袋",
+          "odptStationId": "odpt.Station:JR-East.Ikebukuro"
+        },
+        "constraints": [
+          "趕時間"
+        ],
+        "queryZhTw": "早高峰通勤：我從大崎站到池袋站，埼京線部分停運或停駛。請給我一個替代方案和大概時間。"
+      },
+      "l2Status": {
+        "status_code": "CRITICAL",
+        "has_issues": true,
+        "cause": "人身事故",
+        "affected_lines": [
+          "JR Saikyo"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Saikyo Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "人身事故"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "早高峰通勤：我從大崎站到池袋站，埼京線部分停運或停駛。請給我一個替代方案和大概時間。"
+        },
+        {
+          "role": "assistant",
+          "content": "大崎附近目前出現即時運行異常。原因：人身事故。影響：JR Saikyo。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "大崎附近目前出現即時運行異常。原因：人身事故。影響：JR Saikyo。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=CRITICAL | cause=人身事故 | affected_lines=JR Saikyo",
+          "l2_status": {
+            "status_code": "CRITICAL",
+            "has_issues": true,
+            "cause": "人身事故",
+            "affected_lines": [
+              "JR Saikyo"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Saikyo Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "人身事故"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%A4%A7%E5%B4%8E%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%A4%A7%E5%B4%8E%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"早高峰通勤：我從大崎站到池袋站，埼京線部分停運或停駛。請給我一個替代方案和大概時間。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-15",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-15",
+        "timeOfDay": "日間",
+        "userGroup": "外國遊客",
+        "disruptionType": "班次減少",
+        "origin": {
+          "label": "新宿",
+          "odptStationId": "odpt.Station:JR-East.Shinjuku"
+        },
+        "destination": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "constraints": [
+          "第一次搭日本電車",
+          "希望簡單"
+        ],
+        "queryZhTw": "日間外國遊客：我從新宿站到東京站，中央線班次減少且延誤。請用很簡單的方式告訴我現在怎麼走最穩（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 16,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Chuo Rapid"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Chuo Rapid Line",
+            "status": "delay",
+            "status_detail": "delay_minor",
+            "delay_minutes": 16,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間外國遊客：我從新宿站到東京站，中央線班次減少且延誤。請用很簡單的方式告訴我現在怎麼走最穩（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "新宿附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "新宿附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=16min | cause=信號故障 | affected_lines=JR Chuo Rapid",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 16,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Chuo Rapid"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Chuo Rapid Line",
+                "status": "delay",
+                "status_detail": "delay_minor",
+                "delay_minutes": 16,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%96%B0%E5%AE%BF%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%96%B0%E5%AE%BF%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間外國遊客：我從新宿站到東京站，中央線班次減少且延誤。請用很簡單的方式告訴我現在怎麼走最穩（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-16",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-16",
+        "timeOfDay": "晚間",
+        "userGroup": "機場旅客",
+        "disruptionType": "全線停駛",
+        "origin": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "destination": {
+          "label": "成田第一航廈",
+          "odptStationId": "odpt.Station:Airport.Narita"
+        },
+        "constraints": [
+          "要趕末班車",
+          "行李多"
+        ],
+        "queryZhTw": "晚間機場旅客：我從東京站要去成田第一航廈，總武快速全線停駛。我有行李而且要趕末班車，請給我最保險的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "CRITICAL",
+        "has_issues": true,
+        "cause": "変電所の電気設備故障",
+        "affected_lines": [
+          "JR Sobu Rapid",
+          "Narita Express"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Sobu Rapid Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "変電所の電気設備故障"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "晚間機場旅客：我從東京站要去成田第一航廈，總武快速全線停駛。我有行李而且要趕末班車，請給我最保險的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "東京附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Sobu Rapid、Narita Express。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "東京附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Sobu Rapid、Narita Express。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。",
+        "data": {
+          "l2_summary": "has_issues | status_code=CRITICAL | cause=變電站設備故障 | affected_lines=JR Sobu Rapid, Narita Express",
+          "l2_status": {
+            "status_code": "CRITICAL",
+            "has_issues": true,
+            "cause": "変電所の電気設備故障",
+            "affected_lines": [
+              "JR Sobu Rapid",
+              "Narita Express"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Sobu Rapid Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "変電所の電気設備故障"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "行李寄放（ecbo cloak）",
+              "target": "https://cloak.ecbo.io/?utm_source=lutagu",
+              "metadata": {
+                "category": "storage",
+                "partner_id": "ecbo_cloak"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"晚間機場旅客：我從東京站要去成田第一航廈，總武快速全線停駛。我有行李而且要趕末班車，請給我最保險的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-17",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-17",
+        "timeOfDay": "日間",
+        "userGroup": "行動不便",
+        "disruptionType": "部分停運",
+        "origin": {
+          "label": "御茶ノ水",
+          "odptStationId": "odpt.Station:JR-East.Chuo.Ochanomizu"
+        },
+        "destination": {
+          "label": "錦糸町",
+          "odptStationId": "odpt.Station:JR-East.Sobu.Kinshicho"
+        },
+        "constraints": [
+          "輪椅",
+          "不要換乘複雜"
+        ],
+        "queryZhTw": "日間輪椅使用者：我從御茶ノ水站到錦糸町站，中央總武線延誤很大。請先說明原因與影響，再給我一個無障礙替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 28,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Chuo-Sobu Local"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Chuo-Sobu Local Line",
+            "status": "delay",
+            "status_detail": "delay_major",
+            "delay_minutes": 28,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間輪椅使用者：我從御茶ノ水站到錦糸町站，中央總武線延誤很大。請先說明原因與影響，再給我一個無障礙替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "御茶ノ水附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo-Sobu Local。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "御茶ノ水附近目前出現即時運行異常。原因：信號故障。影響：JR Chuo-Sobu Local。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=28min | cause=信號故障 | affected_lines=JR Chuo-Sobu Local",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 28,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Chuo-Sobu Local"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Chuo-Sobu Local Line",
+                "status": "delay",
+                "status_detail": "delay_major",
+                "delay_minutes": 28,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%BE%A1%E8%8C%B6%E3%83%8E%E6%B0%B4%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%BE%A1%E8%8C%B6%E3%83%8E%E6%B0%B4%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間輪椅使用者：我從御茶ノ水站到錦糸町站，中央總武線延誤很大。請先說明原因與影響，再給我一個無障礙替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-18",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-18",
+        "timeOfDay": "早高峰",
+        "userGroup": "通勤者",
+        "disruptionType": "班次減少",
+        "origin": {
+          "label": "秋葉原",
+          "odptStationId": "odpt.Station:JR-East.Akihabara"
+        },
+        "destination": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "constraints": [
+          "趕時間",
+          "希望最短"
+        ],
+        "queryZhTw": "早高峰通勤：我從秋葉原站到東京站，京浜東北線班次減少且小延誤。請給我一個最短時間的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 9,
+        "cause": "信号トラブル",
+        "affected_lines": [
+          "JR Keihin-Tohoku"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Keihin-Tohoku Line",
+            "status": "delay",
+            "status_detail": "delay_minor",
+            "delay_minutes": 9,
+            "message": "信号トラブル"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "早高峰通勤：我從秋葉原站到東京站，京浜東北線班次減少且小延誤。請給我一個最短時間的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "秋葉原附近目前出現即時運行異常。原因：信號故障。影響：JR Keihin-Tohoku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "秋葉原附近目前出現即時運行異常。原因：信號故障。影響：JR Keihin-Tohoku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=9min | cause=信號故障 | affected_lines=JR Keihin-Tohoku",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 9,
+            "cause": "信号トラブル",
+            "affected_lines": [
+              "JR Keihin-Tohoku"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Keihin-Tohoku Line",
+                "status": "delay",
+                "status_detail": "delay_minor",
+                "delay_minutes": 9,
+                "message": "信号トラブル"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E7%A7%8B%E8%91%89%E5%8E%9F%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E7%A7%8B%E8%91%89%E5%8E%9F%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"早高峰通勤：我從秋葉原站到東京站，京浜東北線班次減少且小延誤。請給我一個最短時間的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-19",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-19",
+        "timeOfDay": "晚間",
+        "userGroup": "外國遊客",
+        "disruptionType": "部分停運",
+        "origin": {
+          "label": "品川",
+          "odptStationId": "odpt.Station:JR-East.Shinagawa"
+        },
+        "destination": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "constraints": [
+          "第一次來東京",
+          "想要最不容易走錯"
+        ],
+        "queryZhTw": "晚間外國遊客：我從品川站到東京站，有部分停運或延誤。請先提醒我延誤狀況與原因，再給我一個最不會走錯的替代方案（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "DELAY",
+        "has_issues": true,
+        "delay_minutes": 40,
+        "cause": "人身事故",
+        "affected_lines": [
+          "JR Yamanote",
+          "JR Keihin-Tohoku"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Keihin-Tohoku Line",
+            "status": "delay",
+            "status_detail": "delay_major",
+            "delay_minutes": 40,
+            "message": "人身事故"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "晚間外國遊客：我從品川站到東京站，有部分停運或延誤。請先提醒我延誤狀況與原因，再給我一個最不會走錯的替代方案（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "品川附近目前出現即時運行異常。原因：人身事故。影響：JR Yamanote、JR Keihin-Tohoku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "品川附近目前出現即時運行異常。原因：人身事故。影響：JR Yamanote、JR Keihin-Tohoku。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。",
+        "data": {
+          "l2_summary": "has_issues | status_code=DELAY | delay=40min | cause=人身事故 | affected_lines=JR Yamanote, JR Keihin-Tohoku",
+          "l2_status": {
+            "status_code": "DELAY",
+            "has_issues": true,
+            "delay_minutes": 40,
+            "cause": "人身事故",
+            "affected_lines": [
+              "JR Yamanote",
+              "JR Keihin-Tohoku"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Keihin-Tohoku Line",
+                "status": "delay",
+                "status_detail": "delay_major",
+                "delay_minutes": 40,
+                "message": "人身事故"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%93%81%E5%B7%9D%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E5%93%81%E5%B7%9D%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"晚間外國遊客：我從品川站到東京站，有部分停運或延誤。請先提醒我延誤狀況與原因，再給我一個最不會走錯的替代方案（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=false), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    },
+    {
+      "caseId": "JR-DIS-20",
+      "timestamp": "2026-01-16T04:41:14.933Z",
+      "scenario": {
+        "id": "JR-DIS-20",
+        "timeOfDay": "日間",
+        "userGroup": "通勤者",
+        "disruptionType": "全線停駛",
+        "origin": {
+          "label": "東京",
+          "odptStationId": "odpt.Station:JR-East.Tokyo"
+        },
+        "destination": {
+          "label": "千葉",
+          "odptStationId": "odpt.Station:JR-East.Sobu.Chiba"
+        },
+        "constraints": [
+          "緊急行程",
+          "願意搭計程車"
+        ],
+        "queryZhTw": "日間緊急：我從東京站到千葉站，總武快速全線停駛。我願意搭計程車，請給我一個最可靠方案與備援（含大概時間）。"
+      },
+      "l2Status": {
+        "status_code": "CRITICAL",
+        "has_issues": true,
+        "cause": "変電所の電気設備故障",
+        "affected_lines": [
+          "JR Sobu Rapid"
+        ],
+        "line_status": [
+          {
+            "operator": "JR-East",
+            "line": "Sobu Rapid Line",
+            "status": "suspended",
+            "status_detail": "halt",
+            "message": "変電所の電気設備故障"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "role": "user",
+          "content": "日間緊急：我從東京站到千葉站，總武快速全線停駛。我願意搭計程車，請給我一個最可靠方案與備援（含大概時間）。"
+        },
+        {
+          "role": "assistant",
+          "content": "東京附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Sobu Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。"
+        }
+      ],
+      "agentResponse": {
+        "source": "l2_disruption",
+        "type": "action",
+        "content": "東京附近目前出現即時運行異常。原因：變電站設備故障。影響：JR Sobu Rapid。\n建議：先改走東京Metro／都營迂回，暫時不要硬等 JR。停電通常恢復時間不穩。",
+        "data": {
+          "l2_summary": "has_issues | status_code=CRITICAL | cause=變電站設備故障 | affected_lines=JR Sobu Rapid",
+          "l2_status": {
+            "status_code": "CRITICAL",
+            "has_issues": true,
+            "cause": "変電所の電気設備故障",
+            "affected_lines": [
+              "JR Sobu Rapid"
+            ],
+            "line_status": [
+              {
+                "operator": "JR-East",
+                "line": "Sobu Rapid Line",
+                "status": "suspended",
+                "status_detail": "halt",
+                "message": "変電所の電気設備故障"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "type": "discovery",
+              "label": "地鐵/公車迂回（Google Maps）",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20metro%20bus",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "bus",
+              "label": "附近公車站",
+              "target": "https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E4%BA%AC%20bus%20stop",
+              "metadata": {
+                "category": "navigation"
+              }
+            },
+            {
+              "type": "taxi",
+              "label": "計程車（GO）",
+              "target": "https://go.mo-t.com/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "bike",
+              "label": "共享單車（LUUP）",
+              "target": "https://luup.sc/",
+              "metadata": {
+                "category": "mobility"
+              }
+            },
+            {
+              "type": "discovery",
+              "label": "找不擠的地方等（Vacan）",
+              "target": "https://vacan.com/map/35.682471,139.764162,14?isOpendata=false&utm_source=lutagu",
+              "metadata": {
+                "category": "crowd",
+                "partner_id": "vacan"
+              }
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "reasoning": "L2 live disruption response",
+        "reasoningLog": [
+          "[Input] Text: \"日間緊急：我從東京站到千葉站，總武快速全線停駛。我願意搭計程車，請給我一個最可靠方案與備援（含大概時間）。\", Locale: zh-TW",
+          "[L2] Live disruption detected (Severe=true), returning disruption-first guidance"
+        ]
+      },
+      "extracted": {
+        "recognizedDisruption": true,
+        "translatedCauseOk": true,
+        "hasAlternativeActions": true,
+        "hasTimeEstimate": false,
+        "hasPrimaryRecommendationSignal": true,
+        "actionsCount": 5,
+        "routeCount": 0
+      },
+      "score_1_to_5": 4,
+      "notes": {
+        "highlights": [
+          "有識別並提示運行異常",
+          "有把原因翻譯成繁中",
+          "有提供可點擊的替代方案連結"
+        ],
+        "gaps": [
+          "缺少可量化的時間估計"
+        ]
+      }
+    }
+  ]
+}

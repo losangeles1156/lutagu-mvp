@@ -10,7 +10,7 @@
     "typecheck": "node -e \"require('node:fs').rmSync('.next/types',{ recursive:true, force:true });\" && tsc --noEmit",
     "dify:test": "tsx scripts/test_dify_connection.ts",
     "test": "node -e \"const { spawnSync } = require('node:child_process'); const fs = require('node:fs'); const path = require('node:path'); const root = path.join(process.cwd(), 'src'); const files = []; const walk = (dir) => { if (!fs.existsSync(dir)) return; for (const entry of fs.readdirSync(dir, { withFileTypes: true })) { const full = path.join(dir, entry.name); if (entry.isDirectory()) walk(full); else if (/\\.(test|spec)\\.ts$/.test(entry.name) && !/\\.ui\\.(test|spec)\\.ts$/.test(entry.name)) files.push(full); } }; walk(root); const args = ['--import','tsx','--test','--test-concurrency=1', ...files]; const res = spawnSync(process.execPath, args, { stdio: 'inherit' }); process.exit(typeof res.status === 'number' ? res.status : 1);\"",
-    "test:ui": "node --test --test-concurrency=1 --import tsx src/ui/tags.ui.test.ts",
+    "test:ui": "node --test --test-concurrency=1 --import tsx src/ui/tags.ui.test.ts src/ui/l2-live.ui.test.ts",
     "crawl:l1": "tsx scripts/l1_pipeline/run.ts --all",
     "crawl:l3": "tsx scripts/l3_fill_coin_lockers.ts",
     "crawl:l3:toilets": "tsx scripts/l3_fill_toilets.ts",
@@ -28,6 +28,8 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@supabase/supabase-js": "^2.39.0",
     "@types/adm-zip": "^0.5.7",
+    "@types/js-cookie": "^3.0.6",
+    "@types/uuid": "^10.0.0",
     "adm-zip": "^0.5.16",
     "ai": "^6.0.23",
     "cheerio": "^1.1.2",
@@ -35,6 +37,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "ioredis": "^5.9.0",
+    "js-cookie": "^3.0.5",
     "leaflet": "^1.9.4",
     "lru-cache": "^11.2.4",
     "lucide-react": "^0.561.0",
@@ -51,6 +54,7 @@
     "swr": "^2.3.8",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^13.0.0",
     "zustand": "^4.5.0"
   },
   "devDependencies": {

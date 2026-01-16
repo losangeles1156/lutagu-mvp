@@ -4,13 +4,17 @@ import {
   buildL4DefaultQuestionTemplates,
   classifyQuestion,
   extractOdptStationIds,
+  extractRouteEndpointsFromText,
   filterFaresForOrigin,
   filterTimetablesForStation,
   findSimpleRoutes,
   findRankedRoutes,
+  filterRoutesByL2Status,
+  getDefaultTopology,
   normalizeOdptStationId,
   type RailwayTopology,
 } from './assistantEngine';
+import { hybridEngine } from './HybridEngine';
 
 test('extractOdptStationIds normalizes odpt:Station prefix', () => {
   const ids = extractOdptStationIds('to: odpt:Station:TokyoMetro.Ginza.Ueno and odpt.Station:Toei.Asakusa.Asakusa');
@@ -68,6 +72,143 @@ test('findSimpleRoutes returns up to 3 routes and respects topology', () => {
   const rendered = routes[0].steps.map(s => s.text).join(' ');
   assert.ok(rendered.includes(origin.split('.').pop()!));
   assert.ok(rendered.includes(dest.split('.').pop()!));
+});
+
+test('filterRoutesByL2Status removes routes that use suspended lines', () => {
+  const routes: any[] = [
+    {
+      label: 'R1',
+      steps: [
+        { kind: 'origin', text: 'Shibuya' },
+        { kind: 'train', text: 'Yamanote', railwayId: 'odpt.Railway:JR-East.Yamanote' },
+        { kind: 'destination', text: 'Shinjuku' },
+      ],
+      sources: [{ type: 'odpt:Railway', verified: true }]
+    },
+    {
+      label: 'R2',
+      steps: [
+        { kind: 'origin', text: 'Ueno' },
+        { kind: 'train', text: 'Ginza', railwayId: 'odpt.Railway:TokyoMetro.Ginza' },
+        { kind: 'destination', text: 'Asakusa' },
+      ],
+      sources: [{ type: 'odpt:Railway', verified: true }]
+    }
+  ];
+
+  const l2Status = {
+    line_status: [
+      {
+        operator: 'JR',
+        line: 'Yamanote Line',
+        status: 'suspended',
+        message: { ja: '運転見合わせ' }
+      }
+    ]
+  };
+
+  const filtered = filterRoutesByL2Status({ routes: routes as any, l2Status });
+  assert.equal(filtered.routes.length, 1);
+  assert.equal(filtered.routes[0].label, 'R2');
+});
+
+test('filterRoutesByL2Status blocks JR line variants (e.g. ChuoRapid vs Chuo)', () => {
+  const routes: any[] = [
+    {
+      label: 'R1',
+      steps: [
+        { kind: 'origin', text: 'Tokyo' },
+        { kind: 'train', text: 'Chuo Rapid', railwayId: 'odpt.Railway:JR-East.ChuoRapid' },
+        { kind: 'destination', text: 'Shinjuku' },
+      ],
+      sources: [{ type: 'odpt:Railway', verified: true }]
+    },
+    {
+      label: 'R2',
+      steps: [
+        { kind: 'origin', text: 'Tokyo' },
+        { kind: 'train', text: 'Marunouchi', railwayId: 'odpt.Railway:TokyoMetro.Marunouchi' },
+        { kind: 'destination', text: 'Shinjuku' },
+      ],
+      sources: [{ type: 'odpt:Railway', verified: true }]
+    }
+  ];
+
+  const l2Status = {
+    line_status: [
+      { operator: 'JR', line: 'Chuo Line', status: 'delay', message: { ja: '運転見合わせ' } }
+    ]
+  };
+
+  const filtered = filterRoutesByL2Status({ routes: routes as any, l2Status });
+  assert.equal(filtered.routes.length, 1);
+  assert.equal(filtered.routes[0].label, 'R2');
+});
+
+test('filterRoutesByL2Status matches ODPT operator tokens and JR-prefixed line names', () => {
+  const routes: any[] = [
+    {
+      label: 'R1',
+      steps: [
+        { kind: 'origin', text: 'Shibuya' },
+        { kind: 'train', text: 'Yamanote', railwayId: 'odpt.Railway:JR-East.Yamanote' },
+        { kind: 'destination', text: 'Shinjuku' },
+      ],
+      sources: [{ type: 'odpt:Railway', verified: true }]
+    },
+    {
+      label: 'R2',
+      steps: [
+        { kind: 'origin', text: 'Ueno' },
+        { kind: 'train', text: 'Ginza', railwayId: 'odpt.Railway:TokyoMetro.Ginza' },
+        { kind: 'destination', text: 'Asakusa' },
+      ],
+      sources: [{ type: 'odpt:Railway', verified: true }]
+    }
+  ];
+
+  const l2Status = {
+    line_status: [
+      {
+        operator: 'odpt.Operator:JR-East',
+        line: 'JR Yamanote Line',
+        status: 'suspended',
+        message: { ja: '運転見合わせ' }
+      }
+    ]
+  };
+
+  const filtered = filterRoutesByL2Status({ routes: routes as any, l2Status });
+  assert.equal(filtered.routes.length, 1);
+  assert.equal(filtered.routes[0].label, 'R2');
+});
+
+test('filterRoutesByL2Status blocks by railwayId in L2 payload', () => {
+  const routes: any[] = [
+    {
+      label: 'R1',
+      steps: [
+        { kind: 'origin', text: 'Tokyo' },
+        { kind: 'train', text: 'Yamanote', railwayId: 'odpt.Railway:JR-East.Yamanote' },
+        { kind: 'destination', text: 'Ueno' },
+      ],
+      sources: [{ type: 'odpt:Railway', verified: true }]
+    }
+  ];
+
+  const l2Status = {
+    line_status: [
+      {
+        status: 'suspended',
+        railway_id: 'odpt.Railway:JR-East.Yamanote',
+        message: { ja: '運転見合わせ' }
+      }
+    ]
+  };
+
+  const filtered = filterRoutesByL2Status({ routes: routes as any, l2Status });
+  assert.equal(filtered.routes.length, 0);
+  assert.equal(filtered.removed.length, 1);
 });
 
 test('findSimpleRoutes supports multi-criteria ranking (fastest, cheapest, fewest transfers)', () => {
@@ -238,4 +379,139 @@ test('stress: handles concurrent-style queries and large datasets', () => {
     assert.equal(classifyQuestion(q2, 'zh-TW').kind, 'timetable');
     assert.equal(classifyQuestion(q3, 'zh-TW').kind, 'route');
   }
+});
+
+test('airport: parses Narita T1 to Komagome and finds a route', () => {
+  const q = '1/16日11:00要從成田第一航廈站前往駒込附近的Airbnb，請告訴我最快的方式。';
+  const endpoints = extractRouteEndpointsFromText(q);
+  assert.ok(endpoints);
+
+  assert.ok(endpoints.originIds.some(id => id.includes('NaritaAirportTerminal1')));
+  assert.ok(endpoints.destinationIds.some(id => id.endsWith('.Komagome')));
+
+  const routes = findRankedRoutes({
+    originStationId: endpoints.originIds,
+    destinationStationId: endpoints.destinationIds,
+    railways: getDefaultTopology() as any,
+    maxHops: 60,
+    locale: 'zh-TW'
+  });
+
+  assert.ok(routes.length > 0);
+});
+
+test('airport: supports Narita/Haneda corridors for multiple city stations', () => {
+  const cases: Array<{ q: string; mustIncludeRailwayId: string }> = [
+    {
+      q: '我要從成田第二航廈前往上野站，請給我最快的方式。',
+      mustIncludeRailwayId: 'lutagu.Railway:Keisei.SkylinerExpress'
+    },
+    {
+      q: '從成田第一航廈到日暮里站怎麼去？',
+      mustIncludeRailwayId: 'lutagu.Railway:Keisei.SkylinerExpress'
+    },
+    {
+      q: '從成田第一航廈前往大手町站，行李很多請給少轉乘。',
+      mustIncludeRailwayId: 'odpt.Railway:JR-East.NaritaExpress'
+    },
+    {
+      q: '我想從成田機場到銀座站，最省時間怎麼走？',
+      mustIncludeRailwayId: 'odpt.Railway:JR-East.NaritaExpress'
+    },
+    {
+      q: '從羽田第三航廈到大門站，請給最快路線。',
+      mustIncludeRailwayId: 'lutagu.Railway:TokyoMonorail.HanedaAirport'
+    },
+    {
+      q: '我在羽田機場，要去新橋站，建議搭哪條線？',
+      mustIncludeRailwayId: 'lutagu.Railway:TokyoMonorail.HanedaAirport'
+    },
+    {
+      q: '從羽田第三航廈到泉岳寺站怎麼去？',
+      mustIncludeRailwayId: 'lutagu.Railway:Keikyu.HanedaAirport'
+    },
+    {
+      q: '羽田機場到品川站最快怎麼走？',
+      mustIncludeRailwayId: 'lutagu.Railway:Keikyu.HanedaAirport'
+    },
+  ];
+
+  for (const c of cases) {
+    const endpoints = extractRouteEndpointsFromText(c.q);
+    assert.ok(endpoints, `failed to extract endpoints: ${c.q}`);
+
+    const routes = findRankedRoutes({
+      originStationId: endpoints.originIds,
+      destinationStationId: endpoints.destinationIds,
+      railways: getDefaultTopology() as any,
+      maxHops: 80,
+      locale: 'zh-TW'
+    });
+
+    assert.ok(routes.length > 0, `no routes found: ${c.q}`);
+
+    const anyRouteUsesRailway = routes.some(r =>
+      r.steps.some((s: any) => s.kind === 'train' && s.railwayId === c.mustIncludeRailwayId)
+    );
+    assert.ok(anyRouteUsesRailway, `expected railway not used (${c.mustIncludeRailwayId}): ${c.q}`);
+  }
+});
+
+test('hybrid: prefers algorithm routes for airport queries even with luggage context', async () => {
+  const q = '從成田第一航廈前往大手町站，行李很多請給少轉乘。';
+  const res = await hybridEngine.processRequest({
+    text: q,
+    locale: 'zh-TW',
+    context: { zone: 'core' } as any,
+  });
+  assert.ok(res);
+  assert.equal(res.source, 'algorithm');
+  assert.equal(res.type, 'route');
+});
+
+test('hybrid: airport routes support emerging lodging stations', async () => {
+  const cases = [
+    '從成田第一航廈到池袋站最快怎麼走？',
+    '從成田機場到錦糸町站怎麼去？',
+    '從羽田第三航廈到淺草站怎麼去？',
+    '從羽田機場到大塚站，請給少轉乘。',
+  ];
+
+  for (const q of cases) {
+    const res = await hybridEngine.processRequest({
+      text: q,
+      locale: 'zh-TW',
+      context: { zone: 'core' } as any,
+    });
+    assert.ok(res, `no result: ${q}`);
+    assert.equal(res.source, 'algorithm', `expected algorithm: ${q}`);
+    assert.equal(res.type, 'route', `expected route type: ${q}`);
+  }
+});
+
+test('hybrid: route intent returns detour actions when suspended lines block routes', async () => {
+  const q = '從 odpt.Station:JR-East.Yamanote.Shibuya 到 odpt.Station:JR-East.Yamanote.Shinjuku 怎麼去？';
+  const res = await hybridEngine.processRequest({
+    text: q,
+    locale: 'zh-TW',
+    context: {
+      strategyContext: {
+        nodeId: 'odpt.Station:JR-East.Yamanote.Shibuya',
+        nodeName: '渋谷',
+        l2Status: {
+          line_status: [
+            { operator: 'JR', line: 'Yamanote Line', status: 'suspended', message: { ja: '運転見合わせ' } }
+          ],
+          status_code: 'DELAY',
+          has_issues: true
+        },
+        commercialActions: [],
+      }
+    } as any,
+  });
+  assert.ok(res);
+  assert.equal(res.source, 'l2_disruption');
+  assert.equal(res.type, 'action');
+  assert.ok(Array.isArray((res as any).data?.actions));
+  assert.ok((res as any).data.actions.length > 0);
 });

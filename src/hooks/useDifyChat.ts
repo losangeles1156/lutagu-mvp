@@ -352,7 +352,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
             setIsOffline(true);
             setThinkingStep('');
         }
-    }, [isLoading, locale, stationId, zone, tL4, sendAiMessage, setAiMessages, onMessage, onComplete]);
+    }, [isLoading, tL4, sendAiMessage, onComplete]);
 
     const clearMessages = useCallback(() => {
         setAiMessages([]);

@@ -258,7 +258,7 @@ export function ChatOverlay() {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [displayMessages]);
+    }, [displayMessages, messagesEndRef]);
 
     useEffect(() => {
         if (!isChatOpen) return;

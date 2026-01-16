@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { L1CustomPlace, PlaceStatus } from '@/lib/types/l1-admin';
 import { L1PlaceEditor } from './L1PlaceEditor';
-import { Search, Filter, Plus, Edit, Trash2, CheckCircle, Eye, ExternalLink, Star } from 'lucide-react';
+import { Search, Filter, Plus, Edit, Trash2, CheckCircle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function L1AuditList() {
@@ -19,14 +19,12 @@ export function L1AuditList() {
     const [editingPlace, setEditingPlace] = useState<L1CustomPlace | null>(null);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-    // Fetch Stations (Simplified fetch, ideally should be from an API or Store)
+    // Fetch Stations
     useEffect(() => {
-        // Quick fetch for stations filter
-        fetch('/api/admin/stations') // Assuming this endpoint exists or similar
+        fetch('/api/admin/stations')
             .then(res => res.json())
             .then(data => setStations(data.stations || []))
             .catch(() => {
-                // Fallback or use hardcoded common stations for MVP
                 setStations([
                     { id: 'odpt:Station:JR-East.Ueno', name: '上野 (Ueno)' },
                     { id: 'odpt:Station:JR-East.Tokyo', name: '東京 (Tokyo)' },
@@ -72,13 +70,6 @@ export function L1AuditList() {
         }
     };
 
-    const handleFeature = async (id: string, current: boolean) => {
-        // Assuming Feature is a tag or priority update, here simplified as priority bump
-        // Actual implementation depends on backend support for 'is_featured'
-        // For now let's just toast
-        toast.info('Feature toggle not fully implemented yet');
-    };
-
     const handleDelete = async (id: string) => {
         if (!confirm('確定要永久刪除此 POI 嗎？')) return;
         try {
@@ -91,7 +82,7 @@ export function L1AuditList() {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow border p-6 min-h-[600px]">
+        <div className="bg-white rounded-xl shadow border border-gray-200 p-6 min-h-[600px]">
             {/* Toolbar */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-4 items-center">
@@ -100,7 +91,7 @@ export function L1AuditList() {
                         <select
                             value={selectedStation}
                             onChange={e => setSelectedStation(e.target.value)}
-                            className="pl-9 pr-4 py-2 border rounded-lg text-sm appearance-none bg-white min-w-[180px]"
+                            className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm appearance-none bg-white min-w-[180px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="">所有車站</option>
                             {stations.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -110,19 +101,19 @@ export function L1AuditList() {
                     <div className="flex bg-gray-100 rounded-lg p-1">
                         <button
                             onClick={() => setStatusFilter('pending')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${statusFilter === 'pending' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${statusFilter === 'pending' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            待審核 (Pending)
+                            待審核
                         </button>
                         <button
                             onClick={() => setStatusFilter('approved')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${statusFilter === 'approved' ? 'bg-white shadow text-green-600' : 'text-gray-500'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${statusFilter === 'approved' ? 'bg-white shadow text-green-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            已發布 (Approved)
+                            已發布
                         </button>
                         <button
                             onClick={() => setStatusFilter('all')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${statusFilter === 'all' ? 'bg-white shadow text-gray-800' : 'text-gray-500'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${statusFilter === 'all' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             全部
                         </button>
@@ -132,14 +123,14 @@ export function L1AuditList() {
                 <div className="flex gap-2">
                     <button
                         onClick={fetchPlaces}
-                        className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"
+                        className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
                         title="重新整理"
                     >
                         <Search size={18} />
                     </button>
                     <button
                         onClick={() => { setEditingPlace(null); setIsEditorOpen(true); }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-blue-700"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-indigo-700 transition-colors"
                     >
                         <Plus size={16} /> 新增 POI
                     </button>
@@ -147,67 +138,73 @@ export function L1AuditList() {
             </div>
 
             {/* List */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="border-b bg-gray-50">
-                            <th className="px-4 py-3 text-left font-medium text-gray-500">名稱 / ID</th>
-                            <th className="px-4 py-3 text-left font-medium text-gray-500">分類</th>
-                            <th className="px-4 py-3 text-left font-medium text-gray-500">短評 (Review)</th>
-                            <th className="px-4 py-3 text-center font-medium text-gray-500">狀態</th>
-                            <th className="px-4 py-3 text-right font-medium text-gray-500">操作</th>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名稱 / ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分類</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">短評 (Review)</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y">
+                    <tbody className="bg-white divide-y divide-gray-200">
                         {loading ? (
                             <tr><td colSpan={5} className="py-10 text-center text-gray-400">載入中...</td></tr>
                         ) : places.length === 0 ? (
                             <tr><td colSpan={5} className="py-10 text-center text-gray-400">無資料</td></tr>
                         ) : places.map(place => (
-                            <tr key={place.id} className="hover:bg-gray-50 group">
-                                <td className="px-4 py-3">
-                                    <div className="font-bold text-gray-800">{place.name_i18n.ja || place.name_i18n.en}</div>
-                                    <div className="text-xs text-gray-400 flex items-center gap-1">
-                                        {place.station_id}
-                                        {place.affiliate_url && <ExternalLink size={10} className="text-blue-400" />}
+                            <tr key={place.id} className="hover:bg-gray-50 group transition-colors">
+                                <td className="px-6 py-4">
+                                    <div className="font-bold text-gray-900">{place.name_i18n.ja || place.name_i18n.en}</div>
+                                    <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                        <span className="truncate max-w-[150px]">{place.station_id}</span>
+                                        {place.affiliate_url && <ExternalLink size={10} className="text-indigo-400" />}
                                     </div>
                                 </td>
-                                <td className="px-4 py-3">
-                                    <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 capitalize">
+                                <td className="px-6 py-4">
+                                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs capitalize">
                                         {place.category}
                                     </span>
                                 </td>
-                                <td className="px-4 py-3 max-w-xs truncate text-gray-600">
+                                <td className="px-6 py-4 max-w-xs truncate text-gray-600">
                                     {place.description_i18n?.['zh-TW'] || '-'}
                                 </td>
-                                <td className="px-4 py-3 text-center">
-                                    <span className={`inline-block w-2.5 h-2.5 rounded-full ${place.status === 'approved' ? 'bg-green-500' :
-                                            place.status === 'pending' ? 'bg-yellow-500' :
-                                                'bg-gray-300'
-                                        }`} />
+                                <td className="px-6 py-4 text-center">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${place.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                            place.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-gray-100 text-gray-800'
+                                        }`}>
+                                        {place.status === 'approved' ? '已發布' :
+                                            place.status === 'pending' ? '待審核' :
+                                                '草稿'}
+                                    </span>
                                 </td>
-                                <td className="px-4 py-3 text-right">
-                                    <div className="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={() => handleApprove(place.id)}
-                                            title="批准"
-                                            className="p-1.5 hover:bg-green-100 text-green-600 rounded"
-                                        >
-                                            <CheckCircle size={16} />
-                                        </button>
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                        {place.status === 'pending' && (
+                                            <button
+                                                onClick={() => handleApprove(place.id)}
+                                                title="批准"
+                                                className="p-1.5 hover:bg-green-100 text-green-600 rounded transition-colors"
+                                            >
+                                                <CheckCircle size={18} />
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => { setEditingPlace(place); setIsEditorOpen(true); }}
                                             title="編輯"
-                                            className="p-1.5 hover:bg-blue-100 text-blue-600 rounded"
+                                            className="p-1.5 hover:bg-indigo-100 text-indigo-600 rounded transition-colors"
                                         >
-                                            <Edit size={16} />
+                                            <Edit size={18} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(place.id)}
                                             title="刪除"
-                                            className="p-1.5 hover:bg-red-100 text-red-600 rounded"
+                                            className="p-1.5 hover:bg-red-100 text-red-600 rounded transition-colors"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
                                 </td>

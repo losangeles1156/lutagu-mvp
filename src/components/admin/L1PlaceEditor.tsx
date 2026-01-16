@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, Save, MapPin } from 'lucide-react';
-import { L1CustomPlace, CreatePlaceRequest, UpdatePlaceRequest } from '@/lib/types/l1-admin';
+import { L1CustomPlace, CreatePlaceRequest } from '@/lib/types/l1-admin';
 import { toast } from 'sonner';
 
 interface L1PlaceEditorProps {
@@ -70,9 +70,9 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
         <div className="fixed inset-0 z-[2000] bg-black/50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b">
+                <div className="flex justify-between items-center p-6 border-b border-gray-100">
                     <h2 className="text-xl font-bold text-gray-800">{isEdit ? '編輯景點' : '新增景點'}</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                         <X size={20} />
                     </button>
                 </div>
@@ -87,8 +87,8 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
                                 required
                                 value={stationId}
                                 onChange={e => setStationId(e.target.value)}
-                                className="w-full border rounded-lg p-2"
-                                disabled={isEdit} // Prevent moving stations for now for simplicity
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                disabled={isEdit}
                             >
                                 <option value="">選擇車站...</option>
                                 {stations.map(s => (
@@ -101,7 +101,7 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
                             <select
                                 value={category}
                                 onChange={e => setCategory(e.target.value)}
-                                className="w-full border rounded-lg p-2"
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             >
                                 <option value="shopping">購物 (Shopping)</option>
                                 <option value="food">美食 (Food)</option>
@@ -120,32 +120,32 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
                                 placeholder="日本語名稱"
                                 value={nameJa}
                                 onChange={e => setNameJa(e.target.value)}
-                                className="border rounded-lg p-2 text-sm"
+                                className="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                             <input
                                 placeholder="English Name"
                                 value={nameEn}
                                 onChange={e => setNameEn(e.target.value)}
-                                className="border rounded-lg p-2 text-sm"
+                                className="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                             <input
                                 placeholder="中文名稱"
                                 value={nameZh}
                                 onChange={e => setNameZh(e.target.value)}
-                                className="border rounded-lg p-2 text-sm"
+                                className="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                         </div>
                     </div>
 
                     {/* Review & Link */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">短評 (Review)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">短評說明 (Review/Description)</label>
                         <textarea
                             rows={3}
                             value={review}
                             onChange={e => setReview(e.target.value)}
-                            placeholder="輸入關於此地點的短評或推薦理由..."
-                            className="w-full border rounded-lg p-2 text-sm"
+                            placeholder="輸入關於此地點的短評、推薦理由或補充說明..."
+                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
 
@@ -156,7 +156,7 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
                             value={url}
                             onChange={e => setUrl(e.target.value)}
                             placeholder="https://..."
-                            className="w-full border rounded-lg p-2 text-sm"
+                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
 
@@ -172,7 +172,7 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
                                 placeholder="Latitude (緯度)"
                                 value={coords?.lat || ''}
                                 onChange={e => setCoords(prev => ({ ...prev!, lat: parseFloat(e.target.value) }))}
-                                className="border rounded px-2 py-1 text-sm"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                             <input
                                 type="number"
@@ -180,7 +180,7 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
                                 placeholder="Longitude (經度)"
                                 value={coords?.lng || ''}
                                 onChange={e => setCoords(prev => ({ ...prev!, lng: parseFloat(e.target.value) }))}
-                                className="border rounded px-2 py-1 text-sm"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
@@ -189,18 +189,18 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex justify-end gap-3 pt-4 border-t">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium"
+                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors"
                         >
                             取消
                         </button>
                         <button
                             type="submit"
                             disabled={loading || !stationId || !nameJa}
-                            className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm disabled:opacity-50"
+                            className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm disabled:opacity-50 transition-colors"
                         >
                             <Save size={16} />
                             {loading ? '儲存中...' : '儲存變更'}

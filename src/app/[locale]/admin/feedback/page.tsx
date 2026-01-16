@@ -71,18 +71,18 @@ export default function FeedbackAdminPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">User Feedback</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">用戶反饋</h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        View and manage user submissions
+                        查看與管理用戶提交的反饋
                     </p>
                 </div>
                 <button
                     onClick={fetchFeedback}
                     disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
                 >
                     <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                    Refresh
+                    重新整理
                 </button>
             </div>
 
@@ -123,13 +123,13 @@ export default function FeedbackAdminPage() {
                 {loading ? (
                     <div className="p-8 text-center text-gray-500">
                         <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
-                        Loading feedback...
+                        載入中...
                     </div>
                 ) : filteredFeedback.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
                         <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <div className="font-medium">No feedback yet</div>
-                        <div className="text-sm">User submissions will appear here</div>
+                        <div className="font-medium">尚無反饋</div>
+                        <div className="text-sm">用戶提交的反饋將顯示於此</div>
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-100">
@@ -157,8 +157,8 @@ export default function FeedbackAdminPage() {
                                                     </span>
                                                 )}
                                                 <span className={`text-xs px-2 py-0.5 rounded-full ${item.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                        item.status === 'reviewed' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-green-100 text-green-700'
+                                                    item.status === 'reviewed' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-green-100 text-green-700'
                                                     }`}>
                                                     {item.status}
                                                 </span>
@@ -188,7 +188,7 @@ export default function FeedbackAdminPage() {
                     <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-100">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-bold">Feedback Details</h3>
+                                <h3 className="text-lg font-bold">反饋詳情</h3>
                                 <button onClick={() => setSelectedItem(null)} className="text-gray-400 hover:text-gray-600">
                                     ×
                                 </button>
@@ -196,32 +196,32 @@ export default function FeedbackAdminPage() {
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
-                                <div className="text-xs font-bold text-gray-400 uppercase mb-1">Type</div>
+                                <div className="text-xs font-bold text-gray-400 uppercase mb-1">類型</div>
                                 <div className="text-sm text-gray-800">{TYPE_CONFIG[selectedItem.feedback_type]?.label || selectedItem.feedback_type}</div>
                             </div>
                             {selectedItem.rating && (
                                 <div>
-                                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">Rating</div>
+                                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">評分</div>
                                     <div className="text-amber-500 text-lg">{'★'.repeat(selectedItem.rating)}{'☆'.repeat(5 - selectedItem.rating)}</div>
                                 </div>
                             )}
                             <div>
-                                <div className="text-xs font-bold text-gray-400 uppercase mb-1">Content</div>
+                                <div className="text-xs font-bold text-gray-400 uppercase mb-1">內容</div>
                                 <div className="text-sm text-gray-800 whitespace-pre-wrap">{selectedItem.content}</div>
                             </div>
                             {selectedItem.node_id && (
                                 <div>
-                                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">Node</div>
+                                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">節點</div>
                                     <div className="text-sm text-gray-800">{selectedItem.node_id}</div>
                                 </div>
                             )}
                             <div>
-                                <div className="text-xs font-bold text-gray-400 uppercase mb-1">Submitted</div>
+                                <div className="text-xs font-bold text-gray-400 uppercase mb-1">提交時間</div>
                                 <div className="text-sm text-gray-800">{new Date(selectedItem.created_at).toLocaleString()}</div>
                             </div>
                             {selectedItem.metadata && (
                                 <div>
-                                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">Metadata</div>
+                                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">元數據</div>
                                     <pre className="text-xs text-gray-600 bg-gray-50 p-2 rounded-lg overflow-auto">
                                         {JSON.stringify(selectedItem.metadata, null, 2)}
                                     </pre>

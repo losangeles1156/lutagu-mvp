@@ -118,11 +118,140 @@ function normalizeLineToken(input: string) {
         .replace(/[\-_.:]/g, '');
 }
 
-function severityToLineStatus(severity: string | undefined) {
-    if (severity === 'critical') return 'suspended';
-    if (severity === 'major' || severity === 'minor') return 'delay';
-    return 'normal';
+type LineStatusDetail = 'normal' | 'delay_minor' | 'delay_major' | 'halt' | 'canceled' | 'unknown';
+
+function extractDelayMinutesFromText(text: string): number | null {
+    const s = String(text || '');
+    if (!s) return null;
+
+    const candidates: number[] = [];
+
+    const jaPatterns: RegExp[] = [
+        /最大\s*(\d{1,3})\s*分/g,
+        /(\d{1,3})\s*分\s*(?:程度)?\s*(?:以上)?\s*(?:の)?\s*(?:遅れ|遅延)/g,
+        /(?:遅れ|遅延)(?:が)?\s*(\d{1,3})\s*分/g,
+        /(\d{1,3})\s*分\s*(?:遅れ|遅延)/g
+    ];
+    for (const re of jaPatterns) {
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(s)) !== null) {
+            const n = Number(m[1]);
+            if (Number.isFinite(n) && n >= 0) candidates.push(n);
+        }
+    }
+
+    const enPatterns: RegExp[] = [
+        /(\d{1,3})\s*(?:min|mins|minutes)\s*(?:delay|delayed|late)?/gi,
+        /delay(?:ed)?\s*(?:by|of)?\s*(\d{1,3})\s*(?:min|mins|minutes)/gi
+    ];
+    for (const re of enPatterns) {
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(s)) !== null) {
+            const n = Number(m[1]);
+            if (Number.isFinite(n) && n >= 0) candidates.push(n);
+        }
+    }
+
+    if (candidates.length === 0) return null;
+    return Math.max(...candidates);
 }
+
+function classifyLineStatusFromText(params: {
+    severity?: string;
+    statusText?: string;
+    messageJa?: string;
+    messageEn?: string;
+    messageZh?: string;
+}): { status: 'normal' | 'delay' | 'suspended'; detail: LineStatusDetail; delayMinutes: number | null } {
+    const statusText = String(params.statusText || '');
+    const ja = String(params.messageJa || '');
+    const en = String(params.messageEn || '');
+    const zh = String(params.messageZh || '');
+
+    const combinedLower = `${statusText}\n${ja}\n${en}\n${zh}`.toLowerCase();
+
+    const looksNormal =
+        combinedLower.includes('平常') ||
+        combinedLower.includes('通常') ||
+        combinedLower.includes('operating normally') ||
+        combinedLower.includes('normal operation') ||
+        combinedLower.includes('no delays') ||
+        combinedLower.includes('service is normal');
+
+    if (looksNormal) {
+        return { status: 'normal', detail: 'normal', delayMinutes: null };
+    }
+
+    const isCanceled =
+        ja.includes('運休') ||
+        ja.includes('運転取り止め') ||
+        ja.includes('運転を取りやめ') ||
+        combinedLower.includes('cancelled') ||
+        combinedLower.includes('canceled') ||
+        combinedLower.includes('cancelled service') ||
+        combinedLower.includes('service cancelled');
+
+    if (isCanceled) {
+        return { status: 'suspended', detail: 'canceled', delayMinutes: null };
+    }
+
+    const isHalt =
+        ja.includes('運転見合わせ') ||
+        ja.includes('運転を見合わせ') ||
+        ja.includes('運転中止') ||
+        ja.includes('運転休止') ||
+        ja.includes('運行を見合わせ') ||
+        combinedLower.includes('service suspended') ||
+        combinedLower.includes('suspended') ||
+        combinedLower.includes('stopped');
+
+    if (isHalt) {
+        return { status: 'suspended', detail: 'halt', delayMinutes: null };
+    }
+
+    const delayMinutes = extractDelayMinutesFromText(`${statusText}\n${ja}\n${en}\n${zh}`);
+    if (delayMinutes !== null) {
+        return {
+            status: 'delay',
+            detail: delayMinutes >= 30 ? 'delay_major' : 'delay_minor',
+            delayMinutes
+        };
+    }
+
+    const looksDelay =
+        ja.includes('遅れ') ||
+        ja.includes('遅延') ||
+        combinedLower.includes('delay') ||
+        combinedLower.includes('delayed');
+
+    if (looksDelay) {
+        return { status: 'delay', detail: 'unknown', delayMinutes: null };
+    }
+
+    if (params.severity === 'critical') {
+        return { status: 'suspended', detail: 'halt', delayMinutes: null };
+    }
+
+    if (params.severity === 'major' || params.severity === 'minor') {
+        return { status: 'delay', detail: 'unknown', delayMinutes: null };
+    }
+
+    return { status: 'normal', detail: 'unknown', delayMinutes: null };
+}
+
+function lineStatusDetailRank(detail: LineStatusDetail): number {
+    if (detail === 'canceled') return 4;
+    if (detail === 'halt') return 3;
+    if (detail === 'delay_major') return 2;
+    if (detail === 'delay_minor') return 1;
+    return 0;
+}
+
+export const __private__ = {
+    extractDelayMinutesFromText,
+    classifyLineStatusFromText,
+    lineStatusDetailRank,
+};
 
 function pickWorstSeverity(disruptions: any[]) {
     const order = ['none', 'minor', 'major', 'critical'];
@@ -335,18 +464,80 @@ export async function GET(request: Request) {
             const matching = combinedDisruptions.filter((d: any) => matchDisruptionToLine(lineDef, d));
 
             if (matching.length > 0) {
-                // Determine valid issue from matches
+                const pick = (() => {
+                    const scored = matching
+                        .map((d: any) => {
+                            const statusText =
+                                (typeof d?.status_label === 'object' && d?.status_label)
+                                    ? (d.status_label.ja || d.status_label.en || '')
+                                    : String(d?.status_label || '');
+
+                            const msgObj = d?.message;
+                            const msgJa =
+                                (typeof msgObj === 'object' && msgObj) ? (msgObj.ja || '') : (typeof msgObj === 'string' ? msgObj : '');
+                            const msgEn = (typeof msgObj === 'object' && msgObj) ? (msgObj.en || '') : '';
+                            const msgZh = (typeof msgObj === 'object' && msgObj) ? (msgObj['zh-TW'] || msgObj.zh || '') : '';
+
+                            const classified = classifyLineStatusFromText({
+                                severity: String(d?.severity || ''),
+                                statusText,
+                                messageJa: msgJa,
+                                messageEn: msgEn,
+                                messageZh: msgZh
+                            });
+
+                            const severityRank = (() => {
+                                const s = String(d?.severity || 'none');
+                                if (s === 'critical') return 3;
+                                if (s === 'major') return 2;
+                                if (s === 'minor') return 1;
+                                return 0;
+                            })();
+
+                            return {
+                                d,
+                                classified,
+                                rank: lineStatusDetailRank(classified.detail),
+                                severityRank
+                            };
+                        })
+                        .sort((a, b) => b.rank - a.rank || b.severityRank - a.severityRank);
+                    return scored[0] || null;
+                })();
+
+                const primary = pick?.d || matching[0];
                 const worst = pickWorstSeverity(matching);
-                const primary = matching.find((d: any) => String(d?.severity) === worst) || matching[0];
 
-                // Text Resolution
-                const msgJa = primary?.message?.ja || primary?.status_label?.ja || '';
-                const msgEn = primary?.message?.en || primary?.status_label?.en || '';
-                const msgZh = primary?.message?.['zh-TW'] || primary?.message?.zh || primary?.status_label?.['zh-TW'] || primary?.status_label?.zh || '';
+                const primaryMsgObj = primary?.message;
+                const msgJa =
+                    (typeof primaryMsgObj === 'object' && primaryMsgObj)
+                        ? (primaryMsgObj.ja || primary?.status_label?.ja || '')
+                        : (typeof primaryMsgObj === 'string' ? primaryMsgObj : (primary?.status_label?.ja || ''));
+                const msgEn =
+                    (typeof primaryMsgObj === 'object' && primaryMsgObj)
+                        ? (primaryMsgObj.en || primary?.status_label?.en || '')
+                        : (primary?.status_label?.en || '');
+                const msgZh =
+                    (typeof primaryMsgObj === 'object' && primaryMsgObj)
+                        ? (primaryMsgObj['zh-TW'] || primaryMsgObj.zh || primary?.status_label?.['zh-TW'] || primary?.status_label?.zh || '')
+                        : (primary?.status_label?.['zh-TW'] || primary?.status_label?.zh || '');
 
-                // DANGER FIX: If the message explicitly says 'Operating Normally' (平常/通常), override status to normal
-                const isActuallyNormal = msgJa.includes('平常') || msgJa.includes('通常') || msgJa.includes('ダイヤ乱れは解消');
-                const status = isActuallyNormal ? 'normal' : severityToLineStatus(worst);
+                const statusText =
+                    (typeof primary?.status_label === 'object' && primary?.status_label)
+                        ? (primary.status_label.ja || primary.status_label.en || '')
+                        : String(primary?.status_label || '');
+
+                const classified = pick?.classified ||
+                    classifyLineStatusFromText({
+                        severity: String(primary?.severity || ''),
+                        statusText,
+                        messageJa: msgJa,
+                        messageEn: msgEn,
+                        messageZh: msgZh
+                    });
+
+                const isActuallyNormal = classified.detail === 'normal' || msgJa.includes('ダイヤ乱れは解消');
+                const status = isActuallyNormal ? 'normal' : classified.status;
 
                 const message = (msgJa || msgEn || msgZh) && !isActuallyNormal
                     ? {
@@ -362,6 +553,9 @@ export async function GET(request: Request) {
                     operator: lineDef.operator,
                     color: lineDef.color,
                     status,
+                    status_detail: isActuallyNormal ? 'normal' : classified.detail,
+                    delay_minutes: isActuallyNormal ? null : classified.delayMinutes,
+                    severity: String(worst || ''),
                     message
                 };
             }
@@ -373,18 +567,29 @@ export async function GET(request: Request) {
                 operator: lineDef.operator,
                 color: lineDef.color,
                 status: 'normal',
+                status_detail: 'normal',
+                delay_minutes: null,
+                severity: 'none',
                 message: undefined
             };
         });
 
         // Overall Station Severity
-        const stationHasDelay = lineStatusArray.some(l => l.status !== 'normal');
+        const hasSuspension = lineStatusArray.some(l => l.status_detail === 'halt' || l.status_detail === 'canceled' || l.status === 'suspended');
+        const hasDelay = lineStatusArray.some(l => l.status_detail === 'delay_major' || l.status_detail === 'delay_minor' || l.status === 'delay');
+
+        let finalStatusCode = 'NORMAL';
+        if (hasSuspension) finalStatusCode = 'SUSPENDED';
+        else if (hasDelay) finalStatusCode = 'DELAY';
 
         // Calculate Weather
         // Priority: 
         // 1. Existing weather_info in snapshot (if < 3 hours old)
         // 2. Live fetch via Open-Meteo (if coordinates available or default)
         // 3. Last known weather from ANY station in DB (global fallback)
+
+        const stationHasDelay = finalStatusCode !== 'NORMAL';
+
 
         const weatherInfo = await (async () => {
             const w: any = baseData.weather_info;
@@ -527,7 +732,7 @@ export async function GET(request: Request) {
                             .upsert(
                                 {
                                     station_id: stationId,
-                                    status_code: stationHasDelay ? 'DELAY' : 'NORMAL',
+                                    status_code: finalStatusCode,
                                     reason_ja: reasonJa,
                                     reason_zh_tw: '',
                                     weather_info: weatherInfo,

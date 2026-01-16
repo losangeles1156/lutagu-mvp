@@ -113,6 +113,22 @@ export class TemplateEngine {
                         data: { action: 'query_fare', target: match[1] }
                     })
                 }
+            },
+            {
+                id: 'live-status-help',
+                priority: 92,
+                patterns: [
+                    /(?:延誤|誤點|停駛|停運|運行|運轉|運行狀態|狀態|異常|停電)/i,
+                    /(?:遅延|運休|運行状況|運転見合わせ)/i,
+                    /(?:delay|delayed|disruption|suspend|suspended|status|power outage|blackout)/i
+                ],
+                responses: {
+                    'zh-TW': '我可以看即時運行狀態。請告訴我你目前在哪一站（或在地圖選擇車站/開啟定位），我就能用即時資料回覆延誤原因與替代建議。',
+                    'zh': '我可以看即时运行状态。请告诉我你目前在哪一站（或在地图选择车站/开启定位），我就能用即时资料回复延误原因与替代建议。',
+                    'en': 'I can check live service status. Tell me your current station (or select one on the map / enable location) so I can use live data to reply with the cause and a backup option.',
+                    'ja': '運行状況を確認できます。今いる駅名（または地図で駅を選択／位置情報を有効化）を教えてください。遅延理由と代替案を即時データで返します。',
+                    'ar': 'يمكنني التحقق من حالة التشغيل الفورية. أخبرني بمحطتك الحالية (أو اختر محطة على الخريطة/فعّل الموقع) لأجيب باستخدام البيانات الفورية مع السبب وخيار بديل.'
+                }
             }
         ];
     }

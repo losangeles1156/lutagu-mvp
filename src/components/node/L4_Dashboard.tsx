@@ -370,10 +370,12 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                 if (!destinationStationId) { setError(t('errors.destinationRequired')); setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId: currentOriginId, demand, verified: false, options: [] })); return; }
                 if (cachedRouteResult && cachedRouteResult.origin === currentOriginId && cachedRouteResult.destination === destinationStationId && cachedRouteResult.text === text) { setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: true, options: cachedRouteResult.options, text })); return; }
                 try {
-                    const json = await fetchJsonCached<any>(`/api/odpt/route?from=${encodeURIComponent(currentOriginId)}&to=${encodeURIComponent(destinationStationId)}&locale=${uiLocale}`, { ttlMs: 5 * 60_000, signal: controller.signal });
+                    const json = await fetchJsonCached<any>(`/api/odpt/route?from=${encodeURIComponent(currentOriginId)}&to=${encodeURIComponent(destinationStationId)}&locale=${uiLocale}`, { ttlMs: 30_000, signal: controller.signal });
                     if (mySeq !== requestSeqRef.current) return;
-                    const apiRoutes = json.routes || [];
-                    if (apiRoutes.length === 0) { setError(t('errors.noRouteFound')); }
+                    const apiRoutes = Array.isArray(json?.routes) ? json.routes : [];
+                    const apiError = typeof json?.error === 'string' ? json.error : '';
+                    if (apiRoutes.length === 0) { setError(apiError || t('errors.noRouteFound')); }
+                    else { setError(''); }
                     const baseOptions = apiRoutes.map((r: any): EnrichedRouteOption => ({ label: r.label, steps: r.steps, sources: r.sources || [{ type: 'odpt:Railway', verified: true }], railways: r.railways, transfers: Number(r.transfers ?? 0), duration: typeof r.duration === 'number' ? r.duration : undefined, fare: r.fare, nextDeparture: r.nextDeparture }));
                     setCachedRouteResult({ origin: currentOriginId, destination: destinationStationId, options: baseOptions, text });
                     setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: true, options: baseOptions, text }));
@@ -693,6 +695,28 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                             </div>
 
                             <AnimatePresence>{error && <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="rounded-2xl bg-rose-50 border border-rose-100 p-4 flex items-start gap-3"><div className="p-2 bg-rose-100 rounded-full text-rose-600"><AlertTriangle size={16} /></div><div className="text-sm font-bold text-rose-800">{error}</div></motion.div>}</AnimatePresence>
+                            {error && task === 'route' && selectedOrigin?.id && selectedDestination?.id && (
+                                <div className="flex flex-wrap gap-2">
+                                    <a
+                                        href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(getStationDisplayName(selectedOrigin))}&destination=${encodeURIComponent(getStationDisplayName(selectedDestination))}&travelmode=transit`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white text-[11px] font-black hover:bg-indigo-600 transition-all active:scale-95 shadow-lg shadow-slate-900/20"
+                                    >
+                                        Google Maps (Transit)
+                                        <ExternalLink size={12} className="opacity-70" />
+                                    </a>
+                                    <a
+                                        href={`https://www.google.com/maps/search/?api=1&query=Taxi near ${encodeURIComponent(getStationDisplayName(selectedOrigin))}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/80 border border-slate-200/60 text-[11px] font-black text-slate-600 hover:text-indigo-600 hover:bg-white transition-all active:scale-95 shadow-sm"
+                                    >
+                                        Find Taxi Nearby
+                                        <ExternalLink size={12} className="opacity-70" />
+                                    </a>
+                                </div>
+                            )}
                             {task === 'time' && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">{isLoading && !timetableData ? <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div> : <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</motion.div>}
                             <AnimatePresence mode="wait">{(suggestion || activeDemo || activeKind) && (
                                 <motion.div key={activeKind || 'results'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="space-y-4">

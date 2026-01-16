@@ -6,6 +6,7 @@ import { DefaultChatTransport } from 'ai';
 import { useTranslations, useLocale } from 'next-intl';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
+import { getSessionId } from '@/lib/tracking';
 
 export interface AgentMessage {
     id?: string;
@@ -68,7 +69,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
         `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
     );
     const sessionIdRef = useRef<string>(
-        globalThis.crypto?.randomUUID?.() ||
+        (typeof window !== 'undefined' ? getSessionId() : null) ||
         `session-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
     );
 
@@ -84,7 +85,8 @@ export function useAgentChat(options: UseAgentChatOptions) {
             locale,
             user_profile: 'general', // This will be overridden by sendMessage if userProfile is passed
             zone: zone || 'core',
-            userLocation: options.userLocation // Added from options
+            userLocation: options.userLocation, // Added from options
+            sessionId: sessionIdRef.current
         }
     }), [stationId, stationName, locale, zone, options.userLocation]);
 
@@ -430,7 +432,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
             setIsOffline(true);
             setThinkingStep('');
         }
-    }, [isLoading, locale, stationId, zone, tL4, sendAiMessage, setAiMessages, onMessage, onComplete]);
+    }, [isLoading, tL4, sendAiMessage, onComplete]);
 
     const clearMessagesHandler = useCallback(() => {
         setAiMessages([]);

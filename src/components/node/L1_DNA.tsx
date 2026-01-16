@@ -14,6 +14,7 @@ import { useL1Places, L1Place } from '@/hooks/useL1Places';
 import { useCategoryTranslation } from '@/hooks/useCategoryTranslation';
 
 import { StationUIProfile } from '@/lib/types/stationStandard';
+import { FavoriteButton } from '@/components/ui/FavoriteButton';
 
 // Enhanced Icon Map with Colors
 const CATEGORY_STYLE: Record<string, { icon: any; color: string; bgColor: string; borderColor: string }> = {
@@ -187,7 +188,7 @@ export function L1_DNA({ data }: { data: StationUIProfile }) {
                             <div>
                                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight mb-1 drop-shadow-sm flex items-center gap-2">
                                     {getLocaleString(title, locale)}
-                                    {/* Optional: Add a small badge if needed */}
+                                    <FavoriteButton nodeId={data.id} className="bg-white/10 hover:bg-white/20 text-white ml-2" />
                                 </h2>
 
                                 {/* Dynamic Insight Tagline - Render ONLY if data exists */}

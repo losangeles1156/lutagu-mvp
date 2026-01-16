@@ -28,6 +28,7 @@ export default async function RootLayout({
 }) {
     const messages = await getMessages();
     const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+    const shouldLoadAnalytics = process.env.NODE_ENV === 'production' && Boolean(gaId);
 
     return (
         <html lang={locale}>
@@ -41,7 +42,7 @@ export default async function RootLayout({
                 <link rel="apple-touch-icon" href="/icons/icon-192.png" />
             </head>
             <body className={inter.className}>
-                {gaId && (
+                {shouldLoadAnalytics && (
                     <>
                         <Script
                             strategy="afterInteractive"

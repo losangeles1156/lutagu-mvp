@@ -23,12 +23,12 @@ export function NodeMerger() {
     const [isFetchingCandidates, setIsFetchingCandidates] = useState(false);
     const [candidateRefreshTrigger, setCandidateRefreshTrigger] = useState(0);
 
-    // Init Wards (eslint-disable because wards.length check ensures idempotency)
+    // Init Wards
     useEffect(() => {
         if (wards.length === 0) fetchWards();
     }, [wards.length, fetchWards]);
 
-    // Fetch Nodes when ward changes (eslint-disable because getNodesByWard is a stable store function)
+    // Fetch Nodes when ward changes
     useEffect(() => {
         if (!selectedWard) return;
         setLoading(true);
@@ -66,8 +66,6 @@ export function NodeMerger() {
                 hubChildrenMap.get(n.parent_hub_id)?.push(n);
             } else {
                 // It's a Hub or Independent
-                // A node is a Hub if it has children OR is_hub=true
-                // But specifically for this list, we want to treat any non-child as a potential target
                 hubs.push(n);
                 independentNodes.push(n);
             }
@@ -78,13 +76,7 @@ export function NodeMerger() {
         return { hubs, independentNodes, hubChildrenMap };
     }, [nodes]);
 
-    // Candidates for merging (Exclude the target hub itself AND its current children)
-    // Candidates for merging:
-    // 1. Exclude the target hub itself
-    // 2. Exclude nodes that are already children of ANY hub (must be independent)
-    // 3. [NEW] Distance Filter: Only show nodes within 1km of the target hub
     // Candidates for merging (Fetched via Spatial API)
-    // Triggered when targetHubId changes
     useEffect(() => {
         if (!targetHubId) {
             setCandidates([]);
@@ -101,17 +93,13 @@ export function NodeMerger() {
             setIsFetchingCandidates(true);
             try {
                 // Fetch 1km radius
-                // getNodeCoordinates returns [lat, lon], fetchNearbyNodes expects (lat, lon)
                 const results = await fetchNearbyNodes(targetCoords[0], targetCoords[1], 1000);
 
                 // Filter and Enhance
                 const filtered = results.filter((n: NodeDatum) => {
                     if (n.id === targetHubId) return false;
                     if (n.parent_hub_id) return false; // Already merged (independent only)
-
-                    // Filter out bus stops if API didn't already (API v2 filters bus_stop, but good to be safe)
                     if (n.type === 'bus_stop') return false;
-
                     return true;
                 }).map((n: NodeDatum) => {
                     const c = getNodeCoordinates(n);
@@ -132,7 +120,7 @@ export function NodeMerger() {
         };
 
         loadCandidates();
-    }, [targetHubId, nodes, candidateRefreshTrigger]); // Re-fetch when hub changes OR after merge/unmerge
+    }, [targetHubId, nodes, candidateRefreshTrigger]);
 
     const handleMerge = async () => {
         if (!targetHubId || selectedChildren.size === 0) return;
@@ -181,7 +169,7 @@ export function NodeMerger() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    hub_node_id: hubId, // Technically not needed for unmerge logic in some APIs, but context is good
+                    hub_node_id: hubId,
                     child_node_ids: [childId],
                     action: 'unmerge'
                 })
@@ -210,7 +198,7 @@ export function NodeMerger() {
                     <select
                         value={selectedWard}
                         onChange={(e) => setSelectedWard(e.target.value)}
-                        className="w-full max-w-xs px-3 py-2 border rounded-lg"
+                        className="w-full max-w-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="">-- 請選擇 --</option>
                         {wards.map(w => (
@@ -227,8 +215,8 @@ export function NodeMerger() {
                 {/* Left: Target Hub Selection */}
                 <div className="border rounded-xl p-4 flex flex-col bg-gray-50/50">
                     <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">1</div>
-                        選擇主 Hub (Target)
+                        <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">1</div>
+                        選擇主節點 (Target Hub)
                     </h3>
                     <div className="flex-1 overflow-y-auto max-h-[500px] space-y-2 pr-2 custom-scrollbar">
                         {hubs.map(node => {
@@ -243,19 +231,19 @@ export function NodeMerger() {
                                         setSelectedChildren(new Set());
                                     }}
                                     className={`w-full text-left p-3 rounded-lg border transition-all cursor-pointer group ${isSelected
-                                        ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-200'
-                                        : 'bg-white border-gray-200 hover:border-blue-300'
+                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-200'
+                                        : 'bg-white border-gray-200 hover:border-indigo-300'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <div className="font-bold text-sm">{node.name.ja}</div>
-                                            <div className={`text-xs truncate ${isSelected ? 'text-blue-100' : 'opacity-70'}`}>{node.id}</div>
+                                            <div className={`text-xs truncate ${isSelected ? 'text-indigo-100' : 'opacity-70'}`}>{node.id}</div>
                                         </div>
                                         {children.length > 0 && (
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isSelected ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-600'
                                                 }`}>
-                                                {children.length} members
+                                                {children.length} 成員
                                             </span>
                                         )}
                                     </div>
@@ -263,14 +251,14 @@ export function NodeMerger() {
                                     {/* Children List */}
                                     {children.length > 0 && (
                                         <div className={`mt-3 pt-2 border-t ${isSelected ? 'border-white/20' : 'border-gray-100'} space-y-1`}>
-                                            <div className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isSelected ? 'text-blue-200' : 'text-gray-400'}`}>Members</div>
+                                            <div className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isSelected ? 'text-indigo-200' : 'text-gray-400'}`}>已合併成員</div>
                                             {children.map(child => (
                                                 <div key={child.id} className={`flex justify-between items-center text-xs p-1.5 rounded ${isSelected ? 'bg-black/20' : 'bg-gray-50'
                                                     }`}>
                                                     <span>{child.name.ja}</span>
                                                     <button
                                                         onClick={(e) => handleUnmerge(child.id, node.id, e)}
-                                                        className={`p-1 rounded hover:bg-red-500 hover:text-white transition ${isSelected ? 'text-blue-100' : 'text-gray-400'
+                                                        className={`p-1 rounded hover:bg-red-500 hover:text-white transition ${isSelected ? 'text-indigo-100' : 'text-gray-400'
                                                             }`}
                                                         title="移除此節點 (Unmerge)"
                                                     >
@@ -299,7 +287,7 @@ export function NodeMerger() {
                     <button
                         onClick={handleMerge}
                         disabled={!targetHubId || selectedChildren.size === 0 || isSubmitting}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium transition-colors"
                     >
                         {isSubmitting ? <RefreshCw className="animate-spin w-4 h-4" /> : <Merge className="w-4 h-4" />}
                         合併 ({selectedChildren.size})
@@ -315,7 +303,7 @@ export function NodeMerger() {
                 <div className="border rounded-xl p-4 flex flex-col bg-gray-50/50">
                     <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs">2</div>
-                        選擇子節點 (Merge Candidates)
+                        選擇子節點 (Candidates)
                     </h3>
 
                     {!targetHubId ? (

@@ -1,14 +1,131 @@
 import { DEMO_SCENARIOS, DemoScenario } from './demoScenarios';
 import CORE_TOPOLOGY from './generated/coreTopology.json';
 
+const EXTRA_TOPOLOGY: any[] = [
+    {
+        railwayId: 'odpt.Railway:JR-East.NaritaExpress',
+        operator: 'odpt.Operator:JR-East',
+        title: { ja: '成田エクスプレス', en: 'Narita Express', 'zh-TW': "成田特快 N'EX" },
+        stationOrder: [
+            {
+                index: 1,
+                station: 'odpt.Station:JR-East.NaritaExpress.NaritaAirportTerminal1',
+                title: { ja: '成田空港 第1ターミナル', en: 'Narita Airport Terminal 1', 'zh-TW': '成田第一航廈' },
+            },
+            {
+                index: 2,
+                station: 'odpt.Station:JR-East.NaritaExpress.NaritaAirportTerminal2and3',
+                title: { ja: '成田空港 第2・第3ターミナル', en: 'Narita Airport Terminal 2 & 3', 'zh-TW': '成田第二/第三航廈' },
+            },
+            {
+                index: 3,
+                station: 'odpt.Station:JR-East.NaritaExpress.Tokyo',
+                title: { ja: '東京', en: 'Tokyo', 'zh-TW': '東京' },
+            },
+            {
+                index: 4,
+                station: 'odpt.Station:JR-East.NaritaExpress.Shinagawa',
+                title: { ja: '品川', en: 'Shinagawa', 'zh-TW': '品川' },
+            },
+        ],
+    },
+    {
+        railwayId: 'lutagu.Railway:Keisei.SkylinerExpress',
+        operator: 'lutagu.Operator:Keisei',
+        title: { ja: 'スカイライナー', en: 'Keisei Skyliner', 'zh-TW': '京成 Skyliner' },
+        stationOrder: [
+            {
+                index: 1,
+                station: 'odpt.Station:Keisei.Skyliner.NaritaAirportTerminal1',
+                title: { ja: '成田空港 第1ターミナル', en: 'Narita Airport Terminal 1', 'zh-TW': '成田第一航廈' },
+            },
+            {
+                index: 2,
+                station: 'odpt.Station:Keisei.Skyliner.NaritaAirportTerminal2and3',
+                title: { ja: '成田空港 第2・第3ターミナル', en: 'Narita Airport Terminal 2 & 3', 'zh-TW': '成田第二/第三航廈' },
+            },
+            {
+                index: 3,
+                station: 'odpt.Station:Keisei.Skyliner.Nippori',
+                title: { ja: '日暮里', en: 'Nippori', 'zh-TW': '日暮里' },
+            },
+            {
+                index: 4,
+                station: 'odpt.Station:Keisei.Skyliner.Ueno',
+                title: { ja: '上野', en: 'Ueno', 'zh-TW': '上野' },
+            },
+        ],
+    },
+    {
+        railwayId: 'lutagu.Railway:TokyoMonorail.HanedaAirport',
+        operator: 'lutagu.Operator:TokyoMonorail',
+        title: { ja: '東京モノレール', en: 'Tokyo Monorail', 'zh-TW': '東京單軌電車' },
+        stationOrder: [
+            {
+                index: 1,
+                station: 'odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal3',
+                title: { ja: '羽田空港 第3ターミナル', en: 'Haneda Airport Terminal 3', 'zh-TW': '羽田第三航廈' },
+            },
+            {
+                index: 2,
+                station: 'odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal2',
+                title: { ja: '羽田空港 第2ターミナル', en: 'Haneda Airport Terminal 2', 'zh-TW': '羽田第二航廈' },
+            },
+            {
+                index: 3,
+                station: 'odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal1',
+                title: { ja: '羽田空港 第1ターミナル', en: 'Haneda Airport Terminal 1', 'zh-TW': '羽田第一航廈' },
+            },
+            {
+                index: 4,
+                station: 'odpt.Station:TokyoMonorail.Haneda.Hamamatsucho',
+                title: { ja: 'モノレール浜松町', en: 'Monorail Hamamatsucho', 'zh-TW': '濱松町（單軌）' },
+            },
+        ],
+    },
+    {
+        railwayId: 'lutagu.Railway:Keikyu.HanedaAirport',
+        operator: 'lutagu.Operator:Keikyu',
+        title: { ja: '京急空港線', en: 'Keikyu Airport Line', 'zh-TW': '京急機場線' },
+        stationOrder: [
+            {
+                index: 1,
+                station: 'odpt.Station:Keikyu.Airport.HanedaAirportTerminal3',
+                title: { ja: '羽田空港 第3ターミナル', en: 'Haneda Airport Terminal 3', 'zh-TW': '羽田第三航廈' },
+            },
+            {
+                index: 2,
+                station: 'odpt.Station:Keikyu.Airport.HanedaAirportTerminal1and2',
+                title: { ja: '羽田空港 第1・第2ターミナル', en: 'Haneda Airport Terminal 1 & 2', 'zh-TW': '羽田第一/第二航廈' },
+            },
+            {
+                index: 3,
+                station: 'odpt.Station:Keikyu.Airport.Sengakuji',
+                title: { ja: '泉岳寺', en: 'Sengakuji', 'zh-TW': '泉岳寺' },
+            },
+            {
+                index: 4,
+                station: 'odpt.Station:Keikyu.Main.Shinagawa',
+                title: { ja: '品川', en: 'Shinagawa', 'zh-TW': '品川' },
+            },
+        ],
+    },
+];
+
+const DEFAULT_TOPOLOGY = [...(CORE_TOPOLOGY as any[]), ...EXTRA_TOPOLOGY];
+
+export function getDefaultTopology(): any[] {
+    return DEFAULT_TOPOLOGY as any[];
+}
+
 const STATION_INDEX = new Map<string, string[]>();
 
-(CORE_TOPOLOGY as any[]).forEach(railway => {
+(DEFAULT_TOPOLOGY as any[]).forEach(railway => {
     railway.stationOrder.forEach((s: any) => {
         const id = s.station;
         const nameEn = s.title?.en?.toLowerCase();
         const nameJa = s.title?.ja;
-        const nameZh = s.title?.['zh-TW'] || nameJa;
+        const nameZh = s.title?.['zh-TW'] || s.title?.['zh-Hant'] || s.title?.['zh-Hans'] || nameJa;
         const base = id.split('.').pop()?.toLowerCase();
 
         const terms = [nameEn, nameJa, nameZh, base].filter(Boolean);
@@ -20,6 +137,8 @@ const STATION_INDEX = new Map<string, string[]>();
         });
     });
 });
+
+const STATION_TERMS = Array.from(STATION_INDEX.keys()).sort((a, b) => b.length - a.length);
 
 import { calcTransferPainIndex } from './algorithms/TransferPainIndex';
 import { calcCascadeDelayRisk } from './algorithms/CascadeDelayRisk';
@@ -147,11 +266,8 @@ export function findStationIdsByName(name: string): string[] {
 export function extractOdptStationIds(text: string): string[] {
     const ids = new Set<string>();
 
-    const re = /(odpt[.:]Station:[A-Za-z0-9_.-]+)/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
-        ids.add(normalizeOdptStationId(m[1]));
-    }
+    const explicit = extractExplicitOdptStationIds(text);
+    explicit.forEach(id => ids.add(id));
 
     if (ids.size === 0) {
         for (const [name, stationIds] of STATION_INDEX.entries()) {
@@ -162,6 +278,236 @@ export function extractOdptStationIds(text: string): string[] {
     }
 
     return Array.from(ids);
+}
+
+function extractExplicitOdptStationIds(text: string): string[] {
+    const ids = new Set<string>();
+    const re = /(odpt[.:]Station:[A-Za-z0-9_.-]+)/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+        ids.add(normalizeOdptStationId(m[1]));
+    }
+    return Array.from(ids);
+}
+
+type RouteEndpointExtraction = {
+    originIds: string[];
+    destinationIds: string[];
+    originText?: string;
+    destinationText?: string;
+};
+
+function stripDateTimeNoise(text: string): string {
+    return text
+        .replace(/\b\d{1,2}\s*[/-]\s*\d{1,2}\s*(?:日)?\b/gi, ' ')
+        .replace(/\b\d{1,2}:\d{2}\b/gi, ' ')
+        .replace(/\b(?:am|pm)\b/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function findFirstIndex(text: string, tokens: string[], startAt = 0): number {
+    let best = -1;
+    for (const t of tokens) {
+        const idx = text.indexOf(t, startAt);
+        if (idx === -1) continue;
+        if (best === -1 || idx < best) best = idx;
+    }
+    return best;
+}
+
+function findStationMentions(text: string): Array<{ term: string; index: number; ids: string[] }> {
+    const original = text;
+    const lower = text.toLowerCase();
+    const used: Array<{ start: number; end: number }> = [];
+    const out: Array<{ term: string; index: number; ids: string[] }> = [];
+
+    const cjkRe = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
+
+    for (const term of STATION_TERMS) {
+        if (!term) continue;
+        const isCjk = cjkRe.test(term);
+        const minLen = isCjk ? 2 : 3;
+        if (term.length < minLen) continue;
+
+        const hay = isCjk ? original : lower;
+        const needle = isCjk ? term : term.toLowerCase();
+        const idx = hay.indexOf(needle);
+        if (idx === -1) continue;
+
+        const start = idx;
+        const end = idx + needle.length;
+        if (used.some(r => !(end <= r.start || start >= r.end))) continue;
+
+        const ids = STATION_INDEX.get(term) || STATION_INDEX.get(needle);
+        if (!ids || ids.length === 0) continue;
+
+        used.push({ start, end });
+        out.push({ term, index: idx, ids });
+        if (out.length >= 12) break;
+    }
+
+    out.sort((a, b) => a.index - b.index);
+    return out;
+}
+
+function resolveAirportAliases(text: string): Array<{ term: string; index: number; ids: string[] }> {
+    const lower = text.toLowerCase();
+    const out: Array<{ term: string; index: number; ids: string[] }> = [];
+
+    const terminal1Ids = [
+        'odpt.Station:JR-East.NaritaAirportBranch.NaritaAirportTerminal1',
+        'odpt.Station:JR-East.NaritaExpress.NaritaAirportTerminal1',
+        'odpt.Station:Keisei.Skyliner.NaritaAirportTerminal1',
+    ];
+    const terminal23Ids = [
+        'odpt.Station:JR-East.NaritaAirportBranch.NaritaAirportTerminal2and3',
+        'odpt.Station:JR-East.NaritaExpress.NaritaAirportTerminal2and3',
+        'odpt.Station:Keisei.Skyliner.NaritaAirportTerminal2and3',
+    ];
+
+    const t1Patterns: Array<[RegExp, string]> = [
+        [/(成田|narita).*?(第\s*1|第一|t\s*1|terminal\s*1)/i, '成田第一航廈'],
+        [/narita\s*airport\s*(terminal\s*1|t\s*1)/i, 'Narita Airport Terminal 1'],
+    ];
+    const t23Patterns: Array<[RegExp, string]> = [
+        [/(成田|narita).*?(第\s*2|第二|第\s*3|第三|t\s*2|t\s*3|terminal\s*2|terminal\s*3|terminal\s*2\s*&\s*3)/i, '成田第二/第三航廈'],
+        [/narita\s*airport\s*(terminal\s*2|terminal\s*3|terminal\s*2\s*&\s*3)/i, 'Narita Airport Terminal 2 & 3'],
+    ];
+
+    for (const [re, label] of t1Patterns) {
+        const m = re.exec(text);
+        if (m && typeof m.index === 'number') {
+            out.push({ term: label, index: m.index, ids: terminal1Ids });
+            break;
+        }
+    }
+    for (const [re, label] of t23Patterns) {
+        const m = re.exec(text);
+        if (m && typeof m.index === 'number') {
+            out.push({ term: label, index: m.index, ids: terminal23Ids });
+            break;
+        }
+    }
+
+    const naritaGenericIdx = Math.min(
+        ...['成田機場', '成田空港', 'narita airport', 'narita'].map(t => {
+            const idx = lower.indexOf(t);
+            return idx === -1 ? Number.POSITIVE_INFINITY : idx;
+        })
+    );
+    if (Number.isFinite(naritaGenericIdx) && out.length === 0) {
+        out.push({ term: '成田機場', index: naritaGenericIdx, ids: [...terminal1Ids, ...terminal23Ids] });
+    }
+
+    out.sort((a, b) => a.index - b.index);
+    return out;
+}
+
+function resolveHanedaAirportAliases(text: string): Array<{ term: string; index: number; ids: string[] }> {
+    const lower = text.toLowerCase();
+    const out: Array<{ term: string; index: number; ids: string[] }> = [];
+
+    const terminal3Ids = [
+        'odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal3',
+        'odpt.Station:Keikyu.Airport.HanedaAirportTerminal3',
+    ];
+    const terminal12Ids = [
+        'odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal1',
+        'odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal2',
+        'odpt.Station:Keikyu.Airport.HanedaAirportTerminal1and2',
+    ];
+
+    const t3Patterns: Array<[RegExp, string]> = [
+        [/(羽田|haneda).*?(第\s*3|第三|t\s*3|terminal\s*3)/i, '羽田第三航廈'],
+        [/haneda\s*airport\s*(terminal\s*3|t\s*3)/i, 'Haneda Airport Terminal 3'],
+    ];
+    const t12Patterns: Array<[RegExp, string]> = [
+        [/(羽田|haneda).*?(第\s*1|第一|t\s*1|terminal\s*1|第\s*2|第二|t\s*2|terminal\s*2)/i, '羽田第一/第二航廈'],
+        [/haneda\s*airport\s*(terminal\s*1|terminal\s*2|terminal\s*1\s*&\s*2|t\s*1|t\s*2)/i, 'Haneda Airport Terminal 1 & 2'],
+    ];
+
+    for (const [re, label] of t3Patterns) {
+        const m = re.exec(text);
+        if (m && typeof m.index === 'number') {
+            out.push({ term: label, index: m.index, ids: terminal3Ids });
+            break;
+        }
+    }
+    for (const [re, label] of t12Patterns) {
+        const m = re.exec(text);
+        if (m && typeof m.index === 'number') {
+            out.push({ term: label, index: m.index, ids: terminal12Ids });
+            break;
+        }
+    }
+
+    const hanedaGenericIdx = Math.min(
+        ...['羽田機場', '羽田空港', 'haneda airport', 'haneda'].map(t => {
+            const idx = lower.indexOf(t);
+            return idx === -1 ? Number.POSITIVE_INFINITY : idx;
+        })
+    );
+    if (Number.isFinite(hanedaGenericIdx) && out.length === 0) {
+        out.push({ term: '羽田機場', index: hanedaGenericIdx, ids: [...terminal3Ids, ...terminal12Ids] });
+    }
+
+    out.sort((a, b) => a.index - b.index);
+    return out;
+}
+
+export function extractRouteEndpointsFromText(text: string): RouteEndpointExtraction | null {
+    const raw = String(text || '');
+    const explicitIds = extractExplicitOdptStationIds(raw);
+    if (explicitIds.length >= 2) {
+        return {
+            originIds: [explicitIds[0]],
+            destinationIds: [explicitIds[explicitIds.length - 1]],
+        };
+    }
+
+    const cleaned = stripDateTimeNoise(raw);
+    const mentions = [...resolveAirportAliases(cleaned), ...resolveHanedaAirportAliases(cleaned), ...findStationMentions(cleaned)];
+    mentions.sort((a, b) => a.index - b.index);
+
+    if (mentions.length === 0) return null;
+
+    const fromIdx = findFirstIndex(cleaned, ['從', 'from'], 0);
+    const toIdx = fromIdx >= 0
+        ? findFirstIndex(cleaned, ['前往', '到', '去', 'to', 'まで'], fromIdx + 1)
+        : findFirstIndex(cleaned, ['前往', '到', '去', 'to', 'まで'], 0);
+
+    const pickFirstAfter = (idx: number) => mentions.find(m => m.index >= idx);
+    const pickBetween = (start: number, end: number) => mentions.find(m => m.index >= start && m.index < end);
+
+    let originMention: { term: string; index: number; ids: string[] } | undefined;
+    let destMention: { term: string; index: number; ids: string[] } | undefined;
+
+    if (fromIdx >= 0 && toIdx >= 0 && toIdx > fromIdx) {
+        originMention = pickBetween(fromIdx + 1, toIdx) || pickFirstAfter(fromIdx + 1);
+        destMention = pickFirstAfter(toIdx + 1) || mentions[mentions.length - 1];
+    } else if (toIdx >= 0) {
+        originMention = mentions[0];
+        destMention = pickFirstAfter(toIdx + 1) || mentions[mentions.length - 1];
+    } else if (mentions.length >= 2) {
+        originMention = mentions[0];
+        destMention = mentions[mentions.length - 1];
+    }
+
+    if (!originMention || !destMention) return null;
+
+    const originIds = Array.from(new Set(originMention.ids.map(normalizeOdptStationId)));
+    const destinationIds = Array.from(new Set(destMention.ids.map(normalizeOdptStationId)));
+
+    if (originIds.length === 0 || destinationIds.length === 0) return null;
+    if (originIds.length === 1 && destinationIds.length === 1 && originIds[0] === destinationIds[0]) return null;
+
+    return {
+        originIds,
+        destinationIds,
+        originText: originMention.term,
+        destinationText: destMention.term,
+    };
 }
 
 export function inferOdptOperatorFromStationId(stationId: string): string | null {
@@ -517,6 +863,179 @@ export type EnrichedRouteOption = RouteOption & {
     tpi?: TPIResult;
     cdr?: CDRResult;
 };
+
+function normalizeOdptRailwayId(input: string): string {
+    const s = String(input || '').trim();
+    if (!s) return '';
+    return s
+        .replace(/^odpt:Railway:/, 'odpt.Railway:')
+        .replace(/^odpt\.Railway:/, 'odpt.Railway:');
+}
+
+function normalizeLineToken(input: string): string {
+    return String(input || '')
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/line$/g, '')
+        .replace(/線$/g, '')
+        .replace(/^jr/, '')
+        .replace(/^jreast/, '')
+        .replace(/^tokyometro/, '')
+        .replace(/^metro/, '')
+        .replace(/^toei/, '')
+        .replace(/^keikyu/, '')
+        .replace(/^seibu/, '')
+        .replace(/^tobu/, '')
+        .replace(/^tokyu/, '')
+        .replace(/^twr/, '')
+        .replace(/^mir/, '')
+        .replace(/[\-_.:]/g, '');
+}
+
+function mapRailwayOperatorToLineOperator(operatorToken: string): string {
+    const raw = String(operatorToken || '').trim();
+    if (!raw) return '';
+
+    const token = raw
+        .replace(/^odpt[.:]Operator:/i, '')
+        .replace(/^operator:/i, '')
+        .trim();
+
+    const simple = token.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (
+        token === 'JR' ||
+        token === 'JR-East' ||
+        simple === 'jr' ||
+        simple === 'jreast' ||
+        raw.toLowerCase().includes('jr-east') ||
+        raw.includes('東日本')
+    ) {
+        return 'JR';
+    }
+
+    if (
+        token === 'TokyoMetro' ||
+        token === 'Metro' ||
+        simple === 'tokyometro' ||
+        simple === 'metro' ||
+        raw.includes('東京メトロ')
+    ) {
+        return 'Metro';
+    }
+
+    if (token === 'Toei' || simple === 'toei' || raw.includes('都営')) return 'Toei';
+    if (token === 'Keikyu' || simple === 'keikyu') return 'Keikyu';
+    if (token === 'Seibu' || simple === 'seibu') return 'Seibu';
+    if (token === 'Tobu' || simple === 'tobu') return 'Tobu';
+    if (token === 'Tokyu' || simple === 'tokyu') return 'Tokyu';
+    if (token === 'TWR' || simple === 'twr') return 'TWR';
+    if (token === 'MIR' || simple === 'mir') return 'MIR';
+
+    return token;
+}
+
+function extractOperatorAndLineFromRailwayId(railwayId: string): { operator: string; line: string } | null {
+    const norm = normalizeOdptRailwayId(railwayId);
+    const m = norm.match(/^odpt\.Railway:([^\.]+)\.(.+)$/);
+    if (!m) return null;
+    const op = mapRailwayOperatorToLineOperator(m[1]);
+    const tail = String(m[2] || '');
+    const parts = tail.split('.').filter(Boolean);
+    const line = parts.length > 0 ? parts[parts.length - 1] : tail;
+    return { operator: op, line };
+}
+
+function isSuspendedLineStatus(ls: any): boolean {
+    const status = String(ls?.status || '').toLowerCase();
+    if (status === 'suspended' || status === 'suspend') return true;
+    if (status === 'stopped' || status === 'stop') return true;
+    if (status === 'cancelled' || status === 'canceled') return true;
+    const msg = String(ls?.message?.ja || ls?.message?.en || ls?.message?.['zh-TW'] || ls?.message?.zh || '').trim();
+    const combined = `${status} ${msg}`;
+    return /運転見合わせ|運休|終日運休|運転中止|運行停止|見合わせ|ストップ|停駛|停運|停電|suspend|suspended|service\s*suspended|stoppage|stopped|cancel/i.test(combined);
+}
+
+export function filterRoutesByL2Status(params: {
+    routes: RouteOption[];
+    l2Status: any;
+}): { routes: RouteOption[]; removed: RouteOption[]; blockedRailwayIds: string[] } {
+    const routes = Array.isArray(params.routes) ? params.routes : [];
+    const l2 = params.l2Status;
+    const lineStatus = Array.isArray(l2?.line_status) ? l2.line_status : [];
+
+    const blockedByOperator = new Map<string, Set<string>>();
+    const addBlocked = (operator: string, lineToken: string) => {
+        const op = mapRailwayOperatorToLineOperator(String(operator || '')).trim().toLowerCase();
+        const line = normalizeLineToken(lineToken);
+        if (!op || !line) return;
+        const set = blockedByOperator.get(op) || new Set<string>();
+        set.add(line);
+        blockedByOperator.set(op, set);
+    };
+
+    for (const ls of lineStatus) {
+        if (!ls || !isSuspendedLineStatus(ls)) continue;
+
+        const op = String(ls.operator || '').trim();
+        const lineToken =
+            String(ls.line || '').trim() ||
+            String(ls?.name?.en || ls?.name?.ja || ls?.name?.['zh-TW'] || ls?.name?.zh || '').trim();
+        if (op && lineToken) addBlocked(op, lineToken);
+
+        const railwayId = String(ls.railway_id || ls.railwayId || '').trim();
+        if (railwayId) {
+            const parsed = extractOperatorAndLineFromRailwayId(railwayId);
+            if (parsed) addBlocked(parsed.operator, parsed.line);
+        }
+    }
+
+    if (blockedByOperator.size === 0) {
+        return { routes, removed: [], blockedRailwayIds: [] };
+    }
+
+    const isLineBlocked = (operator: string, lineToken: string): boolean => {
+        const op = String(operator || '').trim().toLowerCase();
+        const token = normalizeLineToken(lineToken);
+        if (!op || !token) return false;
+        const blockedTokens = blockedByOperator.get(op);
+        if (!blockedTokens || blockedTokens.size === 0) return false;
+        if (blockedTokens.has(token)) return true;
+
+        for (const b of blockedTokens) {
+            if (!b) continue;
+            if (token.startsWith(b) || b.startsWith(token)) {
+                if (Math.min(token.length, b.length) >= 4) return true;
+            }
+        }
+        return false;
+    };
+
+    const kept: RouteOption[] = [];
+    const removed: RouteOption[] = [];
+    const blockedRailwayIds = new Set<string>();
+
+    for (const r of routes) {
+        const stepRailways = (r?.steps || [])
+            .map(s => (s && s.kind === 'train' ? String(s.railwayId || '').trim() : ''))
+            .filter(Boolean);
+
+        const blocked = stepRailways.some((rid) => {
+            const parsed = extractOperatorAndLineFromRailwayId(rid);
+            if (!parsed) return false;
+            if (isLineBlocked(parsed.operator, parsed.line)) {
+                blockedRailwayIds.add(normalizeOdptRailwayId(rid));
+                return true;
+            }
+            return false;
+        });
+
+        if (blocked) removed.push(r);
+        else kept.push(r);
+    }
+
+    return { routes: kept, removed, blockedRailwayIds: Array.from(blockedRailwayIds) };
+}
 
 // Expert Knowledge Repository
 const EXPERT_KNOWLEDGE: Record<string, string[]> = {

@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { hybridEngine, RequestContext } from '@/lib/l4/HybridEngine';
 import { generateRequestId, getElapsedMs, logAIChatMetric, logPerformanceMetric } from '@/lib/monitoring/performanceLogger';
+import { StrategyEngine } from '@/lib/ai/strategyEngine';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -82,16 +83,30 @@ export async function POST(req: NextRequest) {
             return new Response('No query provided', { status: 400 });
         }
 
+        const nodeId = body.nodeId || body.current_station || body.currentStation || body.stationId;
+
         // 2. Build Context
         const context: RequestContext = {
             userId: body.userId || 'anon',
-            currentStation: body.nodeId || body.current_station,
+            currentStation: nodeId,
             userLocation: body.userLocation,
             preferences: {
                 categories: []
             },
             strategyContext: null
         };
+
+        if (!context.strategyContext) {
+            try {
+                if (typeof nodeId === 'string' && nodeId.trim()) {
+                    context.strategyContext = await StrategyEngine.getSynthesisForNodeId(nodeId.trim(), locale);
+                } else if (context.userLocation) {
+                    context.strategyContext = await StrategyEngine.getSynthesis(context.userLocation.lat, context.userLocation.lng, locale);
+                }
+            } catch (_e) {
+                context.strategyContext = null;
+            }
+        }
 
         const stream = createUIMessageStream({
             execute: async ({ writer }) => {

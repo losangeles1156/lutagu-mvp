@@ -93,7 +93,7 @@ export async function GET(request: Request) {
         const now = new Date();
         const { data: cached } = await supabase
             .from('weather_advice_cache')
-            .select('*')
+            .select('advice, jma_link, weather_data, expires_at')
             .eq('mode', mode)
             .eq('locale', locale)
             .eq('user_profile', userProfile)

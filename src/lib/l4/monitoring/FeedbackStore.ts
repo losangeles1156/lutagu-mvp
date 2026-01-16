@@ -1,7 +1,7 @@
 
 export interface FeedbackItem {
     text: string;
-    source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge';
+    source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge' | 'l2_disruption';
     timestamp: number;
     userFeedback?: 'positive' | 'negative';
     missedIntent?: string;
@@ -16,7 +16,7 @@ class FeedbackStore {
         if (this.logs.length > this.MAX_LOGS) {
             this.logs.shift();
         }
-        
+
         // In a real production app, we would send this to a database/Sentry/LogRocket
         if (item.source === 'llm') {
             console.log(`[FeedbackStore] Missed local match for: "${item.text}". Consider adding a template.`);

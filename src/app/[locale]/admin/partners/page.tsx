@@ -4,12 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { partnersApi } from '@/lib/api/l1-admin';
 import type { L1Partner, PartnersListResponse } from '@/lib/types/l1-admin';
+import { Plus, RefreshCw, Pencil, Trash2 } from 'lucide-react';
 
 const STATUS_OPTIONS = [
-    { value: '', label: 'All Status' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'suspended', label: 'Suspended' },
+    { value: '', label: '所有狀態' },
+    { value: 'active', label: '啟用中' },
+    { value: 'inactive', label: '未啟用' },
+    { value: 'suspended', label: '已暫停' },
 ];
 
 export default function PartnersAdminPage() {
@@ -54,12 +55,12 @@ export default function PartnersAdminPage() {
     }, [page, fetchPartners]);
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this partner?')) return;
+        if (!confirm('確定要刪除此合作夥伴嗎？')) return;
         try {
             await partnersApi.delete(id);
             fetchPartners();
         } catch (err: any) {
-            alert(`Failed to delete: ${err.message}`);
+            alert(`刪除失敗: ${err.message}`);
         }
     };
 
@@ -69,36 +70,56 @@ export default function PartnersAdminPage() {
             inactive: 'bg-gray-100 text-gray-800',
             suspended: 'bg-red-100 text-red-800',
         };
+        const labels: Record<string, string> = {
+            active: '啟用中',
+            inactive: '未啟用',
+            suspended: '已暫停',
+        };
         return (
-            <span className={`px-2 py-1 rounded-full text-xs ${colors[status] || 'bg-gray-100'}`}>
-                {status}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100'}`}>
+                {labels[status] || status}
             </span>
         );
     };
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Partners Management</h1>
-                <Link
-                    href="/admin/partners/new"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                    + Add New Partner
-                </Link>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">合作夥伴管理</h1>
+                    <p className="text-sm text-gray-500 mt-1">管理商業合作夥伴與佣金設定</p>
+                </div>
+                <div className="flex gap-3">
+                    <button
+                        onClick={fetchPartners}
+                        disabled={loading}
+                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                    >
+                        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                        重新整理
+                    </button>
+                    <Link
+                        href="/admin/partners/new"
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        <Plus size={16} />
+                        新增夥伴
+                    </Link>
+                </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-lg shadow mb-6">
+            <div className="bg-white p-4 rounded-xl border border-gray-200">
                 <div className="flex flex-wrap gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Status
+                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                            狀態
                         </label>
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
-                            className="border rounded px-3 py-2"
+                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             {STATUS_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>
@@ -108,15 +129,15 @@ export default function PartnersAdminPage() {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Search
+                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                            搜尋
                         </label>
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search by name..."
-                            className="border rounded px-3 py-2"
+                            placeholder="輸入名稱搜尋..."
+                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
                 </div>
@@ -124,63 +145,62 @@ export default function PartnersAdminPage() {
 
             {/* Error */}
             {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
                     {error}
                 </div>
             )}
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Name
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                名稱
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Contact
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                聯絡方式
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Commission Rate
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                佣金比例
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Status
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                狀態
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Created At
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                建立時間
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Actions
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                操作
                             </th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {loading ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                                    Loading...
+                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
+                                    載入中...
                                 </td>
                             </tr>
                         ) : partners.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                                    No partners found
+                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                    尚無合作夥伴
                                 </td>
                             </tr>
                         ) : (
                             partners.map((partner) => (
-                                <tr key={partner.id}>
+                                <tr key={partner.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="text-sm font-medium text-gray-900">
                                             {partner.name}
                                         </div>
-                                        <div className="text-sm text-gray-500">
-                                            {partner.name_ja && (
-                                                <span className="text-gray-400">
-                                                    {partner.name_ja}
-                                                </span>
-                                            )}
-                                        </div>
+                                        {partner.name_ja && (
+                                            <div className="text-xs text-gray-400">
+                                                {partner.name_ja}
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         <div>{partner.contact_email || '-'}</div>
@@ -201,15 +221,17 @@ export default function PartnersAdminPage() {
                                         <div className="flex gap-2">
                                             <Link
                                                 href={`/admin/partners/${partner.id}`}
-                                                className="text-blue-600 hover:text-blue-900"
+                                                className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                title="編輯"
                                             >
-                                                Edit
+                                                <Pencil size={16} />
                                             </Link>
                                             <button
                                                 onClick={() => handleDelete(partner.id)}
-                                                className="text-red-600 hover:text-red-900"
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="刪除"
                                             >
-                                                Delete
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </td>
@@ -220,24 +242,24 @@ export default function PartnersAdminPage() {
                 </table>
 
                 {/* Pagination */}
-                <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200 bg-gray-50">
                     <div className="text-sm text-gray-700">
-                        Showing 1 to {Math.min(limit, total)} of {total} results
+                        顯示 1 至 {Math.min(limit, total)} 筆，共 {total} 筆
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => setPage((p) => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="px-3 py-1 border rounded disabled:opacity-50"
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 hover:bg-white transition-colors"
                         >
-                            Previous
+                            上一頁
                         </button>
                         <button
                             onClick={() => setPage((p) => p + 1)}
                             disabled={page * limit >= total}
-                            className="px-3 py-1 border rounded disabled:opacity-50"
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 hover:bg-white transition-colors"
                         >
-                            Next
+                            下一頁
                         </button>
                     </div>
                 </div>
