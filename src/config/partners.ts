@@ -30,6 +30,102 @@ export interface PartnerOffer {
 }
 
 export const PARTNER_REGISTRY: Record<string, PartnerOffer> = {
+    go_taxi: {
+        id: 'go_taxi',
+        name: {
+            ja: 'GO',
+            en: 'GO',
+            zh: 'GO'
+        },
+        category: 'mobility',
+        baseUrl: 'https://go.mo-t.com/',
+        trackingParams: {
+            utm_source: 'lutagu'
+        },
+        ui: {
+            icon: 'ExternalLink',
+            color: 'indigo',
+            label: {
+                ja: 'タクシー（GO）',
+                en: 'Taxi (GO)',
+                zh: '計程車（GO）'
+            },
+            description: {
+                ja: '急ぐときの最短手段（配車アプリ）',
+                en: 'Fastest fallback when you are in a hurry',
+                zh: '趕時間時最穩的替代方案（叫車）'
+            },
+            cta: {
+                ja: 'アプリを開く',
+                en: 'Open',
+                zh: '開啟'
+            }
+        }
+    },
+    luup: {
+        id: 'luup',
+        name: {
+            ja: 'LUUP',
+            en: 'LUUP',
+            zh: 'LUUP'
+        },
+        category: 'mobility',
+        baseUrl: 'https://luup.sc/',
+        trackingParams: {
+            utm_source: 'lutagu'
+        },
+        ui: {
+            icon: 'Bike',
+            color: 'emerald',
+            label: {
+                ja: 'シェア（LUUP）',
+                en: 'Shared mobility (LUUP)',
+                zh: '共享（LUUP）'
+            },
+            description: {
+                ja: '短距離の移動に便利',
+                en: 'Good for short last-mile trips',
+                zh: '短距離最後一公里的好選擇'
+            },
+            cta: {
+                ja: '開く',
+                en: 'Open',
+                zh: '開啟'
+            }
+        }
+    },
+    toei_bus: {
+        id: 'toei_bus',
+        name: {
+            ja: '都営バス',
+            en: 'Toei Bus',
+            zh: '都營公車'
+        },
+        category: 'mobility',
+        baseUrl: 'https://www.kotsu.metro.tokyo.jp/bus/',
+        trackingParams: {
+            utm_source: 'lutagu'
+        },
+        ui: {
+            icon: 'ExternalLink',
+            color: 'slate',
+            label: {
+                ja: '都営バス',
+                en: 'Toei Bus',
+                zh: '都營公車'
+            },
+            description: {
+                ja: '都営バスの路線・時刻表',
+                en: 'Toei bus routes and timetables',
+                zh: '都營公車路線與時刻表'
+            },
+            cta: {
+                ja: '開く',
+                en: 'Open',
+                zh: '開啟'
+            }
+        }
+    },
     vacan: {
         id: 'vacan',
         name: {

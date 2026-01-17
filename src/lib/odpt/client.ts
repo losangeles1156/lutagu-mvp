@@ -1,4 +1,14 @@
-import { OdptRailway, OdptStation, OdptTrainTimetable, OdptRailwayFare } from './types';
+import {
+    OdptRailway,
+    OdptStation,
+    OdptTrainTimetable,
+    OdptRailwayFare,
+    OdptBus,
+    OdptBusroutePattern,
+    OdptBusTimetable,
+    OdptBusstopPole,
+    OdptBusstopPoleTimetable
+} from './types';
 import { fetchWithRetry, RetryConfig } from '@/lib/utils/retry';
 
 const API_PUBLIC = 'https://api-public.odpt.org/api/v4';
@@ -164,5 +174,64 @@ export const odptClient = {
         if (operator) params['odpt:operator'] = operator;
         if (railway) params['odpt:railway'] = railway;
         return fetchOdpt<import('./types').OdptTrainInformation>('odpt:TrainInformation', params);
+    },
+
+    getBusroutePatterns: (options?: { operator?: string; title?: string; busroute?: string; sameAs?: string }) => {
+        const params: Record<string, string> = {};
+        if (options?.operator) params['odpt:operator'] = options.operator;
+        if (options?.title) params['dc:title'] = options.title;
+        if (options?.busroute) params['odpt:busroute'] = options.busroute;
+        if (options?.sameAs) params['owl:sameAs'] = options.sameAs;
+        return fetchOdpt<OdptBusroutePattern>('odpt:BusroutePattern', params);
+    },
+
+    getBusTimetables: (options?: { operator?: string; calendar?: string; busroutePattern?: string; sameAs?: string }) => {
+        const params: Record<string, string> = {};
+        if (options?.operator) params['odpt:operator'] = options.operator;
+        if (options?.calendar) params['odpt:calendar'] = options.calendar;
+        if (options?.busroutePattern) params['odpt:busroutePattern'] = options.busroutePattern;
+        if (options?.sameAs) params['owl:sameAs'] = options.sameAs;
+        return fetchOdpt<OdptBusTimetable>('odpt:BusTimetable', params);
+    },
+
+    getBusstopPoles: (options?: { operator?: string; title?: string; busroutePattern?: string; busstopPoleNumber?: string; sameAs?: string }) => {
+        const params: Record<string, string> = {};
+        if (options?.operator) params['odpt:operator'] = options.operator;
+        if (options?.title) params['dc:title'] = options.title;
+        if (options?.busroutePattern) params['odpt:busroutePattern'] = options.busroutePattern;
+        if (options?.busstopPoleNumber) params['odpt:busstopPoleNumber'] = options.busstopPoleNumber;
+        if (options?.sameAs) params['owl:sameAs'] = options.sameAs;
+        return fetchOdpt<OdptBusstopPole>('odpt:BusstopPole', params);
+    },
+
+    getBusstopPolesNearby: (options: { lat: number; lon: number; radiusMeters?: number; operator?: string }) => {
+        const params: Record<string, string> = {
+            'geo:lat': String(options.lat),
+            'geo:long': String(options.lon)
+        };
+        if (typeof options.radiusMeters === 'number') params['geo:radius'] = String(options.radiusMeters);
+        if (options.operator) params['odpt:operator'] = options.operator;
+        return fetchOdpt<OdptBusstopPole>('odpt:BusstopPole', params);
+    },
+
+    getBusstopPoleTimetables: (options?: { operator?: string; calendar?: string; busstopPole?: string; busroute?: string; busDirection?: string; sameAs?: string }) => {
+        const params: Record<string, string> = {};
+        if (options?.operator) params['odpt:operator'] = options.operator;
+        if (options?.calendar) params['odpt:calendar'] = options.calendar;
+        if (options?.busstopPole) params['odpt:busstopPole'] = options.busstopPole;
+        if (options?.busroute) params['odpt:busroute'] = options.busroute;
+        if (options?.busDirection) params['odpt:busDirection'] = options.busDirection;
+        if (options?.sameAs) params['owl:sameAs'] = options.sameAs;
+        return fetchOdpt<OdptBusstopPoleTimetable>('odpt:BusstopPoleTimetable', params);
+    },
+
+    getBuses: (options?: { operator?: string; busroutePattern?: string; fromBusstopPole?: string; toBusstopPole?: string; sameAs?: string }) => {
+        const params: Record<string, string> = {};
+        if (options?.operator) params['odpt:operator'] = options.operator;
+        if (options?.busroutePattern) params['odpt:busroutePattern'] = options.busroutePattern;
+        if (options?.fromBusstopPole) params['odpt:fromBusstopPole'] = options.fromBusstopPole;
+        if (options?.toBusstopPole) params['odpt:toBusstopPole'] = options.toBusstopPole;
+        if (options?.sameAs) params['owl:sameAs'] = options.sameAs;
+        return fetchOdpt<OdptBus>('odpt:Bus', params);
     }
 };

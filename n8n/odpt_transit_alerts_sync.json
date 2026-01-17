@@ -25,11 +25,14 @@
             "parameters": {
                 "method": "GET",
                 "url": "https://api.odpt.org/api/v4/odpt:TrainInformation",
-                "authentication": "genericCredentialType",
-                "genericAuthType": "httpQueryAuth",
                 "sendQuery": true,
                 "queryParameters": {
-                    "parameters": []
+                    "parameters": [
+                        {
+                            "name": "acl:consumerKey",
+                            "value": "={{ $env.ODPT_API_KEY_METRO || $env.ODPT_API_KEY || $env.ODPT_API_TOKEN || '' }}"
+                        }
+                    ]
                 },
                 "sendHeaders": false,
                 "options": {}
@@ -42,17 +45,25 @@
                 460,
                 200
             ],
-            "credentials": {
-                "httpQueryAuth": {
-                    "id": "ODPT_STANDARD_TOKEN",
-                    "name": "ODPT Standard Token"
-                }
-            }
+            "credentials": {}
         },
         {
             "parameters": {
                 "method": "GET",
-                "url": "https://api-public.odpt.org/api/v4/odpt:TrainInformation?odpt:operator=odpt.Operator:Toei",
+                "url": "https://api-public.odpt.org/api/v4/odpt:TrainInformation",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "odpt:operator",
+                            "value": "odpt.Operator:Toei"
+                        },
+                        {
+                            "name": "acl:consumerKey",
+                            "value": "={{ $env.ODPT_API_KEY_PUBLIC || $env.ODPT_API_KEY || '' }}"
+                        }
+                    ]
+                },
                 "options": {}
             },
             "id": "http-odpt-toei",
@@ -84,7 +95,7 @@
         },
         {
             "parameters": {
-                "jsCode": "// Transform ODPT data to Supabase schema\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  if (Array.isArray(data)) {\n    for (const alert of data) {\n      results.push({\n        json: {\n          id: alert['owl:sameAs'],\n          operator: alert['odpt:operator'],\n          railway: alert['odpt:railway'],\n          status: alert['odpt:trainInformationStatus']?.ja || 'Unknown',\n          text_ja: alert['odpt:trainInformationText']?.ja || '',\n          text_en: alert['odpt:trainInformationText']?.en || '',\n          occurred_at: alert['dc:date'],\n          updated_at: new Date().toISOString()\n        }\n      });\n    }\n  }\n}\n\nreturn results;"
+                "jsCode": "// Transform ODPT data to Supabase schema\nconst items = $input.all();\nconst results = [];\nconst now = new Date().toISOString();\n\nfunction isNormal(statusJa, textJa) {\n  const s = String(statusJa || '');\n  const t = String(textJa || '');\n  if (!s && !t) return true;\n  if (s === '平常運転' || s === 'Normal') return true;\n  if (t === '平常運転' || t.includes('平常通り運転') || t === '平常運轉' || t.includes('平常通り運轉')) return true;\n  return false;\n}\n\nfor (const item of items) {\n  const data = item.json;\n  if (!Array.isArray(data)) continue;\n\n  for (const alert of data) {\n    const rawStatus = alert?.['odpt:trainInformationStatus'];\n    const statusJa = (typeof rawStatus === 'object' && rawStatus !== null)\n      ? (rawStatus.ja || rawStatus.en || '')\n      : String(rawStatus || '');\n\n    const infoText = alert?.['odpt:trainInformationText'];\n    const textJa = (typeof infoText === 'object' && infoText !== null) ? (infoText.ja || '') : String(infoText || '');\n    const textEn = (typeof infoText === 'object' && infoText !== null) ? (infoText.en || '') : '';\n\n    if (isNormal(statusJa, textJa)) continue;\n\n    const id = alert['owl:sameAs'] || alert['@id'] || `odpt:${alert?.['odpt:railway'] || 'unknown'}:${now}`;\n\n    results.push({\n      json: {\n        id,\n        operator: alert['odpt:operator'],\n        railway: alert['odpt:railway'],\n        status: statusJa || 'Unknown',\n        text_ja: textJa,\n        text_en: textEn,\n        occurred_at: alert['dc:date'],\n        updated_at: now\n      }\n    });\n  }\n}\n\nreturn results;"
             },
             "id": "transform-code",
             "name": "Transform to DB Schema",
@@ -97,28 +108,44 @@
         },
         {
             "parameters": {
-                "operation": "upsert",
-                "tableId": "transit_alerts",
-                "conflictingFields": [
-                    "id"
-                ],
-                "dataMode": "autoMapInputData",
+                "method": "POST",
+                "url": "={{ $env.NEXT_PUBLIC_SUPABASE_URL }}/rest/v1/transit_alerts?on_conflict=id",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "={{ `Bearer ${$env.SUPABASE_SERVICE_KEY}` }}"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Prefer",
+                            "value": "resolution=merge-duplicates"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ $json }}",
                 "options": {}
             },
             "id": "supabase-upsert",
             "name": "Upsert to Supabase",
-            "type": "n8n-nodes-base.supabase",
-            "typeVersion": 1,
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
             "position": [
                 1120,
                 300
-            ],
-            "credentials": {
-                "supabaseApi": {
-                    "id": "SUPABASE_CREDENTIALS",
-                    "name": "LUTAGU Supabase"
-                }
-            }
+            ]
         }
     ],
     "connections": {

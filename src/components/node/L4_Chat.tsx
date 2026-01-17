@@ -8,6 +8,7 @@ import { useAppStore } from '@/stores/appStore';
 import { useAgentChat } from '@/hooks/useAgentChat';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { MessageBubble } from '../chat/MessageBubble';
+import { Action as ChatAction } from '../chat/ActionCard';
 
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 
@@ -79,6 +80,41 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         await sendMessage(text, seedUserProfile || 'general'); // Assuming userProfileStr was meant to be seedUserProfile or a default
     }, [input, isLoading, sendMessage, seedUserProfile]);
 
+    const handleAction = useCallback((action: ChatAction) => {
+        const target = String(action?.target || '');
+
+        if (target === 'internal:restart') {
+            setMessages([{ id: 'initial', role: 'assistant', content: tL4('initialMessage', { station: displayName }) } as any]);
+            setInput('');
+            setHasGreeted(true);
+            return;
+        }
+
+        if (target.startsWith('chat:')) {
+            const q = decodeURIComponent(target.slice('chat:'.length));
+            void handleSend(q);
+            return;
+        }
+
+        if (/^https?:\/\//i.test(target)) {
+            window.open(target, '_blank', 'noopener,noreferrer');
+            return;
+        }
+
+        if (action.type === 'navigate') {
+            const coords = action.metadata?.coordinates as [number, number] | undefined;
+            if (coords && coords.length === 2) {
+                useAppStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
+                useAppStore.getState().setChatOpen(false);
+                return;
+            }
+        }
+
+        if (target) {
+            void handleSend(target);
+        }
+    }, [displayName, handleSend, setMessages, tL4]);
+
     const handleQuickAction = (actionId: string, prompt: string) => {
         // ... implementation for quick actions ...
         handleSend(prompt);
@@ -145,7 +181,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                             key={idx}
                             msg={msg}
                             idx={idx}
-                            handleAction={(action) => handleSend(action.target)}
+                            handleAction={handleAction}
                             variant="l4"
                         />
                     ))}

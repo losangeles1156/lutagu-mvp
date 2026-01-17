@@ -117,9 +117,9 @@ export async function generateL1DNA(
     const result = await generateLLMResponse({
         systemPrompt,
         userPrompt,
-        taskType: 'chat', // Trinity: DeepSeek V3 (Creative)
+        taskType: 'chat', // Trinity: Gemini 3 (Creative)
         temperature: 0.7,
-        model: 'deepseek-v3.2' // Explicitly request DeepSeek
+        model: 'gemini-3-flash-preview' // Explicitly request Gemini 3
     });
 
     // Parse result

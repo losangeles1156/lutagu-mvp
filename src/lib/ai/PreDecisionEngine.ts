@@ -315,7 +315,7 @@ reason 必須在 10 個中文字以內，格式：
 
             // 若為長文/閒聊 (可在 parsed.reason 中偵測關鍵字擴充邏輯)
             if (parsed.reason.includes('閒聊') || parsed.reason.includes('創作')) {
-                suggestedModel = 'deepseek-v3.2';
+                suggestedModel = 'gemini-3-flash-preview';
             }
 
             return {

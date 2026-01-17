@@ -66,11 +66,16 @@ export class SignalCollector {
             });
 
         if (error) {
-            console.error(`[SignalCollector] Supabase insert error: ${error.message}`);
-            // Don't throw to avoid crashing the AI flow
-        } else {
-            console.log(`[SignalCollector] Recorded signal: [${signal.policyCategory}] ${signal.intentTarget} (Unmet: ${signal.unmetNeed})`);
+            const isMissingTable =
+                error.message.includes('Could not find the table') ||
+                error.message.includes('relation "public.demand_signals" does not exist');
+
+            if (!isMissingTable) {
+                console.error(`[SignalCollector] Supabase insert error: ${error.message}`);
+            }
+            return;
         }
+
+        console.log(`[SignalCollector] Recorded signal: [${signal.policyCategory}] ${signal.intentTarget} (Unmet: ${signal.unmetNeed})`);
     }
 }
-

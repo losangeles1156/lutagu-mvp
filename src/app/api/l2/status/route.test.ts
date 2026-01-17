@@ -1,7 +1,18 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 
-import { __private__ } from './route';
+import { GET } from './route';
+
+const __private__ = (GET as any).__private__ as {
+    extractDelayMinutesFromText: (text: string) => number | null;
+    classifyLineStatusFromText: (params: {
+        severity?: string;
+        statusText?: string;
+        messageJa?: string;
+        messageEn?: string;
+        messageZh?: string;
+    }) => { status: 'normal' | 'delay' | 'suspended'; detail: string; delayMinutes: number | null };
+};
 
 test('extractDelayMinutesFromText extracts Japanese delay minutes', () => {
     assert.equal(__private__.extractDelayMinutesFromText('最大 40 分の遅れが出ています'), 40);

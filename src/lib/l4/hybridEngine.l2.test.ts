@@ -51,14 +51,38 @@ test('HybridEngine reads L2 disruption and returns alternative actions', async (
 
     const taxi = actions.find((a: any) => a?.type === 'taxi');
     assert.ok(taxi);
-    assert.ok(typeof taxi.target === 'string' && taxi.target.includes('google.com/maps/dir/?api=1'));
-    assert.ok(taxi.target.includes('travelmode=driving'));
+    assert.ok(typeof taxi.target === 'string' && taxi.target.length > 0);
+    assert.equal(taxi?.metadata?.partner_id, 'go_taxi');
+    {
+        const url = typeof taxi.target === 'string' ? taxi.target : '';
+        const routeUrl = typeof taxi?.metadata?.route_url === 'string' ? taxi.metadata.route_url : '';
+        assert.ok(
+            (url.includes('google.com/maps/dir/?api=1') && url.includes('travelmode=driving')) ||
+            (routeUrl.includes('google.com/maps/dir/?api=1') && routeUrl.includes('travelmode=driving'))
+        );
+    }
     assert.ok(typeof taxi.label === 'string' && taxi.label.includes('min'));
 
     const bike = actions.find((a: any) => a?.type === 'bike');
-    assert.ok(bike);
-    assert.ok(typeof bike.target === 'string' && bike.target.includes('google.com/maps/dir/?api=1'));
-    assert.ok(bike.target.includes('travelmode=bicycling'));
+    const toeiBus = actions.find((a: any) => a?.metadata?.partner_id === 'toei_bus');
+    assert.ok(bike || toeiBus);
+
+    if (bike) {
+        assert.ok(typeof bike.target === 'string' && bike.target.length > 0);
+        assert.equal(bike?.metadata?.partner_id, 'luup');
+        const url = typeof bike.target === 'string' ? bike.target : '';
+        const routeUrl = typeof bike?.metadata?.route_url === 'string' ? bike.metadata.route_url : '';
+        assert.ok(
+            (url.includes('google.com/maps/dir/?api=1') && url.includes('travelmode=bicycling')) ||
+            (routeUrl.includes('google.com/maps/dir/?api=1') && routeUrl.includes('travelmode=bicycling'))
+        );
+    }
+
+    if (toeiBus) {
+        assert.equal(toeiBus?.type, 'transit');
+        assert.ok(typeof toeiBus.target === 'string' && toeiBus.target.startsWith('chat:'));
+        assert.equal(toeiBus?.metadata?.partner_id, 'toei_bus');
+    }
 });
 
 test('HybridEngine L2 disruption uses luggage storage as secondary action', async () => {
@@ -131,4 +155,78 @@ test('HybridEngine L2 disruption includes accessibility and last train guidance'
     assert.equal(res.type, 'action');
     assert.ok(res.content.includes('Accessibility:'));
     assert.ok(res.content.includes('last train'));
+});
+
+test('HybridEngine uses deterministic normal response for recovery status query (en)', async () => {
+    const engine = new HybridEngine();
+
+    const l2Status = {
+        status_code: 'NORMAL',
+        has_issues: false,
+        delay_minutes: 0,
+        line_status: [
+            {
+                line: 'Yamanote Line',
+                operator: 'JR-East',
+                status: 'normal',
+                status_detail: 'normal',
+                delay_minutes: 0,
+                message: 'normal'
+            }
+        ]
+    };
+
+    const res = await engine.processRequest({
+        text: 'Is it back to normal now? Can I take JR as usual, and what risk remains during recovery?',
+        locale: 'en',
+        context: {
+            currentStation: 'odpt.Station:JR-East.Tokyo',
+            strategyContext: {
+                nodeName: 'Tokyo',
+                l2Status
+            } as any
+        }
+    });
+
+    assert.ok(res);
+    assert.equal(res.source, 'algorithm');
+    assert.equal(res.type, 'text');
+    assert.ok(/no major delays/i.test(res.content));
+});
+
+test('HybridEngine uses deterministic normal response for status query (ja)', async () => {
+    const engine = new HybridEngine();
+
+    const l2Status = {
+        status_code: 'NORMAL',
+        has_issues: false,
+        delay_minutes: 0,
+        line_status: [
+            {
+                line: '山手線',
+                operator: 'JR-East',
+                status: 'normal',
+                status_detail: 'normal',
+                delay_minutes: 0,
+                message: '平常運転'
+            }
+        ]
+    };
+
+    const res = await engine.processRequest({
+        text: '今は通常運転に戻りましたか？山手線はいつも通り乗って大丈夫？',
+        locale: 'ja',
+        context: {
+            currentStation: 'odpt.Station:JR-East.Yamanote.Shibuya',
+            strategyContext: {
+                nodeName: '渋谷',
+                l2Status
+            } as any
+        }
+    });
+
+    assert.ok(res);
+    assert.equal(res.source, 'algorithm');
+    assert.equal(res.type, 'text');
+    assert.ok(/大きな遅延は見当たりません/.test(res.content));
 });

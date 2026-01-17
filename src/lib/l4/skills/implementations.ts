@@ -124,8 +124,8 @@ Be specific (Name, Why it's good).
 Tone: Friendly, enthusiastic, like a local friend.
 Output in Traditional Chinese (Taiwan).`,
             userPrompt: `Recommend places for: ${input}`,
-            taskType: 'chat', // Uses DeepSeek V3
-            model: 'deepseek-v3.2',
+            taskType: 'chat', // Uses Gemini 3
+            model: 'gemini-3-flash-preview',
             temperature: 0.8 // More creative for recommendations
         });
 
@@ -137,7 +137,7 @@ Output in Traditional Chinese (Taiwan).`,
             content: synthesis || `附近有很多不錯的 ${category}，但我暫時連線不到地圖資料庫 😅`,
             data: { strategy: 'local_guide', category },
             confidence: 0.95,
-            reasoning: 'Executed Local Guide (DeepSeek)'
+            reasoning: 'Executed Local Guide (Gemini 3)'
         };
     }
 }
@@ -382,8 +382,8 @@ export class CrowdDispatcherSkill extends BaseSkill {
 User is at crowded ${targetStation}.
 Task: Recommend these quieter alternatives.`,
                     userPrompt: input,
-                    taskType: 'chat', // DeepSeek for "Vibe" description
-                    model: 'deepseek-v3.2'
+                    taskType: 'chat', // Gemini 3 for "Vibe" description
+                    model: 'gemini-3-flash-preview'
                 });
             } catch (e) { }
 

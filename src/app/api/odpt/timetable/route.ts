@@ -43,14 +43,18 @@ export async function GET(req: NextRequest) {
         if (!res.ok) throw new Error('ODPT API Error');
         const data = await res.json();
 
+        const tables = Array.isArray(data) ? data : [];
+
         // Filter by Calendar
-        const relevantTables = data.filter((t: any) => {
-            const cal = t['odpt:calendar'].replace('odpt.Calendar:', '');
+        const relevantTables = tables.filter((t: any) => {
+            const calRaw = t?.['odpt:calendar'];
+            if (typeof calRaw !== 'string') return true;
+            const cal = calRaw.replace('odpt.Calendar:', '');
             return calendarSelector.some(c => cal.includes(c));
         });
 
         if (raw === '1' || raw === 'true') {
-            return NextResponse.json(relevantTables, {
+            return NextResponse.json(relevantTables.length > 0 ? relevantTables : tables, {
                 headers: {
                     'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
                 }

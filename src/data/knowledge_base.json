@@ -1,6 +1,6 @@
 [
   {
-    "id": "md-東京車站-基本資訊-1768317066127-hic9e",
+    "id": "md-東京車站-基本資訊-1768633092524-s96j9",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -13,7 +13,7 @@
     "priority": 30
   },
   {
-    "id": "md-東京車站-可搭乘路線-1768317066127-i9w96",
+    "id": "md-東京車站-可搭乘路線-1768633092524-o5qhj",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -26,7 +26,7 @@
     "priority": 50
   },
   {
-    "id": "md-東京車站-月台分布-1768317066127-gdf6o",
+    "id": "md-東京車站-月台分布-1768633092524-sdtc5",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -39,7 +39,7 @@
     "priority": 50
   },
   {
-    "id": "md-東京車站-轉乘注意事項-1768317066127-2gdcc",
+    "id": "md-東京車站-轉乘注意事項-1768633092524-u68ox",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -52,7 +52,7 @@
     "priority": 80
   },
   {
-    "id": "md-東京車站-京葉線替代進站方式（推薦）-1768317066127-k7lkc",
+    "id": "md-東京車站-京葉線替代進站方式（推薦）-1768633092524-9kgve",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -65,7 +65,7 @@
     "priority": 50
   },
   {
-    "id": "md-東京車站-出口指南-1768317066127-66ir0",
+    "id": "md-東京車站-出口指南-1768633092524-gqkp6",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -78,7 +78,7 @@
     "priority": 40
   },
   {
-    "id": "md-東京車站-前往迪士尼-1768317066127-sca3n",
+    "id": "md-東京車站-前往迪士尼-1768633092524-io8mk",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -91,7 +91,7 @@
     "priority": 50
   },
   {
-    "id": "md-東京車站-前往成田機場-1768317066127-1b99g",
+    "id": "md-東京車站-前往成田機場-1768633092524-lcsqu",
     "entityName": "東京車站",
     "entityIds": [
       "odpt:Station:JR-East.Tokyo",
@@ -104,7 +104,7 @@
     "priority": 50
   },
   {
-    "id": "md-新橋車站-基本資訊-1768317066127-whz4m",
+    "id": "md-新橋車站-基本資訊-1768633092524-g3k9u",
     "entityName": "新橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Shimbashi",
@@ -119,7 +119,7 @@
     "priority": 30
   },
   {
-    "id": "md-新橋車站-可搭乘路線-1768317066127-wj3j8",
+    "id": "md-新橋車站-可搭乘路線-1768633092524-66tsv",
     "entityName": "新橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Shimbashi",
@@ -134,7 +134,7 @@
     "priority": 50
   },
   {
-    "id": "md-新橋車站-轉乘注意事項-1768317066127-d2ij8",
+    "id": "md-新橋車站-轉乘注意事項-1768633092524-i1wjc",
     "entityName": "新橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Shimbashi",
@@ -149,7 +149,7 @@
     "priority": 80
   },
   {
-    "id": "md-新橋車站-出口指南-1768317066127-o3a5y",
+    "id": "md-新橋車站-出口指南-1768633092524-hktj6",
     "entityName": "新橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Shimbashi",
@@ -164,7 +164,7 @@
     "priority": 40
   },
   {
-    "id": "md-新橋車站-景點推薦-1768317066127-perzl",
+    "id": "md-新橋車站-景點推薦-1768633092524-xqe7x",
     "entityName": "新橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Shimbashi",
@@ -179,7 +179,7 @@
     "priority": 50
   },
   {
-    "id": "md-濱松町車站-基本資訊-1768317066127-k45v8",
+    "id": "md-濱松町車站-基本資訊-1768633092524-dpcg4",
     "entityName": "濱松町車站",
     "entityIds": [
       "odpt:Station:JR-East.Hamamatsucho",
@@ -193,7 +193,7 @@
     "priority": 30
   },
   {
-    "id": "md-濱松町車站-可搭乘路線-1768317066127-ogg73",
+    "id": "md-濱松町車站-可搭乘路線-1768633092524-67k2p",
     "entityName": "濱松町車站",
     "entityIds": [
       "odpt:Station:JR-East.Hamamatsucho",
@@ -207,7 +207,7 @@
     "priority": 50
   },
   {
-    "id": "md-濱松町車站-轉乘注意事項-1768317066127-tnix7",
+    "id": "md-濱松町車站-轉乘注意事項-1768633092524-u6n8p",
     "entityName": "濱松町車站",
     "entityIds": [
       "odpt:Station:JR-East.Hamamatsucho",
@@ -221,7 +221,7 @@
     "priority": 80
   },
   {
-    "id": "md-濱松町車站-出口指南-1768317066127-4dewr",
+    "id": "md-濱松町車站-出口指南-1768633092524-0fjlx",
     "entityName": "濱松町車站",
     "entityIds": [
       "odpt:Station:JR-East.Hamamatsucho",
@@ -235,7 +235,7 @@
     "priority": 40
   },
   {
-    "id": "md-上野車站-基本資訊-1768317066127-lpxv9",
+    "id": "md-上野車站-基本資訊-1768633092524-7ha1s",
     "entityName": "上野車站",
     "entityIds": [
       "odpt:Station:JR-East.Ueno",
@@ -248,7 +248,7 @@
     "priority": 30
   },
   {
-    "id": "md-上野車站-上野地區共有4個「上野」站-1768317066127-tvvxx",
+    "id": "md-上野車站-上野地區共有4個「上野」站-1768633092524-x5w1i",
     "entityName": "上野車站",
     "entityIds": [
       "odpt:Station:JR-East.Ueno",
@@ -261,7 +261,7 @@
     "priority": 50
   },
   {
-    "id": "md-上野車站-JR上野站可搭乘路線-1768317066127-jl6s5",
+    "id": "md-上野車站-JR上野站可搭乘路線-1768633092524-lxguu",
     "entityName": "上野車站",
     "entityIds": [
       "odpt:Station:JR-East.Ueno",
@@ -274,7 +274,7 @@
     "priority": 50
   },
   {
-    "id": "md-上野車站-轉乘注意事項-1768317066127-m3rt5",
+    "id": "md-上野車站-轉乘注意事項-1768633092524-v07sj",
     "entityName": "上野車站",
     "entityIds": [
       "odpt:Station:JR-East.Ueno",
@@ -287,7 +287,7 @@
     "priority": 80
   },
   {
-    "id": "md-上野車站-出口指南-1768317066127-hdy5g",
+    "id": "md-上野車站-出口指南-1768633092524-buu5q",
     "entityName": "上野車站",
     "entityIds": [
       "odpt:Station:JR-East.Ueno",
@@ -300,7 +300,7 @@
     "priority": 40
   },
   {
-    "id": "md-上野車站-前往成田機場（從京成上野站）-1768317066127-ev81g",
+    "id": "md-上野車站-前往成田機場（從京成上野站）-1768633092524-6t1tq",
     "entityName": "上野車站",
     "entityIds": [
       "odpt:Station:JR-East.Ueno",
@@ -313,7 +313,7 @@
     "priority": 50
   },
   {
-    "id": "md-上野車站-從JR上野站到京成上野站-1768317066127-s6d7w",
+    "id": "md-上野車站-從JR上野站到京成上野站-1768633092524-xe89f",
     "entityName": "上野車站",
     "entityIds": [
       "odpt:Station:JR-East.Ueno",
@@ -326,7 +326,7 @@
     "priority": 50
   },
   {
-    "id": "md-淺草車站-基本資訊-1768317066127-hipq3",
+    "id": "md-淺草車站-基本資訊-1768633092524-zifwr",
     "entityName": "淺草車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Asakusa",
@@ -339,7 +339,7 @@
     "priority": 30
   },
   {
-    "id": "md-淺草車站-淺草共有4個車站-1768317066127-uppiq",
+    "id": "md-淺草車站-淺草共有4個車站-1768633092524-azzqp",
     "entityName": "淺草車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Asakusa",
@@ -352,7 +352,7 @@
     "priority": 50
   },
   {
-    "id": "md-淺草車站-各站往雷門的走法-1768317066127-wyhfz",
+    "id": "md-淺草車站-各站往雷門的走法-1768633092524-7hpuc",
     "entityName": "淺草車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Asakusa",
@@ -365,7 +365,7 @@
     "priority": 50
   },
   {
-    "id": "md-淺草車站-轉乘注意事項-1768317066127-4nthi",
+    "id": "md-淺草車站-轉乘注意事項-1768633092524-zn0ep",
     "entityName": "淺草車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Asakusa",
@@ -378,7 +378,7 @@
     "priority": 80
   },
   {
-    "id": "md-淺草車站-前往機場-1768317066127-xychl",
+    "id": "md-淺草車站-前往機場-1768633092524-074jr",
     "entityName": "淺草車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Asakusa",
@@ -391,7 +391,7 @@
     "priority": 70
   },
   {
-    "id": "md-秋葉原車站-基本資訊-1768317066127-8shje",
+    "id": "md-秋葉原車站-基本資訊-1768633092524-mgal6",
     "entityName": "秋葉原車站",
     "entityIds": [
       "odpt:Station:JR-East.Akihabara",
@@ -404,7 +404,7 @@
     "priority": 30
   },
   {
-    "id": "md-秋葉原車站-秋葉原共有3個車站-1768317066127-bjsui",
+    "id": "md-秋葉原車站-秋葉原共有3個車站-1768633092524-yuf53",
     "entityName": "秋葉原車站",
     "entityIds": [
       "odpt:Station:JR-East.Akihabara",
@@ -417,7 +417,7 @@
     "priority": 50
   },
   {
-    "id": "md-秋葉原車站-前往電器街的方法-1768317066127-9gs2d",
+    "id": "md-秋葉原車站-前往電器街的方法-1768633092524-m6h1x",
     "entityName": "秋葉原車站",
     "entityIds": [
       "odpt:Station:JR-East.Akihabara",
@@ -430,7 +430,7 @@
     "priority": 50
   },
   {
-    "id": "md-秋葉原車站-轉乘注意事項-1768317066127-nl1cs",
+    "id": "md-秋葉原車站-轉乘注意事項-1768633092524-018jw",
     "entityName": "秋葉原車站",
     "entityIds": [
       "odpt:Station:JR-East.Akihabara",
@@ -443,7 +443,7 @@
     "priority": 80
   },
   {
-    "id": "md-錦糸町車站-基本資訊-1768317066127-pu58o",
+    "id": "md-錦糸町車站-基本資訊-1768633092524-7j0f2",
     "entityName": "錦糸町車站",
     "entityIds": [
       "odpt:Station:JR-East.Kinshicho",
@@ -456,7 +456,7 @@
     "priority": 30
   },
   {
-    "id": "md-錦糸町車站-可搭乘路線-1768317066127-htlvx",
+    "id": "md-錦糸町車站-可搭乘路線-1768633092524-7iuqp",
     "entityName": "錦糸町車站",
     "entityIds": [
       "odpt:Station:JR-East.Kinshicho",
@@ -469,7 +469,7 @@
     "priority": 50
   },
   {
-    "id": "md-錦糸町車站-轉乘注意事項-1768317066127-g3m0s",
+    "id": "md-錦糸町車站-轉乘注意事項-1768633092524-8rfrx",
     "entityName": "錦糸町車站",
     "entityIds": [
       "odpt:Station:JR-East.Kinshicho",
@@ -482,7 +482,7 @@
     "priority": 80
   },
   {
-    "id": "md-錦糸町車站-出口指南-1768317066127-otn4t",
+    "id": "md-錦糸町車站-出口指南-1768633092524-o25bz",
     "entityName": "錦糸町車站",
     "entityIds": [
       "odpt:Station:JR-East.Kinshicho",
@@ -495,7 +495,7 @@
     "priority": 40
   },
   {
-    "id": "md-月島車站-基本資訊-1768317066127-5s6eh",
+    "id": "md-月島車站-基本資訊-1768633092524-hcne1",
     "entityName": "月島車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukishima",
@@ -508,7 +508,7 @@
     "priority": 30
   },
   {
-    "id": "md-月島車站-可搭乘路線-1768317066127-f9bpc",
+    "id": "md-月島車站-可搭乘路線-1768633092524-exmq0",
     "entityName": "月島車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukishima",
@@ -521,7 +521,7 @@
     "priority": 50
   },
   {
-    "id": "md-月島車站-轉乘注意事項-1768317066127-r81z2",
+    "id": "md-月島車站-轉乘注意事項-1768633092524-jxhbo",
     "entityName": "月島車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukishima",
@@ -534,7 +534,7 @@
     "priority": 80
   },
   {
-    "id": "md-月島車站-出口指南-1768317066127-qf6re",
+    "id": "md-月島車站-出口指南-1768633092524-dqui1",
     "entityName": "月島車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukishima",
@@ -547,7 +547,7 @@
     "priority": 40
   },
   {
-    "id": "md-築地車站-基本資訊-1768317066127-n9e60",
+    "id": "md-築地車站-基本資訊-1768633092524-uolsv",
     "entityName": "築地車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukiji"
@@ -559,7 +559,7 @@
     "priority": 30
   },
   {
-    "id": "md-築地車站-可搭乘路線-1768317066127-uz1cf",
+    "id": "md-築地車站-可搭乘路線-1768633092524-v2h06",
     "entityName": "築地車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukiji"
@@ -571,7 +571,7 @@
     "priority": 50
   },
   {
-    "id": "md-築地車站-轉乘注意事項-1768317066127-r97o0",
+    "id": "md-築地車站-轉乘注意事項-1768633092524-huhgf",
     "entityName": "築地車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukiji"
@@ -583,7 +583,7 @@
     "priority": 80
   },
   {
-    "id": "md-築地車站-出口指南-1768317066127-s5snn",
+    "id": "md-築地車站-出口指南-1768633092524-1pbod",
     "entityName": "築地車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tsukiji"
@@ -595,7 +595,7 @@
     "priority": 40
   },
   {
-    "id": "md-茅場町車站-基本資訊-1768317066127-o0boq",
+    "id": "md-茅場町車站-基本資訊-1768633092524-quwh3",
     "entityName": "茅場町車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Kayabacho"
@@ -607,7 +607,7 @@
     "priority": 30
   },
   {
-    "id": "md-茅場町車站-可搭乘路線-1768317066127-sjcr8",
+    "id": "md-茅場町車站-可搭乘路線-1768633092524-z5s2v",
     "entityName": "茅場町車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Kayabacho"
@@ -619,7 +619,7 @@
     "priority": 50
   },
   {
-    "id": "md-茅場町車站-轉乘注意事項-1768317066127-1sxge",
+    "id": "md-茅場町車站-轉乘注意事項-1768633092524-v2bgl",
     "entityName": "茅場町車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Kayabacho"
@@ -631,7 +631,7 @@
     "priority": 80
   },
   {
-    "id": "md-茅場町車站-出口指南-1768317066127-hhemr",
+    "id": "md-茅場町車站-出口指南-1768633092524-1l75n",
     "entityName": "茅場町車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Kayabacho"
@@ -643,7 +643,7 @@
     "priority": 40
   },
   {
-    "id": "md-押上車站-基本資訊-1768317066127-gseph",
+    "id": "md-押上車站-基本資訊-1768633092524-nud0z",
     "entityName": "押上車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -653,7 +653,7 @@
     "priority": 30
   },
   {
-    "id": "md-押上車站-可搭乘路線-1768317066127-e76xp",
+    "id": "md-押上車站-可搭乘路線-1768633092524-fv3m5",
     "entityName": "押上車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -663,7 +663,7 @@
     "priority": 50
   },
   {
-    "id": "md-押上車站-轉乘注意事項-1768317066127-z7lh2",
+    "id": "md-押上車站-轉乘注意事項-1768633092524-2me64",
     "entityName": "押上車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -673,7 +673,7 @@
     "priority": 80
   },
   {
-    "id": "md-池袋車站-基本資訊-1768317066127-7zq8p",
+    "id": "md-池袋車站-基本資訊-1768633092524-61njt",
     "entityName": "池袋車站",
     "entityIds": [
       "odpt:Station:JR-East.Ikebukuro",
@@ -686,7 +686,7 @@
     "priority": 30
   },
   {
-    "id": "md-池袋車站-可搭乘路線-1768317066127-1hakn",
+    "id": "md-池袋車站-可搭乘路線-1768633092524-exuh1",
     "entityName": "池袋車站",
     "entityIds": [
       "odpt:Station:JR-East.Ikebukuro",
@@ -699,7 +699,7 @@
     "priority": 50
   },
   {
-    "id": "md-池袋車站-轉乘注意事項-1768317066127-qk3m2",
+    "id": "md-池袋車站-轉乘注意事項-1768633092524-xvzct",
     "entityName": "池袋車站",
     "entityIds": [
       "odpt:Station:JR-East.Ikebukuro",
@@ -712,7 +712,7 @@
     "priority": 80
   },
   {
-    "id": "md-新宿車站-基本資訊-1768317066127-e2d34",
+    "id": "md-新宿車站-基本資訊-1768633092524-0em1a",
     "entityName": "新宿車站",
     "entityIds": [
       "odpt:Station:JR-East.Shinjuku",
@@ -726,7 +726,7 @@
     "priority": 30
   },
   {
-    "id": "md-新宿車站-出口戰略 (生死攸關)-1768317066127-y5m57",
+    "id": "md-新宿車站-出口戰略 (生死攸關)-1768633092524-wzzfq",
     "entityName": "新宿車站",
     "entityIds": [
       "odpt:Station:JR-East.Shinjuku",
@@ -740,7 +740,7 @@
     "priority": 40
   },
   {
-    "id": "md-新宿車站-轉乘陷阱-1768317066127-ktk79",
+    "id": "md-新宿車站-轉乘陷阱-1768633092524-r242b",
     "entityName": "新宿車站",
     "entityIds": [
       "odpt:Station:JR-East.Shinjuku",
@@ -754,7 +754,7 @@
     "priority": 80
   },
   {
-    "id": "md-澀谷車站-基本資訊-1768317066127-exql8",
+    "id": "md-澀谷車站-基本資訊-1768633092524-7a7g3",
     "entityName": "澀谷車站",
     "entityIds": [
       "odpt:Station:JR-East.Shibuya",
@@ -767,7 +767,7 @@
     "priority": 30
   },
   {
-    "id": "md-澀谷車站-垂直移動地獄-1768317066127-0whco",
+    "id": "md-澀谷車站-垂直移動地獄-1768633092524-rk5pi",
     "entityName": "澀谷車站",
     "entityIds": [
       "odpt:Station:JR-East.Shibuya",
@@ -780,7 +780,7 @@
     "priority": 50
   },
   {
-    "id": "md-澀谷車站-出口指引-1768317066127-yrofq",
+    "id": "md-澀谷車站-出口指引-1768633092524-x5okn",
     "entityName": "澀谷車站",
     "entityIds": [
       "odpt:Station:JR-East.Shibuya",
@@ -793,7 +793,7 @@
     "priority": 40
   },
   {
-    "id": "md-日暮里車站-基本資訊-1768317066127-oy820",
+    "id": "md-日暮里車站-基本資訊-1768633092524-3jo92",
     "entityName": "日暮里車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -803,7 +803,7 @@
     "priority": 30
   },
   {
-    "id": "md-日暮里車站-可搭乘路線-1768317066127-r1bou",
+    "id": "md-日暮里車站-可搭乘路線-1768633092524-43pdh",
     "entityName": "日暮里車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -813,7 +813,7 @@
     "priority": 50
   },
   {
-    "id": "md-日暮里車站-轉乘注意事項-1768317066127-z5wzs",
+    "id": "md-日暮里車站-轉乘注意事項-1768633092524-7vliz",
     "entityName": "日暮里車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -823,7 +823,7 @@
     "priority": 80
   },
   {
-    "id": "md-都營淺草線沿線重要車站-路線特色-1768317066127-vlf10",
+    "id": "md-都營淺草線沿線重要車站-路線特色-1768633092524-26vzl",
     "entityName": "都營淺草線沿線重要車站",
     "entityIds": [],
     "section": "路線特色",
@@ -833,7 +833,7 @@
     "priority": 50
   },
   {
-    "id": "md-都營淺草線沿線重要車站-主要車站-1768317066127-lacwi",
+    "id": "md-都營淺草線沿線重要車站-主要車站-1768633092524-b0p2r",
     "entityName": "都營淺草線沿線重要車站",
     "entityIds": [],
     "section": "主要車站",
@@ -843,7 +843,7 @@
     "priority": 50
   },
   {
-    "id": "md-都營淺草線沿線重要車站-搭車秘訣-1768317066127-uvlhl",
+    "id": "md-都營淺草線沿線重要車站-搭車秘訣-1768633092524-4u0vg",
     "entityName": "都營淺草線沿線重要車站",
     "entityIds": [],
     "section": "搭車秘訣",
@@ -853,7 +853,7 @@
     "priority": 50
   },
   {
-    "id": "md-舞濱車站-基本資訊-1768317066127-0eqv0",
+    "id": "md-舞濱車站-基本資訊-1768633092524-95h58",
     "entityName": "舞濱車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -863,7 +863,7 @@
     "priority": 30
   },
   {
-    "id": "md-舞濱車站-可搭乘路線-1768317066127-8zfrr",
+    "id": "md-舞濱車站-可搭乘路線-1768633092524-vc3c4",
     "entityName": "舞濱車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -873,7 +873,7 @@
     "priority": 50
   },
   {
-    "id": "md-舞濱車站-轉乘注意事項-1768317066127-w04dg",
+    "id": "md-舞濱車站-轉乘注意事項-1768633092524-9jck1",
     "entityName": "舞濱車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -883,7 +883,7 @@
     "priority": 80
   },
   {
-    "id": "md-品川車站-基本資訊-1768317066127-6t6hr",
+    "id": "md-品川車站-基本資訊-1768633092524-x5onq",
     "entityName": "品川車站",
     "entityIds": [
       "odpt:Station:JR-East.Shinagawa",
@@ -896,7 +896,7 @@
     "priority": 30
   },
   {
-    "id": "md-品川車站-可搭乘路線-1768317066128-eiznm",
+    "id": "md-品川車站-可搭乘路線-1768633092524-rxvpl",
     "entityName": "品川車站",
     "entityIds": [
       "odpt:Station:JR-East.Shinagawa",
@@ -909,7 +909,7 @@
     "priority": 50
   },
   {
-    "id": "md-品川車站-轉乘注意事項-1768317066128-19tm1",
+    "id": "md-品川車站-轉乘注意事項-1768633092524-w39s1",
     "entityName": "品川車站",
     "entityIds": [
       "odpt:Station:JR-East.Shinagawa",
@@ -922,7 +922,7 @@
     "priority": 80
   },
   {
-    "id": "md-品川車站-出口指南-1768317066128-309iy",
+    "id": "md-品川車站-出口指南-1768633092524-4b31q",
     "entityName": "品川車站",
     "entityIds": [
       "odpt:Station:JR-East.Shinagawa",
@@ -935,7 +935,7 @@
     "priority": 40
   },
   {
-    "id": "md-目黑車站-基本資訊-1768317066128-m1470",
+    "id": "md-目黑車站-基本資訊-1768633092524-ad3xb",
     "entityName": "目黑車站",
     "entityIds": [
       "odpt:Station:JR-East.Meguro",
@@ -950,7 +950,7 @@
     "priority": 30
   },
   {
-    "id": "md-目黑車站-可搭乘路線-1768317066128-xqnk6",
+    "id": "md-目黑車站-可搭乘路線-1768633092524-8bc3f",
     "entityName": "目黑車站",
     "entityIds": [
       "odpt:Station:JR-East.Meguro",
@@ -965,7 +965,7 @@
     "priority": 50
   },
   {
-    "id": "md-目黑車站-轉乘注意事項-1768317066128-zag5k",
+    "id": "md-目黑車站-轉乘注意事項-1768633092524-ang5x",
     "entityName": "目黑車站",
     "entityIds": [
       "odpt:Station:JR-East.Meguro",
@@ -980,7 +980,7 @@
     "priority": 80
   },
   {
-    "id": "md-目黑車站-出口指南-1768317066128-scfkk",
+    "id": "md-目黑車站-出口指南-1768633092524-xxbc4",
     "entityName": "目黑車站",
     "entityIds": [
       "odpt:Station:JR-East.Meguro",
@@ -995,7 +995,7 @@
     "priority": 40
   },
   {
-    "id": "md-五反田車站-基本資訊-1768317066128-cwra8",
+    "id": "md-五反田車站-基本資訊-1768633092524-wz7zu",
     "entityName": "五反田車站",
     "entityIds": [
       "odpt:Station:JR-East.Gotanda",
@@ -1009,7 +1009,7 @@
     "priority": 30
   },
   {
-    "id": "md-五反田車站-可搭乘路線-1768317066128-hmdq2",
+    "id": "md-五反田車站-可搭乘路線-1768633092524-4wwn1",
     "entityName": "五反田車站",
     "entityIds": [
       "odpt:Station:JR-East.Gotanda",
@@ -1023,7 +1023,7 @@
     "priority": 50
   },
   {
-    "id": "md-五反田車站-轉乘注意事項-1768317066128-55fzg",
+    "id": "md-五反田車站-轉乘注意事項-1768633092524-cinc8",
     "entityName": "五反田車站",
     "entityIds": [
       "odpt:Station:JR-East.Gotanda",
@@ -1037,7 +1037,7 @@
     "priority": 80
   },
   {
-    "id": "md-大崎車站-基本資訊-1768317066128-vlvpf",
+    "id": "md-大崎車站-基本資訊-1768633092524-6xyj1",
     "entityName": "大崎車站",
     "entityIds": [
       "odpt:Station:JR-East.Osaki",
@@ -1050,7 +1050,7 @@
     "priority": 30
   },
   {
-    "id": "md-大崎車站-可搭乘路線-1768317066128-7ictd",
+    "id": "md-大崎車站-可搭乘路線-1768633092524-3uo9s",
     "entityName": "大崎車站",
     "entityIds": [
       "odpt:Station:JR-East.Osaki",
@@ -1063,7 +1063,7 @@
     "priority": 50
   },
   {
-    "id": "md-大崎車站-轉乘注意事項-1768317066128-cgn5p",
+    "id": "md-大崎車站-轉乘注意事項-1768633092524-cp4wp",
     "entityName": "大崎車站",
     "entityIds": [
       "odpt:Station:JR-East.Osaki",
@@ -1076,7 +1076,7 @@
     "priority": 80
   },
   {
-    "id": "md-神田車站-基本資訊-1768317066128-vxvtb",
+    "id": "md-神田車站-基本資訊-1768633092524-74c1k",
     "entityName": "神田車站",
     "entityIds": [
       "odpt:Station:JR-East.Kanda",
@@ -1089,7 +1089,7 @@
     "priority": 30
   },
   {
-    "id": "md-神田車站-可搭乘路線-1768317066128-24ghi",
+    "id": "md-神田車站-可搭乘路線-1768633092524-wehq7",
     "entityName": "神田車站",
     "entityIds": [
       "odpt:Station:JR-East.Kanda",
@@ -1102,7 +1102,7 @@
     "priority": 50
   },
   {
-    "id": "md-神田車站-轉乘注意事項-1768317066128-h5sod",
+    "id": "md-神田車站-轉乘注意事項-1768633092524-bv8rm",
     "entityName": "神田車站",
     "entityIds": [
       "odpt:Station:JR-East.Kanda",
@@ -1115,7 +1115,7 @@
     "priority": 80
   },
   {
-    "id": "md-日比谷車站-基本資訊-1768317066128-fufx8",
+    "id": "md-日比谷車站-基本資訊-1768633092524-ytjz0",
     "entityName": "日比谷車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Hibiya",
@@ -1128,7 +1128,7 @@
     "priority": 30
   },
   {
-    "id": "md-日比谷車站-可搭乘路線-1768317066128-v0t71",
+    "id": "md-日比谷車站-可搭乘路線-1768633092524-dhfjy",
     "entityName": "日比谷車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Hibiya",
@@ -1141,7 +1141,7 @@
     "priority": 50
   },
   {
-    "id": "md-日比谷車站-轉乘注意事項-1768317066128-6x3un",
+    "id": "md-日比谷車站-轉乘注意事項-1768633092524-3apo9",
     "entityName": "日比谷車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Hibiya",
@@ -1154,7 +1154,7 @@
     "priority": 80
   },
   {
-    "id": "md-市谷車站-基本資訊-1768317066128-rf43q",
+    "id": "md-市谷車站-基本資訊-1768633092524-nq73z",
     "entityName": "市谷車站",
     "entityIds": [
       "odpt:Station:JR-East.Ichigaya",
@@ -1168,7 +1168,7 @@
     "priority": 30
   },
   {
-    "id": "md-市谷車站-可搭乘路線-1768317066128-g3q43",
+    "id": "md-市谷車站-可搭乘路線-1768633092524-3wi8b",
     "entityName": "市谷車站",
     "entityIds": [
       "odpt:Station:JR-East.Ichigaya",
@@ -1182,7 +1182,7 @@
     "priority": 50
   },
   {
-    "id": "md-市谷車站-轉乘注意事項-1768317066128-soc5o",
+    "id": "md-市谷車站-轉乘注意事項-1768633092524-1hakn",
     "entityName": "市谷車站",
     "entityIds": [
       "odpt:Station:JR-East.Ichigaya",
@@ -1196,7 +1196,7 @@
     "priority": 80
   },
   {
-    "id": "md-成田機場車站-基本資訊-1768317066128-3osg1",
+    "id": "md-成田機場車站-基本資訊-1768633092524-00m1p",
     "entityName": "成田機場車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -1206,7 +1206,7 @@
     "priority": 30
   },
   {
-    "id": "md-成田機場車站-前往東京市區的交通方式-1768317066128-xjpi6",
+    "id": "md-成田機場車站-前往東京市區的交通方式-1768633092524-bpxrt",
     "entityName": "成田機場車站",
     "entityIds": [],
     "section": "前往東京市區的交通方式",
@@ -1216,7 +1216,7 @@
     "priority": 50
   },
   {
-    "id": "md-成田機場車站-轉乘注意事項-1768317066128-hwslf",
+    "id": "md-成田機場車站-轉乘注意事項-1768633092524-h3yl7",
     "entityName": "成田機場車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -1226,7 +1226,7 @@
     "priority": 80
   },
   {
-    "id": "md-羽田機場車站-基本資訊-1768317066128-98skt",
+    "id": "md-羽田機場車站-基本資訊-1768633092524-p72um",
     "entityName": "羽田機場車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -1236,7 +1236,7 @@
     "priority": 30
   },
   {
-    "id": "md-羽田機場車站-前往東京市區的交通方式-1768317066128-xle05",
+    "id": "md-羽田機場車站-前往東京市區的交通方式-1768633092524-dwmcp",
     "entityName": "羽田機場車站",
     "entityIds": [],
     "section": "前往東京市區的交通方式",
@@ -1246,7 +1246,7 @@
     "priority": 50
   },
   {
-    "id": "md-羽田機場車站-轉乘注意事項-1768317066128-m2b4i",
+    "id": "md-羽田機場車站-轉乘注意事項-1768633092524-e5x94",
     "entityName": "羽田機場車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -1256,7 +1256,7 @@
     "priority": 80
   },
   {
-    "id": "md-銀座車站-基本資訊-1768317066128-99ev7",
+    "id": "md-銀座車站-基本資訊-1768633092524-a96ow",
     "entityName": "銀座車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Ginza",
@@ -1270,7 +1270,7 @@
     "priority": 30
   },
   {
-    "id": "md-銀座車站-轉乘秘密-1768317066128-07ms4",
+    "id": "md-銀座車站-轉乘秘密-1768633092524-c2sbu",
     "entityName": "銀座車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Ginza",
@@ -1284,7 +1284,7 @@
     "priority": 80
   },
   {
-    "id": "md-銀座車站-轉乘陷阱-1768317066128-jyumx",
+    "id": "md-銀座車站-轉乘陷阱-1768633092524-me9mn",
     "entityName": "銀座車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Ginza",
@@ -1298,7 +1298,7 @@
     "priority": 80
   },
   {
-    "id": "md-六本木車站-基本資訊-1768317066128-hfmi0",
+    "id": "md-六本木車站-基本資訊-1768633092524-wwu44",
     "entityName": "六本木車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Hibiya.Roppongi",
@@ -1311,7 +1311,7 @@
     "priority": 30
   },
   {
-    "id": "md-六本木車站-轉乘陷阱-1768317066128-ee9oh",
+    "id": "md-六本木車站-轉乘陷阱-1768633092524-c0mdl",
     "entityName": "六本木車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Hibiya.Roppongi",
@@ -1324,7 +1324,7 @@
     "priority": 80
   },
   {
-    "id": "md-六本木車站-出口指引-1768317066128-4s5nh",
+    "id": "md-六本木車站-出口指引-1768633092524-xne9e",
     "entityName": "六本木車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Hibiya.Roppongi",
@@ -1337,7 +1337,7 @@
     "priority": 40
   },
   {
-    "id": "md-大手町車站-基本資訊-1768317066128-1zuw3",
+    "id": "md-大手町車站-基本資訊-1768633092524-lbrup",
     "entityName": "大手町車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Marunouchi.Otemachi",
@@ -1353,7 +1353,7 @@
     "priority": 30
   },
   {
-    "id": "md-大手町車站-轉乘陷阱 (水平移動)-1768317066128-ynpik",
+    "id": "md-大手町車站-轉乘陷阱 (水平移動)-1768633092524-vq65v",
     "entityName": "大手町車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Marunouchi.Otemachi",
@@ -1369,7 +1369,7 @@
     "priority": 80
   },
   {
-    "id": "md-淺草橋車站-基本資訊-1768317066128-svbi1",
+    "id": "md-淺草橋車站-基本資訊-1768633092524-1sipe",
     "entityName": "淺草橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Asakusabashi",
@@ -1382,7 +1382,7 @@
     "priority": 30
   },
   {
-    "id": "md-淺草橋車站-可搭乘路線-1768317066128-c3w58",
+    "id": "md-淺草橋車站-可搭乘路線-1768633092524-lys7s",
     "entityName": "淺草橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Asakusabashi",
@@ -1395,7 +1395,7 @@
     "priority": 50
   },
   {
-    "id": "md-淺草橋車站-轉乘注意事項-1768317066128-6swn4",
+    "id": "md-淺草橋車站-轉乘注意事項-1768633092524-xmmtx",
     "entityName": "淺草橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Asakusabashi",
@@ -1408,7 +1408,7 @@
     "priority": 80
   },
   {
-    "id": "md-神保町車站-基本資訊-1768317066128-bw9cn",
+    "id": "md-神保町車站-基本資訊-1768633092524-7md3a",
     "entityName": "神保町車站",
     "entityIds": [
       "odpt:Station:Toei.Jimbocho",
@@ -1421,7 +1421,7 @@
     "priority": 30
   },
   {
-    "id": "md-神保町車站-可搭乘路線-1768317066128-yz8k6",
+    "id": "md-神保町車站-可搭乘路線-1768633092524-nib26",
     "entityName": "神保町車站",
     "entityIds": [
       "odpt:Station:Toei.Jimbocho",
@@ -1434,7 +1434,7 @@
     "priority": 50
   },
   {
-    "id": "md-神保町車站-轉乘注意事項-1768317066128-9262j",
+    "id": "md-神保町車站-轉乘注意事項-1768633092524-lgw7y",
     "entityName": "神保町車站",
     "entityIds": [
       "odpt:Station:Toei.Jimbocho",
@@ -1447,7 +1447,7 @@
     "priority": 80
   },
   {
-    "id": "md-日本橋車站-基本資訊-1768317066128-0io8f",
+    "id": "md-日本橋車站-基本資訊-1768633092524-4hw49",
     "entityName": "日本橋車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Nihombashi",
@@ -1460,7 +1460,7 @@
     "priority": 30
   },
   {
-    "id": "md-日本橋車站-可搭乘路線-1768317066128-hh72y",
+    "id": "md-日本橋車站-可搭乘路線-1768633092524-vspfx",
     "entityName": "日本橋車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Nihombashi",
@@ -1473,7 +1473,7 @@
     "priority": 50
   },
   {
-    "id": "md-日本橋車站-轉乘注意事項-1768317066128-oq543",
+    "id": "md-日本橋車站-轉乘注意事項-1768633092524-f0u2o",
     "entityName": "日本橋車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Nihombashi",
@@ -1486,7 +1486,7 @@
     "priority": 80
   },
   {
-    "id": "md-御徒町車站-基本資訊-1768317066128-dye4a",
+    "id": "md-御徒町車站-基本資訊-1768633092524-oluqp",
     "entityName": "御徒町車站",
     "entityIds": [
       "odpt:Station:JR-East.Okachimachi",
@@ -1501,7 +1501,7 @@
     "priority": 30
   },
   {
-    "id": "md-御徒町車站-可搭乘路線-1768317066128-mejnt",
+    "id": "md-御徒町車站-可搭乘路線-1768633092524-kbbp9",
     "entityName": "御徒町車站",
     "entityIds": [
       "odpt:Station:JR-East.Okachimachi",
@@ -1516,7 +1516,7 @@
     "priority": 50
   },
   {
-    "id": "md-御徒町車站-轉乘注意事項-1768317066128-tymrh",
+    "id": "md-御徒町車站-轉乘注意事項-1768633092524-8a4ar",
     "entityName": "御徒町車站",
     "entityIds": [
       "odpt:Station:JR-East.Okachimachi",
@@ -1531,7 +1531,7 @@
     "priority": 80
   },
   {
-    "id": "md-霞關車站-基本資訊-1768317066128-pcl8y",
+    "id": "md-霞關車站-基本資訊-1768633092524-pq2xw",
     "entityName": "霞關車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Marunouchi.Kasumigaseki",
@@ -1545,7 +1545,7 @@
     "priority": 30
   },
   {
-    "id": "md-霞關車站-可搭乘路線-1768317066128-5hqvb",
+    "id": "md-霞關車站-可搭乘路線-1768633092524-wrx3e",
     "entityName": "霞關車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Marunouchi.Kasumigaseki",
@@ -1559,7 +1559,7 @@
     "priority": 50
   },
   {
-    "id": "md-霞關車站-轉乘注意事項-1768317066128-5l09k",
+    "id": "md-霞關車站-轉乘注意事項-1768633092524-8lw52",
     "entityName": "霞關車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Marunouchi.Kasumigaseki",
@@ -1573,7 +1573,7 @@
     "priority": 80
   },
   {
-    "id": "md-赤坂見附車站-基本資訊-1768317066128-mztxz",
+    "id": "md-赤坂見附車站-基本資訊-1768633092524-2dwtj",
     "entityName": "赤坂見附車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Akasakamitsuke",
@@ -1586,7 +1586,7 @@
     "priority": 30
   },
   {
-    "id": "md-赤坂見附車站-可搭乘路線-1768317066128-nc7lz",
+    "id": "md-赤坂見附車站-可搭乘路線-1768633092524-uoa7y",
     "entityName": "赤坂見附車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Akasakamitsuke",
@@ -1599,7 +1599,7 @@
     "priority": 50
   },
   {
-    "id": "md-赤坂見附車站-轉乘秘密-1768317066128-aq9j9",
+    "id": "md-赤坂見附車站-轉乘秘密-1768633092524-6ag2d",
     "entityName": "赤坂見附車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Akasakamitsuke",
@@ -1612,7 +1612,7 @@
     "priority": 80
   },
   {
-    "id": "md-九段下車站-基本資訊-1768317066128-1nfkg",
+    "id": "md-九段下車站-基本資訊-1768633092524-86wy1",
     "entityName": "九段下車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tozai.Kudanshita",
@@ -1626,7 +1626,7 @@
     "priority": 30
   },
   {
-    "id": "md-九段下車站-可搭乘路線-1768317066128-1w7q6",
+    "id": "md-九段下車站-可搭乘路線-1768633092524-lwfoz",
     "entityName": "九段下車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tozai.Kudanshita",
@@ -1640,7 +1640,7 @@
     "priority": 50
   },
   {
-    "id": "md-九段下車站-轉乘注意事項-1768317066128-abxmg",
+    "id": "md-九段下車站-轉乘注意事項-1768633092524-poafi",
     "entityName": "九段下車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Tozai.Kudanshita",
@@ -1654,7 +1654,7 @@
     "priority": 80
   },
   {
-    "id": "md-三越前車站-基本資訊-1768317066128-qxeas",
+    "id": "md-三越前車站-基本資訊-1768633092524-xzhpj",
     "entityName": "三越前車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Mitsukoshimae",
@@ -1667,7 +1667,7 @@
     "priority": 30
   },
   {
-    "id": "md-三越前車站-可搭乘路線-1768317066128-d7npt",
+    "id": "md-三越前車站-可搭乘路線-1768633092524-n00o4",
     "entityName": "三越前車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Mitsukoshimae",
@@ -1680,7 +1680,7 @@
     "priority": 50
   },
   {
-    "id": "md-三越前車站-轉乘注意事項-1768317066128-ysar4",
+    "id": "md-三越前車站-轉乘注意事項-1768633092524-iomhd",
     "entityName": "三越前車站",
     "entityIds": [
       "odpt:Station:TokyoMetro.Ginza.Mitsukoshimae",
@@ -1693,7 +1693,7 @@
     "priority": 80
   },
   {
-    "id": "md-銀座線-基本資訊-1768317066128-31ao3",
+    "id": "md-銀座線-基本資訊-1768633092524-u4kf4",
     "entityName": "銀座線",
     "entityIds": [
       "odpt.Railway:TokyoMetro.Ginza"
@@ -1705,7 +1705,7 @@
     "priority": 30
   },
   {
-    "id": "md-銀座線-乘車建議-1768317066128-ygr2g",
+    "id": "md-銀座線-乘車建議-1768633092524-20sxh",
     "entityName": "銀座線",
     "entityIds": [
       "odpt.Railway:TokyoMetro.Ginza"
@@ -1717,7 +1717,7 @@
     "priority": 50
   },
   {
-    "id": "md-山手線-基本資訊-1768317066128-u57nb",
+    "id": "md-山手線-基本資訊-1768633092524-0ngrh",
     "entityName": "山手線",
     "entityIds": [
       "odpt.Railway:JR-East.Yamanote"
@@ -1729,7 +1729,7 @@
     "priority": 30
   },
   {
-    "id": "md-山手線-乘車建議-1768317066128-mg1sa",
+    "id": "md-山手線-乘車建議-1768633092524-7c6m7",
     "entityName": "山手線",
     "entityIds": [
       "odpt.Railway:JR-East.Yamanote"
@@ -1741,7 +1741,7 @@
     "priority": 50
   },
   {
-    "id": "md-丸之內線-基本資訊-1768317066128-rtppc",
+    "id": "md-丸之內線-基本資訊-1768633092524-wlsax",
     "entityName": "丸之內線",
     "entityIds": [
       "odpt.Railway:TokyoMetro.Marunouchi"
@@ -1753,7 +1753,7 @@
     "priority": 30
   },
   {
-    "id": "md-丸之內線-乘車建議-1768317066128-r89pt",
+    "id": "md-丸之內線-乘車建議-1768633092524-n3fuu",
     "entityName": "丸之內線",
     "entityIds": [
       "odpt.Railway:TokyoMetro.Marunouchi"
@@ -1765,7 +1765,7 @@
     "priority": 50
   },
   {
-    "id": "md-京葉線-基本資訊-1768317066128-h3zeh",
+    "id": "md-京葉線-基本資訊-1768633092524-7q3i6",
     "entityName": "京葉線",
     "entityIds": [
       "odpt.Railway:JR-East.Keiyo"
@@ -1777,7 +1777,7 @@
     "priority": 30
   },
   {
-    "id": "md-京葉線-乘車建議-1768317066128-hcdlf",
+    "id": "md-京葉線-乘車建議-1768633092524-j3y3e",
     "entityName": "京葉線",
     "entityIds": [
       "odpt.Railway:JR-East.Keiyo"
@@ -1789,7 +1789,7 @@
     "priority": 50
   },
   {
-    "id": "md-有樂町車站-基本資訊-1768317066128-tf9ki",
+    "id": "md-有樂町車站-基本資訊-1768633092524-59yh6",
     "entityName": "有樂町車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -1799,7 +1799,7 @@
     "priority": 30
   },
   {
-    "id": "md-有樂町車站-可搭乘路線-1768317066128-e5576",
+    "id": "md-有樂町車站-可搭乘路線-1768633092524-tz2is",
     "entityName": "有樂町車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -1809,7 +1809,7 @@
     "priority": 50
   },
   {
-    "id": "md-有樂町車站-轉乘策略 (東京車站京葉線替代)-1768317066128-2n96y",
+    "id": "md-有樂町車站-轉乘策略 (東京車站京葉線替代)-1768633092524-ej3gj",
     "entityName": "有樂町車站",
     "entityIds": [],
     "section": "轉乘策略 (東京車站京葉線替代)",
@@ -1819,7 +1819,7 @@
     "priority": 80
   },
   {
-    "id": "md-有樂町車站-出口指南-1768317066128-0ylng",
+    "id": "md-有樂町車站-出口指南-1768633092524-c3f2u",
     "entityName": "有樂町車站",
     "entityIds": [],
     "section": "出口指南",
@@ -1829,7 +1829,7 @@
     "priority": 40
   },
   {
-    "id": "md-惠比壽車站-基本資訊-1768317066128-i4nsq",
+    "id": "md-惠比壽車站-基本資訊-1768633092524-zm0gw",
     "entityName": "惠比壽車站",
     "entityIds": [
       "odpt:Station:JR-East.Ebisu",
@@ -1842,7 +1842,7 @@
     "priority": 30
   },
   {
-    "id": "md-惠比壽車站-可搭乘路線-1768317066128-zdjvo",
+    "id": "md-惠比壽車站-可搭乘路線-1768633092524-hiauw",
     "entityName": "惠比壽車站",
     "entityIds": [
       "odpt:Station:JR-East.Ebisu",
@@ -1855,7 +1855,7 @@
     "priority": 50
   },
   {
-    "id": "md-惠比壽車站-轉乘注意事項-1768317066128-vogur",
+    "id": "md-惠比壽車站-轉乘注意事項-1768633092524-i5jbh",
     "entityName": "惠比壽車站",
     "entityIds": [
       "odpt:Station:JR-East.Ebisu",
@@ -1868,7 +1868,7 @@
     "priority": 80
   },
   {
-    "id": "md-惠比壽車站-出口指南-1768317066128-4q5jd",
+    "id": "md-惠比壽車站-出口指南-1768633092524-22vt8",
     "entityName": "惠比壽車站",
     "entityIds": [
       "odpt:Station:JR-East.Ebisu",
@@ -1881,7 +1881,7 @@
     "priority": 40
   },
   {
-    "id": "md-飯田橋車站-基本資訊-1768317066128-bbk5u",
+    "id": "md-飯田橋車站-基本資訊-1768633092524-nbpqv",
     "entityName": "飯田橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Iidabashi",
@@ -1895,7 +1895,7 @@
     "priority": 30
   },
   {
-    "id": "md-飯田橋車站-可搭乘路線-1768317066128-4s5ep",
+    "id": "md-飯田橋車站-可搭乘路線-1768633092524-rqe9o",
     "entityName": "飯田橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Iidabashi",
@@ -1909,7 +1909,7 @@
     "priority": 50
   },
   {
-    "id": "md-飯田橋車站-轉乘注意事項-1768317066128-161yk",
+    "id": "md-飯田橋車站-轉乘注意事項-1768633092524-0vgvo",
     "entityName": "飯田橋車站",
     "entityIds": [
       "odpt:Station:JR-East.Iidabashi",
@@ -1923,7 +1923,7 @@
     "priority": 80
   },
   {
-    "id": "md-轉乘小技巧總整理-顏色識別系統-1768317066128-d2seg",
+    "id": "md-轉乘小技巧總整理-顏色識別系統-1768633092524-frq4e",
     "entityName": "轉乘小技巧總整理",
     "entityIds": [],
     "section": "顏色識別系統",
@@ -1933,7 +1933,7 @@
     "priority": 50
   },
   {
-    "id": "md-轉乘小技巧總整理-常見路線顏色-1768317066128-qr315",
+    "id": "md-轉乘小技巧總整理-常見路線顏色-1768633092524-ivyda",
     "entityName": "轉乘小技巧總整理",
     "entityIds": [],
     "section": "常見路線顏色",
@@ -1943,7 +1943,7 @@
     "priority": 50
   },
   {
-    "id": "md-轉乘小技巧總整理-大型行李注意事項-1768317066128-b556a",
+    "id": "md-轉乘小技巧總整理-大型行李注意事項-1768633092524-o58wv",
     "entityName": "轉乘小技巧總整理",
     "entityIds": [],
     "section": "大型行李注意事項",
@@ -1953,7 +1953,7 @@
     "priority": 50
   },
   {
-    "id": "md-轉乘小技巧總整理-購票建議-1768317066128-vv6bo",
+    "id": "md-轉乘小技巧總整理-購票建議-1768633092524-84gv4",
     "entityName": "轉乘小技巧總整理",
     "entityIds": [],
     "section": "購票建議",
@@ -1963,7 +1963,7 @@
     "priority": 50
   },
   {
-    "id": "md-鶯谷車站-基本資訊-1768317066128-atmbh",
+    "id": "md-鶯谷車站-基本資訊-1768633092524-xh6kc",
     "entityName": "鶯谷車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -1973,7 +1973,7 @@
     "priority": 30
   },
   {
-    "id": "md-鶯谷車站-可搭乘路線-1768317066128-u2g4q",
+    "id": "md-鶯谷車站-可搭乘路線-1768633092524-9sg0a",
     "entityName": "鶯谷車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -1983,7 +1983,7 @@
     "priority": 50
   },
   {
-    "id": "md-鶯谷車站-轉乘與出站-1768317066128-1e87x",
+    "id": "md-鶯谷車站-轉乘與出站-1768633092524-m39li",
     "entityName": "鶯谷車站",
     "entityIds": [],
     "section": "轉乘與出站",
@@ -1993,7 +1993,7 @@
     "priority": 80
   },
   {
-    "id": "md-北千住車站-基本資訊-1768317066128-bc96v",
+    "id": "md-北千住車站-基本資訊-1768633092524-cmxbh",
     "entityName": "北千住車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -2003,7 +2003,7 @@
     "priority": 30
   },
   {
-    "id": "md-北千住車站-可搭乘路線-1768317066128-lne67",
+    "id": "md-北千住車站-可搭乘路線-1768633092524-w0c9n",
     "entityName": "北千住車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -2013,7 +2013,7 @@
     "priority": 50
   },
   {
-    "id": "md-北千住車站-轉乘注意事項-1768317066128-88cmr",
+    "id": "md-北千住車站-轉乘注意事項-1768633092524-sung4",
     "entityName": "北千住車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -2023,7 +2023,7 @@
     "priority": 80
   },
   {
-    "id": "md-北千住車站-出口指南-1768317066128-lxdy4",
+    "id": "md-北千住車站-出口指南-1768633092524-nfspw",
     "entityName": "北千住車站",
     "entityIds": [],
     "section": "出口指南",
@@ -2033,7 +2033,7 @@
     "priority": 40
   },
   {
-    "id": "md-代代木車站-基本資訊-1768317066128-vzx2f",
+    "id": "md-代代木車站-基本資訊-1768633092524-m08xn",
     "entityName": "代代木車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -2043,7 +2043,7 @@
     "priority": 30
   },
   {
-    "id": "md-代代木車站-可搭乘路線-1768317066128-9om9f",
+    "id": "md-代代木車站-可搭乘路線-1768633092524-e1bip",
     "entityName": "代代木車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -2053,7 +2053,7 @@
     "priority": 50
   },
   {
-    "id": "md-代代木車站-轉乘與出站-1768317066128-87ngv",
+    "id": "md-代代木車站-轉乘與出站-1768633092524-1th7i",
     "entityName": "代代木車站",
     "entityIds": [],
     "section": "轉乘與出站",
@@ -2063,7 +2063,7 @@
     "priority": 80
   },
   {
-    "id": "md-代代木車站-出口指南-1768317066128-w18ef",
+    "id": "md-代代木車站-出口指南-1768633092524-e79kx",
     "entityName": "代代木車站",
     "entityIds": [],
     "section": "出口指南",
@@ -2073,7 +2073,7 @@
     "priority": 40
   },
   {
-    "id": "md-原宿車站-基本資訊-1768317066128-tad5l",
+    "id": "md-原宿車站-基本資訊-1768633092524-w1dtu",
     "entityName": "原宿車站",
     "entityIds": [],
     "section": "基本資訊",
@@ -2083,7 +2083,7 @@
     "priority": 30
   },
   {
-    "id": "md-原宿車站-可搭乘路線-1768317066128-a5wuk",
+    "id": "md-原宿車站-可搭乘路線-1768633092524-7oaoe",
     "entityName": "原宿車站",
     "entityIds": [],
     "section": "可搭乘路線",
@@ -2093,7 +2093,7 @@
     "priority": 50
   },
   {
-    "id": "md-原宿車站-轉乘注意事項-1768317066128-o7wji",
+    "id": "md-原宿車站-轉乘注意事項-1768633092524-niws8",
     "entityName": "原宿車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -2103,7 +2103,7 @@
     "priority": 80
   },
   {
-    "id": "md-原宿車站-轉乘注意事項-1768317066128-39rrx",
+    "id": "md-原宿車站-轉乘注意事項-1768633092524-et8cm",
     "entityName": "原宿車站",
     "entityIds": [],
     "section": "轉乘注意事項",
@@ -2113,7 +2113,7 @@
     "priority": 80
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Ebisu-Traps（陷阱/警告）-1768317066128-x48ne",
+    "id": "md-odpt:Station:JR-East.Yamanote.Ebisu-Traps（陷阱/警告）-1768633092524-877a3",
     "entityName": "odpt:Station:JR-East.Yamanote.Ebisu",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Ebisu"
@@ -2125,7 +2125,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Ebisu-Hacks（技巧/捷徑）-1768317066128-ewe2z",
+    "id": "md-odpt:Station:JR-East.Yamanote.Ebisu-Hacks（技巧/捷徑）-1768633092524-fsxmn",
     "entityName": "odpt:Station:JR-East.Yamanote.Ebisu",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Ebisu"
@@ -2137,7 +2137,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Ebisu-Facilities（設施資訊）-1768317066128-8tbws",
+    "id": "md-odpt:Station:JR-East.Yamanote.Ebisu-Facilities（設施資訊）-1768633092524-ay872",
     "entityName": "odpt:Station:JR-East.Yamanote.Ebisu",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Ebisu"
@@ -2149,7 +2149,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:Tokyu.Meguro-Traps（陷阱/警告）-1768317066128-eo3rz",
+    "id": "md-odpt:Station:Tokyu.Meguro-Traps（陷阱/警告）-1768633092524-4s2cx",
     "entityName": "odpt:Station:Tokyu.Meguro",
     "entityIds": [
       "odpt:Station:Tokyu.Meguro"
@@ -2161,7 +2161,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:Tokyu.Meguro-Hacks（技巧/捷徑）-1768317066128-imnma",
+    "id": "md-odpt:Station:Tokyu.Meguro-Hacks（技巧/捷徑）-1768633092524-a7wcl",
     "entityName": "odpt:Station:Tokyu.Meguro",
     "entityIds": [
       "odpt:Station:Tokyu.Meguro"
@@ -2173,7 +2173,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:Tokyu.Meguro-Facilities（設施資訊）-1768317066128-ahp0m",
+    "id": "md-odpt:Station:Tokyu.Meguro-Facilities（設施資訊）-1768633092524-mtpqh",
     "entityName": "odpt:Station:Tokyu.Meguro",
     "entityIds": [
       "odpt:Station:Tokyu.Meguro"
@@ -2185,7 +2185,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Nakano-Traps（陷阱/警告）-1768317066128-3uqhr",
+    "id": "md-odpt:Station:JR-East.Nakano-Traps（陷阱/警告）-1768633092524-5lmoh",
     "entityName": "odpt:Station:JR-East.Nakano",
     "entityIds": [
       "odpt:Station:JR-East.Nakano"
@@ -2197,7 +2197,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Nakano-Hacks（技巧/捷徑）-1768317066128-luz83",
+    "id": "md-odpt:Station:JR-East.Nakano-Hacks（技巧/捷徑）-1768633092524-6hgsl",
     "entityName": "odpt:Station:JR-East.Nakano",
     "entityIds": [
       "odpt:Station:JR-East.Nakano"
@@ -2209,7 +2209,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Nakano-Facilities（設施資訊）-1768317066128-lzi7z",
+    "id": "md-odpt:Station:JR-East.Nakano-Facilities（設施資訊）-1768633092524-k06k7",
     "entityName": "odpt:Station:JR-East.Nakano",
     "entityIds": [
       "odpt:Station:JR-East.Nakano"
@@ -2221,7 +2221,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Meguro-Traps（陷阱/警告）-1768317066128-ugd3k",
+    "id": "md-odpt:Station:JR-East.Meguro-Traps（陷阱/警告）-1768633092524-wqxuy",
     "entityName": "odpt:Station:JR-East.Meguro",
     "entityIds": [
       "odpt:Station:JR-East.Meguro"
@@ -2233,7 +2233,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Meguro-Hacks（技巧/捷徑）-1768317066128-sg9gw",
+    "id": "md-odpt:Station:JR-East.Meguro-Hacks（技巧/捷徑）-1768633092524-i6cr2",
     "entityName": "odpt:Station:JR-East.Meguro",
     "entityIds": [
       "odpt:Station:JR-East.Meguro"
@@ -2245,7 +2245,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Meguro-Facilities（設施資訊）-1768317066128-7k1zw",
+    "id": "md-odpt:Station:JR-East.Meguro-Facilities（設施資訊）-1768633092524-m8eby",
     "entityName": "odpt:Station:JR-East.Meguro",
     "entityIds": [
       "odpt:Station:JR-East.Meguro"
@@ -2257,7 +2257,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Shinjuku-Traps（陷阱/警告）-1768317066128-d805w",
+    "id": "md-odpt:Station:JR-East.Yamanote.Shinjuku-Traps（陷阱/警告）-1768633092524-43ygv",
     "entityName": "odpt:Station:JR-East.Yamanote.Shinjuku",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Shinjuku"
@@ -2269,7 +2269,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Shinjuku-Hacks（技巧/捷徑）-1768317066128-41467",
+    "id": "md-odpt:Station:JR-East.Yamanote.Shinjuku-Hacks（技巧/捷徑）-1768633092524-j8am5",
     "entityName": "odpt:Station:JR-East.Yamanote.Shinjuku",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Shinjuku"
@@ -2281,7 +2281,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Shinjuku-Facilities（設施資訊）-1768317066128-058op",
+    "id": "md-odpt:Station:JR-East.Yamanote.Shinjuku-Facilities（設施資訊）-1768633092524-6xg1r",
     "entityName": "odpt:Station:JR-East.Yamanote.Shinjuku",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Shinjuku"
@@ -2293,7 +2293,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Shibuya-Traps（陷阱/警告）-1768317066128-u66iu",
+    "id": "md-odpt:Station:JR-East.Yamanote.Shibuya-Traps（陷阱/警告）-1768633092524-am7l2",
     "entityName": "odpt:Station:JR-East.Yamanote.Shibuya",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Shibuya"
@@ -2305,7 +2305,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Shibuya-Hacks（技巧/捷徑）-1768317066128-nvr0m",
+    "id": "md-odpt:Station:JR-East.Yamanote.Shibuya-Hacks（技巧/捷徑）-1768633092524-9exf2",
     "entityName": "odpt:Station:JR-East.Yamanote.Shibuya",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Shibuya"
@@ -2317,7 +2317,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Shibuya-Facilities（設施資訊）-1768317066128-1pcdy",
+    "id": "md-odpt:Station:JR-East.Yamanote.Shibuya-Facilities（設施資訊）-1768633092524-ftcfi",
     "entityName": "odpt:Station:JR-East.Yamanote.Shibuya",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Shibuya"
@@ -2329,7 +2329,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Ikebukuro-Traps（陷阱/警告）-1768317066128-i63lc",
+    "id": "md-odpt:Station:JR-East.Yamanote.Ikebukuro-Traps（陷阱/警告）-1768633092524-x3l5c",
     "entityName": "odpt:Station:JR-East.Yamanote.Ikebukuro",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Ikebukuro"
@@ -2341,7 +2341,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Ikebukuro-Hacks（技巧/捷徑）-1768317066128-vfaop",
+    "id": "md-odpt:Station:JR-East.Yamanote.Ikebukuro-Hacks（技巧/捷徑）-1768633092524-0zu2w",
     "entityName": "odpt:Station:JR-East.Yamanote.Ikebukuro",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Ikebukuro"
@@ -2353,7 +2353,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Ikebukuro-Facilities（設施資訊）-1768317066128-6gy2s",
+    "id": "md-odpt:Station:JR-East.Yamanote.Ikebukuro-Facilities（設施資訊）-1768633092524-fzj06",
     "entityName": "odpt:Station:JR-East.Yamanote.Ikebukuro",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Ikebukuro"
@@ -2365,7 +2365,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Tokyo-Traps（陷阱/警告）-1768317066128-1j52l",
+    "id": "md-odpt:Station:JR-East.Yamanote.Tokyo-Traps（陷阱/警告）-1768633092524-f81ba",
     "entityName": "odpt:Station:JR-East.Yamanote.Tokyo",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Tokyo"
@@ -2377,7 +2377,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Tokyo-Hacks（技巧/捷徑）-1768317066128-e3pd2",
+    "id": "md-odpt:Station:JR-East.Yamanote.Tokyo-Hacks（技巧/捷徑）-1768633092524-aqhfs",
     "entityName": "odpt:Station:JR-East.Yamanote.Tokyo",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Tokyo"
@@ -2389,7 +2389,7 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Tokyo-Facilities（設施資訊）-1768317066128-25n5k",
+    "id": "md-odpt:Station:JR-East.Yamanote.Tokyo-Facilities（設施資訊）-1768633092524-usymo",
     "entityName": "odpt:Station:JR-East.Yamanote.Tokyo",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Tokyo"
@@ -2401,13 +2401,205 @@
     "priority": 50
   },
   {
-    "id": "md-odpt:Station:JR-East.Yamanote.Shinagawa-Tra-1768317066128-s4k37",
+    "id": "md-odpt:Station:JR-East.Yamanote.Shinagawa-Tra-1768633092524-jyn9v",
     "entityName": "odpt:Station:JR-East.Yamanote.Shinagawa",
     "entityIds": [
       "odpt:Station:JR-East.Yamanote.Shinagawa"
     ],
     "section": "Tra",
     "content": "10分鐘。)\n        *   [Trap] 🚶 **日比谷線轉乘**: 日",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Hamacho-Traps（陷阱/警告）-1768633092524-cws7l",
+    "entityName": "odpt:Station:Toei.Hamacho",
+    "entityIds": [
+      "odpt:Station:Toei.Hamacho"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🧭 **距離近≠換乘近**：地圖上看起來接近的人形町/東日本橋一帶，實際多半需要地面步行。(Advice: 需要換乘或趕時間時，先把步行緩衝抓在 8-12 分鐘。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Hamacho-Hacks（技巧/捷徑）-1768633092524-rz0cs",
+    "entityName": "odpt:Station:Toei.Hamacho",
+    "entityIds": [
+      "odpt:Station:Toei.Hamacho"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 🗺️ **用大地標定位再走**：先在出口圖確認「濱町公園/明治座」方向，再決定出站口。(Advice: 不要在地下亂繞，回到出口圖重選更快。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Inaricho-Traps（陷阱/警告）-1768633092524-ivmmu",
+    "entityName": "odpt:Station:TokyoMetro.Inaricho",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Inaricho"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🚶 **上野圈距離錯覺**：與上野站距離不遠，但走地面依路線不同會有 10+ 分鐘落差。(Advice: 以「目標是 Ueno Park / Ameyoko / かっぱ橋」先決定要往哪個方向出站。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Inaricho-Hacks（技巧/捷徑）-1768633092524-aarmd",
+    "entityName": "odpt:Station:TokyoMetro.Inaricho",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Inaricho"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 🎒 **小站策略**：如果你不需要大站轉乘，稻荷町通常比上野更少人。(Advice: 帶行李要找電梯時，小站反而比較快找到對的出口。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Iriya-Traps（陷阱/警告）-1768633092524-fh3bn",
+    "entityName": "odpt:Station:TokyoMetro.Iriya",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Iriya"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🕒 **日比谷線時段擁擠**：通勤時段車廂與閘門口人流會明顯變慢。(Advice: 趕時間或帶行李，先預留額外 5-8 分鐘緩衝。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Iriya-Hacks（技巧/捷徑）-1768633092524-xj3qe",
+    "entityName": "odpt:Station:TokyoMetro.Iriya",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Iriya"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 🧭 **把它當「上野/淺草的呼吸點」**：行程在上野與淺草之間時，入谷可做中繼。(Advice: 先用地面導航走到最近的大馬路，再用出口圖修正方向。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Iwamotocho-Traps（陷阱/警告）-1768633092524-s9wqr",
+    "entityName": "odpt:Station:Toei.Iwamotocho",
+    "entityIds": [
+      "odpt:Station:Toei.Iwamotocho"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🔀 **地上/地下出入口多**：同一方向可能有多個出入口，走錯會多繞一個街區。(Advice: 先確認目標在「神田側」還是「秋葉原側」，再選出口。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Iwamotocho-Hacks（技巧/捷徑）-1768633092524-hnmwz",
+    "entityName": "odpt:Station:Toei.Iwamotocho",
+    "entityIds": [
+      "odpt:Station:Toei.Iwamotocho"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 🧳 **帶行李先鎖定電梯出口**：都營新宿線月台移動距離較長時，臨時改出口很耗時。(Advice: 一開始就選好有電梯的出口路線，不要中途切換。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Kachidoki-Traps（陷阱/警告）-1768633092524-mnkxd",
+    "entityName": "odpt:Station:Toei.Kachidoki",
+    "entityIds": [
+      "odpt:Station:Toei.Kachidoki"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🕳️ **大江戶線月台深**：從月台到地面常需要多段電扶梯/電梯。(Advice: 轉乘、趕車、推嬰兒車時，先把上地面時間抓在 3-5 分鐘。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Kachidoki-Hacks（技巧/捷徑）-1768633092524-szzn1",
+    "entityName": "odpt:Station:Toei.Kachidoki",
+    "entityIds": [
+      "odpt:Station:Toei.Kachidoki"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 🌬️ **地上更好走**：地面道路相對寬、視線開闊。(Advice: 如果你在地下找不到方向，先上地面再用導航修正。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Kuramae-Traps（陷阱/警告）-1768633092524-9n9su",
+    "entityName": "odpt:Station:Toei.Kuramae",
+    "entityIds": [
+      "odpt:Station:Toei.Kuramae"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🚶 **「蔵前」同名但站體可能分散**：淺草線與大江戶線出入口不一定在同一點。(Advice: 需要兩線互轉時，先確認你要去的是哪一條線，再抓 6-10 分鐘步行緩衝。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:Toei.Kuramae-Hacks（技巧/捷徑）-1768633092524-nrpc8",
+    "entityName": "odpt:Station:Toei.Kuramae",
+    "entityIds": [
+      "odpt:Station:Toei.Kuramae"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 🗺️ **以「隅田川」做方向感**：如果你知道目的地在河的哪一側，選出口更快。(Advice: 先上地面看河/橋，再決定往哪個街區走。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Kyobashi-Traps（陷阱/警告）-1768633092524-0j7ya",
+    "entityName": "odpt:Station:TokyoMetro.Kyobashi",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Kyobashi"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🧩 **地下通道選錯就虧時間**：靠近東京站/銀座一帶，地下連通多但指標容易讓人繞遠。(Advice: 先決定你的最終目標是「東京站八重洲側」還是「銀座方向」，再選出口。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Kyobashi-Hacks（技巧/捷徑）-1768633092524-1yalh",
+    "entityName": "odpt:Station:TokyoMetro.Kyobashi",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Kyobashi"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 🌧️ **雨天優先走地下**：這一帶地下商場與連通道多。(Advice: 先在站內確認可到哪棟大樓的連通口，再接地面最後 100-300m。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Minowa-Traps（陷阱/警告）-1768633092524-2i2wh",
+    "entityName": "odpt:Station:TokyoMetro.Minowa",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Minowa"
+    ],
+    "section": "Traps（陷阱/警告）",
+    "content": "- [Trap] 🕒 **與觀光核心有心理落差**：三ノ輪屬生活圈，步行到熱門景點通常不會很近。(Advice: 先用日比谷線移動到你要的「大站」，再轉乘更穩。)",
+    "type": "tip",
+    "icon": "💡",
+    "priority": 50
+  },
+  {
+    "id": "md-odpt:Station:TokyoMetro.Minowa-Hacks（技巧/捷徑）-1768633092524-k4tcz",
+    "entityName": "odpt:Station:TokyoMetro.Minowa",
+    "entityIds": [
+      "odpt:Station:TokyoMetro.Minowa"
+    ],
+    "section": "Hacks（技巧/捷徑）",
+    "content": "- [Hack] 😌 **避開大站人潮**：作為日比谷線的中繼點，出站/進站壓力通常小於上野、秋葉原。(Advice: 需要買補給或整理行李，這類小站往往更舒服。)",
     "type": "tip",
     "icon": "💡",
     "priority": 50

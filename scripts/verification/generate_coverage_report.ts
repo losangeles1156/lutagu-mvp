@@ -12,6 +12,22 @@ const top100Stations = JSON.parse(fs.readFileSync('scripts/data/top_100_stations
 const knowledgeBase = JSON.parse(fs.readFileSync('src/data/knowledge_base.json', 'utf8'));
 const staticL1Content = fs.readFileSync('src/data/staticL1Data.ts', 'utf8');
 
+function getArgValue(name: string): string | null {
+    const prefix = `--${name}=`;
+    const found = process.argv.find(a => a.startsWith(prefix));
+    return found ? found.slice(prefix.length) : null;
+}
+
+function hasFlag(name: string): boolean {
+    return process.argv.includes(`--${name}`);
+}
+
+function parsePositiveInt(value: string | null, fallback: number): number {
+    if (!value) return fallback;
+    const n = Number.parseInt(value, 10);
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
 // Get L4 knowledge IDs and names mentioned in content
 const knowledgeIds = new Set(knowledgeBase.flatMap((k: any) => k.entityIds || []));
 const knowledgeNames = new Set(knowledgeBase.map((k: any) => k.entityName));
@@ -34,20 +50,32 @@ for (const match of allStationKeyMatches) {
     staticL1Ids.add(match[1]);
 }
 
-console.log(`L1 Name Index Size: ${l1NameIndex.size}`);
-console.log(`Static L1 IDs Size: ${staticL1Ids.size}`);
+const start = parsePositiveInt(getArgValue('start'), 1);
+const end = parsePositiveInt(getArgValue('end'), top100Stations.length);
+const summaryOnly = hasFlag('summaryOnly') || hasFlag('summary');
+const verbose = hasFlag('verbose');
+const limitMissing = parsePositiveInt(getArgValue('limitMissing'), 20);
 
-console.log(`=== Tokyo Core 11 Wards Coverage Report ===`);
-console.log(`Analyzing top 100 stations from scripts/data/top_100_stations.json\n`);
+const sliceStart = Math.max(1, start);
+const sliceEnd = Math.min(Math.max(sliceStart, end), top100Stations.length);
+const stations = top100Stations.slice(sliceStart - 1, sliceEnd);
 
-console.log('| Station | Ward | L1 | L4 | Operators |');
-console.log('|:---|:---|:---:|:---:|:---|');
+if (!summaryOnly || verbose) {
+    console.log(`=== Tokyo Core 11 Wards Coverage Report ===`);
+    console.log(`Range: ${sliceStart}-${sliceEnd} (${stations.length} stations)\n`);
+    console.log('| Station | Ward | L1 | L4 | Operators |');
+    console.log('|:---|:---|:---:|:---:|:---|');
+}
 
 let l1Count = 0;
 let l1FullCount = 0;
 let l4Count = 0;
 
-top100Stations.forEach((s: any) => {
+const missingL1Full: { name: string; ward: string }[] = [];
+const missingL4: { name: string; ward: string }[] = [];
+const missingBoth: { name: string; ward: string }[] = [];
+
+stations.forEach((s: any) => {
     const name = s.name || s.names?.ja || 'Unknown';
     const ward = s.ward || 'Unknown';
     const operators = s.operators ? s.operators.join(', ') : (s.operator || 'Unknown');
@@ -57,10 +85,6 @@ top100Stations.forEach((s: any) => {
     const clusterId = l1NameIndex.get(name) || l1NameIndex.get(nameEn);
     const hasL1Index = !!clusterId;
     const hasL1Full = !!(clusterId && staticL1Ids.has(clusterId));
-    
-    if (name === '上野' || name === '東京' || name === '鶯谷') {
-        console.log(`Debug ${name}: clusterId=${clusterId}, hasL1Full=${hasL1Full}, staticL1IdsHas=${staticL1Ids.has(clusterId || '')}`);
-    }
     
     // Check L4 coverage (ID or Name)
     const ids = s.ids || (s.id ? [s.id] : []);
@@ -101,19 +125,41 @@ top100Stations.forEach((s: any) => {
     if (hasL1Full) l1FullCount++;
     if (hasL4) l4Count++;
 
-    const row = [
-        name.padEnd(8),
-        ward.padEnd(10),
-        hasL1Full ? '✅' : (hasL1Index ? '➖' : '❌'),
-        hasL4 ? '✅' : '❌',
-        operators
-    ];
-    console.log(`| ${row.join(' | ')} |`);
+    if (hasL1Index && !hasL1Full) missingL1Full.push({ name, ward });
+    if (!hasL4) missingL4.push({ name, ward });
+    if ((!hasL1Full && hasL1Index) && !hasL4) missingBoth.push({ name, ward });
+
+    if (!summaryOnly || verbose) {
+        const row = [
+            name.padEnd(8),
+            ward.padEnd(10),
+            hasL1Full ? '✅' : (hasL1Index ? '➖' : '❌'),
+            hasL4 ? '✅' : '❌',
+            operators
+        ];
+        console.log(`| ${row.join(' | ')} |`);
+    }
 });
 
-console.log(`\nSummary:`);
-console.log(`L1 Index Coverage: ${l1Count}/100`);
-console.log(`L1 Full Coverage:  ${l1FullCount}/100`);
-console.log(`L4 Content Coverage: ${l4Count}/100`);
-console.log(`\n* Total Unique Stations Analyzed: ${top100Stations.length}`);
-console.log(`\n* Legend: ✅ Full Content, ➖ Name Index Only, ❌ No Coverage`);
+console.log(`\nSummary (Range ${sliceStart}-${sliceEnd}):`);
+console.log(`L1 Index Coverage: ${l1Count}/${stations.length}`);
+console.log(`L1 Full Coverage:  ${l1FullCount}/${stations.length}`);
+console.log(`L4 Content Coverage: ${l4Count}/${stations.length}`);
+
+const formatMissing = (items: { name: string; ward: string }[]) =>
+    items
+        .slice(0, limitMissing)
+        .map(i => `${i.name} (${i.ward})`)
+        .join(', ');
+
+if (missingL1Full.length > 0) {
+    console.log(`\nMissing L1 Full (showing up to ${limitMissing}): ${formatMissing(missingL1Full)}${missingL1Full.length > limitMissing ? ` ...(+${missingL1Full.length - limitMissing})` : ''}`);
+}
+
+if (missingL4.length > 0) {
+    console.log(`Missing L4 (showing up to ${limitMissing}): ${formatMissing(missingL4)}${missingL4.length > limitMissing ? ` ...(+${missingL4.length - limitMissing})` : ''}`);
+}
+
+if (missingBoth.length > 0) {
+    console.log(`Missing Both (showing up to ${limitMissing}): ${formatMissing(missingBoth)}${missingBoth.length > limitMissing ? ` ...(+${missingBoth.length - limitMissing})` : ''}`);
+}

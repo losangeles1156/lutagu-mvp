@@ -1,6 +1,6 @@
 import { odptClient } from './client';
 import assert from 'node:assert';
-import { test, describe, mock } from 'node:test';
+import { test, describe } from 'node:test';
 
 // We want to test the internal logic of fetchOdpt via public methods
 // Since we can't easily mock process.env after import, we assume they are set or missing
@@ -53,5 +53,27 @@ describe('ODPT Client Token Dispatching', () => {
             assert.strictEqual(e.message.includes('ODPT_API_KEY_METRO missing'), false);
             assert.strictEqual(e.message.includes('ODPT_API_KEY_JR_EAST missing'), false);
         }
+    });
+
+    test('Should route Toei BusroutePattern to Public API base URL', async (t) => {
+        const originalFetch = globalThis.fetch;
+        const urls: string[] = [];
+
+        globalThis.fetch = (async (input: any) => {
+            urls.push(String(input));
+            return new Response(JSON.stringify([]), {
+                status: 200,
+                headers: { 'content-type': 'application/json' }
+            });
+        }) as any;
+
+        t.after(() => {
+            globalThis.fetch = originalFetch;
+        });
+
+        await odptClient.getBusroutePatterns({ operator: 'odpt.Operator:Toei', title: '都01' });
+
+        assert.ok(urls.length >= 1);
+        assert.match(urls[0], /^https:\/\/api-public\.odpt\.org\/api\/v4\/odpt:BusroutePattern\?/);
     });
 });

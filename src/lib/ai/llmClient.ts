@@ -11,10 +11,10 @@ export interface LLMParams {
 }
 
 function resolveTimeoutMs(taskType: LLMParams['taskType'] | undefined) {
-    if (taskType === 'classification' || taskType === 'simple') return 10000;
-    if (taskType === 'chat' || taskType === 'synthesis') return 20000;
-    if (taskType === 'reasoning' || taskType === 'context_heavy') return 30000;
-    return 20000;
+    if (taskType === 'classification' || taskType === 'simple') return 20000;
+    if (taskType === 'chat' || taskType === 'synthesis') return 30000;
+    if (taskType === 'reasoning' || taskType === 'context_heavy') return 45000;
+    return 30000;
 }
 
 function resolveMaxTokens(params: LLMParams) {
@@ -45,12 +45,12 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
     }
 
-    // 2. Logic / Reasoning / Precision -> Gemini 3 Flash Preview (Pro-level Brain)
+    // 2. Logic / Reasoning / Precision -> Gemini 2.0 Flash Exp
     if (taskType === 'reasoning' || taskType === 'context_heavy') {
         const result = await generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
-        // Fallback to MiniMax-M2.1 if Gemini 3 fails (User Request: backup role)
+        // Fallback to MiniMax-M2.1 if Gemini 2.0 fails (User Request: backup role)
         if (!result && process.env.MINIMAX_API_KEY) {
-            console.warn('[LLM] Gemini 3 Flash failed, falling back to MiniMax M2.1');
+            console.warn('[LLM] Gemini 2.0 Flash failed, falling back to MiniMax M2.1');
             return generateMiniMaxResponse(params);
         }
         return result;

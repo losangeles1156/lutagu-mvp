@@ -247,12 +247,6 @@ function lineStatusDetailRank(detail: LineStatusDetail): number {
     return 0;
 }
 
-export const __private__ = {
-    extractDelayMinutesFromText,
-    classifyLineStatusFromText,
-    lineStatusDetailRank,
-};
-
 function pickWorstSeverity(disruptions: any[]) {
     const order = ['none', 'minor', 'major', 'critical'];
     return disruptions.reduce(
@@ -722,6 +716,34 @@ export async function GET(request: Request) {
                 fetched_at: nowIso
             };
 
+            const overallSeverity = (() => {
+                if (hasSuspension) return 'critical';
+                if (lineStatusArray.some(l => l.status_detail === 'delay_major')) return 'major';
+                if (lineStatusArray.some(l => l.status_detail === 'delay_minor')) return 'minor';
+                if (hasDelay) return 'minor';
+                return 'none';
+            })();
+
+            const affectedLines = Array.from(
+                new Set(
+                    lineStatusArray
+                        .filter(l => l.status !== 'normal')
+                        .map(l => l.name?.ja || l.line)
+                        .filter(Boolean)
+                )
+            );
+
+            const shouldLogHistory = (() => {
+                if (overallSeverity === 'none') return false;
+                const last = Array.isArray(historyRows) && historyRows.length > 0 ? (historyRows[0] as any) : null;
+                if (!last) return true;
+                const lastAtMs = last?.created_at ? Date.parse(String(last.created_at)) : NaN;
+                const recent = Number.isFinite(lastAtMs) && (Date.now() - lastAtMs < 5 * 60 * 1000);
+                if (!recent) return true;
+                if (String(last?.severity || '') !== overallSeverity) return true;
+                return false;
+            })();
+
             try {
                 const tasks: PromiseLike<any>[] = [];
 
@@ -759,6 +781,20 @@ export async function GET(request: Request) {
                     );
                 }
 
+                if (shouldLogHistory) {
+                    tasks.push(
+                        supabaseAdmin
+                            .from('l2_disruption_history')
+                            .insert({
+                                station_id: stationId,
+                                severity: overallSeverity,
+                                has_issues: true,
+                                affected_lines: affectedLines,
+                                disruption_data: disruptionData,
+                            })
+                    );
+                }
+
                 await Promise.all(tasks);
             } catch (e) {
                 console.warn('[L2 API] Persist failed:', e);
@@ -775,3 +811,9 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+;(GET as any).__private__ = {
+    extractDelayMinutesFromText,
+    classifyLineStatusFromText,
+    lineStatusDetailRank,
+};

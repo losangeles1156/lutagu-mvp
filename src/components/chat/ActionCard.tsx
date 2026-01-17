@@ -1,9 +1,9 @@
-import { MapPin, Info, CalendarPlus, Train, Car, Navigation, Zap, Banknote } from 'lucide-react';
+import { MapPin, Info, CalendarPlus, Train, Car, Bike, Navigation, Zap, Banknote } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { TrapCard } from './TrapCard';
 import { HackCard } from './HackCard';
 
-export type ActionType = 'navigate' | 'details' | 'trip' | 'transit' | 'taxi' | 'discovery' | 'trap' | 'hack' | 'poi';
+export type ActionType = 'navigate' | 'details' | 'trip' | 'transit' | 'taxi' | 'bike' | 'discovery' | 'trap' | 'hack' | 'poi';
 
 export interface Action {
     type: ActionType;
@@ -59,6 +59,13 @@ const CONFIG: Record<string, any> = {
         textColor: 'text-amber-800',
         borderColor: 'border-amber-100',
         hoverColor: 'hover:bg-amber-100'
+    },
+    bike: {
+        icon: Bike,
+        bgColor: 'bg-emerald-50',
+        textColor: 'text-emerald-800',
+        borderColor: 'border-emerald-100',
+        hoverColor: 'hover:bg-emerald-100'
     },
     discovery: {
         icon: Navigation,

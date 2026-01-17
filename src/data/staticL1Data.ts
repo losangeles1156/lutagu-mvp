@@ -19014,6 +19014,118 @@ export const STATIC_L1_DATA: Record<string, L1_DNA_Data> = {
             { "id": "lively", "label": { "ja": "にぎやか", "en": "Lively", "zh": "熱鬧" }, "score": 4 }
         ],
         "last_updated": "2026-01-12T10:00:00.000Z"
+    },
+    "odpt.Station:Toei.Hamacho": {
+        "categories": {
+            "nature": { "id": "nature", "count": 40, "label": { "ja": "自然", "en": "Nature", "zh": "自然" }, "subcategories": {}, "representative_spots": [] },
+            "culture": { "id": "culture", "count": 60, "label": { "ja": "文化", "en": "Culture", "zh": "文化" }, "subcategories": {}, "representative_spots": [] },
+            "dining": { "id": "dining", "count": 160, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "浜町公園と水辺の空気、都心なのに歩ける余白がある街", "en": "A walkable pocket of calm with parks and riverside air", "zh": "有濱町公園與水岸氣息，市中心也能慢走的街區" },
+        "title": { "ja": "水辺の落ち着き", "en": "Riverside Calm", "zh": "水岸的安定感" },
+        "vibe_tags": [
+            { "id": "quiet", "label": { "ja": "落ち着いた", "en": "Quiet", "zh": "安靜" }, "score": 4 },
+            { "id": "walkable", "label": { "ja": "歩きやすい", "en": "Walkable", "zh": "好走" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
+    },
+    "odpt.Station:TokyoMetro.Inaricho": {
+        "categories": {
+            "culture": { "id": "culture", "count": 80, "label": { "ja": "文化", "en": "Culture", "zh": "文化" }, "subcategories": {}, "representative_spots": [] },
+            "shopping": { "id": "shopping", "count": 120, "label": { "ja": "買い物", "en": "Shopping", "zh": "購物" }, "subcategories": {}, "representative_spots": [] },
+            "dining": { "id": "dining", "count": 220, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "上野の外縁、下町の気配と道具街の実用性が近い街", "en": "Edge of Ueno with a practical downtown vibe", "zh": "上野外緣，帶下町氣息且很實用的街區" },
+        "title": { "ja": "上野の外縁", "en": "Ueno Edge", "zh": "上野外緣" },
+        "vibe_tags": [
+            { "id": "local", "label": { "ja": "下町", "en": "Local", "zh": "在地" }, "score": 4 },
+            { "id": "practical", "label": { "ja": "実用的", "en": "Practical", "zh": "實用" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
+    },
+    "odpt.Station:TokyoMetro.Iriya": {
+        "categories": {
+            "culture": { "id": "culture", "count": 60, "label": { "ja": "文化", "en": "Culture", "zh": "文化" }, "subcategories": {}, "representative_spots": [] },
+            "dining": { "id": "dining", "count": 180, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] },
+            "residential": { "id": "residential", "count": 90, "label": { "ja": "住宅", "en": "Residential", "zh": "住宅" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "上野・浅草の間にある生活街、観光の合間に息を整えやすい", "en": "A lived-in area between Ueno and Asakusa", "zh": "位於上野與淺草之間的生活街區，適合中途喘口氣" },
+        "title": { "ja": "生活の街", "en": "Everyday Tokyo", "zh": "日常東京" },
+        "vibe_tags": [
+            { "id": "calm", "label": { "ja": "穏やか", "en": "Calm", "zh": "平穩" }, "score": 4 },
+            { "id": "local", "label": { "ja": "下町", "en": "Local", "zh": "在地" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
+    },
+    "odpt.Station:Toei.Iwamotocho": {
+        "categories": {
+            "shopping": { "id": "shopping", "count": 180, "label": { "ja": "買い物", "en": "Shopping", "zh": "購物" }, "subcategories": {}, "representative_spots": [] },
+            "dining": { "id": "dining", "count": 260, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] },
+            "business": { "id": "business", "count": 120, "label": { "ja": "ビジネス", "en": "Business", "zh": "商務" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "秋葉原・神田の間、地上と地下の接続が多い実務エリア", "en": "Between Akihabara and Kanda, with many underground connections", "zh": "介於秋葉原與神田之間，地上地下連通多的實務區" },
+        "title": { "ja": "地上と地下の接点", "en": "Ground–Underground Junction", "zh": "地上與地下的接點" },
+        "vibe_tags": [
+            { "id": "busy", "label": { "ja": "忙しい", "en": "Busy", "zh": "忙碌" }, "score": 4 },
+            { "id": "practical", "label": { "ja": "実用的", "en": "Practical", "zh": "實用" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
+    },
+    "odpt.Station:Toei.Kachidoki": {
+        "categories": {
+            "waterfront": { "id": "waterfront", "count": 60, "label": { "ja": "水辺", "en": "Waterfront", "zh": "水岸" }, "subcategories": {}, "representative_spots": [] },
+            "residential": { "id": "residential", "count": 140, "label": { "ja": "住宅", "en": "Residential", "zh": "住宅" }, "subcategories": {}, "representative_spots": [] },
+            "dining": { "id": "dining", "count": 220, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "タワーマンションと運河の街、地下が深いぶん地上は開けている", "en": "Canals and modern towers; open streets above ground", "zh": "運河與高樓的街區，地下深但地上相對開闊" },
+        "title": { "ja": "湾岸の生活拠点", "en": "Bay Living Hub", "zh": "灣岸生活據點" },
+        "vibe_tags": [
+            { "id": "modern", "label": { "ja": "モダン", "en": "Modern", "zh": "現代" }, "score": 4 },
+            { "id": "open_space", "label": { "ja": "開放的", "en": "Open", "zh": "開闊" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
+    },
+    "odpt.Station:Toei.Kuramae": {
+        "categories": {
+            "shopping": { "id": "shopping", "count": 150, "label": { "ja": "買い物", "en": "Shopping", "zh": "購物" }, "subcategories": {}, "representative_spots": [] },
+            "culture": { "id": "culture", "count": 70, "label": { "ja": "文化", "en": "Culture", "zh": "文化" }, "subcategories": {}, "representative_spots": [] },
+            "dining": { "id": "dining", "count": 200, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "浅草の隣、手仕事の店と川沿いの散歩が似合う街", "en": "Neighbor of Asakusa with crafts and riverside walks", "zh": "淺草旁邊，適合逛手作小店與河邊散步的街區" },
+        "title": { "ja": "手仕事と水辺", "en": "Crafts & Riverside", "zh": "手作與水岸" },
+        "vibe_tags": [
+            { "id": "craft", "label": { "ja": "手仕事", "en": "Craft", "zh": "手作" }, "score": 4 },
+            { "id": "walkable", "label": { "ja": "歩きやすい", "en": "Walkable", "zh": "好走" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
+    },
+    "odpt.Station:TokyoMetro.Ginza.Kyobashi": {
+        "categories": {
+            "shopping": { "id": "shopping", "count": 260, "label": { "ja": "ショッピング", "en": "Shopping", "zh": "購物" }, "subcategories": {}, "representative_spots": [] },
+            "business": { "id": "business", "count": 200, "label": { "ja": "ビジネス", "en": "Business", "zh": "商務" }, "subcategories": {}, "representative_spots": [] },
+            "dining": { "id": "dining", "count": 240, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "東京駅・銀座の間、地下通路の選択で時間差が出る街", "en": "Between Tokyo Station and Ginza; small route choices matter", "zh": "介於東京站與銀座之間，走對地下路線就省時間" },
+        "title": { "ja": "中央の連絡点", "en": "Central Connector", "zh": "中央連絡點" },
+        "vibe_tags": [
+            { "id": "central", "label": { "ja": "中心", "en": "Central", "zh": "中心" }, "score": 5 },
+            { "id": "fast_pace", "label": { "ja": "テンポが速い", "en": "Fast-paced", "zh": "節奏快" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
+    },
+    "odpt.Station:TokyoMetro.Minowa": {
+        "categories": {
+            "dining": { "id": "dining", "count": 140, "label": { "ja": "食事", "en": "Dining", "zh": "美食" }, "subcategories": {}, "representative_spots": [] },
+            "shopping": { "id": "shopping", "count": 90, "label": { "ja": "買い物", "en": "Shopping", "zh": "購物" }, "subcategories": {}, "representative_spots": [] },
+            "local": { "id": "local", "count": 70, "label": { "ja": "下町", "en": "Local", "zh": "下町" }, "subcategories": {}, "representative_spots": [] }
+        },
+        "tagline": { "ja": "観光の中心から少し外れた下町、移動のストレスが少なめ", "en": "A quieter downtown area away from the tourist core", "zh": "離觀光中心稍遠的下町，相對不那麼緊繃" },
+        "title": { "ja": "静かな下町", "en": "Quiet Downtown", "zh": "安靜下町" },
+        "vibe_tags": [
+            { "id": "local", "label": { "ja": "下町", "en": "Local", "zh": "在地" }, "score": 4 },
+            { "id": "calm", "label": { "ja": "穏やか", "en": "Calm", "zh": "平穩" }, "score": 4 }
+        ],
+        "last_updated": "2026-01-17T00:00:00.000Z"
     }
 };
 

@@ -1,0 +1,225 @@
+{
+  "name": "LUTAGU Weather Data Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "35.6895"
+            },
+            {
+              "name": "longitude",
+              "value": "139.6917"
+            },
+            {
+              "name": "current",
+              "value": "temperature_2m,weather_code,wind_speed_10m"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-weather",
+      "name": "Fetch Open-Meteo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const weatherData = $input.first().json;\nconst current = weatherData.current;\n\nlet condition = 'Unknown';\nif (current.weather_code <= 3) condition = 'Clear';\nelse if (current.weather_code <= 60) condition = 'Cloudy';\nelse condition = 'Rain';\n\nconst stations = [\n  'odpt.Station:TokyoMetro.Ginza.Ueno',\n  'odpt.Station:TokyoMetro.Hibiya.Ueno',\n  'odpt.Station:JR-East.Yamanote.Ueno',\n  'odpt.Station:TokyoMetro.Ginza.Asakusa',\n  'odpt.Station:Toei.Asakusa.Asakusa',\n  'odpt.Station:TokyoMetro.Hibiya.Akihabara',\n  'odpt.Station:JR-East.Yamanote.Akihabara',\n  'odpt.Station:TokyoMetro.Marunouchi.Tokyo',\n  'odpt.Station:JR-East.Yamanote.Tokyo',\n  'odpt.Station:TokyoMetro.Ginza.Ginza',\n  'odpt.Station:Toei.Asakusa.Kuramae',\n  'odpt.Station:Toei.Oedo.ShinOkachimachi',\n  'odpt.Station:TokyoMetro.Ginza.Kanda',\n  'odpt.Station:TokyoMetro.Marunouchi.Otemachi',\n  'odpt.Station:Toei.Asakusa.Oshiage',\n  'odpt.Station:TokyoMetro.Hanzomon.Oshiage',\n  'odpt.Station:TokyoMetro.Hibiya.Ningyocho',\n  'odpt.Station:Toei.Asakusa.Ningyocho',\n  'odpt.Station:TokyoMetro.Ginza.Nihombashi',\n  'odpt.Station:Toei.Asakusa.Nihombashi',\n  'odpt.Station:JR-East.Yamanote.Shinjuku',\n  'odpt.Station:JR-East.Shinjuku',\n  'odpt.Station:JR-East.Yamanote.Shibuya',\n  'odpt.Station:JR-East.Shibuya',\n  'odpt.Station:JR-East.Yamanote.Ikebukuro',\n  'odpt.Station:JR-East.Ikebukuro',\n  'odpt.Station:JR-East.Yamanote.Shinagawa',\n  'odpt.Station:JR-East.Tokaido.Shinagawa',\n  'odpt.Station:JR-East.Shinagawa'\n];\n\nconst now = new Date().toISOString();\n\nconst updates = stations.map(stationId => ({\n  station_id: stationId,\n  weather_info: {\n    temp: current.temperature_2m,\n    condition: condition,\n    wind: current.wind_speed_10m,\n    update_time: now\n  },\n  updated_at: now\n}));\n\nreturn { json: { updates } };"
+      },
+      "id": "transform-data",
+      "name": "Transform Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.NEXT_PUBLIC_SUPABASE_URL || $env.SUPABASE_URL) }}/rest/v1/transit_dynamic_snapshot?on_conflict=station_id",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ `Bearer ${$env.SUPABASE_SERVICE_KEY}` }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.updates }}",
+        "options": {}
+      },
+      "id": "upsert-supabase",
+      "name": "Upsert to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date().toISOString();\nconst updates = $node['Transform Data']?.first()?.json?.updates || $json?.updates || [];\nreturn {\n  json: {\n    actor_user_id: null,\n    actor_visitor_id: null,\n    actor_ip_hash: null,\n    actor_user_agent_hash: null,\n    action: 'create',\n    resource_type: 'weather_sync',\n    resource_id: 'tokyo',\n    before: null,\n    after: {\n      ok: true,\n      station_count: Array.isArray(updates) ? updates.length : 0,\n      updated_at: updates?.[0]?.updated_at || now,\n      source: 'open-meteo'\n    },\n    created_at: now\n  }\n};"
+      },
+      "id": "build-audit-log",
+      "name": "Build Audit Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.NEXT_PUBLIC_SUPABASE_URL || $env.SUPABASE_URL) }}/rest/v1/audit_logs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ `Bearer ${$env.SUPABASE_SERVICE_KEY}` }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "write-audit-log",
+      "name": "Write Audit Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "Fetch Open-Meteo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Open-Meteo": {
+      "main": [
+        [
+          {
+            "node": "Transform Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Data": {
+      "main": [
+        [
+          {
+            "node": "Upsert to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Build Audit Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Audit Log": {
+      "main": [
+        [
+          {
+            "node": "Write Audit Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateId": "lutagu-weather-sync"
+  }
+}

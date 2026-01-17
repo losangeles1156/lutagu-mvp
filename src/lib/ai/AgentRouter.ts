@@ -61,10 +61,10 @@ Rules:
 2. If the input matches a tool's capability, select that tool.
 3. Extract necessary parameters from the input based on the tool's schema.
 4. If NO tool is suitable, or the user is just chit-chatting, return "null".
-5. OUTPUT FORMAT: You must return a strict JSON object. No markdown.
+5. OUTPUT FORMAT: Return ONLY a valid JSON object. Do not use markdown blocks.
 {
   "toolName": "name_of_the_tool",
-  "reasoning": "Why you chose this tool",
+  "reasoning": "Max 10 words explanation",
   "parameters": { ...extracted params... }
 }
 `;
@@ -74,20 +74,35 @@ Rules:
                 systemPrompt,
                 userPrompt: input,
                 taskType: 'classification',
-                temperature: 0.0
+                model: 'gemini-3-flash-preview',
+                temperature: 0.0,
+                maxTokens: 1024 // Ensure enough space for JSON with reasoning
             });
 
             if (!response) return null;
 
-            // Clean response (remove markdown code blocks if any)
-            const cleanJson = response.replace(/```json/g, '').replace(/```/g, '').trim();
+            // Attempt to extract JSON object from response
+            let jsonString = response.trim();
+            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                jsonString = jsonMatch[0];
+            }
+
+            // Clean response (remove markdown code blocks if any left)
+            const cleanJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
 
             if (cleanJson.toLowerCase() === 'null') {
                 agentRouterCache.set(cacheKey, { t: 'null' });
                 return null;
             }
 
-            const parsed = JSON.parse(cleanJson);
+            let parsed;
+            try {
+                parsed = JSON.parse(cleanJson);
+            } catch (e) {
+                console.warn('[AgentRouter] JSON Parse Failed. Raw:', response);
+                throw e; // Let the outer catch handle it
+            }
 
             if (parsed.toolName && tools.some(t => t.definition.name === parsed.toolName)) {
                 const out = parsed as ToolSelection;

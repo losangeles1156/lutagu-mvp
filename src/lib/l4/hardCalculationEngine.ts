@@ -1,5 +1,6 @@
 import { MatchedStrategyCard, EvaluationContext } from '@/types/lutagu_l4';
 import { odptClient } from '@/lib/odpt/client';
+import { STATION_MAP } from '@/lib/api/nodes';
 
 export class L4HardCalculationEngine {
 
@@ -40,8 +41,19 @@ export class L4HardCalculationEngine {
                     const infoList = await odptClient.getTrainInformation(operator, targetRailway);
 
                     for (const info of infoList) {
-                        if (info['odpt:trainInformationStatus'] && info['odpt:trainInformationStatus'] !== '平常運転' && info['odpt:trainInformationStatus'] !== '平時運行') {
-                            const text = info['odpt:trainInformationText']?.[locale === 'zh-TW' ? 'ja' : (locale === 'en' ? 'en' : 'ja')] || 'Delay detected';
+                        const statusObj = info['odpt:trainInformationStatus'] as any;
+                        const statusText =
+                            (typeof statusObj === 'object' && statusObj)
+                                ? (statusObj.ja || statusObj.en || statusObj['zh-TW'] || statusObj.zh || '')
+                                : String(statusObj || '');
+
+                        if (statusText && statusText !== '平常運転' && statusText !== '平時運行') {
+                            const textObj = info['odpt:trainInformationText'] as any;
+                            const localeKey = locale === 'en' ? 'en' : 'ja';
+                            const text =
+                                (typeof textObj === 'object' && textObj)
+                                    ? (textObj[localeKey] || textObj.ja || textObj.en || textObj['zh-TW'] || textObj.zh || 'Delay detected')
+                                    : String(textObj || 'Delay detected');
 
                             cards.push({
                                 id: `odpt-delay-${info['@id']}`,
@@ -57,7 +69,10 @@ export class L4HardCalculationEngine {
                 }
             }
         } catch (e) {
-            console.error('[HardCalc] Failed to fetch train info', e);
+            const msg = e instanceof Error ? e.message : String(e);
+            if (!/ODPT_API_KEY_(?:METRO|JR_EAST) missing/i.test(msg)) {
+                console.error('[HardCalc] Failed to fetch train info', e);
+            }
         }
     }
 
@@ -126,7 +141,10 @@ export class L4HardCalculationEngine {
             }
 
         } catch (e) {
-            console.error('[HardCalc] Last Train check failed', e);
+            const msg = e instanceof Error ? e.message : String(e);
+            if (!/ODPT_API_KEY_(?:METRO|JR_EAST) missing/i.test(msg)) {
+                console.error('[HardCalc] Last Train check failed', e);
+            }
         }
     }
 
@@ -138,20 +156,31 @@ export class L4HardCalculationEngine {
             let isMainland = true;
 
             if (stationId) {
-                const stations = await odptClient.getStation(stationId);
-                if (stations && stations.length > 0) {
-                    const s = stations[0];
-                    if (s['geo:lat'] && s['geo:long']) {
-                        lat = s['geo:lat'];
-                        lon = s['geo:long'];
-
-                        // 2. Region Check (Mainland Only)
-                        // Lat > 34.8 excludes Izu Islands (Oshima is ~34.7)
-                        // This covers Tokyo (23 wards/Tama), Kanagawa, Chiba mainland.
-                        if (lat < 34.8) {
-                            isMainland = false;
+                const normalizedStationId = stationId.replace(/^odpt:Station:/, 'odpt.Station:');
+                const mapped = STATION_MAP[normalizedStationId];
+                if (mapped) {
+                    lat = mapped.lat;
+                    lon = mapped.lon;
+                } else {
+                    try {
+                        const stations = await odptClient.getStation(normalizedStationId);
+                        if (stations && stations.length > 0) {
+                            const s = stations[0];
+                            if (s['geo:lat'] && s['geo:long']) {
+                                lat = s['geo:lat'];
+                                lon = s['geo:long'];
+                            }
+                        }
+                    } catch (e) {
+                        const msg = e instanceof Error ? e.message : String(e);
+                        if (!/ODPT_API_KEY_(?:METRO|JR_EAST) missing/i.test(msg)) {
+                            console.error('[HardCalc] Station lookup failed', e);
                         }
                     }
+                }
+
+                if (lat < 34.8) {
+                    isMainland = false;
                 }
             }
 

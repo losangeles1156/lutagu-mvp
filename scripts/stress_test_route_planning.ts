@@ -4,6 +4,60 @@ import { performance } from 'perf_hooks';
 
 const railways = CORE_TOPOLOGY as unknown as RailwayTopology[];
 
+function getArgValue(name: string): string | null {
+  const prefix = `--${name}=`;
+  const found = process.argv.find(a => a.startsWith(prefix));
+  return found ? found.slice(prefix.length) : null;
+}
+
+function hasFlag(name: string): boolean {
+  return process.argv.includes(`--${name}`);
+}
+
+function parsePositiveInt(value: string | null, fallback: number): number {
+  if (!value) return fallback;
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function quantile(values: number[], q: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const pos = (sorted.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  if (sorted[base + 1] === undefined) return sorted[base];
+  return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+}
+
+function inferOperatorKeyFromId(id: string): string {
+  const cleaned = id.replace(/^odpt[.:]Station:/, '').replace(/^odpt[.:]Railway:/, '');
+  const first = cleaned.split('.')[0];
+  return first || 'Unknown';
+}
+
+function buildStationIndex() {
+  const stationIds = new Set<string>();
+  const stationTitleById = new Map<string, { ja?: string; en?: string }>();
+  for (const r of railways) {
+    for (const s of r.stationOrder) {
+      stationIds.add(s.station);
+      if (!stationTitleById.has(s.station)) {
+        stationTitleById.set(s.station, { ja: s.title?.ja, en: s.title?.en });
+      }
+    }
+  }
+
+  const byOperator = new Map<string, string[]>();
+  for (const id of stationIds) {
+    const op = inferOperatorKeyFromId(id);
+    const list = byOperator.get(op) || [];
+    list.push(id);
+    byOperator.set(op, list);
+  }
+  return { stationIds: Array.from(stationIds), stationTitleById, byOperator };
+}
+
 // 輔助函數：查找車站 ID
 function findStationIds(name: string): string[] {
   const exactIds = new Set<string>();
@@ -85,18 +139,37 @@ const TEST_DATASET = [
 
 async function runStressTest() {
   console.log('=== BambiGO 路線規劃演算法壓力測試與可靠性驗證 ===');
-  console.log(`總測試案例數: ${TEST_DATASET.length}`);
+  const mode = hasFlag('random') ? 'random' : 'dataset';
+  const iterations = parsePositiveInt(getArgValue('iterations'), mode === 'random' ? 1000 : TEST_DATASET.length);
+  const maxHops = parsePositiveInt(getArgValue('maxHops'), 80);
+  const crossSystemOnly = hasFlag('crossSystemOnly');
+
+  console.log(`模式: ${mode}`);
+  console.log(`總測試案例數: ${mode === 'random' ? iterations : TEST_DATASET.length}`);
   
   const results: any[] = [];
   const startMemory = process.memoryUsage().heapUsed / 1024 / 1024;
 
-  for (const tc of TEST_DATASET) {
+  const stationIndex = buildStationIndex();
+  const operatorKeys = Array.from(stationIndex.byOperator.keys()).filter(k => (stationIndex.byOperator.get(k) || []).length > 0);
+
+  const runOne = (tc: { from: string; to: string; type: string; googleDuration?: number | null }) => {
     const fromIds = findStationIds(tc.from);
     const toIds = findStationIds(tc.to);
 
     if (fromIds.length === 0 || toIds.length === 0) {
-      console.log(`⚠️ 找不到車站: ${tc.from} 或 ${tc.to}`);
-      continue;
+      results.push({
+        ...tc,
+        executionTime: 0,
+        found: false,
+        duration: 0,
+        transfers: 0,
+        label: 'N/A',
+        accuracy: null,
+        routeOperators: [],
+        isCrossSystem: false
+      });
+      return;
     }
 
     const startTime = performance.now();
@@ -104,6 +177,7 @@ async function runStressTest() {
       originStationId: fromIds[0],
       destinationStationId: toIds,
       railways,
+      maxHops,
       locale: 'zh-TW'
     });
     const endTime = performance.now();
@@ -111,39 +185,118 @@ async function runStressTest() {
     const executionTime = endTime - startTime;
     const bestRoute = routes[0];
     const duration = bestRoute?.duration ?? 0;
+    const railwaysInRoute = bestRoute?.railways || [];
+    const routeOperators = Array.from(new Set(railwaysInRoute.map(inferOperatorKeyFromId)));
+    const isCrossSystem = routeOperators.length > 1;
 
     results.push({
       ...tc,
       executionTime,
       found: routes.length > 0,
-      duration: duration,
+      duration,
       transfers: bestRoute?.transfers || 0,
       label: bestRoute?.label || 'N/A',
-      accuracy: tc.googleDuration ? (1 - Math.abs(duration - tc.googleDuration) / tc.googleDuration) : null
+      accuracy: tc.googleDuration ? (1 - Math.abs(duration - (tc.googleDuration || 0)) / (tc.googleDuration || 1)) : null,
+      routeOperators,
+      isCrossSystem
     });
+  };
+
+  if (mode === 'dataset') {
+    for (const tc of TEST_DATASET) {
+      runOne(tc);
+    }
+  } else {
+    let attempts = 0;
+    let completed = 0;
+    const maxAttempts = iterations * 5;
+    while (completed < iterations && attempts < maxAttempts) {
+      attempts++;
+      const opA = operatorKeys[Math.floor(Math.random() * operatorKeys.length)];
+      const opB = operatorKeys[Math.floor(Math.random() * operatorKeys.length)];
+      if (!opA || !opB || opA === opB) continue;
+      const listA = stationIndex.byOperator.get(opA) || [];
+      const listB = stationIndex.byOperator.get(opB) || [];
+      if (listA.length === 0 || listB.length === 0) continue;
+      const fromId = listA[Math.floor(Math.random() * listA.length)];
+      const toId = listB[Math.floor(Math.random() * listB.length)];
+      if (!fromId || !toId || fromId === toId) continue;
+
+      const fromTitle = stationIndex.stationTitleById.get(fromId);
+      const toTitle = stationIndex.stationTitleById.get(toId);
+      const fromName = fromTitle?.ja || fromTitle?.en || fromId;
+      const toName = toTitle?.ja || toTitle?.en || toId;
+
+      const startTime = performance.now();
+      const routes = findRankedRoutes({
+        originStationId: fromId,
+        destinationStationId: toId,
+        railways,
+        maxHops,
+        locale: 'zh-TW'
+      });
+      const endTime = performance.now();
+
+      const executionTime = endTime - startTime;
+      const bestRoute = routes[0];
+      const railwaysInRoute = bestRoute?.railways || [];
+      const routeOperators = Array.from(new Set(railwaysInRoute.map(inferOperatorKeyFromId)));
+      const isCrossSystem = routeOperators.length > 1;
+      if (crossSystemOnly && !isCrossSystem) continue;
+
+      results.push({
+        from: fromName,
+        to: toName,
+        fromId,
+        toId,
+        type: `Random(${opA}->${opB})`,
+        executionTime,
+        found: routes.length > 0,
+        duration: bestRoute?.duration ?? 0,
+        transfers: bestRoute?.transfers || 0,
+        label: bestRoute?.label || 'N/A',
+        accuracy: null,
+        routeOperators,
+        isCrossSystem
+      });
+      completed++;
+    }
   }
 
   const endMemory = process.memoryUsage().heapUsed / 1024 / 1024;
-  const avgTime = results.reduce((acc, r) => acc + r.executionTime, 0) / results.length;
-  const maxTime = Math.max(...results.map(r => r.executionTime));
-  const avgAccuracy = results.filter(r => r.accuracy !== null).reduce((acc, r) => acc + r.accuracy, 0) / results.filter(r => r.accuracy !== null).length;
+  const timings = results.map(r => r.executionTime).filter((v: any) => typeof v === 'number' && Number.isFinite(v));
+  const avgTime = timings.reduce((acc, v) => acc + v, 0) / Math.max(1, timings.length);
+  const maxTime = timings.length > 0 ? Math.max(...timings) : 0;
+  const p50 = quantile(timings, 0.5);
+  const p95 = quantile(timings, 0.95);
+  const accItems = results.filter(r => r.accuracy !== null && typeof r.accuracy === 'number' && Number.isFinite(r.accuracy));
+  const avgAccuracy = accItems.length > 0 ? (accItems.reduce((acc, r) => acc + r.accuracy, 0) / accItems.length) : null;
+  const successRate = results.length > 0 ? (results.filter(r => r.found).length / results.length) : 0;
+  const crossSystemRate = results.length > 0 ? (results.filter(r => r.isCrossSystem).length / results.length) : 0;
+  const avgTransfers = results.length > 0 ? (results.reduce((acc, r) => acc + (r.transfers || 0), 0) / results.length) : 0;
   
   console.log('\n--- 統計數據 ---');
   console.log(`平均響應時間: ${avgTime.toFixed(2)} ms`);
   console.log(`最大響應時間: ${maxTime.toFixed(2)} ms`);
-  console.log(`平均時間準確率: ${(avgAccuracy * 100).toFixed(2)}%`);
+  console.log(`P50 響應時間: ${p50.toFixed(2)} ms`);
+  console.log(`P95 響應時間: ${p95.toFixed(2)} ms`);
+  if (avgAccuracy !== null) console.log(`平均時間準確率: ${(avgAccuracy * 100).toFixed(2)}%`);
   console.log(`記憶體增量: ${(endMemory - startMemory).toFixed(2)} MB`);
-  console.log(`成功率: ${(results.filter(r => r.found).length / results.length * 100).toFixed(2)}%`);
+  console.log(`成功率: ${(successRate * 100).toFixed(2)}%`);
+  console.log(`跨系統占比: ${(crossSystemRate * 100).toFixed(2)}%`);
+  console.log(`平均轉乘次數: ${avgTransfers.toFixed(2)}`);
 
-  console.log('\n--- 異常案例分析 (準確率 < 85%) ---');
-  results.filter(r => r.accuracy !== null && r.accuracy < 0.85).forEach(r => {
-    console.log(`[${r.type}] ${r.from} -> ${r.to}: BambiGO ${r.duration}分 vs Google ${r.googleDuration}分 (準確率: ${(r.accuracy * 100).toFixed(2)}%)`);
-  });
+  if (mode === 'dataset') {
+    console.log('\n--- 異常案例分析 (準確率 < 85%) ---');
+    results.filter(r => r.accuracy !== null && r.accuracy < 0.85).forEach(r => {
+      console.log(`[${r.type}] ${r.from} -> ${r.to}: BambiGO ${r.duration}分 vs Google ${r.googleDuration}分 (準確率: ${(r.accuracy * 100).toFixed(2)}%)`);
+    });
+  }
 
   // 輸出 JSON 供後續分析
   const fs = require('fs');
-  fs.writeFileSync('test_results.json', JSON.stringify({
-    stats: { avgTime, maxTime, memoryDelta: endMemory - startMemory, successRate: results.filter(r => r.found).length / results.length },
+  fs.writeFileSync(mode === 'random' ? 'test_results_random.json' : 'test_results.json', JSON.stringify({
+    stats: { avgTime, maxTime, p50, p95, memoryDelta: endMemory - startMemory, successRate, crossSystemRate, avgTransfers, mode, iterations, maxHops },
     results
   }, null, 2));
 }

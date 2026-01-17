@@ -23,25 +23,26 @@
         },
         {
             "parameters": {
+                "method": "GET",
                 "url": "https://api.open-meteo.com/v1/forecast",
-                "options": {
-                    "queryParameters": {
-                        "parameters": [
-                            {
-                                "name": "latitude",
-                                "value": "35.6895"
-                            },
-                            {
-                                "name": "longitude",
-                                "value": "139.6917"
-                            },
-                            {
-                                "name": "current",
-                                "value": "temperature_2m,weather_code,wind_speed_10m"
-                            }
-                        ]
-                    }
-                }
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "latitude",
+                            "value": "35.6895"
+                        },
+                        {
+                            "name": "longitude",
+                            "value": "139.6917"
+                        },
+                        {
+                            "name": "current",
+                            "value": "temperature_2m,weather_code,wind_speed_10m"
+                        }
+                    ]
+                },
+                "options": {}
             },
             "id": "fetch-weather",
             "name": "Fetch Open-Meteo",
@@ -54,7 +55,7 @@
         },
         {
             "parameters": {
-                "jsCode": "const weatherData = $input.first().json;\nconst current = weatherData.current;\n\nlet condition = 'Unknown';\nif (current.weather_code <= 3) condition = 'Clear';\nelse if (current.weather_code <= 60) condition = 'Cloudy';\nelse condition = 'Rain';\n\nconst stations = [\n  'odpt:Station:TokyoMetro.Ueno',\n  'odpt:Station:TokyoMetro.Asakusa',\n  'odpt:Station:JR-East.Akihabara',\n  'odpt:Station:JR-East.Tokyo',\n  'odpt:Station:TokyoMetro.Ginza',\n  'odpt:Station:Toei.Kuramae',\n  'odpt:Station:Toei.ShinOkachimachi',\n  'odpt:Station:Toei.Ningyocho',\n  'odpt:Station:JR-East.Kanda',\n  'odpt:Station:Toei.Nihombashi',\n  'odpt:Station:TokyoMetro.Mitsukoshimae',\n  'odpt:Station:Toei.HigashiGinza',\n  'odpt:Station:TokyoMetro.Tawaramachi',\n  'odpt:Station:TokyoMetro.Iriya',\n  'odpt:Station:JR-East.Uguisudani',\n  'odpt:Station:Toei.Asakusabashi',\n  'odpt:Station:TokyoMetro.Kayabacho',\n  'odpt:Station:TokyoMetro.Kasumigaseki',\n  'odpt:Station:TokyoMetro.Iidabashi',\n  'odpt:Station:TokyoMetro.Ochanomizu',\n  'odpt:Station:TokyoMetro.Minowa',\n  'odpt:Station:TokyoMetro.Kyobashi',\n  'odpt:Station:TokyoMetro.Otemachi',\n  'odpt:Station:JR-East.Okachimachi',\n  'odpt:Station:Toei.HigashiNihombashi'\n];\n\nconst now = new Date().toISOString();\n\nconst updates = stations.map(stationId => ({\n  station_id: stationId,\n  weather_info: {\n    temp: current.temperature_2m,\n    condition: condition,\n    wind: current.wind_speed_10m,\n    update_time: now\n  },\n  updated_at: now\n}));\n\nreturn { json: { updates } };"
+                "jsCode": "const weatherData = $input.first().json;\nconst current = weatherData.current;\n\nlet condition = 'Unknown';\nif (current.weather_code <= 3) condition = 'Clear';\nelse if (current.weather_code <= 60) condition = 'Cloudy';\nelse condition = 'Rain';\n\nconst stations = [\n  'odpt.Station:TokyoMetro.Ginza.Ueno',\n  'odpt.Station:TokyoMetro.Hibiya.Ueno',\n  'odpt.Station:JR-East.Yamanote.Ueno',\n  'odpt.Station:TokyoMetro.Ginza.Asakusa',\n  'odpt.Station:Toei.Asakusa.Asakusa',\n  'odpt.Station:TokyoMetro.Hibiya.Akihabara',\n  'odpt.Station:JR-East.Yamanote.Akihabara',\n  'odpt.Station:TokyoMetro.Marunouchi.Tokyo',\n  'odpt.Station:JR-East.Yamanote.Tokyo',\n  'odpt.Station:TokyoMetro.Ginza.Ginza',\n  'odpt.Station:Toei.Asakusa.Kuramae',\n  'odpt.Station:Toei.Oedo.ShinOkachimachi',\n  'odpt.Station:TokyoMetro.Ginza.Kanda',\n  'odpt.Station:TokyoMetro.Marunouchi.Otemachi',\n  'odpt.Station:Toei.Asakusa.Oshiage',\n  'odpt.Station:TokyoMetro.Hanzomon.Oshiage',\n  'odpt.Station:TokyoMetro.Hibiya.Ningyocho',\n  'odpt.Station:Toei.Asakusa.Ningyocho',\n  'odpt.Station:TokyoMetro.Ginza.Nihombashi',\n  'odpt.Station:Toei.Asakusa.Nihombashi',\n  'odpt.Station:JR-East.Yamanote.Shinjuku',\n  'odpt.Station:JR-East.Shinjuku',\n  'odpt.Station:JR-East.Yamanote.Shibuya',\n  'odpt.Station:JR-East.Shibuya',\n  'odpt.Station:JR-East.Yamanote.Ikebukuro',\n  'odpt.Station:JR-East.Ikebukuro',\n  'odpt.Station:JR-East.Yamanote.Shinagawa',\n  'odpt.Station:JR-East.Tokaido.Shinagawa',\n  'odpt.Station:JR-East.Shinagawa'\n];\n\nconst now = new Date().toISOString();\n\nconst updates = stations.map(stationId => ({\n  station_id: stationId,\n  weather_info: {\n    temp: current.temperature_2m,\n    condition: condition,\n    wind: current.wind_speed_10m,\n    update_time: now\n  },\n  updated_at: now\n}));\n\nreturn { json: { updates } };"
             },
             "id": "transform-data",
             "name": "Transform Data",
@@ -68,34 +69,34 @@
         {
             "parameters": {
                 "method": "POST",
-                "url": "={{ $env.SUPABASE_URL }}/rest/v1/transit_dynamic_snapshot?on_conflict=station_id",
+                "url": "={{ ($env.NEXT_PUBLIC_SUPABASE_URL || $env.SUPABASE_URL) }}/rest/v1/transit_dynamic_snapshot?on_conflict=station_id",
                 "authentication": "genericCredentialType",
                 "genericAuthType": "httpHeaderAuth",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "={{ `Bearer ${$env.SUPABASE_SERVICE_KEY}` }}"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Prefer",
+                            "value": "resolution=merge-duplicates"
+                        }
+                    ]
+                },
                 "sendBody": true,
                 "specifyBody": "json",
                 "jsonBody": "={{ $json.updates }}",
-                "options": {
-                    "headers": {
-                        "parameters": [
-                            {
-                                "name": "apikey",
-                                "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
-                            },
-                            {
-                                "name": "Authorization",
-                                "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
-                            },
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "name": "Prefer",
-                                "value": "resolution=merge-duplicates"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "id": "upsert-supabase",
             "name": "Upsert to Supabase",
@@ -122,7 +123,7 @@
         {
             "parameters": {
                 "method": "POST",
-                "url": "={{ $env.SUPABASE_URL }}/rest/v1/audit_logs",
+                "url": "={{ ($env.NEXT_PUBLIC_SUPABASE_URL || $env.SUPABASE_URL) }}/rest/v1/audit_logs",
                 "authentication": "genericCredentialType",
                 "genericAuthType": "httpHeaderAuth",
                 "sendHeaders": true,
@@ -134,7 +135,7 @@
                         },
                         {
                             "name": "Authorization",
-                            "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+                            "value": "={{ `Bearer ${$env.SUPABASE_SERVICE_KEY}` }}"
                         },
                         {
                             "name": "Content-Type",
@@ -144,7 +145,7 @@
                 },
                 "sendBody": true,
                 "specifyBody": "json",
-                "jsonBody": "={{ JSON.stringify($json) }}",
+                "jsonBody": "={{ $json }}",
                 "options": {}
             },
             "id": "write-audit-log",

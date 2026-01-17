@@ -94,7 +94,34 @@ LUTAGU is a PWA-based **Urban Empathy Navigation Service** for Tokyo.
   - Guest: No GPS requirement, manual node selection
   - Member: GPS tracking + LINE Login, enables Trip Guard
 
-### 3.4 Key Dependencies
+### 3.4 Browser Automation & Testing
+- **agent-browser** (v0.5.0) - AI-optimized browser automation CLI
+  - **Purpose**: Web scraping, PWA testing, OAuth flow verification
+  - **Advantages**: 93% less token consumption vs Playwright MCP
+  - **Features**: Zero-config, snapshot-based workflow, deterministic operations
+  - **Installation**: `npm install -g agent-browser && agent-browser install`
+  - **Common Commands**:
+    ```bash
+    agent-browser open <url>           # Navigate to URL
+    agent-browser snapshot -i --json   # Get interactive elements
+    agent-browser click <selector>     # Click element
+    agent-browser fill <ref> <text>    # Fill form
+    agent-browser screenshot           # Take screenshot
+    agent-browser close                # Close browser
+    ```
+  - **Use Cases**:
+    - ETL scripts requiring web scraping (OSM data, GBFS feeds)
+    - Testing PWA functionality (offline mode, install prompts)
+    - Verifying LINE Login OAuth integration
+
+### 3.5 MCP (Model Context Protocol) Tools
+- **GitHub MCP Server** - Repository management, PR/Issues handling
+- **Sequential Thinking MCP** - Structured problem-solving for complex tasks
+- **PostgreSQL MCP Server** - Direct Supabase database queries
+  - Connection: Transaction pooler (6543 port)
+  - Credentials: Stored in `.env.local` (`DATABASE_URL`)
+
+### 3.6 Key Dependencies
 ```json
 {
   "@ai-sdk/google": "^3.0.6",
