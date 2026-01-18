@@ -10,7 +10,7 @@
 
 import { templateEngine } from './intent/TemplateEngine';
 import { algorithmProvider } from './algorithms/AlgorithmProvider';
-import { extractRouteEndpointsFromText, type SupportedLocale } from './assistantEngine';
+import { extractRouteEndpointsFromText, buildLastTrainSuggestion, type SupportedLocale } from './assistantEngine';
 import { metricsCollector } from './monitoring/MetricsCollector';
 import { DataNormalizer } from './utils/Normalization';
 import { feedbackStore } from './monitoring/FeedbackStore';
@@ -413,11 +413,11 @@ export class HybridEngine {
                             const routes = await algorithmProvider.findRoutes({ originId, destinationId, locale, l2Status });
                             if (routes && routes.length > 0) {
                                 let content = locale.startsWith('zh') ? `為您找到從 ${originLabel} 到 ${destLabel} 的路線建議。` : `Found routes from ${originLabel} to ${destLabel}.`;
-                                
+
                                 // Prepend disruption warning if L2 issues exist, even if we found a route
                                 if (l2Status && this.hasL2Issues(l2Status)) {
                                     const summary = this.summarizeL2Status(l2Status);
-                                    const warning = locale.startsWith('ja') 
+                                    const warning = locale.startsWith('ja')
                                         ? `⚠️ 現在、運行に乱れがあります（${summary}）。回避ルートを提案します。\n\n`
                                         : locale.startsWith('en')
                                             ? `⚠️ Live disruption detected (${summary}). Here are alternative routes.\n\n`
@@ -425,11 +425,24 @@ export class HybridEngine {
                                     content = warning + content;
                                 }
 
+                                // WVT: Check if late night and add末班車 suggestion
+                                const lastTrainSuggestion = buildLastTrainSuggestion({
+                                    stationId: destinationId,
+                                    currentTime: new Date(),
+                                    locale
+                                });
+
                                 return {
                                     source: 'algorithm',
                                     type: 'route',
                                     content,
-                                    data: { routes, originId, destinationId, l2_status: l2Status },
+                                    data: {
+                                        routes,
+                                        originId,
+                                        destinationId,
+                                        l2_status: l2Status,
+                                        lastTrainSuggestion // Will be null if not late night
+                                    },
                                     confidence: 0.95,
                                     reasoning: 'Calculated route via algorithm (with L2 awareness).'
                                 };
@@ -449,7 +462,7 @@ export class HybridEngine {
 
                                 let originCoord = this.getStationCoord(originId);
                                 if (!originCoord && FALLBACK_COORDS[originLabel]) originCoord = FALLBACK_COORDS[originLabel];
-                                
+
                                 let destCoord = this.getStationCoord(destinationId);
                                 if (!destCoord && FALLBACK_COORDS[destLabel]) destCoord = FALLBACK_COORDS[destLabel];
 
@@ -463,7 +476,7 @@ export class HybridEngine {
                                 const distanceKm = originCoord && destCoord
                                     ? this.getDistanceFromLatLonInKm(originCoord.lat, originCoord.lon, destCoord.lat, destCoord.lon)
                                     : 5.0; // Default 5km to ensure ETA generation
-                                
+
                                 const taxiEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'taxi') : null;
                                 const bikeEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'bike') : null;
                                 const etaSuffixTaxi = taxiEta ? this.formatEtaLabel(taxiEta.min, taxiEta.max, locale) : '';
@@ -1005,7 +1018,7 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
 
         let originCoord = this.getStationCoord(originIdForCoord);
         if (!originCoord && FALLBACK_COORDS[originLabel]) originCoord = FALLBACK_COORDS[originLabel];
-        
+
         let destCoord = this.getStationCoord(destIdForCoord);
         if (!destCoord && FALLBACK_COORDS[destLabel]) destCoord = FALLBACK_COORDS[destLabel];
 

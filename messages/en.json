@@ -544,7 +544,8 @@
         "skipOnboardingDesc": "You can reopen the onboarding from the menu later.",
         "feedbackSent": "Feedback received!",
         "noNodesInView": "No stations in this area",
-        "noNodesHint": "Try moving or zooming the map to view other areas"
+        "noNodesHint": "Try moving or zooming the map to view other areas",
+        "backToMap": "Back to Map"
     },
     "feedback": {
         "title": "Provide Feedback",
@@ -684,33 +685,5 @@
             "accessibility": "I'm going to Ueno Zoo with a stroller. Which exit at Ueno Station is the most convenient?"
         }
     },
-    "validation": "Validation",
-    "feedback": {
-        "title": "Share Your Thoughts",
-        "openFeedback": "Send Feedback",
-        "thankYou": "Thank you for your feedback!",
-        "submittedMessage": "We read every piece of feedback carefully.",
-        "back": "Back",
-        "ratingLabel": "Overall Rating",
-        "contentLabel": "Details",
-        "submit": "Submit",
-        "types": {
-            "general": "General Feedback",
-            "bug": "Bug Report",
-            "spot": "Spot Tip",
-            "tip": "Share Experience"
-        },
-        "descriptions": {
-            "general": "Rate your overall experience",
-            "bug": "Report an issue or error",
-            "spot": "Share a hidden gem you found",
-            "tip": "Share transit tips and hacks"
-        },
-        "placeholders": {
-            "general": "Tell us about your experience...",
-            "bug": "Describe the issue including steps to reproduce...",
-            "spot": "Describe this spot and its location...",
-            "tip": "Share your experience or tip..."
-        }
-    }
+    "validation": "Validation"
 }

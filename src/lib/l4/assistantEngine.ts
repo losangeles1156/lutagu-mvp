@@ -1,5 +1,45 @@
 import { DEMO_SCENARIOS, DemoScenario } from './demoScenarios';
 import CORE_TOPOLOGY from './generated/coreTopology.json';
+import PRIVATE_RAILWAYS_TOPOLOGY from './generated/extraTopology.json';
+import { PriorityQueue } from '../utils/PriorityQueue';
+import { SEED_NODES } from '../nodes/seedNodes';
+import { parsePointWKT, getDistanceKm } from '../utils/geoUtils';
+import { RAPID_SERVICE_PATTERNS, RAPID_STATION_ALIASES } from './data/rapidServicePatterns';
+
+// Initialize Station Coordinates Map for A* Heuristic
+const STATION_COORDINATES = new Map<string, { lat: number, lng: number }>();
+for (const node of SEED_NODES) {
+    if (node.location && typeof node.location === 'string' && node.location.startsWith('POINT')) {
+        const coords = parsePointWKT(node.location);
+        if (coords) {
+            STATION_COORDINATES.set(node.id, { lat: coords[0], lng: coords[1] });
+        }
+    }
+}
+
+/**
+ * Heuristic function for A* Search.
+ * Estimates the minimum time to reach any of the destination stations.
+ * Uses Euclidean distance divided by max speed (e.g., 100km/h = ~0.6 min/km).
+ * Admissible heuristic: never overestimates the cost (time).
+ */
+function calculateHeuristic(currentId: string, destIds: string[]): number {
+    const currentLoc = STATION_COORDINATES.get(currentId);
+    if (!currentLoc) return 0;
+
+    let minTime = Infinity;
+    for (const destId of destIds) {
+        const destLoc = STATION_COORDINATES.get(destId);
+        if (!destLoc) continue;
+
+        const distKm = getDistanceKm(currentLoc.lat, currentLoc.lng, destLoc.lat, destLoc.lng);
+        // Assume max speed 120km/h = 2km/min => 0.5 min/km
+        // Using a lower bound to ensure admissibility
+        const timeEst = distKm * 0.5;
+        if (timeEst < minTime) minTime = timeEst;
+    }
+    return minTime === Infinity ? 0 : minTime;
+}
 
 const EXTRA_TOPOLOGY: any[] = [
     {
@@ -112,7 +152,8 @@ const EXTRA_TOPOLOGY: any[] = [
     },
 ];
 
-const DEFAULT_TOPOLOGY = [...(CORE_TOPOLOGY as any[]), ...EXTRA_TOPOLOGY];
+
+const DEFAULT_TOPOLOGY = [...(CORE_TOPOLOGY as any[]), ...EXTRA_TOPOLOGY, ...(PRIVATE_RAILWAYS_TOPOLOGY as any[])];
 
 export function getDefaultTopology(): any[] {
     return DEFAULT_TOPOLOGY as any[];
@@ -1242,6 +1283,30 @@ function buildAdjacency(railways: RailwayTopology[]) {
         }
     }
 
+    // === Add Rapid/Express Service Edges ===
+    for (const pattern of RAPID_SERVICE_PATTERNS) {
+        const stops = pattern.stops;
+        for (let i = 0; i < stops.length - 1; i++) {
+            const from = normalizeOdptStationId(stops[i]);
+            const to = normalizeOdptStationId(stops[i + 1]);
+            addEdge(from, to, pattern.railwayId);
+            addEdge(to, from, pattern.railwayId);
+        }
+        // Add transfers from rapid stations to local network using aliases
+        for (const stopId of stops) {
+            const baseName = stopId.split('.').pop()!;
+            if (RAPID_STATION_ALIASES[baseName]) {
+                for (const aliasId of RAPID_STATION_ALIASES[baseName]) {
+                    const normalized = normalizeOdptStationId(aliasId);
+                    if (normalized !== normalizeOdptStationId(stopId)) {
+                        addEdge(normalizeOdptStationId(stopId), normalized, 'transfer');
+                        addEdge(normalized, normalizeOdptStationId(stopId), 'transfer');
+                    }
+                }
+            }
+        }
+    }
+
     return adj;
 }
 
@@ -1256,61 +1321,7 @@ function getAdjacency(railways: RailwayTopology[]) {
     return adj;
 }
 
-class MinHeap<T> {
-    private readonly items: Array<{ value: T; priority: number }> = [];
 
-    get size() {
-        return this.items.length;
-    }
-
-    push(value: T, priority: number) {
-        const node = { value, priority };
-        this.items.push(node);
-        this.bubbleUp(this.items.length - 1);
-    }
-
-    pop(): { value: T; priority: number } | undefined {
-        if (this.items.length === 0) return undefined;
-        const top = this.items[0];
-        const last = this.items.pop()!;
-        if (this.items.length > 0) {
-            this.items[0] = last;
-            this.bubbleDown(0);
-        }
-        return top;
-    }
-
-    private bubbleUp(index: number) {
-        while (index > 0) {
-            const parent = Math.floor((index - 1) / 2);
-            if (this.items[parent].priority <= this.items[index].priority) break;
-            const tmp = this.items[parent];
-            this.items[parent] = this.items[index];
-            this.items[index] = tmp;
-            index = parent;
-        }
-    }
-
-    private bubbleDown(index: number) {
-        const len = this.items.length;
-        while (true) {
-            const left = index * 2 + 1;
-            const right = left + 1;
-            let smallest = index;
-            if (left < len && this.items[left].priority < this.items[smallest].priority) {
-                smallest = left;
-            }
-            if (right < len && this.items[right].priority < this.items[smallest].priority) {
-                smallest = right;
-            }
-            if (smallest === index) break;
-            const tmp = this.items[smallest];
-            this.items[smallest] = this.items[index];
-            this.items[index] = tmp;
-            index = smallest;
-        }
-    }
-}
 
 import { TRANSFER_DATABASE, getTransferDistance, isOutOfStationTransfer, getHubBufferMinutes } from './data/transferDatabase';
 
@@ -1388,21 +1399,389 @@ function estimateFareByDistance(operatorKey: string, hops: number): number {
     return 200;
 }
 
-function edgeTimeMinutes(railwayId: string): number {
+export interface TrafficCondition {
+    railwayId: string;
+    status: 'Normal' | 'Delays' | 'Suspended';
+    delayMinutes: number;
+    text?: string;
+}
+
+// Phase 4: Wait Value Time (WVT) - Informational Layer
+export type AmenityTier = 'S' | 'A' | 'B' | 'C';
+
+interface StationFacility {
+    tier: AmenityTier;
+    facilities: {
+        netCafe?: string;
+        hotel?: string;
+        restaurant24h?: string;
+        convenienceStore?: string;
+    };
+    lastTrainNote?: Partial<Record<SupportedLocale, string>>;
+}
+
+const STATION_FACILITIES: Record<string, StationFacility> = {
+    'Shinjuku': {
+        tier: 'S',
+        facilities: {
+            netCafe: '快活CLUB 新宿西口店 (24h)',
+            hotel: 'First Cabin 新宿 (膠囊旅館)',
+            restaurant24h: 'すき家、松屋、吉野家 (24h)',
+            convenienceStore: '7-11, FamilyMart (站內多家)',
+        },
+        lastTrainNote: {
+            ja: '西口地下に24時間営業のネットカフェやカプセルホテルがあります',
+            en: 'West exit underground has 24h net cafes and capsule hotels',
+            'zh-TW': '西口地下街有多家 24h 網咖和膠囊旅館',
+        },
+    },
+    'Shibuya': {
+        tier: 'S',
+        facilities: {
+            netCafe: '快活CLUB 渋谷道玄坂店 (24h)',
+            hotel: 'The Millennials Shibuya (膠囊)',
+            restaurant24h: 'すき家、マクドナルド (24h)',
+        },
+        lastTrainNote: {
+            ja: '道玄坂エリアに24時間営業の店舗が多数',
+            en: 'Dogenzaka area has many 24h establishments',
+            'zh-TW': '道玄坂區有多家 24h 營業店家',
+        },
+    },
+    'Ikebukuro': {
+        tier: 'A',
+        facilities: {
+            netCafe: '快活CLUB 池袋東口店 (24h)',
+            hotel: 'Booth Net Cafe & Capsule',
+            restaurant24h: '松屋、なか卯 (24h)',
+        },
+        lastTrainNote: {
+            ja: '東口・西口ともにネットカフェあり',
+            en: 'Net cafes available at both East and West exits',
+            'zh-TW': '東口、西口皆有網咖',
+        },
+    },
+    'Tokyo': {
+        tier: 'S',
+        facilities: {
+            convenienceStore: 'NewDays, KIOSK (站內)',
+            restaurant24h: '周辺に24h店舗少なめ',
+        },
+        lastTrainNote: {
+            ja: '八重洲口側にビジネスホテル多数。終電後は周辺が静か',
+            en: 'Many business hotels on Yaesu side. Area quiet after last train',
+            'zh-TW': '八重洲口有多家商務旅館，末班車後周邊較為安靜',
+        },
+    },
+    'Ueno': {
+        tier: 'A',
+        facilities: {
+            netCafe: '快活CLUB 上野広小路店 (24h)',
+            hotel: 'カプセルホテル上野',
+        },
+        lastTrainNote: {
+            ja: '御徒町方面に24時間営業の店舗あり',
+            en: 'Okachimachi direction has 24h shops',
+            'zh-TW': '御徒町方向有 24h 店家',
+        },
+    },
+    'Akihabara': {
+        tier: 'A',
+        facilities: {
+            netCafe: '@home cafe, 各種ネットカフェ多数',
+            restaurant24h: 'すき家、松屋 (24h)',
+        },
+        lastTrainNote: {
+            ja: '電気街口周辺にネットカフェ多数',
+            en: 'Many net cafes around Electric Town exit',
+            'zh-TW': '電器街口附近有多家網咖',
+        },
+    },
+    'Shinagawa': {
+        tier: 'A',
+        facilities: {
+            hotel: '京品ホテル、アパホテル',
+            convenienceStore: 'NewDays (站內)',
+        },
+        lastTrainNote: {
+            ja: '港南口にビジネスホテル集中',
+            en: 'Business hotels concentrated at Konan exit',
+            'zh-TW': '港南口有多家商務旅館',
+        },
+    },
+    'Yokohama': {
+        tier: 'A',
+        facilities: {
+            netCafe: '快活CLUB 横浜西口店 (24h)',
+            hotel: '東横イン横浜西口',
+            restaurant24h: 'すき家、松屋 (24h)',
+        },
+        lastTrainNote: {
+            ja: '西口にネットカフェとビジネスホテルあり',
+            en: 'Net cafes and business hotels at West exit',
+            'zh-TW': '西口有網咖和商務旅館',
+        },
+    },
+    // === Additional Stations (Expansion) ===
+    'Roppongi': {
+        tier: 'A',
+        facilities: {
+            netCafe: 'BAGUS 六本木店 (24h)',
+            restaurant24h: '24h 餐廳多 (夜店區)',
+        },
+        lastTrainNote: {
+            ja: '夜遊びエリアなので24時間営業の店が多い',
+            en: 'Nightlife area with many 24h establishments',
+            'zh-TW': '夜生活區，24h 營業店家多',
+        },
+    },
+    'Ebisu': {
+        tier: 'B',
+        facilities: {
+            restaurant24h: 'すき家、松屋 (24h)',
+            convenienceStore: 'FamilyMart, 7-11',
+        },
+        lastTrainNote: {
+            ja: '西口方面に飲食店あり',
+            en: 'Restaurants around West exit',
+            'zh-TW': '西口方向有餐廳',
+        },
+    },
+    'Nakano': {
+        tier: 'B',
+        facilities: {
+            netCafe: '快活CLUB 中野店 (24h)',
+            restaurant24h: '松屋、日高屋 (24h)',
+        },
+        lastTrainNote: {
+            ja: '北口サンモール近くにネットカフェあり',
+            en: 'Net cafe near North exit Sun Mall',
+            'zh-TW': '北口 Sun Mall 附近有網咖',
+        },
+    },
+    'Kichijoji': {
+        tier: 'B',
+        facilities: {
+            netCafe: '快活CLUB 吉祥寺店 (24h)',
+            restaurant24h: 'すき家、松屋 (24h)',
+        },
+        lastTrainNote: {
+            ja: '北口にネットカフェ・カラオケあり',
+            en: 'Net cafes and karaoke at North exit',
+            'zh-TW': '北口有網咖、卡拉OK',
+        },
+    },
+    'Machida': {
+        tier: 'B',
+        facilities: {
+            netCafe: '快活CLUB 町田店 (24h)',
+            hotel: 'ホテル町田ヴィラ',
+        },
+        lastTrainNote: {
+            ja: '小田急側にネットカフェあり',
+            en: 'Net cafe near Odakyu side',
+            'zh-TW': '小田急側有網咖',
+        },
+    },
+    'Omiya': {
+        tier: 'A',
+        facilities: {
+            netCafe: '快活CLUB 大宮東口店 (24h)',
+            hotel: '東横イン大宮',
+            restaurant24h: 'すき家、松屋 (24h)',
+        },
+        lastTrainNote: {
+            ja: '東口に深夜営業の店舗集中',
+            en: 'Late-night establishments at East exit',
+            'zh-TW': '東口有多家深夜營業店家',
+        },
+    },
+    'Asakusa': {
+        tier: 'B',
+        facilities: {
+            hotel: 'カプセルホテル浅草',
+            convenienceStore: 'FamilyMart, Lawson',
+        },
+        lastTrainNote: {
+            ja: '雷門周辺にカプセルホテルあり。深夜は静か',
+            en: 'Capsule hotels near Kaminarimon. Quiet at night',
+            'zh-TW': '雷門附近有膠囊旅館，深夜較安靜',
+        },
+    },
+    'Ginza': {
+        tier: 'B',
+        facilities: {
+            restaurant24h: '周辺は高級店多く深夜営業少なめ',
+        },
+        lastTrainNote: {
+            ja: '深夜は新橋方面に移動した方が店舗多い',
+            en: 'Move towards Shinbashi for more late-night options',
+            'zh-TW': '深夜建議往新橋方向，店家較多',
+        },
+    },
+    'Oshiage': {
+        tier: 'B',
+        facilities: {
+            convenienceStore: 'FamilyMart (東京晴空塔內)',
+        },
+        lastTrainNote: {
+            ja: 'スカイツリー内の店舗は閉まるので押上駅周辺へ',
+            en: 'Skytree shops close late; head to Oshiage station area',
+            'zh-TW': '晴空塔內店鋪會打烊，請往押上站周邊',
+        },
+    },
+    'Odaiba': {
+        tier: 'C',
+        facilities: {
+            hotel: '大江戸温泉物語 (宿泊可)',
+        },
+        lastTrainNote: {
+            ja: '終電後は大江戸温泉で仮眠可能。他の施設は少ない',
+            en: 'Oedo Onsen allows overnight stay. Few other options',
+            'zh-TW': '末班車後可在大江戶溫泉過夜，其他設施較少',
+        },
+    },
+    'Hachioji': {
+        tier: 'B',
+        facilities: {
+            netCafe: '快活CLUB 八王子店 (24h)',
+            hotel: '東横イン八王子',
+        },
+        lastTrainNote: {
+            ja: '北口にネットカフェとビジネスホテルあり',
+            en: 'Net cafe and business hotels at North exit',
+            'zh-TW': '北口有網咖和商務旅館',
+        },
+    },
+    'Tachikawa': {
+        tier: 'B',
+        facilities: {
+            netCafe: '快活CLUB 立川店 (24h)',
+            restaurant24h: 'すき家、松屋 (24h)',
+        },
+        lastTrainNote: {
+            ja: '南口・北口両方に深夜営業店舗あり',
+            en: 'Late-night shops at both South and North exits',
+            'zh-TW': '南口、北口皆有深夜營業店家',
+        },
+    },
+};
+
+function getAmenityTier(stationId: string): AmenityTier {
+    for (const [key, facility] of Object.entries(STATION_FACILITIES)) {
+        if (stationId.includes(`.${key}`)) return facility.tier;
+    }
+    return 'B';
+}
+
+function getStationFacility(stationId: string): StationFacility | null {
+    for (const [key, facility] of Object.entries(STATION_FACILITIES)) {
+        if (stationId.includes(`.${key}`)) return facility;
+    }
+    return null;
+}
+
+/**
+ * Build suggestion for last-train/late-night scenarios.
+ * Returns null if not applicable (not late night or no facility data).
+ */
+export function buildLastTrainSuggestion(params: {
+    stationId: string;
+    currentTime: Date;
+    locale: SupportedLocale;
+}): L4Suggestion | null {
+    const hour = params.currentTime.getHours();
+    const isLateNight = hour >= 23 || hour < 5; // 23:00 - 05:00
+
+    if (!isLateNight) return null;
+
+    const facility = getStationFacility(params.stationId);
+    if (!facility) return null;
+
+    const steps: RouteStep[] = [];
+    const locale = params.locale;
+
+    // Build facility info steps
+    if (facility.facilities.netCafe) {
+        steps.push({ kind: 'info', text: `🖥️ ${facility.facilities.netCafe}`, icon: '🖥️' });
+    }
+    if (facility.facilities.hotel) {
+        steps.push({ kind: 'info', text: `🏨 ${facility.facilities.hotel}`, icon: '🏨' });
+    }
+    if (facility.facilities.restaurant24h) {
+        steps.push({ kind: 'info', text: `🍜 ${facility.facilities.restaurant24h}`, icon: '🍜' });
+    }
+    if (facility.facilities.convenienceStore) {
+        steps.push({ kind: 'info', text: `🏪 ${facility.facilities.convenienceStore}`, icon: '🏪' });
+    }
+
+    // Add note
+    if (facility.lastTrainNote) {
+        const note = facility.lastTrainNote[locale] || facility.lastTrainNote['zh-TW'];
+        steps.push({ kind: 'info', text: `💡 ${note}`, icon: '💡' });
+    }
+
+    if (steps.length === 0) return null;
+
+    const titles: Record<SupportedLocale, string> = {
+        ja: '🌙 終電後のご案内',
+        en: '🌙 After Last Train',
+        zh: '🌙 末班车后建议',
+        'zh-TW': '🌙 末班車後建議',
+        ar: '🌙 بعد آخر قطار',
+    };
+
+    return {
+        title: titles[locale] || titles['zh-TW'],
+        options: [{
+            label: titles[locale] || titles['zh-TW'],
+            steps,
+            sources: [{ type: 'odpt:Railway', verified: false }]
+        }]
+    };
+}
+
+// Removed: getAmenityMultiplier - WVT no longer affects routing weights
+
+function edgeTimeMinutes(railwayId: string, conditions?: Map<string, TrafficCondition>): number {
     if (railwayId === 'transfer') return 5;
-    
-    // 快速線路站距較長，耗時較多
-    const isRapid = railwayId.includes('Rapid') || railwayId.includes('Express') || railwayId.includes('LimitedExpress') || railwayId.includes('Shinkansen');
-    
-    // 東京地鐵核心線路站距極短
+
+    // Check traffic conditions
+    if (conditions && conditions.has(railwayId)) {
+        const cond = conditions.get(railwayId)!;
+        if (cond.status === 'Suspended') return Infinity;
+        // If delayed, we add a fraction of delay per edge?
+        // Better: The caller handles the "initial wait" penalty.
+        // Here we just add a small "slowdown" factor if trains are running slower.
+        // For MVP, we assume running time is same, but intervals are longer (wait time).
+        // So we keep edge time same, but caller adds penalty.
+    }
+
+    // Check if this is a rapid service pattern with defined avgMinutesPerEdge
+    const rapidPattern = RAPID_SERVICE_PATTERNS.find(p => p.railwayId === railwayId);
+    if (rapidPattern) {
+        return rapidPattern.avgMinutesPerEdge;
+    }
+
+    // Fallback for general rapid detection
+    const isRapid = railwayId.includes('Rapid') || railwayId.includes('Express') ||
+        railwayId.includes('LimitedExpress') || railwayId.includes('Shinkansen') ||
+        railwayId.includes('SpecialRapid');
+
+    // Core metro lines have short station intervals
     const isCoreMetro = railwayId.includes('Ginza') || railwayId.includes('Marunouchi') || railwayId.includes('Hibiya');
 
     if (railwayId.includes('TokyoMetro') || railwayId.includes('Toei')) {
-        if (isCoreMetro) return 1.5; // 核心地鐵站間僅約 1.5 分鐘
+        if (isCoreMetro) return 1.5;
         return isRapid ? 2.5 : 1.8;
     }
     if (railwayId.includes('JR-East')) {
-        return isRapid ? 3.5 : 2.5; 
+        return isRapid ? 4.0 : 2.0; // Tuned: Rapid slightly slower, Local faster
+    }
+    // Private railways (Tobu, Seibu, Keio, Odakyu, etc.)
+    if (railwayId.includes('Tobu') || railwayId.includes('Seibu') ||
+        railwayId.includes('Keio') || railwayId.includes('Odakyu')) {
+        return isRapid ? 5.0 : 2.2;
     }
     return 2.5;
 }
@@ -1557,42 +1936,57 @@ function dijkstraBestPath(params: {
     adj: Map<string, Array<{ to: string; railwayId: string }>>;
     maxHops: number;
     score: (c: RouteCosts) => number;
+    trafficConditions?: Map<string, TrafficCondition>;
 }): { path: string[]; edgeRailways: string[]; costs: RouteCosts } | null {
-    const { origins, dests, adj, maxHops, score } = params;
+    const { origins, dests, adj, maxHops, score, trafficConditions } = params;
 
-    const dist = new Map<string, number>();
+    const dist = new Map<string, number>(); // gScore: actual cost from start
     const costsByKey = new Map<string, RouteCosts>();
     const prev = new Map<string, { prevKey: string; fromStation: string; viaRailwayId: string }>();
-    const heap = new MinHeap<{ key: string }>();
+
+    // PriorityQueue stores { element: stateKey, priority: fScore }
+    // fScore = gScore + h(n)
+    const pq = new PriorityQueue<string>();
 
     const destSet = new Set(dests);
-
-    const BASE_WAIT_TIME = 2.0; // 平均候車時間 (分鐘)
+    const BASE_WAIT_TIME = 2.0;
 
     for (const origin of origins) {
         const startKey = encodeStateKey(origin, null, null);
         dist.set(startKey, 0);
-        costsByKey.set(startKey, { 
-            time: 0, 
-            fare: 0, 
-            transfers: 0, 
-            hops: 0, 
-            railwaySwitches: 0, 
+        costsByKey.set(startKey, {
+            time: 0,
+            fare: 0,
+            transfers: 0,
+            hops: 0,
+            railwaySwitches: 0,
             operatorSwitches: 0,
             transferDistance: 0,
-            crowding: 20 // 預設初始擁擠度
+            crowding: 20
         });
-        heap.push({ key: startKey }, 0);
+
+        // Initial heuristic
+        const h = calculateHeuristic(origin, dests);
+        pq.push(startKey, h);
     }
 
-    while (heap.size > 0) {
-        const current = heap.pop()!;
-        const currentKey = current.value.key;
+    while (!pq.isEmpty) {
+        const currentKey = pq.pop()!;
         const currentCosts = costsByKey.get(currentKey);
-        if (!currentCosts) continue;
-        const currentDist = dist.get(currentKey);
-        if (typeof currentDist === 'number' && current.priority > currentDist) continue;
 
+        // If state was updated after being added to PQ, skip if current extraction is stale
+        // (Not strictly necessary if we don't support updating priority, but standard optimization)
+        // With generic PQ, we can't easily check "staleness" without tracking visited set or current best gScore check.
+        // We check if current gScore > known best gScore.
+        // Wait, dist.get(currentKey) IS the best known.
+        // The issue is if we pushed the specific key multiple times.
+        // Our PQ doesn't deduplicate.
+        // So we strictly check:
+        // Actually, we don't store "gScore" in the node, so we rely on dist map.
+
+        if (!currentCosts) continue;
+
+        // Verify if we found a destination
         const decoded = decodeStateKey(currentKey);
         if (destSet.has(decoded.station)) {
             const path: string[] = [decoded.station];
@@ -1611,9 +2005,24 @@ function dijkstraBestPath(params: {
         if (currentCosts.hops >= maxHops) continue;
         const edges = adj.get(decoded.station) || [];
 
-        for (const e of edges) {
-            const nextStation = e.to;
-            const viaRailwayId = e.railwayId;
+        for (const edge of edges) {
+            const nextStation = edge.to;
+            const viaRailwayId = edge.railwayId;
+
+            // Traffic Check: If Suspended, skip edge
+            let trafficDelay = 0;
+            if (trafficConditions && trafficConditions.has(viaRailwayId)) {
+                const cond = trafficConditions.get(viaRailwayId)!;
+                if (cond.status === 'Suspended') continue; // Skip suspended lines
+                if (cond.status === 'Delays') {
+                    // For edges, we don't add full delay (that's for boarding).
+                    // We can add a small congestion factor if needed, but for now 0.
+                }
+            }
+
+            // Calculate Edge Time
+            const edgeTime = edgeTimeMinutes(viaRailwayId, trafficConditions);
+            if (edgeTime === Infinity) continue; // Safety check
 
             const nextCosts: RouteCosts = {
                 time: currentCosts.time,
@@ -1640,16 +2049,16 @@ function dijkstraBestPath(params: {
                 const operator = lineParts[0];
                 const line = lineParts[1];
                 const toLineId = `odpt.Railway:${operator}.${line}`;
-                
+
                 const distance = getTransferDistance(fromStationId, toLineId);
                 const isOutStation = isOutOfStationTransfer(fromStationId, toLineId);
-                
+
                 let transferTime = distance / 60; // 稍微提高步行速度至 60m/min (東京節奏)
-                
+
                 if (isOutStation) {
                     transferTime += 2; // 降低站外轉乘額外懲罰 (3 -> 2)
                 }
-                
+
                 if (fromOp && toOp && fromOp !== toOp) {
                     transferTime += 1.5; // 跨公司購票/閘門時間 (2 -> 1.5)
                     nextCosts.operatorSwitches += 1;
@@ -1664,6 +2073,17 @@ function dijkstraBestPath(params: {
                 }
                 transferTime += hubBuffer;
 
+                // === TPI Integration ===
+                // Look up baseTpi from TRANSFER_DATABASE and add normalized penalty
+                const stationTransfers = TRANSFER_DATABASE[fromStationId];
+                if (stationTransfers && stationTransfers[toLineId]) {
+                    const tpiData = stationTransfers[toLineId];
+                    // Add baseTpi / 10 as additional time penalty (TPI 60 = 6 min extra)
+                    transferTime += (tpiData.baseTpi || 0) / 10;
+                    // Add floor difference penalty
+                    transferTime += (tpiData.floorDifference || 0) * 0.5;
+                }
+
                 nextCosts.time += transferTime;
                 nextCosts.transfers += 1;
                 nextCosts.transferDistance += distance;
@@ -1673,11 +2093,25 @@ function dijkstraBestPath(params: {
                 const isOperatorSwitch = decoded.lastOperator && decoded.lastOperator !== operatorKey;
 
                 let boardingPenalty = 0;
-                // 根據線路類型動態調整候車時間
-                let lineWaitTime = (viaRailwayId.includes('TokyoMetro') || viaRailwayId.includes('Toei')) 
+                let lineWaitTime = (viaRailwayId.includes('TokyoMetro') || viaRailwayId.includes('Toei'))
                     ? BASE_WAIT_TIME * 0.6  // 地鐵班次更密 (0.7 -> 0.6)
                     : BASE_WAIT_TIME;
-                
+
+                // Add Traffic Delay if boarding/switching to this line
+                if (isRailwaySwitch || !decoded.lastRailway) {
+                    if (trafficConditions && trafficConditions.has(viaRailwayId)) {
+                        const cond = trafficConditions.get(viaRailwayId)!;
+                        if (cond.status === 'Delays') {
+                            lineWaitTime += cond.delayMinutes; // Add full delay to wait time
+                        }
+                    }
+                }
+
+                // Phase 4: Wait Value Time (WVT) - REMOVED FROM ROUTING LOGIC
+                // WVT should be an informational layer for末班車/長等待 scenarios,
+                // not a path weight modifier. AmenityTier data is preserved for L4 Knowledge.
+                // See: Sequential Thinking analysis on TPI vs WVT relationship.
+
                 if (currentCosts.hops < 4) {
                     lineWaitTime *= 0.6; // 極短途通常發生在繁華區，班次更密且用戶通常會趕車
                 }
@@ -1696,8 +2130,9 @@ function dijkstraBestPath(params: {
                     boardingPenalty = lineWaitTime;
                 }
 
-                nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty;
-                
+                nextCosts.time += edgeTime + boardingPenalty; // Use calculated edgeTime
+                // nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty; // Original line
+
                 // 擁擠度簡單估算：某些線路較擁擠
                 if (viaRailwayId.includes('Yamanote') || viaRailwayId.includes('Chuo')) {
                     nextCosts.crowding = Math.min(100, nextCosts.crowding + 5);
@@ -1709,14 +2144,24 @@ function dijkstraBestPath(params: {
                 viaRailwayId === 'transfer' ? decoded.lastOperator : operatorKeyFromRailwayId(viaRailwayId);
 
             const nextKey = encodeStateKey(nextStation, nextLastRailway, nextLastOperator);
-            const nextPriority = score(nextCosts);
+            // Calculate new gScore (cost from start)
+            // Note: 'score' function returns the weighted cost of the PATH, not just the edge.
+            // Wait, let's verify how 'score' input is constructed.
+            // It takes 'nextCosts'. 'nextCosts' accumulates time/transfers/etc.
+            // So 'score(nextCosts)' is the g(n) for the neighbor.
+            const newGScore = score(nextCosts);
+            const currentBestG = dist.get(nextKey);
 
-            const prevBest = dist.get(nextKey);
-            if (prevBest === undefined || nextPriority < prevBest) {
-                dist.set(nextKey, nextPriority);
+            if (currentBestG === undefined || newGScore < currentBestG) {
+                dist.set(nextKey, newGScore);
                 costsByKey.set(nextKey, nextCosts);
                 prev.set(nextKey, { prevKey: currentKey, fromStation: decoded.station, viaRailwayId });
-                heap.push({ key: nextKey }, nextPriority);
+
+                // A*: f(n) = g(n) + h(n)
+                const hScore = calculateHeuristic(nextStation, dests);
+                const fScore = newGScore + hScore;
+
+                pq.push(nextKey, fScore);
             }
         }
     }
@@ -1819,6 +2264,7 @@ export function findRankedRoutes(params: {
     maxHops?: number;
     locale?: SupportedLocale;
     userDemand?: L4DemandState; // Added userDemand
+    trafficConditions?: TrafficCondition[]; // New input for dynamic traffic
 }): EnrichedRouteOption[] {
     const originIds = Array.isArray(params.originStationId)
         ? params.originStationId.map(normalizeOdptStationId)
@@ -1841,17 +2287,17 @@ export function findRankedRoutes(params: {
             score: (c) => {
                 // 1. 實際行程時間 (65% 權重) - 提高時間權重以更精確匹配 Google Maps
                 const timeScore = c.time * 0.65;
-                
+
                 // 2. 轉乘次數 (15% 權重) - 每次轉乘約等同於 6 分鐘乘車痛感
                 const transferScore = c.transfers * 6 * 0.15;
-                
+
                 // 3. 轉乘距離與補償 (15% 權重)
                 let distancePenalty = 0;
                 if (c.transferDistance > TRANSFER_THRESHOLD) {
                     distancePenalty = (c.transferDistance - TRANSFER_THRESHOLD) * 1.5;
                 }
                 const distanceScore = (c.transferDistance / 100 * 5 + distancePenalty) * 0.15;
-                
+
                 // 4. 列車擁擠度 (5% 權重)
                 const crowdScore = (c.crowding / 10) * 0.05;
 
@@ -1879,6 +2325,9 @@ export function findRankedRoutes(params: {
     const signatureToIndex = new Map<string, number>();
     const usedLabels = new Set<string>();
     const adj = getAdjacency(railways);
+    const trafficMap = params.trafficConditions
+        ? new Map(params.trafficConditions.map(c => [c.railwayId, c]))
+        : undefined;
 
     for (const cand of candidates) {
         const found = dijkstraBestPath({
@@ -1886,7 +2335,8 @@ export function findRankedRoutes(params: {
             dests: destIds,
             adj,
             maxHops,
-            score: cand.score
+            score: cand.score,
+            trafficConditions: trafficMap
         });
         if (!found) continue;
         const signature = `${found.path.join('>')}|${found.edgeRailways.join(',')}`;

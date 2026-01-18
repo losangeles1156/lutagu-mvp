@@ -75,5 +75,34 @@ export function getNodeCoordinates(node: any): [number, number] | null {
         return [node.location.coordinates[1], node.location.coordinates[0]];
     }
 
+
+    // Shape 5: WKT string "POINT(lon lat)"
+    if (typeof node.location === 'string' && node.location.startsWith('POINT')) {
+        return parsePointWKT(node.location);
+    }
+
     return null;
+}
+
+/**
+ * Parses a simple WKT POINT string (e.g., "POINT(139.7774 35.7141)")
+ * Returns [lat, lon] or null if invalid
+ */
+export function parsePointWKT(wkt: string): [number, number] | null {
+    try {
+        const content = wkt.match(/\(([^)]+)\)/);
+        if (!content || !content[1]) return null;
+
+        const parts = content[1].trim().split(/\s+/);
+        if (parts.length < 2) return null;
+
+        const lng = parseFloat(parts[0]);
+        const lat = parseFloat(parts[1]);
+
+        if (isNaN(lng) || isNaN(lat)) return null;
+
+        return [lat, lng];
+    } catch (e) {
+        return null;
+    }
 }

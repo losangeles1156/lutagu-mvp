@@ -550,6 +550,7 @@
         "feedbackSent": "フィードバックを受け付けました！",
         "noNodesInView": "このエリアに駅はありません",
         "noNodesHint": "地図を移動またはズームして他のエリアを表示してください",
+        "backToMap": "マップに戻る",
         "retry": "再試行"
     },
     "feedback": {
@@ -690,33 +691,5 @@
             "accessibility": "ベビーカーで上野動物園に行きたいのですが、上野駅のどの出口が一番便利ですか？"
         }
     },
-    "validation": "検証",
-    "feedback": {
-        "title": "ご意見をお聞かせください",
-        "openFeedback": "フィードバック",
-        "thankYou": "ありがとうございました！",
-        "submittedMessage": "いただいたご意見は一つひとつ大切に読ませていただきます。",
-        "back": "戻る",
-        "ratingLabel": "総合評価",
-        "contentLabel": "詳細",
-        "submit": "送信",
-        "types": {
-            "general": "使用感想",
-            "bug": "不具合報告",
-            "spot": "スポット情報",
-            "tip": "経験シェア"
-        },
-        "descriptions": {
-            "general": "LUTAGUの総合評価",
-            "bug": "エラーや問題を報告",
-            "spot": "見つけた穴場を共有",
-            "tip": "乗車テクニックを共有"
-        },
-        "placeholders": {
-            "general": "ご利用の感想をお聞かせください...",
-            "bug": "発生した問題と再現手順を教えてください...",
-            "spot": "このスポットの特徴と場所を教えてください...",
-            "tip": "あなたの経験やコツを共有してください..."
-        }
-    }
+    "validation": "検証"
 }

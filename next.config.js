@@ -6,6 +6,12 @@ const isProd = process.env.NODE_ENV === 'production';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // 🚀 Performance: Enable tree-shaking for Lucide icons
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+  },
   async rewrites() {
     const cdnBase = process.env.NEXT_PUBLIC_DATA_CDN_BASE_URL;
     if (!isProd || !cdnBase) return [];

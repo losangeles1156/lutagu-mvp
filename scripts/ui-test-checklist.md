@@ -1,4 +1,4 @@
-# BambiGO_MVP UI 測試清單
+# Lutagu UI 測試清單
 
 ## 開發伺服器狀態
 - [ ] 伺服器正在運行 (http://localhost:3000/zh-TW)

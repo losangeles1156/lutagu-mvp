@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase'; // Fallback
 import { Session } from '@supabase/supabase-js';
 
-const GUEST_FAVORITES_KEY = 'bambigo_guest_favorites';
+const GUEST_FAVORITES_KEY = 'lutagu_guest_favorites';
 
 export function useFavorites() {
     const [favorites, setFavorites] = useState<Set<string>>(new Set());

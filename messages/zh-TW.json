@@ -552,7 +552,8 @@
         "skipOnboardingDesc": "您可以稍後從功能表重新開啟新手引導。",
         "feedbackSent": "已收到您的回饋！",
         "noNodesInView": "此區域暫無車站資料",
-        "noNodesHint": "嘗試移動地圖或縮放以查看其他區域"
+        "noNodesHint": "嘗試移動地圖或縮放以查看其他區域",
+        "backToMap": "返回地圖"
     },
     "feedback": {
         "title": "提供回饋",

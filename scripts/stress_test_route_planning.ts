@@ -82,7 +82,7 @@ const TEST_DATASET = [
   { from: '浜松町', to: '渋谷', type: 'Airport', googleDuration: 20 },
   { from: '成田空港', to: '上野', type: 'Airport', googleDuration: 60 },
   { from: '品川', to: '横浜', type: 'Airport', googleDuration: 20 },
-  
+
   // --- 市區核心 (Urban Core) ---
   { from: '東京', to: '新宿', type: 'Urban', googleDuration: 14 },
   { from: '銀座', to: '六本木', type: 'Urban', googleDuration: 12 },
@@ -94,7 +94,7 @@ const TEST_DATASET = [
   { from: '新橋', to: '新宿', type: 'Urban', googleDuration: 20 },
   { from: '目黒', to: '飯田橋', type: 'Urban', googleDuration: 25 },
   { from: '四ツ谷', to: '浅草', type: 'Urban', googleDuration: 25 },
-  
+
   // --- 郊區/長距離 (Suburban/Long Distance) ---
   { from: '吉祥寺', to: '東京', type: 'Suburban', googleDuration: 35 },
   { from: '三鷹', to: '銀座', type: 'Suburban', googleDuration: 40 },
@@ -138,7 +138,7 @@ const TEST_DATASET = [
 ];
 
 async function runStressTest() {
-  console.log('=== BambiGO 路線規劃演算法壓力測試與可靠性驗證 ===');
+  console.log('=== Lutagu 路線規劃演算法壓力測試與可靠性驗證 ===');
   const mode = hasFlag('random') ? 'random' : 'dataset';
   const iterations = parsePositiveInt(getArgValue('iterations'), mode === 'random' ? 1000 : TEST_DATASET.length);
   const maxHops = parsePositiveInt(getArgValue('maxHops'), 80);
@@ -146,7 +146,7 @@ async function runStressTest() {
 
   console.log(`模式: ${mode}`);
   console.log(`總測試案例數: ${mode === 'random' ? iterations : TEST_DATASET.length}`);
-  
+
   const results: any[] = [];
   const startMemory = process.memoryUsage().heapUsed / 1024 / 1024;
 
@@ -274,7 +274,7 @@ async function runStressTest() {
   const successRate = results.length > 0 ? (results.filter(r => r.found).length / results.length) : 0;
   const crossSystemRate = results.length > 0 ? (results.filter(r => r.isCrossSystem).length / results.length) : 0;
   const avgTransfers = results.length > 0 ? (results.reduce((acc, r) => acc + (r.transfers || 0), 0) / results.length) : 0;
-  
+
   console.log('\n--- 統計數據 ---');
   console.log(`平均響應時間: ${avgTime.toFixed(2)} ms`);
   console.log(`最大響應時間: ${maxTime.toFixed(2)} ms`);
@@ -289,7 +289,7 @@ async function runStressTest() {
   if (mode === 'dataset') {
     console.log('\n--- 異常案例分析 (準確率 < 85%) ---');
     results.filter(r => r.accuracy !== null && r.accuracy < 0.85).forEach(r => {
-      console.log(`[${r.type}] ${r.from} -> ${r.to}: BambiGO ${r.duration}分 vs Google ${r.googleDuration}分 (準確率: ${(r.accuracy * 100).toFixed(2)}%)`);
+      console.log(`[${r.type}] ${r.from} -> ${r.to}: Lutagu ${r.duration}分 vs Google ${r.googleDuration}分 (準確率: ${(r.accuracy * 100).toFixed(2)}%)`);
     });
   }
 

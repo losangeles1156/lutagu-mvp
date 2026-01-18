@@ -1,9 +1,16 @@
 {
   "stats": {
-    "avgTime": 3.8541258775510183,
-    "maxTime": 13.012415999999973,
-    "memoryDelta": 3.3448715209960938,
-    "successRate": 1
+    "avgTime": 5.306245000000001,
+    "maxTime": 17.96783300000004,
+    "p50": 3.019729500000011,
+    "p95": 15.136289400000006,
+    "memoryDelta": 5.61700439453125,
+    "successRate": 0.98,
+    "crossSystemRate": 0.2,
+    "avgTransfers": 0.78,
+    "mode": "dataset",
+    "iterations": 50,
+    "maxHops": 80
   },
   "results": [
     {
@@ -11,588 +18,808 @@
       "to": "東京",
       "type": "Airport",
       "googleDuration": 10,
-      "executionTime": 3.815250000000006,
+      "executionTime": 4.548916999999989,
       "found": true,
-      "duration": 8,
+      "duration": 9,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.8
+      "accuracy": 0.9,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "成田空港",
       "to": "新宿",
       "type": "Airport",
       "googleDuration": 85,
-      "executionTime": 8.847583,
+      "executionTime": 11.305582999999984,
       "found": true,
-      "duration": 86,
+      "duration": 77,
       "transfers": 3,
       "label": "最佳建議",
-      "accuracy": 0.9882352941176471
+      "accuracy": 0.9058823529411765,
+      "routeOperators": [
+        "JR-East",
+        "Toei"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "浜松町",
       "to": "渋谷",
       "type": "Airport",
       "googleDuration": 20,
-      "executionTime": 7.862125000000006,
+      "executionTime": 11.072457999999983,
       "found": true,
-      "duration": 23,
+      "duration": 21,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.85
+      "accuracy": 0.95,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "成田空港",
       "to": "上野",
       "type": "Airport",
       "googleDuration": 60,
-      "executionTime": 1.7773749999999922,
+      "executionTime": 2.147541999999987,
       "found": true,
-      "duration": 72,
+      "duration": 70,
       "transfers": 2,
       "label": "最佳建議",
-      "accuracy": 0.8
+      "accuracy": 0.8333333333333334,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "品川",
       "to": "横浜",
       "type": "Airport",
       "googleDuration": 20,
-      "executionTime": 1.3810840000000013,
+      "executionTime": 2.169792000000001,
       "found": true,
-      "duration": 12,
+      "duration": 15,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.6
+      "accuracy": 0.75,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "東京",
       "to": "新宿",
       "type": "Urban",
       "googleDuration": 14,
-      "executionTime": 0.586874999999992,
+      "executionTime": 1.7003750000000082,
       "found": true,
-      "duration": 15,
+      "duration": 17,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.9285714285714286
+      "accuracy": 0.7857142857142857,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "銀座",
       "to": "六本木",
       "type": "Urban",
       "googleDuration": 12,
-      "executionTime": 1.7485829999999964,
+      "executionTime": 2.2392499999999984,
       "found": true,
       "duration": 14,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.8333333333333334
+      "accuracy": 0.8333333333333334,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "秋葉原",
       "to": "渋谷",
       "type": "Urban",
       "googleDuration": 30,
-      "executionTime": 10.404667000000018,
+      "executionTime": 9.446665999999993,
       "found": true,
-      "duration": 34,
+      "duration": 29,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.8666666666666667
+      "accuracy": 0.9666666666666667,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "池袋",
       "to": "品川",
       "type": "Urban",
       "googleDuration": 28,
-      "executionTime": 4.385833000000019,
+      "executionTime": 4.676125000000013,
       "found": true,
-      "duration": 22,
-      "transfers": 1,
+      "duration": 45,
+      "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.7857142857142857
+      "accuracy": 0.3928571428571429,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "上野",
       "to": "恵比寿",
       "type": "Urban",
       "googleDuration": 32,
-      "executionTime": 8.991208999999998,
+      "executionTime": 10.769584000000009,
       "found": true,
       "duration": 32,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 1
+      "accuracy": 1,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "表参道",
       "to": "日本橋",
       "type": "Urban",
       "googleDuration": 20,
-      "executionTime": 1.2597909999999786,
+      "executionTime": 1.578374999999994,
       "found": true,
       "duration": 20,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 1
+      "accuracy": 1,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "赤坂見附",
       "to": "大手町",
       "type": "Urban",
       "googleDuration": 10,
-      "executionTime": 0.28274999999999295,
+      "executionTime": 0.3605829999999912,
       "found": true,
       "duration": 8,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.8
+      "accuracy": 0.8,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "新橋",
       "to": "新宿",
       "type": "Urban",
       "googleDuration": 20,
-      "executionTime": 6.435708999999974,
+      "executionTime": 7.5290410000000065,
       "found": true,
       "duration": 21,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.95
+      "accuracy": 0.95,
+      "routeOperators": [
+        "Toei"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "目黒",
       "to": "飯田橋",
       "type": "Urban",
       "googleDuration": 25,
-      "executionTime": 2.2218330000000037,
+      "executionTime": 4.647917000000007,
       "found": true,
       "duration": 23,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.92
+      "accuracy": 0.92,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "四ツ谷",
       "to": "浅草",
       "type": "Urban",
       "googleDuration": 25,
-      "executionTime": 5.211458000000022,
+      "executionTime": 9.117250000000013,
       "found": true,
-      "duration": 29,
+      "duration": 26,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.84
+      "accuracy": 0.96,
+      "routeOperators": [
+        "JR-East",
+        "Toei"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "吉祥寺",
       "to": "東京",
       "type": "Suburban",
       "googleDuration": 35,
-      "executionTime": 1.6742080000000215,
+      "executionTime": 3.207833999999991,
       "found": true,
-      "duration": 39,
+      "duration": 37,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.8857142857142857
+      "accuracy": 0.9428571428571428,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "三鷹",
       "to": "銀座",
       "type": "Suburban",
       "googleDuration": 40,
-      "executionTime": 2.042665999999997,
+      "executionTime": 5.18995799999999,
       "found": true,
-      "duration": 40,
+      "duration": 39,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 1
+      "accuracy": 0.975,
+      "routeOperators": [
+        "JR-East",
+        "TokyoMetro"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "立川",
       "to": "新宿",
       "type": "Suburban",
       "googleDuration": 30,
-      "executionTime": 0.5410420000000045,
+      "executionTime": 0.450917000000004,
       "found": true,
-      "duration": 50,
+      "duration": 23,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.33333333333333337
+      "accuracy": 0.7666666666666666,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "八王子",
       "to": "東京",
       "type": "Suburban",
       "googleDuration": 55,
-      "executionTime": 0.9897919999999942,
+      "executionTime": 1.6755419999999503,
       "found": true,
-      "duration": 75,
+      "duration": 47,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.6363636363636364
+      "accuracy": 0.8545454545454545,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "町田",
       "to": "渋谷",
       "type": "Suburban",
       "googleDuration": 45,
-      "executionTime": 3.8221670000000074,
+      "executionTime": 4.804874999999981,
       "found": true,
-      "duration": 66,
+      "duration": 56,
       "transfers": 2,
       "label": "最佳建議",
-      "accuracy": 0.5333333333333333
+      "accuracy": 0.7555555555555555,
+      "routeOperators": [
+        "Odakyu",
+        "JR-East"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "大宮",
       "to": "新宿",
       "type": "Suburban",
       "googleDuration": 35,
-      "executionTime": 0.9818339999999921,
+      "executionTime": 4.38291700000002,
       "found": true,
-      "duration": 17,
+      "duration": 33,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.48571428571428577
+      "accuracy": 0.9428571428571428,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "浦和",
       "to": "東京",
       "type": "Suburban",
       "googleDuration": 30,
-      "executionTime": 0.6561670000000106,
+      "executionTime": 0.7979170000000408,
       "found": true,
-      "duration": 44,
+      "duration": 32,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.5333333333333333
+      "accuracy": 0.9333333333333333,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "柏",
       "to": "上野",
       "type": "Suburban",
       "googleDuration": 35,
-      "executionTime": 0.6011670000000038,
+      "executionTime": 0.5683750000000032,
       "found": true,
-      "duration": 26,
+      "duration": 29,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.7428571428571429
+      "accuracy": 0.8285714285714285,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "船橋",
       "to": "秋葉原",
       "type": "Suburban",
       "googleDuration": 30,
-      "executionTime": 0.4536249999999882,
+      "executionTime": 0.3957500000000209,
       "found": true,
-      "duration": 31,
+      "duration": 25,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.9666666666666667
+      "accuracy": 0.8333333333333334,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "千葉",
       "to": "東京",
       "type": "Suburban",
       "googleDuration": 45,
-      "executionTime": 1.047458000000006,
+      "executionTime": 1.7029590000000212,
       "found": true,
-      "duration": 38,
+      "duration": 43,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.8444444444444444
+      "accuracy": 0.9555555555555556,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "川越",
       "to": "池袋",
       "type": "Suburban",
       "googleDuration": 35,
-      "executionTime": 0.4853339999999946,
+      "executionTime": 0.6299579999999878,
       "found": true,
-      "duration": 53,
+      "duration": 43,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.48571428571428577
+      "accuracy": 0.7714285714285715,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "所沢",
       "to": "新宿",
       "type": "Suburban",
       "googleDuration": 40,
-      "executionTime": 0.9139999999999873,
+      "executionTime": 1.251374999999996,
       "found": true,
-      "duration": 44,
+      "duration": 37,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.9
+      "accuracy": 0.925,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "高尾",
       "to": "新宿",
       "type": "Suburban",
       "googleDuration": 50,
-      "executionTime": 0.6243330000000071,
+      "executionTime": 0.7022500000000491,
       "found": true,
-      "duration": 72,
+      "duration": 38,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.56
+      "accuracy": 0.76,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "国分寺",
       "to": "新宿",
       "type": "Suburban",
       "googleDuration": 25,
-      "executionTime": 0.32954200000000355,
+      "executionTime": 0.3625839999999698,
       "found": true,
-      "duration": 40,
+      "duration": 18,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.4
+      "accuracy": 0.72,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "府中",
       "to": "新宿",
       "type": "Suburban",
       "googleDuration": 30,
-      "executionTime": 1.508874999999989,
+      "executionTime": 1.2404579999999896,
       "found": true,
-      "duration": 56,
+      "duration": 37,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.1333333333333333
+      "accuracy": 0.7666666666666666,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "浅草",
       "to": "都庁前",
       "type": "Complex",
       "googleDuration": 35,
-      "executionTime": 9.251249999999999,
+      "executionTime": 15.044875000000047,
       "found": true,
       "duration": 44,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.7428571428571429
+      "accuracy": 0.7428571428571429,
+      "routeOperators": [
+        "TokyoMetro",
+        "Toei"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "押上",
       "to": "中目黒",
       "type": "Complex",
       "googleDuration": 45,
-      "executionTime": 4.936749999999989,
+      "executionTime": 7.097207999999966,
       "found": true,
       "duration": 39,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.8666666666666667
+      "accuracy": 0.8666666666666667,
+      "routeOperators": [
+        "Toei",
+        "TokyoMetro"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "中目黒",
       "to": "秋葉原",
       "type": "Complex",
       "googleDuration": 30,
-      "executionTime": 0.3260829999999828,
+      "executionTime": 0.40895799999998417,
       "found": true,
       "duration": 23,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.7666666666666666
+      "accuracy": 0.7666666666666666,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "代々木上原",
       "to": "東京",
       "type": "Complex",
       "googleDuration": 25,
-      "executionTime": 1.342375000000004,
+      "executionTime": 2.002291000000014,
       "found": true,
       "duration": 27,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.92
+      "accuracy": 0.92,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "北千住",
       "to": "六本木",
       "type": "Complex",
       "googleDuration": 40,
-      "executionTime": 3.072041999999982,
+      "executionTime": 3.6878340000000094,
       "found": true,
       "duration": 33,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.825
+      "accuracy": 0.825,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "中野",
       "to": "豊洲",
       "type": "Complex",
       "googleDuration": 45,
-      "executionTime": 8.14149999999998,
+      "executionTime": 11.955332999999996,
       "found": true,
-      "duration": 44,
+      "duration": 40,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.9777777777777777
+      "accuracy": 0.8888888888888888,
+      "routeOperators": [
+        "JR-East",
+        "TokyoMetro"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "荻窪",
       "to": "月島",
       "type": "Complex",
       "googleDuration": 40,
-      "executionTime": 5.3381669999999986,
+      "executionTime": 9.372333999999967,
       "found": true,
-      "duration": 46,
+      "duration": 42,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.85
+      "accuracy": 0.95,
+      "routeOperators": [
+        "JR-East",
+        "Toei"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "練馬",
       "to": "新橋",
       "type": "Complex",
       "googleDuration": 35,
-      "executionTime": 1.5322500000000048,
+      "executionTime": 2.0977910000000293,
       "found": true,
       "duration": 34,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.9714285714285714
+      "accuracy": 0.9714285714285714,
+      "routeOperators": [
+        "Toei"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "和光市",
       "to": "銀座",
       "type": "Complex",
       "googleDuration": 45,
-      "executionTime": 1.7885410000000093,
+      "executionTime": 2.831625000000031,
       "found": true,
       "duration": 41,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.9111111111111111
+      "accuracy": 0.9111111111111111,
+      "routeOperators": [
+        "TokyoMetro"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "赤羽",
       "to": "六本木",
       "type": "Complex",
       "googleDuration": 35,
-      "executionTime": 7.548334000000011,
+      "executionTime": 15.211082999999974,
       "found": true,
-      "duration": 49,
+      "duration": 39,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.6
+      "accuracy": 0.8857142857142857,
+      "routeOperators": [
+        "JR-East",
+        "Toei"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "駒込",
       "to": "五反田",
       "type": "Misc",
       "googleDuration": 35,
-      "executionTime": 1.9434170000000108,
+      "executionTime": 1.7775829999999928,
       "found": true,
-      "duration": 34,
+      "duration": 27,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.9714285714285714
+      "accuracy": 0.7714285714285715,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "巣鴨",
       "to": "浜松町",
       "type": "Misc",
       "googleDuration": 30,
-      "executionTime": 1.9915420000000097,
+      "executionTime": 2.2975420000000213,
       "found": true,
-      "duration": 34,
+      "duration": 27,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.8666666666666667
+      "accuracy": 0.9,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "大井町",
       "to": "赤羽",
       "type": "Misc",
       "googleDuration": 40,
-      "executionTime": 5.171500000000009,
+      "executionTime": 5.245457999999985,
       "found": true,
-      "duration": 49,
+      "duration": 39,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.775
+      "accuracy": 0.975,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "蒲田",
       "to": "日暮里",
       "type": "Misc",
       "googleDuration": 45,
-      "executionTime": 2.35583299999999,
+      "executionTime": 1.7012080000000083,
       "found": true,
-      "duration": 39,
+      "duration": 31,
       "transfers": 0,
       "label": "最佳建議",
-      "accuracy": 0.8666666666666667
+      "accuracy": 0.6888888888888889,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "大森",
       "to": "亀戸",
       "type": "Misc",
       "googleDuration": 40,
-      "executionTime": 10.294832999999983,
+      "executionTime": 14.828041000000042,
       "found": true,
-      "duration": 44,
+      "duration": 37,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.9
+      "accuracy": 0.925,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "錦糸町",
       "to": "恵比寿",
       "type": "Misc",
       "googleDuration": 35,
-      "executionTime": 8.420916999999974,
+      "executionTime": 13.174709000000007,
       "found": true,
-      "duration": 39,
+      "duration": 37,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.8857142857142857
+      "accuracy": 0.9428571428571428,
+      "routeOperators": [
+        "JR-East",
+        "TokyoMetro"
+      ],
+      "isCrossSystem": true
     },
     {
       "from": "両国",
       "to": "原宿",
       "type": "Misc",
       "googleDuration": 30,
-      "executionTime": 8.169165999999962,
+      "executionTime": 10.712041999999997,
       "found": true,
-      "duration": 37,
+      "duration": 31,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.7666666666666666
+      "accuracy": 0.9666666666666667,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "水道橋",
       "to": "舞浜",
       "type": "Misc",
       "googleDuration": 45,
-      "executionTime": 13.012415999999973,
+      "executionTime": 17.96783300000004,
       "found": true,
-      "duration": 49,
+      "duration": 41,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.9111111111111111
+      "accuracy": 0.9111111111111111,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
     },
     {
       "from": "御茶ノ水",
       "to": "舞浜",
       "type": "Misc",
       "googleDuration": 40,
-      "executionTime": 12.330917,
+      "executionTime": 17.225374999999985,
       "found": true,
-      "duration": 47,
+      "duration": 39,
       "transfers": 1,
       "label": "最佳建議",
-      "accuracy": 0.825
+      "accuracy": 0.975,
+      "routeOperators": [
+        "JR-East"
+      ],
+      "isCrossSystem": false
+    },
+    {
+      "from": "神田",
+      "to": "駒沢大学",
+      "type": "Misc",
+      "googleDuration": 30,
+      "executionTime": 0,
+      "found": false,
+      "duration": 0,
+      "transfers": 0,
+      "label": "N/A",
+      "accuracy": null,
+      "routeOperators": [],
+      "isCrossSystem": false
     }
   ]
 }

@@ -57,7 +57,7 @@ export const useTripGuardStore = create<TripGuardState>()(
             }
         }),
         {
-            name: 'bambigo-trip-guard',
+            name: 'lutagu-trip-guard',
         }
     )
 );

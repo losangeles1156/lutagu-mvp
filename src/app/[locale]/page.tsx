@@ -2,18 +2,16 @@
 
 import dynamic from 'next/dynamic';
 import { useAppStore } from '@/stores/appStore';
-import { NodeTabs } from '@/components/node/NodeTabs';
+import { NodeSkeleton } from '@/components/node/NodeSkeleton';
 import { SubscriptionModal } from '@/components/guard/SubscriptionModal';
-import { FeedbackHub } from '@/components/feedback/FeedbackHub';
 import { SystemMenu } from '@/components/ui/SystemMenu';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { ChatPanel } from '@/components/chat/ChatPanel';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { fetchNodeConfig, NodeProfile } from '@/lib/api/nodes';
-import { X, MessageSquare, MessageSquarePlus } from 'lucide-react';
+import { X, MessageSquare, MessageSquarePlus, Map } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { getSupabase } from '@/lib/supabase';
@@ -21,10 +19,27 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// 🚀 Performance: Dynamic imports for code splitting
 const MapContainer = dynamic(
     () => import('@/components/map/MapContainer'),
     { ssr: false, loading: () => <div className="w-full h-screen bg-gray-100 animate-pulse" /> }
 );
+
+const ChatPanel = dynamic(
+    () => import('@/components/chat/ChatPanel').then(m => ({ default: m.ChatPanel })),
+    { ssr: false, loading: () => <div className="h-full bg-slate-50 animate-pulse rounded-2xl" /> }
+);
+
+const NodeTabs = dynamic(
+    () => import('@/components/node/NodeTabs').then(m => ({ default: m.NodeTabs })),
+    { ssr: false, loading: () => <NodeSkeleton /> }
+);
+
+const FeedbackHub = dynamic(
+    () => import('@/components/feedback/FeedbackHub').then(m => ({ default: m.FeedbackHub })),
+    { ssr: false }
+);
+
 
 export default function Home() {
     const [hydrated, setHydrated] = useState(false);
@@ -223,7 +238,7 @@ export default function Home() {
                             <LanguageSwitcher className="p-2 shadow-none glass-effect-none bg-transparent hover:bg-gray-100 rounded-2xl" />
                             <button
                                 onClick={() => { setBottomSheetOpen(false); setCurrentNode(null); }}
-                                className="p-3 bg-gray-100 rounded-2xl text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-90 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                                className="p-3.5 min-w-[48px] min-h-[48px] bg-gray-100 rounded-2xl text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all active:scale-90 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                 aria-label={tCommon('close')}
                             >
                                 <X size={24} aria-hidden="true" />
@@ -231,8 +246,19 @@ export default function Home() {
                         </div>
                     </header>
                     <div className="flex-1 overflow-hidden">
-                        <NodeTabs nodeData={nodeData} profile={profile} />
+                        {nodeData ? <NodeTabs nodeData={nodeData} profile={profile} /> : <NodeSkeleton />}
                     </div>
+                    {/* P2: Bottom close button for thumb zone accessibility */}
+                    <footer className="p-4 border-t border-gray-100 bg-white/95 backdrop-blur-xl safe-area-bottom">
+                        <button
+                            onClick={() => { setBottomSheetOpen(false); setCurrentNode(null); }}
+                            className="w-full h-12 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-bold text-sm transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                            aria-label={tCommon('backToMap')}
+                        >
+                            <Map size={18} aria-hidden="true" />
+                            <span>{tCommon('backToMap')}</span>
+                        </button>
+                    </footer>
                 </section>
             )}
 
@@ -254,7 +280,7 @@ export default function Home() {
                                 <LanguageSwitcher className="p-2 shadow-none glass-effect-none bg-transparent hover:bg-slate-50 rounded-full" />
                                 <button
                                     onClick={() => setShowSkipConfirm(true)}
-                                    className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    className="min-w-[44px] min-h-[44px] p-2.5 hover:bg-slate-50 rounded-full transition-colors text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                     aria-label={tOnboarding('skip')}
                                 >
                                     <X className="w-5 h-5" aria-hidden="true" />
