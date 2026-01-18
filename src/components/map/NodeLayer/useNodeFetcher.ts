@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useMap } from 'react-leaflet';
 import { useNodeDisplay, NodeDatum, HubDetails } from '@/providers/NodeDisplayProvider';
@@ -175,7 +177,7 @@ export function useNodeFetcher() {
             setNodes(combined, allHubDetails);
         } catch (e: any) {
             if (controller.signal.aborted || e?.name === 'AbortError') return;
-            console.error('[useNodeFetcher] Error:', e?.message);
+            logger.error('[useNodeFetcher] Error:', e?.message);
             setError(String(e?.message || 'Failed to load nodes'));
         } finally {
             setLoading(false);

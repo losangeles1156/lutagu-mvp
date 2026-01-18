@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useApiFetch } from '@/hooks/useApiFetch';
@@ -143,7 +145,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                 const reqBody: RecommendRequest = { stationId, userPreferences: prefs, locale: uiLocale as 'zh-TW' | 'ja' | 'en' };
                 const res = await fetch('/api/l4/recommend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reqBody) });
                 if (res.ok) { const data = await res.json(); setRecommendations(data.cards || []); }
-            } catch (err) { console.error('[L4 Dashboard] Failed to fetch recommendations:', err); }
+            } catch (err) { logger.error('[L4 Dashboard] Failed to fetch recommendations:', err); }
             finally { setIsRecommending(false); }
         };
         fetchRecommendations();
@@ -160,7 +162,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                     setMarkdownKnowledge(data.tips || []);
                 }
             } catch (err) {
-                console.error('[L4 Dashboard] Failed to fetch markdown knowledge:', err);
+                logger.error('[L4 Dashboard] Failed to fetch markdown knowledge:', err);
             } finally {
                 setIsKnowledgeLoading(false);
             }
@@ -357,7 +359,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                         const json = await fetchJsonCached<OdptStationTimetable[]>(`/api/odpt/timetable?station=${encodeURIComponent(memberId)}&raw=1`, { ttlMs: 30_000, signal: controller.signal });
                         if (mySeq !== requestSeqRef.current) return;
                         if (json && json.length > 0) { allTimetables = [...allTimetables, ...json]; fetchedAny = true; }
-                    } catch (e: any) { if (e?.name !== 'AbortError') console.warn(`[Timetable] Failed for ${memberId}:`, e); }
+                    } catch (e: any) { if (e?.name !== 'AbortError') logger.warn(`[Timetable] Failed for ${memberId}:`, e); }
                 }
                 if (fetchedAny) { const filtered = filterTimetablesForStation(allTimetables, currentOriginId); setTimetableData(filtered.length > 0 ? filtered : allTimetables); setSuggestion(buildTimetableSuggestion({ stationId: currentOriginId, demand, verified: true })); return; }
                 setTimetableData([]); setSuggestion(buildTimetableSuggestion({ stationId: currentOriginId, demand, verified: false })); return;

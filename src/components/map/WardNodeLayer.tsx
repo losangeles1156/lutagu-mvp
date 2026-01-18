@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useEffect, useMemo } from 'react';
 import { useWardStore, Ward } from '@/lib/stores/wardStore';
 import { NodeMarker } from './NodeMarker';
@@ -171,7 +173,7 @@ export function useWardNodes(wardId: string | null) {
             .then(data => {
                 if (mounted) setNodes(data);
             })
-            .catch(err => console.error(err))
+            .catch(err => logger.error(err))
             .finally(() => {
                 if (mounted) setIsLoadingNodes(false);
             });

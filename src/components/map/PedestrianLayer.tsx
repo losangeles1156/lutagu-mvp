@@ -1,6 +1,8 @@
 
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useMap, Polyline, CircleMarker, Popup } from 'react-leaflet';
 import { useAppStore } from '@/stores/appStore';
@@ -121,7 +123,7 @@ export function PedestrianLayer() {
 
         } catch (err: any) {
             if (controller.signal.aborted || err?.name === 'AbortError') return;
-            console.error(err);
+            logger.error(err);
             toast.error(err.message);
             setRoutePath(null);
             setRouteSummary(null);
@@ -204,7 +206,7 @@ export function PedestrianLayer() {
             setLinks(nextLinks);
         } catch (e: any) {
             if (controller.signal.aborted || e?.name === 'AbortError') return;
-            console.error("Failed to fetch graph", e);
+            logger.error("Failed to fetch graph", e);
         } finally {
             if (abortControllerRef.current === controller) {
                 setLoading(false);

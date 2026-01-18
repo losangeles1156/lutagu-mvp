@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useEffect, useCallback } from 'react';
 import { UserEditor } from './UserEditor';
 import { Search, Plus, Edit, Trash2, Shield, User, RefreshCw } from 'lucide-react';
@@ -41,7 +43,7 @@ export function UserList() {
             const data = await res.json();
             setMembers(data.items || []);
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             toast.error('無法載入會員列表');
         } finally {
             setLoading(false);

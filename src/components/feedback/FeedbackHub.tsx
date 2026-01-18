@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquarePlus, X, Star, Bug, MapPin, Lightbulb, Send, Loader2 } from 'lucide-react';
@@ -63,7 +65,7 @@ export function FeedbackHub({ nodeId, nodeName, children }: FeedbackHubProps) {
                 }, 2000);
             }
         } catch (error) {
-            console.error('Failed to submit feedback:', error);
+            logger.error('Failed to submit feedback:', error);
         } finally {
             setIsSubmitting(false);
         }

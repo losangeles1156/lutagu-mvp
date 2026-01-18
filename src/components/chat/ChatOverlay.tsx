@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
@@ -212,7 +214,7 @@ export function ChatOverlay() {
             }))
         };
 
-        console.log('[ChatOverlay] Initializing welcome message for', isDemoMode ? 'Demo Mode' : 'AI Mode');
+        logger.log('[ChatOverlay] Initializing welcome message for', isDemoMode ? 'Demo Mode' : 'AI Mode');
 
         if (isDemoMode) {
             clearStoreMessages();
@@ -242,10 +244,10 @@ export function ChatOverlay() {
                     return;
                 }
 
-                console.error('[ChatOverlay] L2 Fetch Failed', res.status, res.statusText);
+                logger.error('[ChatOverlay] L2 Fetch Failed', res.status, res.statusText);
             } catch (e: any) {
                 if (controller.signal.aborted || e?.name === 'AbortError') return;
-                console.error('[ChatOverlay] L2 Fetch Error', e);
+                logger.error('[ChatOverlay] L2 Fetch Error', e);
             }
         };
 
@@ -380,7 +382,7 @@ export function ChatOverlay() {
                 })
             });
         } catch (e) {
-            console.error('Feedback Error', e);
+            logger.error('Feedback Error', e);
             // Revert if failed (optional, but good practice)
         }
     };

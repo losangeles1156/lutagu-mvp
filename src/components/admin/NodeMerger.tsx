@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useMemo, useEffect } from 'react';
 import { useWardStore } from '@/lib/stores/wardStore';
 import { NodeDatum, fetchNearbyNodes } from '@/lib/api/nodes';
@@ -40,7 +42,7 @@ export function NodeMerger() {
                 setSelectedChildren(new Set());
             })
             .catch(err => {
-                console.error('Failed to fetch nodes', err);
+                logger.error('Failed to fetch nodes', err);
                 toast.error('無法載入節點');
             })
             .finally(() => setLoading(false));
@@ -112,7 +114,7 @@ export function NodeMerger() {
 
                 setCandidates(filtered);
             } catch (error) {
-                console.error('Failed to fetch nearby candidates', error);
+                logger.error('Failed to fetch nearby candidates', error);
                 toast.error('無法載入附近節點');
             } finally {
                 setIsFetchingCandidates(false);
@@ -152,7 +154,7 @@ export function NodeMerger() {
             setCandidateRefreshTrigger(prev => prev + 1);
 
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             toast.error('合併失敗');
         } finally {
             setIsSubmitting(false);

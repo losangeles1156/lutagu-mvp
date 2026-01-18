@@ -685,5 +685,42 @@
             "accessibility": "I'm going to Ueno Zoo with a stroller. Which exit at Ueno Station is the most convenient?"
         }
     },
-    "validation": "Validation"
+    "validation": "Validation",
+    "admin": {
+        "dashboard": {
+            "title": "Dashboard",
+            "overview": "Session Journey Overview",
+            "refresh": "Refresh",
+            "viewDetails": "View Detailed Metrics",
+            "noData": "No session data yet",
+            "userActivity": "User activity will be displayed here",
+            "loading": "Loading...",
+            "stats": {
+                "todaySessions": "Today's Sessions",
+                "engagedSessions": "Engaged Sessions",
+                "conversion": "Conversion",
+                "positiveFeedback": "Positive Feedback",
+                "negativeFeedback": "Negative",
+                "problemSolutionRate": "Problem Solution Rate",
+                "conversionRate": "Conversion Rate"
+            },
+            "table": {
+                "recentSessions": "Recent Sessions",
+                "session": "Session",
+                "startTime": "Start Time",
+                "steps": "Steps",
+                "stepsUnit": "steps",
+                "conversion": "Conversion",
+                "feedback": "Feedback",
+                "partnerClicks": "Partner Clicks",
+                "converted": "✓ Converted"
+            }
+        },
+        "quickLinks": {
+            "feedback": "Feedback",
+            "metrics": "Metrics",
+            "security": "Security",
+            "partners": "Partners"
+        }
+    }
 }

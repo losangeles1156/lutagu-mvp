@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
     LayoutDashboard, Users, TrendingUp, ThumbsUp,
@@ -32,6 +32,8 @@ interface SessionJourney {
 
 export default function AdminDashboardPage() {
     const locale = useLocale();
+    const t = useTranslations('admin.dashboard');
+    const tQuickLinks = useTranslations('admin.quickLinks');
     const [loading, setLoading] = useState(true);
     const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
     const [recentSessions, setRecentSessions] = useState<SessionJourney[]>([]);
@@ -59,31 +61,31 @@ export default function AdminDashboardPage() {
 
     const statCards = dailyStats ? [
         {
-            label: '今日 Sessions',
+            label: t('stats.todaySessions'),
             value: dailyStats.total_sessions,
             icon: Users,
             color: 'bg-blue-500',
         },
         {
-            label: 'Engaged Sessions',
+            label: t('stats.engagedSessions'),
             value: dailyStats.engaged_sessions,
             icon: Activity,
             color: 'bg-emerald-500',
-            subtext: `${dailyStats.problem_solution_rate_pct}% 問題解決率`
+            subtext: `${dailyStats.problem_solution_rate_pct}% ${t('stats.problemSolutionRate')}`
         },
         {
-            label: 'Conversion',
+            label: t('stats.conversion'),
             value: dailyStats.conversion_sessions,
             icon: MousePointer,
             color: 'bg-amber-500',
-            subtext: `${dailyStats.conversion_rate_pct}% 轉化率`
+            subtext: `${dailyStats.conversion_rate_pct}% ${t('stats.conversionRate')}`
         },
         {
-            label: '正面回饋',
+            label: t('stats.positiveFeedback'),
             value: dailyStats.positive_feedback_sessions,
             icon: ThumbsUp,
             color: 'bg-indigo-500',
-            subtext: `${dailyStats.negative_feedback_sessions} 負面`
+            subtext: `${dailyStats.negative_feedback_sessions} ${t('stats.negativeFeedback')}`
         },
     ] : [];
 
@@ -92,9 +94,9 @@ export default function AdminDashboardPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        Session Journey 概覽 • {new Date().toLocaleDateString(locale)}
+                        {t('overview')} • {new Date().toLocaleDateString(locale)}
                     </p>
                 </div>
                 <button
@@ -103,7 +105,7 @@ export default function AdminDashboardPage() {
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
                 >
                     <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                    重新整理
+                    {t('refresh')}
                 </button>
             </div>
 
@@ -153,25 +155,25 @@ export default function AdminDashboardPage() {
             {/* Recent Sessions Table */}
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="font-bold text-gray-900">最近 Sessions</h2>
+                    <h2 className="font-bold text-gray-900">{t('table.recentSessions')}</h2>
                     <Link
                         href={`/${locale}/admin/metrics`}
                         className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                     >
-                        查看詳細指標 <ArrowRight size={14} />
+                        {t('viewDetails')} <ArrowRight size={14} />
                     </Link>
                 </div>
 
                 {loading ? (
                     <div className="p-8 text-center text-gray-500">
                         <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
-                        載入中...
+                        {t('loading')}
                     </div>
                 ) : recentSessions.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
                         <LayoutDashboard className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <div className="font-medium">尚無 Session 資料</div>
-                        <div className="text-sm">用戶活動將在此顯示</div>
+                        <div className="font-medium">{t('noData')}</div>
+                        <div className="text-sm">{t('userActivity')}</div>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
@@ -179,22 +181,22 @@ export default function AdminDashboardPage() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Session
+                                        {t('table.session')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        開始時間
+                                        {t('table.startTime')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        步驟
+                                        {t('table.steps')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        轉化
+                                        {t('table.conversion')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        回饋
+                                        {t('table.feedback')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Partner Clicks
+                                        {t('table.partnerClicks')}
                                     </th>
                                 </tr>
                             </thead>
@@ -221,14 +223,14 @@ export default function AdminDashboardPage() {
                                                     />
                                                 ))}
                                                 <span className="ml-2 text-xs text-gray-500">
-                                                    {session.funnel_steps_completed} 步
+                                                    {session.funnel_steps_completed} {t('table.stepsUnit')}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {session.reached_conversion_step ? (
                                                 <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                    ✓ 轉化
+                                                    {t('table.converted')}
                                                 </span>
                                             ) : (
                                                 <span className="text-xs text-gray-400">-</span>
@@ -261,10 +263,10 @@ export default function AdminDashboardPage() {
             {/* Quick Links */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { label: 'Feedback', href: `/${locale}/admin/feedback`, icon: ThumbsUp },
-                    { label: 'Metrics', href: `/${locale}/admin/metrics`, icon: TrendingUp },
-                    { label: 'Security', href: `/${locale}/admin/security`, icon: Activity },
-                    { label: 'Partners', href: `/${locale}/admin/partners`, icon: Users },
+                    { labelKey: 'feedback', href: `/${locale}/admin/feedback`, icon: ThumbsUp },
+                    { labelKey: 'metrics', href: `/${locale}/admin/metrics`, icon: TrendingUp },
+                    { labelKey: 'security', href: `/${locale}/admin/security`, icon: Activity },
+                    { labelKey: 'partners', href: `/${locale}/admin/partners`, icon: Users },
                 ].map((link) => {
                     const Icon = link.icon;
                     return (
@@ -274,7 +276,7 @@ export default function AdminDashboardPage() {
                             className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
                         >
                             <Icon size={18} className="text-gray-400" />
-                            <span className="font-medium text-gray-700">{link.label}</span>
+                            <span className="font-medium text-gray-700">{tQuickLinks(link.labelKey)}</span>
                             <ArrowRight size={14} className="ml-auto text-gray-300" />
                         </Link>
                     );

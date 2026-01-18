@@ -687,5 +687,42 @@
             "accessibility": "無障礙"
         }
     },
-    "validation": "驗證"
+    "validation": "驗證",
+    "admin": {
+        "dashboard": {
+            "title": "儀表板",
+            "overview": "Session Journey 概覽",
+            "refresh": "重新整理",
+            "viewDetails": "查看詳細指標",
+            "noData": "尚無 Session 資料",
+            "userActivity": "用戶活動將在此顯示",
+            "loading": "載入中...",
+            "stats": {
+                "todaySessions": "今日 Sessions",
+                "engagedSessions": "Engaged Sessions",
+                "conversion": "Conversion",
+                "positiveFeedback": "正面回饋",
+                "negativeFeedback": "負面",
+                "problemSolutionRate": "問題解決率",
+                "conversionRate": "轉化率"
+            },
+            "table": {
+                "recentSessions": "最近 Sessions",
+                "session": "Session",
+                "startTime": "開始時間",
+                "steps": "步驟",
+                "stepsUnit": "步",
+                "conversion": "轉化",
+                "feedback": "回饋",
+                "partnerClicks": "Partner Clicks",
+                "converted": "✓ 轉化"
+            }
+        },
+        "quickLinks": {
+            "feedback": "Feedback",
+            "metrics": "Metrics",
+            "security": "Security",
+            "partners": "Partners"
+        }
+    }
 }

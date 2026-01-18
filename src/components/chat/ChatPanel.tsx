@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useChat } from '@ai-sdk/react';
 import ReactMarkdown from 'react-markdown';
@@ -365,7 +367,7 @@ export function ChatPanel() {
 
             showToast?.(tChat('feedbackSent', { defaultValue: 'Feedback sent!' }), 'success');
         } catch (error) {
-            console.error('Feedback submission failed:', error);
+            logger.error('Feedback submission failed:', error);
             showToast?.(tChat('feedbackError', { defaultValue: 'Failed to send feedback' }), 'error');
         }
     };

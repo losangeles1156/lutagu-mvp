@@ -691,5 +691,42 @@
             "accessibility": "ベビーカーで上野動物園に行きたいのですが、上野駅のどの出口が一番便利ですか？"
         }
     },
-    "validation": "検証"
+    "validation": "検証",
+    "admin": {
+        "dashboard": {
+            "title": "ダッシュボード",
+            "overview": "セッション概要",
+            "refresh": "更新",
+            "viewDetails": "詳細指標を表示",
+            "noData": "セッションデータがありません",
+            "userActivity": "ユーザーアクティビティがここに表示されます",
+            "loading": "読み込み中...",
+            "stats": {
+                "todaySessions": "本日のセッション",
+                "engagedSessions": "エンゲージメントセッション",
+                "conversion": "コンバージョン",
+                "positiveFeedback": "肯定的フィードバック",
+                "negativeFeedback": "否定的",
+                "problemSolutionRate": "問題解決率",
+                "conversionRate": "コンバージョン率"
+            },
+            "table": {
+                "recentSessions": "最近のセッション",
+                "session": "セッション",
+                "startTime": "開始時刻",
+                "steps": "ステップ",
+                "stepsUnit": "ステップ",
+                "conversion": "コンバージョン",
+                "feedback": "フィードバック",
+                "partnerClicks": "パートナークリック",
+                "converted": "✓ 変換済"
+            }
+        },
+        "quickLinks": {
+            "feedback": "フィードバック",
+            "metrics": "メトリクス",
+            "security": "セキュリティ",
+            "partners": "パートナー"
+        }
+    }
 }

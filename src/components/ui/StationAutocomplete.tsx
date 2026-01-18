@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Loader2, MapPin } from 'lucide-react';
 import type { Station } from '@/types/station';
@@ -62,7 +64,7 @@ export function StationAutocomplete({
                 // Ignore abort errors
                 return;
             }
-            console.error('Station search failed:', e);
+            logger.error('Station search failed:', e);
         } finally {
             // Only clear loading if this is the active request
             if (abortControllerRef.current === controller) {

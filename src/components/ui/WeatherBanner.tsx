@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Info, X, ShieldAlert } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -37,7 +39,7 @@ export function WeatherBanner() {
                     }
                 }
             } catch (error) {
-                console.warn('Weather fetch failed');
+                logger.warn('Weather fetch failed');
             }
         };
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import React, { Component, ReactNode } from 'react';
 import { useNodes, useHubDetails, useNodeLoading, useNodeError } from '@/providers/NodeDisplayProvider';
 import { HubNodeLayer } from '../HubNodeLayer';
@@ -23,7 +25,7 @@ class NodeLayerErrorBoundary extends Component<
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        console.error('[NodeLayer] Render error caught:', error, errorInfo);
+        logger.error('[NodeLayer] Render error caught:', error, errorInfo);
     }
 
     render() {
@@ -100,7 +102,7 @@ function NodeLayerContent({ zone, locale }: NodeLayerContentProps) {
     })();
 
     if (error) {
-        console.warn('[NodeLayer] Display error:', error);
+        logger.warn('[NodeLayer] Display error:', error);
         // Still try to render whatever nodes we have
     }
 

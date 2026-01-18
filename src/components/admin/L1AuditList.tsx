@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useEffect, useCallback } from 'react';
 import { L1CustomPlace, PlaceStatus } from '@/lib/types/l1-admin';
 import { L1PlaceEditor } from './L1PlaceEditor';
@@ -45,7 +47,7 @@ export function L1AuditList() {
             const data = await res.json();
             setPlaces(data.places || []);
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             toast.error('無法載入列表');
         } finally {
             setLoading(false);

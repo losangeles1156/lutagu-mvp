@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useEffect, useCallback, useState } from 'react';
 import { useWardStore, Ward } from '@/lib/stores/wardStore';
 
@@ -82,7 +84,7 @@ export function WardDetector({
                 detectWard,
                 (error) => {
                     // Silently fail - user can manually trigger
-                    console.log('Auto-detection failed:', error.message);
+                    logger.log('Auto-detection failed:', error.message);
                 },
                 {
                     enableHighAccuracy: false,

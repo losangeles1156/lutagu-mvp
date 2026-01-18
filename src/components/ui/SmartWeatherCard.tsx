@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Cloud, Sun, CloudRain, CloudSnow, Wind, Droplets, AlertTriangle, ShieldAlert, ExternalLink, Umbrella } from 'lucide-react';
@@ -120,7 +122,7 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
                     }
                 }
             } catch (e) {
-                console.warn('[SmartWeatherCard] Error:', e);
+                logger.warn('[SmartWeatherCard] Error:', e);
             } finally {
                 if (isMounted) setLoading(false);
             }

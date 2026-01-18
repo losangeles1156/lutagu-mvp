@@ -1,4 +1,6 @@
 
+import { logger } from '@/lib/utils/logger';
+
 import React, { useEffect, useRef } from 'react';
 import { fetchNodesByWard } from '@/lib/api/nodesByWard';
 import { NodeDatum } from '@/lib/api/nodes';
@@ -62,12 +64,12 @@ export function WardNodeLoader({ wardIds, onNodesLoaded, onLoadingChange }: Ward
                 });
 
                 if (isMounted) {
-                    console.log(`[WardNodeLoader] Loaded ${allNodes.length} total, ${operatorFiltered.length} after operator filter, ${filteredNodes.length} after bounds filter, from ${idsToFetch.size} wards`);
+                    logger.log(`[WardNodeLoader] Loaded ${allNodes.length} total, ${operatorFiltered.length} after operator filter, ${filteredNodes.length} after bounds filter, from ${idsToFetch.size} wards`);
                     onNodesLoaded(filteredNodes);
                     loadedWardsRef.current = wardsKey;
                 }
             } catch (err) {
-                console.error('[WardNodeLoader] Error loading ward nodes:', err);
+                logger.error('[WardNodeLoader] Error loading ward nodes:', err);
             } finally {
                 if (isMounted) onLoadingChange(false);
             }

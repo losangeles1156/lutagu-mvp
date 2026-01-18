@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -134,7 +136,7 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
                     });
                 }
                 // Handle case where tags is an object or other type
-                console.warn('[NodeTabs] vibe_tags is not an array:', typeof tags, tags);
+                logger.warn('[NodeTabs] vibe_tags is not an array:', typeof tags, tags);
                 return [];
             })(),
             tagline: rawData.l1_dna?.tagline,

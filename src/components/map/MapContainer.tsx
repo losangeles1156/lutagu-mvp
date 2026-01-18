@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { Component, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -107,7 +109,7 @@ function dedupeNodesById(nodes: NodeDatum[]) {
 
             if (newVersion > existingVersion) {
                 // Newer version, replace
-                console.log(`[VersionControl] ${n.id}: v${existingVersion} → v${newVersion}`);
+                logger.log(`[VersionControl] ${n.id}: v${existingVersion} → v${newVersion}`);
                 map.set(n.id, n);
             } else if (newVersion === existingVersion) {
                 // Same version, compare updated_at
@@ -115,7 +117,7 @@ function dedupeNodesById(nodes: NodeDatum[]) {
                 const newUpdated = n.updated_at ?? 0;
 
                 if (newUpdated > existingUpdated) {
-                    console.log(`[VersionControl] ${n.id}: same v${newVersion}, newer data (${existingUpdated} → ${newUpdated})`);
+                    logger.log(`[VersionControl] ${n.id}: same v${newVersion}, newer data (${existingUpdated} → ${newUpdated})`);
                     map.set(n.id, n);
                 }
                 // else: older data, keep existing
@@ -293,7 +295,7 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
         const sw = padded.getSouthWest();
         const ne = padded.getNorthEast();
 
-        console.log('[ViewportNodeLoader] load() triggered:', {
+        logger.log('[ViewportNodeLoader] load() triggered:', {
             zoom,
             sw: { lat: sw.lat, lon: sw.lng },
             ne: { lat: ne.lat, lon: ne.lng }
@@ -307,21 +309,21 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
         // [NEW] Check cache validity with version tracking
         const cached = cacheRef.current.get(key);
         if (cached) {
-            console.log(`[ViewportNodeLoader] Cache HIT for ${key}`);
+            logger.log(`[ViewportNodeLoader] Cache HIT for ${key}`);
             if (isCacheValid(cached, 0, zoom)) {
-                console.log(`[ViewportNodeLoader] Cache VALID, returning ${cached.nodes.length} nodes from cache.`);
+                logger.log(`[ViewportNodeLoader] Cache VALID, returning ${cached.nodes.length} nodes from cache.`);
                 onError(null);
                 onData(cached.nodes, cached.hubDetails);
                 return;
             } else {
-                console.log(`[ViewportNodeLoader] Cache STALE, will refetch.`);
+                logger.log(`[ViewportNodeLoader] Cache STALE, will refetch.`);
             }
         } else {
-            console.log(`[ViewportNodeLoader] Cache MISS for ${key}`);
+            logger.log(`[ViewportNodeLoader] Cache MISS for ${key}`);
         }
 
         if (inFlightKeyRef.current === key) {
-            console.log(`[ViewportNodeLoader] Request ALREADY IN FLIGHT for ${key}, skipping.`);
+            logger.log(`[ViewportNodeLoader] Request ALREADY IN FLIGHT for ${key}, skipping.`);
             return;
         }
         inFlightKeyRef.current = key;
@@ -333,7 +335,7 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
         onLoading(true);
         onError(null);
 
-        console.log(`[ViewportNodeLoader] Starting API fetch for ${key}...`);
+        logger.log(`[ViewportNodeLoader] Starting API fetch for ${key}...`);
 
         try {
             // [DEV FIX] Bypass rate limit check in development to prevent map loading failures
@@ -424,16 +426,16 @@ function ViewportNodeLoader({ onData, onLoading, onError, refreshKey }: {
                 maxVersion
             });
 
-            console.log(`[VersionCache] Stored cache for ${key} with versions [${minVersion}, ${maxVersion}]`);
+            logger.log(`[VersionCache] Stored cache for ${key} with versions [${minVersion}, ${maxVersion}]`);
 
-            console.log(`[ViewportNodeLoader] Finished loading. Total nodes: ${combined.length}`);
+            logger.log(`[ViewportNodeLoader] Finished loading. Total nodes: ${combined.length}`);
             onData(combined, allHubDetails);
         } catch (e: any) {
             if (controller.signal.aborted || e?.name === 'AbortError') {
-                console.log(`[ViewportNodeLoader] Fetch ABORTED for key ${key}`);
+                logger.log(`[ViewportNodeLoader] Fetch ABORTED for key ${key}`);
                 return;
             }
-            console.error(`[ViewportNodeLoader] Fetch ERROR:`, e?.message);
+            logger.error(`[ViewportNodeLoader] Fetch ERROR:`, e?.message);
             onError(String(e?.message || 'Failed to load nodes'));
         } finally {
             onLoading(false);
@@ -480,7 +482,7 @@ class MapErrorBoundary extends Component<{ children: ReactNode; onReset: () => v
         return { hasError: true };
     }
     componentDidCatch(error: any, errorInfo: any) {
-        console.error('MapContainer Crash:', error, errorInfo);
+        logger.error('MapContainer Crash:', error, errorInfo);
     }
     render() {
         if (this.state.hasError) {

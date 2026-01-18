@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState } from 'react';
 import { X, Save, MapPin } from 'lucide-react';
 import { L1CustomPlace, CreatePlaceRequest } from '@/lib/types/l1-admin';
@@ -59,7 +61,7 @@ export function L1PlaceEditor({ place, stations, onClose, onSave }: L1PlaceEdito
             onClose();
 
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             toast.error('儲存失敗');
         } finally {
             setLoading(false);

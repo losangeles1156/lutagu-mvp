@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useEffect, useRef, useState } from 'react';
 import { Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
@@ -47,7 +49,7 @@ export function TrainLayer() {
                 }
             } catch (e) {
                 if (controller.signal.aborted || (e instanceof Error && e.name === 'AbortError')) return;
-                console.error('Failed to fetch trains:', e);
+                logger.error('Failed to fetch trains:', e);
             }
         };
 

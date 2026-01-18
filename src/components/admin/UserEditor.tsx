@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import { useState } from 'react';
 import { X, Save, User, Shield } from 'lucide-react';
 import { toast } from 'sonner';
@@ -55,7 +57,7 @@ export function UserEditor({ user, onClose, onSave }: UserEditorProps) {
             onClose();
 
         } catch (error: any) {
-            console.error(error);
+            logger.error(error);
             toast.error(error.message || '儲存失敗');
         } finally {
             setLoading(false);

@@ -1,5 +1,7 @@
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { RefreshCw, AlertCircle, ChevronLeft } from 'lucide-react';
 
@@ -32,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    logger.error('Uncaught error:', error, errorInfo);
   }
 
   private handleReset = () => {
