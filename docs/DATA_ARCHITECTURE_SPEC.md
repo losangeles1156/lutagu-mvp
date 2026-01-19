@@ -1,6 +1,6 @@
-# BambiGO L1~L4 Data Architecture & ETL Specification
+# LUTAGU L1~L4 Data Architecture & ETL Specification
 
-This document outlines the tiered data architecture and the ETL (Extract, Transform, Load) processes used in the BambiGO project.
+This document outlines the tiered data architecture and the ETL (Extract, Transform, Load) processes used in the LUTAGU project.
 
 ## 1. Data Layer Architecture (L1~L4)
 
@@ -50,7 +50,7 @@ This document outlines the tiered data architecture and the ETL (Extract, Transf
 
 ### 2.1 L1 Pipeline (POI Ingestion)
 1.  **Extract**: Queries OpenStreetMap via Overpass API for POIs within a radius of major stations.
-2.  **Transform**: Standardizes OSM tags into BambiGO's category system.
+2.  **Transform**: Standardizes OSM tags into LUTAGU's category system.
 3.  **Load**: Upserts into `l1_places`.
 *   *Script*: `scripts/l1_pipeline/run.ts`
 

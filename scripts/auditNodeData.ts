@@ -194,7 +194,7 @@ async function auditIdFormatConsistency(): Promise<AuditResult> {
 }
 
 async function main() {
-    console.log('🔍 BambiGO Node Data Integrity Audit');
+    console.log('🔍 LUTAGU Node Data Integrity Audit');
     console.log('=====================================');
 
     const results: AuditResult[] = [];

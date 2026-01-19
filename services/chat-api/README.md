@@ -1,6 +1,6 @@
 # AI Chat Service (Cloud Run)
 
-This is the standalone AI Chat microservice for BambiGO, designed to run on GCP Cloud Run.
+This is the standalone AI Chat microservice for LUTAGU, designed to run on GCP Cloud Run.
 
 ## Purpose
 - Handles all AI/LLM-related processing

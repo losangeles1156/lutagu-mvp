@@ -1,4 +1,4 @@
-import { unstable_cache } from 'next/cache';
+// import { unstable_cache } from 'next/cache'; // Removed for backend service
 
 /**
  * Internal logic to scrape Yahoo Japan Transit.
@@ -44,30 +44,23 @@ const fetchYahooStatusInternal = async () => {
 };
 
 // Define the cached version
-// This might throw at runtime if next/cache is not available in the environment
-const getCachedYahooStatus = unstable_cache(
-    fetchYahooStatusInternal,
-    ['yahoo-train-status'],
-    { revalidate: 60, tags: ['train-status'] }
-);
+const getCachedYahooStatus = async () => {
+    return await fetchYahooStatusInternal();
+};
 
 /**
  * Scrapes Yahoo Japan Transit for train status information (Kanto Area).
  * Returns a list of lines with reported trouble (delays, suspensions).
  * 
- * Uses Next.js unstable_cache when available, falls back to direct fetch for scripts.
+ * Uses internal fetch directly (Next.js cache removed for backend service).
  */
 export const fetchYahooStatus = async () => {
     try {
         return await getCachedYahooStatus();
     } catch (error: any) {
-        // Fallback if running outside of Next.js context (e.g. scripts)
-        // The error is usually "Invariant: incrementalCache missing"
-        if (error.message && (error.message.includes('Invariant') || error.message.includes('incrementalCache'))) {
-            // console.warn('[YahooService] Cache unavailable, using direct fetch');
-            return await fetchYahooStatusInternal();
-        }
-        throw error;
+        // Fallback
+        console.warn('[YahooService] Error fetching status:', error);
+        return [];
     }
 };
 

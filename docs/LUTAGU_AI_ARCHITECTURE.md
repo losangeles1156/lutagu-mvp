@@ -67,11 +67,11 @@ graph TD
 
 ## 3. 技術實作參考位置
 
-*   **五層架構核心**: [HybridEngine.ts](file:///Users/zhuangzixian/Documents/BambiGO_MVP/src/lib/l4/HybridEngine.ts)
-*   **推理工具定義**: [reasoningTools.ts](file:///Users/zhuangzixian/Documents/BambiGO_MVP/src/lib/l4/reasoningTools.ts)
-*   **避難決策邏輯**: [decisionEngine.ts](file:///Users/zhuangzixian/Documents/BambiGO_MVP/src/lib/l5/decisionEngine.ts)
-*   **專家規則實作**: [evacuationRules.ts](file:///Users/zhuangzixian/Documents/BambiGO_MVP/src/lib/l5/evacuationRules.ts)
-*   **API 入口**: [process/route.ts](file:///Users/zhuangzixian/Documents/BambiGO_MVP/src/app/api/hybrid/process/route.ts)
+*   **五層架構核心**: [HybridEngine.ts](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/src/lib/l4/HybridEngine.ts)
+*   **推理工具定義**: [reasoningTools.ts](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/src/lib/l4/reasoningTools.ts)
+*   **避難決策邏輯**: [decisionEngine.ts](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/src/lib/l5/decisionEngine.ts)
+*   **專家規則實作**: [evacuationRules.ts](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/src/lib/l5/evacuationRules.ts)
+*   **API 入口**: [process/route.ts](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/src/app/api/hybrid/process/route.ts)
 
 > [!TIP]
 > 目前避難方案已整合至 AI Agent 的工具鏈中。當用戶詢問「現在下大雨，我該怎麼辦？」時，AI 會自動觸發 `check_safety` 並輸出包含垂直避難建議的結構化回覆。

@@ -43,11 +43,11 @@
 ## 4. 優化方案驗證與比較
 
 ### **方案 A：後端串流緩衝 (已實現)**
-- **操作**：在 [route.ts](file:///Users/zhuangzixian/Documents/BambiGO_MVP/src/app/api/agent/chat/route.ts) 中加入 20 字元的輸出緩衝。
+- **操作**：在 [route.ts](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/src/app/api/agent/chat/route.ts) 中加入 20 字元的輸出緩衝。
 - **效果**：減少網路封包碎片，前端渲染更平滑，減少 UI 抖動。
 
 ### **方案 B：Hybrid Engine 預生成模板 (已實現)**
-- **操作**：利用 [HybridEngine.ts](file:///Users/zhuangzixian/Documents/BambiGO_MVP/src/lib/l4/HybridEngine.ts) 攔截高頻問題（如：你好、如何去某地）。
+- **操作**：利用 [HybridEngine.ts](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/src/lib/l4/HybridEngine.ts) 攔截高頻問題（如：你好、如何去某地）。
 - **效果**：TTFB 從 5s 降低至 **<100ms** (命中模板時)，效能提升 50 倍。
 
 ### **方案 C：優先級分級處理 (建議)**

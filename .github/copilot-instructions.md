@@ -35,4 +35,4 @@ Core Value: Translate raw open data (ODPT, GTFS, OSM) into empathetic action sug
 - **L4 (Action)**: AI-generated mobility strategies.
 
 ---
-*For detailed rules, refer to [project_rules.md](file:///Users/zhuangzixian/Documents/BambiGO_MVP/rules/project_rules.md)*
+*For detailed rules, refer to [project_rules.md](file:///Users/zhuangzixian/Documents/LUTAGU_MVP/rules/project_rules.md)*

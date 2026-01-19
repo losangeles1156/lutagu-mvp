@@ -2,7 +2,7 @@
 set -e
 
 SERVICE_NAME="chat-api"
-PROJECT_ID="bambigo-mvp" # Replace with actual Project ID
+PROJECT_ID="lutagu-mvp" # Replace with actual Project ID
 REGION="asia-northeast1"
 IMAGE_TAG="gcr.io/$PROJECT_ID/$SERVICE_NAME:latest"
 

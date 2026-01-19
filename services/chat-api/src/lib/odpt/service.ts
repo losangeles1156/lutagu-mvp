@@ -20,7 +20,7 @@ const OPERATOR_MAP: Record<string, string[]> = {
 import { getRedisCache, initRedisCacheFromEnv } from '@/lib/cache/redisCacheService';
 import { createHash } from 'node:crypto';
 
-const redisCache = getRedisCache<any[]>('odpt');
+const redisCache = getRedisCache<any>('odpt');
 let redisInit: Promise<any> | null = null;
 
 async function ensureRedis() {

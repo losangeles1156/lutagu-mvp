@@ -1,4 +1,4 @@
-# BambiGO_MVP UI 修復摘要報告
+# LUTAGU_MVP UI 修復摘要報告
 
 ## 📅 執行日期
 2026-01-10

@@ -299,7 +299,7 @@ GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
 EMBEDDING_PROVIDER=gemini  # 'gemini' (default, 1500 RPM) | 'minimax' (10 RPM)
 
 # AI Backend (n8n Orchestration)
-N8N_WEBHOOK_URL=https://n8n.zeabur.app/webhook/bambigo-chat
+N8N_WEBHOOK_URL=https://n8n.zeabur.app/webhook/lutagu-chat
 N8N_WEBHOOK_SECRET=optional_secret_token
 
 # LINE (Trip Guard Push Notifications)
