@@ -1,6 +1,14 @@
 
-const TOKEN_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN || process.env.ODPT_API_KEY_PUBLIC;
-const TOKEN_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP || process.env.ODPT_API_KEY || process.env.ODPT_API_KEY_CHALLENGE2025;
+
+
+function getTokens() {
+    return {
+        standard: process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN || process.env.ODPT_API_KEY_PUBLIC,
+        challenge: process.env.ODPT_CHALLENGE_KEY || process.env.ODPT_API_TOKEN_BACKUP || process.env.ODPT_API_KEY || process.env.ODPT_API_KEY_CHALLENGE2025
+    };
+}
+
+
 
 const BASE_URL_STANDARD = 'https://api.odpt.org/api/v4';
 const BASE_URL_CHALLENGE = 'https://api-challenge.odpt.org/api/v4';
@@ -45,7 +53,8 @@ async function fetchForOperator(key: string, ids: string[]) {
     // Challenge API operators
     const challengeOperators = ['JR-East', 'Keikyu', 'Seibu', 'Tobu', 'Tokyu'];
     const baseUrl = challengeOperators.includes(key) ? BASE_URL_CHALLENGE : BASE_URL_STANDARD;
-    const token = challengeOperators.includes(key) ? TOKEN_CHALLENGE : TOKEN_STANDARD;
+    const tokens = getTokens();
+    const token = challengeOperators.includes(key) ? tokens.challenge : tokens.standard;
     if (!token) return [];
 
     // Cache Key: Operator
@@ -240,7 +249,8 @@ async function fetchJrEastKantoSnapshotCached(): Promise<JrEastKantoSnapshot | n
 }
 
 export async function getTrainStatus(operator?: string) {
-    if (!TOKEN_STANDARD && !TOKEN_CHALLENGE) {
+    const tokens = getTokens();
+    if (!tokens.standard && !tokens.challenge) {
         console.warn('Missing ODPT API Key, returning empty status');
         return [];
     }

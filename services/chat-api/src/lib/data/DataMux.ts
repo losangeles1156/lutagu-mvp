@@ -64,6 +64,7 @@ export class DataMux {
         const enrichedData: any = {
             // L2: Weather & Crowd
             weather_condition: l2Data.weather_info?.condition || 'Unknown',
+            weather: l2Data.weather_info || { condition: 'Unknown', temp: 20 },
             crowd_level: l2Data.crowd_level || 'low',
 
             // L3: Facilities

@@ -53,6 +53,7 @@ export interface RequestContext {
     };
     currentStation?: string;
     strategyContext?: StrategyContext | null;
+    recentMessages?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
 export class HybridEngine {
@@ -213,6 +214,9 @@ export class HybridEngine {
                         userProfile: 'general'
                     });
 
+                    // FIX: Don't set bestMatch here. Just let enrichedData flow to LLM Fallback.
+                    // This allows generic queries like "Time" or "Weather" to be answered by LLM with context.
+                    /*
                     if (enrichedData?.l4_cards && enrichedData.l4_cards.length > 0) {
                         bestMatch = {
                             source: 'knowledge',
@@ -227,6 +231,7 @@ export class HybridEngine {
                             reasoningLog: logs
                         };
                     }
+                    */
                 } catch (e) {
                     console.error('[HybridEngine] DataMux Enrichment failed:', e);
                 }
@@ -251,6 +256,12 @@ export class HybridEngine {
                 const t = k.traps?.slice(0, 3).map((it: any) => `[Trap] ${it.title}: ${it.desc}`).join('\n') || '';
                 const h = k.hacks?.slice(0, 3).map((it: any) => `[Hack] ${it.title}: ${it.desc}`).join('\n') || '';
                 activeKnowledgeSnippet = `Station Knowledge:\n${t}\n${h}`;
+            }
+            if (enrichedData?.weather) {
+                const w = enrichedData.weather;
+                activeKnowledgeSnippet += `\nStation Weather: ${w.condition}, Temp: ${w.temp}°C, Wind: ${w.wind}m/s`;
+            } else if (enrichedData?.weather_condition) {
+                activeKnowledgeSnippet += `\nStation Weather: ${enrichedData.weather_condition}`;
             }
 
             const systemPrompt = this.buildSystemPrompt(locale);
@@ -379,31 +390,31 @@ export class HybridEngine {
                 match: RegExp;
                 names: { 'zh-TW': string; ja: string; en: string };
             }> = [
-                {
-                    railwayId: 'odpt.Railway:TokyoMetro.Ginza',
-                    operatorKey: 'TokyoMetro',
-                    match: /(?:銀座線|ginza\s*line)/i,
-                    names: { 'zh-TW': '銀座線', ja: '銀座線', en: 'Ginza Line' }
-                },
-                {
-                    railwayId: 'odpt.Railway:TokyoMetro.Marunouchi',
-                    operatorKey: 'TokyoMetro',
-                    match: /(?:丸ノ内線|丸之內線|marunouchi\s*line)/i,
-                    names: { 'zh-TW': '丸之內線', ja: '丸ノ内線', en: 'Marunouchi Line' }
-                },
-                {
-                    railwayId: 'odpt.Railway:TokyoMetro.Hibiya',
-                    operatorKey: 'TokyoMetro',
-                    match: /(?:日比谷線|hibiya\s*line)/i,
-                    names: { 'zh-TW': '日比谷線', ja: '日比谷線', en: 'Hibiya Line' }
-                },
-                {
-                    railwayId: 'odpt.Railway:JR-East.Yamanote',
-                    operatorKey: 'JR-East',
-                    match: /(?:山手線|yamanote\s*line)/i,
-                    names: { 'zh-TW': '山手線', ja: '山手線', en: 'Yamanote Line' }
-                }
-            ];
+                    {
+                        railwayId: 'odpt.Railway:TokyoMetro.Ginza',
+                        operatorKey: 'TokyoMetro',
+                        match: /(?:銀座線|ginza\s*line)/i,
+                        names: { 'zh-TW': '銀座線', ja: '銀座線', en: 'Ginza Line' }
+                    },
+                    {
+                        railwayId: 'odpt.Railway:TokyoMetro.Marunouchi',
+                        operatorKey: 'TokyoMetro',
+                        match: /(?:丸ノ内線|丸之內線|marunouchi\s*line)/i,
+                        names: { 'zh-TW': '丸之內線', ja: '丸ノ内線', en: 'Marunouchi Line' }
+                    },
+                    {
+                        railwayId: 'odpt.Railway:TokyoMetro.Hibiya',
+                        operatorKey: 'TokyoMetro',
+                        match: /(?:日比谷線|hibiya\s*line)/i,
+                        names: { 'zh-TW': '日比谷線', ja: '日比谷線', en: 'Hibiya Line' }
+                    },
+                    {
+                        railwayId: 'odpt.Railway:JR-East.Yamanote',
+                        operatorKey: 'JR-East',
+                        match: /(?:山手線|yamanote\s*line)/i,
+                        names: { 'zh-TW': '山手線', ja: '山手線', en: 'Yamanote Line' }
+                    }
+                ];
 
             const hint = lineHints.find(h => h.match.test(text)) || null;
             try {
@@ -592,6 +603,16 @@ Use the provided "Hacks" and "Traps" context whenever relevant.
         const jst = getJSTTime();
         const timeStr = `${String(jst.hour).padStart(2, '0')}:${String(jst.minute).padStart(2, '0')}`;
         let prompt = `Current Time (JST): ${timeStr}\nUser Query: ${query}\n`;
+        if (ctx?.recentMessages && ctx.recentMessages.length > 0) {
+            const history = ctx.recentMessages
+                .slice(-6)
+                .map((m) => {
+                    const trimmed = m.content.length > 200 ? `${m.content.slice(0, 200)}…` : m.content;
+                    return `${m.role === 'assistant' ? 'Assistant' : 'User'}: ${trimmed}`;
+                })
+                .join('\n');
+            if (history) prompt += `Recent Conversation:\n${history}\n`;
+        }
         if (ctx?.userLocation) prompt += `Location: ${ctx.userLocation.lat}, ${ctx.userLocation.lng}\n`;
         if (ctx?.currentStation) prompt += `Station: ${ctx.currentStation}\n`;
 

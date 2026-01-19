@@ -2,11 +2,14 @@ import { Router } from 'express';
 import { hybridEngine, RequestContext } from '@/lib/l4/HybridEngine';
 import { StrategyEngine } from '@/lib/ai/strategyEngine';
 import { randomUUID } from 'crypto';
+import { generateRequestId, getTimestamp, getElapsedMs, logAIChatMetric } from '@/lib/monitoring/performanceLogger';
 
 export const agentChatRouter = Router();
 
 agentChatRouter.post('/', async (req, res) => {
     try {
+        const requestId = generateRequestId();
+        const startTime = getTimestamp();
         const body = req.body;
         const locale = body.locale || 'zh-TW';
 
@@ -33,9 +36,27 @@ agentChatRouter.post('/', async (req, res) => {
             return '';
         };
 
-        const query = extractText(body.text) || extractText(body.messages?.[body.messages?.length - 1]?.content) || 'Hello';
+        const query =
+            extractText(body.text) ||
+            extractText(body.input) ||
+            extractText(body.prompt) ||
+            extractText(body.message) ||
+            extractText(body.messages?.[body.messages?.length - 1]) ||
+            'Hello';
         const nodeId = body.nodeId || body.current_station || body.currentStation || body.stationId;
         const userId = body.userId || `anon-${randomUUID()}`;
+        const sessionId = body.sessionId || userId;
+
+        const recentMessages = Array.isArray(body.messages)
+            ? body.messages
+                .map((m: any) => {
+                    const role = m?.role === 'assistant' ? 'assistant' : 'user';
+                    const content = extractText(m?.content ?? m?.parts ?? m?.text ?? m);
+                    return content ? { role, content } : null;
+                })
+                .filter(Boolean)
+                .slice(-8)
+            : [];
 
         // Build Context
         const context: RequestContext = {
@@ -43,7 +64,8 @@ agentChatRouter.post('/', async (req, res) => {
             currentStation: nodeId,
             userLocation: body.userLocation,
             preferences: { categories: [] },
-            strategyContext: null
+            strategyContext: null,
+            recentMessages: recentMessages as Array<{ role: 'user' | 'assistant'; content: string }>
         };
 
         // Strategy Synthesis (L4) logic
@@ -66,12 +88,31 @@ agentChatRouter.post('/', async (req, res) => {
         res.setHeader('Cache-Control', 'no-cache, no-transform');
         res.setHeader('X-Accel-Buffering', 'no');
         res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Request-Id', requestId);
         if (typeof res.flushHeaders === 'function') {
             res.flushHeaders();
         }
 
+        let outputLength = 0;
+        let hadError = false;
+        let errorMessage: string | undefined;
+        let decisionSource: string | undefined;
+        let decisionType: string | undefined;
+        let anomalyReason: string | undefined;
+        let decisionLevel: string | undefined;
+        let decisionConfidence: number | undefined;
+        let matchedSkill: string | undefined;
+        let agentTool: string | undefined;
+        let dataMuxHit = false;
+        let usedFallback = false;
+
+        const inputHasAlphaNumeric = /[\p{L}\p{N}]/u.test(query);
+        const inputHasCjk = /[\u4e00-\u9fa5\u3040-\u30ff]/.test(query);
+        const inputHasEmoji = /\p{Extended_Pictographic}/u.test(query);
+
         const sendUpdate = (delta: string) => {
             if (!delta) return;
+            outputLength += delta.length;
             res.write(delta);
         };
 
@@ -96,6 +137,29 @@ agentChatRouter.post('/', async (req, res) => {
             });
 
             if (result) {
+                decisionSource = result.source;
+                decisionType = result.type;
+                if (result.reasoning?.startsWith('Anomaly detection:')) {
+                    anomalyReason = result.reasoning.replace('Anomaly detection:', '').trim();
+                }
+                const logs = Array.isArray(result.reasoningLog) ? result.reasoningLog : [];
+                for (const entry of logs) {
+                    const intentMatch = entry.match(/\[Intent\] Classified Level: (\w+) \(Conf: ([0-9.]+)\)/);
+                    if (intentMatch) {
+                        decisionLevel = intentMatch[1];
+                        decisionConfidence = Number(intentMatch[2]);
+                    }
+                    const skillMatch = entry.match(/\[Deep Research\] Legacy Skill Triggered: (.+)$/);
+                    if (skillMatch) {
+                        matchedSkill = skillMatch[1];
+                    }
+                    const agentMatch = entry.match(/\[Deep Research\] Agent Decision: ([^\s]+) /);
+                    if (agentMatch) {
+                        agentTool = agentMatch[1];
+                    }
+                    if (entry.includes('DataMux enriched content found')) dataMuxHit = true;
+                    if (entry.includes('[Fallback] Delegating to LLM Service')) usedFallback = true;
+                }
                 // Note: reasoning field is for internal logging only, not sent to users
                 // Only send content to prevent debug info leakage (Fixed: Issue #AI-CHAT-001)
                 if (!streamedAnyToken && result.content) {
@@ -112,9 +176,38 @@ agentChatRouter.post('/', async (req, res) => {
             }
         } catch (error: any) {
             console.error('[AgentChat] Process Error:', error);
+            hadError = true;
+            errorMessage = error?.message || String(error);
             const msg = locale === 'en' ? 'Service temporarily unavailable.' : '服務暫時無法使用。';
             sendUpdate(msg);
         } finally {
+            const responseTimeMs = getElapsedMs(startTime);
+            logAIChatMetric({
+                requestId,
+                sessionId,
+                nodeId,
+                locale,
+                responseTimeMs,
+                inputLength: typeof query === 'string' ? query.length : 0,
+                outputLength,
+                hadError,
+                errorMessage,
+                metadata: {
+                    decisionSource,
+                    decisionType,
+                    decisionLevel,
+                    decisionConfidence,
+                    matchedSkill,
+                    agentTool,
+                    dataMuxHit,
+                    usedFallback,
+                    anomalyReason,
+                    hasStrategyContext: Boolean(context.strategyContext),
+                    inputHasAlphaNumeric,
+                    inputHasCjk,
+                    inputHasEmoji
+                }
+            });
             // End stream
             res.end();
         }
