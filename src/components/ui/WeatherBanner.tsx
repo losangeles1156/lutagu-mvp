@@ -4,7 +4,7 @@ import { logger } from '@/lib/utils/logger';
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Info, X, ShieldAlert } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
-import { createClient } from '@/lib/supabase/client';
+import { getSupabase } from '@/lib/supabase';
 
 interface WeatherAlert {
     title: string;
@@ -28,7 +28,7 @@ export function WeatherBanner() {
     const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
-        const supabase = createClient();
+        const supabase = getSupabase();
 
         // Initial fetch from API
         const fetchAlerts = async () => {
@@ -59,7 +59,7 @@ export function WeatherBanner() {
                     table: 'weather_alerts',
                     filter: "severity=in.(warning,emergency)"
                 },
-                (payload) => {
+                (payload: any) => {
                     logger.info('[Realtime] Weather alert received:', payload);
                     const newAlert = payload.new as any;
                     if (newAlert && (newAlert.severity === 'warning' || newAlert.severity === 'emergency')) {
