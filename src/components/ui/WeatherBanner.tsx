@@ -1,10 +1,10 @@
 'use client';
 
 import { logger } from '@/lib/utils/logger';
-
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Info, X, ShieldAlert } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
+import { createClient } from '@/lib/supabase/client';
 
 interface WeatherAlert {
     title: string;
@@ -28,6 +28,9 @@ export function WeatherBanner() {
     const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
+        const supabase = createClient();
+
+        // Initial fetch from API
         const fetchAlerts = async () => {
             try {
                 const res = await fetch('/api/weather');
@@ -44,9 +47,47 @@ export function WeatherBanner() {
         };
 
         fetchAlerts();
-        // Check every 5 minutes
+
+        // Subscribe to Supabase Realtime for instant alert updates
+        const channel = supabase
+            .channel('weather_alerts_realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'weather_alerts',
+                    filter: "severity=in.(warning,emergency)"
+                },
+                (payload) => {
+                    logger.info('[Realtime] Weather alert received:', payload);
+                    const newAlert = payload.new as any;
+                    if (newAlert && (newAlert.severity === 'warning' || newAlert.severity === 'emergency')) {
+                        const formattedAlert: WeatherAlert = {
+                            title: newAlert.title || newAlert.alert_type || 'Weather Alert',
+                            summary: typeof newAlert.content === 'object'
+                                ? newAlert.content
+                                : { ja: newAlert.content, en: newAlert.content, zh: newAlert.content },
+                            original_summary: typeof newAlert.content === 'string' ? newAlert.content : '',
+                            updated: newAlert.updated_at || newAlert.created_at || new Date().toISOString(),
+                            severity: newAlert.severity === 'emergency' ? 'critical' : 'warning',
+                            alert_type: newAlert.alert_type,
+                            region: newAlert.region
+                        };
+                        setAlerts(prev => [formattedAlert, ...prev.slice(0, 4)]);
+                        setIsVisible(true);
+                    }
+                }
+            )
+            .subscribe();
+
+        // Fallback polling every 5 minutes
         const interval = setInterval(fetchAlerts, 5 * 60 * 1000);
-        return () => clearInterval(interval);
+
+        return () => {
+            clearInterval(interval);
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     if (!isVisible || alerts.length === 0) return null;
@@ -67,7 +108,6 @@ export function WeatherBanner() {
     };
 
     // Determine Language Key
-    // Backend returns keys: ja, en, zh
     const langKey = locale.startsWith('zh') ? 'zh' : locale.startsWith('en') ? 'en' : 'ja';
     const displaySummary = mainAlert.summary?.[langKey] || mainAlert.summary?.ja || mainAlert.original_summary;
 
