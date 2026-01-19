@@ -25,6 +25,7 @@ import { AgentRouter } from '@/lib/ai/AgentRouter';
 import { executeSkill, skillRegistry } from './skills/SkillRegistry';
 import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
 import { getTrainStatus } from '@/lib/odpt/service';
+import { getActiveAlerts } from '@/lib/weather/alertService';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -268,6 +269,21 @@ export class HybridEngine {
             const isExtremeWeatherQuery = /(?:大雪|積雪|雪害|暴風雪|寒流|降雪|停駛|停運|運休|見合わせ|運転見合わせ|道路管制|封路|高速公路封閉|颱風|台風|暴風|地震|揺れ|snow|typhoon|earthquake)/i.test(text);
             if (isExtremeWeatherQuery) {
                 logs.push('[Knowledge] Extreme Weather Query Detected - Injecting Expert Knowledge');
+
+                // Inject active alerts from database (if any)
+                try {
+                    const activeAlerts = await getActiveAlerts('tokyo');
+                    if (activeAlerts.length > 0) {
+                        const alertSummary = activeAlerts.slice(0, 3).map(a =>
+                            `[${a.severity?.toUpperCase() || 'ALERT'}] ${a.title || a.alert_type}: ${typeof a.content === 'object' ? a.content.ja : a.content}`
+                        ).join('\n');
+                        activeKnowledgeSnippet += `\n[Active Weather Alerts]\n${alertSummary}\n`;
+                        logs.push(`[Alerts] Injected ${activeAlerts.length} active alerts`);
+                    }
+                } catch (alertErr) {
+                    console.error('[HybridEngine] Alert fetch failed:', alertErr);
+                }
+
                 const extremeWeatherKnowledge = `
 [Extreme Weather Guide]
 - JR 在來線：積雪 20cm 以上可能減班，30cm 以上可能停駛。
