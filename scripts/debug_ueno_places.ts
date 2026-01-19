@@ -12,7 +12,7 @@ const supabase = createClient(
 
 async function debugUenoPlaces() {
     console.log('--- Debugging Ueno Places ---');
-    
+
     // Search for anything with Ueno/上野 in name
     const { data: places, error } = await supabase
         .from('l1_places')
@@ -26,7 +26,7 @@ async function debugUenoPlaces() {
     }
 
     console.log(`Found ${places?.length} places matching Ueno/上野.`);
-    
+
     if (places && places.length > 0) {
         places.forEach(p => {
             console.log(`- [${p.id}] ${p.name} (Cat: ${p.category}, Stn: ${p.station_id})`);

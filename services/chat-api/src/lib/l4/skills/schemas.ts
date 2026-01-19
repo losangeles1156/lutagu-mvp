@@ -164,4 +164,3 @@ export const MEDICAL_SCHEMA: ToolDefinition = {
         required: ["symptom"]
     }
 };
-

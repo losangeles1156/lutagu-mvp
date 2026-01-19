@@ -98,9 +98,9 @@ entries.push({
 
 // 修改後
 <span className="text-xs font-black uppercase tracking-widest opacity-80">
-    {alert?.alert_type ? `${alert.region} ${alert.alert_type}` 
-        : isCritical ? tL2('criticalAlert') 
-        : isEmergencyMode ? tL2('warningAlert') 
+    {alert?.alert_type ? `${alert.region} ${alert.alert_type}`
+        : isCritical ? tL2('criticalAlert')
+        : isEmergencyMode ? tL2('warningAlert')
         : 'TOKYO'}
 </span>
 ```

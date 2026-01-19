@@ -30,20 +30,20 @@ graph TD
     Runner --> ScraperA[Metro Scraper]
     Runner --> ScraperB[Toei Scraper]
     Runner --> ScraperC[JR/Others Scraper]
-    
+
     ScraperA --Raw JSON--> Processor[Data Processor]
     ScraperB --Raw JSON--> Processor
     ScraperC --Raw JSON--> Processor
-    
+
     subgraph Processing Logic
         Processor --> Normalize[正規化 (Normalization)]
         Normalize --> Merge[節點合併 (Node Merging)]
         Merge --> Validate[資料驗證 (Validation)]
     end
-    
+
     Validate --> |Success| Snapshot[DB Snapshot (JSONB)]
     Validate --> |Failure| ErrorLog[Error Logs]
-    
+
     Snapshot --> API[API Endpoint]
     API --> Client[LUTAGU Frontend]
 ```

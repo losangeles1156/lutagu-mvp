@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
             headers: {
                 'Content-Type': 'application/json',
                 // Forward auth or other headers if needed
-                // 'Authorization': req.headers.get('Authorization') || '' 
+                // 'Authorization': req.headers.get('Authorization') || ''
             },
             body: JSON.stringify(body)
         });

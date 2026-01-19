@@ -31,12 +31,12 @@ export const JAPAN_HOLIDAYS_2026: Record<string, string> = {
 export function getJSTTime() {
     const now = new Date();
     const jstDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-    
+
     const yyyy = jstDate.getFullYear();
     const mm = String(jstDate.getMonth() + 1).padStart(2, '0');
     const dd = String(jstDate.getDate()).padStart(2, '0');
     const dateKey = `${yyyy}-${mm}-${dd}`;
-    
+
     const holidayName = JAPAN_HOLIDAYS_2026[dateKey];
     const isHoliday = !!holidayName || (jstDate.getDay() === 0 || jstDate.getDay() === 6);
 

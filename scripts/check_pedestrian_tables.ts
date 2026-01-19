@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS pedestrian_links (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Pedestrian Nodes Table  
+-- Pedestrian Nodes Table
 CREATE TABLE IF NOT EXISTS pedestrian_nodes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   node_id TEXT UNIQUE NOT NULL,

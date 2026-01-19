@@ -1,9 +1,9 @@
 /**
  * Phase 2: Atmosphere Tag Generation Script
- * 
+ *
  * Purpose: Generate atmosphere_tags for L1 POI records using batch LLM classification
  * Uses fetch API for OpenAI calls to avoid additional dependencies
- * 
+ *
  * Usage:
  *   npx tsx scripts/generate-atmosphere-tags.ts \
  *     --batch-size 20 \
@@ -239,9 +239,9 @@ async function getUnclassifiedPOIs(limit: number): Promise<POIInput[]> {
 }
 
 async function logClassification(
-    poiId: string, 
-    batchId: string, 
-    status: string, 
+    poiId: string,
+    batchId: string,
+    status: string,
     errorMessage?: string
 ): Promise<void> {
     try {
@@ -290,7 +290,7 @@ async function main() {
 
     while (iterations < maxIterations) {
         const pois = await getUnclassifiedPOIs(config.batchSize);
-        
+
         if (pois.length === 0) {
             console.log('No more unclassified POIs found.');
             break;
@@ -303,13 +303,13 @@ async function main() {
             await semaphore.acquire();
             try {
                 const result = await callOpenAI(poi);
-                
+
                 if (result && result.confidence >= config.minConfidence) {
                     await updatePOIAtmosphere(poi.id, result);
                     await logClassification(poi.id, batchId, 'success');
                     return { success: true, poi };
                 } else {
-                    await logClassification(poi.id, batchId, 'failed', 
+                    await logClassification(poi.id, batchId, 'failed',
                         result ? `Low confidence: ${result.confidence}` : 'LLM classification failed');
                     return { success: false, poi };
                 }

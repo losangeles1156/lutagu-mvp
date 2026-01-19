@@ -12,7 +12,7 @@ const supabase = createClient(
 
 async function checkUenoData() {
     console.log('--- Checking Ueno Data ---');
-    
+
     // Ueno IDs
     const uenoIds = [
         'odpt:Station:TokyoMetro.Ginza.Ueno',
@@ -24,14 +24,14 @@ async function checkUenoData() {
 
     // 1. Check L1 Places
     console.log('\n--- L1 Places (l1_places) ---');
-    
+
     // Check what IDs the "Ueno" places actually have
     const { data: nameMatches } = await supabase
         .from('l1_places')
         .select('id, name, station_id, category')
         .ilike('name', '%Ueno%')
         .limit(10);
-        
+
     console.log('Sample L1 Places with "Ueno" in name:');
     if (nameMatches) {
         nameMatches.forEach(p => console.log(`- [${p.name}] StationID: ${p.station_id || 'NULL'} Category: ${p.category}`));

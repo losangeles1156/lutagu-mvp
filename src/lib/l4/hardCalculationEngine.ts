@@ -1,6 +1,7 @@
 import { MatchedStrategyCard, EvaluationContext } from '@/types/lutagu_l4';
 import { odptClient } from '@/lib/odpt/client';
 import { STATION_MAP } from '@/lib/api/nodes';
+import { getPartnerUrl } from '@/config/partners';
 
 export class L4HardCalculationEngine {
 
@@ -62,6 +63,15 @@ export class L4HardCalculationEngine {
                                 icon: '⚠️',
                                 title: locale === 'en' ? 'Train Status Alert' : '運行情報 (Live)',
                                 description: text,
+                                actionLabel: locale === 'en' ? 'Open GO Taxi' : locale === 'ja' ? 'GO を開く' : '開啟 GO 叫車',
+                                actionUrl: getPartnerUrl('go_taxi', {
+                                    utm_medium: 'l4',
+                                    utm_campaign: 'disruption'
+                                }) || undefined,
+                                metadata: {
+                                    partner_id: 'go_taxi',
+                                    link_type: 'l4_disruption'
+                                },
                                 _debug_reason: `HardCalc: Detected abnormal status on ${targetRailway}`
                             });
                         }
@@ -87,7 +97,7 @@ export class L4HardCalculationEngine {
             if (!operator) return;
 
             // Fetch Timetable for this station
-            // Note: In MVP we check the first available timetable. 
+            // Note: In MVP we check the first available timetable.
             // In prod we should check the timetable specifically for the direction the user wants.
             // Since we don't know direction, we just warn if ANY last train is close.
             const timetables = await odptClient.getStationTimetable(stationId, operator);
@@ -136,6 +146,16 @@ export class L4HardCalculationEngine {
                     icon: '🌙',
                     title: locale === 'en' ? 'Last Train Imminent' : '末班車注意',
                     description: msg,
+                    actionLabel: locale === 'en' ? 'Open GO Taxi' : locale === 'ja' ? 'GO を開く' : '開啟 GO 叫車',
+                    actionUrl: getPartnerUrl('go_taxi', {
+                        utm_medium: 'l4',
+                        utm_campaign: 'last_train'
+                    }) || undefined,
+                    metadata: {
+                        partner_id: 'go_taxi',
+                        link_type: 'l4_last_train',
+                        station_id: stationId
+                    },
                     _debug_reason: `HardCalc: Last train at ${Math.floor(globalLastDepartureTime / 60)}:${globalLastDepartureTime % 60} (Diff: ${diff}m)`
                 });
             }

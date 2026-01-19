@@ -189,4 +189,3 @@ export default function TermsPage({ params }: { params: { locale: string } }) {
     </main>
   );
 }
-

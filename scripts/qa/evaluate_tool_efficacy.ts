@@ -28,7 +28,7 @@ const TEST_CASES = [
 async function evaluateEfficacy() {
   console.log('📊 Starting Tool Efficacy Evaluation...');
   console.log('----------------------------------------');
-  
+
   let successCount = 0;
   let totalCount = TEST_CASES.length;
   const results = [];
@@ -58,13 +58,13 @@ async function evaluateEfficacy() {
   console.log('----------------------------------------');
   const successRate = ((successCount / totalCount) * 100).toFixed(1);
   console.log(`📈 Efficacy Score: ${successRate}% Success Rate`);
-  
+
   // KPI Output
   console.log('\n--- KPI Report ---');
   console.log(`1. Tool Success Rate: ${successRate}%`);
   const avgLatency = results.reduce((acc, r) => acc + r.latency, 0) / totalCount;
   console.log(`2. Avg Latency: ${avgLatency.toFixed(0)}ms`);
-  
+
   const coverageGaps = results.filter(r => r.status === 'EMPTY').map(r => r.name);
   if (coverageGaps.length > 0) {
     console.log(`3. Coverage Gaps Identified: ${coverageGaps.join(', ')}`);

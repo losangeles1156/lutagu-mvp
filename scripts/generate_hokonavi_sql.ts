@@ -40,10 +40,10 @@ function processGeoJSON(filePath: string, sourceName: string, idPrefix: string) 
       const lon = geom.coordinates[0];
       const lat = geom.coordinates[1];
       const floor = props.floor || 0;
-      const isIndoor = props.in_out === 1; // Assuming 1=Indoor, 2=Outdoor? Or vice versa. 
-      // Actually Hokonavi: 1=Indoor, 2=Outdoor, 3=Semi-outdoor. 
+      const isIndoor = props.in_out === 1; // Assuming 1=Indoor, 2=Outdoor? Or vice versa.
+      // Actually Hokonavi: 1=Indoor, 2=Outdoor, 3=Semi-outdoor.
       // Let's assume 1=Indoor for now.
-      
+
       // SQL
       nodes.push(`
         INSERT INTO pedestrian_nodes (node_id, coordinates, lat, lon, floor_level, is_indoor, source_dataset)
@@ -64,13 +64,13 @@ function processGeoJSON(filePath: string, sourceName: string, idPrefix: string) 
       const startId = `${idPrefix}${props.start_id}`;
       const endId = `${idPrefix}${props.end_id}`;
       const distance = props.distance || 0;
-      
+
       const rank = escapeSql(props.rank);
       const rt_struct = props.rt_struct || 0;
       const width = props.width || 0;
       const slope = props.vtcl_slope || 0;
       const lev_diff = props.lev_diff || 0;
-      
+
       const braille = mapBool(props.brail_tile);
       const elevator = mapBool(props.elevator);
       const roof = mapBool(props.roof);
@@ -130,7 +130,7 @@ async function main() {
 
   for (const ds of datasets) {
     console.log(`Processing ${ds.name}...`);
-    
+
     const nodePath = path.join(TEMP_DIR, ds.nodeFile);
     const linkPath = path.join(TEMP_DIR, ds.linkFile);
 
@@ -141,12 +141,12 @@ async function main() {
       sqlOutput += `-- Nodes for ${ds.name}\n`;
       sqlOutput += nodeData.nodes.join('\n');
     }
-    
+
     if (linkData.links.length > 0) {
       sqlOutput += `\n-- Links for ${ds.name}\n`;
       sqlOutput += linkData.links.join('\n');
     }
-    
+
     console.log(`  Nodes: ${nodeData.nodes.length}, Links: ${linkData.links.length}`);
   }
 

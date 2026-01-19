@@ -87,7 +87,7 @@ export function useFavorites() {
             // Logged in: Call API
             try {
                 const method = isAdding ? 'POST' : 'DELETE';
-                // API currently only supports POST (upsert) and GET. 
+                // API currently only supports POST (upsert) and GET.
                 // We need to check if DELETE is supported or if we need to implement it.
                 // Looking at route.ts, only GET and POST are exported?
                 // Wait, I saw GET and POST. Let's check if DELETE is there.

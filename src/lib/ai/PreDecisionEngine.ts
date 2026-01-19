@@ -1,11 +1,11 @@
 /**
  * PreDecisionEngine - 混合意圖分類引擎
- * 
+ *
  * 設計目標：
  * 1. 快速意圖分類 (0-5ms)
  * 2. 成本優化 (優先使用低成本方法)
  * 3. 快取機制避免重複計算
- * 
+ *
  * @packageDocumentation
  */
 
@@ -167,7 +167,7 @@ interface CacheEntry {
 
 /**
  * PreDecisionEngine - 預決策引擎
- * 
+ *
  * 職責：
  * 1. 快速意圖分類 (關鍵詞匹配 → ML 分類)
  * 2. 結果快取
@@ -184,7 +184,7 @@ export class PreDecisionEngine {
 
     /**
      * 分類使用者輸入意圖
-     * 
+     *
      * @param text 使用者輸入文字
      * @returns 預決策結果
      */
@@ -291,7 +291,7 @@ export class PreDecisionEngine {
             const result = await generateLLMResponse({
                 systemPrompt: `你是意圖分類專家，請分析使用者輸入並分類為以下等級：
 - simple: 問候、基本資訊、FAQ - 可用預設範本回答
-- medium: 需要計算的路線、票價、特定站點資訊 - 需要演算法處理  
+- medium: 需要計算的路線、票價、特定站點資訊 - 需要演算法處理
 - complex: 需要推理的行程規劃、多站點建議、情境判斷 - 需要 LLM 處理
 
 請嚴格只回覆 JSON 格式，reason 請用繁體中文(台灣)，

@@ -77,9 +77,9 @@ describe('SlidingWindowRateLimiter', () => {
         it('should reset specific key', () => {
             limiter.check('user1');
             limiter.check('user1');
-            
+
             limiter.reset('user1');
-            
+
             const result = limiter.check('user1');
             expect(result.remaining).toBe(4);
         });
@@ -87,9 +87,9 @@ describe('SlidingWindowRateLimiter', () => {
         it('should reset all keys', () => {
             limiter.check('user1');
             limiter.check('user2');
-            
+
             limiter.resetAll();
-            
+
             expect(limiter.check('user1').remaining).toBe(4);
             expect(limiter.check('user2').remaining).toBe(4);
         });
@@ -98,7 +98,7 @@ describe('SlidingWindowRateLimiter', () => {
     describe('Remaining Quota', () => {
         it('should return correct remaining quota', () => {
             expect(limiter.getRemaining('user1')).toBe(5);
-            
+
             limiter.check('user1');
             expect(limiter.getRemaining('user1')).toBe(4);
         });
@@ -213,7 +213,7 @@ describe('Rate Limit Service', () => {
             };
 
             const response = service.createTooManyRequestsResponse(result);
-            
+
             expect(response.status).toBe(429);
             expect(response.headers.get('Retry-After')).toBe('60');
             expect(response.headers.get('X-RateLimit-Remaining')).toBe('0');
@@ -228,7 +228,7 @@ describe('Factory Functions', () => {
             windowMs: 60000,
             mode: 'sliding'
         };
-        
+
         const limiter = createRateLimiter(config);
         expect(limiter).toBeInstanceOf(SlidingWindowRateLimiter);
         limiter.destroy();
@@ -240,7 +240,7 @@ describe('Factory Functions', () => {
             windowMs: 60000,
             mode: 'fixed'
         };
-        
+
         const limiter = createRateLimiter(config);
         expect(limiter).toBeInstanceOf(FixedWindowRateLimiter);
         limiter.destroy();

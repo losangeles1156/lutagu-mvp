@@ -19,12 +19,12 @@ function getSupabaseClient() {
 
 /**
  * L3 無障礙設施 API
- * 
+ *
  * 查詢類型:
  * - ?station_id=xxx : 取得特定車站的無障礙設施
  * - ?type=elevator|escalator|toilet : 篩選設施類型
  * - ?ward=xxx : 依行政區篩選
- * 
+ *
  * 回傳格式:
  * {
  *   station_id: string,

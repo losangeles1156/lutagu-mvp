@@ -1,7 +1,7 @@
 -- Seed L4 Knowledge for Remainder Stations (Osaki, Sengakuji, Kamata, Nihombashi, Ochanomizu)
 
 -- Osaki
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [
@@ -23,7 +23,7 @@ $$::jsonb
 WHERE id LIKE '%Osaki%';
 
 -- Sengakuji
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [
@@ -45,7 +45,7 @@ $$::jsonb
 WHERE id LIKE '%Sengakuji%';
 
 -- Kamata
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [
@@ -67,7 +67,7 @@ $$::jsonb
 WHERE id LIKE '%Kamata%';
 
 -- Nihombashi
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [
@@ -89,7 +89,7 @@ $$::jsonb
 WHERE id LIKE '%Nihombashi%';
 
 -- Ochanomizu
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [

@@ -1,6 +1,6 @@
 /**
  * ODPT Station ID Normalization and Matching Utility
- * 
+ *
  * Handles variants like:
  * - odpt:Station:JR-East.Yamanote.Ueno
  * - odpt.Station:JR-East.Yamanote.Ueno

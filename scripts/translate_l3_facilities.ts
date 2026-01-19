@@ -1,9 +1,9 @@
 /**
  * L3 Facilities Batch Translation Script
- * 
+ *
  * Translates existing L3 facility data in Supabase to Traditional Chinese
  * using Mistral API.
- * 
+ *
  * Target types: toilet, locker, elevator, escalator
  * Sources: Tokyo Metro, Toei, JR East
  */

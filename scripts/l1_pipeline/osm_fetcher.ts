@@ -108,7 +108,7 @@ function buildQuery(lat: number, lon: number, radius: number, category: string):
             filter = `
                 node["leisure"="park"]${bbox};
                 way["leisure"="park"]${bbox};
-                node["natural"="tree"]["species"~"Prunus|Acer"]${bbox}; 
+                node["natural"="tree"]["species"~"Prunus|Acer"]${bbox};
             `;
             // Note: Prunus (Sakura/Plum), Acer (Maple)
             break;

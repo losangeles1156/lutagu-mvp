@@ -102,7 +102,7 @@ function mapOsmToFacility(element: any, stationId: string): L3Facility | null {
     // Enhance name if available
     if (tags.name) nameJa = tags.name;
     if (tags['name:en']) nameEn = tags['name:en'];
-    
+
     // Attributes
     const attributes: any = {
         _source: 'OSM',
@@ -110,7 +110,7 @@ function mapOsmToFacility(element: any, stationId: string): L3Facility | null {
         wheelchair: tags.wheelchair === 'yes',
         operator: tags.operator
     };
-    
+
     if (tags.level) attributes.level = tags.level;
     if (tags.fee) attributes.fee = tags.fee;
 
@@ -144,7 +144,7 @@ async function main() {
         // Skip if already has facilities (unless we want to force update)
         // Check l3_facilities table count
         const { count } = await supabase.from('l3_facilities').select('id', { count: 'exact', head: true }).eq('station_id', station.id);
-        
+
         if (count && count > 5) { // Arbitrary threshold
             console.log(`⏩ Skipping ${station.name?.en} (Already has ${count} facilities)`);
             continue;
@@ -172,7 +172,7 @@ async function main() {
         try {
             const query = buildOverpassQuery(lat, lon, CONFIG.RADIUS);
             const data = await fetchOverpass(query);
-            
+
             if (!data || !data.elements) {
                 console.log(`   No data from OSM.`);
                 continue;
@@ -188,10 +188,10 @@ async function main() {
             // Simple approach: Upsert all
             if (facilities.length > 0) {
                 console.log(`   Found ${facilities.length} items. Saving...`);
-                
+
                 // We need to map to l3_facilities schema
                 // l3_facilities columns: id (uuid), station_id, type, name_i18n, attributes, updated_at
-                // We don't have unique ID for upsert, so we insert? 
+                // We don't have unique ID for upsert, so we insert?
                 // Wait, upsert needs constraint.
                 // We can generate UUID or use a composite key if table supports it.
                 // l3_facilities might not have a unique constraint on (station_id, osm_id).
@@ -199,19 +199,19 @@ async function main() {
                 // To avoid duplicates on re-run, I'll delete existing for this station first?
                 // Dangerous if mixed sources.
                 // I'll assume safe to insert for now, or check for duplicates.
-                
+
                 // Let's insert.
                 const { error: insErr } = await supabase.from('l3_facilities').upsert(facilities, { onConflict: 'station_id, type, name_i18n' }); // Guessing constraint
                 // Actually, let's just insert and ignore conflicts or errors?
                 // Supabase upsert requires a unique constraint to match on.
                 // If I don't know the constraint, I might fail.
                 // I'll try insert.
-                
+
                 // Inspect l3_facilities schema first? No time.
                 // Most likely it's just ID primary key.
                 // I'll select existing to compare or just insert.
                 // Let's use a simpler approach: Insert.
-                
+
                 const { error: upsertErr } = await supabase.from('l3_facilities').insert(facilities);
                 if (upsertErr) {
                      // If insert fails, maybe try upsert on ID if I generate it deterministically?

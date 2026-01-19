@@ -19,7 +19,7 @@ async function findZoo() {
         .select('id, name, station_id, category')
         .or('name.ilike.%Zoo%,name.ilike.%動物園%')
         .limit(20);
-    
+
     console.log('Matches by name "Zoo/動物園":');
     nameMatches?.forEach(p => console.log(`- [${p.name}] (${p.id}) Cat: ${p.category} Stn: ${p.station_id}`));
 
@@ -30,7 +30,7 @@ async function findZoo() {
         .eq('category', 'shopping')
         .ilike('name', '%Ueno%')
         .limit(20);
-        
+
     console.log('\nMatches by Category "shopping" + Name "Ueno":');
     shoppingMatches?.forEach(p => console.log(`- [${p.name}] (${p.id}) Cat: ${p.category} Stn: ${p.station_id}`));
 

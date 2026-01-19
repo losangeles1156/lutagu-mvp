@@ -29,7 +29,7 @@ export class DbImporter {
                 );
             `
         });
-        
+
         if (error && !error.message.includes('permission denied')) {
             console.warn('[DbImporter] Could not create table via RPC, assuming it exists or handled manually.');
         }
@@ -84,7 +84,7 @@ export class DbImporter {
             .eq('source', url)
             .limit(1)
             .maybeSingle();
-        
+
         return !!data;
     }
 }

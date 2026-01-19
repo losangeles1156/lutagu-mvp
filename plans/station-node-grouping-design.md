@@ -1,7 +1,7 @@
 # Lutagu 車站節點分組設計方案
 
-> 版本：v1.0  
-> 日期：2026-01-03  
+> 版本：v1.0
+> 日期：2026-01-03
 > 狀態：設計定稿，待實作
 
 ## 1. 背景與問題陳述
@@ -99,7 +99,7 @@ graph LR
     A --> C[子站點數量 badge]
     A --> D[🔗 換乘符號]
     A --> E[站名字標籤]
-    
+
     style B fill:#4F46E5,stroke:#fff,stroke-width:2px
     style C fill:#1F2937,stroke:#fff,stroke-width:2px
     style D fill:#F59E0B,stroke:#fff,stroke-width:1px

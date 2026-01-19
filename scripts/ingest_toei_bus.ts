@@ -74,7 +74,7 @@ async function main() {
     console.log('🚌 Starting Toei Bus Static Ingestion...');
 
     // 1. Ingest Bus Stops (BusstopPole)
-    // Note: Toei Bus has > 1000 stops, so we might need pagination if API supports it, 
+    // Note: Toei Bus has > 1000 stops, so we might need pagination if API supports it,
     // but ODPT odpt:BusstopPole often requires specific operator filter.
     console.log('Fetching Toei Bus stops...');
     const busStops = await fetchOdpt('odpt:BusstopPole', { 'odpt:operator': 'odpt.Operator:Toei' });

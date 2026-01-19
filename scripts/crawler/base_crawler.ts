@@ -35,16 +35,16 @@ export abstract class BaseCrawler {
 
     async crawl(url: string): Promise<CrawlerResult | null> {
         if (!this.browser) await this.init();
-        
+
         const page = await this.browser!.newPage();
         try {
             await page.setUserAgent(this.getRandomUserAgent());
             await page.setViewport({ width: 1280, height: 800 });
-            
+
             console.log(`[Crawler] Visiting: ${url}`);
             // Use a longer timeout and waitUntil: 'load' for redirected pages
             await page.goto(url, { waitUntil: 'load', timeout: 60000 });
-            
+
             // Extra wait for some JS to execute
             await this.sleep(2000);
 

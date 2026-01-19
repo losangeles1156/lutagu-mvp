@@ -24,18 +24,18 @@ async function testTools() {
     // 2. Test Timetable Tool (L2) - Using Toei (Public API, no token needed)
     console.log('\nTesting TimetableTool (Toei)...');
     const timetableTool = new TimetableTool();
-    const timetableResult = await timetableTool.execute({ 
-        station: 'odpt.Station:Toei.Oedo.UenoOkachimachi', 
-        operator: 'odpt.Operator:Toei' 
+    const timetableResult = await timetableTool.execute({
+        station: 'odpt.Station:Toei.Oedo.UenoOkachimachi',
+        operator: 'odpt.Operator:Toei'
     }, context);
     console.log('Timetable Result:', JSON.stringify(timetableResult, null, 2).slice(0, 500) + '...');
 
     // 3. Test Fare Tool (L2) - Using Toei (Public API)
     console.log('\nTesting FareTool (Toei)...');
     const fareTool = new FareTool();
-    const fareResult = await fareTool.execute({ 
-        from: 'odpt.Station:Toei.Oedo.UenoOkachimachi', 
-        to: 'odpt.Station:Toei.Oedo.Ryogoku' 
+    const fareResult = await fareTool.execute({
+        from: 'odpt.Station:Toei.Oedo.UenoOkachimachi',
+        to: 'odpt.Station:Toei.Oedo.Ryogoku'
     }, context);
     console.log('Fare Result:', JSON.stringify(fareResult, null, 2).slice(0, 500) + '...');
 }

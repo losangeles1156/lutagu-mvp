@@ -131,7 +131,7 @@ const QUICK_PATTERNS: Record<string, { pattern: RegExp; intent: string }[]> = {
     { pattern: /(.+線|.+ライン).*(延誤|遅延|狀態|状況)/i, intent: 'line_status' },
     { pattern: /(現在|今).*(擁擠|混雑|人多)/i, intent: 'crowding_status' },
   ],
-  
+
   // 設施查詢 → 查 DB
   facility_query: [
     { pattern: /(廁所|トイレ|toilet|洗手間)/i, intent: 'find_toilet' },
@@ -139,7 +139,7 @@ const QUICK_PATTERNS: Record<string, { pattern: RegExp; intent: string }[]> = {
     { pattern: /(ATM|提款機)/i, intent: 'find_atm' },
     { pattern: /(充電|チャージ|charge)/i, intent: 'find_charging' },
   ],
-  
+
   // 系統指令
   system_command: [
     { pattern: /(切換|切替|switch).*(語言|言語|language)/i, intent: 'change_language' },
@@ -268,15 +268,15 @@ export async function classifyIntent(input: string): Promise<{
 
   const data = await response.json();
   const intentRaw = data.response?.trim().toLowerCase();
-  
+
   const validIntents = [
     'route_search', 'facility_search', 'status_query',
     'node_info', 'trip_guard', 'general_chat', 'unclear'
   ];
-  
+
   const intent = validIntents.includes(intentRaw) ? intentRaw : 'unclear';
   const confidence = intent === 'unclear' ? 0.3 : 0.85;
-  
+
   return { intent, confidence };
 }
 
@@ -311,7 +311,7 @@ ${intent === 'route_search' ? `
   });
 
   const data = await response.json();
-  
+
   try {
     const jsonMatch = data.response?.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -320,7 +320,7 @@ ${intent === 'route_search' ? `
   } catch (e) {
     console.error('Entity extraction failed:', e);
   }
-  
+
   return {};
 }
 ```
@@ -344,18 +344,18 @@ ${intent === 'route_search' ? `
 const LLM_TRIGGERS = [
   // 多條件組合
   /(.+)(而且|並且|同時|还要|また).+/i,
-  
+
   // 特殊需求
   /(輪椅|wheelchair|車椅子|無障礙|バリアフリー)/i,
   /(小孩|子供|baby|嬰兒|ベビーカー)/i,
   /(行李|大件|荷物|luggage)/i,
-  
+
   // 情緒表達
   /(急|趕|焦|緊急|ヤバい|困った|help)/i,
-  
+
   // 開放式問題
   /(推薦|建議|おすすめ|suggest|哪裡好|どこがいい)/i,
-  
+
   // 節點人格對話
   /(這裡|這站|ここ).*(特色|故事|歷史|什麼樣)/i,
 ];
@@ -389,7 +389,7 @@ export async function handleComplexQuery(
   actionCards?: ActionCard[];
 }> {
   const systemPrompt = buildSystemPrompt(context);
-  
+
   const response = await fetch(`${DIFY_CONFIG.baseUrl}/chat-messages`, {
     method: 'POST',
     headers: {
@@ -410,7 +410,7 @@ export async function handleComplexQuery(
   });
 
   const data = await response.json();
-  
+
   return {
     response: data.answer,
     actionCards: parseActionCards(data.answer),
@@ -537,37 +537,37 @@ export function applyCommercialRules(
   locale: 'zh-TW' | 'ja' | 'en'
 ): ActionCard[] {
   const applicable: ActionCard[] = [];
-  
+
   for (const rule of rules) {
     let triggered = false;
-    
+
     switch (rule.trigger.condition) {
       case 'delay':
         const delay = context.l2Status.transit_status?.[0]?.delay_minutes || 0;
         triggered = delay >= (rule.trigger.threshold || 10);
         break;
-        
+
       case 'rain':
         triggered = context.l2Status.weather?.condition === 'rain';
         break;
-        
+
       case 'crowded':
         triggered = context.l2Status.crowding?.level === 'very_crowded';
         break;
-        
+
       case 'luggage':
         triggered = context.userIntent.hasLuggage === true;
         break;
-        
+
       case 'accessibility':
         triggered = context.userIntent.needsAccessibility === true;
         break;
-        
+
       case 'rush':
         triggered = context.userIntent.isRushing === true;
         break;
     }
-    
+
     if (triggered) {
       applicable.push({
         type: mapProviderToType(rule.action.provider),
@@ -582,7 +582,7 @@ export function applyCommercialRules(
       });
     }
   }
-  
+
   // 按優先級排序，取前 3 個
   return applicable
     .sort((a, b) => (a._priority || 99) - (b._priority || 99))
@@ -611,7 +611,7 @@ export function buildActionCards(
   locale: 'zh-TW' | 'ja' | 'en'
 ): ActionCard[] {
   const cards: ActionCard[] = [];
-  
+
   // 1. 主要交通建議（永遠是第一張）
   if (routeOptions.length > 0) {
     const best = routeOptions[0];
@@ -625,11 +625,11 @@ export function buildActionCards(
       is_recommended: true,
     });
   }
-  
+
   // 2. 商業導流卡片（最多 2 張）
   const commercialSlots = commercialCards.slice(0, 2);
   cards.push(...commercialSlots);
-  
+
   // 確保總數不超過 3 張
   return cards.slice(0, 3);
 }
@@ -647,7 +647,7 @@ export async function processUserInput(
   context: AppContext
 ): Promise<ProcessResult> {
   const startTime = Date.now();
-  
+
   // Step 1: 快速規則匹配
   const quickResult = quickMatch(input);
   if (quickResult.matched) {
@@ -656,7 +656,7 @@ export async function processUserInput(
     result.processingLayer = 'rule';
     return result;
   }
-  
+
   // Step 2: 檢查是否需要 LLM
   if (shouldUseLLM(input)) {
     const result = await handleLLMQuery(input, context);
@@ -664,10 +664,10 @@ export async function processUserInput(
     result.processingLayer = 'llm';
     return result;
   }
-  
+
   // Step 3: SLM 分類
   const classification = await classifyIntent(input);
-  
+
   if (classification.confidence < 0.6) {
     // 信心度低，升級到 LLM
     const result = await handleLLMQuery(input, context);
@@ -675,13 +675,13 @@ export async function processUserInput(
     result.processingLayer = 'llm';
     return result;
   }
-  
+
   // Step 4: 根據意圖處理
   const entities = await extractEntities(input, classification.intent);
   const result = await handleSLMIntent(classification.intent, entities, context);
   result.latencyMs = Date.now() - startTime;
   result.processingLayer = 'slm';
-  
+
   return result;
 }
 ```
@@ -707,7 +707,7 @@ export async function processWithFallback(
   } catch (e) {
     console.warn('Processing failed, using fallback:', e);
   }
-  
+
   // 降級回應
   return {
     response: getFallbackResponse(context.locale),

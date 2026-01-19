@@ -11,7 +11,7 @@ async function testHatsumodeScenario() {
     // 1. Get Current Time
     console.log('\n[Step 1] Fetching Current Time (Japan)...');
     const timeResult = await executeTool('get_current_time', {});
-    
+
     if (!timeResult.success || !timeResult.data) {
         console.error('Failed to get time:', timeResult.error);
         return;
@@ -31,10 +31,10 @@ async function testHatsumodeScenario() {
     // 2. Simulate User Query: "Hatsumode info"
     // Scenario A: Real Date (or Forced Jan 1st if today isn't)
     console.log('\n[Step 2] Searching Knowledge with Jan 1st Context...');
-    
+
     // Force Jan 1st for consistent testing regardless of when this script runs in future
-    const jan1stDate = '2026-01-01T10:00:00.000Z'; 
-    
+    const jan1stDate = '2026-01-01T10:00:00.000Z';
+
     const contextA: TagContext = {
         userProfile: 'general',
         weather: 'clear',
@@ -65,7 +65,7 @@ async function testHatsumodeScenario() {
     // Scenario B: Off-Season Date (July 1st)
     console.log('\n[Step 3] Negative Test: Searching with July 1st Context...');
     const july1stDate = '2026-07-01T10:00:00.000Z';
-    
+
     const contextB: TagContext = {
         userProfile: 'general',
         weather: 'clear',

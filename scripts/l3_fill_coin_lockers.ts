@@ -1,7 +1,7 @@
 
 /**
  * L3 Data Supplement: Coin Lockers
- * 
+ *
  * This script specifically targets Coin Lockers (amenity=locker) from OpenStreetMap
  * to supplement existing L3 data. It runs for ALL active stations, not just missing ones.
  */
@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const RADIUS_METERS = 150; // slightly larger radius to catch lockers just outside gates
-const DELAY_MS = 1500; 
+const DELAY_MS = 1500;
 
 interface NodeRecord {
     id: string;
@@ -124,7 +124,7 @@ function transformLocker(osmElement: any, stationId: string) {
     if (tags['payment:ic_cards'] === 'yes') attributes.payment.push('IC Cards');
     if (tags['payment:coins'] === 'yes') attributes.payment.push('Coins');
     if (tags['payment:cash'] === 'yes') attributes.payment.push('Cash');
-    
+
     // Dedupe payment
     attributes.payment = [...new Set(attributes.payment)];
 
@@ -170,7 +170,7 @@ async function main() {
         console.log(`[${++stationsProcessed}/${stations.length}] Checking ${station.name || station.id}...`);
 
         const elements = await fetchOverpassLockers(coords.lat, coords.lon);
-        
+
         if (elements.length > 0) {
             const facilitiesToInsert = elements.map(el => transformLocker(el, station.id));
 
@@ -180,22 +180,22 @@ async function main() {
             // So we might need to delete existing lockers for this station first OR check existence.
             // To be safe and clean: Delete existing 'coin_locker' for this station and re-insert.
             // This ensures we have the latest set and no duplicates.
-            
+
             // 1. Delete existing lockers for this station
-            /* 
-            // Commented out to avoid accidental data loss if other sources exist. 
+            /*
+            // Commented out to avoid accidental data loss if other sources exist.
             // But for now, assuming this script is the authority for OSM lockers.
             await supabase
                 .from('l3_facilities')
                 .delete()
                 .eq('station_id', station.id)
                 .eq('type', 'coin_locker')
-                .ilike('attributes->>source', 'OpenStreetMap'); 
+                .ilike('attributes->>source', 'OpenStreetMap');
             */
-           
-            // Actually, let's just insert. If we duplicate, we duplicate. 
+
+            // Actually, let's just insert. If we duplicate, we duplicate.
             // Ideally we should check if osm_id exists in attributes.
-            
+
             // Let's do a check-and-insert approach to avoid duplicates
             // Get existing lockers for this station
             const { data: existing } = await supabase

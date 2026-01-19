@@ -58,23 +58,23 @@ async function main() {
     for (const url of LEGACY_URLS) {
         try {
             console.log(`[Patching] ${url}...`);
-            
+
             // Choose crawler based on URL
             const crawler = url.includes('letsgojp.com') ? tokyoCrawler : matchaCrawler;
-            
+
             const result = await crawler.crawl(url);
-            
+
             if (result && result.title) {
                 // Process and Import L1
                 const l1Data = processor.processL1(result);
                 await importer.importL1(l1Data);
-                
+
                 // Also process L4 to ensure consistency (upsert will handle existing)
                 const l4Items = processor.processL4(result);
                 for (const l4 of l4Items) {
                     await importer.importL4(l4);
                 }
-                
+
                 console.log(`[Success] ${url} - Title: ${result.title}`);
                 successCount++;
             } else {
@@ -84,7 +84,7 @@ async function main() {
 
             // Respectful delay
             await new Promise(resolve => setTimeout(resolve, 2000));
-            
+
         } catch (error) {
             console.error(`[Error] Failed to patch ${url}:`, error);
             failCount++;

@@ -1,6 +1,6 @@
 /**
  * L4 Expert Knowledge Base API
- * 
+ *
  * Provides access to L4 expert knowledge including:
  * - Railway line tips
  * - Hub station tips
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     // Normalize locale for LLM service
     if (locale === 'zh') locale = 'zh-TW';
     if (!['zh-TW', 'en', 'ja'].includes(locale)) locale = 'zh-TW';
-    
+
     const targetLocale = locale as SupportedLocale;
 
     try {
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
                 // Prioritize SSoT (Markdown)
                 let markdownTips = knowledgeService.getKnowledgeByRailwayId(id);
-                
+
                 // Apply filters
                 if (minPriority > 0) {
                     markdownTips = markdownTips.filter(k => k.priority >= minPriority);
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
 
                 // Get markdown-based tips (SSoT)
                 let markdownTips = knowledgeService.getKnowledgeByStationId(id);
-                
+
                 // Apply filters
                 if (minPriority > 0) {
                     markdownTips = markdownTips.filter(k => k.priority >= minPriority);
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
                         (translatedAccessibility as any)[originalKey] = item.content;
                     });
                 }
-                
+
                 return NextResponse.json({
                     station_id: id,
                     tips: translatedTips,
@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
                     targetLocale
                 );
                 const resultTips = tips.map((t, i) => ({ ...t, text: translatedTips[i].content }));
-                
+
                 return NextResponse.json({
                     location_id: id,
                     tips: resultTips,
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
                     { id: `pass-use-${i}`, content: p.whenToUse, section: 'Pass Usage' }
                 ]);
                 const translatedPassItems = await translateKnowledgeItems(passItems, targetLocale);
-                
+
                 const resultPasses = passes.map((p, i) => {
                     const baseIdx = i * 3;
                     return {

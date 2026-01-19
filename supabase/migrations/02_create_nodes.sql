@@ -3,13 +3,13 @@ create table nodes (
   id text primary key,                     -- 'odpt:TokyoMetro.Ueno'
   parent_hub_id text references nodes(id), -- null = Hub, has value = Spoke
   city_id text references cities(id) not null,
-  
+
   -- Basic Info
   name jsonb not null,                     -- {"zh-TW": "上野站", ...}
   name_short jsonb,                        -- Abbreviation {"zh-TW": "上野", ...}
   coordinates geometry(Point, 4326) not null,
   node_type text not null,                 -- 'station' / 'exit' / 'bus_stop' / 'poi'
-  
+
   -- L1 Tags (Hub has values, Spoke inherits)
   facility_profile jsonb,
   /*
@@ -19,7 +19,7 @@ create table nodes (
     "calculated_at": "2025-10-01T00:00:00Z"
   }
   */
-  
+
   vibe_tags jsonb,
   /*
   {
@@ -28,10 +28,10 @@ create table nodes (
     "en": ["Shopping Paradise", "Foodie Haven"]
   }
   */
-  
+
   -- AI Persona (Hub has values, Spoke inherits)
   persona_prompt text,
-  
+
   -- Commercial Nudge Rules (Hub has values, Spoke inherits)
   commercial_rules jsonb,
   /*
@@ -43,10 +43,10 @@ create table nodes (
     }
   ]
   */
-  
+
   -- Transit Info
   transit_lines jsonb,                     -- List of line IDs
-  
+
   -- Metadata
   is_active boolean default true,
   created_at timestamp default now(),

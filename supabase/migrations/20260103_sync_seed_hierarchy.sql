@@ -4,10 +4,10 @@
 -- =============================================================================
 
 -- Step 1: Add is_hub column if it doesn't exist
-DO $$ 
+DO $$
 BEGIN
     IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
+        SELECT 1 FROM information_schema.columns
         WHERE table_name = 'nodes' AND column_name = 'is_hub'
     ) THEN
         ALTER TABLE nodes ADD COLUMN is_hub BOOLEAN DEFAULT FALSE;
@@ -123,26 +123,26 @@ INSERT INTO seed_nodes_hierarchy (node_id, is_hub, parent_hub_id) VALUES
 
 -- Step 4: Update nodes table with seed data
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id
 FROM seed_nodes_hierarchy s
 WHERE n.id = s.node_id;
 
 -- Step 5: For any remaining nodes without parent_hub_id, set is_hub = true (they are standalone hubs)
-UPDATE nodes 
+UPDATE nodes
 SET is_hub = TRUE
 WHERE parent_hub_id IS NULL AND is_hub IS NULL;
 
 -- Step 6: Verify the results - Fixed column names
-SELECT 
+SELECT
     CASE WHEN parent_hub_id IS NULL THEN 'HUB' ELSE 'SPOKE' END as role,
     COUNT(*) as count
-FROM nodes 
+FROM nodes
 GROUP BY role;
 
 -- Step 7: Show summary
-SELECT 
+SELECT
     COUNT(*) FILTER (WHERE is_hub = true) as total_hubs,
     COUNT(*) FILTER (WHERE is_hub = false) as total_spokes,
     COUNT(*) FILTER (WHERE parent_hub_id IS NOT NULL) as spokes_with_parents,
@@ -150,10 +150,10 @@ SELECT
 FROM nodes;
 
 -- Step 8: Show sample data
-SELECT id, 
+SELECT id,
     CASE WHEN parent_hub_id IS NULL THEN 'HUB' ELSE 'SPOKE' END as role,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id LIKE '%Ueno%' OR id LIKE '%Tokyo%' OR id LIKE '%Shinjuku%'
 ORDER BY id
 LIMIT 20;

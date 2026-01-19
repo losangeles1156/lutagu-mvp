@@ -68,7 +68,7 @@ async function auditMinatoStations() {
             console.log(`     (Facilities: ${keys} keys, Platforms: ${l3Data.platform_count})`);
         }
 
-        // L4 Check (Wisdom/Tips) -> Assuming in `nodes` table column `l4_tips` or separate table? 
+        // L4 Check (Wisdom/Tips) -> Assuming in `nodes` table column `l4_tips` or separate table?
         // Or strictly strictly "wisdom" table?
         // Let's check `nodes` columns first.
         // Actually L4 is often dynamic or from vector store. `export_dify_wisdom.ts` implies external source.

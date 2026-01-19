@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function testPedestrianRpc() {
   console.log('📡 Testing get_nearby_accessibility_graph RPC...');
-  
+
   // Test coordinates (Ueno Station area)
   const query_lat = 35.7138;
   const query_lon = 139.7772;

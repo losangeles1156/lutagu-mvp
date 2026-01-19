@@ -1,7 +1,7 @@
 # AI 混合型智慧引擎全面測試與效能評估計劃
 
-> **評估日期**: 2026-01-07  
-> **專案名稱**: LUTAGU/LUTAGU - 東京交通 AI 導航助手  
+> **評估日期**: 2026-01-07
+> **專案名稱**: LUTAGU/LUTAGU - 東京交通 AI 導航助手
 > **評估範圍**: L4 混合型智慧引擎 (Hybrid Intelligence Engine)
 
 ---
@@ -128,16 +128,16 @@ flowchart TB
 const edgeCases = [
     // 空輸入測試
     { text: '', locale: 'zh-TW', expected: 'template' },
-    
+
     // 極端長度輸入
     { text: 'a'.repeat(10000), locale: 'zh-TW', expected: 'anomaly' },
-    
+
     // 多語系混合
     { text: '你好 from Tokyo to 渋谷', locale: 'zh-TW', expected: 'algorithm' },
-    
+
     // 特殊字元
     { text: '從@#$%站到^&*站', locale: 'zh-TW', expected: 'anomaly' },
-    
+
     // 相似站點名稱
     { text: '從上野到上野御徒町', locale: 'zh-TW', expected: 'algorithm' },
 ];

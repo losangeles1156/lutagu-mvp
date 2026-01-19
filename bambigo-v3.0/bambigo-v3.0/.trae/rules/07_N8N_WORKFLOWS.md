@@ -85,7 +85,7 @@ const hubNodes = await supabase
 // Step 2: 對每個 Hub 執行 Overpass 查詢
 for (const hub of hubNodes) {
   const [lng, lat] = hub.coordinates.coordinates;
-  
+
   // Overpass QL 查詢
   const query = `
     [out:json][timeout:30];
@@ -103,21 +103,21 @@ for (const hub of hubNodes) {
     );
     out count;
   `;
-  
+
   const response = await fetch('https://overpass-api.de/api/interpreter', {
     method: 'POST',
     body: query,
   });
-  
+
   // Step 3: 計算類別統計
   const categoryCounts = computeCategoryCounts(response);
-  
+
   // Step 4: 生成 Vibe Tags
   const vibeTags = generateVibeTags(categoryCounts);
-  
+
   // Step 5: 翻譯 Vibe Tags
   const translatedTags = await translateVibeTags(vibeTags);
-  
+
   // Step 6: 更新資料庫
   await supabase
     .from('nodes')
@@ -307,7 +307,7 @@ const facilityQuery = `
 ```javascript
 function parseFacility(osmNode, nodeId) {
   const type = detectFacilityType(osmNode.tags);
-  
+
   return {
     id: `facility:${nodeId}:${type}:${osmNode.id}`,
     node_id: nodeId,
@@ -329,19 +329,19 @@ function parseFacility(osmNode, nodeId) {
 
 function extractAttributes(tags, type) {
   const attrs = {};
-  
+
   if (tags.wheelchair === 'yes') attrs.accessible = true;
   if (tags.changing_table === 'yes') attrs.baby_facilities = true;
   if (tags.fee === 'no') attrs.free = true;
-  
+
   if (type === 'atm') {
     if (tags.international === 'yes') attrs.international_card = true;
   }
-  
+
   if (type === 'locker') {
     attrs.size = tags.size || 'medium';
   }
-  
+
   return attrs;
 }
 ```
@@ -390,17 +390,17 @@ function extractAttributes(tags, type) {
 ```javascript
 async function translateText(text, sourceLang, targetLangs) {
   const result = { [sourceLang]: text };
-  
+
   for (const targetLang of targetLangs) {
     if (targetLang === sourceLang) continue;
-    
+
     // 1. 檢查專有名詞對照表
     const cached = await checkProperNounCache(text);
     if (cached && cached[targetLang]) {
       result[targetLang] = cached[targetLang];
       continue;
     }
-    
+
     // 2. 檢查翻譯快取
     const cacheKey = `translate:${sourceLang}:${targetLang}:${text}`;
     const cachedTranslation = await redis.get(cacheKey);
@@ -408,7 +408,7 @@ async function translateText(text, sourceLang, targetLangs) {
       result[targetLang] = cachedTranslation;
       continue;
     }
-    
+
     // 3. 呼叫 DeepL API
     const response = await fetch('https://api.deepl.com/v2/translate', {
       method: 'POST',
@@ -422,16 +422,16 @@ async function translateText(text, sourceLang, targetLangs) {
         target_lang: mapLocaleToDeepL(targetLang),
       }),
     });
-    
+
     const data = await response.json();
     const translated = data.translations[0].text;
-    
+
     // 4. 儲存到快取
     await redis.setex(cacheKey, 30 * 24 * 60 * 60, translated); // 30 天
-    
+
     result[targetLang] = translated;
   }
-  
+
   return result;
 }
 
@@ -481,9 +481,9 @@ async function fetchODPTTrainInfo() {
   const response = await fetch(
     `https://api.odpt.org/api/v4/odpt:TrainInformation?acl:consumerKey=${ODPT_API_KEY}`
   );
-  
+
   const data = await response.json();
-  
+
   return data.map(info => ({
     line_id: info['odpt:railway'].replace('odpt.Railway:', ''),
     line_name: {
@@ -521,11 +521,11 @@ function extractDelayMinutes(text) {
 async function updateL2Status(nodeId, transitStatus) {
   const key = `l2:${nodeId}`;
   const ttl = 20 * 60; // 20 分鐘
-  
+
   // 取得現有狀態
   const existing = await redis.get(key);
   const existingData = existing ? JSON.parse(existing) : null;
-  
+
   // 建立新狀態
   const newData = {
     node_id: nodeId,
@@ -535,14 +535,14 @@ async function updateL2Status(nodeId, transitStatus) {
     crowding: existingData?.crowding,
     weather: existingData?.weather,
   };
-  
+
   // 比較是否有變化
-  const hasChanged = !existingData || 
+  const hasChanged = !existingData ||
     JSON.stringify(existingData.transit_status) !== JSON.stringify(transitStatus);
-  
+
   // 寫入 Redis
   await redis.setex(key, ttl, JSON.stringify(newData));
-  
+
   return { hasChanged, newData };
 }
 ```
@@ -596,41 +596,41 @@ async function checkTripGuards() {
     .from('trip_guards')
     .select('*, users(*)')
     .eq('is_active', true);
-  
+
   const now = new Date();
   const currentDay = now.getDay(); // 0-6
   const currentTime = now.toTimeString().slice(0, 5); // HH:MM
-  
+
   for (const guard of guards) {
     // 檢查是否在有效時段
     if (guard.active_days && !guard.active_days.includes(currentDay)) continue;
     if (guard.active_start_time && currentTime < guard.active_start_time) continue;
     if (guard.active_end_time && currentTime > guard.active_end_time) continue;
-    
+
     // 檢查監控的路線狀態
     for (const lineId of guard.watched_lines) {
       const l2 = await redis.get(`l2:line:${lineId}`);
       if (!l2) continue;
-      
+
       const status = JSON.parse(l2);
-      
+
       // 判斷是否需要通知
       const shouldNotify = shouldSendNotification(guard.notify_threshold, status);
-      
+
       if (shouldNotify) {
         // 檢查是否最近已通知過（防止重複）
         const lastNotified = guard.last_notified_at;
         if (lastNotified && (now - new Date(lastNotified)) < 30 * 60 * 1000) {
           continue; // 30 分鐘內不重複通知
         }
-        
+
         // 發送推播
         await sendPushNotification(guard.users, {
           title: `⚠️ ${status.line_name.ja} 運行異常`,
           body: status.reason?.ja || '請確認最新狀態',
           data: { lineId, status },
         });
-        
+
         // 更新最後通知時間
         await supabase
           .from('trip_guards')
@@ -715,7 +715,7 @@ function shouldSendNotification(threshold, status) {
 // 所有 Workflow 共用的錯誤處理
 async function handleWorkflowError(workflowName, error, context) {
   console.error(`[${workflowName}] Error:`, error);
-  
+
   // 發送 Slack 通知
   await sendSlackNotification({
     channel: '#lutagu-alerts',
@@ -729,7 +729,7 @@ async function handleWorkflowError(workflowName, error, context) {
       ],
     }],
   });
-  
+
   // 記錄到錯誤日誌表
   await supabase
     .from('workflow_errors')
@@ -747,20 +747,20 @@ async function handleWorkflowError(workflowName, error, context) {
 ```javascript
 async function withRetry(fn, maxRetries = 3, delay = 1000) {
   let lastError;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
       console.warn(`Attempt ${attempt} failed:`, error.message);
-      
+
       if (attempt < maxRetries) {
         await new Promise(resolve => setTimeout(resolve, delay * attempt));
       }
     }
   }
-  
+
   throw lastError;
 }
 

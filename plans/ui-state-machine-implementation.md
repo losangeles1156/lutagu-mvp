@@ -1,8 +1,8 @@
 # 前端 UI 狀態機實作計劃
 
-> **版本**：v1.0  
-> **日期**：2026-01-07  
-> **模式**：Architect  
+> **版本**：v1.0
+> **日期**：2026-01-07
+> **模式**：Architect
 > **任務**：實作狀態機模式管理 UI 介面互動與狀態持久化
 
 ---
@@ -70,21 +70,21 @@ EXPLORE    → -            -           -              COLLAPSED_*
 interface UIState {
   // 核心狀態
   uiState: 'login' | 'fullscreen' | 'collapsed_desktop' | 'collapsed_mobile' | 'explore';
-  
+
   // 裝置偵測
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
-  
+
   // 對話相關
   messages: ChatMessage[];
   pendingInput: string;
   inputFocus: boolean;
-  
+
   // 動畫控制
   isAnimating: boolean;
   animationDirection: 'forward' | 'backward' | null;
-  
+
   // 持久化
   lastState: 'login' | 'fullscreen' | 'collapsed_desktop' | 'collapsed_mobile' | 'explore';
   sessionStartTime: number;
@@ -244,8 +244,8 @@ export const DEVICE_TYPES = {
 const stateTransitions = {
   login: { opacity: 0, y: 20 },
   fullscreen: { opacity: 1, y: 0 },
-  collapsed_desktop: { 
-    x: 0, 
+  collapsed_desktop: {
+    x: 0,
     width: '20%-25%',
     transition: { duration: 0.3, ease: 'easeOut' }
   },
@@ -256,9 +256,9 @@ const stateTransitions = {
   },
 };
 
-export function StateTransition({ 
-  children, 
-  uiState 
+export function StateTransition({
+  children,
+  uiState
 }: StateTransitionProps) {
   return (
     <AnimatePresence mode="wait">
@@ -324,18 +324,18 @@ export function StateTransition({
 // src/components/ui-state/LoginPanel.tsx
 export function LoginPanel() {
   const { transitionTo } = useUIStateMachine();
-  
+
   const handleLogin = async () => {
     // 1. 產生或取得 difyUserId
     const userId = await generateDifyUserId();
-    
+
     // 2. 儲存至 localStorage
     saveToLocalStorage('difyUserId', userId);
-    
+
     // 3. 切換至 fullscreen 狀態
     transitionTo('fullscreen');
   };
-  
+
   return (
     <div className="login-container">
       <h1>歡迎使用 LUTAGU</h1>
@@ -439,5 +439,5 @@ useEffect(() => {
 
 ---
 
-> **計劃完成日期**：2026-01-07  
+> **計劃完成日期**：2026-01-07
 > **下一步**：切換至 Code 模式實施

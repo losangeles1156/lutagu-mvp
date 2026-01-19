@@ -1,13 +1,13 @@
 /**
  * JR East L3 Facility Scraper
- * 
+ *
  * Strategy:
  * 1. For each JR East station missing L3 data:
  *    - Look up the JR East internal station code (from a mapping table or ODPT API)
  *    - Fetch the barrier-free page: /estation/stations/[ID].html
  *    - Parse facility availability (elevator, toilet, wheelchair toilet, escalator)
  * 2. Output: SQL insert statements for l3_facilities table
- * 
+ *
  * Note: JR East website requires browser automation due to 403 blocking of simple HTTP requests.
  * This script generates a list of URLs and expected data structure for manual review or
  * Puppeteer-based execution.

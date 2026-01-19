@@ -8,9 +8,9 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY!;
 
 async function listCrawledStations() {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    
+
     console.log('--- Querying l4_knowledge_embeddings for crawled stations ---');
-    
+
     const { data, error } = await supabase
         .from('l4_knowledge_embeddings')
         .select('entity_name, source, knowledge_type')
@@ -28,10 +28,10 @@ async function listCrawledStations() {
 
     const stations = new Map<string, Set<string>>();
     data.forEach(item => {
-        const name = typeof item.entity_name === 'string' 
-            ? item.entity_name 
+        const name = typeof item.entity_name === 'string'
+            ? item.entity_name
             : (item.entity_name as any)?.ja || (item.entity_name as any)?.['zh-TW'] || 'Unknown';
-        
+
         if (!stations.has(name)) {
             stations.set(name, new Set());
         }

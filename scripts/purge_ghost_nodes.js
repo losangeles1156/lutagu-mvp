@@ -12,7 +12,7 @@ async function purgeGhostNodes() {
   // 1. 找出所有坐標在東京站 [139.767, 35.681] 但名稱不是「東京」的節點，直接刪除！
   // 這些都是之前 L4 遷移失敗產生的殘留
   const TOKYO_STATION_COORDS = [139.767, 35.681];
-  const threshold = 0.001; 
+  const threshold = 0.001;
 
   const { data: ghosts } = await supabase
     .from('nodes')
@@ -22,7 +22,7 @@ async function purgeGhostNodes() {
   const nodesToDelete = ghosts.filter(n => {
     if (!n.coordinates || !n.coordinates.coordinates) return false;
     const [lon, lat] = n.coordinates.coordinates;
-    return Math.abs(lon - TOKYO_STATION_COORDS[0]) < threshold && 
+    return Math.abs(lon - TOKYO_STATION_COORDS[0]) < threshold &&
            Math.abs(lat - TOKYO_STATION_COORDS[1]) < threshold;
   });
 
@@ -45,7 +45,7 @@ async function purgeGhostNodes() {
 
   console.log(`\n池袋節點總數: ${ikebukuros?.length || 0}`);
   // 我們只保留 ID 為 'odpt:Station:JR-East.Ikebukuro' 且是 Hub 的那個，其他的如果坐標不對或行政區不對就清理
-  
+
   // 3. 強制刷新所有 Hub 的 ward_id
   console.log('\n強制同步核心 Hub 的行政區歸屬...');
   await supabase.from('nodes').update({ ward_id: 'ward:toshima' }).eq('id', 'odpt:Station:JR-East.Ikebukuro');

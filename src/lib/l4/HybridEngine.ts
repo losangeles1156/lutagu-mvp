@@ -1,6 +1,6 @@
 /**
  * HybridEngine - AI 混合型智慧引擎 (Refactored with SkillRegistry)
- * 
+ *
  * 整合四層架構：
  * L1: Template Engine + POITaggedDecisionEngine (最快)
  * L2: Algorithm Provider (標準)
@@ -400,6 +400,30 @@ export class HybridEngine {
         const lowerText = text.toLowerCase();
         const l2Status = (context?.strategyContext as any)?.l2Status;
 
+        if (/(?:票價|多少錢|fare|運賃)/i.test(text)) {
+            const destMatch = text.match(/(?:到|至|まで|to)\s*([^?\s]+)/i);
+            const nameMatch = text.match(/([^?\s]+)(?:的)?(?:票價|車資|運賃|fare)/i);
+            const destName = (destMatch?.[1] || nameMatch?.[1] || '').trim();
+            if (destName && context?.currentStation) {
+                const destId = DataNormalizer.lookupStationId(destName);
+                if (destId) {
+                    try {
+                        const fare = await algorithmProvider.calculateFare(context.currentStation, destId);
+                        if (fare) {
+                            return {
+                                source: 'algorithm',
+                                type: 'fare',
+                                content: locale.startsWith('zh') ? `前往 ${destName} 的票價約為 ${fare.ic} 日圓 (IC 卡)。` : `The fare to ${destName} is approximately ${fare.ic} JPY.`,
+                                data: { fare, destination: destName },
+                                confidence: 0.9,
+                                reasoning: 'Calculated fare via algorithm.'
+                            };
+                        }
+                    } catch (e) { }
+                }
+            }
+        }
+
         // Route Intent
         if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
             const endpoints = extractRouteEndpointsFromText(text);
@@ -516,30 +540,6 @@ export class HybridEngine {
                             }
                         } catch (e) { }
                     }
-                }
-            }
-        }
-
-        // Fare Intent
-        if (lowerText.match(/(?:票價|多少錢|fare|運賃)/)) {
-            const destMatch = text.match(/(?:到|至|まで|to)\s*([^?\s]+)/i);
-            const destName = destMatch?.[1];
-            if (destName && context?.currentStation) {
-                const destId = DataNormalizer.lookupStationId(destName);
-                if (destId) {
-                    try {
-                        const fare = await algorithmProvider.calculateFare(context.currentStation, destId);
-                        if (fare) {
-                            return {
-                                source: 'algorithm',
-                                type: 'fare',
-                                content: locale.startsWith('zh') ? `前往 ${destName} 的票價約為 ${fare.ic} 日圓 (IC 卡)。` : `The fare to ${destName} is approximately ${fare.ic} JPY.`,
-                                data: { fare, destination: destName },
-                                confidence: 0.9,
-                                reasoning: 'Calculated fare via algorithm.'
-                            };
-                        }
-                    } catch (e) { }
                 }
             }
         }

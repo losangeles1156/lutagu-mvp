@@ -12,7 +12,7 @@ async function runTests() {
     const query = "Find a quiet cafe with wifi";
     const parsedTags = TagEngine.parseQuery(query);
     const tagNames = parsedTags.map(t => t.name).sort();
-    
+
     if (tagNames.includes('quiet') && tagNames.includes('cafe') && tagNames.includes('wifi')) {
         console.log(`[PASS] Parsed "${query}" -> ${tagNames.join(', ')}`);
         passed++;
@@ -39,7 +39,7 @@ async function runTests() {
     total++;
     console.log('\nTest 3: Dynamic Weighting (Profile)');
     const elevatorTag: Tag = { id: 't1', name: 'elevator', category: 'facility', baseWeight: 0.8 };
-    
+
     const contextGeneral: TagContext = { userProfile: 'general', weather: 'clear' };
     const contextWheelchair: TagContext = { userProfile: 'wheelchair', weather: 'clear' };
 
@@ -60,7 +60,7 @@ async function runTests() {
     total++;
     console.log('\nTest 4: Dynamic Weighting (Weather)');
     const parkTag: Tag = { id: 't6', name: 'park', category: 'outdoor', baseWeight: 0.5 };
-    
+
     const contextRain: TagContext = { userProfile: 'general', weather: 'rain' };
     const wRain = TagEngine.calculateContextualWeight(parkTag, contextRain);
 

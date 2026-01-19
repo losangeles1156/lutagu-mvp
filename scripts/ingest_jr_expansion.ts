@@ -12,9 +12,9 @@ const supabase = createClient(
 );
 
 const ODPT_API_URL = "https://api.odpt.org/api/v4/odpt:Station";
-const ODPT_TOKEN = process.env.ODPT_AUTH_TOKEN || 
-                   process.env.NEXT_PUBLIC_ODPT_TOKEN || 
-                   process.env.ODPT_API_TOKEN || 
+const ODPT_TOKEN = process.env.ODPT_AUTH_TOKEN ||
+                   process.env.NEXT_PUBLIC_ODPT_TOKEN ||
+                   process.env.ODPT_API_TOKEN ||
                    process.env.ODPT_API_TOKEN_BACKUP;
 
 // Target Line Names (English, Partial Match)
@@ -120,7 +120,7 @@ async function main() {
     }
 
     console.log('=== Starting Phase 2: JR East Expansion (Yamanote + Chuo-Sobu + Sobu Rapid) ===');
-    
+
     // Fetch all JR East stations (filtered locally)
     const stations = await fetchOdptStations('odpt.Operator:JR-East');
     console.log(`Fetched ${stations.length} stations for JR-East`);
@@ -140,12 +140,12 @@ async function main() {
         if (railways.some(r => r.includes('Yamanote'))) {
             shouldIngest = true;
         }
-        
+
         // 2. Chuo-Sobu Line (Local) -> "Chuo-Sobu" in ODPT?
         // ODPT usually calls it "odpt.Railway:JR-East.ChuoSobu"
         else if (railways.some(r => r.includes('ChuoSobu'))) {
             // Filter: East of Nakano, West of Kameido (inclusive)
-            // But checking bounds by name is tricky. 
+            // But checking bounds by name is tricky.
             // We'll rely on the STATION_COORDS list or simple name check.
             // Actually, we can check if it's in our coordinate list OR explicit allowed list.
             if (lookupCoords(id, enName)) {
@@ -181,13 +181,13 @@ async function main() {
         }
 
         const nameI18n = getLocaleName(s['odpt:stationTitle']);
-        
+
         // Hub Logic
-        const isHub = 
-            nameI18n.en.includes('Tokyo') || 
-            nameI18n.en.includes('Shinjuku') || 
-            nameI18n.en.includes('Shibuya') || 
-            nameI18n.en.includes('Ikebukuro') || 
+        const isHub =
+            nameI18n.en.includes('Tokyo') ||
+            nameI18n.en.includes('Shinjuku') ||
+            nameI18n.en.includes('Shibuya') ||
+            nameI18n.en.includes('Ikebukuro') ||
             nameI18n.en.includes('Ueno') ||
             nameI18n.en.includes('Akihabara') ||
             nameI18n.en.includes('Shinagawa');
@@ -214,7 +214,7 @@ async function main() {
         const { error } = await supabase
             .from('stations_static')
             .upsert(toInsert, { onConflict: 'id' });
-        
+
         if (error) {
             console.error(`❌ Error inserting JR East:`, error.message);
         } else {

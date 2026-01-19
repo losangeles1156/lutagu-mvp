@@ -17,15 +17,15 @@ CREATE TABLE IF NOT EXISTS performance_metrics (
 );
 
 -- Index for time-based queries
-CREATE INDEX IF NOT EXISTS idx_performance_metrics_created_at 
+CREATE INDEX IF NOT EXISTS idx_performance_metrics_created_at
 ON performance_metrics(created_at DESC);
 
 -- Index for endpoint analysis
-CREATE INDEX IF NOT EXISTS idx_performance_metrics_endpoint 
+CREATE INDEX IF NOT EXISTS idx_performance_metrics_endpoint
 ON performance_metrics(endpoint);
 
 -- Index for request correlation
-CREATE INDEX IF NOT EXISTS idx_performance_metrics_request_id 
+CREATE INDEX IF NOT EXISTS idx_performance_metrics_request_id
 ON performance_metrics(request_id);
 
 -- =====================================================
@@ -52,11 +52,11 @@ CREATE TABLE IF NOT EXISTS ai_chat_metrics (
 );
 
 -- Index for time-based queries
-CREATE INDEX IF NOT EXISTS idx_ai_chat_metrics_created_at 
+CREATE INDEX IF NOT EXISTS idx_ai_chat_metrics_created_at
 ON ai_chat_metrics(created_at DESC);
 
 -- Index for node analysis
-CREATE INDEX IF NOT EXISTS idx_ai_chat_metrics_node_id 
+CREATE INDEX IF NOT EXISTS idx_ai_chat_metrics_node_id
 ON ai_chat_metrics(node_id);
 
 -- =====================================================
@@ -65,7 +65,7 @@ ON ai_chat_metrics(node_id);
 
 -- API Performance Summary (last 24h)
 CREATE OR REPLACE VIEW v_api_performance_24h AS
-SELECT 
+SELECT
     endpoint,
     COUNT(*) as request_count,
     AVG(response_time_ms)::INTEGER as avg_ms,
@@ -80,7 +80,7 @@ ORDER BY request_count DESC;
 
 -- AI Quality Summary (last 24h)
 CREATE OR REPLACE VIEW v_ai_quality_24h AS
-SELECT 
+SELECT
     locale,
     COUNT(*) as total_requests,
     AVG(response_time_ms)::INTEGER as avg_response_ms,
@@ -93,7 +93,7 @@ GROUP BY locale;
 
 -- Hourly request volume
 CREATE OR REPLACE VIEW v_hourly_volume AS
-SELECT 
+SELECT
     DATE_TRUNC('hour', created_at) as hour,
     COUNT(*) as request_count,
     AVG(response_time_ms)::INTEGER as avg_ms

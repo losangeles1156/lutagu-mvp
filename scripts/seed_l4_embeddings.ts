@@ -1,16 +1,16 @@
 /**
  * L4 Knowledge Base Vector Embedding Seeder
- * 
+ *
  * This script generates embeddings for L4 knowledge entries and stores them
  * in the database for semantic search.
- * 
+ *
  * Usage: npx tsx scripts/seed_l4_embeddings.ts
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { 
-  RAILWAY_EXPERT_TIPS, 
-  HUB_STATION_TIPS, 
+import {
+  RAILWAY_EXPERT_TIPS,
+  HUB_STATION_TIPS,
   ACCESSIBILITY_GUIDE,
   SPECIAL_LOCATION_TIPS,
   PASS_RECOMMENDATIONS
@@ -68,10 +68,10 @@ async function generateEmbedding(text: string): Promise<number[]> {
  */
 function prepareRailwayKnowledge() {
   const entries: any[] = [];
-  
+
   for (const [railwayId, tips] of Object.entries(RAILWAY_EXPERT_TIPS)) {
     const railwayName = railwayId.split('.').pop() || railwayId;
-    
+
     for (const tip of tips) {
       entries.push({
         knowledge_type: 'railway',
@@ -87,22 +87,22 @@ function prepareRailwayKnowledge() {
       });
     }
   }
-  
+
   return entries;
 }
 
 function prepareHubStationKnowledge() {
   const entries: any[] = [];
-  
+
   for (const [stationId, tips] of Object.entries(HUB_STATION_TIPS)) {
     const stationName = stationId.split('.').pop() || stationId;
-    
+
     for (const tip of tips) {
       // Determine user context from category
-      const userContext = tip.category === 'accessibility' 
+      const userContext = tip.category === 'accessibility'
         ? ['wheelchair', 'stroller', 'largeLuggage', 'senior']
         : ['general'];
-      
+
       entries.push({
         knowledge_type: 'hub_station',
         entity_id: stationId,
@@ -117,16 +117,16 @@ function prepareHubStationKnowledge() {
       });
     }
   }
-  
+
   return entries;
 }
 
 function prepareAccessibilityKnowledge() {
   const entries: any[] = [];
-  
+
   for (const [stationId, advice] of Object.entries(ACCESSIBILITY_GUIDE)) {
     const stationName = stationId.split('.').pop() || stationId;
-    
+
     // Add each accessibility type as separate entry
     const accessibilityTypes = [
       { key: 'wheelchair', context: ['wheelchair'] },
@@ -135,7 +135,7 @@ function prepareAccessibilityKnowledge() {
       { key: 'vision', context: ['vision'] },
       { key: 'senior', context: ['senior'] }
     ];
-    
+
     for (const { key, context } of accessibilityTypes) {
       if (advice[key as keyof typeof advice]) {
         entries.push({
@@ -153,21 +153,21 @@ function prepareAccessibilityKnowledge() {
       }
     }
   }
-  
+
   return entries;
 }
 
 function prepareSpecialLocationKnowledge() {
   const entries: any[] = [];
-  
+
   for (const [locationId, tips] of Object.entries(SPECIAL_LOCATION_TIPS)) {
     const locationName = locationId.replace(/-/g, ' ');
-    
+
     for (const tip of tips) {
-      const userContext = tip.category === 'airport' 
+      const userContext = tip.category === 'airport'
         ? ['largeLuggage', 'stroller']
         : ['general'];
-      
+
       entries.push({
         knowledge_type: 'special_location',
         entity_id: locationId,
@@ -182,13 +182,13 @@ function prepareSpecialLocationKnowledge() {
       });
     }
   }
-  
+
   return entries;
 }
 
 function preparePassKnowledge() {
   const entries: any[] = [];
-  
+
   for (const pass of PASS_RECOMMENDATIONS) {
     entries.push({
       knowledge_type: 'pass',
@@ -203,7 +203,7 @@ function preparePassKnowledge() {
       ward_context: []
     });
   }
-  
+
   return entries;
 }
 
@@ -212,7 +212,7 @@ function preparePassKnowledge() {
  */
 async function seedL4Embeddings() {
   console.log('🚀 Starting L4 Knowledge Embeddings Seeding...');
-  
+
   // Collect all knowledge entries
   const allEntries = [
     ...prepareRailwayKnowledge(),
@@ -221,22 +221,22 @@ async function seedL4Embeddings() {
     ...prepareSpecialLocationKnowledge(),
     ...preparePassKnowledge()
   ];
-  
+
   console.log(`📊 Total entries to process: ${allEntries.length}`);
-  
+
   let successCount = 0;
   let errorCount = 0;
-  
+
   // Process in batches
   for (let i = 0; i < allEntries.length; i += BATCH_SIZE) {
     const batch = allEntries.slice(i, i + BATCH_SIZE);
     console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(allEntries.length / BATCH_SIZE)}`);
-    
+
     for (const entry of batch) {
       try {
         // Generate embedding for the content
         const embedding = await generateEmbedding(entry.content);
-        
+
         // Upsert to database
         const { error } = await supabase
           .from('l4_knowledge_embeddings')
@@ -257,7 +257,7 @@ async function seedL4Embeddings() {
             onConflict: 'knowledge_type, entity_id, content',
             ignoreDuplicates: false
           });
-        
+
         if (error) {
           console.error(`❌ Error seeding ${entry.entity_id}:`, error.message);
           errorCount++;
@@ -269,13 +269,13 @@ async function seedL4Embeddings() {
         errorCount++;
       }
     }
-    
+
     // Rate limiting delay
     if (i + BATCH_SIZE < allEntries.length) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
-  
+
   console.log('✅ Seeding complete!');
   console.log(`📈 Success: ${successCount}, Errors: ${errorCount}`);
   console.log(`📊 Total L4 knowledge entries: ${allEntries.length}`);

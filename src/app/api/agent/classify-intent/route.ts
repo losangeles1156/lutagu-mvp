@@ -6,7 +6,7 @@ export const maxDuration = 30;
 
 /**
  * Intent Classification API
- * 
+ *
  * Uses AssistantEngine logic to classify user intent for L4 features.
  */
 export async function POST(req: NextRequest) {

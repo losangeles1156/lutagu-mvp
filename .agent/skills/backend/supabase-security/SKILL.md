@@ -14,7 +14,7 @@ allowed-tools: [view_file, mcp_supabase-mcp-server_execute_sql]
 
 ## 🛡️ 核心原則 (Core Directives)
 
-1.  **RLS by Default**: 
+1.  **RLS by Default**:
     - 凡是 `CREATE TABLE`，**必須** 緊接著 `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`。
     - 嚴禁裸奔的 Table。
 

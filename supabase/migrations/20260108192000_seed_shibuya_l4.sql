@@ -1,6 +1,6 @@
 -- Shibuya L4 Knowledge (Traps & Hacks)
 -- Updating all Shibuya nodes (JR and Metro) to ensure coverage
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [

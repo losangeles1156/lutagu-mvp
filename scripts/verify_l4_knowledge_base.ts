@@ -1,6 +1,6 @@
 /**
  * L4 Knowledge Base Verification Script
- * 
+ *
  * Verifies that all major hub stations have L4 expert knowledge coverage
  * and accessibility advice configured.
  */

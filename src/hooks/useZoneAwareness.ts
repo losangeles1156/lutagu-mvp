@@ -77,7 +77,7 @@ export function useZoneAwareness() {
             (error) => {
                 // Handle geolocation errors gracefully
                 if (!isSubscribed) return;
-                
+
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
                         console.warn('[useZoneAwareness] Geolocation permission denied');

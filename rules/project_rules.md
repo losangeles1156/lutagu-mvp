@@ -51,7 +51,7 @@ LUTAGU 是一個基於 PWA 的**城市感性導航服務**。
 {
   "name": {
     "zh-TW": "上野站",
-    "ja": "上野駅", 
+    "ja": "上野駅",
     "en": "Ueno Station"
   }
 }

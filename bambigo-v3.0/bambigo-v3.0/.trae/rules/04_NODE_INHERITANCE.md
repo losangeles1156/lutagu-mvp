@@ -106,26 +106,26 @@ create table nodes (
   id text primary key,                    -- 'ueno_station' / 'ueno_station_north'
   parent_hub_id text references nodes(id), -- null = Hub, 有值 = Spoke
   city_id text references cities(id),
-  
+
   -- 基本資料（每個節點獨立）
   name jsonb not null,                    -- {"zh-TW": "上野站", "ja": "上野駅", ...}
   coordinates point not null,
   node_type text not null,                -- 'station' / 'exit' / 'bus_stop' / 'poi'
-  
+
   -- L1 標籤（Hub 有值，Spoke 繼承）
   facility_profile jsonb,                 -- 類別統計
   vibe_tags jsonb,                        -- 氛圍標籤
   l1_calculated_at timestamp,
-  
+
   -- AI 人格（Hub 有值，Spoke 繼承）
   persona_prompt text,
-  
+
   -- 商業導流規則（Hub 有值，Spoke 繼承）
   commercial_rules jsonb,
-  
+
   -- L3 設施（每個節點獨立）
   -- 另外的 facilities 表，用 node_id 關聯
-  
+
   -- 元資料
   is_active boolean default true,
   created_at timestamp default now(),
@@ -161,17 +161,17 @@ begin
   select to_jsonb(n) into node_data
   from nodes n
   where n.id = node_id;
-  
+
   -- 如果是 Hub，直接返回
   if node_data->>'parent_hub_id' is null then
     return node_data;
   end if;
-  
+
   -- 如果是 Spoke，合併 Hub 資料
   select to_jsonb(h) into hub_data
   from nodes h
   where h.id = (node_data->>'parent_hub_id');
-  
+
   -- 繼承 Hub 的欄位
   return node_data || jsonb_build_object(
     'facility_profile', coalesce(node_data->'facility_profile', hub_data->'facility_profile'),
@@ -217,11 +217,11 @@ export async function resolveNode(nodeId: string): Promise<ResolvedNode> {
     .select('*')
     .eq('id', nodeId)
     .single();
-  
+
   if (!node) {
     throw new Error(`Node not found: ${nodeId}`);
   }
-  
+
   // 如果是 Hub，直接返回
   if (!node.parent_hub_id) {
     return {
@@ -229,18 +229,18 @@ export async function resolveNode(nodeId: string): Promise<ResolvedNode> {
       _isHub: true,
     };
   }
-  
+
   // 如果是 Spoke，查詢 Hub 並繼承
   const { data: hub } = await supabase
     .from('nodes')
     .select('*')
     .eq('id', node.parent_hub_id)
     .single();
-  
+
   if (!hub) {
     throw new Error(`Hub not found: ${node.parent_hub_id}`);
   }
-  
+
   return {
     ...node,
     // 繼承 Hub 的欄位（Spoke 自己沒有的話）
@@ -265,7 +265,7 @@ export async function resolveNodes(nodeIds: string[]): Promise<ResolvedNode[]> {
     .from('nodes')
     .select('*')
     .in('id', nodeIds);
-  
+
   // 收集需要查詢的 Hub IDs
   const hubIds = new Set<string>();
   for (const node of nodes || []) {
@@ -273,25 +273,25 @@ export async function resolveNodes(nodeIds: string[]): Promise<ResolvedNode[]> {
       hubIds.add(node.parent_hub_id);
     }
   }
-  
+
   // 批次查詢 Hubs
   const { data: hubs } = await supabase
     .from('nodes')
     .select('*')
     .in('id', Array.from(hubIds));
-  
+
   // 建立 Hub 查找表
   const hubMap = new Map<string, Node>();
   for (const hub of hubs || []) {
     hubMap.set(hub.id, hub);
   }
-  
+
   // 解析所有節點
   return (nodes || []).map(node => {
     if (!node.parent_hub_id) {
       return { ...node, _isHub: true };
     }
-    
+
     const hub = hubMap.get(node.parent_hub_id);
     return {
       ...node,
@@ -459,7 +459,7 @@ const uenoNorthExit: Partial<Node> = {
   },
   coordinates: { lat: 35.7141, lng: 139.7774 },
   node_type: 'exit',
-  
+
   // L1, AI Prompt, 商業規則 → 繼承自 ueno
   facility_profile: null,
   vibe_tags: null,
@@ -507,17 +507,17 @@ Step 3: 解析節點（含繼承）
         resolvedNode = {
           id: 'ueno_exit_north',
           name: '上野站正面口',
-          
+
           // 繼承自 Hub 'ueno'
           facility_profile: { shopping: 23, dining: 18, ... },
           vibe_tags: ['購物天堂', '美食激戰區'],
           persona_prompt: '你是上野站的在地嚮導...',
           commercial_rules: [...],
-          
+
           // 自己的資料
           coordinates: (35.7141, 139.7774),
           l2_status: { crowding: 'moderate' },
-          
+
           _inheritedFrom: 'ueno'
         }
 
@@ -566,7 +566,7 @@ export async function getResolvedNode(nodeId: string): Promise<ResolvedNode> {
   if (cached && !isExpired(cached)) {
     return cached;
   }
-  
+
   const resolved = await resolveNode(nodeId);
   nodeCache.set(nodeId, { ...resolved, _cachedAt: Date.now() });
   return resolved;
@@ -582,11 +582,11 @@ export async function preloadHubs(): Promise<void> {
     .from('nodes')
     .select('*')
     .is('parent_hub_id', null);
-  
+
   for (const hub of hubs || []) {
     nodeCache.set(hub.id, { ...hub, _isHub: true, _cachedAt: Date.now() });
   }
-  
+
   console.log(`Preloaded ${hubs?.length} hub nodes`);
 }
 ```

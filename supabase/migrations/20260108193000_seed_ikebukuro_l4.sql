@@ -1,6 +1,6 @@
 -- Ikebukuro L4 Knowledge (Traps & Hacks)
 -- Updating all Ikebukuro nodes (JR and Metro)
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [

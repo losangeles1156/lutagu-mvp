@@ -78,7 +78,7 @@ test('findSimpleRoutes supports multi-criteria ranking (fastest, cheapest, fewes
   // Path 1: A -> B -> C (2 hops, 20 mins, ¥200) - Shortest transfers
   // Path 2: A -> D -> E -> C (3 hops, 15 mins, ¥300) - Fastest
   // Path 3: A -> F -> G -> H -> C (4 hops, 25 mins, ¥150) - Cheapest
-  
+
   const railways: RailwayTopology[] = [
     {
       railwayId: 'R1', operator: 'Op1',
@@ -111,16 +111,16 @@ test('findSimpleRoutes supports multi-criteria ranking (fastest, cheapest, fewes
 
   // We need to mock the cost estimation logic if it's not purely topological
   // findSimpleRoutes currently uses Dijkstra with weights
-  const routes = findSimpleRoutes({ 
-    originStationId: origin, 
-    destinationStationId: dest, 
+  const routes = findSimpleRoutes({
+    originStationId: origin,
+    destinationStationId: dest,
     railways,
     maxHops: 10,
     locale: 'en'
   });
 
   assert.ok(routes.length >= 1);
-  
+
   // Verify that the labels exist
   // findSimpleRoutes now uses findRankedRoutes which provides descriptive labels
   const labels = routes.map(r => r.label);
@@ -133,7 +133,7 @@ test('findRankedRoutes supports multi-criteria ranking (fastest, cheapest, fewes
   // Path 1: A -> B1 (Line 1), B1 -(transfer)- B2, B2 -> C (Line 2) [1 transfer, FAST]
   // Path 2: A -> D1 (Line 3), D1 -(transfer)- D2, D2 -> C (Line 4) [1 transfer, CHEAP]
   // Path 3: A -> E -> F -> G -> H -> I -> C (Line 5) [0 transfers, SLOW & EXPENSIVE]
-  
+
   const railways: RailwayTopology[] = [
     {
       railwayId: 'odpt.Railway:TokyoMetro.Line1', operator: 'odpt.Operator:TokyoMetro',
@@ -180,16 +180,16 @@ test('findRankedRoutes supports multi-criteria ranking (fastest, cheapest, fewes
   const origin = 'odpt.Station:Common.A';
   const dest = 'odpt.Station:Common.C';
 
-  const routes = findRankedRoutes({ 
-    originStationId: origin, 
-    destinationStationId: dest, 
+  const routes = findRankedRoutes({
+    originStationId: origin,
+    destinationStationId: dest,
     railways,
     maxHops: 10,
     locale: 'en'
   });
 
   assert.ok(routes.length >= 1);
-   
+
    const labels = routes.map((r: any) => r.label);
    console.log('Labels found:', labels);
    assert.ok(labels.some((l: string) => l.includes('Fastest')));

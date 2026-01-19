@@ -29,10 +29,10 @@ const OPERATORS = {
 const API_BASE = 'https://api.odpt.org/api/v4';
 
 async function fetchFaresForStation(stationId: string, operator: string) {
-    // Determine endpoint based on operator (Toei is technically on api-public, but api.odpt.org usually proxies or works with key too. 
+    // Determine endpoint based on operator (Toei is technically on api-public, but api.odpt.org usually proxies or works with key too.
     // Toei public endpoint: https://api-public.odpt.org/api/v4/odpt:RailwayFare
     // Metro endpoint: https://api.odpt.org/api/v4/odpt:RailwayFare
-    
+
     let url = '';
     if (operator === OPERATORS.TOEI) {
         url = `https://api-public.odpt.org/api/v4/odpt:RailwayFare?odpt:operator=${operator}&odpt:fromStation=${stationId}`;
@@ -76,20 +76,20 @@ async function main() {
     // 2. Iterate and fetch
     // We can do this in chunks to be faster, but let's be polite to the API.
     // ODPT rate limits are generous but let's do 5 concurrent requests.
-    
+
     const CHUNK_SIZE = 5;
     for (let i = 0; i < stations.length; i += CHUNK_SIZE) {
         const chunk = stations.slice(i, i + CHUNK_SIZE);
         const promises = chunk.map(async (station) => {
             const id = station.id;
             let operator = '';
-            
+
             if (id.includes('Toei')) operator = OPERATORS.TOEI;
             else if (id.includes('TokyoMetro')) operator = OPERATORS.METRO;
             else return; // Skip non-Toei/Metro stations for now (e.g. if we have others)
 
             const fares = await fetchFaresForStation(id, operator);
-            
+
             if (fares.length === 0) return;
 
             // Transform to DB schema
@@ -119,7 +119,7 @@ async function main() {
 
         await Promise.all(promises);
         process.stdout.write(`\rProcessed ${Math.min(i + CHUNK_SIZE, stations.length)}/${stations.length} stations... (Total fares: ${totalUpserted})`);
-        
+
         // Small delay
         await new Promise(r => setTimeout(r, 200));
     }

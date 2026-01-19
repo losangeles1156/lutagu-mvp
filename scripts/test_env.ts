@@ -26,7 +26,7 @@ async function checkConnection() {
     try {
         console.log('Testing Supabase connection...');
         const { data, error } = await supabase.from('odpt_stations').select('count', { count: 'exact', head: true });
-        
+
         if (error) {
             console.error('❌ Supabase connection failed:', error.message);
         } else {

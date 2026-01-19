@@ -119,7 +119,7 @@ MapContainer.HubNodeLayer → filter(n => n.parent_hub_id === null)
 ```sql
 -- =============================================================================
 -- 修復：東京車站節點顯示異常 - 行政區映射修正
--- 
+--
 -- 問題：
 -- 1. 豐島區和板橋區都定義了池袋站 (JR-East.Ikebukuro)，導致 ward_id 衝突
 -- 2. 千代田區車站父子關係不完整，導致節點顯示不穩定
@@ -233,7 +233,7 @@ INSERT INTO temp_ward_node_fix (node_id, is_hub, parent_hub_id, ward_id) VALUES
 ('odpt:Station:Toei.Uchisaiwaicho', false, NULL, 'ward:chiyoda');
 
 -- Step 4: 驗證修復前的衝突
-SELECT 
+SELECT
     '修復前衝突檢查' as status,
     node_id,
     COUNT(*) as occurrence,
@@ -245,7 +245,7 @@ HAVING COUNT(*) > 1;
 -- Step 5: 執行修復
 -- 先更新豐島區
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id,
     ward_id = s.ward_id
@@ -254,7 +254,7 @@ WHERE n.id = s.node_id AND s.ward_id = 'ward:toshima';
 
 -- 再更新板橋區
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id,
     ward_id = s.ward_id
@@ -263,7 +263,7 @@ WHERE n.id = s.node_id AND s.ward_id = 'ward:itabashi';
 
 -- 最後更新千代田區
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id,
     ward_id = s.ward_id
@@ -273,44 +273,44 @@ WHERE n.id = s.node_id AND s.ward_id = 'ward:chiyoda';
 -- Step 6: 驗證修復結果
 
 -- 驗證豐島區
-SELECT 
+SELECT
     '豐島區驗證' as check_name,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:toshima';
 
 -- 驗證板橋區（不應包含池袋站）
-SELECT 
+SELECT
     '板橋區驗證' as check_name,
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:itabashi' AND is_hub = true
 ORDER BY name->>'zh-TW';
 
 -- 驗證千代田區
-SELECT 
+SELECT
     '千代田區驗證' as check_name,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:chiyoda';
 
 -- 確認池袋站只屬於豐島區
-SELECT 
+SELECT
     '池袋站歸屬檢查' as check_name,
     id,
     ward_id,
     is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id = 'odpt:Station:JR-East.Ikebukuro'
    OR id = 'odpt:Station:TokyoMetro.Ikebukuro';
 
@@ -324,24 +324,24 @@ DROP TABLE IF EXISTS temp_ward_node_fix;
 
 ```sql
 -- 驗證千代田區的主要樞紐站
-SELECT 
-    id, 
-    name->>'zh-TW' as name, 
-    is_hub, 
+SELECT
+    id,
+    name->>'zh-TW' as name,
+    is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:chiyoda'
   AND (is_hub = true OR parent_hub_id IS NOT NULL)
 ORDER BY name->>'zh-TW';
 
 -- 修正東京站及其子站的父子關係
 -- JR 東京站是 Hub
-UPDATE nodes 
+UPDATE nodes
 SET is_hub = true, parent_hub_id = NULL
 WHERE id = 'odpt:Station:JR-East.Tokyo';
 
 -- 東京 Metro 大手町站是 JR 東京站的子站
-UPDATE nodes 
+UPDATE nodes
 SET parent_hub_id = 'odpt:Station:JR-East.Tokyo'
 WHERE id = 'odpt:Station:TokyoMetro.Otemachi'
    OR id = 'odpt:Station:TokyoMetro.Chiyoda.Otemachi'
@@ -349,7 +349,7 @@ WHERE id = 'odpt:Station:TokyoMetro.Otemachi'
 
 -- 驗證銀座線和日比谷線的核心站
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id IN (
     'odpt:Station:TokyoMetro.Ginza',
     'odpt:Station:TokyoMetro.Hibiya',
@@ -387,14 +387,14 @@ CREATE TABLE nodes_backup AS SELECT * FROM nodes WHERE is_hub = true;
 ```typescript
 const visibleNodes = useMemo(() => {
     if (!nodes || nodes.length === 0) return [];
-    
+
     // 在 Ward 模式下，顯示所有該行政區的 Hub
     // 考慮加入一個參數來控制是否嚴格隱藏子節點
     return nodes.filter(n => {
         // 顯示條件：
         // 1. 是 Hub (is_hub = true, parent_hub_id = null)
         // 2. 或者是該行政區的主要站點（需要額外的邏輯判斷）
-        return n.parent_hub_id === null || 
+        return n.parent_hub_id === null ||
                (n.is_hub === true && n.parent_hub_id === null);
     });
 }, [nodes]);
@@ -408,7 +408,7 @@ const visibleNodes = useMemo(() => {
 ```sql
 -- 檢查豐島區的 Hub 站點
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:toshima'
   AND is_hub = true
 ORDER BY name->>'zh-TW';
@@ -422,7 +422,7 @@ ORDER BY name->>'zh-TW';
 ```sql
 -- 檢查板橋區的 Hub 站點（不應包含池袋站）
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:itabashi'
   AND is_hub = true
 ORDER BY name->>'zh-TW';
@@ -437,7 +437,7 @@ ORDER BY name->>'zh-TW';
 ```sql
 -- 檢查千代田區的主要 Hub
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:chiyoda'
   AND is_hub = true
 ORDER BY name->>'zh-TW';

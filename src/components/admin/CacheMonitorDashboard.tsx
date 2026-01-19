@@ -27,12 +27,12 @@ function generateRealMetrics(): MonitorMetrics {
     const now = Date.now();
     const caches = getAllCacheStats();
     const warmer = getWarmerStats();
-    
+
     let totalHitCount = 0;
     let totalMissCount = 0;
     let totalMemory = 0;
     let totalEntries = 0;
-    
+
     Object.values(caches).forEach(stats => {
         totalHitCount += stats.hitCount;
         totalMissCount += stats.missCount;
@@ -45,8 +45,8 @@ function generateRealMetrics(): MonitorMetrics {
         caches,
         warmer,
         system: {
-            totalHitRate: totalHitCount + totalMissCount > 0 
-                ? (totalHitCount / (totalHitCount + totalMissCount)) * 100 
+            totalHitRate: totalHitCount + totalMissCount > 0
+                ? (totalHitCount / (totalHitCount + totalMissCount)) * 100
                 : 0,
             totalMemoryUsage: totalMemory,
             totalEntries: totalEntries

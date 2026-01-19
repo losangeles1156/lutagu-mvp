@@ -37,17 +37,17 @@ function getPoiEngine(): POITaggedDecisionEngine {
 // POST /api/poi/recommend
 export async function POST(request: NextRequest) {
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    
+
     console.log(`[${requestId}] POI Recommend API called`);
 
     try {
         const body = await request.json();
-        const { 
-            query, 
-            userId, 
-            location, 
+        const {
+            query,
+            userId,
+            location,
             preferences,
-            limit = 10 
+            limit = 10
         } = body;
 
         if (!query || typeof query !== 'string') {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error(`[${requestId}] Error:`, error);
-        
+
         return NextResponse.json({
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',

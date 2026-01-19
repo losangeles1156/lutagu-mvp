@@ -1,6 +1,6 @@
 /**
  * 東京23區車站 L1~L4 數據完整性審計腳本 - 修正版
- * 
+ *
  * 此腳本用於審計東京23區各行政區的車站數據完整性
  * 檢查項目：
  * - L1 設施分類數據
@@ -28,108 +28,108 @@ const CORE_STATIONS = [
     'odpt.Station:TokyoMetro.Marunouchi.Shinjuku', 'odpt.Station:Toei.Shinjuku.Shinjuku',
     'odpt.Station:Odakyu.Shinjuku', 'odpt.Station:Keio.Shinjuku',
     'odpt.Station:Toei.Oedo.Shinjuku',
-    
+
     // 港區
     'odpt.Station:JR-East.Shinagawa', 'odpt.Station:JR-East.Yamanote.Shinagawa',
     'odpt.Station:Keikyu.Shinagawa', 'odpt.Station:JR-East.Hamamatsucho',
     'odpt.Station:Toei.Mita.Hamamatsucho', 'odpt.Station:Toei.Oedo.Daimon',
     'odpt.Station:JR-East.Daimon', 'odpt.Station:TokyoMetro.Ginza.Shimbashi',
     'odpt.Station:JR-East.Shimbashi',
-    
+
     // 渋谷區
     'odpt.Station:JR-East.Shibuya', 'odpt.Station:JR-East.Yamanote.Shibuya',
     'odpt.Station:TokyoMetro.Hanzomon.Shibuya', 'odpt.Station:TokyoMetro.Fukutoshin.Shibuya',
     'odpt.Station:Tokyu.Toyoko.Shibuya', 'odpt.Station:Tokyu.Denentoshi.Shibuya',
     'odpt.Station:Keio.Inokashira.Shibuya',
-    
+
     // 千代田區
     'odpt.Station:JR-East.Tokyo', 'odpt.Station:JR-East.Yamanote.Tokyo',
     'odpt.Station:TokyoMetro.Marunouchi.Tokyo', 'odpt.Station:TokyoMetro.Tozai.Otemachi',
     'odpt.Station:TokyoMetro.Chiyoda.Otemachi', 'odpt.Station:Toei.Mita.Otemachi',
     'odpt.Station:TokyoMetro.Ginza.Kanda', 'odpt.Station:JR-East.Kanda',
-    
+
     // 中央區
     'odpt.Station:TokyoMetro.Ginza.Ginza', 'odpt.Station:TokyoMetro.Hibiya.Ginza',
     'odpt.Station:TokyoMetro.Yurakucho.Ginza', 'odpt.Station:TokyoMetro.Hibiya.HigashiGinza',
     'odpt.Station:TokyoMetro.Tozai.Nihombashi', 'odpt.Station:TokyoMetro.Ginza.Nihombashi',
     'odpt.Station:Toei.Asakusa.Nihombashi', 'odpt.Station:TokyoMetro.Hibiya.Ningyocho',
     'odpt.Station:Toei.Asakusa.Ningyocho',
-    
+
     // 文京區
     'odpt.Station:JR-East.Ueno', 'odpt.Station:JR-East.Yamanote.Ueno',
     'odpt.Station:TokyoMetro.Ginza.Ueno', 'odpt.Station:TokyoMetro.Hibiya.Ueno',
     'odpt.Station:Keisei.Ueno', 'odpt.Station:TokyoMetro.Chiyoda.Ochanomizu',
     'odpt.Station:JR-East.Ochanomizu',
-    
+
     // 台東區
     'odpt.Station:TokyoMetro.Ginza.Asakusa', 'odpt.Station:Toei.Asakusa.Asakusa',
     'odpt.Station:Tobu.Isesaki.Asakusa', 'odpt.Station:TokyoMetro.Hibiya.Akihabara',
     'odpt.Station:JR-East.Akihabara', 'odpt.Station:JR-East.Yamanote.Akihabara',
     'odpt.Station:TsukubaExpress.Akihabara',
-    
+
     // 墨田區
     'odpt.Station:TokyoMetro.Hanzomon.Oshiage', 'odpt.Station:Toei.Asakusa.Oshiage',
     'odpt.Station:Tobu.Isesaki.Oshiage', 'odpt.Station:Keisei.Oshiage.Oshiage',
     'odpt.Station:JR-East.Kinshicho', 'odpt.Station:TokyoMetro.Hanzomon.Kinshicho',
-    
+
     // 江東區
     'odpt.Station:TokyoMetro.Tozai.Toyocho', 'odpt.Station:TokyoMetro.Yurakucho.Toyosu',
     'odpt.Station:TokyoMetro.Yurakucho.Shintoshin', 'odpt.Station:Toei.Oedo.Tsukijishijo',
     'odpt.Station:Toei.Oedo.Kachidoki', 'odpt.Station:TokyoMetro.Yurakucho.Tsukishima',
     'odpt.Station:Toei.Oedo.MonzenNakacho',
-    
+
     // 品川區
     'odpt.Station:JR-East.Osaki', 'odpt.Station:JR-East.Yamanote.Osaki',
     'odpt.Station:Tokyu.Osaki',
-    
+
     // 目黑區
     'odpt.Station:TokyoMetro.Hibiya.NakaMeguro', 'odpt.Station:Tokyu.Toyoko.NakaMeguro',
     'odpt.Station:TokyoMetro.Namboku.Meguro', 'odpt.Station:Tokyu.Meguro',
     'odpt.Station:JR-East.Meguro', 'odpt.Station:TokyoMetro.Hibiya.Ebisu',
     'odpt.Station:JR-East.Ebisu',
-    
+
     // 大田区
     'odpt.Station:JR-East.Kamata', 'odpt.Station:Keikyu.Kamata',
     'odpt.Station:Tokyu.Tamagawa', 'odpt.Station:JR-East.Omori',
-    
+
     // 世田谷區
     'odpt.Station:Tokyu.Sangenjaya', 'odpt.Station:Keio.Inokashira.Shimokitazawa',
-    
+
     // 杉並區
     'odpt.Station:JR-East.Asagaya', 'odpt.Station:JR-East.Kichijoji',
     'odpt.Station:Seibu.ShinjukuOgawa',
-    
+
     // 豐島區
     'odpt.Station:JR-East.Ikebukuro', 'odpt.Station:JR-East.Yamanote.Ikebukuro',
     'odpt.Station:TokyoMetro.Yurakucho.Ikebukuro', 'odpt.Station:TokyoMetro.Marunouchi.Ikebukuro',
     'odpt.Station:Tobu.Ikebukuro', 'odpt.Station:Seibu.Ikebukuro',
     'odpt.Station:JR-East.Sugamo',
-    
+
     // 北區
     'odpt.Station:JR-East.Tabata', 'odpt.Station:JR-East.Yamanote.Tabata',
     'odpt.Station:JR-East.Oji', 'odpt.Station:TokyoMetro.Namboku.Oji',
     'odpt.Station:JR-East.Komagome', 'odpt.Station:TokyoMetro.Namboku.Komagome',
-    
+
     // 荒川区
     'odpt.Station:JR-East.Nippori', 'odpt.Station:JR-East.Yamanote.Nippori',
     'odpt.Station:TokyoMetro.Chiyoda.Nippori', 'odpt.Station:Keisei.Nippori',
     'odpt.Station:JR-East.NishiNippori', 'odpt.Station:TokyoMetro.Chiyoda.NishiNippori',
-    
+
     // 板橋區
     'odpt.Station:JR-East.Itabashi', 'odpt.Station:TokyoMetro.Tozai.Itabashi',
     'odpt.Station:JR-East.Otsuka', 'odpt.Station:TokyoMetro.Yurakucho.Otsuka',
-    
+
     // 練馬區
     'odpt.Station:Seibu.Ikebukuro.Nerima', 'odpt.Station:TokyoMetro.Tozai.Nerima',
     'odpt.Station:Seibu.Shinjuku.Nerima',
-    
+
     // 足立區
     'odpt.Station:JR-East.Kitasenju', 'odpt.Station:TokyoMetro.Hibiya.Kitasenju',
     'odpt.Station:Tobu.Isesaki.Kitasenju',
-    
+
     // 葛飾區
     'odpt.Station:JR-East.Katsushika', 'odpt.Station:TokyoMetro.Chiyoda.Katsushika',
-    
+
     // 江戶川區
     'odpt.Station:JR-East.Koiwa', 'odpt.Station:JR-East.ShinKoiwa'
 ];
@@ -166,7 +166,7 @@ async function auditAllData(): Promise<void> {
     console.log();
 
     console.log('正在獲取車站節點數據...');
-    
+
     // Fetch ALL nodes from database
     const { data: nodes, error: nodeError } = await supabase
         .from('nodes')
@@ -188,7 +188,7 @@ async function auditAllData(): Promise<void> {
         const normalizedId = node.id.replace('odpt:Station:', 'odpt.Station:');
         stationIdMap.set(node.id, node);
         stationIdMap.set(normalizedId, node);
-        
+
         // Also map without odpt.Station: prefix
         const shortId = node.id.replace('odpt.Station:', '').replace('odpt:Station:', '');
         stationIdMap.set(shortId, node);
@@ -237,7 +237,7 @@ async function auditAllData(): Promise<void> {
 
     for (const stationId of CORE_STATIONS) {
         let node = stationIdMap.get(stationId) || stationIdMap.get(stationId.replace('odpt.Station:', ''));
-        
+
         // Try alternative formats
         if (!node) {
             const altId = stationId.replace('odpt.Station:', 'odpt:Station:');

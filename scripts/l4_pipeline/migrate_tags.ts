@@ -58,7 +58,7 @@ async function migrateL4Tags() {
                         .update({
                             tags_core: tags.tags_core,
                             tags_intent: tags.tags_intent
-                            // tags_visual is not part of L4 schema yet, or if it is we can add it. 
+                            // tags_visual is not part of L4 schema yet, or if it is we can add it.
                             // Based on task description, only core and intent were added to L4.
                         })
                         .eq('id', item.id);

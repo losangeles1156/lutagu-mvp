@@ -33,11 +33,11 @@ export interface INodeActor {
     type: NodeType;
     parentId: string | null;
     childrenIds: string[];
-    
+
     // Core Methods
     receiveMessage(msg: IAgentMessage): Promise<IAgentMessage>;
     syncState(): Promise<void>;
-    
+
     // Level specific handlers
     getLevelHandler(level: AgentLevel): any;
 }

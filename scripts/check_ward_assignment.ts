@@ -14,7 +14,7 @@ async function checkWardAssignment() {
   const { count: totalNodes, error: totalError } = await supabase
     .from('nodes')
     .select('*', { count: 'exact', head: true });
-  
+
   if (totalError) {
     console.error('Error counting nodes:', totalError);
     return;
@@ -26,7 +26,7 @@ async function checkWardAssignment() {
     .from('nodes')
     .select('*', { count: 'exact', head: true })
     .not('ward_id', 'is', null);
-    
+
   if (wardError) {
     console.error('Error counting nodes with ward_id:', wardError);
     return;
@@ -39,13 +39,13 @@ async function checkWardAssignment() {
     .from('wards')
     .select('*')
     .order('id');
-    
+
   if (wardsError) {
     console.error('Error fetching wards:', wardsError);
     return;
   }
   console.log(`Wards in DB: ${wards?.length || 0}`);
-  
+
   if (wards && wards.length > 0) {
     console.log('\nWard Statistics:');
     // Show first ward structure
@@ -63,7 +63,7 @@ async function checkWardAssignment() {
     .select('id, name, ward_id, is_hub')
     .not('ward_id', 'is', null)
     .limit(5);
-    
+
   if (sampleNodes) {
     sampleNodes.forEach((node: any) => {
       console.log(`  - ${node.name?.ja || node.id}: ward=${node.ward_id}, is_hub=${node.is_hub}`);
@@ -73,9 +73,9 @@ async function checkWardAssignment() {
   // Check if there's a function to assign wards
   console.log('\n=== Checking for find_ward_by_point function ===');
   try {
-    const { data: funcExists } = await supabase.rpc('find_ward_by_point', { 
-      lat: 35.6895, 
-      lng: 139.6917 
+    const { data: funcExists } = await supabase.rpc('find_ward_by_point', {
+      lat: 35.6895,
+      lng: 139.6917
     });
     console.log('find_ward_by_point function result:', funcExists);
   } catch {

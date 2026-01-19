@@ -8,7 +8,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 async function verifyWardAssignments() {
   console.log('--- 驗證豐島區與板橋區的車站歸屬 ---');
-  
+
   // 檢查池袋相關站點
   const { data: ikebukuroNodes } = await supabase
     .from('nodes')

@@ -30,6 +30,10 @@ export class AnomalyDetector {
             return { isAnomaly: true, reason: 'Empty input' };
         }
 
+        if (trimmed.length >= 4 && !/[\p{L}\p{N}]/u.test(trimmed)) {
+            return { isAnomaly: true, reason: 'No alphanumeric content' };
+        }
+
         // 2. Repetitive characters (e.g., "aaaaaaaaaa")
         if (/(.)\1{9,}/.test(trimmed)) {
             return { isAnomaly: true, reason: 'Repetitive characters' };
@@ -39,14 +43,20 @@ export class AnomalyDetector {
         // 對於中長字串，如果熵值過高 (接近隨機) 或過低 (重複性太高)，則視為異常
         if (trimmed.length >= 10) {
             const entropy = this.calculateEntropy(trimmed);
-            // 檢測是否包含 CJK 字符
-            const hasCJK = /[\u4e00-\u9fa5\u3040-\u30ff]/.test(trimmed);
-            // 如果包含 CJK，熵值門檻放寬 (因為漢字與假名的組合本身熵值較高)
-            const threshold = hasCJK ? 5.2 : 4.5;
 
-            if (entropy > threshold && trimmed.length > 25) {
+            const cjkMatches = trimmed.match(/[\u4e00-\u9fa5\u3040-\u30ff]/g);
+            const cjkCount = cjkMatches ? cjkMatches.length : 0;
+            const cjkRatio = cjkCount / trimmed.length;
+
+            const hasKnownStructuredId = /\bodpt\.[A-Za-z0-9_-]+:/.test(trimmed);
+
+            const shouldApplyHighEntropyCheck = !hasKnownStructuredId && cjkRatio < 0.25;
+            const highEntropyThreshold = 4.5;
+
+            if (shouldApplyHighEntropyCheck && entropy > highEntropyThreshold && trimmed.length > 25) {
                 return { isAnomaly: true, reason: `High entropy (${entropy.toFixed(2)})` };
             }
+
             if (entropy < 1.0 && trimmed.length > 15) {
                 return { isAnomaly: true, reason: `Low entropy (${entropy.toFixed(2)})` };
             }

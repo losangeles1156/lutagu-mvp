@@ -24,7 +24,7 @@ This workflow describes the process of researching and adding detailed L3 (Servi
 Select a specific Ward (e.g., Taito, Chiyoda, Chuo) and list all "seed nodes" in that ward that are currently missing `l3Facilities` in `src/data/stationWisdom.ts`.
 
 ### 2. Facility Extraction
-For each station, find the official map and extract the following 6 key facility types. 
+For each station, find the official map and extract the following 6 key facility types.
 **Note:** Use specific floor numbers (e.g., 'Metro B1', 'JR 3F') and meaningful location descriptions (e.g., 'Near Exit A3', 'Inside Ticket Gate').
 
 #### Required Data Points:

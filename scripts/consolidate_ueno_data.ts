@@ -32,7 +32,7 @@ async function consolidateUeno() {
         if (sourceId === TARGET_ID) continue;
 
         console.log(`\nProcessing source: ${sourceId}`);
-        
+
         // Fetch all places from source
         const { data: places, error } = await supabase
             .from('l1_places')
@@ -57,7 +57,7 @@ async function consolidateUeno() {
         for (const place of places) {
             // Check if this OSM ID already exists in TARGET
             // (Assuming osm_id is reliable. If null, we might rely on name, but let's stick to osm_id first)
-            
+
             let exists = false;
             if (place.osm_id) {
                 const { data: existing } = await supabase
@@ -85,7 +85,7 @@ async function consolidateUeno() {
                     .from('l1_places')
                     .delete()
                     .eq('id', place.id);
-                
+
                 if (delError) console.error(`Failed to delete ${place.id}:`, delError);
                 else deleted++;
             } else {
@@ -95,7 +95,7 @@ async function consolidateUeno() {
                     .from('l1_places')
                     .update({ station_id: TARGET_ID })
                     .eq('id', place.id);
-                
+
                 if (moveError) {
                     // Check if it failed due to unique constraint (race condition or check miss)
                     if (moveError.code === '23505') {
@@ -121,7 +121,7 @@ async function consolidateUeno() {
         .eq('station_id', TARGET_ID)
         .or('name.ilike.%Zoo%,name.ilike.%動物園%')
         .neq('category', 'tourism');
-    
+
     if (zooError) console.error('Error updating zoo category:', zooError);
     else console.log('Zoo categories updated to tourism.');
 }

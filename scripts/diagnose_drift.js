@@ -38,7 +38,7 @@ async function diagnoseWardNodes() {
     .from('nodes')
     .select('id, name->>ja, ward_id, coordinates')
     .limit(20);
-    
+
   const drifted = palaceNodes?.filter(n => {
     const coords = n.coordinates?.coordinates;
     if (!coords) return false;

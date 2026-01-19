@@ -17,7 +17,7 @@ async function inspectL1L3Structure() {
         .from('stations')
         .select('id, name, l1_dna')
         .limit(1);
-    
+
     if (sError) console.error('L1 Error:', sError);
     else {
         console.log('\n--- L1 (Stations/DNA) Sample ---');
@@ -29,7 +29,7 @@ async function inspectL1L3Structure() {
         .from('station_status')
         .select('*')
         .limit(1);
-    
+
     if (stError) console.error('L2 Error:', stError);
     else {
         console.log('\n--- L2 (Status) Sample ---');
@@ -41,7 +41,7 @@ async function inspectL1L3Structure() {
         .from('station_facilities')
         .select('*')
         .limit(1);
-    
+
     if (fError) console.error('L3 Error:', fError);
     else {
         console.log('\n--- L3 (Facilities) Sample ---');

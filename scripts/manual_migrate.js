@@ -64,7 +64,7 @@ async function applyMigrations() {
                 await client.query('ROLLBACK');
                 console.error(`❌ Failed: ${file}`);
                 console.error(`Error: ${err.message}`);
-                // If it's "already exists" we might want to continue, 
+                // If it's "already exists" we might want to continue,
                 // but for a requested "refresh" we want to know why.
             }
         }

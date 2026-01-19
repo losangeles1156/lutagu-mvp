@@ -11,7 +11,7 @@ const supabase = createClient(
 
 async function verifyEncoding() {
     console.log('--- Verifying Database Encoding & Multi-language Structure ---');
-    
+
     const { data, error } = await supabase
         .from('l4_knowledge_embeddings')
         .select('entity_id, entity_name, content, source')
@@ -28,7 +28,7 @@ async function verifyEncoding() {
         console.log(`Entity Name (JSONB):`, JSON.stringify(item.entity_name, null, 2));
         console.log(`Content Preview: ${item.content.substring(0, 100)}...`);
         console.log(`Source: ${item.source}`);
-        
+
         // Check for actual replacement characters (U+FFFD)
         const hasIssue = item.content.includes('\uFFFD') || JSON.stringify(item.entity_name).includes('\uFFFD');
         if (hasIssue) {

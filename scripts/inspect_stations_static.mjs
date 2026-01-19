@@ -37,7 +37,7 @@ async function inspect() {
     console.log(`\n=== List of ${stations.length} Stations in DB ===`);
     stations.forEach(s => {
         // Try to find a human readable name
-        // Based on previous JSON, we have l1_identity_tag, etc. 
+        // Based on previous JSON, we have l1_identity_tag, etc.
         // Let's print ID and maybe any other useful field we see in keys later.
         // For now just ID is safest.
         console.log(`- ${s.station_id}`);

@@ -20,7 +20,7 @@ async function applyMigration() {
     CREATE TABLE IF NOT EXISTS public.l3_facilities (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         station_id TEXT NOT NULL REFERENCES public.nodes(id) ON DELETE CASCADE,
-        type TEXT NOT NULL, 
+        type TEXT NOT NULL,
         name_i18n JSONB DEFAULT '{}'::jsonb,
         location_coords GEOGRAPHY(POINT),
         attributes JSONB DEFAULT '{}'::jsonb,

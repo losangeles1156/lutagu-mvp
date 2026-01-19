@@ -5,6 +5,8 @@ import { ExternalLink, Info, AlertTriangle, Lightbulb, Ticket, Clock, Snowflake,
 import { motion, AnimatePresence } from 'framer-motion';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { useState } from 'react';
+import { trackFunnelEvent } from '@/lib/tracking';
+import { getPartnerIdFromUrl, getSafeExternalUrl } from '@/config/partners';
 
 interface StrategyCardsProps {
     cards: MatchedStrategyCard[];
@@ -56,6 +58,28 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
         setExpandedCardId(expandedCardId === id ? null : id);
     };
 
+    const handleExternalClick = (card: MatchedStrategyCard) => {
+        const safeUrl = card.actionUrl ? getSafeExternalUrl(card.actionUrl) : null;
+        if (!safeUrl) return;
+
+        const partnerId = (card.metadata && card.metadata.partner_id)
+            ? String(card.metadata.partner_id)
+            : (getPartnerIdFromUrl(safeUrl) || undefined);
+
+        trackFunnelEvent({
+            step_name: 'external_link_click',
+            step_number: 5,
+            path: '/l4',
+            metadata: {
+                target_url: safeUrl,
+                link_type: (card.metadata && card.metadata.link_type) ? String(card.metadata.link_type) : 'l4_card',
+                partner_id: partnerId,
+                card_id: card.id,
+                card_type: card.type
+            }
+        });
+    };
+
     return (
         <div className="space-y-4 mb-6">
             <div className="flex items-center gap-2 px-1 mb-2">
@@ -71,21 +95,22 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
 
             {cards.map((card, idx) => {
                 const isExpanded = expandedCardId === (card.id || String(idx));
-                const descStr = typeof card.description === 'object' 
-                    ? getLocaleString(card.description, locale) 
+                const descStr = typeof card.description === 'object'
+                    ? getLocaleString(card.description, locale)
                     : (card.description || '');
                 const isLongDescription = descStr.length > 60;
-                
+                const safeActionUrl = card.actionUrl ? getSafeExternalUrl(card.actionUrl) : null;
+
                 return (
                     <motion.div
                         key={card.id || idx}
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ 
+                        transition={{
                             type: 'spring',
                             stiffness: 260,
                             damping: 20,
-                            delay: idx * 0.08 
+                            delay: idx * 0.08
                         }}
                         className={`rounded-[2rem] ${getCardBg(card.type)} border backdrop-blur-xl p-5 shadow-xl shadow-slate-200/10 hover:shadow-2xl hover:shadow-slate-200/20 transition-all group ring-1 ring-white/20`}
                     >
@@ -116,11 +141,12 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
 
                                 <div className="mt-4 flex flex-wrap items-center gap-2">
                                     {/* Action Button */}
-                                    {card.actionUrl && (
+                                    {safeActionUrl && (
                                         <a
-                                            href={card.actionUrl}
+                                            href={safeActionUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
+                                            onClick={() => handleExternalClick(card)}
                                             className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-slate-900 text-white text-[11px] font-black hover:bg-indigo-600 transition-all active:scale-95 shadow-lg shadow-slate-900/20"
                                         >
                                             {card.actionLabel || (locale.startsWith('zh') ? '立即查看 View' : 'View Now')}
@@ -134,8 +160,8 @@ export function StrategyCards({ cards, locale }: StrategyCardsProps) {
                                             onClick={() => toggleExpand(card.id || String(idx))}
                                             className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-white/80 border border-slate-200/60 text-[11px] font-black text-slate-600 hover:text-indigo-600 hover:bg-white transition-all active:scale-95 shadow-sm"
                                         >
-                                            {isExpanded 
-                                                ? (locale.startsWith('zh') ? '收起詳情 Hide' : 'Show Less') 
+                                            {isExpanded
+                                                ? (locale.startsWith('zh') ? '收起詳情 Hide' : 'Show Less')
                                                 : (locale.startsWith('zh') ? '展開建議 More' : 'Show More')}
                                             <ChevronDown size={12} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                                         </button>

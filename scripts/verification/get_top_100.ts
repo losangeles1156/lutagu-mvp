@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 const CORE_WARDS = [
-    'Chiyoda', 'Chuo', 'Minato', 'Shinjuku', 'Shibuya', 
+    'Chiyoda', 'Chuo', 'Minato', 'Shinjuku', 'Shibuya',
     'Toshima', 'Taito', 'Shinagawa', 'Bunkyo', 'Meguro', 'Sumida'
 ];
 

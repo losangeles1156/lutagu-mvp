@@ -14,7 +14,7 @@ async function testTargetedCrawl() {
 
     try {
         await tokyoCrawler.init();
-        
+
         const targetUrls = [
             'https://tokyo.letsgojp.com/archives/634771/', // 2025東京必買
             'https://tokyo.letsgojp.com/archives/61965/',  // 淺草攻略
@@ -25,18 +25,18 @@ async function testTargetedCrawl() {
         for (const url of targetUrls) {
             console.log(`[Targeted] Crawling: ${url}`);
             const result = await tokyoCrawler.crawl(url);
-            
+
             if (result) {
                 console.log(`[Targeted] Title: ${result.title}`);
                 const l4Items = processor.processL4(result);
-                
+
                 if (l4Items.length > 0) {
                     console.log(`[Targeted] Successfully mapped to ${l4Items.length} entities:`);
                     for (const l4 of l4Items) {
                         console.log(`  - Entity ID: ${l4.entity_id}`);
                         console.log(`  - Entity Name: ${l4.entity_name}`);
                         console.log(`  - Subcategory: ${l4.subcategory}`);
-                        
+
                         // Try importing to verify DB connection and table structure
                         try {
                             await importer.importL4(l4);

@@ -2,23 +2,23 @@
 
 -- Chiyoda Ward
 UPDATE nodes SET ward_id = 'ward:chiyoda', is_active = true WHERE name->>'en' IN (
-    'Akihabara', 'Otemachi', 'Shin-ochanomizu', 'Kanda', 'Ochanomizu', 
-    'Iidabashi', 'Ichigaya', 'Hanzomon', 'Nijubashimae <Marunouchi>', 
-    'Kojimachi', 'Kudanshita', 'Jimbocho', 'Iwamotocho', 'Takebashi', 
+    'Akihabara', 'Otemachi', 'Shin-ochanomizu', 'Kanda', 'Ochanomizu',
+    'Iidabashi', 'Ichigaya', 'Hanzomon', 'Nijubashimae <Marunouchi>',
+    'Kojimachi', 'Kudanshita', 'Jimbocho', 'Iwamotocho', 'Takebashi',
     'Sakuradamon', 'Nagatacho', 'Kokkai-gijidomae', 'Kasumigaseki', 'Hibiya'
 );
 
 -- Minato Ward
 UPDATE nodes SET ward_id = 'ward:minato', is_active = true WHERE name->>'en' IN (
-    'Akasaka', 'Roppongi', 'Roppongi-itchome', 'Nogizaka', 'Aoyama-itchome', 
-    'Gaiemmae', 'Tameike-sanno', 'Kamiyacho', 'Onarimon', 'Shiba-koen', 
+    'Akasaka', 'Roppongi', 'Roppongi-itchome', 'Nogizaka', 'Aoyama-itchome',
+    'Gaiemmae', 'Tameike-sanno', 'Kamiyacho', 'Onarimon', 'Shiba-koen',
     'Akabanebashi', 'Azabu-juban', 'Shirokane-takanawa', 'Shirokanedai'
 );
 
 -- Chuo Ward
 UPDATE nodes SET ward_id = 'ward:chuo', is_active = true WHERE name->>'en' IN (
-    'Mitsukoshimae', 'Ningyocho', 'Suitengumae', 'Bakuro-yokoyama', 
-    'Higashi-nihombashi', 'Kyobashi', 'Nihombashi', 'Kodemmacho', 
+    'Mitsukoshimae', 'Ningyocho', 'Suitengumae', 'Bakuro-yokoyama',
+    'Higashi-nihombashi', 'Kyobashi', 'Nihombashi', 'Kodemmacho',
     'Hamacho', 'Tsukiji', 'Tsukishima', 'Kachidoki'
 );
 
@@ -29,15 +29,15 @@ UPDATE nodes SET ward_id = 'ward:taito', is_active = true WHERE name->>'en' IN (
 
 -- Shinjuku Ward
 UPDATE nodes SET ward_id = 'ward:shinjuku', is_active = true WHERE name->>'en' IN (
-    'Nakai', 'Ushigome-Yanagicho', 'Ushigome-kagurazaka', 'Wakamatsu-kawada', 
-    'Yotsuya', 'Shinjuku-sanchome', 'Shinjuku-nishiguchi', 'Higashi-shinjuku', 
+    'Nakai', 'Ushigome-Yanagicho', 'Ushigome-kagurazaka', 'Wakamatsu-kawada',
+    'Yotsuya', 'Shinjuku-sanchome', 'Shinjuku-nishiguchi', 'Higashi-shinjuku',
     'Akebonobashi', 'Yotsuya-sanchome', 'Nishi-shinjuku', 'Ochiai', 'Kagurazaka'
 );
 
 -- Bunkyo Ward
 UPDATE nodes SET ward_id = 'ward:bunkyo', is_active = true WHERE name->>'en' IN (
-    'Hongo-sanchome', 'Kasuga', 'Suidobashi', 'Edogawabashi', 
-    'Myogadani', 'Korakuen', 'Hakusan', 'Sengoku', 'Todaimae', 
+    'Hongo-sanchome', 'Kasuga', 'Suidobashi', 'Edogawabashi',
+    'Myogadani', 'Korakuen', 'Hakusan', 'Sengoku', 'Todaimae',
     'Hon-komagome', 'Shin-otsuka', 'Yushima', 'Nezu', 'Sendagi'
 );
 
@@ -49,7 +49,7 @@ UPDATE nodes SET ward_id = 'ward:shinagawa', is_active = true WHERE name->>'en' 
 
 -- Toshima Ward
 UPDATE nodes SET ward_id = 'ward:toshima', is_active = true WHERE name->>'en' IN (
-    'Senkawa', 'Kanamecho', 'Zoshigaya', 'Higashi-ikebukuro', 
+    'Senkawa', 'Kanamecho', 'Zoshigaya', 'Higashi-ikebukuro',
     'Kita-ikebukuro', 'Shim板bashi' -- Wait, typo? Checking...
 );
 
@@ -61,4 +61,3 @@ UPDATE nodes SET ward_id = 'ward:toshima', is_active = true WHERE name->>'en' = 
 -- Fixing incorrectly assigned Koto stations
 UPDATE nodes SET ward_id = 'ward:koto' WHERE name->>'en' IN ('Kinshicho', 'Toyosu', 'Shin-kiba', 'Tatsumi', 'Toyocho', 'Kiyosumi-shirakawa', 'Monzen-nakacho', 'Kiba', 'Minami-sunamachi', 'Ojima', 'Nishi-ojima', 'Higashi-ojima', 'Sumiyoshi');
 UPDATE nodes SET is_active = false WHERE ward_id = 'ward:koto';
-

@@ -1360,10 +1360,10 @@ function perHopFareForOperator(operatorKey: string): number {
 /**
  * 基於距離（以站數估算）計算票價
  * JR/Metro/Toei 票價都是基於距離，同公司內換乘票價一致
- * 
+ *
  * JR 東日本東京圈票價表（IC卡）：
  * 1-3km: ¥140, 4-6km: ¥160, 7-10km: ¥170, 11-15km: ¥200, 16-20km: ¥220
- * 
+ *
  * Tokyo Metro 票價表（IC卡）：
  * 1-6km: ¥180, 7-11km: ¥200, 12-19km: ¥250, 20-27km: ¥290, 28km+: ¥330
  */

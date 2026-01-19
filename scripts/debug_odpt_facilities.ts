@@ -9,7 +9,7 @@ const TOKEN_CHALLENGE = process.env.ODPT_API_TOKEN_BACKUP || process.env.ODPT_AU
 
 async function main() {
     console.log('Fetching JR East Ueno info from ODPT Challenge API...');
-    
+
     if (!TOKEN_CHALLENGE) {
         console.error('No ODPT Token found!');
         return;
@@ -17,9 +17,9 @@ async function main() {
 
     const stationId = 'odpt.Station:JR-East.Yamanote.Ueno'; // ID might vary, try generic
     // Actually, JR IDs are like "odpt.Station:JR-East.Yamanote.Ueno"
-    
+
     const url = `${ODPT_CHALLENGE}/odpt:Station?odpt:operator=odpt.Operator:JR-East&acl:consumerKey=${TOKEN_CHALLENGE}`;
-    
+
     try {
         const res = await fetch(url);
         if (!res.ok) {
@@ -28,7 +28,7 @@ async function main() {
         }
         const data = await res.json();
         console.log(`Found ${data.length} stations.`);
-        
+
         const ueno = data.find((s: any) => s['odpt:stationTitle']?.en === 'Ueno' || s['dc:title'] === 'Ueno');
         if (ueno) {
             console.log('Ueno Data:', JSON.stringify(ueno, null, 2));

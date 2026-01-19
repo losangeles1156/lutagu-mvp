@@ -43,11 +43,11 @@ async function main() {
             coordinates: coordinates,
             node_type: node.type, // Map 'type' -> 'node_type'
 
-            // parent_hub_id logic: 
+            // parent_hub_id logic:
             // If is_hub is true, parent_hub_id must be NULL.
-            // If is_hub is false, we technically need a parent. 
+            // If is_hub is false, we technically need a parent.
             // For now, if we don't know the parent, leaving it NULL makes it a "Hub" in the system's eyes.
-            // Correct approach: map is_hub=true -> null. is_hub=false -> undefined? 
+            // Correct approach: map is_hub=true -> null. is_hub=false -> undefined?
             // But strict DB might not enforce providing parent.
             parent_hub_id: node.is_hub ? null : null, // Default to null (Hub) for now to ensure visibility.
 

@@ -4,7 +4,7 @@ Here is the execution plan for Phase 1:
 
 ## 1. Database Schema Upgrade (v4.1)
 - **Action**: Create and run `scripts/setup_v4_1_schema.ts`.
-- **Details**: 
+- **Details**:
   - Drop existing `nodes` table (resetting data).
   - Create all 8 tables defined in `db_schema.md`: `cities`, `nodes`, `facilities`, `facility_suitability`, `shared_mobility_stations`, `users`, `trip_subscriptions`, `nudge_logs`.
   - Implement RLS policies and Indexes as specified.

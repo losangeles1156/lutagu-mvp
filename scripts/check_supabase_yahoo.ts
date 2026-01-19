@@ -17,7 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function checkYahooData() {
   console.log('Checking for Yahoo Japan data in Supabase...');
-  
+
   const { data, error } = await supabase
     .from('transit_alerts')
     .select('*')
@@ -31,13 +31,13 @@ async function checkYahooData() {
 
   if (!data || data.length === 0) {
     console.log('No Yahoo data found in transit_alerts table.');
-    
+
   const { data: snapData, error: snapErr } = await supabase
     .from('transit_dynamic_snapshot')
     .select('station_id, updated_at, status_code')
     .order('updated_at', { ascending: false })
     .limit(10);
-  
+
   if (snapErr) {
     console.error('Error accessing transit_dynamic_snapshot:', snapErr);
   } else {

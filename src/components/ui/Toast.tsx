@@ -26,7 +26,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     const showToast = (message: string, type: ToastType = 'info') => {
         const id = `toast-${++toastCount}`;
         setToasts(prev => [...prev, { id, message, type }]);
-        
+
         // Auto-remove after 3 seconds
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));

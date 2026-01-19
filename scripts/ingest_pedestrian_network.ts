@@ -200,11 +200,11 @@ async function downloadAndExtractZip(url: string): Promise<{ links: LinkFeature[
     try {
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
+
         const buffer = await res.arrayBuffer();
         const zip = new AdmZip(Buffer.from(buffer));
         const zipEntries = zip.getEntries();
-        
+
         let linkData: any = null;
         let nodeData: any = null;
 
@@ -228,7 +228,7 @@ async function downloadAndExtractZip(url: string): Promise<{ links: LinkFeature[
 
 async function ingestLinks(features: LinkFeature[], stationId: string, source: string) {
     if (features.length === 0) return;
-    
+
     // Chunk processing for large datasets
     const CHUNK_SIZE = 500;
     for (let i = 0; i < features.length; i += CHUNK_SIZE) {

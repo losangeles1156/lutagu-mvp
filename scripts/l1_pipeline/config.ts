@@ -9,7 +9,7 @@ export const CONFIG = {
         PREMIUM: 50, // 餐飲、購物、住宿、文化
         STANDARD: 30 // 其他
     },
-    
+
     // 类别定义
     CATEGORIES: {
         PREMIUM_IDS: ['dining', 'shopping', 'accommodation', 'culture'],

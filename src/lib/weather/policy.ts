@@ -170,7 +170,7 @@ export const WEATHER_REGION_POLICY = {
             // We also require the sentence to explicitly mention a target region.
             // This prevents "Saitama Warning" from polluting "Tokyo Advisory" in a combined feed.
             // Exception: If the title is generic (e.g. "Weather Warning") and matches no region,
-            // we might miss it if we strictly require region match. 
+            // we might miss it if we strictly require region match.
             // BUT, `isTargetRegion` filters out alerts that don't have (Target + Warning) in the same sentence.
             // So we are safe to enforce this.
             const mentionsTarget = targetRegionsPattern.test(sentence);

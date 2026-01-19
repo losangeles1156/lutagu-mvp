@@ -7,7 +7,7 @@
 -- ============================================
 -- 插入有 parent_hub_id 的節點
 INSERT INTO node_hierarchy (node_id, hub_id, is_active, display_order)
-SELECT 
+SELECT
     id AS node_id,
     parent_hub_id AS hub_id,
     TRUE AS is_active,
@@ -21,7 +21,7 @@ ON CONFLICT (node_id) DO UPDATE SET
 
 -- 標記所有節點為 active（無 hub_id 的為 Hub 站點）
 INSERT INTO node_hierarchy (node_id, hub_id, is_active, display_order)
-SELECT 
+SELECT
     id AS node_id,
     NULL AS hub_id,
     TRUE AS is_active,
@@ -40,7 +40,7 @@ RAISE NOTICE 'Phase 2-1: 節點層級同步完成';
 -- ============================================
 -- 為每個 L1 _places 記錄建立 config 條目，預設 is_approved = FALSE
 INSERT INTO node_l1_config (node_id, category, source_table, source_id, is_approved)
-SELECT 
+SELECT
     station_id AS node_id,
     category,
     'l1_places' AS source_table,
@@ -56,7 +56,7 @@ RAISE NOTICE 'Phase 2-2: L1 數據標記完成 (待審核)';
 -- ============================================
 -- 核心站點列表（可自定義）
 DO $$
-DECLARE 
+DECLARE
     core_hubs TEXT[] := ARRAY[
         'odpt.Station:JR-East.Ueno',
         'odpt.Station:JR-East.Shinjuku',
@@ -93,7 +93,7 @@ BEGIN
     SELECT COUNT(*) INTO total_l1 FROM node_l1_config;
     SELECT COUNT(*) INTO approved_l1 FROM node_l1_config WHERE is_approved = TRUE;
     SELECT COUNT(*) INTO pending_l1 FROM node_l1_config WHERE is_approved = FALSE;
-    
+
     RAISE NOTICE '======================================';
     RAISE NOTICE 'Phase 2 數據遷移統計';
     RAISE NOTICE '======================================';

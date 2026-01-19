@@ -21,4 +21,3 @@ export async function DELETE(_req: NextRequest, { params }: { params: { nodeId: 
 
     return NextResponse.json({ ok: true });
 }
-

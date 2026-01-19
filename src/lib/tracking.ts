@@ -23,7 +23,7 @@ export function getSessionId(): string | null {
     if (!sid) {
         sid = uuidv4();
         Cookies.set(SESSION_COOKIE_NAME, sid, {
-            expires: SESSION_EXPIRY_MINUTES / (24 * 60), // Convert minutes to days 
+            expires: SESSION_EXPIRY_MINUTES / (24 * 60), // Convert minutes to days
             sameSite: 'Lax'
         });
     } else {

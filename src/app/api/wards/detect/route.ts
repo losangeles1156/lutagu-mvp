@@ -49,7 +49,7 @@ export async function GET(req: Request) {
         if (error || !ward) {
             // Fallback: Try simple bbox check if PostGIS function fails
             console.warn('[api/wards/detect] PostGIS fallback, searching by simple check');
-            
+
             const { data: fallbackWard } = await supabase
                 .from('wards')
                 .select(`
@@ -68,7 +68,7 @@ export async function GET(req: Request) {
                 .single();
 
             if (!fallbackWard) {
-                return NextResponse.json({ 
+                return NextResponse.json({
                     error: 'No ward found at this location',
                     coordinates: { lat, lng }
                 }, { status: 404 });

@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 /**
  * Tool for AI Agents to retrieve pedestrian network context.
- * 
+ *
  * Strategy:
  * 1. Tries to call the optimized PostgreSQL function `get_nearby_accessibility_graph`.
  * 2. If that function is missing (migration not run), falls back to a bounding-box query.
@@ -13,7 +13,7 @@ export class PedestrianAccessibilityTool implements ITool {
     id = 'pedestrian_accessibility';
     name = 'Pedestrian Accessibility Scanner';
     description = 'Scans nearby pedestrian network for accessible paths, elevators, and facilities. Input: { lat, lon, radius? }';
-    requiredLevel = AgentLevel.L3_FACILITY; 
+    requiredLevel = AgentLevel.L3_FACILITY;
 
     async execute(params: { lat: number; lon: number; radius?: number }, context: IToolContext): Promise<any> {
         const lat = params.lat;
@@ -38,7 +38,7 @@ export class PedestrianAccessibilityTool implements ITool {
 
             // Quietly fall back to client-side query if RPC is missing
             // This is "optimization" by degradation: we don't want to spam warnings for valid fallback behavior.
-            
+
             // 2. Fallback: Client-side Bounding Box Query (Robustness)
             // 1 degree lat ~= 111km. 100m ~= 0.001 degrees (roughly)
             const delta = (radius / 111000) * 1.5; // 1.5x buffer
@@ -71,7 +71,7 @@ export class PedestrianAccessibilityTool implements ITool {
                 .select('link_id, start_node_id, end_node_id, distance_meters, has_elevator_access, has_braille_tiles, accessibility_rank')
                 .in('start_node_id', nodeIds)
                 .limit(50);
-                
+
             // Format for LLM
             const formattedData = [
                 ...(nodes.map(n => ({

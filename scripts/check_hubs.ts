@@ -3,7 +3,7 @@ require('dotenv').config({ path: '.env.local' });
 
 async function main() {
     const { supabaseAdmin } = await import('../src/lib/supabase');
-    
+
     // Check for Hub nodes
     const { data: hubs, error } = await supabaseAdmin
         .from('nodes')

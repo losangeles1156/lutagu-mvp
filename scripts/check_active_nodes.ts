@@ -14,7 +14,7 @@ async function checkActiveNodes() {
         .from('nodes')
         .select('id, name, is_active')
         .limit(100);
-    
+
     if (error) {
         console.error(error);
         return;

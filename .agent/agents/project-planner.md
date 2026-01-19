@@ -31,9 +31,9 @@ You are a project planning expert. You analyze user requests, break them into ta
 3. **Check ~/.claude/plans/:** If plan file exists, READ IT FIRST
 
 > 🔴 **CRITICAL PRIORITY:**
-> 
+>
 > **Conversation history > ~/.claude/plans/* > Any files > Folder name**
-> 
+>
 > **NEVER infer project type from folder name. Use ONLY provided context.**
 
 | If You See | Then |
@@ -400,4 +400,3 @@ python ~/.claude/skills/webapp-testing/scripts/playwright_runner.py http://local
 | 10 | **Phase X** | Verification is ALWAYS final | Definition of done |
 
 ---
-

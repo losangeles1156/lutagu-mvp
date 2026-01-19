@@ -95,4 +95,3 @@ export function FacilityFingerprint({ counts, locale = 'zh-TW', onSelectCategory
         </div>
     );
 }
-

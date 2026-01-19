@@ -13,7 +13,7 @@ async function listModels() {
     }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-    
+
     console.log('Fetching available models from Google AI...');
     try {
         const response = await fetch(url);
@@ -22,7 +22,7 @@ async function listModels() {
             console.error(await response.text());
             return;
         }
-        
+
         const data = await response.json();
         if (data.models) {
             console.log('\n✅ Available Models:');

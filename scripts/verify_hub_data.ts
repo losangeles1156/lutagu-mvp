@@ -19,7 +19,7 @@ async function verify() {
         .select('*')
         .eq('id', 'Hub:Ueno')
         .single();
-    
+
     console.log('Hub:Ueno:', uenoHub ? '✅ Found' : '❌ Missing');
     if (uenoHub) {
         console.log('  Type:', uenoHub.node_type);

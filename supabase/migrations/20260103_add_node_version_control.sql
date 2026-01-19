@@ -13,23 +13,23 @@ DROP FUNCTION IF EXISTS dedupe_nodes_by_version(nodes_data[]);
 DO $$
 BEGIN
     IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
+        SELECT 1 FROM information_schema.columns
         WHERE table_name = 'nodes' AND column_name = 'version'
     ) THEN
         ALTER TABLE nodes ADD COLUMN version INTEGER DEFAULT 1;
         RAISE NOTICE 'Added version column to nodes table';
     END IF;
-    
+
     IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
+        SELECT 1 FROM information_schema.columns
         WHERE table_name = 'nodes' AND column_name = 'updated_at'
     ) THEN
         ALTER TABLE nodes ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
         RAISE NOTICE 'Added updated_at column to nodes table';
     END IF;
-    
+
     IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
+        SELECT 1 FROM information_schema.columns
         WHERE table_name = 'nodes' AND column_name = 'data_hash'
     ) THEN
         ALTER TABLE nodes ADD COLUMN data_hash TEXT; -- SHA-256 hash of node data for change detection
@@ -44,14 +44,14 @@ CREATE OR REPLACE FUNCTION update_node_version()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
-    
+
     -- Auto-increment version on update
     IF OLD.version IS NULL THEN
         NEW.version = 1;
     ELSE
         NEW.version = OLD.version + 1;
     END IF;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -80,11 +80,11 @@ BEGIN
     FOR node_record IN SELECT * FROM jsonb_array_elements(input_nodes) AS node
     LOOP
         current_id := node_record.node ->> 'id';
-        
+
         -- Check if we already have this node in result
         IF (result -> 0 IS NULL) OR NOT (
-            SELECT COUNT(*) > 0 
-            FROM jsonb_array_elements(result) AS existing 
+            SELECT COUNT(*) > 0
+            FROM jsonb_array_elements(result) AS existing
             WHERE existing ->> 'id' = current_id
         ) THEN
             -- First time seeing this ID, add to result
@@ -94,7 +94,7 @@ BEGIN
             SELECT jsonb_agg(node) INTO latest_node
             FROM jsonb_array_elements(result) AS node
             WHERE node ->> 'id' = current_id;
-            
+
             -- If new node has higher version, replace
             IF (node_record.node ->> 'version')::INT > (latest_node -> 0 ->> 'version')::INT THEN
                 result := (
@@ -116,7 +116,7 @@ BEGIN
             END IF;
         END IF;
     END LOOP;
-    
+
     RETURN result;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -133,7 +133,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         n.version,
         n.updated_at,
         to_jsonb(n) AS data_snapshot,
@@ -155,7 +155,7 @@ DECLARE
 BEGIN
     SELECT data_hash INTO v_current_hash
     FROM nodes WHERE id = p_node_id;
-    
+
     -- If no hash stored or hash differs, data has changed
     RETURN v_current_hash IS NULL OR v_current_hash != p_data_hash;
 END;
@@ -167,7 +167,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE FUNCTION update_node_hash(p_node_id VARCHAR, p_data_hash TEXT)
 RETURNS VOID AS $$
 BEGIN
-    UPDATE nodes 
+    UPDATE nodes
     SET data_hash = p_data_hash,
         version = COALESCE(version, 0) + 1,
         updated_at = NOW()

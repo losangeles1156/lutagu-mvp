@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function checkHierarchy() {
     console.log('--- Hierarchy Audit ---');
-    
+
     // Total nodes in nodes table
     const { count: totalNodes } = await supabase.from('nodes').select('*', { count: 'exact', head: true });
     console.log('Total nodes:', totalNodes);

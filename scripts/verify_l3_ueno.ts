@@ -12,7 +12,7 @@ const supabase = createClient(
 
 async function verifyL3Ueno() {
     console.log('--- Verifying L3 Ueno Data ---');
-    
+
     const { data: facilities, error } = await supabase
         .from('l3_facilities')
         .select('*')
@@ -24,16 +24,16 @@ async function verifyL3Ueno() {
     }
 
     console.log(`Found ${facilities?.length} facilities.`);
-    
+
     if (facilities && facilities.length > 0) {
         // Group by type
         const counts = facilities.reduce((acc, f) => {
             acc[f.type] = (acc[f.type] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
-        
+
         console.log('Counts by Type:', counts);
-        
+
         // Show a few examples
         console.log('Examples:');
         facilities.slice(0, 3).forEach(f => {

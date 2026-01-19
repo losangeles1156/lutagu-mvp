@@ -36,7 +36,7 @@ async function fixUenoData() {
     } else if (placesToMove && placesToMove.length > 0) {
         console.log(`Found ${placesToMove.length} places to move.`);
         const ids = placesToMove.map(p => p.id);
-        
+
         const { error: updateError } = await supabase
             .from('l1_places')
             .update({ station_id: hubId })
@@ -51,7 +51,7 @@ async function fixUenoData() {
     // 2. Fix Ueno Zoo Category
     console.log('\n--- Fixing Ueno Zoo Category ---');
     // Find Ueno Zoo variants
-    // Use a raw filter string for complex OR logic across columns if needed, 
+    // Use a raw filter string for complex OR logic across columns if needed,
     // or just fetch all zoos and filter in memory to be safe.
     const { data: zoos, error: zooError } = await supabase
         .from('l1_places')
@@ -62,13 +62,13 @@ async function fixUenoData() {
          console.error('Zoo Search Error:', zooError);
     } else if (zoos && zoos.length > 0) {
         // Filter in memory for Ueno/上野
-        const uenoZoos = zoos.filter(z => 
+        const uenoZoos = zoos.filter(z =>
             (z.name && (z.name.toLowerCase().includes('ueno') || z.name.includes('上野'))) ||
             (z.name_i18n && JSON.stringify(z.name_i18n).toLowerCase().includes('ueno'))
         );
 
         console.log(`Found ${uenoZoos.length} Ueno Zoo entries.`);
-        
+
         if (uenoZoos.length > 0) {
             // 1. Update Category for ALL
             const zooIds = uenoZoos.map(z => z.id);
@@ -76,7 +76,7 @@ async function fixUenoData() {
                 .from('l1_places')
                 .update({ category: 'nature' })
                 .in('id', zooIds);
-            
+
             if (catError) console.error('Category Update Error:', catError);
             else console.log('✅ Updated categories to nature');
 

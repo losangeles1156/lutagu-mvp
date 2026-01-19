@@ -2,14 +2,14 @@
  * L1 景點模組導出
  */
 
-export { 
-    CATEGORY_MAPPINGS, 
-    getCategoryFromOSMTags, 
-    getCategoryById, 
-    getAllCategories, 
+export {
+    CATEGORY_MAPPINGS,
+    getCategoryFromOSMTags,
+    getCategoryById,
+    getAllCategories,
     getCategoryName,
     compareCategoriesByWeight,
-    type CategoryMapping 
+    type CategoryMapping
 } from './categoryMapping';
 
 export {

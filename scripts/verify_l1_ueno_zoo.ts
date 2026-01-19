@@ -12,7 +12,7 @@ const supabase = createClient(
 
 async function verifyZoo() {
     console.log('--- Verifying Ueno Zoo Category ---');
-    
+
     const { data: zoos, error } = await supabase
         .from('l1_places')
         .select('*')
@@ -23,9 +23,9 @@ async function verifyZoo() {
         console.error('Error:', error);
         return;
     }
-    
+
     // Filter for Ueno
-    const uenoZoos = zoos?.filter(z => 
+    const uenoZoos = zoos?.filter(z =>
         (z.name && (z.name.toLowerCase().includes('ueno') || z.name.includes('上野'))) ||
         (z.name_i18n && JSON.stringify(z.name_i18n).toLowerCase().includes('ueno'))
     );
@@ -36,11 +36,11 @@ async function verifyZoo() {
             console.log(`  Category: ${z.category}`);
             console.log(`  Station: ${z.station_id}`);
         });
-        
+
         const allNature = uenoZoos.every(z => z.category === 'nature');
         if (allNature) console.log('✅ All Ueno Zoo entries are category: nature');
         else console.log('❌ Some Ueno Zoo entries have wrong category!');
-        
+
         const allHub = uenoZoos.every(z => z.station_id === 'Hub:Ueno');
         if (allHub) console.log('✅ All Ueno Zoo entries are linked to Hub:Ueno');
         else console.log('⚠️ Some Ueno Zoo entries are NOT linked to Hub:Ueno (might be okay if intended)');

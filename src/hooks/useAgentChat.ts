@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import { TextStreamChatTransport } from 'ai';
 import { useTranslations, useLocale } from 'next-intl';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
@@ -76,8 +76,14 @@ export function useAgentChat(options: UseAgentChatOptions) {
     const hasHydratedFromStoreRef = useRef(false);
     const lastStoreSyncSignatureRef = useRef<string>('');
 
+    const offlineMessage = useMemo(() => {
+        if (locale.startsWith('ja')) return 'すみません、現在AIサービスに接続できません。少し後で再試行してください。';
+        if (locale.startsWith('en')) return 'Sorry, the AI service is temporarily unavailable. Please try again shortly.';
+        return '抱歉，目前無法連接 AI 服務，請稍後再試。';
+    }, [locale]);
+
     // AI SDK v6 transport-based architecture
-    const transport = useMemo(() => new DefaultChatTransport({
+    const transport = useMemo(() => new TextStreamChatTransport({
         api: '/api/agent/chat',
         body: {
             nodeId: stationId || '',
@@ -221,6 +227,20 @@ export function useAgentChat(options: UseAgentChatOptions) {
 
         useUIStateMachine.getState().setMessages(nextStoreMessages as any);
     }, [syncToUIStateMachine, messages, aiMessages]);
+
+    useEffect(() => {
+        if (!isOffline) return;
+        setAiMessages(prev => {
+            const last = prev[prev.length - 1] as any;
+            if (last?.role === 'assistant' && last?.content === offlineMessage) return prev;
+            return [...prev, {
+                id: `error-${Date.now()}`,
+                role: 'assistant',
+                content: offlineMessage,
+                parts: [{ type: 'text', text: offlineMessage }]
+            } as any];
+        });
+    }, [isOffline, offlineMessage, setAiMessages]);
 
     // Effect to extract side-channel data (Thinking, Suggested Questions) from raw messages
     useEffect(() => {

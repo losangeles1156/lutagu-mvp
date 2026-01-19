@@ -74,4 +74,3 @@ export async function requireAdmin(request: Request) {
 
     return auth;
 }
-

@@ -81,7 +81,7 @@ async function main() {
         }
 
         console.log('--- Full Crawler Job Completed ---');
-        
+
         // Generate a simple report
         const report = {
             timestamp: new Date().toISOString(),

@@ -171,13 +171,13 @@ export function calculateDistance(
     const R = 6371000; // 地球半徑 (公尺)
     const dLat = (point2.lat - point1.lat) * Math.PI / 180;
     const dLng = (point2.lng - point1.lng) * Math.PI / 180;
-    
+
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(point1.lat * Math.PI / 180) * Math.cos(point2.lat * Math.PI / 180) *
         Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    
+
     return R * c;
 }
 
@@ -196,7 +196,7 @@ export function pointToLineSegmentDistance(
 
     const dot = A * C + B * D;
     const lenSq = C * C + D * D;
-    
+
     let param = -1;
     if (lenSq !== 0) {
         param = dot / lenSq;

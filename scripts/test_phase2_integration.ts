@@ -14,7 +14,7 @@ interface ITool { id: string; execute(p:any, c:any): Promise<any>; }
 
 class MockToolRegistry {
     register(t: any) { console.log(`[Registry] Registered ${t.id}`); }
-    getTool(id: string) { 
+    getTool(id: string) {
         if(id === 'fare') return { execute: async() => ({ ticket: 170 }) };
         return null;
     }
@@ -50,7 +50,7 @@ async function runIntegrationTest() {
 
     console.log('\n--- Decision Cycle ---');
     const suggestions = engine.process(context, nodeState, potentialActions);
-    
+
     console.log('Top Suggestion:', suggestions[0]);
 
     // 4. Simulate Tool Call

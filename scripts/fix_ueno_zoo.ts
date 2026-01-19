@@ -12,21 +12,21 @@ const supabase = createClient(
 
 async function findAndFixZoo() {
     console.log('--- Finding Ueno Zoo ---');
-    
+
     // Search broadly
     const { data: zoos, error } = await supabase
         .from('l1_places')
         .select('*')
         .or('name_i18n->>en.ilike.%Zoo%,name_i18n->>ja.ilike.%動物園%');
-        
+
     if (error) {
         console.error('Error:', error);
         return;
     }
-    
+
     console.log(`Found ${zoos?.length} zoo-like places.`);
-    
-    const uenoZoo = zoos?.find(z => 
+
+    const uenoZoo = zoos?.find(z =>
         (z.name && (z.name.includes('Ueno') || z.name.includes('上野'))) ||
         (JSON.stringify(z.name_i18n).includes('Ueno') || JSON.stringify(z.name_i18n).includes('上野'))
     );
@@ -42,7 +42,7 @@ async function findAndFixZoo() {
                 .from('l1_places')
                 .update({ category: 'nature' }) // or culture
                 .eq('id', uenoZoo.id);
-            
+
             if (updateError) console.error('Update Error:', updateError);
             else console.log('✅ Updated category to nature');
         }

@@ -12,6 +12,8 @@ import { useAgentChat } from '@/hooks/useAgentChat';
 import { ActionCard, Action as ChatAction } from './ActionCard';
 import { ContextSelector } from './ContextSelector';
 import { demoScripts } from '@/data/demoScripts';
+import { trackFunnelEvent } from '@/lib/tracking';
+import { getPartnerIdFromUrl, getSafeExternalUrl } from '@/config/partners';
 
 export function buildL2StatusUrl(stationId: string) {
     return `/api/l2/status?station_id=${encodeURIComponent(stationId)}`;
@@ -322,19 +324,77 @@ export function ChatOverlay() {
                 setMessages((prev: any[]) => [...prev, { id: Date.now().toString(), role: 'assistant', content, parts: [{ type: 'text', text: content }] } as any]);
             }
         } else if (action.type === 'taxi') {
-            window.open(`https://go.mo-t.com/`, '_blank');
+            const url = action.target?.startsWith('http') ? action.target : 'https://go.mo-t.com/';
+            const safeUrl = getSafeExternalUrl(url);
+            if (!safeUrl) return;
+            trackFunnelEvent({
+                step_name: 'external_link_click',
+                step_number: 5,
+                path: '/chat',
+                metadata: {
+                    target_url: safeUrl,
+                    link_type: action.metadata?.category || 'taxi',
+                    partner_id: action.metadata?.partner_id || getPartnerIdFromUrl(safeUrl) || undefined,
+                    action_type: action.type,
+                    label: action.label
+                }
+            });
+            window.open(safeUrl, '_blank', 'noopener,noreferrer');
         } else if (action.type === 'discovery') {
             if (action.target?.startsWith('chat:')) {
                 const q = decodeURIComponent(action.target.slice('chat:'.length));
                 handleSendMessage(q);
             } else if (action.target?.startsWith('http')) {
-                window.open(action.target, '_blank');
+                const safeUrl = getSafeExternalUrl(action.target);
+                if (!safeUrl) return;
+                trackFunnelEvent({
+                    step_name: 'external_link_click',
+                    step_number: 5,
+                    path: '/chat',
+                    metadata: {
+                        target_url: safeUrl,
+                        link_type: action.metadata?.category || 'discovery',
+                        partner_id: action.metadata?.partner_id || getPartnerIdFromUrl(safeUrl) || undefined,
+                        action_type: action.type,
+                        label: action.label
+                    }
+                });
+                window.open(safeUrl, '_blank', 'noopener,noreferrer');
             } else {
-                window.open(`https://luup.sc/`, '_blank');
+                const url = 'https://luup.sc/';
+                const safeUrl = getSafeExternalUrl(url);
+                if (!safeUrl) return;
+                trackFunnelEvent({
+                    step_name: 'external_link_click',
+                    step_number: 5,
+                    path: '/chat',
+                    metadata: {
+                        target_url: safeUrl,
+                        link_type: action.metadata?.category || 'discovery',
+                        partner_id: action.metadata?.partner_id || getPartnerIdFromUrl(safeUrl) || undefined,
+                        action_type: action.type,
+                        label: action.label
+                    }
+                });
+                window.open(safeUrl, '_blank', 'noopener,noreferrer');
             }
         } else if (action.type === 'transit') {
             if (action.target?.startsWith('http')) {
-                window.open(action.target, '_blank');
+                const safeUrl = getSafeExternalUrl(action.target);
+                if (!safeUrl) return;
+                trackFunnelEvent({
+                    step_name: 'external_link_click',
+                    step_number: 5,
+                    path: '/chat',
+                    metadata: {
+                        target_url: safeUrl,
+                        link_type: action.metadata?.category || 'transit',
+                        partner_id: action.metadata?.partner_id || getPartnerIdFromUrl(safeUrl) || undefined,
+                        action_type: action.type,
+                        label: action.label
+                    }
+                });
+                window.open(safeUrl, '_blank', 'noopener,noreferrer');
             } else {
                 const content = tChat('openingTimetable', { label: action.label });
                 if (isDemoMode) {

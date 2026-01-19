@@ -20,11 +20,11 @@ const CATEGORY_COLOR = {
 const PARTNER_ICON = L.divIcon({
     className: 'partner-marker',
     html: `<div style="
-        width: 24px; 
-        height: 24px; 
+        width: 24px;
+        height: 24px;
         background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        border: 2px solid white; 
-        border-radius: 50%; 
+        border: 2px solid white;
+        border-radius: 50%;
         box-shadow: 0 2px 8px rgba(255, 165, 0, 0.5);
         display: flex;
         align-items: center;
@@ -61,11 +61,11 @@ export function L1Layer() {
                 const icon = isPartner ? PARTNER_ICON : L.divIcon({
                     className: 'l1-marker',
                     html: `<div style="
-                        width: 10px; 
-                        height: 10px; 
-                        background-color: ${color}; 
-                        border: 2px solid white; 
-                        border-radius: 50%; 
+                        width: 10px;
+                        height: 10px;
+                        background-color: ${color};
+                        border: 2px solid white;
+                        border-radius: 50%;
                         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                     "></div>`,
                     iconSize: [12, 12],

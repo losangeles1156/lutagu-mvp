@@ -78,7 +78,7 @@ INSERT INTO seed_hierarchy_v3 (node_id, is_hub, parent_hub_id) VALUES
 -- Step 3: Update all nodes to match the seed hierarchy
 -- First, update nodes that ARE in our seed hierarchy
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id
 FROM seed_hierarchy_v3 s
@@ -86,13 +86,13 @@ WHERE n.id = s.node_id;
 
 -- Step 4: For nodes NOT in our seed hierarchy, set them as standalone (is_hub=false)
 -- EXCEPT for nodes that are already correctly set as hubs (major stations)
-UPDATE nodes 
+UPDATE nodes
 SET is_hub = false, parent_hub_id = NULL
-WHERE is_hub = true 
+WHERE is_hub = true
   AND id NOT IN (SELECT node_id FROM seed_hierarchy_v3 WHERE is_hub = true);
 
 -- Step 5: Verify the fix - Show summary
-SELECT 
+SELECT
     COUNT(*) FILTER (WHERE is_hub = true AND parent_hub_id IS NULL) as total_hubs,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_stations,
     COUNT(*) FILTER (WHERE parent_hub_id IS NOT NULL) as child_nodes,
@@ -100,18 +100,18 @@ SELECT
 FROM nodes;
 
 -- Step 6: Verify key stations
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id,
-    CASE 
+    CASE
         WHEN is_hub = true AND parent_hub_id IS NULL THEN '✅ HUB'
         WHEN is_hub = false AND parent_hub_id IS NULL THEN '✅ STANDALONE'
         WHEN parent_hub_id IS NOT NULL THEN '✅ CHILD of ' || parent_hub_id
         ELSE '❌ UNKNOWN'
     END as status
-FROM nodes 
+FROM nodes
 WHERE id IN (
     'odpt:Station:JR-East.Tokyo',
     'odpt:Station:JR-East.Shinjuku',
@@ -131,17 +131,17 @@ WHERE id IN (
 ORDER BY name->>'zh-TW';
 
 -- Step 7: Check some regular stations that should be standalone
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id,
-    CASE 
+    CASE
         WHEN is_hub = true THEN '❌ SHOULD BE FALSE'
         ELSE '✅ OK'
     END as check_result
-FROM nodes 
-WHERE id LIKE '%Takanawa%' 
+FROM nodes
+WHERE id LIKE '%Takanawa%'
    OR id LIKE '%Tamachi%'
    OR id LIKE '%Sengakuji%'
    OR id LIKE '%Takanawadai%'

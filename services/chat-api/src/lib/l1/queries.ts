@@ -26,10 +26,10 @@ export async function getApprovedL1PlacesContext(nodeId: string, locale: string 
         const { data, error } = await supabaseAdmin
             .from('l1_custom_places')
             .select(`
-                name_i18n, 
+                name_i18n,
                 primary_category,
-                category, 
-                description_i18n, 
+                category,
+                description_i18n,
                 affiliate_url,
                 vibe_tags,
                 ai_description

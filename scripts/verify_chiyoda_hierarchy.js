@@ -8,7 +8,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 async function verifyChiyodaHierarchy() {
   console.log('--- 驗證千代田區車站父子關係 ---');
-  
+
   const targetIds = [
     'odpt:Station:JR-East.Tokyo',
     'odpt.Station:TokyoMetro.Chiyoda.Otemachi',

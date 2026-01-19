@@ -1,7 +1,7 @@
 # LUTAGU L1 數據系統架構確認報告
 
-**建立日期**: 2026-01-06  
-**版本**: v1.0  
+**建立日期**: 2026-01-06
+**版本**: v1.0
 **目的**: 為後續優化工作奠定基礎
 
 ---
@@ -122,16 +122,16 @@ flowchart TD
     A[currentNodeId 變更] --> B{Supabase 可用?}
     B -->|是| C[查詢 nodes 表取得 parent_hub_id]
     B -->|否| Z[使用靜態 fallback 資料]
-    
+
     C --> D[建立站點 ID 候選清單]
     D --> E[並行查詢]
-    
+
     E --> F[l1_custom_places - 自定義景點]
     E --> G[l1_places - OSM 景點]
-    
+
     F --> H[去重與合併]
     G --> H
-    
+
     H --> I[按優先級排序]
     I --> J[setPlaces 狀態更新]
 ```
@@ -256,39 +256,39 @@ flowchart TB
     subgraph 資料層
         DB[(Supabase PostgreSQL)]
     end
-    
+
     subgraph OSM 數據源
         OSM[OpenStreetMap]
         Scraper[L1 V29 Scraper]
     end
-    
+
     subgraph 後台管理
         AdminUI[後台管理介面]
         Audit[L1 審核模組]
         Analytics[分析儀表板]
     end
-    
+
     subgraph API 層
         IngestAPI[/api/l1/ingest]
         PublicAPI[/api/l1/places]
         AdminAPI[/api/admin/l1/*]
     end
-    
+
     subgraph 前端展示
         Map[地圖 L1Layer]
         DNAPanel[L1_DNA 面板]
         PlaceCard[PlaceCard 組件]
     end
-    
+
     OSM --> Scraper
     Scraper --> IngestAPI
     IngestAPI --> DB
-    
+
     AdminUI --> AdminAPI
     AdminAPI --> DB
     Audit --> DB
     Analytics --> DB
-    
+
     PublicAPI --> DB
     Map --> PublicAPI
     DNAPanel --> PublicAPI
@@ -402,5 +402,5 @@ GET /api/l1/places?stationId=odpt:TokyoMetro.Ueno&category=restaurant
 
 ---
 
-**報告建立者**: Kilo Code (Architect Mode)  
+**報告建立者**: Kilo Code (Architect Mode)
 **下次檢視日期**: 2026-02-06

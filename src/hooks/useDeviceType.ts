@@ -27,13 +27,13 @@ export function useDeviceType(): UseDeviceTypeReturn {
 
   const updateDeviceInfo = useCallback(() => {
     if (typeof window === 'undefined') return;
-    
+
     const width = window.innerWidth;
     const height = window.innerHeight;
-    
+
     setWindowWidth(width);
     setWindowHeight(height);
-    
+
     // 判斷裝置類型
     let newDeviceType: DeviceType;
     if (width <= BREAKPOINTS.MOBILE) {
@@ -44,7 +44,7 @@ export function useDeviceType(): UseDeviceTypeReturn {
       newDeviceType = 'desktop';
     }
     setDeviceType(newDeviceType);
-    
+
     // 判斷螢幕方向
     setOrientation(width < height ? 'portrait' : 'landscape');
   }, []);

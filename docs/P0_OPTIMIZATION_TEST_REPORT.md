@@ -1,6 +1,6 @@
 /**
  * Lutagu P0 等級優化任務測試報告
- * 
+ *
  * 報告日期: 2026-01-06
  * 測試環境: macOS / Next.js / Supabase
  */
@@ -54,18 +54,18 @@
 const testCacheHitRate = async () => {
     const cache = getL1PlacesCache();
     const testKeys = generateTestKeys(50);
-    
+
     // 第一次請求 (MISS)
     for (const key of testKeys) {
         cache.get(key); // MISS
     }
-    
+
     // 第二次請求 (HIT)
     let hits = 0;
     for (const key of testKeys) {
         if (cache.get(key)) hits++;
     }
-    
+
     const hitRate = (hits / testKeys.length) * 100;
     console.log(`快取命中率: ${hitRate}%`); // 預期: 100%
 };
@@ -143,11 +143,11 @@ Retry-After: 60
 export async function GET(request: NextRequest) {
     const limiter = getRateLimitService();
     const result = limiter.check(request, DEFAULT_RATE_LIMITS.l1Places);
-    
+
     if (!result.allowed) {
         return limiter.createTooManyRequestsResponse(result);
     }
-    
+
     // ... 正常處理邏輯
 }
 ```
@@ -185,7 +185,7 @@ const CATEGORY_MAPPINGS = [
 // src/hooks/useL1Places.ts
 function parseCoordinates(location: any): [number, number] {
     let coords: [number, number] = [0, 0];
-    
+
     if (typeof location === 'string' && location.startsWith('POINT')) {
         // PostGIS WKT 格式: POINT(lng lat)
         const match = location.match(/POINT\(([-0-9\.]+) ([-0-9\.]+)\)/);
@@ -196,7 +196,7 @@ function parseCoordinates(location: any): [number, number] {
         // GeoJSON 格式: [lng, lat]
         coords = location.coordinates;
     }
-    
+
     return coords;
 }
 ```
@@ -230,13 +230,13 @@ describe('CacheService', () => {
         cache.set('key1', 'value1');
         expect(cache.get('key1')).toBe('value1');
     });
-    
+
     it('should expire values after TTL', async () => {
         cache.set('key1', 'value1', 100);
         await new Promise(r => setTimeout(r, 150));
         expect(cache.get('key1')).toBeNull();
     });
-    
+
     it('should evict LRU when cache is full', () => {
         // Fill cache, access first, then overflow
         // Verify LRU eviction works
@@ -257,12 +257,12 @@ describe('CacheService', () => {
 // API 響應時間測試腳本
 async function measureResponseTime() {
     const start = performance.now();
-    
+
     const response = await fetch('/api/l1/places?stationId=toyo:ueno');
-    
+
     const end = performance.now();
     console.log(`Response time: ${end - start}ms`);
-    
+
     expect(end - start).toBeLessThan(1000);
 }
 ```
@@ -278,7 +278,7 @@ describe('Category Mapping', () => {
         { tags: { shop: 'convenience' }, expected: 'convenience' },
         { tags: { tourism: 'museum' }, expected: 'attraction' },
     ];
-    
+
     testCases.forEach(({ tags, expected }) => {
         it(`should map ${JSON.stringify(tags)} to ${expected}`, () => {
             expect(getCategoryFromOSMTags(tags)).toBe(expected);
@@ -292,7 +292,7 @@ describe('Coordinate Conversion', () => {
         const result = parseCoordinates('POINT(139.77 35.71)');
         expect(result).toEqual([139.77, 35.71]);
     });
-    
+
     it('should handle GeoJSON format', () => {
         const result = parseCoordinates({ coordinates: [139.77, 35.71] });
         expect(result).toEqual([139.77, 35.71]);

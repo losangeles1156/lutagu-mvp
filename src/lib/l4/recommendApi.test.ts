@@ -3,13 +3,14 @@ import { test, describe, mock } from 'node:test';
 import { decisionEngine } from './decisionEngine';
 import { hardCalculationEngine } from './hardCalculationEngine';
 import { EvaluationContext, MatchedStrategyCard } from '../../types/lutagu_l4';
+import { getPartnerIdFromUrl, getPartnerUrl, getSafeExternalUrl } from '../../config/partners';
 
 // Mocking LLM client to avoid actual API calls during test
-// We can't easily mock the import inside the route.ts from here, 
+// We can't easily mock the import inside the route.ts from here,
 // so we'll test the core logic of merging and fallback.
 
 describe('L4 Recommendation Flow Logic', () => {
-    
+
     test('Should merge results from both engines and sort by priority', async () => {
         const context: EvaluationContext = {
             stationId: 'odpt.Station:TokyoMetro.Ginza.Ueno',
@@ -26,9 +27,9 @@ describe('L4 Recommendation Flow Logic', () => {
 
         const softCards = decisionEngine.evaluate(context);
         const hardCards = await hardCalculationEngine.evaluate(context);
-        
+
         const merged = [...hardCards, ...softCards].sort((a, b) => b.priority - a.priority);
-        
+
         assert.ok(merged.length > 0, 'Should have merged cards');
         for (let i = 0; i < merged.length - 1; i++) {
             assert.ok(merged[i].priority >= merged[i+1].priority, 'Cards should be sorted by priority descending');
@@ -40,7 +41,7 @@ describe('L4 Recommendation Flow Logic', () => {
             { id: '1', type: 'info', icon: '', title: '', description: '', priority: 80 },
             { id: '2', type: 'info', icon: '', title: '', description: '', priority: 30 }
         ];
-        
+
         const lowPriorityCards: MatchedStrategyCard[] = [
             { id: '1', type: 'info', icon: '', title: '', description: '', priority: 40 },
             { id: '2', type: 'info', icon: '', title: '', description: '', priority: 10 }
@@ -72,5 +73,24 @@ describe('L4 Recommendation Flow Logic', () => {
 
         assert.strictEqual(cards.length, 1);
         assert.strictEqual(cards[0].id, 'fallback-default');
+    });
+
+    test('Partner URL builder adds tracking and stays https', () => {
+        const url = getPartnerUrl('go_taxi', { utm_campaign: 'test', lat: '35.7', lon: '139.7' });
+        assert.ok(url.startsWith('https://'), 'Partner URL must be https');
+        assert.ok(url.includes('utm_source=lutagu'), 'Partner URL must include utm_source');
+        assert.ok(url.includes('utm_campaign=test'), 'Partner URL must include dynamic params');
+    });
+
+    test('Partner ID resolver matches registered partner hosts', () => {
+        assert.strictEqual(getPartnerIdFromUrl('https://go.mo-t.com/'), 'go_taxi');
+        assert.strictEqual(getPartnerIdFromUrl('https://luup.sc/'), 'luup');
+        assert.strictEqual(getPartnerIdFromUrl('https://example.com/'), null);
+    });
+
+    test('Safe external URL rejects non-http protocols', () => {
+        assert.strictEqual(getSafeExternalUrl('javascript:alert(1)'), null);
+        assert.strictEqual(getSafeExternalUrl('data:text/html;base64,QQ=='), null);
+        assert.strictEqual(getSafeExternalUrl('https://go.mo-t.com/'), 'https://go.mo-t.com/');
     });
 });

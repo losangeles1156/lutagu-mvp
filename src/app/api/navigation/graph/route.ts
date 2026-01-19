@@ -17,7 +17,7 @@ export async function GET(request: Request) {
         }
 
         const result = await NavigationService.getPedestrianGraph(lat, lon, radius, userProfile, weather);
-        
+
         return NextResponse.json(result);
 
     } catch (err: any) {

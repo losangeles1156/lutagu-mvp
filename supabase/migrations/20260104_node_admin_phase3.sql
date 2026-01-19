@@ -9,17 +9,17 @@
 -- ============================================
 SELECT '=== L1 數據統計 ===' AS info;
 
-SELECT 
+SELECT
     '總 L1 記錄' AS metric,
     COUNT(*)::text AS value
 FROM l1_places
 UNION ALL
-SELECT 
+SELECT
     '待審核' AS metric,
     COUNT(*)::text AS value
 FROM v_l1_pending
 UNION ALL
-SELECT 
+SELECT
     '已批准' AS metric,
     COUNT(*)::text AS value
 FROM v_l1_approved;
@@ -27,7 +27,7 @@ FROM v_l1_approved;
 -- ============================================
 -- 2. 按站點統計待審核數據
 -- ============================================
-SELECT 
+SELECT
     node_id AS station_id,
     COUNT(*) AS pending_count,
     array_agg(DISTINCT category) AS categories
@@ -39,7 +39,7 @@ LIMIT 20;
 -- ============================================
 -- 3. 按分類統計待審核數據
 -- ============================================
-SELECT 
+SELECT
     category,
     COUNT(*) AS count,
     array_agg(DISTINCT node_id LIMIT 5) AS sample_stations
@@ -53,7 +53,7 @@ ORDER BY count DESC;
 -- 將 {STATION_ID} 替換為實際站點 ID
 -- 例如：odpt.Station:JR-East.Ueno
 
-SELECT 
+SELECT
     id,
     node_id,
     name,
@@ -75,11 +75,11 @@ ORDER BY category, name;
 /*
 -- 示例：批准單條記錄
 UPDATE node_l1_config
-SET 
+SET
     is_approved = TRUE,
     approved_at = NOW(),
     notes = 'Approved via Supabase Studio'
-WHERE 
+WHERE
     node_id = 'odpt.Station:JR-East.Ueno'
     AND source_table = 'l1_places'
     AND source_id = '{PLACE_ID}';
@@ -93,12 +93,12 @@ WHERE
 /*
 -- 示例：批准上野站的所有餐廳
 UPDATE node_l1_config c
-SET 
+SET
     is_approved = TRUE,
     approved_at = NOW(),
     notes = 'Bulk approved: ' || NOW()::text
 FROM v_l1_pending p
-WHERE 
+WHERE
     c.node_id = p.node_id
     AND c.source_table = 'l1_places'
     AND c.source_id = p.id::text
@@ -109,7 +109,7 @@ WHERE
 -- ============================================
 -- 7. 查看核心站點的批准狀態
 -- ============================================
-SELECT 
+SELECT
     node_id,
     COUNT(*) AS total_l1,
     SUM(CASE WHEN is_approved THEN 1 ELSE 0 END) AS approved,
@@ -129,17 +129,17 @@ ORDER BY pending DESC;
 -- ============================================
 -- 8. 驗證視圖數據一致性
 -- ============================================
-SELECT 
+SELECT
     'v_l1_pending 記錄數' AS view_name,
     COUNT(*)::text AS record_count
 FROM v_l1_pending
 UNION ALL
-SELECT 
+SELECT
     'v_l1_approved 記錄數' AS view_name,
     COUNT(*)::text AS record_count
 FROM v_l1_approved
 UNION ALL
-SELECT 
+SELECT
     'node_l1_config 總數' AS view_name,
     COUNT(*)::text AS record_count
 FROM node_l1_config;
@@ -147,7 +147,7 @@ FROM node_l1_config;
 -- ============================================
 -- 9. 檢查是否有未匹配的 l1_places
 -- ============================================
-SELECT 
+SELECT
     '未匹配的 l1_places' AS issue,
     COUNT(*)::text AS count
 FROM l1_places l
@@ -157,7 +157,7 @@ WHERE c.source_id IS NULL;
 -- ============================================
 -- 10. 查找重複的 config 記錄
 -- ============================================
-SELECT 
+SELECT
     node_id,
     source_table,
     source_id,

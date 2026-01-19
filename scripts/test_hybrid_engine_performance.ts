@@ -7,7 +7,7 @@ async function runPerformanceTests() {
 
     const concurrentRequests = 50;
     const totalRequests = 200;
-    
+
     const testCases = [
         { text: '你好', locale: 'zh-TW' },
         { text: '從新宿到澀谷', locale: 'zh-TW' },
@@ -45,7 +45,7 @@ async function runPerformanceTests() {
     const totalDuration = endTime - startTime;
     const avgLatency = results.reduce((acc, r) => acc + r.duration, 0) / results.length;
     const throughput = (totalRequests / (totalDuration / 1000)).toFixed(2);
-    
+
     const sources = results.reduce((acc: any, r) => {
         acc[r.source] = (acc[r.source] || 0) + 1;
         return acc;
@@ -58,7 +58,7 @@ async function runPerformanceTests() {
     console.log(`- Avg Latency: ${avgLatency.toFixed(2)}ms`);
     console.log(`- Min Latency: ${Math.min(...results.map(r => r.duration))}ms`);
     console.log(`- Max Latency: ${Math.max(...results.map(r => r.duration))}ms`);
-    
+
     console.log('\n🧠 Resource Usage:');
     console.log(`- Memory Used: ${((endMemory - startMemory) / 1024 / 1024).toFixed(2)} MB`);
     console.log(`- CPU User Time: ${(endCpu.user / 1000).toFixed(2)}ms`);

@@ -70,7 +70,7 @@ export class RedisCacheService<T = any> {
     private config: RedisCacheConfig;
     private isConnected: boolean = false;
     private localCache: Map<string, { value: T; expiresAt: number }> = new Map();
-    
+
     // 統計資訊
     private hitCount: number = 0;
     private missCount: number = 0;
@@ -99,11 +99,11 @@ export class RedisCacheService<T = any> {
      */
     async connect(redisConfig?: Partial<RedisConfig>): Promise<void> {
         const config = { ...DEFAULT_REDIS_CONFIG, ...redisConfig };
-        
+
         try {
             // 嘗試載入 ioredis
             const Redis = await import('ioredis');
-            
+
             const redisOptionsBase: any = {
                 db: config.db,
                 connectTimeout: config.connectTimeout,
@@ -130,11 +130,11 @@ export class RedisCacheService<T = any> {
             const redisInstance = config.url
                 ? new Redis.default(config.url, redisOptions)
                 : new Redis.default(redisOptions);
-            
+
             // 確保 client 不為 null
             this.client = redisInstance as unknown as RedisClient;
             this.client.isConnected = true;
-            
+
             this.client.on('connect', () => {
                 console.log('[RedisCache] 已連線到 Redis');
                 this.isConnected = true;
@@ -206,15 +206,15 @@ export class RedisCacheService<T = any> {
             try {
                 const redisKey = this.getFullKey(key);
                 const value = await this.client.get(redisKey);
-                
+
                 if (value) {
                     const parsed = JSON.parse(value) as T;
                     this.remoteHitCount++;
                     this.hitCount++;
-                    
+
                     // 更新本地快取
                     this.setLocalCache(key, parsed);
-                    
+
                     return parsed;
                 }
             } catch (error) {
@@ -241,7 +241,7 @@ export class RedisCacheService<T = any> {
             try {
                 const redisKey = this.getFullKey(key);
                 const serialized = JSON.stringify(value);
-                
+
                 await this.client.set(redisKey, serialized, 'PX', ttl);
             } catch (error) {
                 console.warn('[RedisCache] Redis set 錯誤:', error);

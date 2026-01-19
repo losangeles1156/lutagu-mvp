@@ -1,7 +1,7 @@
 /**
  * Airport Stations Data File
  * Phase 4: Keikyu Haneda & Keisei Narita Airport Terminals
- * 
+ *
  * Note: Airport stations use skipVibes=true for internal terminal facilities
  * because OSM data outside the station is irrelevant (it's an airport).
  */

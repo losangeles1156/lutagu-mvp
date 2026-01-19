@@ -42,7 +42,7 @@ async function listAllHubs() {
         const name = typeof hub.name === 'object'
             ? (hub.name['zh-TW'] || hub.name['ja'] || hub.name['en'] || hub.id)
             : (hub.name || hub.id);
-        
+
         // Parse coordinates
         let coords = 'N/A';
         if (hub.coordinates) {
@@ -88,7 +88,7 @@ async function listAllHubs() {
             .select('id, name, is_hub')
             .eq('id', hubId)
             .single();
-        
+
         if (data && !data.is_hub) {
             const name = typeof data.name === 'object'
                 ? (data.name['zh-TW'] || data.name['ja'] || data.name['en'] || data.id)

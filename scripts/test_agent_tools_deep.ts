@@ -3,7 +3,7 @@ import { TagContext } from '../src/lib/tagging/TagEngine';
 
 async function runTests() {
     console.log('--- Starting Agent Tools Deep Dive Tests ---\n');
-    
+
     // Test 1: Natural Language Query
     console.log('Test 1: search_knowledge with Natural Language Query (Tokyo Station)');
     const result1 = await executeTool('search_knowledge', {

@@ -10,7 +10,7 @@ async function testPerformance() {
     });
 
     console.log('--- API Performance Test (Native Fetch) ---');
-    
+
     try {
         // Request 1: Should be slow (database)
         console.log('\nRequest 1: Initial call (Database)');

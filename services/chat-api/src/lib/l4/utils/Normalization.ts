@@ -17,7 +17,7 @@ export class DataNormalizer {
     public static lookupStationId(name: string): string | null {
         const normalized = this.normalizeStationName(name);
         const candidates = findStationIdsByName(normalized);
-        
+
         if (candidates.length > 0) return candidates[0];
 
         // Second pass: try even more aggressive normalization

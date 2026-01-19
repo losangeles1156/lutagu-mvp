@@ -9,7 +9,7 @@ export abstract class BaseAgentModule {
     }
 
     abstract getLevel(): AgentLevel;
-    
+
     // Default handler, override in specific implementations
     async handle(message: IAgentMessage): Promise<any> {
         console.log(`[BaseAgent:${this.getLevel()}] Handling message`, message);

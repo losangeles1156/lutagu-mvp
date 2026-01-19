@@ -21,7 +21,7 @@ async function check() {
     .select('*')
     .or('name_i18n->>en.ilike.%Zoo%,name_i18n->>ja.ilike.%動物園%')
     .limit(5);
-  
+
   if (pError) {
       console.error('Error searching places:', pError);
       // Fallback to check if table exists or other tables

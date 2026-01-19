@@ -1,7 +1,7 @@
 # L1~L4 資料結構與 AI 混合型智慧引擎應用對照文件
 
-> **文件日期**: 2026-01-07  
-> **專案名稱**: LUTAGU/LUTAGU MVP  
+> **文件日期**: 2026-01-07
+> **專案名稱**: LUTAGU/LUTAGU MVP
 > **版本**: 1.0
 
 ---
@@ -37,11 +37,11 @@ flowchart TB
 
     Q --> P
     C --> P
-    
+
     P -->|Level 1| TE
     P -->|Level 2| AE
     P -->|Level 3| LLM
-    
+
     TE --> L1D
     AE --> L2D
     DE --> L3D
@@ -123,7 +123,7 @@ BEGIN
     WHERE l.station_id = p_station_id
         AND (p_category IS NULL OR l.category = p_category)
         AND l.is_approved = TRUE
-    ORDER BY 
+    ORDER BY
         CASE WHEN l.source = 'manual' THEN 0 ELSE 1 END,  -- 手動數據優先
         l.name
     LIMIT p_limit;
@@ -243,7 +243,7 @@ export class RouteFinder {
         destination: string
     ): Promise<RouteResult | null> {
         const startTime = Date.now();
-        
+
         // 初始化
         const distances = new Map<string, number>();
         const previous = new Map<string, RouteEdge | null>();
@@ -255,7 +255,7 @@ export class RouteFinder {
 
         while (!pq.isEmpty()) {
             const current = pq.dequeue()!;
-            
+
             if (visited.has(current.node)) continue;
             visited.add(current.node);
 
@@ -268,7 +268,7 @@ export class RouteFinder {
             for (const edge of neighbors) {
                 if (visited.has(edge.to)) continue;
 
-                const newDist = distances.get(current.node)! + 
+                const newDist = distances.get(current.node)! +
                     edge.travelTime + edge.transferTime;
 
                 if (newDist < (distances.get(edge.to) || Infinity)) {
@@ -566,7 +566,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         k.id,
         k.title,
         k.content,
@@ -603,7 +603,7 @@ BEGIN
     SELECT openai_embedding(p_query) INTO v_query_embedding;
 
     RETURN QUERY
-    SELECT 
+    SELECT
         k.id,
         k.title,
         k.content,
@@ -615,11 +615,11 @@ BEGIN
             -- 重要性分數 (20%)
             (k.importance::float / 10.0) * 0.2 +
             -- 上下文匹配分數 (10%)
-            CASE 
-                WHEN p_user_context IS NOT NULL AND 
-                     k.user_context && p_user_context 
-                THEN 0.1 
-                ELSE 0 
+            CASE
+                WHEN p_user_context IS NOT NULL AND
+                     k.user_context && p_user_context
+                THEN 0.1
+                ELSE 0
             END
         ) AS hybrid_score
     FROM l4_knowledge_v2 k
@@ -725,7 +725,7 @@ flowchart LR
     P -->|Level 1| T["Template Cache\nTTL: 1h"]
     P -->|Level 2| A["Algorithm Cache\nTTL: 5min"]
     P -->|Level 3| L["LLM Response\nTTL: 10min"]
-    
+
     T --> L1DB["L1 Database\n(PostgreSQL)"]
     A --> L2DB["L2 Database"]
     L --> L4DB["L4 Database\n(pgvector)"]
@@ -749,46 +749,46 @@ flowchart LR
 ```sql
 -- 數據品質儀表板
 CREATE VIEW v_data_quality_dashboard AS
-SELECT 
+SELECT
     'L1' AS layer,
     COUNT(*) AS total_records,
     COUNT(*) FILTER (WHERE is_approved = TRUE) AS approved,
     COUNT(*) FILTER (WHERE is_approved = FALSE OR is_approved IS NULL) AS pending,
     ROUND(
-        COUNT(*) FILTER (WHERE is_approved = TRUE)::float / 
+        COUNT(*) FILTER (WHERE is_approved = TRUE)::float /
         NULLIF(COUNT(*), 0) * 100, 1
     ) AS approval_rate
 FROM l1_places
 UNION ALL
-SELECT 
+SELECT
     'L2' AS layer,
     COUNT(*) AS total_records,
     COUNT(*) FILTER (WHERE status = 'resolved') AS resolved,
     COUNT(*) FILTER (WHERE status = 'ongoing') AS ongoing,
     ROUND(
-        COUNT(*) FILTER (WHERE status = 'resolved')::float / 
+        COUNT(*) FILTER (WHERE status = 'resolved')::float /
         NULLIF(COUNT(*), 0) * 100, 1
     ) AS resolution_rate
 FROM l2_disruption_history
 UNION ALL
-SELECT 
+SELECT
     'L3' AS layer,
     COUNT(*) AS total_records,
     COUNT(*) FILTER (WHERE is_active = TRUE) AS active,
     COUNT(*) FILTER (WHERE is_active = FALSE) AS inactive,
     ROUND(
-        COUNT(*) FILTER (WHERE is_active = TRUE)::float / 
+        COUNT(*) FILTER (WHERE is_active = TRUE)::float /
         NULLIF(COUNT(*), 0) * 100, 1
     ) AS active_rate
 FROM l3_facilities
 UNION ALL
-SELECT 
+SELECT
     'L4' AS layer,
     COUNT(*) AS total_records,
     COUNT(*) FILTER (WHERE embedding IS NOT NULL) AS embedded,
     COUNT(*) FILTER (WHERE embedding IS NULL) AS missing_embedding,
     ROUND(
-        COUNT(*) FILTER (WHERE embedding IS NOT NULL)::float / 
+        COUNT(*) FILTER (WHERE embedding IS NOT NULL)::float /
         NULLIF(COUNT(*), 0) * 100, 1
     ) AS embedding_rate
 FROM l4_knowledge_v2;
@@ -823,6 +823,6 @@ FROM l4_knowledge_v2;
 
 ---
 
-> **文件維護**: AI Architect Mode  
-> **版本歷史**: v1.0 (2026-01-07) 初始版本  
+> **文件維護**: AI Architect Mode
+> **版本歷史**: v1.0 (2026-01-07) 初始版本
 > **下次 Review**: 2026-02-07

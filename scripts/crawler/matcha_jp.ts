@@ -6,14 +6,14 @@ export class MatchaJpCrawler extends BaseCrawler {
     protected async extractData(page: Page, url: string): Promise<CrawlerResult> {
         return await page.evaluate((url) => {
             const title = document.querySelector('h1')?.textContent?.trim() || '';
-            const content = document.querySelector('.article__main')?.textContent?.trim() || 
+            const content = document.querySelector('.article__main')?.textContent?.trim() ||
                            document.querySelector('article')?.textContent?.trim() || '';
-            
+
             const metaDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
             const author = document.querySelector('.article__author-name')?.textContent?.trim() || '';
-            const publishedAt = document.querySelector('.article__date')?.textContent?.trim() || 
+            const publishedAt = document.querySelector('.article__date')?.textContent?.trim() ||
                               document.querySelector('time')?.getAttribute('datetime') || '';
-            
+
             const tags: string[] = [];
             document.querySelectorAll('.article__tag-btn-place, .article__tag-link').forEach(tag => {
                 const tagText = tag.textContent?.trim();
@@ -45,7 +45,7 @@ export class MatchaJpCrawler extends BaseCrawler {
         try {
             await page.setUserAgent(this.getRandomUserAgent());
             await page.goto(pageUrl, { waitUntil: 'networkidle2' });
-            
+
             const links = await page.evaluate(() => {
                 const anchorElements = document.querySelectorAll('a.article__title-link, a[href*="/jp/"]');
                 const urls: string[] = [];

@@ -35,7 +35,7 @@ export async function getPedestrianGraph(
     userProfile: string = 'general',
     weatherCondition: string = 'clear'
 ): Promise<NavigationGraphResult> {
-    
+
     // 1. Get Nodes via Optimized RPC
     const { data: mixedResults, error: nodeError } = await supabaseAdmin.rpc('get_nearby_accessibility_graph', {
         query_lat: lat,
@@ -68,10 +68,10 @@ export async function getPedestrianGraph(
         }
 
         const result = await linksQuery;
-        
+
         if (result.error) {
              console.warn('RPC Error (get_pedestrian_links_geojson):', result.error.message);
-             
+
              // Fallback if RPC fails (missing function OR type mismatch OR other issues)
              console.warn('Falling back to raw query (no GeoJSON).');
              const idList = nodeIds.map((id: string) => `"${id}"`).join(',');
@@ -79,7 +79,7 @@ export async function getPedestrianGraph(
                 .from('pedestrian_links')
                 .select('*')
                 .or(`start_node_id.in.(${idList}),end_node_id.in.(${idList})`);
-             
+
              if (userProfile === 'wheelchair' || userProfile === 'stroller') {
                 fallbackQuery = fallbackQuery.eq('has_elevator_access', true);
              }
@@ -104,7 +104,7 @@ export async function getPedestrianGraph(
     if (weatherCondition === 'rain') {
         reasoning.push(`Weather Alert: Prioritizing indoor connections in weighting (client-side).`);
     }
-    
+
     // 5. Calculate Metrics
     const nodeCount = nodes ? nodes.length : 0;
     const linkCount = links ? links.length : 0;

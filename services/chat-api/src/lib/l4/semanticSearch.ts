@@ -1,15 +1,15 @@
 /**
  * L4 Knowledge Semantic Search Client
- * 
+ *
  * Provides AI Agent with efficient knowledge retrieval that only
  * returns relevant information based on user context.
- * 
+ *
  * Usage:
- * 
+ *
  * import { SemanticL4Client } from '@/lib/l4/semanticSearch';
- * 
+ *
  * const client = new SemanticL4Client();
- * 
+ *
  * // Get relevant knowledge for a user query
  * const results = await client.searchRelevantKnowledge({
  *   query: "上野站有電梯嗎？我推著嬰兒車",
@@ -17,7 +17,7 @@
  *   userContext: ["stroller"],
  *   timeContext: "weekday-morning"
  * });
- * 
+ *
  * // Get station transfer tips
  * const transferTips = await client.getTransferTips({
  *   stationId: "odpt:Station:JR-East.Shinjuku"
@@ -196,7 +196,7 @@ export class SemanticL4Client {
     timeContext?: string
   ): Promise<SearchResponse> {
     const stationName = stationId.split('.').pop() || stationId;
-    
+
     return this.searchRelevantKnowledge({
       query: `${stationName} 的車站資訊、設施和建議`,
       stationId,

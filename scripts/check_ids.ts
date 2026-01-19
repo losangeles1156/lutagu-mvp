@@ -14,7 +14,7 @@ async function check() {
     const { data: stations, error: sError } = await supabase
         .from('stations_static')
         .select('id');
-    
+
     if (sError) {
         console.error('Error fetching stations:', sError);
         return;
@@ -28,7 +28,7 @@ async function check() {
         .from('nodes')
         .select('id')
         .in('id', stationIds.slice(0, 100)); // Reduced to 100
-    
+
     if (nError) {
         console.error('Error fetching nodes:', nError);
         return;

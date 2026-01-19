@@ -10,7 +10,7 @@
 ### 1.1 核心應用 (Core Application)
 *   **名稱**: Lutagu MVP Core
 *   **路徑**: 專案根目錄 (`/`)
-*   **技術堆疊**: 
+*   **技術堆疊**:
     *   **Framework**: Next.js 14 (App Router)
     *   **Language**: TypeScript
     *   **UI**: Tailwind CSS, Radix UI, Framer Motion
@@ -26,10 +26,10 @@
 ### 1.2 資料層 (Data Layer)
 *   **資料庫**: **Supabase** (Managed PostgreSQL)
     *   **核心資料**: `nodes` (車站節點), `facilities` (設施), `users` (使用者)。
-    *   **擴充功能**: 
+    *   **擴充功能**:
         *   `postgis`: 空間地理運算 (如距離排序、範圍查詢)。
         *   `pgvector`: 向量資料儲存 (RAG 知識庫)。
-    *   **關鍵優化**: 
+    *   **關鍵優化**:
         *   RPC `get_nearby_accessibility_graph`: 優化 KNN 空間查詢效能。
 *   **快取 (Cache)**:
     *   **Redis**: 目前程式碼中包含 `ioredis`，用於 Session Store 與 Rate Limiting (主要在 Chat API 中使用)。
@@ -114,10 +114,10 @@
 
 **建議方案**: **Cloudflare Gateway + Google Cloud Run**
 
-*   **成本**: 
+*   **成本**:
     *   Cloudflare (Free Tier): $0
     *   Cloud Run: 按量計費 (低流量時接近 $0)
-*   **效率**: 
+*   **效率**:
     *   Cloudflare Edge 處理連線交握。
     *   Cloud Run 處理複雜 AI 運算 (不受 Vercel 10s 限制)。
 *   **遷移成本**: **低** (沿用 Docker，無需改 code)。

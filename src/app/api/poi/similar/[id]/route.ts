@@ -82,7 +82,7 @@ export async function GET(
 
         // Map results
         const poiMap = new Map((pois || []).map(p => [p.id, p]));
-        
+
         const results = similarities.map(item => {
             const poi = poiMap.get(item.similar_poi_id);
             return {

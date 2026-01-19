@@ -13,6 +13,8 @@ import { hybridEngine } from '@/lib/l4/HybridEngine';
 
 import { ParsedMessageContent } from '../chat/ParsedMessageContent';
 import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
+import { trackFunnelEvent } from '@/lib/tracking';
+import { getPartnerIdFromUrl, getSafeExternalUrl } from '@/config/partners';
 
 interface L4_BambiProps {
     data: StationUIProfile;
@@ -269,7 +271,21 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                             <button
                                 onClick={() => {
                                     if (bestCard.actionUrl) {
-                                        window.open(bestCard.actionUrl, '_blank', 'noopener,noreferrer');
+                                        const safeUrl = getSafeExternalUrl(bestCard.actionUrl);
+                                        if (!safeUrl) return;
+                                        trackFunnelEvent({
+                                            step_name: 'external_link_click',
+                                            step_number: 5,
+                                            path: '/station/bambi',
+                                            metadata: {
+                                                target_url: safeUrl,
+                                                link_type: 'station_l4_card',
+                                                partner_id: getPartnerIdFromUrl(safeUrl) || undefined,
+                                                station_id: stationId,
+                                                card_id: bestCard.id
+                                            }
+                                        });
+                                        window.open(safeUrl, '_blank', 'noopener,noreferrer');
                                         return;
                                     }
                                     if (otherCards.length > 0) setIsOtherOpen(true);
@@ -316,7 +332,23 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                 </div>
                                 <button
                                     onClick={() => {
-                                        if (card.actionUrl) window.open(card.actionUrl, '_blank', 'noopener,noreferrer');
+                                        if (card.actionUrl) {
+                                            const safeUrl = getSafeExternalUrl(card.actionUrl);
+                                            if (!safeUrl) return;
+                                            trackFunnelEvent({
+                                                step_name: 'external_link_click',
+                                                step_number: 5,
+                                                path: '/station/bambi',
+                                                metadata: {
+                                                    target_url: safeUrl,
+                                                    link_type: 'station_l4_card',
+                                                    partner_id: getPartnerIdFromUrl(safeUrl) || undefined,
+                                                    station_id: stationId,
+                                                    card_id: card.id
+                                                }
+                                            });
+                                            window.open(safeUrl, '_blank', 'noopener,noreferrer');
+                                        }
                                     }}
                                     disabled={!card.actionUrl}
                                     className={`mt-3 w-full py-3 rounded-2xl font-black text-xs tracking-widest transition-colors active:scale-[0.99] ${card.actionUrl ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-slate-100 text-slate-300'}`}

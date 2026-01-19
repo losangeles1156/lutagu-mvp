@@ -15,7 +15,7 @@
 
 ### Stage 1: Raw Analysis & Categorization (原料分析)
 *   **Input**: Store Name, Description, Reviews, Google Maps Category.
-*   **Task**: 
+*   **Task**:
     1.  決定唯一的 `l1_category` (Taxonomy Check).
     2.  決定 `l1_subcategory` (Specific Niche).
     3.  分離功能性設施 (Facilities) 到 L3 欄位 (如：有插座、有廁所 -> L3，不進 tags)。

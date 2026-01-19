@@ -1035,7 +1035,7 @@
 - [toilet] 東急線月台（1F）東側、西側各 1 間；都營/南北線閘內 B2 層東側 1 間 [Wheelchair] [BabyRoom]
 - [elevator] 東口 1 處（1F↔B2） [Wheelchair]
 - [locker] 東口站前廣場投幣式行李櫃 [L-size] [M-size]
-- [wifi] 站內 Tokyo Free Wi-Fi 
+- [wifi] 站內 Tokyo Free Wi-Fi
 
 ---
 

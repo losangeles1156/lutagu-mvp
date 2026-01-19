@@ -1,7 +1,7 @@
 
 /**
  * L3 Data Supplement: Toilets
- * 
+ *
  * This script targets Toilets (amenity=toilets) from OpenStreetMap
  * to supplement existing L3 data for all active stations.
  */
@@ -17,8 +17,8 @@ const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SER
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
-const RADIUS_METERS = 150; 
-const DELAY_MS = 1500; 
+const RADIUS_METERS = 150;
+const DELAY_MS = 1500;
 
 interface NodeRecord {
     id: string;
@@ -152,7 +152,7 @@ async function main() {
         console.log(`[${++stationsProcessed}/${stations.length}] Checking ${station.name || station.id}...`);
 
         const elements = await fetchOverpassToilets(coords.lat, coords.lon);
-        
+
         if (elements.length > 0) {
             const facilitiesToInsert = elements.map(el => transformToilet(el, station.id));
 

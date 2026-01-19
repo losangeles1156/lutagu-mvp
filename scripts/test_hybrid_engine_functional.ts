@@ -34,10 +34,10 @@ async function runFunctionalTests() {
         // 3. Algorithm Layer Tests - Fare
         {
             name: 'Fare Calculation (zh-TW)',
-            input: { 
-                text: '票價到東京', 
-                locale: 'zh-TW', 
-                context: { current_station: 'odpt.Station:JR-East.Yamanote.Shinjuku' } 
+            input: {
+                text: '票價到東京',
+                locale: 'zh-TW',
+                context: { current_station: 'odpt.Station:JR-East.Yamanote.Shinjuku' }
             },
             verify: (res: any) => res.source === 'template' && res.type === 'action' && res.data?.action === 'query_fare'
         },

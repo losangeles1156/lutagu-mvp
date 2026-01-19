@@ -49,12 +49,12 @@ async function fixUenoData() {
             console.log(`Updating Zoo: ${zoo.name} (${zoo.id}) - Current Cat: ${zoo.category}`);
             const { error: updateError } = await supabase
                 .from('l1_places')
-                .update({ 
+                .update({
                     category: 'tourism', // or 'attraction' if supported, 'tourism' is safe
                     station_id: TARGET_UENO_ID
                 })
                 .eq('id', zoo.id);
-            
+
             if (updateError) console.error(`Failed to update ${zoo.name}:`, updateError);
             else console.log(`Updated ${zoo.name} successfully.`);
         }
@@ -64,7 +64,7 @@ async function fixUenoData() {
 
     // 2. Fix misplaced Ueno places
     console.log('\n2. Fixing misplaced Ueno places...');
-    
+
     // Fetch all places with "Ueno" in name
     // We have to do client-side filtering because "NOT IN" with array is hard in simple query builder with other conditions
     const { data: uenoPlaces, error: uenoError } = await supabase
@@ -96,14 +96,14 @@ async function fixUenoData() {
         // If it's linked to Inaricho, Akihabara, Iriya, etc., and has Ueno in name, move it.
         // But be careful: "Ueno" might be part of "Uenohara" (different place) - unlikely in this context but possible.
         // Let's print what we are moving.
-        
+
         console.log(`Moving "${place.name}" from ${place.station_id} to ${TARGET_UENO_ID}`);
-        
+
         const { error: moveError } = await supabase
             .from('l1_places')
             .update({ station_id: TARGET_UENO_ID })
             .eq('id', place.id);
-            
+
         if (moveError) console.error(`Failed to move ${place.name}:`, moveError);
         else movedCount++;
     }

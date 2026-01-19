@@ -8,7 +8,7 @@ create table if not exists l1_places (
   location geography(Point, 4326),
   tags jsonb default '{}'::jsonb,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  
+
   -- Prevent duplicates from same OSM node
   unique(station_id, osm_id)
 );

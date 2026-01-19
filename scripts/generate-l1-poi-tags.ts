@@ -1,10 +1,10 @@
 /**
  * L1 POI Tag Generation Script (Phase 1)
- * 
+ *
  * Purpose: Generate location_tags and category_tags for all L1 POI records
  * This script calls the PostgreSQL functions we created.
- * 
- * Usage: 
+ *
+ * Usage:
  *   npx tsx scripts/generate-l1-poi-tags.ts [--batch-size 1000] [--tag-type location|category|all]
  */
 
@@ -80,7 +80,7 @@ function generateCategoryTags(name: string, category: string, tags: Record<strin
             };
         }
     }
-    
+
     return {
         primary: category || 'other',
         secondary: (tags?.amenity || tags?.shop || 'other') as string,
@@ -98,12 +98,12 @@ async function processBatch(batchSize: number, tagType: 'location' | 'category' 
             p_batch_size: batchSize,
             p_tag_type: tagType
         });
-    
+
     if (error) {
         console.error('Error calling batch_update_l1_tags:', error);
         return { updated: 0, errors: batchSize, tag_type: tagType, timestamp: new Date().toISOString() };
     }
-    
+
     return data as BatchResult;
 }
 
@@ -112,7 +112,7 @@ async function getUnprocessedCount(): Promise<number> {
         .from('l1_places')
         .select('id', { count: 'exact', head: true })
         .is('location_tags', null);
-    
+
     return count || 0;
 }
 
@@ -121,39 +121,39 @@ async function runWithFallback(batchSize: number, tagType: 'location' | 'categor
         .from('l1_places')
         .select('id, name, station_id, category, tags, location')
         .limit(batchSize);
-    
+
     if (tagType === 'location') {
         query = query.is('location_tags', null).not('location', 'is', null);
     } else if (tagType === 'category') {
         query = query.is('category_tags', null);
     }
-    
+
     const { data: pois, error } = await query;
-    
+
     if (error || !pois || pois.length === 0) {
         return { processed: 0, errors: 0 };
     }
-    
+
     console.log(`Processing ${pois.length} POIs with ${tagType} tags...`);
-    
+
     let processed = 0;
     let errors = 0;
-    
+
     for (const poi of pois) {
         try {
             const updateData: Record<string, unknown> = {};
-            
+
             if (tagType !== 'category') {
                 updateData.category_tags = generateCategoryTags(poi.name, poi.category, poi.tags || {});
             }
-            
+
             if (tagType !== 'location' && poi.station_id) {
                 const { data: stationData } = await supabase
                     .from('nodes')
                     .select('id, parent_hub_id, name')
                     .eq('id', poi.station_id)
                     .single();
-                
+
                 if (stationData) {
                     updateData.location_tags = {
                         ward: null,
@@ -167,20 +167,20 @@ async function runWithFallback(batchSize: number, tagType: 'location' | 'categor
                     };
                 }
             }
-            
+
             await supabase.from('l1_places').update(updateData).eq('id', poi.id);
             processed++;
-            
+
             if (processed % 100 === 0) {
                 console.log(`Processed ${processed} POIs...`);
             }
-            
+
         } catch (err) {
             errors++;
             console.error(`Error processing POI ${poi.id}:`, err);
         }
     }
-    
+
     return { processed, errors };
 }
 
@@ -188,40 +188,40 @@ async function main() {
     const args = process.argv.slice(2);
     const batchSize = parseInt(args.find(a => a.startsWith('--batch-size'))?.split('=')[1] || '1000');
     const tagType = (args.find(a => a.startsWith('--tag-type'))?.split('=')[1] || 'all') as 'location' | 'category' | 'all';
-    
+
     console.log('=== L1 POI Tag Generation (Phase 1) ===');
     console.log(`Batch size: ${batchSize}`);
     console.log(`Tag type: ${tagType}`);
     console.log('');
-    
+
     const totalCount = await getUnprocessedCount();
     console.log(`Total POIs to process: ${totalCount}`);
     console.log('');
-    
+
     let totalProcessed = 0;
     let totalErrors = 0;
     let iterations = 0;
     const maxIterations = 200;
-    
+
     while (iterations < maxIterations) {
         const result = await processBatch(batchSize, tagType);
-        
+
         if (result.updated === 0) {
             const fallbackResult = await runWithFallback(batchSize, tagType);
             totalProcessed += fallbackResult.processed;
             totalErrors += fallbackResult.errors;
-            
+
             if (fallbackResult.processed === 0) break;
         } else {
             totalProcessed += result.updated;
             totalErrors += result.errors;
         }
-        
+
         iterations++;
         console.log(`Iteration ${iterations}: Processed ${totalProcessed} POIs`);
         await new Promise(resolve => setTimeout(resolve, 200));
     }
-    
+
     console.log('');
     console.log('=== Summary ===');
     console.log(`Total processed: ${totalProcessed}`);

@@ -91,10 +91,10 @@ allowed-tools: [write_to_file, run_command, view_file]
       it('should return correct value given input', () => {
         // Arrange
         const input = 1;
-        
+
         // Act
         const result = myService(input);
-        
+
         // Assert
         assert.strictEqual(result, 2);
       });

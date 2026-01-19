@@ -44,7 +44,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         w.id, w.name_i18n, w.prefecture, w.ward_code,
         w.center_point, w.priority_order, w.is_active,
         w.node_count, w.hub_count
@@ -54,10 +54,10 @@ BEGIN
       AND ST_Contains(w.boundary, ST_SetSRID(ST_MakePoint(point_lng, point_lat), 4326))
     ORDER BY w.priority_order ASC
     LIMIT 1;
-    
+
     IF NOT FOUND THEN
         RETURN QUERY
-        SELECT 
+        SELECT
             w.id, w.name_i18n, w.prefecture, w.ward_code,
             w.center_point, w.priority_order, w.is_active,
             w.node_count, w.hub_count
@@ -73,7 +73,7 @@ $$;
 DO $$
 BEGIN
     IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
+        SELECT 1 FROM information_schema.columns
         WHERE table_name = 'nodes' AND column_name = 'ward_id'
     ) THEN
         ALTER TABLE nodes ADD COLUMN ward_id TEXT REFERENCES wards(id);

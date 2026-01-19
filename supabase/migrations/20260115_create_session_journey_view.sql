@@ -5,38 +5,38 @@
 -- 1. Core Session Journey View
 -- Aggregates session-level data from multiple tables
 CREATE OR REPLACE VIEW view_session_journey AS
-SELECT 
+SELECT
     fe.session_id,
     fe.visitor_id,
     MIN(fe.created_at) AS session_start,
     MAX(fe.created_at) AS session_end,
     COUNT(DISTINCT fe.step_name) AS funnel_steps_completed,
     MAX(fe.step_number) AS max_step_reached,
-    
+
     -- Did they reach the final step? (external_link_click)
     BOOL_OR(fe.step_name = 'external_link_click') AS reached_conversion_step,
-    
+
     -- Feedback aggregation (from ai_chat_feedback)
     (
         SELECT COALESCE(SUM(f.score), 0)
-        FROM ai_chat_feedback f 
+        FROM ai_chat_feedback f
         WHERE f.session_id = fe.session_id
     ) AS feedback_score_sum,
     (
-        SELECT COUNT(*) 
-        FROM ai_chat_feedback f 
+        SELECT COUNT(*)
+        FROM ai_chat_feedback f
         WHERE f.session_id = fe.session_id
     ) AS feedback_count,
-    
+
     -- Conversion aggregation (from nudge_logs)
     (
-        SELECT COUNT(*) 
-        FROM nudge_logs n 
-        WHERE n.visitor_id = fe.visitor_id 
+        SELECT COUNT(*)
+        FROM nudge_logs n
+        WHERE n.visitor_id = fe.visitor_id
         AND n.conversion_status = 'clicked'
         AND n.clicked_at BETWEEN fe.created_at - INTERVAL '1 hour' AND fe.created_at + INTERVAL '1 hour'
     ) AS partner_clicks,
-    
+
     -- Extract step progression as array
     ARRAY_AGG(DISTINCT fe.step_name ORDER BY fe.step_name) AS steps_completed
 
@@ -46,7 +46,7 @@ GROUP BY fe.session_id, fe.visitor_id;
 -- 2. Daily Session Quality Summary
 -- Aggregates view_session_journey by day for dashboard
 CREATE OR REPLACE VIEW view_daily_session_quality_v2 AS
-SELECT 
+SELECT
     DATE_TRUNC('day', session_start) AS date,
     COUNT(*) AS total_sessions,
     COUNT(*) FILTER (WHERE max_step_reached >= 3) AS engaged_sessions,

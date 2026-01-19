@@ -1,10 +1,10 @@
 import { StationUIProfile } from '@/lib/types/stationStandard';
 
 // Define the types for the tourism knowledge base
-export type TourismCategory = 
-  | 'Traditional & Temples' 
-  | 'Retro Shopping' 
-  | 'Youth Culture & Fashion' 
+export type TourismCategory =
+  | 'Traditional & Temples'
+  | 'Retro Shopping'
+  | 'Youth Culture & Fashion'
   | 'Nature & Relaxation'
   | 'Food & Izakaya'
   | 'Modern Shopping & Retail'
@@ -613,8 +613,8 @@ export const TOURISM_ALTERNATIVES: TourismStrategy[] = [
 
 // Helper to find strategies
 export function findAlternativesFor(hotspotNameOrId: string): TourismStrategy | undefined {
-  return TOURISM_ALTERNATIVES.find(s => 
-    s.hotspot.id === hotspotNameOrId || 
+  return TOURISM_ALTERNATIVES.find(s =>
+    s.hotspot.id === hotspotNameOrId ||
     s.hotspot.name.en.toLowerCase().includes(hotspotNameOrId.toLowerCase()) ||
     s.hotspot.name.ja.includes(hotspotNameOrId)
   );

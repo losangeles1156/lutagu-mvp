@@ -60,10 +60,15 @@ agentChatRouter.post('/', async (req, res) => {
             }
         }
 
-        // Set Headers for Streaming
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.setHeader('Transfer-Encoding', 'chunked');
         res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Cache-Control', 'no-cache, no-transform');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.setHeader('Connection', 'keep-alive');
+        if (typeof res.flushHeaders === 'function') {
+            res.flushHeaders();
+        }
 
         const sendUpdate = (delta: string) => {
             if (!delta) return;

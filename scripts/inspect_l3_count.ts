@@ -19,7 +19,7 @@ async function main() {
         .from('stations_static')
         .select('id, name')
         .ilike('id', `%${term}%`);
-    
+
     if (!stations) {
         console.log('No stations found.');
         return;
@@ -30,7 +30,7 @@ async function main() {
             .from('l3_facilities')
             .select('*', { count: 'exact', head: true })
             .eq('station_id', s.id);
-        
+
         console.log(`${s.id}: ${count} facilities`);
     }
 }

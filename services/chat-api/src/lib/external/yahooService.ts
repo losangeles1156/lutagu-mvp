@@ -51,7 +51,7 @@ const getCachedYahooStatus = async () => {
 /**
  * Scrapes Yahoo Japan Transit for train status information (Kanto Area).
  * Returns a list of lines with reported trouble (delays, suspensions).
- * 
+ *
  * Uses internal fetch directly (Next.js cache removed for backend service).
  */
 export const fetchYahooStatus = async () => {

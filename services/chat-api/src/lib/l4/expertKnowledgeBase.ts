@@ -1,13 +1,13 @@
 /**
  * L4 Expert Knowledge Base - LEGACY DATA
- * 
- * @deprecated This file contains legacy hardcoded data. 
+ *
+ * @deprecated This file contains legacy hardcoded data.
  * Please use the Single Source of Truth (SSoT) instead:
  * src/data/tokyo_transit_knowledge_base.md
- * 
+ *
  * New knowledge should be added to the Markdown file, and then run:
  * `npm run sync:knowledge` (or `tsx scripts/sync_knowledge.ts`)
- * 
+ *
  * The API routes and services are refactored to prioritize the SSoT
  * generated JSON (src/data/knowledge_base.json).
  */

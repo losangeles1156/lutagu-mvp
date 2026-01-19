@@ -1,6 +1,6 @@
 -- Mass Seed Data for Core Tokyo Stations
 INSERT INTO l1_custom_places (station_id, name_i18n, primary_category, category, vibe_tags, ai_description, keywords, is_active, status, location)
-VALUES 
+VALUES
 
 -- UENO (Culture, Park, Museum, Ameyoko)
 (

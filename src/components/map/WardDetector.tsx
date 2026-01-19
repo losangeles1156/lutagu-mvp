@@ -35,7 +35,7 @@ export function WardDetector({
             .query({ name: 'geolocation' })
             .then((permission) => {
                 setGeoPermission(permission.state);
-                
+
                 // Listen for permission changes
                 permission.addEventListener('change', () => {
                     setGeoPermission(permission.state);
@@ -49,7 +49,7 @@ export function WardDetector({
     // Detect ward when location changes
     const detectWard = useCallback(async (position: GeolocationPosition) => {
         const { latitude, longitude } = position.coords;
-        
+
         const ward = await detectWardByLocation(latitude, longitude);
         onWardDetected(ward);
     }, [detectWardByLocation, onWardDetected]);
@@ -146,7 +146,7 @@ export function WardDetector({
     return (
         <div className="ward-detector">
             {children}
-            
+
             {/* Hidden helper for manual detection */}
             <button
                 onClick={manualDetect}
@@ -163,7 +163,7 @@ export function useWardDetection() {
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isDetecting, setIsDetecting] = useState(false);
-    
+
     const {
         detectWardByLocation,
         detectedWard,
@@ -176,11 +176,11 @@ export function useWardDetection() {
         setLocation({ lat, lng });
 
         const ward = await detectWardByLocation(lat, lng);
-        
+
         if (!ward) {
             setError('無法檢測所在區域');
         }
-        
+
         setIsDetecting(false);
         return ward;
     }, [detectWardByLocation]);

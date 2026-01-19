@@ -1,6 +1,6 @@
 -- Insert seed data for Asakusa and Iidabashi
 INSERT INTO l1_custom_places (station_id, name_i18n, primary_category, category, vibe_tags, ai_description, keywords, is_active, status, location)
-VALUES 
+VALUES
 (
   'odpt.Station:TokyoMetro.Ginza.Asakusa',
   '{"ja": "吉野家 浅草店", "en": "Yoshinoya Asakusa", "zh": "吉野家 淺草店"}',

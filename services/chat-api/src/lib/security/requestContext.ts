@@ -34,4 +34,3 @@ export async function getRequestSecurityContext(request: any) {
         userAgentHash
     };
 }
-

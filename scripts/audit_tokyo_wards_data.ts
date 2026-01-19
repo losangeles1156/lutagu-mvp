@@ -1,6 +1,6 @@
 /**
  * 東京23區車站 L1~L4 數據完整性審計腳本
- * 
+ *
  * 此腳本用於審計東京23區各行政區的車站數據完整性
  * 檢查項目：
  * - L1 設施分類數據
@@ -62,7 +62,7 @@ const WARDS_STATIONS: Record<string, string[]> = {
         'odpt.Station:Toei.Asakusa.Nihombashi', 'odpt.Station:TokyoMetro.Hibiya.Ningyocho',
         'odpt.Station:Toei.Asakusa.Ningyocho', 'odpt.Station:TokyoMetro.Hibiya.Kodemmacho'
     ],
-    
+
     // Zone B: 傳統文化區
     '文京區': [
         'odpt.Station:JR-East.Ueno', 'odpt.Station:JR-East.Yamanote.Ueno',
@@ -92,7 +92,7 @@ const WARDS_STATIONS: Record<string, string[]> = {
         'odpt.Station:Toei.Oedo.Tsukijishijo', 'odpt.Station:Toei.Oedo.Kachidoki',
         'odpt.Station:TokyoMetro.Yurakucho.Tsukishima', 'odpt.Station:Toei.Oedo.MonzenNakacho'
     ],
-    
+
     // Zone C: 西南區
     '品川區': [
         'odpt.Station:JR-East.Shinagawa', 'odpt.Station:JR-East.Yamanote.Shinagawa',
@@ -130,7 +130,7 @@ const WARDS_STATIONS: Record<string, string[]> = {
         'odpt.Station:TokyoMetro.Namboku.Ikebukuro', 'odpt.Station:JR-East.Sugamo',
         'odpt.Station:TokyoMetro.Marunouchi.Sugamo'
     ],
-    
+
     // Zone D: 北區
     '北區': [
         'odpt.Station:JR-East.Tabata', 'odpt.Station:JR-East.Yamanote.Tabata',
@@ -151,7 +151,7 @@ const WARDS_STATIONS: Record<string, string[]> = {
         'odpt.Station:JR-East.Otsuka', 'odpt.Station:TokyoMetro.Yurakucho.Otsuka',
         'odpt.Station:Tobu.Ojiya.Otsuka'
     ],
-    
+
     // Zone E: 西部邊緣區
     '練馬區': [
         'odpt.Station:Seibu.Ikebukuro.Nerima', 'odpt.Station:TokyoMetro.Tozai.Nerima',
@@ -163,7 +163,7 @@ const WARDS_STATIONS: Record<string, string[]> = {
         'odpt.Station:Tobu.Isesaki.Kitasenju', 'odpt.Station:TokyoMetro.Mayano',
         'odpt.Station:JR-East.MinamiKurume', 'odpt.Station:Toei.NipporiToneri.Arakawa'
     ],
-    
+
     // Zone F: 東部邊緣區
     '葛飾區': [
         'odpt.Station:JR-East.Katsushika', 'odpt.Station:TokyoMetro.Chiyoda.Katsushika',
@@ -246,7 +246,7 @@ async function auditWardData(wardName: string, stationIds: string[]): Promise<Wa
     for (const stationId of stationIds) {
         const node = nodeMap.get(stationId);
         const facilityProfile = node?.facility_profile as any;
-        
+
         const hasL1 = !!(
             facilityProfile?.category_counts?.convenience_count !== undefined ||
             facilityProfile?.category_counts?.restaurant_count !== undefined ||
@@ -299,7 +299,7 @@ async function runAudit() {
         console.log(`正在審計 ${wardName}...`);
         const report = await auditWardData(wardName, stationIds);
         reports.push(report);
-        
+
         grandTotalStations += report.total_stations;
         grandTotalL1 += report.stations_with_l1;
         grandTotalL2 += report.stations_with_l2;

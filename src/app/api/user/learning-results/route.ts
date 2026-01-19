@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { 
-  FacilityPreferenceWeight, 
-  DecisionLog, 
+import {
+  FacilityPreferenceWeight,
+  DecisionLog,
   LearningResultsResponse,
-  DEFAULT_SCORING_CONFIG 
+  DEFAULT_SCORING_CONFIG
 } from '@/lib/types/userLearning';
 import { calculateWeightedScore } from '@/lib/types/userLearning';
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
     const limit = parseInt(searchParams.get('limit') || '20');
-    
+
     if (!userId) {
       return NextResponse.json({
         success: false,
@@ -37,11 +37,11 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    
+
     if (!supabase) {
       const duration = Date.now() - startTime;
       console.log(`[Learning Results API] Demo: ${duration}ms - User ${userId}`);
-      
+
       return NextResponse.json({
         success: true,
         user_id: userId,
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    
+
     if (!supabase) {
       const duration = Date.now() - startTime;
       return NextResponse.json({

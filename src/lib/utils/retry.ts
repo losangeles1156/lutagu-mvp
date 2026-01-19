@@ -34,11 +34,11 @@ const DEFAULT_CONFIG: RetryConfig = {
 function calculateDelay(attempt: number, config: RetryConfig): number {
     const baseDelay = config.initialDelayMs * Math.pow(config.backoffMultiplier, attempt);
     const cappedDelay = Math.min(baseDelay, config.maxDelayMs);
-    
+
     // Apply jitter: +/- (jitterRange * 100)% of the delay
     const jitterFactor = 1 + (Math.random() * 2 - 1) * config.jitterRange;
     const jitteredDelay = Math.round(cappedDelay * jitterFactor);
-    
+
     return Math.max(0, jitteredDelay);
 }
 
@@ -51,7 +51,7 @@ export function sleep(ms: number): Promise<void> {
 
 /**
  * Fetch with exponential backoff retry
- * 
+ *
  * @param url - The URL to fetch
  * @param options - Fetch options
  * @param config - Optional retry configuration
@@ -65,27 +65,27 @@ export async function fetchWithRetry<T>(
 ): Promise<T> {
     const cfg: RetryConfig = { ...DEFAULT_CONFIG, ...config };
     let lastError: Error | null = null;
-    
+
     for (let attempt = 0; attempt <= cfg.maxRetries; attempt++) {
         try {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
-            
+
             const response = await fetch(url, {
                 ...options,
                 signal: controller.signal
             });
-            
+
             clearTimeout(timeout);
-            
+
             // Check if we should retry based on status code
             if (!response.ok) {
                 const status = response.status;
-                
+
                 if (cfg.retryOnStatusCodes.includes(status)) {
                     const retryAfter = response.headers.get('retry-after');
                     let delay = calculateDelay(attempt, cfg);
-                    
+
                     // Respect Retry-After header if present
                     if (retryAfter) {
                         const seconds = parseInt(retryAfter, 10);
@@ -93,7 +93,7 @@ export async function fetchWithRetry<T>(
                             delay = Math.max(delay, seconds * 1000);
                         }
                     }
-                    
+
                     if (attempt < cfg.maxRetries) {
                         console.warn(
                             `[Retry] HTTP ${status} on attempt ${attempt + 1}/${cfg.maxRetries + 1}, ` +
@@ -103,34 +103,34 @@ export async function fetchWithRetry<T>(
                         continue;
                     }
                 }
-                
+
                 // Not retryable or max retries exceeded
                 const text = await response.text().catch(() => '');
                 throw new Error(`HTTP ${status}: ${text || response.statusText}`);
             }
-            
+
             // Success - parse and return JSON
             return await response.json();
-            
+
         } catch (error) {
             lastError = error instanceof Error ? error : new Error(String(error));
-            
+
             // Check custom retryable predicate
             const isCustomRetryable = cfg.isRetryable?.(error);
-            
+
             // Check if error is retryable
-            const isNetworkError = error instanceof TypeError && 
+            const isNetworkError = error instanceof TypeError &&
                 error.message.includes('fetch') ||
                 error instanceof DOMException && error.name === 'AbortError';
-            
-            const shouldRetry = isNetworkError || 
+
+            const shouldRetry = isNetworkError ||
                 isCustomRetryable ||
                 attempt < cfg.maxRetries;
-            
+
             if (!shouldRetry) {
                 throw error;
             }
-            
+
             if (attempt < cfg.maxRetries) {
                 const delay = calculateDelay(attempt, cfg);
                 console.warn(
@@ -141,13 +141,13 @@ export async function fetchWithRetry<T>(
             }
         }
     }
-    
+
     throw lastError;
 }
 
 /**
  * Generic function to execute any async operation with retry
- * 
+ *
  * @param operation - The async operation to execute
  * @param config - Optional retry configuration
  * @returns Promise resolving to the operation result
@@ -159,24 +159,24 @@ export async function retryOperation<T>(
 ): Promise<T> {
     const cfg: RetryConfig = { ...DEFAULT_CONFIG, ...config };
     let lastError: Error | null = null;
-    
+
     for (let attempt = 0; attempt <= cfg.maxRetries; attempt++) {
         try {
             return await operation();
         } catch (error) {
             lastError = error instanceof Error ? error : new Error(String(error));
-            
+
             const isCustomRetryable = cfg.isRetryable?.(error);
-            const isNetworkError = error instanceof TypeError && 
+            const isNetworkError = error instanceof TypeError &&
                 error.message.includes('network') ||
                 error instanceof DOMException && error.name === 'AbortError';
-            
+
             const shouldRetry = isNetworkError || isCustomRetryable || attempt < cfg.maxRetries;
-            
+
             if (!shouldRetry) {
                 throw error;
             }
-            
+
             if (attempt < cfg.maxRetries) {
                 const delay = calculateDelay(attempt, cfg);
                 console.warn(
@@ -187,7 +187,7 @@ export async function retryOperation<T>(
             }
         }
     }
-    
+
     throw lastError;
 }
 
@@ -196,9 +196,9 @@ export async function retryOperation<T>(
  */
 export function createRetryClient(defaults: Partial<RetryConfig>) {
     return {
-        fetch: <T>(url: string, options?: RequestInit) => 
+        fetch: <T>(url: string, options?: RequestInit) =>
             fetchWithRetry<T>(url, options, defaults),
-        operation: <T>(op: () => Promise<T>) => 
+        operation: <T>(op: () => Promise<T>) =>
             retryOperation<T>(op, defaults)
     };
 }
@@ -215,7 +215,7 @@ export const retryClients = {
         backoffMultiplier: 2.5,
         jitterRange: 0.3
     }),
-    
+
     /** ODPT API: Moderate retry settings */
     odpt: createRetryClient({
         maxRetries: 3,
@@ -224,7 +224,7 @@ export const retryClients = {
         backoffMultiplier: 2,
         jitterRange: 0.2
     }),
-    
+
     /** General APIs: Conservative settings */
     general: createRetryClient({
         maxRetries: 2,

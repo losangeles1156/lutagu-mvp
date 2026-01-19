@@ -109,9 +109,9 @@ BEGIN
             0.8 AS base_score
         FROM public.l4_knowledge_embeddings l4
         WHERE l4.entity_id = station_id
-        
+
         UNION
-        
+
         -- Get knowledge for the parent hub station
         SELECT
             l4.id,
@@ -130,14 +130,14 @@ BEGIN
             bk.*,
             1 - (l4.embedding <=> user_query_embedding) AS semantic_score,
             -- Boost score for matching user context
-            CASE 
+            CASE
                 WHEN user_context IS NOT NULL AND l4.user_context @> to_jsonb(user_context)
-                THEN 0.3 ELSE 0.0 
+                THEN 0.3 ELSE 0.0
             END AS context_boost,
             -- Boost score for matching time context
-            CASE 
+            CASE
                 WHEN time_context IS NOT NULL AND l4.time_context @> to_jsonb(ARRAY[time_context])
-                THEN 0.1 ELSE 0.0 
+                THEN 0.1 ELSE 0.0
             END AS time_boost
         FROM base_knowledge bk
         JOIN public.l4_knowledge_embeddings l4 ON bk.id = l4.id
@@ -164,10 +164,10 @@ async function run() {
   try {
     await client.connect();
     console.log('🔌 Connected to database');
-    
+
     await client.query(sql);
     console.log('✅ Functions match_l4_knowledge and get_station_knowledge_contextual created/updated successfully');
-    
+
   } catch (err) {
     console.error('❌ Error executing SQL:', err);
   } finally {

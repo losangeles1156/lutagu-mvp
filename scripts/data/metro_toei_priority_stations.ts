@@ -1,7 +1,7 @@
 /**
  * Tokyo Metro / Toei Independent Stations
  * These stations are NOT co-located with JR East
- * 
+ *
  * Priority: 30 core stations for Phase 3
  * Format compatible with station_registry.ts
  */

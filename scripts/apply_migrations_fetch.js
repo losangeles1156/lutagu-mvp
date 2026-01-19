@@ -37,7 +37,7 @@ function execSql(sql) {
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({ sql_query: sql });
         const url = new URL(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`);
-        
+
         const options = {
             method: 'POST',
             headers: {

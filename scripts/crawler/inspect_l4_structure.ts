@@ -11,7 +11,7 @@ const supabase = createClient(
 
 async function inspectL4Structure() {
     console.log('--- Inspecting L4 Knowledge Structure ---');
-    
+
     // 1. Check a few records from l4_knowledge_embeddings
     const { data: embeddings, error: embError } = await supabase
         .from('l4_knowledge_embeddings')
@@ -29,14 +29,14 @@ async function inspectL4Structure() {
     // We'll guess language from content or look for a locale/language column
     const { data: columns, error: colError } = await supabase
         .rpc('get_table_columns', { table_name: 'l4_knowledge_embeddings' });
-    
+
     if (colError) {
         // Fallback: just try to select some common column names
         const { data: langData, error: langError } = await supabase
             .from('l4_knowledge_embeddings')
             .select('id')
             .limit(1);
-        
+
         if (langError) {
             console.error('Error checking columns:', langError);
         } else {

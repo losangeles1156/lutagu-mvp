@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     // Prefer Hub if available
     let targetNode = nodes.find(n => n.node_type === 'hub') || nodes[0];
-    
+
     // Get all related IDs (Hub + Children)
     let relatedIds = [targetNode.id];
     if (targetNode.node_type === 'hub') {
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
         .from('l3_facilities')
         .select('category, provider')
         .in('station_id', relatedIds);
-    
+
     const externalServices = externalLinks?.map(link => ({
         type: link.category,
         provider: link.provider

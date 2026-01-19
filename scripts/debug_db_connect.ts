@@ -27,7 +27,7 @@ async function testConnection() {
         } else {
             console.log('Connection Successful! Node count:', data); // data is null for head:true with count
         }
-        
+
         // Try to select 1 row
         const { data: nodes, error: nodeError } = await supabase.from('nodes').select('id, name').limit(1);
         if (nodeError) {

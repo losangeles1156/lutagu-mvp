@@ -49,13 +49,13 @@ async function aggregateHubs() {
 
         // 2. Filter logic (Simple for now: if name matches, we assume it's the same hub area for MVP)
         // In production, we would check geospatial distance < 200m
-        // For now, we exclude things like "Nishi-Shinjuku" if we only want "Shinjuku"? 
+        // For now, we exclude things like "Nishi-Shinjuku" if we only want "Shinjuku"?
         // Let's be inclusive for "Hub" concept: "Shinjuku-sanchome" IS part of Shinjuku Hub ecosystem.
         // But "Higashi-Ueno" might be distinct?
         // Let's stick to strict name matching for safety or manual list.
         // Actually, for "Ueno", we want "JR-East.Ueno", "TokyoMetro.Ueno", "Keisei.Ueno".
         // We do NOT want "Ueno-hirokoji" yet unless close.
-        
+
         // Refined filter: exact match on common station names
         const validChildren = candidates.filter(node => {
             const enName = node.name?.en || '';
@@ -63,7 +63,7 @@ async function aggregateHubs() {
             // Allow "Ueno", "Keisei Ueno", "Ueno Station"
             // Exclude "Ueno-hirokoji" if strictly looking for main station, but for a "Area Hub", it's debatable.
             // Let's keep it simple: if it contains the string, it's a candidate for the Spoke.
-            return true; 
+            return true;
         });
 
         console.log(`Found ${validChildren.length} potential spokes:`, validChildren.map(n => n.id));
@@ -78,29 +78,29 @@ async function aggregateHubs() {
 
         // 3. Create or Update Hub Node
         const hubId = `Hub:${hub.name}`;
-        
+
         // Calculate Centroid
         let sumLon = 0, sumLat = 0;
         let count = 0;
         validChildren.forEach(child => {
             // Parse Point
-            // child.location is usually GeoJSON object or string depending on client config. 
+            // child.location is usually GeoJSON object or string depending on client config.
             // Supabase returns GeoJSON object usually if configured, or string.
             // Let's handle both safely if possible, or assume string WKT if that's what we saw earlier.
             // Earlier logs showed: location: { coordinates: [lon, lat] } in types, but 'POINT(...)' in raw seed?
             // Let's check the data returned.
             // Assuming it matches the DB format.
         });
-        
+
         // Simple fallback location: use the first child's location
-        const representativeLoc = validChildren[0].coordinates; 
+        const representativeLoc = validChildren[0].coordinates;
 
         const hubPayload = {
             id: hubId,
             city_id: 'tokyo_core', // assume core
             name: { en: `${hub.name} Hub`, ja: `${hub.ja} 枢紐`, zh: `${hub.ja} 轉運站` },
             node_type: 'hub',
-            coordinates: representativeLoc, 
+            coordinates: representativeLoc,
             // is_hub: true, // Removed as column doesn't exist; inferred from node_type='hub' or parent_hub_id=null
             parent_hub_id: null,
             vibe_tags: ['aggregated_hub'],
@@ -123,7 +123,7 @@ async function aggregateHubs() {
                 .from('nodes')
                 .update({ parent_hub_id: hubId })
                 .eq('id', child.id);
-            
+
             if (updateError) {
                 console.error(`Failed to link child ${child.id}:`, updateError);
             } else {

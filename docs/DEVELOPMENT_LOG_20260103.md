@@ -41,7 +41,7 @@
 #### 2.1.1 L1 位置 DNA 數據
 - **位置**: `src/lib/nodes/seedNodes.ts`
 - **狀態**: ✅ 完成
-- **說明**: 
+- **說明**:
   - 東京23區車站 L1 數據達到 100% 覆蓋
   - 車站周邊設施資料（便利商店、餐廳、景點等）完整
   - 涵蓋所有主要樞紐站和小型站點
@@ -63,7 +63,7 @@
   - 涵蓋東京 Metro、都營地下鐵、主要私鐵
 
 #### 2.1.4 L4 專家知識庫
-- **位置**: 
+- **位置**:
   - `src/lib/l4/expertKnowledgeBase.ts`
   - `src/lib/l4/nodeTagKnowledgeClient.ts`
   - `knowledge/` 目錄
@@ -175,7 +175,7 @@ GET /api/nodes/viewport?... 200 in 553ms
 3. 複製 `supabase/migrations/20260103_user_learning_system.sql` 內容
 4. 執行 SQL
 
-**預期結果**: 
+**預期結果**:
 - 建立 5 個新表格
 - 建立 5 個索引
 - 建立 3 個 Trigger 函數
@@ -185,7 +185,7 @@ GET /api/nodes/viewport?... 200 in 553ms
 
 #### 4.2.1 清理無效遷移檔案
 **問題**: 目錄中存在無效名稱的遷移檔案
-**位置**: 
+**位置**:
 - `supabase/migrations/202` (已刪除)
 - `supabase/migrations/check_hubs_query.sql` (已刪除)
 
@@ -214,7 +214,7 @@ npx supabase db push --include-all
 
 ### 5.1 已知問題
 
-1. **遷移檔案過多**: 
+1. **遷移檔案過多**:
    - 超過 60 個遷移檔案
    - 許多包含重複或衝突的 SQL
    - 建議未來使用 `supabase db reset` 重新整理
@@ -311,7 +311,7 @@ LUTAGU_MVP/
    ```bash
    # 測試用戶偏好 API
    curl http://localhost:3000/api/user/preferences
-   
+
    # 測試決策記錄 API
    curl -X POST http://localhost:3000/api/decision/record \
      -H "Content-Type: application/json" \

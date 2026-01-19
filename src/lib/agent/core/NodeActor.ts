@@ -46,7 +46,7 @@ export class NodeActor implements INodeActor {
     type: NodeType;
     parentId: string | null;
     childrenIds: string[] = [];
-    
+
     // Modules
     private modules: Map<AgentLevel, BaseAgentModule> = new Map();
 
@@ -71,7 +71,7 @@ export class NodeActor implements INodeActor {
 
     async receiveMessage(msg: IAgentMessage): Promise<IAgentMessage> {
         console.log(`[NodeActor:${this.id}] Received ${msg.type} from ${msg.from}`);
-        
+
         // Route to appropriate module
         const agentModule = this.modules.get(msg.level);
         if (agentModule) {
@@ -101,7 +101,7 @@ export class NodeActor implements INodeActor {
             console.log(`[NodeActor:${this.id}] Syncing state from ${this.childrenIds.length} children...`);
             // In a real implementation, we would call children to get their status
             // For MVP, we might aggregate DB rows
-        } 
+        }
         // 2. If Spoke, push status to Parent (or Parent pulls it)
         else if (this.parentId) {
             console.log(`[NodeActor:${this.id}] Notify parent ${this.parentId} of state change.`);
@@ -111,7 +111,7 @@ export class NodeActor implements INodeActor {
     getLevelHandler(level: AgentLevel) {
         return this.modules.get(level);
     }
-    
+
     registerModule(level: AgentLevel, module: BaseAgentModule) {
         this.modules.set(level, module);
     }

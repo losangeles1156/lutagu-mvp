@@ -12,7 +12,7 @@ interface AtmosphereTags {
         style: 'modern' | 'traditional' | 'casual' | 'formal' | 'unique';
         crowd_level: 'empty' | 'sparse' | 'moderate' | 'crowded' | 'packed';
     };
-    
+
     // 適合場景
     scenes: {
         business: boolean;      // 商務洽談
@@ -22,7 +22,7 @@ interface AtmosphereTags {
         friends: boolean;       // 朋友聚會
         tourist: boolean;       // 觀光客友善
     };
-    
+
     // 環境特徵
     environment: {
         indoor: boolean;        // 室內
@@ -33,7 +33,7 @@ interface AtmosphereTags {
         smoking: 'allowed' | 'prohibited' | 'partial';
         noise_level: 1 | 2 | 3 | 4 | 5;  // 1=安靜, 5=吵雜
     };
-    
+
     // 時段特性
     time特性: {
         breakfast: boolean;     // 早餐
@@ -42,7 +42,7 @@ interface AtmosphereTags {
         late_night: boolean;    // 深夜
         all_day: boolean;       // 全天候
     };
-    
+
     // 特殊體驗
     special: {
         reservation: boolean;   // 需預約
@@ -52,7 +52,7 @@ interface AtmosphereTags {
         buffett: boolean;       // 吃到飽
         private_room: boolean;  // 包廂
     };
-    
+
     // LLM 置信度
     confidence: number;         // 0.0 - 1.0
     model_used: string;         // 模型名稱
@@ -252,7 +252,7 @@ ALTER TABLE l1_places ADD COLUMN IF NOT EXISTS atmosphere_tags JSONB;
 
 -- 建立氣氛標籤統計視圖
 CREATE OR REPLACE VIEW v_l1_atmosphere_statistics AS
-SELECT 
+SELECT
     category,
     energy,
     style,
@@ -260,9 +260,9 @@ SELECT
     AVG((atmosphere_tags->>'confidence')::float) as avg_confidence
 FROM l1_places,
      LATERAL jsonb_array_elements(
-        CASE 
-            WHEN jsonb_typeof(atmosphere_tags) = 'object' 
-            THEN jsonb_build_array(atmosphere_tags) 
+        CASE
+            WHEN jsonb_typeof(atmosphere_tags) = 'object'
+            THEN jsonb_build_array(atmosphere_tags)
             ELSE atmosphere_tags->'core'
         END
      ) as core
@@ -323,25 +323,25 @@ interface PrecomputedSimilarity {
 
 ```typescript
 class POISimilarityCalculator {
-    
+
     /**
      * 計算兩 POI 間的類別相似度
      */
     calculateCategorySimilarity(poi1: POI, poi2: POI): number {
         // 同類別 = 1.0
         if (poi1.category === poi2.category) return 1.0;
-        
+
         // 同父類別 = 0.7
-        if (this.getParentCategory(poi1.category) === 
+        if (this.getParentCategory(poi1.category) ===
             this.getParentCategory(poi2.category)) return 0.7;
-        
+
         // 跨類別但相關 = 0.4
         const relatedCategories = this.getRelatedCategories(poi1.category);
         if (relatedCategories.includes(poi2.category)) return 0.4;
-        
+
         return 0.0;
     }
-    
+
     /**
      * 計算兩 POI 間的氣氛相似度
      */
@@ -349,54 +349,54 @@ class POISimilarityCalculator {
         if (!poi1.atmosphere_tags || !poi2.atmosphere_tags) {
             return 0.5;  // 無氣氛資料時使用中間值
         }
-        
+
         const a1 = poi1.atmosphere_tags;
         const a2 = poi2.atmosphere_tags;
-        
+
         // Energy 相似度
         const energySim = a1.core.energy === a2.core.energy ? 1.0 : 0.5;
-        
+
         // Style 相似度
         const styleSim = a1.core.style === a2.core.style ? 1.0 : 0.6;
-        
+
         // 場景重疊度
         const scenes1 = this.getTrueScenes(a1.scenes);
         const scenes2 = this.getTrueScenes(a2.scenes);
         const sceneOverlap = this.jaccardSimilarity(scenes1, scenes2);
-        
+
         // 環境重疊度
         const env1 = this.getEnvironmentVector(a1.environment);
         const env2 = this.getEnvironmentVector(a2.environment);
         const envSim = 1 - this.euclideanDistance(env1, env2) / Math.sqrt(env1.length);
-        
+
         return (energySim * 0.3 + styleSim * 0.3 + sceneOverlap * 0.2 + envSim * 0.2);
     }
-    
+
     /**
      * 計算兩 POI 間的位置相似度
      */
     calculateLocationSimilarity(poi1: POI, poi2: POI): number {
         // 同一車站 = 1.0
         if (poi1.station_id === poi2.station_id) return 1.0;
-        
+
         // 同一行政區 = 0.8
         if (poi1.location_tags?.ward === poi2.location_tags?.ward) {
             return 0.8;
         }
-        
+
         // 計算直線距離 (km)
         const distance = this.calculateDistance(
-            poi1.coordinates, 
+            poi1.coordinates,
             poi2.coordinates
         );
-        
+
         // 距離衰減：1km 以內 = 0.6, 2km = 0.4, 5km = 0.2
         if (distance <= 1) return 0.6;
         if (distance <= 2) return 0.4;
         if (distance <= 5) return 0.2;
         return 0.1;
     }
-    
+
     /**
      * 計算整體相似度
      */
@@ -408,30 +408,30 @@ class POISimilarityCalculator {
             price_weight: 0.1,
             popularity_weight: 0.1
         };
-        
+
         const categoryScore = this.calculateCategorySimilarity(poi1, poi2);
         const locationScore = this.calculateLocationSimilarity(poi1, poi2);
         const atmosphereScore = this.calculateAtmosphereSimilarity(poi1, poi2);
         const priceScore = this.calculatePriceSimilarity(poi1, poi2);
         const popularityScore = this.calculatePopularitySimilarity(poi1, poi2);
-        
-        const overall = 
+
+        const overall =
             categoryScore * weights.category_weight +
             locationScore * weights.location_weight +
             atmosphereScore * weights.atmosphere_weight +
             priceScore * weights.price_weight +
             popularityScore * weights.popularity_weight;
-        
+
         // 找出共同標籤
         const commonTags = this.findCommonTags(poi1, poi2);
-        
+
         // 生成推薦理由
         const reason = this.generateRecommendationReason(poi1, poi2, {
             categoryScore,
             locationScore,
             atmosphereScore
         });
-        
+
         return {
             poi_id: poi1.id,
             similar_poi_id: poi2.id,
@@ -464,43 +464,43 @@ interface PrecomputeBatchConfig {
 }
 
 class SimilarityPrecomputationJob {
-    
+
     async run(config: PrecomputeBatchConfig): Promise<JobResult> {
         const startTime = Date.now();
         let processed = 0;
         let inserted = 0;
         let errors = 0;
-        
+
         // 1. 獲取需要計算的 POI 清單
         const pois = await this.getPOIsForComputation();
-        
+
         // 2. 按優先級排序
         const sortedPOIs = this.sortByPriority(pois, config.priority_pois);
-        
+
         // 3. 分批處理
         const batches = this.createBatches(sortedPOIs, config.batch_size);
-        
+
         for (const batch of batches) {
             const results = await Promise.all(
                 batch.map(poi => this.computeSimilarities(poi, pois, config))
             );
-            
+
             // 4. 過濾並排序結果
             const filteredResults = results
                 .flat()
                 .filter(r => r.similarity_score >= config.min_similarity_threshold)
                 .sort((a, b) => b.similarity_score - a.similarity_score)
                 .slice(0, config.max_similar_per_poi);
-            
+
             // 5. 批量寫入資料庫
             await this.batchInsert(filteredResults);
-            
+
             processed += batch.length;
             inserted += filteredResults.length;
-            
+
             console.log(`Processed ${processed} POIs, Inserted ${inserted} similarities`);
         }
-        
+
         return {
             processed,
             inserted,
@@ -508,22 +508,22 @@ class SimilarityPrecomputationJob {
             duration_ms: Date.now() - startTime
         };
     }
-    
+
     private async computeSimilarities(
-        poi: POI, 
-        allPOIs: POI[], 
+        poi: POI,
+        allPOIs: POI[],
         config: PrecomputeBatchConfig
     ): Promise<PrecomputedSimilarity[]> {
         // 排除自身
         const candidates = allPOIs.filter(p => p.id !== poi.id);
-        
+
         // 並行計算相似度
         const similarities = await Promise.all(
-            candidates.map(candidate => 
+            candidates.map(candidate =>
                 this.calculator.calculateOverallSimilarity(poi, candidate)
             )
         );
-        
+
         return similarities;
     }
 }
@@ -543,7 +543,7 @@ CREATE TABLE IF NOT EXISTS l1_poi_similarities (
     recommendation_reason TEXT,
     computed_at TIMESTAMP NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP NOT NULL,
-    
+
     UNIQUE(poi_id, similar_poi_id)
 );
 
@@ -555,7 +555,7 @@ CREATE INDEX idx_expires_at ON l1_poi_similarities(expires_at);
 
 -- 相似度統計視圖
 CREATE OR REPLACE VIEW v_l1_similarity_statistics AS
-SELECT 
+SELECT
     poi_id,
     COUNT(*) as similar_count,
     AVG(similarity_score) as avg_similarity,
@@ -585,27 +585,27 @@ CREATE INDEX idx_job_log_started ON l1_similarity_job_log(started_at DESC);
 
 ```typescript
 class SimilarityUpdater {
-    
+
     /**
      * 當 POI 標籤更新時，觸發相似度重新計算
      */
     async onPOITagsUpdated(poiId: string): Promise<void> {
         // 1. 標記現有相似度為過期
         await this.markAsExpired(poiId);
-        
+
         // 2. 重新計算該 POI 的相似度
         const newSimilarities = await this.recomputeForPOI(poiId);
-        
+
         // 3. 更新相關 POI 的相似度（因為它們的相似清單可能需要更新）
         const relatedPOIs = await this.getRelatedPOIs(poiId);
         for (const relatedId of relatedPOIs) {
             await this.markAsExpired(relatedId);
         }
-        
+
         // 4. 批次插入新相似度
         await this.batchInsert(newSimilarities);
     }
-    
+
     /**
      * 定期清理過期相似度
      */
@@ -614,7 +614,7 @@ class SimilarityUpdater {
             .from('l1_poi_similarities')
             .delete()
             .lt('expires_at', new Date());
-        
+
         return count;
     }
 }
@@ -648,7 +648,7 @@ npx tsx scripts/precompute-similarities.ts \
 ### Step 4: 驗證結果
 ```sql
 -- 檢查氣氛標籤覆蓋率
-SELECT 
+SELECT
     COUNT(*) as total,
     COUNT(atmosphere_tags) as with_atmosphere,
     ROUND(COUNT(atmosphere_tags)::numeric / COUNT(*) * 100, 1) as coverage_pct
@@ -658,7 +658,7 @@ FROM l1_places;
 SELECT * FROM v_l1_similarity_statistics LIMIT 10;
 
 -- 檢查相似推薦範例
-SELECT 
+SELECT
     p1.name as poi_name,
     p2.name as similar_name,
     similarity_score,

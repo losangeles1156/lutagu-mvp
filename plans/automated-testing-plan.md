@@ -118,7 +118,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 describe('LanguageSwitcher', () => {
   it('renders language options in Traditional Chinese', () => {
     render(<LanguageSwitcher />);
-    
+
     // 檢查下拉選單包含繁體中文選項
     expect(screen.getByText('繁體中文')).toBeInTheDocument();
     expect(screen.getByText('English')).toBeInTheDocument();
@@ -127,10 +127,10 @@ describe('LanguageSwitcher', () => {
 
   it('shows dropdown when button is clicked', () => {
     render(<LanguageSwitcher />);
-    
+
     const button = screen.getByRole('button', { name: /切換語言/i });
     fireEvent.click(button);
-    
+
     expect(screen.getByText('繁體中文')).toBeVisible();
   });
 
@@ -140,9 +140,9 @@ describe('LanguageSwitcher', () => {
       useRouter: () => ({ replace: mockReplace }),
       usePathname: () => '/',
     }));
-    
+
     render(<LanguageSwitcher />);
-    
+
     fireEvent.click(screen.getByText('English'));
     expect(mockReplace).toHaveBeenCalledWith('/', expect.any(Object));
   });
@@ -162,27 +162,27 @@ describe('MainLayout', () => {
 
   it('renders AI assistant button with translated text', () => {
     render(
-      <MainLayout 
-        mapPanel={mockMapPanel} 
-        chatPanel={mockChatPanel} 
+      <MainLayout
+        mapPanel={mockMapPanel}
+        chatPanel={mockChatPanel}
       />
     );
-    
+
     // 檢查 AI 助手按鈕存在
     expect(screen.getByText('AI 助手')).toBeInTheDocument();
   });
 
   it('expands chat panel when button is clicked', () => {
     render(
-      <MainLayout 
-        mapPanel={mockMapPanel} 
-        chatPanel={mockChatPanel} 
+      <MainLayout
+        mapPanel={mockMapPanel}
+        chatPanel={mockChatPanel}
       />
     );
-    
+
     const aiButton = screen.getByText('AI 助手');
     fireEvent.click(aiButton);
-    
+
     // 驗證展開後的行為
     // 實際行為取決於 UI 狀態管理
   });
@@ -203,7 +203,7 @@ describe('ErrorBoundary', () => {
         <div data-testid="content">Test Content</div>
       </ErrorBoundary>
     );
-    
+
     expect(screen.getByTestId('content')).toBeInTheDocument();
   });
 
@@ -251,7 +251,7 @@ describe('i18n - 繁體中文 (zh-TW)', () => {
   it('all common translations are present', () => {
     const requiredKeys = [
       'common.close',
-      'common.cancel', 
+      'common.cancel',
       'common.confirm',
       'common.loading',
       'common.error',
@@ -273,7 +273,7 @@ describe('i18n - 繁體中文 (zh-TW)', () => {
         <LanguageSwitcher />
       </NextIntlClientProvider>
     );
-    
+
     expect(screen.getByText('繁體中文')).toBeInTheDocument();
   });
 });
@@ -290,13 +290,13 @@ import { test, expect } from '@playwright/test';
 test.describe('Internationalization (i18n)', () => {
   test('switches to Traditional Chinese', async ({ page }) => {
     await page.goto('http://localhost:3000/en');
-    
+
     // 打開語言切換器
     await page.click('[aria-label="Change language"]');
-    
+
     // 選擇繁體中文
     await page.click('text=繁體中文');
-    
+
     // 驗證導航已變為中文
     await expect(page.locator('text=探索')).toBeVisible();
     await expect(page.locator('text=行程')).toBeVisible();
@@ -304,9 +304,9 @@ test.describe('Internationalization (i18n)', () => {
 
   test('all navigation items are translated', async ({ page }) => {
     await page.goto('http://localhost:3000/zh-TW');
-    
+
     const navItems = ['探索', '行程', '守護', '我的'];
-    
+
     for (const item of navItems) {
       await expect(page.locator(`text=${item}`)).toBeVisible();
     }
@@ -315,7 +315,7 @@ test.describe('Internationalization (i18n)', () => {
   test('error messages are in correct language', async ({ page }) => {
     // 觸發錯誤場景
     await page.goto('http://localhost:3000/zh-TW');
-    
+
     // 驗證錯誤訊息為中文
     await expect(page.locator('text=糟了！系統發生錯誤')).toBeVisible();
   });
@@ -324,21 +324,21 @@ test.describe('Internationalization (i18n)', () => {
 test.describe('Interactive Elements', () => {
   test('AI assistant button click expands chat', async ({ page }) => {
     await page.goto('http://localhost:3000/zh-TW');
-    
+
     // 點擊 AI 助手按鈕
     await page.click('text=AI 助手');
-    
+
     // 驗證對話面板展開
     await expect(page.locator('text=問 LUTAGU...')).toBeVisible();
   });
 
   test('tab switching works correctly', async ({ page }) => {
     await page.goto('http://localhost:3000/zh-TW');
-    
+
     // 點擊不同標籤
     await page.click('text=附近');
     await expect(page.locator('text=生活機能')).toBeVisible();
-    
+
     await page.click('text=狀態');
     await expect(page.locator('text=運行情報')).toBeVisible();
   });
@@ -385,23 +385,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - run: npm ci
-      
+
       - run: npm test -- --coverage
-      
+
       - run: npm run test:e2e
         env:
           PLAYWRIGHT_CHROMIUM_USE_HEADLESS_NEW: 1
-      
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -40,7 +40,7 @@ export function JapanTimeClock({ className }: { className?: string }) {
                 </span>
                 <span className="text-[10px] opacity-40 font-medium">JST</span>
             </div>
-            
+
             <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-bold">
                 <Calendar size={12} className="opacity-50" />
                 <span>{time.date.getMonth() + 1}/{time.date.getDate()}</span>

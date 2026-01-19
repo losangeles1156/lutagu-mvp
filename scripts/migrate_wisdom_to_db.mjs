@@ -95,7 +95,7 @@ async function migrate() {
     for (const [id, facilities] of Object.entries(WISDOM_DATA)) {
         console.log(`Migrating ${id}... (${facilities.length} items)`);
 
-        // Upsert 
+        // Upsert
         const { error } = await supabase
             .from('stations_static')
             .update({

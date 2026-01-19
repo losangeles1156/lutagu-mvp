@@ -140,7 +140,7 @@ OSM/L1 Scraper → l1_places 表
 ```sql
 -- view: 等待審核的 L1 數據
 CREATE OR REPLACE VIEW v_l1_pending AS
-SELECT 
+SELECT
     l1.id,
     l1.station_id,
     l1.name,
@@ -150,13 +150,13 @@ SELECT
     c.is_featured,
     c.notes
 FROM l1_places l1
-LEFT JOIN node_l1_config c ON l1.station_id = c.node_id 
+LEFT JOIN node_l1_config c ON l1.station_id = c.node_id
     AND c.source_id = l1.id::TEXT
 WHERE c.is_approved IS NULL OR c.is_approved = FALSE;
 
 -- view: 已批准的 L1 數據（前端實際顯示）
 CREATE OR REPLACE VIEW v_l1_approved AS
-SELECT 
+SELECT
     l1.id,
     l1.station_id,
     l1.name,
@@ -165,7 +165,7 @@ SELECT
     c.is_featured,
     c.display_order
 FROM l1_places l1
-JOIN node_l1_config c ON l1.station_id = c.node_id 
+JOIN node_l1_config c ON l1.station_id = c.node_id
     AND c.source_id = l1.id::TEXT
 WHERE c.is_approved = TRUE
 ORDER BY c.display_order, l1.name;
@@ -238,7 +238,7 @@ async function getApprovedL1Data(nodeId: string, category?: string) {
         .eq('station_id', nodeId)
         .eq('is_approved', true)
         .order('display_order');
-    
+
     return data;
 }
 ```
@@ -248,11 +248,11 @@ async function getApprovedL1Data(nodeId: string, category?: string) {
 ```typescript
 function L1PlaceList({ nodeId, category }) {
     const places = useL1Places(nodeId, category);  // 只返回已批准數據
-    
+
     return (
         <div>
             {places.map(place => (
-                <PlaceCard 
+                <PlaceCard
                     key={place.id}
                     place={place}
                     isFeatured={place.is_featured}  // 精選標記

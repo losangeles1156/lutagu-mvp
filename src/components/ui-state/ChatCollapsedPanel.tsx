@@ -182,7 +182,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
               onChange={(e) => setInput(e.target.value)}
               placeholder={tChat('placeholder')}
               maxLength={MAX_INPUT_LENGTH}
-              className="flex-1 px-3 py-2 bg-slate-50 border-0 rounded-lg 
+              className="flex-1 px-3 py-2 bg-slate-50 border-0 rounded-lg
                 focus:ring-2 focus:ring-indigo-500 focus:bg-white
                 text-sm font-medium placeholder:text-slate-400 min-h-[44px]"
             />
@@ -286,7 +286,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
               onChange={(e) => setInput(e.target.value)}
               placeholder={tChat('placeholder')}
               maxLength={MAX_INPUT_LENGTH}
-              className="flex-1 px-3 py-2 bg-slate-50 border-0 rounded-lg 
+              className="flex-1 px-3 py-2 bg-slate-50 border-0 rounded-lg
                 focus:ring-2 focus:ring-indigo-500 focus:bg-white
                 text-sm font-medium placeholder:text-slate-400 min-h-[44px]"
             />

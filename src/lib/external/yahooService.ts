@@ -55,7 +55,7 @@ const getCachedYahooStatus = unstable_cache(
 /**
  * Scrapes Yahoo Japan Transit for train status information (Kanto Area).
  * Returns a list of lines with reported trouble (delays, suspensions).
- * 
+ *
  * Uses Next.js unstable_cache when available, falls back to direct fetch for scripts.
  */
 export const fetchYahooStatus = async () => {

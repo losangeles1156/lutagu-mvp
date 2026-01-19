@@ -334,21 +334,21 @@ export const CACHE_STRATEGY = {
     ttl: 5 * 60,  // 5 分鐘本地快取
     staleWhileRevalidate: true,
   },
-  
+
   // L2 即時狀態（熱數據）
   l2Status: {
     source: 'redis',
     ttl: 0,  // 不快取，直接讀 Redis
     staleWhileRevalidate: false,
   },
-  
+
   // L3 設施（溫數據）
   facilities: {
     source: 'supabase',
     ttl: 10 * 60,  // 10 分鐘
     staleWhileRevalidate: true,
   },
-  
+
   // AI 回應
   aiResponse: {
     source: 'none',  // 不快取
@@ -422,11 +422,11 @@ const ODPT_BASE_URL = 'https://api.odpt.org/api/v4';
 export async function getTrainInformation(lineId?: string) {
   const url = new URL(`${ODPT_BASE_URL}/odpt:TrainInformation`);
   url.searchParams.set('acl:consumerKey', process.env.ODPT_API_KEY!);
-  
+
   if (lineId) {
     url.searchParams.set('odpt:railway', `odpt.Railway:${lineId}`);
   }
-  
+
   const response = await fetch(url.toString());
   return response.json();
 }
@@ -435,7 +435,7 @@ export async function getStationInfo(stationId: string) {
   const url = new URL(`${ODPT_BASE_URL}/odpt:Station`);
   url.searchParams.set('acl:consumerKey', process.env.ODPT_API_KEY!);
   url.searchParams.set('owl:sameAs', `odpt.Station:${stationId}`);
-  
+
   const response = await fetch(url.toString());
   return response.json();
 }
@@ -454,10 +454,10 @@ export async function queryNearbyPOIs(
   radius: number = 200,
   categories: string[]
 ) {
-  const categoryQueries = categories.map(cat => 
+  const categoryQueries = categories.map(cat =>
     `node["${cat}"](around:${radius},${lat},${lng});`
   ).join('\n');
-  
+
   const query = `
     [out:json][timeout:30];
     (
@@ -465,12 +465,12 @@ export async function queryNearbyPOIs(
     );
     out body;
   `;
-  
+
   const response = await fetch(OVERPASS_URL, {
     method: 'POST',
     body: query,
   });
-  
+
   return response.json();
 }
 ```
@@ -499,7 +499,7 @@ export async function translate(
       target_lang: mapToDeepLLang(targetLang),
     }),
   });
-  
+
   const data = await response.json();
   return data.translations[0].text;
 }
@@ -597,7 +597,7 @@ services:
       - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
     ports:
       - 5678:5678
-      
+
   ollama:
     image: ollama/ollama
     ports:

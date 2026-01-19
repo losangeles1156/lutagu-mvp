@@ -34,7 +34,7 @@ async function diagnose() {
       .select('id, name, is_hub, parent_hub_id')
       .or(`name->>ja.eq.${name},name->>zh-TW.eq.${name}`)
       .limit(10);
-    
+
     if (cError) {
       console.error(`Error searching children for ${name}:`, cError);
     } else {

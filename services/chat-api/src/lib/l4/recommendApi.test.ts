@@ -5,11 +5,11 @@ import { hardCalculationEngine } from './hardCalculationEngine';
 import { EvaluationContext, MatchedStrategyCard } from '../../types/lutagu_l4';
 
 // Mocking LLM client to avoid actual API calls during test
-// We can't easily mock the import inside the route.ts from here, 
+// We can't easily mock the import inside the route.ts from here,
 // so we'll test the core logic of merging and fallback.
 
 describe('L4 Recommendation Flow Logic', () => {
-    
+
     test('Should merge results from both engines and sort by priority', async () => {
         const context: EvaluationContext = {
             stationId: 'odpt.Station:TokyoMetro.Ginza.Ueno',
@@ -26,9 +26,9 @@ describe('L4 Recommendation Flow Logic', () => {
 
         const softCards = decisionEngine.evaluate(context);
         const hardCards = await hardCalculationEngine.evaluate(context);
-        
+
         const merged = [...hardCards, ...softCards].sort((a, b) => b.priority - a.priority);
-        
+
         assert.ok(merged.length > 0, 'Should have merged cards');
         for (let i = 0; i < merged.length - 1; i++) {
             assert.ok(merged[i].priority >= merged[i+1].priority, 'Cards should be sorted by priority descending');
@@ -40,7 +40,7 @@ describe('L4 Recommendation Flow Logic', () => {
             { id: '1', type: 'info', icon: '', title: '', description: '', priority: 80 },
             { id: '2', type: 'info', icon: '', title: '', description: '', priority: 30 }
         ];
-        
+
         const lowPriorityCards: MatchedStrategyCard[] = [
             { id: '1', type: 'info', icon: '', title: '', description: '', priority: 40 },
             { id: '2', type: 'info', icon: '', title: '', description: '', priority: 10 }

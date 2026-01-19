@@ -37,7 +37,7 @@ export class DataProcessor {
         const knowledgeItems: L4Data[] = [];
         const content = result.content;
         const title = result.title;
-        
+
         // Find entities (stations) mentioned in the content
         for (const [name, id] of Object.entries(STATION_MAPPING)) {
             // Skip false positives if they are too short and common

@@ -12,7 +12,7 @@ const supabase = createClient(
 
 async function inspectUenoNode() {
     console.log('--- Inspecting Ueno Node ---');
-    
+
     // Search for Ueno in 'nodes'
     const { data: nodes, error } = await supabase
         .from('nodes')
@@ -28,7 +28,7 @@ async function inspectUenoNode() {
             .select('*')
             .ilike('name', '%上野%')
             .limit(5);
-            
+
         if (error2) console.log('Error fetching nodes:', error2.message);
         else printNodes(nodes2);
     } else {
@@ -41,7 +41,7 @@ function printNodes(nodes: any[]) {
         console.log('No Ueno node found.');
         return;
     }
-    
+
     console.log(`Found ${nodes.length} nodes:`);
     nodes.forEach(n => {
         console.log(`\nID: ${n.id}`);
@@ -50,7 +50,7 @@ function printNodes(nodes: any[]) {
         console.log(`Facility Profile: ${JSON.stringify(n.facility_profile)}`);
         console.log(`Transit Lines: ${JSON.stringify(n.transit_lines)}`);
     });
-    
+
     const uenoId = nodes[0].id;
     checkFares(uenoId);
 }
@@ -61,7 +61,7 @@ async function checkFares(stationId: string) {
         .from('fares')
         .select('*', { count: 'exact', head: true })
         .or(`from_station_id.eq.${stationId},to_station_id.eq.${stationId}`);
-        
+
     if (error) console.log('Fares error:', error.message);
     else console.log(`Fares count: ${count}`);
 }

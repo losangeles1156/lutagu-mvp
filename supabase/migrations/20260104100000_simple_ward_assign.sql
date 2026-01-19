@@ -5,7 +5,7 @@
 SELECT 'Current wards:' as info, COUNT(*) as count FROM public.wards;
 
 -- Check nodes with ward_id
-SELECT 'Nodes with ward_id:' as info, COUNT(*) as count 
+SELECT 'Nodes with ward_id:' as info, COUNT(*) as count
 FROM public.nodes WHERE ward_id IS NOT NULL;
 
 -- Simple assignment using ward center_point (distance-based)
@@ -22,7 +22,7 @@ BEGIN
     FOR w IN SELECT * FROM public.wards WHERE is_active = true LOOP
         -- Get center point of ward
         SELECT center_point INTO ward_center FROM public.wards WHERE id = w.id;
-        
+
         IF ward_center IS NOT NULL THEN
             -- Update nodes within ~3km of ward center that don't have ward_id
             UPDATE public.nodes n
@@ -38,7 +38,7 @@ BEGIN
                   ward_center::geography
                 ) < 5000  -- Within 5km
               );
-            
+
             RAISE NOTICE 'Assigned nodes to ward: %', w.id;
         END IF;
     END LOOP;
@@ -51,7 +51,7 @@ SET node_count = (
 );
 
 -- Final check
-SELECT 
+SELECT
     w.id,
     w.name_i18n->>'ja' as ward_name,
     w.node_count
@@ -60,7 +60,7 @@ ORDER BY w.node_count DESC
 LIMIT 10;
 
 -- Overall coverage
-SELECT 
+SELECT
     COUNT(*) as total_nodes,
     COUNT(CASE WHEN ward_id IS NOT NULL THEN 1 END) as assigned,
     ROUND(

@@ -75,7 +75,7 @@ This document outlines the tiered data architecture and the ETL (Extract, Transf
 ## 3. Data Integrity & Quality Standards
 
 *   **Encoding**: All text data MUST be stored in **UTF-8** format.
-*   **Incremental Updates**: 
+*   **Incremental Updates**:
     *   Based on `source` URL in `l4_knowledge_embeddings`.
     *   Uses `upsert` logic to prevent duplicates while allowing content updates.
 *   **Validation**:

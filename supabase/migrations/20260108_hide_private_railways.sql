@@ -1,7 +1,7 @@
 -- 1. Hide specific private railway operators completely (by Node ID)
 -- User requested: Seibu, Odakyu, Yurikamome, Keio
-UPDATE nodes 
-SET is_active = false 
+UPDATE nodes
+SET is_active = false
 WHERE id LIKE 'odpt.Station:Seibu.%'
    OR id LIKE 'odpt.Station:Odakyu.%'
    OR id LIKE 'odpt.Station:Yurikamome.%'
@@ -15,19 +15,19 @@ UPDATE nodes
 SET is_active = false
 WHERE id LIKE 'odpt.Station:Toei.Nippori%' -- Matches Toei.Nippori
    OR EXISTS (
-       SELECT 1 
-       FROM jsonb_array_elements_text(transit_lines) line 
+       SELECT 1
+       FROM jsonb_array_elements_text(transit_lines) line
        WHERE line = 'odpt.Railway:Toei.NipporiToneri'
    );
 
 -- Naka-Meguro: Show Tokyu only, Hide Tokyo Metro
-UPDATE nodes 
-SET is_active = false 
+UPDATE nodes
+SET is_active = false
 WHERE id = 'odpt.Station:TokyoMetro.NakaMeguro';
 
 -- Sengakuji: Show Toei only, Hide Keikyu
-UPDATE nodes 
-SET is_active = false 
+UPDATE nodes
+SET is_active = false
 WHERE id = 'odpt.Station:Keikyu.Sengakuji';
 
 -- Meiji-Jingumae: Hide duplicate/variant node 'MeijiJingumaeHarajuku', keep 'MeijiJingumae'

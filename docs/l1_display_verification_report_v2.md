@@ -1,7 +1,7 @@
 # L1 資料展示優化驗證報告 v2.0
 
-**建立日期**: 2026-01-06  
-**版本**: v2.0  
+**建立日期**: 2026-01-06
+**版本**: v2.0
 **狀態**: ✅ 快取優化已完成
 
 ---
@@ -60,7 +60,7 @@
 
 **問題**: API 與前端使用不同快取鍵格式（排序 vs 未排序）
 
-**修復方案**: 
+**修復方案**:
 - 新增 [`src/lib/cache/cacheKeyBuilder.ts`](src/lib/cache/cacheKeyBuilder.ts:1)
 - 統一使用 `CacheKeyBuilder.forStation()` 產生快取鍵
 - 確保站點 ID 排序一致性
@@ -137,7 +137,7 @@ class CacheKeyBuilder {
 // src/lib/cache/cacheWarmer.ts
 class CacheWarmer {
     private hotStations: Map<string, StationHotness> = new Map();
-    
+
     async warmup(cache: CacheService): Promise<void> {
         const hotStations = this.getHotStations();
         for (const station of hotStations) {
@@ -175,7 +175,7 @@ export function CacheMonitorDashboard() {
                 <Card>記憶體使用</Card>
                 <Card>熱門站點預熱</Card>
             </div>
-            
+
             {/* 快取詳細資訊 */}
             <div className="grid grid-cols-3">
                 {Object.entries(metrics.caches).map(([name, stats]) => (
@@ -307,5 +307,5 @@ POST /api/cache/warmup
 
 ---
 
-**報告維護者**: LUTAGU Tech Team  
+**報告維護者**: LUTAGU Tech Team
 **最後更新**: 2026-01-06

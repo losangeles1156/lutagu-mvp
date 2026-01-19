@@ -40,4 +40,3 @@ test('normalizeVibeTagsForDisplay supports L1 vibe tag objects with score', () =
         count: 5
     });
 });
-

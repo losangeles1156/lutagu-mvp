@@ -2,11 +2,11 @@
 create table facility_suitability (
   id uuid primary key default gen_random_uuid(),
   facility_id text references facilities(id) on delete cascade,
-  
+
   tag text not null,                      -- 'good_for_waiting', 'luggage_friendly'
   confidence float default 1.0,           -- 0-1
   source text default 'manual',           -- 'manual', 'ai_inferred'
-  
+
   created_at timestamptz default now()
 );
 

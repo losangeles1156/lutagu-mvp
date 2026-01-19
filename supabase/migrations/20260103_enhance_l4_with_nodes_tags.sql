@@ -8,38 +8,38 @@ CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
 -- Create enhanced L4 knowledge table with node/tag relationships
 CREATE TABLE IF NOT EXISTS public.l4_knowledge_v2 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
+
     -- Core content
     knowledge_type TEXT NOT NULL, -- 'railway', 'hub_station', 'accessibility', 'special_location', 'pass', 'crowd'
     title JSONB DEFAULT '{}'::jsonb, -- Multi-lingual title
     content TEXT NOT NULL, -- The actual knowledge tip/advice
     icon TEXT, -- Emoji icon for display
-    
+
     -- Node relationship (for node-specific knowledge)
     node_id TEXT REFERENCES public.nodes(id) ON DELETE CASCADE, -- Direct node reference
     node_vibe JSONB DEFAULT '[]'::jsonb, -- Node vibes for filtering ['culture', 'geek', 'luxury', etc.]
-    
+
     -- Tag relationship (for tag-based knowledge)
     tag_category JSONB DEFAULT '[]'::jsonb, -- Main categories ['leisure', 'shopping', 'dining', 'service']
     tag_subcategory JSONB DEFAULT '[]'::jsonb, -- Sub categories ['nature', 'culture', 'market', 'cafe']
     tag_detail JSONB DEFAULT '[]'::jsonb, -- Detail categories ['park', 'museum', 'souvenir']
-    
+
     -- Classification
     category TEXT, -- 'warning', 'tip', 'pass', 'accessibility', 'crowd', 'facility', 'transfer', 'tourist', 'shopping'
     subcategory TEXT, -- For finer classification
-    
+
     -- Context tags for filtering
     time_context JSONB DEFAULT '[]'::jsonb, -- ['weekday-morning', 'weekday-evening', 'weekend', 'holiday']
     user_context JSONB DEFAULT '[]'::jsonb, -- ['wheelchair', 'stroller', 'largeLuggage', 'vision', 'senior', 'general']
     ward_context JSONB DEFAULT '[]'::jsonb, -- ['新宿區', '港區', etc.]
-    
+
     -- Importance and filtering
     importance INT DEFAULT 5, -- 1-10, higher = more important
     relevance_weight FLOAT DEFAULT 1.0, -- Weight for ranking
-    
+
     -- Vector embedding (768 dimensions - Gemini standard)
     embedding vector(768),
-    
+
     -- Metadata
     source TEXT DEFAULT 'expertKnowledgeBase', -- Data source reference
     confidence FLOAT DEFAULT 1.0, -- Confidence score
@@ -69,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_l4v2_user_context ON public.l4_knowledge_v2 USING
 CREATE INDEX IF NOT EXISTS idx_l4v2_importance ON public.l4_knowledge_v2(importance DESC);
 
 -- Create HNSW index for vector similarity search
-CREATE INDEX IF NOT EXISTS idx_l4v2_embedding_hnsw ON public.l4_knowledge_v2 
+CREATE INDEX IF NOT EXISTS idx_l4v2_embedding_hnsw ON public.l4_knowledge_v2
 USING hnsw (embedding vector_cosine_ops);
 
 -- ============================================================
@@ -197,7 +197,7 @@ DECLARE
 BEGIN
     -- Get node info for vibe matching
     SELECT * INTO v_node FROM public.nodes WHERE id = p_node_id LIMIT 1;
-    
+
     RETURN QUERY
     SELECT
         k.id,

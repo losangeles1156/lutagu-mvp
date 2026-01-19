@@ -72,7 +72,7 @@ export class L4HardCalculationEngine {
             if (!operator) return;
 
             // Fetch Timetable for this station
-            // Note: In MVP we check the first available timetable. 
+            // Note: In MVP we check the first available timetable.
             // In prod we should check the timetable specifically for the direction the user wants.
             // Since we don't know direction, we just warn if ANY last train is close.
             const timetables = await odptClient.getStationTimetable(stationId, operator);

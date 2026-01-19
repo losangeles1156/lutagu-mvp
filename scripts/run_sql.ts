@@ -28,18 +28,18 @@ if (!sqlFile) {
 async function executeSqlFromFile() {
     const sqlPath = join(process.cwd(), sqlFile);
     console.log(`Executing SQL from: ${sqlPath}`);
-    
+
     const sql = readFileSync(sqlPath, 'utf-8');
-    
+
     // Split by semicolons and execute each statement
     const statements = sql.split(';').filter(s => s.trim());
-    
+
     for (const statement of statements) {
         if (statement.trim().length === 0) continue;
-        
+
         console.log(`Executing statement...`);
         const { error } = await supabase.rpc('exec_sql', { sql: statement });
-        
+
         if (error) {
             console.error('Error executing statement:', error.message);
         } else {

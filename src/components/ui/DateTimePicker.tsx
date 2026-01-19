@@ -27,11 +27,11 @@ export function DateTimePicker({
 }: DateTimePickerProps) {
     const locale = useLocale();
     const t = useTranslations('dateTimePicker');
-    
+
     const [isOpen, setIsOpen] = useState(false);
     const [viewDate, setViewDate] = useState<Date>(value || new Date());
     const [viewMode, setViewMode] = useState<'date' | 'time'>('date');
-    
+
     const containerRef = useRef<HTMLDivElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -58,34 +58,34 @@ export function DateTimePicker({
 
     const formatDate = (date: Date) => {
         if (locale === 'ja') {
-            return date.toLocaleDateString('ja-JP', { 
-                year: 'numeric', 
-                month: 'long', 
+            return date.toLocaleDateString('ja-JP', {
+                year: 'numeric',
+                month: 'long',
                 day: 'numeric',
                 weekday: 'short'
             });
         }
         if (locale === 'en') {
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
                 day: 'numeric',
                 weekday: 'short'
             });
         }
-        return date.toLocaleDateString('zh-TW', { 
-            year: 'numeric', 
-            month: 'long', 
+        return date.toLocaleDateString('zh-TW', {
+            year: 'numeric',
+            month: 'long',
             day: 'numeric',
             weekday: 'short'
         });
     };
 
     const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('zh-TW', { 
-            hour: '2-digit', 
+        return date.toLocaleTimeString('zh-TW', {
+            hour: '2-digit',
             minute: '2-digit',
-            hour12: false 
+            hour12: false
         });
     };
 
@@ -102,7 +102,7 @@ export function DateTimePicker({
     const handleDateSelect = (day: number) => {
         const newDate = new Date(viewDate);
         newDate.setDate(day);
-        
+
         // Reset time to current or preserve
         if (value) {
             newDate.setHours(value.getHours(), value.getMinutes());
@@ -110,10 +110,10 @@ export function DateTimePicker({
             const now = new Date();
             newDate.setHours(now.getHours(), now.getMinutes());
         }
-        
+
         if (minDate && newDate < minDate) return;
         if (maxDate && newDate > maxDate) return;
-        
+
         onChange(newDate);
         if (!showTime) {
             setIsOpen(false);
@@ -126,13 +126,13 @@ export function DateTimePicker({
         const newDate = value ? new Date(value) : new Date();
         const maxHours = 23;
         const maxMinutes = 59;
-        
+
         if (type === 'hour') {
             newDate.setHours(Math.max(0, Math.min(maxHours, newDate.getHours() + delta)));
         } else {
             newDate.setMinutes(Math.max(0, Math.min(maxMinutes, newDate.getMinutes() + delta)));
         }
-        
+
         onChange(newDate);
     };
 
@@ -178,15 +178,15 @@ export function DateTimePicker({
 
     const isSelectedDate = (day: number) => {
         if (!value) return false;
-        return value.getDate() === day && 
-               value.getMonth() === viewDate.getMonth() && 
+        return value.getDate() === day &&
+               value.getMonth() === viewDate.getMonth() &&
                value.getFullYear() === viewDate.getFullYear();
     };
 
     const isToday = (day: number) => {
         const today = new Date();
-        return day === today.getDate() && 
-               viewDate.getMonth() === today.getMonth() && 
+        return day === today.getDate() &&
+               viewDate.getMonth() === today.getMonth() &&
                viewDate.getFullYear() === today.getFullYear();
     };
 
@@ -202,7 +202,7 @@ export function DateTimePicker({
     const daysInMonth = getDaysInMonth(viewDate);
     const firstDay = getFirstDayOfMonth(viewDate);
     const days: (number | null)[] = [];
-    
+
     for (let i = 0; i < firstDay; i++) {
         days.push(null);
     }
@@ -210,7 +210,7 @@ export function DateTimePicker({
         days.push(i);
     }
 
-    const weekDays = locale === 'ja' 
+    const weekDays = locale === 'ja'
         ? ['日', '月', '火', '水', '木', '金', '土']
         : locale === 'en'
             ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -243,10 +243,10 @@ export function DateTimePicker({
 
             {/* Picker Panel */}
             {isOpen && (
-                <div 
+                <div
                     ref={pickerRef}
-                    className="absolute top-full left-0 right-0 mt-2 
-                        bg-white rounded-2xl shadow-xl border border-slate-100 
+                    className="absolute top-full left-0 right-0 mt-2
+                        bg-white rounded-2xl shadow-xl border border-slate-100
                         z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
                 >
                     {/* Tabs */}
@@ -255,8 +255,8 @@ export function DateTimePicker({
                             <button
                                 onClick={() => setViewMode('date')}
                                 className={`flex-1 py-3 text-sm font-bold transition-colors
-                                    ${viewMode === 'date' 
-                                        ? 'text-indigo-600 bg-indigo-50' 
+                                    ${viewMode === 'date'
+                                        ? 'text-indigo-600 bg-indigo-50'
                                         : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
@@ -266,8 +266,8 @@ export function DateTimePicker({
                             <button
                                 onClick={() => setViewMode('time')}
                                 className={`flex-1 py-3 text-sm font-bold transition-colors
-                                    ${viewMode === 'time' 
-                                        ? 'text-indigo-600 bg-indigo-50' 
+                                    ${viewMode === 'time'
+                                        ? 'text-indigo-600 bg-indigo-50'
                                         : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
@@ -302,8 +302,8 @@ export function DateTimePicker({
                             {/* Week Days */}
                             <div className="grid grid-cols-7 gap-1 mb-2">
                                 {weekDays.map((day, idx) => (
-                                    <div 
-                                        key={idx} 
+                                    <div
+                                        key={idx}
                                         className="text-center text-xs font-bold text-slate-400 py-2"
                                     >
                                         {day}
@@ -323,8 +323,8 @@ export function DateTimePicker({
                                             text-sm font-bold rounded-xl transition-all
                                             min-h-[44px]
                                             ${!day ? 'invisible' : ''}
-                                            ${isSelectedDate(day!) 
-                                                ? 'bg-indigo-600 text-white' 
+                                            ${isSelectedDate(day!)
+                                                ? 'bg-indigo-600 text-white'
                                                 : isToday(day!)
                                                     ? 'bg-indigo-50 text-indigo-600'
                                                     : 'hover:bg-slate-100 text-slate-700'
@@ -342,7 +342,7 @@ export function DateTimePicker({
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => handleQuickSelect('now')}
-                                        className="flex-1 py-2 px-3 text-xs font-bold 
+                                        className="flex-1 py-2 px-3 text-xs font-bold
                                             bg-slate-100 text-slate-600 rounded-lg
                                             hover:bg-slate-200 transition-colors min-h-[40px]"
                                     >
@@ -350,7 +350,7 @@ export function DateTimePicker({
                                     </button>
                                     <button
                                         onClick={() => handleQuickSelect('today18')}
-                                        className="flex-1 py-2 px-3 text-xs font-bold 
+                                        className="flex-1 py-2 px-3 text-xs font-bold
                                             bg-slate-100 text-slate-600 rounded-lg
                                             hover:bg-slate-200 transition-colors min-h-[40px]"
                                     >
@@ -358,7 +358,7 @@ export function DateTimePicker({
                                     </button>
                                     <button
                                         onClick={() => handleQuickSelect('tomorrow10')}
-                                        className="flex-1 py-2 px-3 text-xs font-bold 
+                                        className="flex-1 py-2 px-3 text-xs font-bold
                                             bg-slate-100 text-slate-600 rounded-lg
                                             hover:bg-slate-200 transition-colors min-h-[40px]"
                                     >
@@ -397,7 +397,7 @@ export function DateTimePicker({
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     onClick={() => handleQuickSelect('now')}
-                                    className="py-3 text-sm font-bold 
+                                    className="py-3 text-sm font-bold
                                         bg-slate-100 text-slate-600 rounded-xl
                                         hover:bg-slate-200 transition-colors min-h-[44px]"
                                 >
@@ -406,7 +406,7 @@ export function DateTimePicker({
                                 <button
                                     onClick={handleConfirm}
                                     disabled={!value}
-                                    className="py-3 text-sm font-bold 
+                                    className="py-3 text-sm font-bold
                                         bg-indigo-600 text-white rounded-xl
                                         hover:bg-indigo-700 transition-colors
                                         disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"

@@ -30,6 +30,10 @@ export class AnomalyDetector {
             return { isAnomaly: true, reason: 'Empty input' };
         }
 
+        if (trimmed.length >= 4 && !/[\p{L}\p{N}]/u.test(trimmed)) {
+            return { isAnomaly: true, reason: 'No alphanumeric content' };
+        }
+
         // 2. Repetitive characters (e.g., "aaaaaaaaaa")
         if (/(.)\1{9,}/.test(trimmed)) {
             return { isAnomaly: true, reason: 'Repetitive characters' };

@@ -58,21 +58,21 @@
 ```sql
 create table cities (
   id text primary key,              -- 'tokyo' / 'kawagoe'
-  
+
   name jsonb not null,              -- {"zh-TW": "東京", "ja": "東京", "en": "Tokyo"}
   timezone text not null,           -- 'Asia/Tokyo'
-  
+
   -- 服務範圍（GeoJSON Polygon）
   core_zone geometry(Polygon, 4326),
   buffer_zone geometry(Polygon, 4326),
-  
+
   -- 數據源設定
   data_sources jsonb,               -- {"transit": "ODPT", "poi": "OSM"}
-  
+
   -- 預設語系
   default_locale text default 'ja',
   supported_locales text[] default array['zh-TW', 'ja', 'en'],
-  
+
   -- 元資料
   is_active boolean default true,
   created_at timestamp default now(),
@@ -81,7 +81,7 @@ create table cities (
 
 -- 範例數據
 insert into cities (id, name, timezone, data_sources) values
-('tokyo', '{"zh-TW": "東京", "ja": "東京", "en": "Tokyo"}', 'Asia/Tokyo', 
+('tokyo', '{"zh-TW": "東京", "ja": "東京", "en": "Tokyo"}', 'Asia/Tokyo',
  '{"transit": "ODPT", "poi": "OSM", "weather": "JMA"}');
 ```
 
@@ -93,13 +93,13 @@ create table nodes (
   id text primary key,                     -- 'ueno' / 'ueno_exit_north'
   parent_hub_id text references nodes(id), -- null = Hub, 有值 = Spoke
   city_id text references cities(id) not null,
-  
+
   -- 基本資料（每個節點獨立）
   name jsonb not null,                     -- {"zh-TW": "上野站", ...}
   name_short jsonb,                        -- 簡稱 {"zh-TW": "上野", ...}
   coordinates geometry(Point, 4326) not null,
   node_type text not null,                 -- 'station' / 'exit' / 'bus_stop' / 'poi'
-  
+
   -- L1 標籤（Hub 有值，Spoke 繼承）
   facility_profile jsonb,
   /*
@@ -109,7 +109,7 @@ create table nodes (
     "calculated_at": "2025-10-01T00:00:00Z"
   }
   */
-  
+
   vibe_tags jsonb,
   /*
   {
@@ -118,10 +118,10 @@ create table nodes (
     "en": ["Shopping Paradise", "Foodie Haven"]
   }
   */
-  
+
   -- AI 人格（Hub 有值，Spoke 繼承）
   persona_prompt text,
-  
+
   -- 商業導流規則（Hub 有值，Spoke 繼承）
   commercial_rules jsonb,
   /*
@@ -133,10 +133,10 @@ create table nodes (
     }
   ]
   */
-  
+
   -- 交通資訊（車站類型專用）
   transit_lines jsonb,                     -- 經過的路線 ID 列表
-  
+
   -- 元資料
   is_active boolean default true,
   created_at timestamp default now(),
@@ -170,18 +170,18 @@ for each row execute function update_updated_at();
 create table facilities (
   id text primary key,                     -- 'facility:ueno:toilet:01'
   node_id text references nodes(id) not null,
-  
+
   -- 設施類型
   facility_type text not null,             -- 'toilet' / 'locker' / 'atm' / ...
-  
+
   -- 名稱與位置描述
   name jsonb not null,                     -- {"zh-TW": "北口廁所", ...}
   direction jsonb not null,                -- {"zh-TW": "出站左轉 30 公尺", ...}
   floor text,                              -- 'B1' / '2F'
-  
+
   -- 座標（可選，用於精確導航）
   coordinates geometry(Point, 4326),
-  
+
   -- 屬性
   attributes jsonb,
   /*
@@ -193,13 +193,13 @@ create table facilities (
     "international_card": true
   }
   */
-  
+
   -- 營業資訊
   opening_hours jsonb,                     -- {"zh-TW": "24 小時", ...}
-  
+
   -- 外部連結
   google_maps_url text,
-  
+
   -- 元資料
   data_source text,                        -- 'osm' / 'manual' / 'partner'
   is_active boolean default true,
@@ -219,18 +219,18 @@ create index idx_facilities_active on facilities(is_active) where is_active = tr
 create table pois (
   id text primary key,                     -- 'poi:ueno:dining:001'
   node_id text references nodes(id) not null,
-  
+
   -- 分類（對應 L1 主類別）
   category text not null,                  -- 'shopping' / 'dining' / ...
   subcategory text,                        -- 'convenience_store' / 'ramen' / ...
-  
+
   -- 名稱
   name jsonb not null,                     -- {"zh-TW": "7-ELEVEN 上野店", ...}
-  
+
   -- 位置
   direction jsonb not null,                -- {"zh-TW": "北口出來右轉 50 公尺", ...}
   coordinates geometry(Point, 4326) not null,
-  
+
   -- 詳細資訊
   info jsonb,
   /*
@@ -242,10 +242,10 @@ create table pois (
     "rating": 4.2
   }
   */
-  
+
   -- 外部連結
   google_maps_url text not null,
-  
+
   -- 元資料
   data_source text,                        -- 'osm' / 'google_places' / 'manual'
   is_active boolean default true,
@@ -268,18 +268,18 @@ create index idx_pois_coordinates on pois using gist(coordinates);
 ```sql
 create table partners (
   id text primary key,                     -- 'go_taxi' / 'ecbo_cloak'
-  
+
   name jsonb not null,                     -- {"zh-TW": "GO Taxi", ...}
   category text not null,                  -- 'taxi' / 'bike' / 'luggage'
-  
+
   -- 連結設定
   base_deeplink text not null,             -- 'https://go.mo-t.com/'
   affiliate_code text,
-  
+
   -- 圖示
   icon_url text,
   icon_emoji text,                         -- '🚕'
-  
+
   -- 元資料
   is_active boolean default true,
   created_at timestamp default now()
@@ -287,11 +287,11 @@ create table partners (
 
 -- 範例數據
 insert into partners (id, name, category, base_deeplink, icon_emoji) values
-('go_taxi', '{"zh-TW": "GO Taxi", "ja": "GO タクシー", "en": "GO Taxi"}', 
+('go_taxi', '{"zh-TW": "GO Taxi", "ja": "GO タクシー", "en": "GO Taxi"}',
  'taxi', 'https://go.mo-t.com/', '🚕'),
-('ecbo_cloak', '{"zh-TW": "ecbo cloak", "ja": "ecbo cloak", "en": "ecbo cloak"}', 
+('ecbo_cloak', '{"zh-TW": "ecbo cloak", "ja": "ecbo cloak", "en": "ecbo cloak"}',
  'luggage', 'https://cloak.ecbo.io/', '🧳'),
-('luup', '{"zh-TW": "LUUP", "ja": "LUUP", "en": "LUUP"}', 
+('luup', '{"zh-TW": "LUUP", "ja": "LUUP", "en": "LUUP"}',
  'bike', 'https://luup.sc/', '🛵');
 ```
 
@@ -300,26 +300,26 @@ insert into partners (id, name, category, base_deeplink, icon_emoji) values
 ```sql
 create table nudge_logs (
   id uuid primary key default gen_random_uuid(),
-  
+
   -- 發生位置
   city_id text references cities(id),
   node_id text references nodes(id),
-  
+
   -- Session（匿名追蹤）
   session_id text not null,
-  
+
   -- 觸發資訊
   trigger_type text not null,              -- 'delay' / 'rain' / 'luggage'
   trigger_context jsonb,                   -- 觸發時的 L2 狀態
-  
+
   -- 導流內容
   partner_id text references partners(id),
   action_card_content jsonb,               -- 顯示的卡片內容
-  
+
   -- 用戶行為
   displayed_at timestamp not null,
   clicked_at timestamp,                    -- null = 未點擊
-  
+
   -- 元資料
   locale text,
   user_agent text,
@@ -334,7 +334,7 @@ create index idx_nudge_logs_clicked on nudge_logs(clicked_at) where clicked_at i
 
 -- 分析視圖：CTR 統計
 create view nudge_stats as
-select 
+select
   partner_id,
   trigger_type,
   count(*) as total_displayed,
@@ -354,15 +354,15 @@ group by partner_id, trigger_type, date_trunc('day', created_at);
 ```sql
 create table users (
   id uuid primary key default gen_random_uuid(),
-  
+
   -- 身份（可選登入）
   auth_provider text,                      -- 'line' / 'google' / null
   auth_id text unique,
-  
+
   -- 偏好設定
   preferred_locale text default 'zh-TW',
   accessibility_mode boolean default false,
-  
+
   -- 元資料
   created_at timestamp default now(),
   last_active_at timestamp default now()
@@ -378,25 +378,25 @@ create index idx_users_auth on users(auth_provider, auth_id);
 create table trip_guards (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
-  
+
   -- 訂閱內容
   watched_lines text[] not null,           -- ['TokyoMetro.Ginza', 'JR-East.Yamanote']
   origin_node_id text references nodes(id),
   destination_node_id text references nodes(id),
-  
+
   -- 通知設定
   notify_channel text not null,            -- 'line' / 'push'
   notify_threshold text default 'major',   -- 'all' / 'major' / 'critical'
-  
+
   -- 時間設定
   active_start_time time,                  -- 只在特定時段監控
   active_end_time time,
   active_days integer[],                   -- [1,2,3,4,5] = 週一到週五
-  
+
   -- 狀態
   is_active boolean default true,
   last_notified_at timestamp,
-  
+
   -- 元資料
   created_at timestamp default now(),
   updated_at timestamp default now()
@@ -481,20 +481,20 @@ begin
   -- 取得節點
   select to_jsonb(n.*) into v_node
   from nodes n where n.id = p_node_id;
-  
+
   if v_node is null then
     return null;
   end if;
-  
+
   -- 如果是 Hub，直接返回
   if v_node->>'parent_hub_id' is null then
     return v_node || '{"_isHub": true}'::jsonb;
   end if;
-  
+
   -- 取得 Hub
   select to_jsonb(h.*) into v_hub
   from nodes h where h.id = (v_node->>'parent_hub_id');
-  
+
   -- 合併（Spoke 優先，沒有則用 Hub 的）
   return v_node || jsonb_build_object(
     'facility_profile', coalesce(v_node->'facility_profile', v_hub->'facility_profile'),
@@ -523,7 +523,7 @@ returns table(
 ) as $$
 begin
   return query
-  select 
+  select
     n.id,
     st_distance(
       n.coordinates::geography,

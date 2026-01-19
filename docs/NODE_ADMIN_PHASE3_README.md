@@ -21,7 +21,7 @@ SELECT COUNT(*) FROM node_l1_config;
 SELECT COUNT(*) FROM v_l1_pending;
 
 -- 查看待審核
-SELECT * FROM v_l1_pending 
+SELECT * FROM v_l1_pending
 WHERE node_id = 'odpt.Station:JR-East.Ueno'
 LIMIT 50;
 

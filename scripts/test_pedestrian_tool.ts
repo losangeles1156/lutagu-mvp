@@ -10,7 +10,7 @@ async function main() {
     console.log('🧪 Testing Pedestrian Accessibility Tool (AI Agent Mode)...');
 
     const tool = new PedestrianAccessibilityTool();
-    
+
     // Test Case: Shinjuku Station Area (Known to have data if ingestion worked)
     // Or Yoyogi since user provided Yoyogi data specifically in the first prompt
     // Yoyogi Station: Lat 35.6830, Lon 139.7020
@@ -21,13 +21,13 @@ async function main() {
     };
 
     console.log(`\n📍 Scanning location: ${testLocation.lat}, ${testLocation.lon} (Radius: ${testLocation.radius}m)`);
-    
+
     try {
         const result = await tool.execute(testLocation, { nodeId: 'test-agent', level: 'L3_FACILITY' } as any);
-        
+
         console.log('\n--- Tool Output ---');
         console.log(`Source: ${result.source}`);
-        
+
         if (result.source === 'optimized_rpc') {
             console.log(`✅ SUCCESS: Used optimized DB function.`);
             console.log(`Items found: ${result.count}`);

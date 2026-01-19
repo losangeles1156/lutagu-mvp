@@ -1,7 +1,7 @@
 # AI Agent 決策核心建置方案評估報告
 
-> **評估日期**: 2026-01-05  
-> **專案名稱**: LUTAGU/LUTAGU - 東京交通 AI 導航助手  
+> **評估日期**: 2026-01-05
+> **專案名稱**: LUTAGU/LUTAGU - 東京交通 AI 導航助手
 > **評估範圍**: L4 Strategy Agent（策略決策層）大腦建置方案比較
 
 ---
@@ -125,13 +125,13 @@ L4 Agent 的職責是將 L1-L3 的結構化數據與使用者情境結合，產�
 interface AgentEngine {
   // 對話理解與意圖分類
   understand(input: UserMessage): Promise<Intent>;
-  
+
   // 上下文建構 (L1-L3 數據聚合)
   buildContext(intent: Intent, session: Session): Promise<AgentContext>;
-  
+
   // 工具調用協調
   executeTools(tools: ToolCall[]): Promise<ToolResult[]>;
-  
+
   // 回覆生成 (含 RAG 檢索)
   generate(context: AgentContext, tools: ToolResult[]): Promise<Response>;
 }
@@ -140,9 +140,9 @@ interface AgentEngine {
 class LutaguDecisionEngine implements AgentEngine {
   private decisionRules: DecisionRule[];
   private personaPrompts: Map<StationID, string>;
-  
+
   async makeDecision(
-    context: AgentContext, 
+    context: AgentContext,
     options: RouteOption[]
   ): Promise<Recommendation> {
     // 根據用戶類型 (輪椅/行李/推車) 過濾選項
@@ -256,13 +256,13 @@ services:
       - postgres
       - redis
       - weaviate
-  
+
   dify-web:
     image: langgenius/dify-web:latest
     environment:
       - API_URL=http://dify-api:5001
       - CONSOLE_WEB_URL=http://localhost:3000/
-  
+
   postgres:
     image: postgres:15-alpine
     volumes:
@@ -271,7 +271,7 @@ services:
       - POSTGRES_PASSWORD=your-password
       - POSTGRES_USER=postgres
       - POSTGRES_DB=dify
-  
+
   weaviate:
     image: semitechnologies/weaviate:latest
     environment:
@@ -279,7 +279,7 @@ services:
       - AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true
       - PERSISTENCE_DATA_PATH=/var/lib/weaviate
       - ENABLE_MODULES=text2vec-openai
-  
+
   redis:
     image: redis:7-alpine
     command: redis-server --appendonly yes
@@ -641,6 +641,6 @@ class LocalAgentAdapter implements AgentAdapter {
 
 ---
 
-> **報告撰寫**: AI Architect Mode  
-> **版本**: 1.0  
+> **報告撰寫**: AI Architect Mode
+> **版本**: 1.0
 > **最後更新**: 2026-01-05

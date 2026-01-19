@@ -35,7 +35,7 @@ BEGIN
         CREATE POLICY "Enable read access for all users" ON public.l4_knowledge_embeddings
             FOR SELECT USING (true);
     END IF;
-    
+
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'l4_knowledge_embeddings' AND policyname = 'Enable insert/update for service role only') THEN
         CREATE POLICY "Enable insert/update for service role only" ON public.l4_knowledge_embeddings
             FOR ALL USING (auth.role() = 'service_role');
@@ -52,7 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_l4_user_context ON public.l4_knowledge_embeddings
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE tablename = 'l4_knowledge_embeddings' AND indexname = 'idx_l4_embedding_hnsw') THEN
-        CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings 
+        CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings
         USING hnsw (embedding vector_cosine_ops);
     END IF;
 END $$;

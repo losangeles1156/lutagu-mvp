@@ -98,17 +98,17 @@ export class L4DecisionEngine {
 
         // Map WVCRecommendation to icons and titles
         const recommendationMap: Record<string, { icon: string, title: string }> = {
-            'wait': { 
-                icon: '⏳', 
-                title: locale === 'ja' ? '待機推奨' : locale === 'en' ? 'Wait for Train' : '建議在月台等候' 
+            'wait': {
+                icon: '⏳',
+                title: locale === 'ja' ? '待機推奨' : locale === 'en' ? 'Wait for Train' : '建議在月台等候'
             },
-            'divert': { 
-                icon: '🚕', 
-                title: locale === 'ja' ? '代替手段推奨' : locale === 'en' ? 'Alternative Recommended' : '建議考慮替代方案' 
+            'divert': {
+                icon: '🚕',
+                title: locale === 'ja' ? '代替手段推奨' : locale === 'en' ? 'Alternative Recommended' : '建議考慮替代方案'
             },
-            'rest_nearby': { 
-                icon: '☕', 
-                title: locale === 'ja' ? '休憩のすすめ' : locale === 'en' ? 'Take a Break' : '建議稍作休息' 
+            'rest_nearby': {
+                icon: '☕',
+                title: locale === 'ja' ? '休憩のすすめ' : locale === 'en' ? 'Take a Break' : '建議稍作休息'
             }
         };
 
@@ -146,7 +146,7 @@ export class L4DecisionEngine {
         }
 
         // 2. Line Match (If defined, MUST match one of the context lines)
-        // Logic: If rule applies to Keiyo Line, and user is AT Tokyo Station (context), 
+        // Logic: If rule applies to Keiyo Line, and user is AT Tokyo Station (context),
         // strictly speaking we need to know if the user IS USING Keiyo Line.
         // For MVP, if line_ids is empty in context, we might be lenient, but V3.0 implies strict context.
         // Let's assume if rule specifies lines, text context MUST include at least one.

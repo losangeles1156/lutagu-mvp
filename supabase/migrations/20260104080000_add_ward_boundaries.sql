@@ -159,7 +159,7 @@ VALUES ('20260104080000', 'add_ward_boundaries.sql', ARRAY[1]::text[])
 ON CONFLICT (version) DO NOTHING;
 
 -- Verify
-SELECT id, name_i18n->>'ja' as name, 
+SELECT id, name_i18n->>'ja' as name,
        boundary IS NOT null as has_boundary,
        node_count
 FROM public.wards ORDER BY id;

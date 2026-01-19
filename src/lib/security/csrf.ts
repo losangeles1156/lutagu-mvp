@@ -21,4 +21,3 @@ export function enforceCsrfIfCookieBasedAuth(request: Request) {
     if (csrfCookie !== csrfHeader) return { ok: false, reason: 'mismatch' };
     return { ok: true };
 }
-

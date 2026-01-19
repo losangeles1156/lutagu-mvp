@@ -64,7 +64,7 @@ async function main() {
         console.log(`Mapped ${mappedSurveys.length} survey records across years.`);
         if (mappedSurveys.length > 0) {
             // Sort by year descending to keep the latest if we only want one per station
-            // But storing all years is also fine for historical vibe. 
+            // But storing all years is also fine for historical vibe.
             // For MVP, we'll upsert based on (station_id, survey_year).
 
             console.log('Sample Mapped Survey:', mappedSurveys[0]);

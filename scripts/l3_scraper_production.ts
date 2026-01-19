@@ -90,18 +90,18 @@ async function extractFacilities(text: string, operator: string) {
     const prompt = `
     You are a data extraction AI. Extract station facility information from the scraping text.
     Target Operator: ${operator}
-    
+
     Extract strictly as JSON array of objects:
     - type: "elevator", "escalator", "toilet", "barrier_free_entrance", "waiting_room"
     - name_ja: Short descriptive name (e.g. "改札内エレベーター")
     - name_en: English name
     - location_desc: Location text (e.g. "ホーム階〜改札階")
     - attributes: JSON object (e.g. { "wheelchair": true, "ostomate": true })
-    
+
     Rules:
     - Look for "多機能トイレ", "車いす", "オストメイト".
     - Ignore navigation menus.
-    
+
     Input:
     ${text}
     `;

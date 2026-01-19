@@ -9,7 +9,7 @@ export async function fetchNodesByWard(wardId: string): Promise<NodeDatum[]> {
         try {
             // Fetch HND (Haneda) and NRT (Narita) specifically
             const airportIds = [
-                'odpt:Station:Airport.Haneda', 
+                'odpt:Station:Airport.Haneda',
                 'odpt:Station:Airport.Narita',
                 'odpt.Station:Keikyu.Airport.Haneda-Airport-Terminal-1-2',
                 'odpt.Station:Keikyu.Airport.Haneda-Airport-Terminal-3',
@@ -18,12 +18,12 @@ export async function fetchNodesByWard(wardId: string): Promise<NodeDatum[]> {
                 'odpt.Station:Keisei.Main.NaritaAirportTerminal1',
                 'odpt.Station:Keisei.Main.NaritaAirportTerminal2'
             ];
-            const promises = airportIds.map(id => 
+            const promises = airportIds.map(id =>
                 fetch(`/api/nodes/${id}?_t=${Date.now()}`).then(res => res.ok ? res.json() : null).catch(() => null)
             );
             const results = await Promise.all(promises);
             const validNodes = results.filter(n => n !== null).map(data => data.node || data);
-            
+
             return validNodes.map((n: any) => ({
                 ...n,
                 location: n.coordinates ? { type: 'Point', coordinates: [n.coordinates.lng, n.coordinates.lat] } : n.location,

@@ -17,7 +17,7 @@ async function main() {
 
     // First, check the current state of schema_migrations
     console.log('📋 Current schema_migrations entries:');
-    
+
     const { data: currentMigrations, error: selectError } = await supabase
         .from('schema_migrations')
         .select('*')
@@ -43,7 +43,7 @@ async function main() {
 
     // Delete conflicting migrations
     console.log('🗑️  Deleting conflicting migrations...');
-    
+
     const { error: deleteError } = await supabase
         .from('schema_migrations')
         .delete()
@@ -58,7 +58,7 @@ async function main() {
 
     // Verify the deletion
     console.log('📋 Updated schema_migrations entries:');
-    
+
     const { data: updatedMigrations, error: verifyError } = await supabase
         .from('schema_migrations')
         .select('*')

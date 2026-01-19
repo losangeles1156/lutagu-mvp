@@ -27,28 +27,28 @@ CREATE TABLE l1_custom_places (
     subcategory VARCHAR,
     location POINT(4326),                -- PostGIS 地理座標
     address TEXT,
-    
+
     -- 合作店家專屬欄位
     is_partner BOOLEAN DEFAULT TRUE,     -- 是否為合作店家
     partner_id VARCHAR,                  -- 合作店家ID
     affiliate_url TEXT,                  -- 導流連結
     discount_info JSONB,                 -- 優惠資訊
     business_hours JSONB,                -- 營業時間
-    
+
     -- 媒體
     image_urls TEXT[],
     logo_url TEXT,
-    
+
     -- 狀態
     is_active BOOLEAN DEFAULT TRUE,
     priority INTEGER DEFAULT 100,        -- 數值越大越優先顯示
     expires_at TIMESTAMP WITH TIME ZONE, -- 活動期限
-    
+
     -- 審核
     status VARCHAR DEFAULT 'draft',      -- draft, pending, approved, rejected
     approved_by UUID,
     approved_at TIMESTAMP WITH TIME ZONE,
-    
+
     -- 時間戳
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -72,14 +72,14 @@ CREATE TABLE l1_partners (
     contact_email VARCHAR,
     contact_phone VARCHAR,
     website_url TEXT,
-    
+
     -- 結算相關
     commission_rate DECIMAL(4,2),        -- 佣金比例
     affiliate_code VARCHAR,              -- 聯盟行銷代碼
-    
+
     -- 狀態
     status VARCHAR DEFAULT 'active',     -- active, inactive, suspended
-    
+
     -- 時間戳
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -153,11 +153,11 @@ interface PlaceFormData {
     description: { ja: string; en: string; zh: string };
     category: string;           // 下拉選擇
     subcategory: string;
-    
+
     // 位置
     address: string;
     location: { lat: number; lng: number };  // 地圖選擇
-    
+
     // 合作店家資訊
     isPartner: boolean;
     partnerId?: string;         // 若選擇現有店家
@@ -168,11 +168,11 @@ interface PlaceFormData {
         description: string;
     };
     businessHours?: {...};
-    
+
     // 媒體
     images: File[];
     logo: File;
-    
+
     // 發布
     status: 'draft' | 'pending' | 'approved';
     priority: number;           // 1-100
@@ -193,10 +193,10 @@ async function fetchPlaces(stationId: string) {
     // 1. 先獲取自定義景點（高優先級）
     const customRes = await fetch(`/api/l1/places?stationId=${stationId}&includePartnerOnly=false`);
     const customPlaces = await customRes.json();
-    
+
     // 2. 若需要，獲取 OSM 景點（低優先級）
     // ...
-    
+
     // 3. 合併：自定義景點覆蓋 OSM 景點（依 osm_id 去重）
     return mergePlaces(customPlaces, osmPlaces);
 }

@@ -9,6 +9,8 @@ import { useAppStore } from '@/stores/appStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useAgentChat } from '@/hooks/useAgentChat';
 import ReactMarkdown from 'react-markdown';
+import { trackFunnelEvent } from '@/lib/tracking';
+import { getPartnerIdFromUrl, getSafeExternalUrl } from '@/config/partners';
 
 interface L4_StrategyProps {
     data: StationUIProfile;
@@ -248,7 +250,21 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                             <button
                                 onClick={() => {
                                     if (bestCard.actionUrl) {
-                                        window.open(bestCard.actionUrl, '_blank', 'noopener,noreferrer');
+                                        const safeUrl = getSafeExternalUrl(bestCard.actionUrl);
+                                        if (!safeUrl) return;
+                                        trackFunnelEvent({
+                                            step_name: 'external_link_click',
+                                            step_number: 5,
+                                            path: '/station/l4',
+                                            metadata: {
+                                                target_url: safeUrl,
+                                                link_type: 'station_l4_card',
+                                                partner_id: getPartnerIdFromUrl(safeUrl) || undefined,
+                                                station_id: stationId,
+                                                card_id: bestCard.id
+                                            }
+                                        });
+                                        window.open(safeUrl, '_blank', 'noopener,noreferrer');
                                         return;
                                     }
                                     if (otherCards.length > 0) setIsOtherOpen(true);
@@ -282,7 +298,23 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
                                 </div>
                                 <button
                                     onClick={() => {
-                                        if (card.actionUrl) window.open(card.actionUrl, '_blank', 'noopener,noreferrer');
+                                        if (card.actionUrl) {
+                                            const safeUrl = getSafeExternalUrl(card.actionUrl);
+                                            if (!safeUrl) return;
+                                            trackFunnelEvent({
+                                                step_name: 'external_link_click',
+                                                step_number: 5,
+                                                path: '/station/l4',
+                                                metadata: {
+                                                    target_url: safeUrl,
+                                                    link_type: 'station_l4_card',
+                                                    partner_id: getPartnerIdFromUrl(safeUrl) || undefined,
+                                                    station_id: stationId,
+                                                    card_id: card.id
+                                                }
+                                            });
+                                            window.open(safeUrl, '_blank', 'noopener,noreferrer');
+                                        }
                                     }}
                                     disabled={!card.actionUrl}
                                     className={`mt-3 w-full py-3 rounded-2xl font-black text-xs tracking-widest transition-colors active:scale-[0.99] ${card.actionUrl ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-slate-100 text-slate-300'}`}

@@ -1,6 +1,6 @@
 
-import { 
-    findRankedRoutes, 
+import {
+    findRankedRoutes,
     normalizeOdptStationId,
     type RouteOption,
     type SupportedLocale
@@ -46,7 +46,7 @@ export class AlgorithmProvider {
     }
 
     public async calculateFare(originId: string, destId: string): Promise<{ ic: number; ticket: number } | null> {
-        // In a real scenario, this would use a fare table. 
+        // In a real scenario, this would use a fare table.
         // For now, we reuse the route finding logic which includes fare calculation.
         const routes = await this.findRoutes({ originId, destinationId: destId, locale: 'zh-TW' });
         if (routes && routes.length > 0) {

@@ -70,9 +70,9 @@ function generateMapping() {
                 const id = dir;
                 const parts = id.split('.');
                 const stationPart = parts[parts.length - 1]; // e.g. Jiyugaoka, Yutenji
-                
+
                 // Try to find matching Japanese name from wardStations
-                const match = wardStations.find(ws => 
+                const match = wardStations.find(ws =>
                     ws.name_en.replace(/-/g, '').toLowerCase() === stationPart.toLowerCase() ||
                     ws.name_en.toLowerCase() === stationPart.toLowerCase()
                 );

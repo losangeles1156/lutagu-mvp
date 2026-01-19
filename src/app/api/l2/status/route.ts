@@ -577,7 +577,7 @@ export async function GET(request: Request) {
         else if (hasDelay) finalStatusCode = 'DELAY';
 
         // Calculate Weather
-        // Priority: 
+        // Priority:
         // 1. Existing weather_info in snapshot (if < 3 hours old)
         // 2. Live fetch via Open-Meteo (if coordinates available or default)
         // 3. Last known weather from ANY station in DB (global fallback)

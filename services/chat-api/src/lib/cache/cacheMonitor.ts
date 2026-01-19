@@ -76,7 +76,7 @@ export class CacheMonitor {
         }
 
         this.isRunning = true;
-        
+
         // 立即執行一次監控
         this.collectMetrics().catch(console.error);
 
@@ -216,7 +216,7 @@ export class CacheMonitor {
      */
     private handleAlert(alert: Alert): void {
         this.alerts.push(alert);
-        
+
         // 保持 Alert 歷史在合理範圍內
         if (this.alerts.length > 50) {
             this.alerts.shift();
@@ -243,8 +243,8 @@ export class CacheMonitor {
      * 獲取目前指標
      */
     getCurrentMetrics(): MonitorMetrics | null {
-        return this.metricsHistory.length > 0 
-            ? this.metricsHistory[this.metricsHistory.length - 1] 
+        return this.metricsHistory.length > 0
+            ? this.metricsHistory[this.metricsHistory.length - 1]
             : null;
     }
 
@@ -288,7 +288,7 @@ export class CacheMonitor {
   - 記憶體使用: ${(metrics.system.totalMemoryUsage / (1024 * 1024)).toFixed(2)}MB
 
 快取詳細:
-${Object.entries(metrics.caches).map(([name, stats]) => 
+${Object.entries(metrics.caches).map(([name, stats]) =>
     `  ${name}:
     - 大小: ${stats.size}/${stats.maxSize}
     - 命中率: ${stats.hitRate.toFixed(2)}%

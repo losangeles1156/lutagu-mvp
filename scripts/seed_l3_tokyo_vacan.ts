@@ -29,7 +29,7 @@ async function seedTokyoStationL3() {
 
     if (nodeError || !node) {
         console.error('Tokyo Station node not found! Please ingest basic node data first.');
-        // Attempting to look for 'Tokyo' in general if specific ID fails? 
+        // Attempting to look for 'Tokyo' in general if specific ID fails?
         // For now, let's assume the ID is correct or matches what's in the DB.
         // If exact match fails, let's try to find "Tokyo" name to get the ID.
         const { data: searchNodes } = await supabase
@@ -82,7 +82,7 @@ async function seedTokyoStationL3() {
 
     // First, delete existing relevant test data to avoid duplicates for this run
     // (Optional: depending on how we want to manage data, but for seeding test data, clean slate is often good)
-    // But we don't want to wipe REAL data. 
+    // But we don't want to wipe REAL data.
     // For MVP, likely we don't have real scraper data for Tokyo yet OR we just append.
     // Let's just insert (or upsert if we had IDs). Since we don't fix IDs here, we might duplicate.
     // Let's try to delete by name to be safe-ish.

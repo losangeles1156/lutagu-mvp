@@ -35,7 +35,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': 'JR新宿站西口多功能廁所', 'ja': '新宿駅西口多目的トイレ', 'en': 'JR Shinjuku West Exit Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'West Entrance' }
   },
-  
+
   // ========== 港區 (Minato Ward) ==========
   {
     station_id: 'odpt:Station:JR-East.Hamamatsucho',
@@ -85,7 +85,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': '新橋站烏森口多功能廁所', 'ja': '新橋駅烏森口多目的トイレ', 'en': 'Shimbashi Karasumori Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'Karasumori Exit' }
   },
-  
+
   // ========== 涉谷區 (Shibuya Ward) ==========
   {
     station_id: 'odpt:Station:JR-East.Shibuya',
@@ -135,7 +135,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': '表參道站站內無障礙廁所', 'ja': '表参道駅構内多目的トイレ', 'en': 'Omotesando Station Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'Inside Station' }
   },
-  
+
   // ========== 千代田區 (Chiyoda Ward) ==========
   {
     station_id: 'odpt:Station:JR-East.Tokyo',
@@ -191,7 +191,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': '霞關站站內無障礙廁所', 'ja': '霞ヶ関駅構内多目的トイレ', 'en': 'Kasumigaseki Station Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'Inside Station' }
   },
-  
+
   // ========== 中央區 (Chuo Ward) ==========
   {
     station_id: 'odpt:Station:Toei.Nihombashi',
@@ -229,7 +229,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': '銀座站站內無障礙廁所', 'ja': '銀座駅構内多目的トイレ', 'en': 'Ginza Station Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'Inside Station' }
   },
-  
+
   // ========== 台東區 (Taito Ward) ==========
   {
     station_id: 'odpt:Station:JR-East.Ueno',
@@ -291,7 +291,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': '秋葉原站多功能廁所', 'ja': '秋葉原駅多目的トイレ', 'en': 'Akihabara Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'Station Hall' }
   },
-  
+
   // ========== 文京區 (Bunkyo Ward) ==========
   {
     station_id: 'odpt:Station:TokyoMetro.Ochanomizu',
@@ -305,7 +305,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': '御茶之水站站內無障礙廁所', 'ja': '御茶ノ水駅構内多目的トイレ', 'en': 'Ochanomizu Station Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'Inside Station' }
   },
-  
+
   // ========== 墨田區 (Sumida Ward) ==========
   {
     station_id: 'odpt:Station:Toei.Asakusa.Oshiage',
@@ -325,7 +325,7 @@ const L3_ACCESSIBILITY_DATA = [
     name_i18n: { 'zh-TW': '押上站多功能廁所', 'ja': '押上駅多目的トイレ', 'en': 'Oshiage Multi-purpose Toilet' },
     attributes: { accessible: true, ostomate: true, baby_friendly: true, location: 'Station Hall' }
   },
-  
+
   // ========== 豊島區 (Toshima Ward) ==========
   {
     station_id: 'odpt:Station:JR-East.Ikebukuro',
@@ -355,10 +355,10 @@ const L3_ACCESSIBILITY_DATA = [
 
 async function seedL3Accessibility() {
   console.log('🌱 Seeding L3 Accessibility Facilities...');
-  
+
   let successCount = 0;
   let errorCount = 0;
-  
+
   for (const facility of L3_ACCESSIBILITY_DATA) {
     const { error } = await supabase
       .from('l3_facilities')
@@ -372,7 +372,7 @@ async function seedL3Accessibility() {
         onConflict: 'station_id, type, name_i18n',
         ignoreDuplicates: true
       });
-    
+
     if (error) {
       console.error(`❌ Error seeding ${facility.station_id} (${facility.type}):`, error.message);
       errorCount++;
@@ -380,7 +380,7 @@ async function seedL3Accessibility() {
       successCount++;
     }
   }
-  
+
   console.log(`✅ Seeding complete: ${successCount} facilities seeded, ${errorCount} errors`);
   console.log(`📊 Total L3 accessibility facilities: ${L3_ACCESSIBILITY_DATA.length}`);
 }

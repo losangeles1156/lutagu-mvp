@@ -126,11 +126,11 @@ async function main() {
     for (const item of KNOWLEDGE_ITEMS) {
         try {
             console.log(`Processing: ${item.name['zh-TW']} (${item.id})`);
-            
+
             const embedding = await generateEmbedding(item.content);
-            
+
             console.log(`Upserting: ${item.id}`);
-            
+
             const { error } = await supabase
                 .from('l4_knowledge_embeddings')
                 .upsert({
@@ -152,7 +152,7 @@ async function main() {
             } else {
                 console.log(`Successfully ingested: ${item.id}`);
             }
-            
+
             // Wait a bit to avoid rate limits
             await new Promise(resolve => setTimeout(resolve, 500));
         } catch (err) {

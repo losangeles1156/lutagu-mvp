@@ -1,6 +1,6 @@
 /**
  * LUTAGU Agent Reasoning Chain - Type Definitions
- * 
+ *
  * 核心概念：
  * - 「節點」提供用戶需求位址 (Node = Where)
  * - 「標籤」提供環境脈絡 (Tag = Context)

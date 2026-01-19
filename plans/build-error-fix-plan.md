@@ -47,7 +47,7 @@
 ALTER TABLE l1_places ADD COLUMN IF NOT EXISTS location_tags TEXT[];
 
 -- 建立 GIN 索引以優化陣列查詢效能
-CREATE INDEX IF NOT EXISTS idx_l1_places_location_tags 
+CREATE INDEX IF NOT EXISTS idx_l1_places_location_tags
 ON l1_places USING GIN (location_tags);
 
 -- 建立更新觸發器（可選）
@@ -63,7 +63,7 @@ $$ LANGUAGE plpgsql;
 DO $$
 BEGIN
     IF EXISTS (
-        SELECT 1 FROM information_schema.columns 
+        SELECT 1 FROM information_schema.columns
         WHERE table_name = 'l1_places' AND column_name = 'updated_at'
     ) THEN
         CREATE TRIGGER trigger_update_l1_places_timestamp
@@ -95,13 +95,13 @@ export interface L1Place {
 
 ```sql
 -- 確認欄位已新增
-SELECT column_name, data_type 
-FROM information_schema.columns 
+SELECT column_name, data_type
+FROM information_schema.columns
 WHERE table_name = 'l1_places' AND column_name = 'location_tags';
 
 -- 測試索引
-EXPLAIN ANALYZE 
-SELECT * FROM l1_places 
+EXPLAIN ANALYZE
+SELECT * FROM l1_places
 WHERE location_tags @> '{"日本料理"}';
 ```
 
@@ -146,7 +146,7 @@ const fetchWards = useCallback(async () => {
       .from('wards')
       .select('*')
       .order('name');
-      
+
     if (error) throw error;
     setWards(data || []);
   } catch (err) {
@@ -156,13 +156,13 @@ const fetchWards = useCallback(async () => {
 
 const getNodesByWard = useCallback(async (currentWardId: string) => {
   if (!currentWardId) return;
-  
+
   try {
     const { data, error } = await supabase
       .from('nodes')
       .select('*')
       .eq('ward_id', currentWardId);
-      
+
     if (error) throw error;
     setNodes(data || []);
   } catch (err) {
@@ -324,24 +324,24 @@ flowchart TB
     subgraph Database["資料庫問題"]
         A["l1_places.location_tags 欄位缺失"]
     end
-    
+
     subgraph POIEngine["POITaggedEngine"]
         B["POI 標籤查詢失敗"]
     end
-    
+
     subgraph Frontend["前端問題"]
         C["React Hook 依賴警告"]
         D["useEffect 效能問題"]
     end
-    
+
     subgraph API["API 路由問題"]
         E["動態路由靜態生成失敗"]
     end
-    
+
     A --> B
     B --> D
     B --> E
-    
+
     style A fill:#ffcccc
     style B fill:#ffcccc
     style C fill:#ffffcc

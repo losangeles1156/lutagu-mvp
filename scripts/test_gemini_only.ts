@@ -37,7 +37,7 @@ async function testGemini() {
     for (const modelName of candidates) {
         console.log(`\nTrying ${modelName}...`);
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-        
+
         try {
             const res = await fetchWithTimeout(url, {
                 method: 'POST',

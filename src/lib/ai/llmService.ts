@@ -1,6 +1,6 @@
 /**
  * LUTAGU LLM Service Layer
- * 
+ *
  * Unified entry point for AI-powered content generation.
  * Uses MiniMax-M2.1 for reasoning tasks, with fallbacks.
  */
@@ -51,7 +51,7 @@ export async function generateWeatherAdvice(
         - 15-20°C：薄外套或長袖 (Thin jacket/Long sleeves)
         - 20-25°C：舒適單衣 (Comfortable shirt)
         - >25°C：透氣短袖 (Breathable wear)
-        
+
         請用一句話（20字以內）給出建議。若有下雨或強風請一併考慮。不要給出矛盾建議（如同時穿薄外套又穿毛衣）。`
         : locale === 'ja'
             ? 'あなたは東京交通アシスタント LUTAGU です。天気に基づき、論理的で実用的な服装アドバイスをしてください（30文字以内）。矛盾するアドバイスは避けてください。'
@@ -93,18 +93,18 @@ export async function generateL1DNA(
 
     const systemPrompt = locale === 'zh-TW'
         ? `你是東京城市觀察家 LUTAGU。請結合「POI數據」與你對該地點的「百科知識/大眾印象」，分析該車站的一句話人格與氛圍。
-        
+
         任務：
         1. tagline (一句話人格)：基於Wiki印象，描述該地的核心特色（例如：秋葉原=電器與動漫聖地、新大久保=韓國街、淺草=下町風情）。(15字內)
         2. vibeTags (氛圍標籤)：描述該地的「氣氛」或「體驗感」（例如：復古、熱鬧、神聖、新舊交融、次文化）。(3-5個)
-        
+
         以 JSON 格式回覆：{"tagline": "...", "vibeTags": ["...", "..."]}`
         : `You are LUTAGU. Analyze the station's personality based on POI data and specific Wiki-style knowledge.
-        
+
         Tasks:
         1. tagline: The station's unique "Persona" (e.g. Akihabara = Anime Holy Land). (Max 10 words)
         2. vibeTags: The "Atmosphere" or "Vibe" (e.g. Retro, Bustling, Spiritual). (3-5 tags)
-        
+
         Reply in JSON: {"tagline": "...", "vibeTags": ["...", "..."]}`;
 
     const poiSummary = Object.entries(poiCounts)
@@ -169,9 +169,9 @@ export async function translateKnowledgeItems(
 
     const targetLang = languageMap[targetLocale] || 'English';
 
-    const systemPrompt = `You are LUTAGU, a Tokyo transit expert. 
+    const systemPrompt = `You are LUTAGU, a Tokyo transit expert.
     Translate the following transit tips from Traditional Chinese to ${targetLang}.
-    
+
     Guidelines:
     - Keep the tone helpful, professional, and concise.
     - Keep specific proper nouns (station names, line names) as is if they are commonly known in ${targetLang}, or provide the ${targetLang} equivalent.
@@ -288,12 +288,12 @@ export async function rerankL4Cards(
 
     const systemPrompt = locale === 'zh-TW'
         ? `你是東京交通助手 LUTAGU 的智能過濾器。請根據用戶的具體需求（如：輪椅、嬰兒車、大型行李），審核以下建議卡片是否相關。
-        
+
         審核標準：
         1. 剔除「矛盾」或「不可行」的建議（例如：對輪椅用戶建議走樓梯）。
         2. 剔除「無關」建議（例如：對商務客顯示兒童樂園折扣）。
         3. 保留「通用」且「有價值」的建議（例如：車站Wi-Fi、廁所位置）。
-        
+
         請回傳一個 JSON 陣列，包含所有應該【保留】的卡片 ID。`
         : `You are LUTAGU's smart filter. Review advice cards based on user needs (e.g. Wheelchair, Stroller).
         Task: Return a JSON array of card IDs that should be KEPT.

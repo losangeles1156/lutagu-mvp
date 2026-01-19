@@ -64,14 +64,14 @@ async function debugLinks() {
   // Construct the filter string
   // Note: PostgREST limit for URL length can be an issue with many IDs.
   // We need to check if we are hitting that.
-  
+
   const idList = nodeIds.map((id: string) => `"${id}"`).join(',');
-  // console.log('Filter string length:', idList.length); 
-  
+  // console.log('Filter string length:', idList.length);
+
   // Try a smaller batch first to verify syntax
   const smallBatchIds = nodeIds.slice(0, 5);
   const smallIdList = smallBatchIds.map((id: string) => `"${id}"`).join(',');
-  
+
   console.log('Querying with small batch of IDs...');
   const { data: fallbackDataSmall, error: fallbackErrorSmall } = await supabase
     .from('pedestrian_links')
@@ -93,12 +93,12 @@ async function debugLinks() {
       if (idList.length > 2000) {
           console.warn(`Warning: Filter string is very long (${idList.length} chars). This might cause 414 URI Too Long.`);
       }
-      
+
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('pedestrian_links')
         .select('id')
         .or(`start_node_id.in.(${idList}),end_node_id.in.(${idList})`);
-      
+
       if (fallbackError) {
         console.error('Fallback Full Batch Error:', fallbackError.message);
       } else {

@@ -41,7 +41,7 @@ async function applyFixes() {
 
   for (const fix of fixes) {
     console.log(`Applying fix for ${fix.id}...`);
-    
+
     // 1. Update Hub
     const { error: hubError } = await supabase
       .from('nodes')
@@ -51,7 +51,7 @@ async function applyFixes() {
         parent_hub_id: fix.parent_hub_id
       })
       .eq('id', fix.id);
-    
+
     if (hubError) console.error(`Error updating hub ${fix.id}:`, hubError);
 
     // 2. Update Children by pattern
@@ -64,7 +64,7 @@ async function applyFixes() {
         })
         .like('id', pattern)
         .neq('id', fix.id);
-      
+
       if (fix.excludeChildren) {
         query = query.not('id', 'in', `(${fix.excludeChildren.join(',')})`);
       }
@@ -77,7 +77,7 @@ async function applyFixes() {
   // 3. Coordinate-based cleanup (simplified approach)
   console.log('Running coordinate-based cleanup...');
   const { data: hubs } = await supabase.from('nodes').select('id, coordinates').eq('is_hub', true);
-  
+
   if (hubs) {
     for (const hub of hubs) {
       // Find nodes with same coordinates but not this hub
@@ -87,9 +87,9 @@ async function applyFixes() {
         .eq('coordinates', hub.coordinates)
         .neq('id', hub.id)
         .is('parent_hub_id', null);
-      
+
       if (cleanupError) {
-        // This might fail if coordinates is not directly comparable this way, 
+        // This might fail if coordinates is not directly comparable this way,
         // but it's a good secondary attempt.
         console.warn(`Coordinate cleanup for ${hub.id} might have skipped some nodes.`);
       }

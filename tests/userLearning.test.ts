@@ -3,9 +3,9 @@
  * Tests for: user preferences, weighted scoring, data hashing, and type validation
  */
 
-import { 
-  calculateWeightedScore, 
-  generateDataHash, 
+import {
+  calculateWeightedScore,
+  generateDataHash,
   DEFAULT_SCORING_CONFIG,
   UserPreferences,
   DecisionLog,
@@ -17,11 +17,11 @@ import {
 // =============================================================================
 
 describe('User Learning System - Core Functions', () => {
-  
+
   // =============================================================================
   // calculateWeightedScore Tests
   // =============================================================================
-  
+
   describe('calculateWeightedScore', () => {
     it('should return base score for new user (no history)', () => {
       const score = calculateWeightedScore(0, null, 0, 0);
@@ -68,7 +68,7 @@ describe('User Learning System - Core Functions', () => {
       const today = calculateWeightedScore(50, now, 10, 0);
       const weekAgo = calculateWeightedScore(50, now - 7 * 24 * 60 * 60 * 1000, 10, 0);
       const monthAgo = calculateWeightedScore(50, now - 30 * 24 * 60 * 60 * 1000, 10, 0);
-      
+
       expect(today).toBeGreaterThan(weekAgo);
       expect(weekAgo).toBeGreaterThan(monthAgo);
     });
@@ -84,7 +84,7 @@ describe('User Learning System - Core Functions', () => {
         positiveCap: 20,
         negativeCap: 10
       };
-      
+
       const now = Date.now();
       const score = calculateWeightedScore(100, now, 20, 0, customConfig);
       expect(score).toBeGreaterThanOrEqual(0.90);
@@ -109,7 +109,7 @@ describe('User Learning System - Core Functions', () => {
   // =============================================================================
   // generateDataHash Tests
   // =============================================================================
-  
+
   describe('generateDataHash', () => {
     it('should generate consistent hash for same data', () => {
       const data = { name: 'test', value: 123 };
@@ -152,7 +152,7 @@ describe('User Learning System - Core Functions', () => {
   // =============================================================================
   // Type Validation Tests
   // =============================================================================
-  
+
   describe('Type Validation', () => {
     it('should create valid UserPreferences object', () => {
       const prefs: UserPreferences = {
@@ -180,25 +180,25 @@ describe('User Learning System - Core Functions', () => {
         source: 'web',
         created_at: Date.now()
       };
-      
+
       expect(prefs.user_id).toBe('user-123');
       expect(prefs.user_profile).toBe('general');
       expect(prefs.source).toBe('web');
     });
 
     it('should accept valid user_profile values', () => {
-      const profiles: Array<'general' | 'wheelchair' | 'stroller' | 'large_luggage'> = 
+      const profiles: Array<'general' | 'wheelchair' | 'stroller' | 'large_luggage'> =
         ['general', 'wheelchair', 'stroller', 'large_luggage'];
-      
+
       profiles.forEach(profile => {
         expect(['general', 'wheelchair', 'stroller', 'large_luggage']).toContain(profile);
       });
     });
 
     it('should accept valid sort_by values', () => {
-      const sortOptions: Array<'distance' | 'rating' | 'popularity' | 'preference_score'> = 
+      const sortOptions: Array<'distance' | 'rating' | 'popularity' | 'preference_score'> =
         ['distance', 'rating', 'popularity', 'preference_score'];
-      
+
       sortOptions.forEach(option => {
         expect(['distance', 'rating', 'popularity', 'preference_score']).toContain(option);
       });
@@ -208,7 +208,7 @@ describe('User Learning System - Core Functions', () => {
   // =============================================================================
   // Scoring Formula Verification
   // =============================================================================
-  
+
   describe('Scoring Formula Verification', () => {
     it('should match expected formula: (F×0.30) + (R×0.30) + (P×0.25) + (N×0.15)', () => {
       // Test with known values
@@ -216,23 +216,23 @@ describe('User Learning System - Core Functions', () => {
       const lastSelectedAt = Date.now() - 7 * 24 * 60 * 60 * 1000;
       const positiveCount = 10;
       const negativeCount = 5;
-      
+
       const score = calculateWeightedScore(selectionCount, lastSelectedAt, positiveCount, negativeCount);
-      
+
       // Manual calculation verification
       const freqScore = Math.min(50 / 100, 1.0); // 0.5
       const daysSince = 7;
       const recencyScore = Math.exp(-0.1 * daysSince); // ~0.496
       const posScore = Math.min(10 / 20, 1.0); // 0.5
       const negScore = 1.0 - Math.min(5 / 10, 1.0); // 0.5
-      
+
       const expectedScore = Number((
         freqScore * 0.30 +
         recencyScore * 0.30 +
         posScore * 0.25 +
         negScore * 0.15
       ).toFixed(3));
-      
+
       expect(score).toBeCloseTo(expectedScore, 2);
     });
   });
@@ -243,7 +243,7 @@ describe('User Learning System - Core Functions', () => {
 // =============================================================================
 
 describe('User Learning API - Integration', () => {
-  
+
   describe('Preference Default Values', () => {
     it('should have correct default values for new user', () => {
       const defaults = {
@@ -260,7 +260,7 @@ describe('User Learning API - Integration', () => {
         sort_order: 'asc',
         user_profile: 'general'
       };
-      
+
       expect(defaults.default_lat).toBe(35.7138);
       expect(defaults.default_lon).toBe(139.7773);
       expect(defaults.label_language).toBe('zh-TW');
@@ -287,7 +287,7 @@ describe('User Learning API - Integration', () => {
         DEFAULT_SCORING_CONFIG.recencyWeight +
         DEFAULT_SCORING_CONFIG.positiveWeight +
         DEFAULT_SCORING_CONFIG.negativeWeight;
-      
+
       expect(sum).toBeCloseTo(1.0, 5);
     });
   });
@@ -298,7 +298,7 @@ describe('User Learning API - Integration', () => {
 // =============================================================================
 
 describe('Edge Cases', () => {
-  
+
   describe('calculateWeightedScore edge cases', () => {
     it('should handle negative selection count', () => {
       const score = calculateWeightedScore(-1, null, 0, 0);

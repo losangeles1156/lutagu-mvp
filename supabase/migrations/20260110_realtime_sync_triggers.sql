@@ -13,7 +13,7 @@ BEGIN
             VALUES (
                 NEW.parent_hub_id,
                 NEW.id,
-                CASE 
+                CASE
                     WHEN NEW.id LIKE '%TokyoMetro%' THEN 'TokyoMetro'
                     WHEN NEW.id LIKE '%Toei%' THEN 'Toei'
                     WHEN NEW.id LIKE '%JR-East%' THEN 'JR-East'
@@ -22,14 +22,14 @@ BEGIN
             )
             ON CONFLICT (hub_id, member_id) DO NOTHING;
         END IF;
-        
+
         -- 如果節點是 Hub (is_hub = true)，確保自己也在成員列表中
         IF NEW.is_hub = true THEN
             INSERT INTO hub_station_members (hub_id, member_id, operator)
             VALUES (
                 NEW.id,
                 NEW.id,
-                CASE 
+                CASE
                     WHEN NEW.id LIKE '%TokyoMetro%' THEN 'TokyoMetro'
                     WHEN NEW.id LIKE '%Toei%' THEN 'Toei'
                     WHEN NEW.id LIKE '%JR-East%' THEN 'JR-East'
@@ -38,10 +38,10 @@ BEGIN
             )
             ON CONFLICT (hub_id, member_id) DO NOTHING;
         END IF;
-        
+
         RETURN NEW;
     END IF;
-    
+
     -- 處理 DELETE
     IF TG_OP = 'DELETE' THEN
         -- 刪除該節點的所有成員關係
@@ -49,7 +49,7 @@ BEGIN
         DELETE FROM hub_station_members WHERE hub_id = OLD.id;
         RETURN OLD;
     END IF;
-    
+
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
@@ -72,7 +72,7 @@ BEGIN
         -- 更新作為 Hub 的記錄
         UPDATE hub_station_members SET hub_id = NEW.id WHERE hub_id = OLD.id;
     END IF;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

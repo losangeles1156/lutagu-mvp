@@ -4,7 +4,7 @@ import { getSupabase } from '@/lib/supabase';
 /**
  * GET /api/nodes/nearest
  * Find the nearest node to a given lat/lon coordinate
- * 
+ *
  * Query params:
  * - lat: latitude (required)
  * - lon: longitude (required)

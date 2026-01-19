@@ -1,6 +1,6 @@
 -- Create Airport Ward
 INSERT INTO wards (id, name_i18n, prefecture, ward_code, boundary, center_point, priority_order, is_active)
-VALUES 
+VALUES
 (
   'ward:airport',
   '{"ja": "空港エリア", "en": "Airport Area", "zh-TW": "機場區域"}',
@@ -15,7 +15,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Create Airport Hubs
 INSERT INTO nodes (id, name, node_type, is_hub, ward_id, city_id, coordinates, is_active)
-VALUES 
+VALUES
 (
   'odpt:Station:Airport.Haneda',
   '{"ja": "羽田空港", "en": "Haneda Airport", "zh-TW": "羽田機場"}',
@@ -36,21 +36,21 @@ VALUES
   ST_SetSRID(ST_MakePoint(140.392, 35.772), 4326),
   true
 )
-ON CONFLICT (id) DO UPDATE SET 
+ON CONFLICT (id) DO UPDATE SET
   ward_id = 'ward:airport',
   is_hub = true,
   city_id = 'tokyo_core',
   coordinates = EXCLUDED.coordinates;
 
 -- Aggregating Haneda Child Nodes
-UPDATE nodes 
+UPDATE nodes
 SET parent_hub_id = 'odpt:Station:Airport.Haneda'
-WHERE 
+WHERE
   id LIKE 'odpt.Station:TokyoMonorail.HanedaAirportLine.Haneda%' OR
   id LIKE 'odpt.Station:Keikyu.Airport.Haneda%';
 
 -- Aggregating Narita Child Nodes
-UPDATE nodes 
+UPDATE nodes
 SET parent_hub_id = 'odpt:Station:Airport.Narita'
-WHERE 
+WHERE
   id LIKE 'odpt.Station:Keisei.%NaritaAirport%';

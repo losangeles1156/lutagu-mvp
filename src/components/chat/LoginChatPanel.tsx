@@ -178,7 +178,7 @@ export function LoginChatPanel() {
                     )}
 
                     {/* Messages Area */}
-                    <div 
+                    <div
                         className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin"
                         role="log"
                         aria-live="polite"
@@ -250,7 +250,7 @@ export function LoginChatPanel() {
                                 placeholder={t('placeholder', { defaultValue: 'Ask me anything...' })}
                                 aria-label={t('inputLabel', { defaultValue: 'Type your question' })}
                                 aria-describedby={input ? undefined : 'input-hint'}
-                                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl 
+                                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl
                                     text-sm font-bold placeholder:text-slate-400
                                     min-h-[48px] outline-none transition-all
                                     disabled:opacity-50 disabled:cursor-not-allowed"

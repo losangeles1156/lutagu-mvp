@@ -68,13 +68,13 @@ RETURNS TABLE (
   accessibility_rank text,
   distance_meters float,
   geometry json
-) 
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     pl.id,
     pl.link_id,
     pl.start_node_id,
@@ -84,7 +84,7 @@ BEGIN
     pl.distance_meters::float,
     ST_AsGeoJSON(pl.geometry)::json as geometry
   FROM public.pedestrian_links pl
-  WHERE pl.start_node_id = ANY(target_node_ids) 
+  WHERE pl.start_node_id = ANY(target_node_ids)
      OR pl.end_node_id = ANY(target_node_ids);
 END;
 $$;

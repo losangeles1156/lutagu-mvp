@@ -11,7 +11,7 @@ create table if not exists public.l4_data_mux_cache (
   result jsonb not null,
   created_at timestamp with time zone default now(),
   expires_at timestamp with time zone not null,
-  
+
   -- Create unique index to allow easy upsert
   unique(station_id, locale, user_profile)
 );
@@ -39,5 +39,5 @@ create policy "Service role can update cache"
   using (true);
 
 -- Index for faster lookups including expiry check
-create index if not exists idx_l4_data_mux_cache_lookup 
+create index if not exists idx_l4_data_mux_cache_lookup
 on public.l4_data_mux_cache (station_id, locale, user_profile, expires_at);

@@ -73,6 +73,8 @@ scripts/*.json
 # Local env files
 .env*.local
 .env
+.env*.backup*
+.env.local.backup*
 
 # n8n exported workflows (never include real credentials)
 n8n/lutagu_L2_Hybrid_Workflow.json
@@ -107,7 +109,6 @@ public/sw*.js
 public/workbox-*.js
 
 # Secret files (never commit)
-.secrets.baseline
 *.key
 **/secrets/**
 *.bak

@@ -5,9 +5,9 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const ODPT_API_URL = "https://api.odpt.org/api/v4/odpt:Station";
-const ODPT_TOKEN = process.env.ODPT_AUTH_TOKEN || 
-                   process.env.NEXT_PUBLIC_ODPT_TOKEN || 
-                   process.env.ODPT_API_TOKEN || 
+const ODPT_TOKEN = process.env.ODPT_AUTH_TOKEN ||
+                   process.env.NEXT_PUBLIC_ODPT_TOKEN ||
+                   process.env.ODPT_API_TOKEN ||
                    process.env.ODPT_API_TOKEN_BACKUP;
 
 async function inspectJr() {

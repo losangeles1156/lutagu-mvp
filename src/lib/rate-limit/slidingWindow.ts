@@ -61,8 +61,8 @@ export class SlidingWindowRateLimiter {
 
         // 檢查是否超限
         if (currentCount >= this.config.maxRequests) {
-            const resetAt = existing 
-                ? existing.windowStart + this.config.windowMs 
+            const resetAt = existing
+                ? existing.windowStart + this.config.windowMs
                 : now + this.config.windowMs;
 
             return {

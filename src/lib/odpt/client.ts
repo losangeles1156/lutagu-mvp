@@ -70,8 +70,8 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
         // Strategy A: Toei -> Public API, Optional Public Token
         baseUrl = API_PUBLIC;
         token = TOKENS.PUBLIC;
-    } else if (operator.includes('JR-East') || operator.includes('Keio') || operator.includes('Keikyu') || 
-               operator.includes('Keisei') || operator.includes('Odakyu') || operator.includes('Seibu') || 
+    } else if (operator.includes('JR-East') || operator.includes('Keio') || operator.includes('Keikyu') ||
+               operator.includes('Keisei') || operator.includes('Odakyu') || operator.includes('Seibu') ||
                operator.includes('Tobu') || operator.includes('Tokyu') || operator.includes('Yurikamome')) {
         // Strategy B: JR East & Private Railways -> Challenge API, JR East/Challenge Token
         baseUrl = API_CHALLENGE;

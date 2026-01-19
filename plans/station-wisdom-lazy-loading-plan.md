@@ -47,7 +47,7 @@ export async function getStationWisdom(stationId: string) {
 async function loadWisdomForStation(stationId: string) {
     const module = await import('./station_wisdom_generated');
     const allWisdom = module.GENERATED_KNOWLEDGE;
-    
+
     // 過濾只返回相關的知識
     return allWisdom.filter((item: any) => {
         const stationIds = item.trigger?.station_ids || [];
@@ -120,7 +120,7 @@ async function loadStationWisdom(nodeId: string): Promise<any[]> {
 
 function filterWisdomForStation(wisdom: any[], nodeId: string): any[] {
     const stationId = getStationIdFromNode(nodeId);
-    
+
     return wisdom.filter(item => {
         // 檢查 station_ids
         if (item.trigger?.station_ids?.includes(stationId)) {
@@ -129,7 +129,7 @@ function filterWisdomForStation(wisdom: any[], nodeId: string): any[] {
         // 檢查 station_names_hint
         const nameHints = item.trigger?.station_names_hint || [];
         const nodeName = stationId.split('.').pop()?.toLowerCase();
-        return nameHints.some((hint: string) => 
+        return nameHints.some((hint: string) =>
             nodeName?.includes(hint.toLowerCase())
         );
     });
@@ -143,7 +143,7 @@ export function preloadPopularStations() {
         'odpt.Station:TokyoMetro.Asakusa',
         // ... 其他熱門車站
     ];
-    
+
     popularStations.forEach(id => {
         getStationWisdom(id).catch(console.error);
     });

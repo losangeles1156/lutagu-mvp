@@ -71,12 +71,12 @@ export interface PedestrianRouteResult {
 
 /**
  * NavigationService
- * 
+ *
  * Centralized service for pedestrian navigation and accessibility graph retrieval.
  * Used by both the Navigation API and AI Agent Tools.
  */
 export class NavigationService {
-    
+
     /**
      * Retrieves a pedestrian navigation graph for a specific area.
      */
@@ -87,7 +87,7 @@ export class NavigationService {
         userProfile: string = 'general',
         weather: string = 'clear'
     ): Promise<NavigationGraphResult> {
-        
+
         // 1. Get Nodes via Optimized RPC
         const { data: mixedResults, error: rpcError } = await supabaseAdmin.rpc('get_nearby_accessibility_graph', {
             query_lat: lat,
@@ -122,7 +122,7 @@ export class NavigationService {
 
             if (linkError) {
                 console.warn('[NavigationService] RPC Error (get_pedestrian_links_geojson), falling back:', linkError);
-                
+
                 // Fallback to standard query if RPC fails
                 const { data: fallbackLinks, error: fallbackError } = await supabaseAdmin
                     .from('pedestrian_links')

@@ -19,7 +19,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  weather: 
+                  weather:
                     type: string
                   temp:
                     type: number

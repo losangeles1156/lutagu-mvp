@@ -2,13 +2,13 @@
 create extension if not exists vector;
 
 -- 1. Enhancing l1_places for Vibe Matching (Scenario 1)
-alter table l1_places 
+alter table l1_places
 add column if not exists vibe_embedding vector(1536), -- For 'vibe-matcher' cosine similarity
 add column if not exists crowd_level_simulated int default 1; -- 1 (Empty) to 5 (Packed)
 
 -- Create index for faster vector search
-create index if not exists l1_places_vibe_idx 
-on l1_places 
+create index if not exists l1_places_vibe_idx
+on l1_places
 using ivfflat (vibe_embedding vector_cosine_ops)
 with (lists = 100);
 
@@ -19,10 +19,10 @@ create table if not exists station_exits (
     exit_name jsonb not null, -- { "ja": "東口", "en": "East Exit" }
     location geometry(Point, 4326), -- PostGIS Point for precise distance calc
     accessibility_features jsonb default '{}'::jsonb, -- { "elevator": true, "slope": false }
-    
+
     constraint fk_station foreign key (station_id) references l4_knowledge_embeddings(entity_id) on delete cascade
-    -- Note: Foreign key might need adjustment depending on actual stations table, 
-    -- but usually we link to the node ID concept. 
+    -- Note: Foreign key might need adjustment depending on actual stations table,
+    -- but usually we link to the node ID concept.
     -- If no strict foreign key table exists for station_id strings, we can omit the constraint.
 );
 

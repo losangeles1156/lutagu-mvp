@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS pedestrian_links (
   end_node_id TEXT NOT NULL,
   geometry GEOGRAPHY(LineString, 4326),
   distance_meters NUMERIC(8,1),
-  
+
   -- Accessibility attributes
   accessibility_rank TEXT,          -- 'SAA', 'SBA', 'AAA', etc.
   route_structure INTEGER,          -- 1=corridor, 3=crosswalk, 4=stairs, 5=elevator
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS pedestrian_links (
   has_braille_tiles BOOLEAN DEFAULT false,
   has_elevator_access BOOLEAN DEFAULT false,
   has_roof BOOLEAN DEFAULT false,
-  
+
   -- Metadata
   source_dataset TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS pedestrian_nodes (
   floor_level NUMERIC(3,1) DEFAULT 0,  -- 0=ground, -1=B1, 1=1F
   is_indoor BOOLEAN DEFAULT false,
   connected_links TEXT[],
-  
+
   -- Metadata
   source_dataset TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),

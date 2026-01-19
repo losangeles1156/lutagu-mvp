@@ -1,7 +1,7 @@
 /**
  * LUTAGU Design Tokens - TypeScript 版本
  * 統一管理視覺設計系統
- * 
+ *
  * 用於 TypeScript 程式碼中的常數引用
  * CSS 版本請參考 src/styles/tokens.css
  */
@@ -285,8 +285,8 @@ export function getTabStyle(active: boolean) {
     return `
         flex-1 h-full flex flex-col items-center justify-center gap-1.5
         rounded-[22px] transition-colors
-        ${active 
-            ? 'text-indigo-700' 
+        ${active
+            ? 'text-indigo-700'
             : 'text-slate-400 hover:text-slate-600'
         }
         focus:outline-none focus:ring-2 focus:ring-indigo-500

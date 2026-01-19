@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS hub_station_members (
     hub_id TEXT NOT NULL,          -- Hub ID (通常是邏輯 ID，如 odpt:Station:JR-East.Ueno)
     member_id TEXT NOT NULL,       -- 成員車站 ID (物理 ID 或其他邏輯 ID)
-    operator TEXT,                 -- 運營商 
+    operator TEXT,                 -- 運營商
     line_name TEXT,                -- 路線名稱 (可選)
     created_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY (hub_id, member_id)

@@ -12,7 +12,7 @@ async function generateTopology() {
 
     console.log('Fetching railways...');
     console.log('Fetching railways...');
-    
+
     // Target Operators
     const operators = [
         'odpt.Operator:JR-East',
@@ -27,8 +27,8 @@ async function generateTopology() {
             console.log(`Fetching ${op}...`);
             const railways = await odptClient.getRailways(op);
             console.log(`Fetched ${railways.length} railways for ${op}`);
-            
-            // Filter out Shinkansen and other non-standard lines if needed, 
+
+            // Filter out Shinkansen and other non-standard lines if needed,
             // but for now let's keep it simple and take everything
             const filtered = railways.filter(r => {
                 const id = r['owl:sameAs'] || '';
@@ -36,7 +36,7 @@ async function generateTopology() {
                 return id.startsWith('odpt.Railway:');
             });
             console.log(`Kept ${filtered.length} railway lines`);
-            
+
             allRailways.push(...filtered);
         } catch (e) {
             console.error(`Error fetching ${op}:`, e);

@@ -3,7 +3,7 @@ import { hybridEngine } from './src/lib/l4/HybridEngine';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load env 
+// Load env
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 // Mock Date Helper

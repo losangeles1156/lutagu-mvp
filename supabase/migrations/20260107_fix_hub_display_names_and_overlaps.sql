@@ -1,21 +1,21 @@
 -- 1. Fix Legacy Hub Names (String -> JSON LocaleString)
 -- Ueno
-UPDATE nodes 
+UPDATE nodes
 SET name = '{"en": "Ueno", "ja": "上野", "zh-TW": "上野", "zh-CN": "上野"}'::jsonb
 WHERE id = 'odpt:Station:JR-East.Ueno';
 
 -- Shibuya
-UPDATE nodes 
+UPDATE nodes
 SET name = '{"en": "Shibuya", "ja": "渋谷", "zh-TW": "渋谷", "zh-CN": "渋谷"}'::jsonb
 WHERE id = 'odpt:Station:JR-East.Shibuya';
 
 -- Ikebukuro
-UPDATE nodes 
+UPDATE nodes
 SET name = '{"en": "Ikebukuro", "ja": "池袋", "zh-TW": "池袋", "zh-CN": "池袋"}'::jsonb
 WHERE id = 'odpt:Station:JR-East.Ikebukuro';
 
 -- Akihabara
-UPDATE nodes 
+UPDATE nodes
 SET name = '{"en": "Akihabara", "ja": "秋葉原", "zh-TW": "秋葉原", "zh-CN": "秋葉原"}'::jsonb
 WHERE id = 'odpt:Station:JR-East.Akihabara';
 
@@ -27,8 +27,8 @@ WHERE id = 'odpt:Station:JR-East.Akihabara';
 UPDATE nodes SET is_hub = true, parent_hub_id = null WHERE id = 'odpt:Station:JR-East.Ikebukuro';
 
 -- Children
-UPDATE nodes 
-SET is_hub = false, 
+UPDATE nodes
+SET is_hub = false,
     parent_hub_id = 'odpt:Station:JR-East.Ikebukuro'
 WHERE id IN (
     'odpt.Station:JR-East.Yamanote.Ikebukuro',
@@ -45,8 +45,8 @@ WHERE id IN (
 UPDATE nodes SET is_hub = true, parent_hub_id = null WHERE id = 'odpt:Station:JR-East.Akihabara';
 
 -- Children
-UPDATE nodes 
-SET is_hub = false, 
+UPDATE nodes
+SET is_hub = false,
     parent_hub_id = 'odpt:Station:JR-East.Akihabara'
 WHERE id IN (
     'odpt.Station:JR-East.ChuoSobuLocal.Akihabara',
@@ -61,7 +61,7 @@ WHERE id IN (
 UPDATE nodes SET is_hub = true, parent_hub_id = null WHERE id = 'odpt:Station:JR-East.Ueno';
 
 -- Ensure children don't claim to be hubs
-UPDATE nodes 
+UPDATE nodes
 SET is_hub = false,
     parent_hub_id = 'odpt:Station:JR-East.Ueno'
 WHERE id IN (
@@ -86,11 +86,11 @@ WHERE id IN (
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'nodes' AND column_name = 'version') THEN
-        UPDATE nodes SET version = COALESCE(version, 0) + 1 
+        UPDATE nodes SET version = COALESCE(version, 0) + 1
         WHERE id IN (
-            'odpt:Station:JR-East.Ueno', 
-            'odpt:Station:JR-East.Shibuya', 
-            'odpt:Station:JR-East.Ikebukuro', 
+            'odpt:Station:JR-East.Ueno',
+            'odpt:Station:JR-East.Shibuya',
+            'odpt:Station:JR-East.Ikebukuro',
             'odpt:Station:JR-East.Akihabara'
         );
     END IF;

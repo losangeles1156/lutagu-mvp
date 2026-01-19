@@ -1,7 +1,7 @@
 # 東京23區行政區節點重建計劃
 
-> 版本：v2.0  
-> 日期：2026-01-04  
+> 版本：v2.0
+> 日期：2026-01-04
 > 狀態：規劃中，待實作
 
 ## ⚠️ 重要：與現有 Hub 設計的關係
@@ -129,15 +129,15 @@ CREATE TABLE wards (
     name_i18n JSONB NOT NULL,               -- {"zh-TW": "台東區", "ja": "台東区", "en": "Taito"}
     prefecture TEXT NOT NULL DEFAULT 'Tokyo',
     ward_code INT,                          -- ISO 13131 ward code
-    
+
     -- Geographic Data (from 国土地理院)
     boundary GEOMETRY(MultiPolygon, 4326),
     center_point GEOMETRY(Point, 4326),
-    
+
     -- Statistics (聚合現有 nodes 數據)
     node_count INT DEFAULT 0,
     hub_count INT DEFAULT 0,
-    
+
     -- Metadata
     priority_order INT DEFAULT 0,
     is_active BOOLEAN DEFAULT true,
@@ -185,32 +185,32 @@ interface SeedNode {
 
 async function assignNodesToWards() {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
-    
+
     // 1. 獲取所有 wards 和其邊界
     const { data: wards } = await supabase.from('wards').select('id, boundary, name_i18n');
-    
+
     if (!wards || wards.length === 0) {
         throw new Error('No wards found. Please seed wards table first.');
     }
-    
+
     // 2. 獲取所有 nodes（只取 id 和 coordinates）
     const { data: nodes } = await supabase
         .from('nodes')
         .select('id, coordinates, is_hub, parent_hub_id');
-    
+
     let assigned = 0;
     let errors = 0;
-    
+
     // 3. 對於每個節點，判斷其所屬行政區
     for (const node of nodes!) {
         try {
             // 解析座標
             const coordMatch = node.coordinates?.match(/POINT\(([^)]+)\)/);
             if (!coordMatch) continue;
-            
+
             const [lng, lat] = coordMatch[1].split(' ').map(Number);
             const point = turf.point([lng, lat]);
-            
+
             // 查找所屬行政區
             for (const ward of wards!) {
                 if (turf.booleanPointInPolygon(point, ward.boundary)) {
@@ -219,7 +219,7 @@ async function assignNodesToWards() {
                         .from('nodes')
                         .update({ ward_id: ward.id })
                         .eq('id', node.id);
-                    
+
                     if (error) {
                         console.error(`Error assigning ${node.id}:`, error);
                         errors++;
@@ -235,7 +235,7 @@ async function assignNodesToWards() {
             errors++;
         }
     }
-    
+
     console.log(`\n=== Assignment Complete ===`);
     console.log(`Assigned: ${assigned}`);
     console.log(`Errors: ${errors}`);
@@ -244,16 +244,16 @@ async function assignNodesToWards() {
 // 執行後，更新 wards 表的統計數據
 async function updateWardStats() {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
-    
+
     const { data: wards } = await supabase.from('wards').select('id');
-    
+
     for (const ward of wards!) {
         // 統計節點數
         const { count: nodeCount } = await supabase
             .from('nodes')
             .select('*', { count: 'exact', head: true })
             .eq('ward_id', ward.id);
-        
+
         // 統計 Hub 數（is_hub=true 且無 parent_hub_id）
         const { count: hubCount } = await supabase
             .from('nodes')
@@ -261,10 +261,10 @@ async function updateWardStats() {
             .eq('ward_id', ward.id)
             .eq('is_hub', true)
             .is('parent_hub_id', null);
-        
+
         await supabase
             .from('wards')
-            .update({ 
+            .update({
                 node_count: nodeCount || 0,
                 hub_count: hubCount || 0
             })
@@ -298,7 +298,7 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const includeStats = url.searchParams.get('include_stats') === '1';
     const onlyActive = url.searchParams.get('only_active') !== '0';
-    
+
     let query = supabase.from('wards').select(`
         id,
         name_i18n,
@@ -307,20 +307,20 @@ export async function GET(req: Request) {
         priority_order,
         is_active
     `);
-    
+
     if (onlyActive) {
         query = query.eq('is_active', true);
     }
-    
+
     const { data: wards, error } = await query.order('priority_order');
-    
+
     if (includeStats) {
         // 獲取每個行政區的節點統計
         const { data: stats } = await supabase
             .from('nodes')
             .select('ward_id, is_hub')
             .in('ward_id', wards?.map(w => w.id) || []);
-        
+
         // 聚合統計
         const wardStats = new Map<string, { total: number; hubs: number }>();
         for (const stat of stats || []) {
@@ -329,7 +329,7 @@ export async function GET(req: Request) {
             if (stat.is_hub) current.hubs++;
             wardStats.set(stat.ward_id, current);
         }
-        
+
         // 合併到 wards 響應
         const response: WardResponse = {
             wards: wards?.map(w => ({
@@ -343,10 +343,10 @@ export async function GET(req: Request) {
             })) || [],
             total: wards?.length || 0
         };
-        
+
         return NextResponse.json(response);
     }
-    
+
     return NextResponse.json({ wards, total: wards?.length || 0 });
 }
 ```
@@ -392,18 +392,18 @@ export async function GET(
     { params }: { params: { wardId: string } }
 ) {
     const { wardId } = params;
-    
+
     // 1. 獲取 ward 詳情
     const { data: ward } = await supabase
         .from('wards')
         .select('*')
         .eq('id', wardId)
         .single();
-    
+
     if (!ward) {
         return NextResponse.json({ error: 'Ward not found' }, { status: 404 });
     }
-    
+
     // 2. 獲取該行政區的所有節點
     const { data: nodes } = await supabase
         .from('nodes')
@@ -413,12 +413,12 @@ export async function GET(
         `)
         .eq('ward_id', wardId)
         .eq('is_active', true);
-    
+
     // 3. 分離 Hub 和 Child（使用現有 Hub 邏輯）
     const hubs = nodes?.filter(n => n.is_hub && !n.parent_hub_id) || [];
     const childNodes = nodes?.filter(n => n.parent_hub_id) || [];
     const standaloneNodes = nodes?.filter(n => !n.is_hub && !n.parent_hub_id) || [];
-    
+
     // 4. 為每個 Hub 獲取子站點詳情（從 hub_members 表）
     const hubDetails = await Promise.all(
         hubs.map(async (hub) => {
@@ -427,7 +427,7 @@ export async function GET(
                 .from('hub_members')
                 .select('member_id')
                 .eq('hub_id', hub.id);
-            
+
             return {
                 id: hub.id,
                 name: hub.name,
@@ -441,7 +441,7 @@ export async function GET(
             };
         })
     );
-    
+
     return NextResponse.json({
         ward: {
             id: ward.id,
@@ -482,24 +482,24 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const lat = parseFloat(url.searchParams.get('lat')!);
     const lng = parseFloat(url.searchParams.get('lng')!);
-    
+
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
         return NextResponse.json({ error: 'Invalid coordinates' }, { status: 400 });
     }
-    
+
     // 使用 PostGIS ST_Contains 高效空間查詢
     const { data: ward } = await supabase
         .rpc('find_ward_by_point', { lat, lng })
         .single();
-    
+
     if (!ward) {
-        return NextResponse.json({ 
+        return NextResponse.json({
             error: 'No ward found at this location',
             lat,
             lng
         }, { status: 404 });
     }
-    
+
     return NextResponse.json({
         ward_id: ward.id,
         ward_name: ward.name_i18n,
@@ -525,9 +525,9 @@ RETURNS TABLE (
 ) AS $
 BEGIN
     RETURN QUERY
-    SELECT 
-        w.id, 
-        w.name_i18n, 
+    SELECT
+        w.id,
+        w.name_i18n,
         w.prefecture,
         ST_Distance(
             w.center_point,
@@ -559,12 +559,12 @@ interface WardState {
     // 當前選中的行政區
     currentWardId: string | null;
     setCurrentWard: (wardId: string | null) => void;
-    
+
     // 已加載的行政區數據
     loadedWards: Map<string, WardData>;
     loadWardData: (wardId: string) => Promise<void>;
     clearWardCache: () => void;
-    
+
     // 數據過濾選項
     showHubsOnly: boolean;
     showLabels: boolean;
@@ -603,34 +603,34 @@ export const useWardStore = create<WardState>()(
         (set, get) => ({
             currentWardId: null,
             setCurrentWard: (wardId) => set({ currentWardId: wardId }),
-            
+
             loadedWards: new Map(),
             loadWardData: async (wardId) => {
                 const { loadedWards } = get();
-                
+
                 // 檢查快取是否有效（24小時）
                 const cached = loadedWards.get(wardId);
                 if (cached && Date.now() - cached.loadedAt < 24 * 60 * 60 * 1000) {
                     return;
                 }
-                
+
                 // 獲取新數據
                 const response = await fetch(`/api/wards/${wardId}`);
                 const data = await response.json();
-                
+
                 const newWardData: WardData = {
                     ward: data.ward,
                     standalone_nodes: data.standalone_nodes,
                     hubs: data.hubs,
                     loadedAt: Date.now()
                 };
-                
+
                 set({
                     loadedWards: new Map(loadedWards).set(wardId, newWardData)
                 });
             },
             clearWardCache: () => set({ loadedWards: new Map() }),
-            
+
             showHubsOnly: false,
             showLabels: true,
             toggleHubsOnly: () => set((state) => ({ showHubsOnly: !state.showHubsOnly })),
@@ -661,45 +661,45 @@ import L from 'leaflet';
 export function WardDetector() {
     const map = useMap();
     const { currentWardId, setCurrentWard, loadWardData } = useWardStore();
-    
+
     useEffect(() => {
         const handleMoveEnd = async () => {
             const center = map.getCenter();
-            
+
             // 檢測當前所在的行政區
             const response = await fetch(
                 `/api/wards/detect?lat=${center.lat}&lng=${center.lng}`
             );
-            
+
             if (response.ok) {
                 const data = await response.json();
                 const detectedWardId = data.ward_id;
-                
+
                 if (detectedWardId !== currentWardId) {
                     setCurrentWard(detectedWardId);
                     await loadWardData(detectedWardId);
                 }
             }
         };
-        
+
         // 防抖處理
         let timeout: NodeJS.Timeout;
         const debouncedHandler = () => {
             clearTimeout(timeout);
             timeout = setTimeout(handleMoveEnd, 500);
         };
-        
+
         map.on('moveend', debouncedHandler);
-        
+
         // 初始檢測
         handleMoveEnd();
-        
+
         return () => {
             map.off('moveend', debouncedHandler);
             clearTimeout(timeout);
         };
     }, [map, currentWardId, setCurrentWard, loadWardData]);
-    
+
     return null;
 }
 ```
@@ -727,16 +727,16 @@ interface NodeItem {
 export function WardNodeLayer() {
     const map = useMap();
     const { loadedWards, currentWardId, showHubsOnly, showLabels } = useWardStore();
-    
+
     // 獲取當前行政區的數據
     const currentWardData = currentWardId ? loadedWards.get(currentWardId) : null;
-    
+
     // 計算可見節點（整合 Hub 和獨立站點）
     const visibleNodes = useMemo(() => {
         if (!currentWardData) return [];
-        
+
         const nodes: NodeItem[] = [];
-        
+
         // 添加所有 Hub
         for (const hub of currentWardData.hubs) {
             nodes.push({
@@ -746,14 +746,14 @@ export function WardNodeLayer() {
                 is_hub: true,
                 parent_hub_id: null
             });
-            
+
             // 如果不是 showHubsOnly，添加子站點
             if (!showHubsOnly && hub.child_nodes.length > 0) {
                 // 子站點需要從額外數據源獲取名稱和座標
                 // 實際實現時可從 /api/wards/:wardId 返回的數據中獲取
             }
         }
-        
+
         // 添加獨立站點（非 Hub）
         if (!showHubsOnly) {
             for (const node of currentWardData.standalone_nodes) {
@@ -766,19 +766,19 @@ export function WardNodeLayer() {
                 });
             }
         }
-        
+
         return nodes;
     }, [currentWardData, showHubsOnly]);
-    
+
     // 計算可見邊界
     const wardBoundary = useMemo(() => {
         if (!currentWardData) return null;
         // 從 ward.boundary 獲取（API 返回）
         return null;
     }, [currentWardData]);
-    
+
     if (!currentWardData) return null;
-    
+
     return (
         <>
             {/* 行政區邊界疊加層（可選） */}
@@ -794,7 +794,7 @@ export function WardNodeLayer() {
                     }}
                 />
             )}
-            
+
             {/* 節點標記（使用現有的 NodeMarker，它已支援 Hub 顯示） */}
             {visibleNodes.map((node) => (
                 <NodeMarker

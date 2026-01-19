@@ -292,19 +292,19 @@ UPDATE nodes SET is_hub = false, parent_hub_id = 'odpt:Station:Toei.ShinOkachima
 
 -- Step 4: 驗證結果 - 只顯示 Hub 站點
 SELECT id, name->>'zh-TW' as name, is_hub
-FROM nodes 
+FROM nodes
 WHERE is_hub = true
 ORDER BY name->>'zh-TW';
 
 -- Step 5: 統計總數
-SELECT 
+SELECT
     COUNT(*) FILTER (WHERE is_hub = true) as hubs,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as children,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone
 FROM nodes;
 
 -- Step 6: 驗證父子關係
-SELECT 
+SELECT
     p.name->>'zh-TW' as hub_name,
     c.name->>'zh-TW' as child_name
 FROM nodes c

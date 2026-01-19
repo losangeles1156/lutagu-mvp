@@ -5,7 +5,7 @@ import { getRateLimitService, DEFAULT_RATE_LIMITS } from '@/lib/rate-limit';
 // 輔助函數：解析 PostGIS POINT 格式
 function parsePointLocation(location: any): { lat: number; lng: number } {
     if (!location) return { lat: 0, lng: 0 };
-    
+
     if (typeof location === 'string' && location.startsWith('POINT')) {
         const match = location.match(/POINT\(([-0-9\.]+) ([-0-9\.]+)\)/);
         if (match) {
@@ -16,7 +16,7 @@ function parsePointLocation(location: any): { lat: number; lng: number } {
     } else if (location.x !== undefined && location.y !== undefined) {
         return { lng: location.x, lat: location.y };
     }
-    
+
     return { lat: 0, lng: 0 };
 }
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     // 檢查限流
     const limiter = getRateLimitService();
     const rateLimitResult = limiter.check(request, DEFAULT_RATE_LIMITS.l1Places);
-    
+
     if (!rateLimitResult.allowed) {
         return limiter.createTooManyRequestsResponse(rateLimitResult);
     }
@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
         }
 
         // 解析站點 ID 列表
-        const stationIds = stationId.includes(',') 
-            ? stationId.split(',') 
+        const stationIds = stationId.includes(',')
+            ? stationId.split(',')
             : [stationId];
 
         // =========================================
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
             return 0;
         });
 
-        const response = NextResponse.json({ 
+        const response = NextResponse.json({
             places: allPlaces,
             summary: {
                 total: allPlaces.length,
@@ -162,11 +162,11 @@ export async function GET(request: NextRequest) {
                 partner: customPlaces.filter(p => p.isPartner).length
             }
         });
-        
+
         // 添加限流響應頭
         response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
         response.headers.set('X-RateLimit-Reset', Math.ceil(rateLimitResult.resetAt / 1000).toString());
-        
+
         return response;
     } catch (err) {
         console.error('[API/l1/places] Error:', err);

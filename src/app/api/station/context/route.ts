@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 /**
  * GET /api/station/context?station_id=odpt.Station:...
- * 
+ *
  * Returns:
  * - busy_level: Tier based on historical passenger journeys
  * - annual_journeys: Number from latest survey year

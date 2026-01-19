@@ -3,7 +3,7 @@ import { generateWeatherAdvice, generateL1DNA, generateL4Advice } from '@/lib/ai
 
 /**
  * AI Service Test Endpoint
- * 
+ *
  * GET /api/ai/test - Test MiniMax connection with sample generation
  * POST /api/ai/test - Generate content based on request body
  */

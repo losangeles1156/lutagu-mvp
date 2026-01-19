@@ -4,9 +4,9 @@
 
 export { SlidingWindowRateLimiter, FixedWindowRateLimiter, createRateLimiter, createFixedWindowLimiter } from './slidingWindow';
 export type { RateLimitConfig, RateLimitResult } from './slidingWindow';
-export { 
-    RateLimitService, 
-    getRateLimitService, 
+export {
+    RateLimitService,
+    getRateLimitService,
     getL1PlacesRateLimiter,
     withRateLimit,
     create429Response,

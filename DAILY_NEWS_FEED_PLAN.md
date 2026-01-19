@@ -16,7 +16,7 @@ graph TD
     D -->|使用 Gemini 2.5 Flash Lite| E(結構化 Event JSON)
     E -->|3. 生成向量| F[Embedding Service]
     F -->|4. UPSERT| G[(Supabase: news_events)]
-    
+
     H[User: '新宿甜點'] -->|5. Query| I[LocalGuide Skill]
     I -->|RAG Search| G
     I -->|Context + Prompt| J[DeepSeek V3]
@@ -56,7 +56,7 @@ create table news_events (
 
 -- 距今 30 天內的活動才加入索引搜尋
 create index on news_events using ivfflat (embedding vector_cosine_ops)
-where end_date >= current_date; 
+where end_date >= current_date;
 ```
 
 ### 3.4 技能整合 (Skill Integration)

@@ -34,7 +34,7 @@ async function upsertIncident(params: {
 }) {
     // Check if incident_tracking table exists first
     const { error: tableCheckError } = await supabase.from('incident_tracking').select('id').limit(1);
-    
+
     if (tableCheckError && tableCheckError.message.includes('Could not find the table')) {
         console.warn('⚠️  incident_tracking table does not exist. Incident details will be printed to console only.');
         console.log('--- Incident Details ---');

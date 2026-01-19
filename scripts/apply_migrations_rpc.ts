@@ -37,10 +37,10 @@ async function runMigration() {
         // Actually, create_ai_feedback.sql has complex PL/pgSQL? No, mostly CREATE TABLE.
         // fix_ambiguous_columns.sql has PL/pgSQL which contains semicolons inside $$...$$ block.
         // Splitting by ; will BREAK the function definition.
-        
+
         // We really need to execute the whole block if possible.
         // If exec_sql takes a single string, we can pass the whole content.
-        
+
         const { error } = await supabase.rpc('exec_sql', { sql_query: sql });
 
         if (error) {
@@ -48,14 +48,14 @@ async function runMigration() {
             if (error.code === 'PGRST202' || error.message.includes('Could not find')) {
                 console.warn('⚠️  RPC "exec_sql" not found. Cannot apply migration via HTTP.');
                 totalSuccess = false;
-                break; 
+                break;
             }
             totalSuccess = false;
         } else {
             console.log(`✅ Applied ${migrationFile}`);
         }
     }
-    
+
     if (!totalSuccess) {
         console.log('\n❌ Some migrations failed. Trying fallback to direct DB connection...');
         process.exit(1);

@@ -28,7 +28,7 @@ const majorHubs = [
     { id: 'odpt.Station:Keio.Shibuya', ward: 'ward:shibuya' },
     { id: 'odpt.Station:JR-East.Daikanyama', ward: 'ward:shibuya' },
     { id: 'odpt.Station:Tokyu.Toyoko.Daikanyama', ward: 'ward:shibuya' },
-    
+
     // Shinagawa Ward
     { id: 'odpt.Station:JR-East.Shinagawa', ward: 'ward:shinagawa' },
     { id: 'odpt.Station:JR-East.Osaki', ward: 'ward:shinagawa' },
@@ -36,7 +36,7 @@ const majorHubs = [
     { id: 'odpt.Station:JR-East.Tamachi', ward: 'ward:shinagawa' },
     { id: 'odpt.Station:TokyoMetro.Namboku.Shinagawa', ward: 'ward:shinagawa' },
     { id: 'odpt.Station:Toei.Mita.Tamachi', ward: 'ward:shinagawa' },
-    
+
     // Minato Ward
     { id: 'odpt.Station:Toei.Oedo.Roppongi', ward: 'ward:minato' },
     { id: 'odpt.Station:TokyoMetro.Hibiya.Roppongi', ward: 'ward:minato' },
@@ -45,7 +45,7 @@ const majorHubs = [
     { id: 'odpt.Station:TokyoMetro.Ginza.AkasakaMitsuke', ward: 'ward:minato' },
     { id: 'odpt.Station:TokyoMetro.Marunouchi.AkasakaMitsuke', ward: 'ward:minato' },
     { id: 'odpt.Station:Toei.Oedo.AkasakaMitsuke', ward: 'ward:minato' },
-    
+
     // Chuo Ward
     { id: 'odpt.Station:TokyoMetro.Ginza', ward: 'ward:chuo' },
     { id: 'odpt.Station:TokyoMetro.Nihombashi', ward: 'ward:chuo' },
@@ -53,7 +53,7 @@ const majorHubs = [
     { id: 'odpt.Station:TokyoMetro.Hibiya', ward: 'ward:chuo' },
     { id: 'odpt.Station:Toei.Shinjuku.Higashishinjuku', ward: 'ward:chuo' },
     { id: 'odpt.Station:JR-East.Kanda', ward: 'ward:chuo' },  // Already a hub
-    
+
     // Shinjuku Ward
     { id: 'odpt.Station:TokyoMetro.Marunouchi.Shinjuku', ward: 'ward:shinjuku' },
     { id: 'odpt.Station:Toei.Oedo.Shinjuku', ward: 'ward:shinjuku' },
@@ -61,18 +61,18 @@ const majorHubs = [
     { id: 'odpt.Station:Odakyu.Shinjuku', ward: 'ward:shinjuku' },
     { id: 'odpt.Station:Seibu.Shinjuku', ward: 'ward:shinjuku' },
     { id: 'odpt.Station:JR-East.SeijoYamate', ward: 'ward:shinjuku' },
-    
+
     // Taito Ward
     { id: 'odpt.Station:TokyoMetro.Ginza.Ueno', ward: 'ward:taito' },
     { id: 'odpt.Station:TokyoMetro.Hibiya.Ueno', ward: 'ward:taito' },
     { id: 'odpt.Station:Keisei.Ueno', ward: 'ward:taito' },
-    
+
     // Other major hubs
     { id: 'odpt.Station:JR-East.Ikebukuro', ward: 'ward:toshima' },
     { id: 'odpt.Station:TokyoMetro.Yurakucho.Ikebukuro', ward: 'ward:toshima' },
     { id: 'odpt.Station:Seibu.Ikebukuro', ward: 'ward:toshima' },
     { id: 'odpt.Station:Tobu.Ikebukuro', ward: 'ward:toshima' },
-    
+
     { id: 'odpt.Station:JR-East.Ginza', ward: 'ward:chuo' },
 ];
 
@@ -134,7 +134,7 @@ async function identifyAndMarkHubs() {
 
     // Now re-run ward assignment
     console.log('\n[Step 2] Re-assigning nodes to wards...');
-    
+
     const { data: wards } = await supabase
         .from('wards')
         .select('id, name_i18n, center_point')
@@ -164,7 +164,7 @@ async function identifyAndMarkHubs() {
     for (const node of nodes) {
         try {
             let coords: [number, number] | null = null;
-            
+
             if (node.coordinates?.coordinates) {
                 coords = [node.coordinates.coordinates[0], node.coordinates.coordinates[1]];
             } else if (Array.isArray(node.coordinates)) {
@@ -179,13 +179,13 @@ async function identifyAndMarkHubs() {
 
             for (const ward of wards) {
                 if (!ward.center_point?.coordinates) continue;
-                
+
                 const [lng, lat] = ward.center_point.coordinates;
                 const dist = Math.sqrt(
-                    Math.pow(coords[0] - lng, 2) + 
+                    Math.pow(coords[0] - lng, 2) +
                     Math.pow(coords[1] - lat, 2)
                 );
-                
+
                 if (dist < nearestDist && dist < 0.1) { // Within ~10km
                     nearestDist = dist;
                     nearestWard = ward;
@@ -235,7 +235,7 @@ async function identifyAndMarkHubs() {
 
         await supabase
             .from('wards')
-            .update({ 
+            .update({
                 node_count: nodeCount || 0,
                 hub_count: hubCount || 0,
                 updated_at: new Date().toISOString()

@@ -42,7 +42,7 @@ export class NodeRepository extends BaseRepository<any> {
             .select('*')
             .eq('id', id)
             .single();
-        
+
         if (data) this.setCache(id, data);
         return data || null;
     }
@@ -71,7 +71,7 @@ export class StatusRepository extends BaseRepository<any> {
             .order('updated_at', { ascending: false })
             .limit(1)
             .single();
-        
+
         if (data) this.setCache(stationId, data);
         return data;
     }

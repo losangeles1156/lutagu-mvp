@@ -8,21 +8,21 @@
 ```mermaid
 graph TD
     User[User Input] --> A[Pre-Decision Engine]
-    
+
     A -->|Simple Intent| B{L1: Template Engine}
     A -->|Medium Intent| C{L2: Algo Provider}
     A -->|Complex Intent| D{L3: Knowledge Engine}
-    
+
     B -->|Match| ResponseA[Fast Reply <100ms]
     B -->|No Match| C
-    
+
     C -->|POI Tag Hit| ResponseB[POI Recommendation]
     C -->|Route/Fare Calc| ResponseC[Algorithm Result]
     C -->|No Match| D
-    
+
     D -->|Semantic Hit| E[Knowledge Synthesis]
     E -->|MiniMax/Gemini| ResponseD[Expert Advice]
-    
+
     D -->|No Match| F[Fallback: LLM Orchestrator]
     F -->|Reasoning| ResponseF[General Chat]
 ```
@@ -38,7 +38,7 @@ graph TD
 ### Layer 2: Algorithm & POI Tags (演算法層)
 *   **Cost**: Zero Token (DB Query)
 *   **Latency**: < 200ms
-*   **用途**: 
+*   **用途**:
     1. **POI Tags**: 搜尋「拉麵」、「廁所」（使用 L1 Tagging 系統）。
     2. **Hard Calc**: 計算票價、查詢時刻表、最短路徑 (Dijkstra)。
 

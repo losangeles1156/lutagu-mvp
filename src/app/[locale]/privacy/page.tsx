@@ -196,4 +196,3 @@ export default function PrivacyPage({ params }: { params: { locale: string } }) 
     </main>
   );
 }
-

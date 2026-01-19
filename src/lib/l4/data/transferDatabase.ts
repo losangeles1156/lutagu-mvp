@@ -187,7 +187,7 @@ export function isOutOfStationTransfer(fromStationId: string, toLineId: string):
   if (!stationInfo) return false;
   const transfer = stationInfo[toLineId];
   if (!transfer) return false;
-  
+
   // 這裡簡單判斷：跨公司且距離長，或特定標註的轉乘
   if (fromStationId.includes('Kuramae')) return true;
   return transfer.walkingDistanceMeters > 200;
@@ -201,7 +201,7 @@ export function getTransferDistance(fromStationId: string, toLineId: string): nu
   if (stationInfo && stationInfo[toLineId]) {
     return stationInfo[toLineId].walkingDistanceMeters;
   }
-  
+
   // 預設值：站內轉乘約 100m，跨公司約 250m
   if (fromStationId.split('.')[2] === toLineId.split('.')[2]) {
     return 100;

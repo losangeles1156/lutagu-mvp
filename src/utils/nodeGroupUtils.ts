@@ -34,7 +34,7 @@ export function groupNodesByProximity(nodes: NodeDatum[], thresholdMeters: numbe
     });
 
     const remainingNodes = nodes.filter(n => !processed.has(n.id) && !hubMap.has(n.id));
-    
+
     remainingNodes.forEach(node => {
         if (processed.has(node.id)) return;
 

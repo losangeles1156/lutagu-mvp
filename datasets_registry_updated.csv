@@ -34,7 +34,7 @@ ds_011,JR東日本,鐵道, [Challenge 2025 only],static,JSON,api,https://api-cha
 臨時列車、他路線直通列車などの一部は含まない場合があります。
 「公共交通オープンデータチャレンジ限定ライセンス」およびその特定利用条件をよく読んで、ご利用ください。"
 ds_012,JR東日本,鐵道,,static,GTFS/GTFS-JP,file,https://api-challenge.odpt.org/api/v4/files/JR-East/data/JR-East-Train-GTFS.zip?acl:consumerKey=[Access_Token_for_Challenge2025],https://api-challenge.odpt.org,/api/v4/files/JR-East/data/JR-East-Train-GTFS.zip?acl:consumerKey=[Access_Token_for_Challenge2025],True,COMPETITION_LIMITED,SECONDARY,"【チャレンジ2025限定】
-東日本旅客鉄道(JR東日本)の関東エリアの一部の路線について、GTFS形式による鉄道関連情報を提供します。 
+東日本旅客鉄道(JR東日本)の関東エリアの一部の路線について、GTFS形式による鉄道関連情報を提供します。
 東京都、神奈川県、埼玉県、千葉県とその周辺の一部の在来線を対象とします。
 新幹線は含みません。
 常磐線は坂元以南のみ、中央線は高尾以東のみを対象とします。
@@ -42,7 +42,7 @@ ds_012,JR東日本,鐵道,,static,GTFS/GTFS-JP,file,https://api-challenge.odpt.o
 中央線、青梅線の特急列車は含みません。
 臨時列車、他路線直通列車などの一部は含まない場合があります。
 「公共交通オープンデータチャレンジ限定ライセンス」およびその特定利用条件をよく読んで、ご利用ください。"
-ds_013,TOKYO CRUISE SHIP,渡輪,TOKYO CRUISE-20250402,static,GTFS/GTFS-JP,file,https://api.odpt.org/api/v4/files/odpt/TokyoCruiseShip/AllLines.zip?date=20250402&acl:consumerKey=[アクセストークン/YOUR_ACCESS_TOKEN],https://api.odpt.org,/api/v4/files/odpt/TokyoCruiseShip/AllLines.zip?date=20250402&acl:consumerKey=[アクセストークン/YOUR_ACCESS_TOKEN],True,COMPETITION_LIMITED,SECONDARY,"有効期間 : 2025年7月1日 〜 2026年3月31日 
+ds_013,TOKYO CRUISE SHIP,渡輪,TOKYO CRUISE-20250402,static,GTFS/GTFS-JP,file,https://api.odpt.org/api/v4/files/odpt/TokyoCruiseShip/AllLines.zip?date=20250402&acl:consumerKey=[アクセストークン/YOUR_ACCESS_TOKEN],https://api.odpt.org,/api/v4/files/odpt/TokyoCruiseShip/AllLines.zip?date=20250402&acl:consumerKey=[アクセストークン/YOUR_ACCESS_TOKEN],True,COMPETITION_LIMITED,SECONDARY,"有効期間 : 2025年7月1日 〜 2026年3月31日
 バージョン : 2.0
 公共交通オープンデータ基本ライセンス、および、その特定利用条件をよく読んで、ご利用ください。"
 ds_014,首都圏新都市鉄道,鐵道,つくばエクスプレス鉄道関連情報,static,GTFS/GTFS-JP,file,https://api.odpt.org/api/v4/files/MIR/data/MIR-Train-GTFS.zip?acl:consumerKey=[発行されたアクセストークン/YOUR_ACCESS_TOKEN],https://api.odpt.org,/api/v4/files/MIR/data/MIR-Train-GTFS.zip?acl:consumerKey=[発行されたアクセストークン/YOUR_ACCESS_TOKEN],True,COMPETITION_LIMITED,SECONDARY,首都圏新都市鉄道（つくばエクスプレス）について、GTFS形式による鉄道関連情報を提供します。

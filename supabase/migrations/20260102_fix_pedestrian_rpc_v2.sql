@@ -15,7 +15,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 AS $$
-  select 
+  select
     pl.id,
     pl.start_node_id,
     pl.end_node_id,
@@ -24,6 +24,6 @@ AS $$
     pl.distance_meters::float, -- Explicit cast to float to match return type
     st_asgeojson(pl.geometry)::json as geometry
   from pedestrian_links pl
-  where pl.start_node_id = any(target_node_ids) 
+  where pl.start_node_id = any(target_node_ids)
      or pl.end_node_id = any(target_node_ids);
 $$;

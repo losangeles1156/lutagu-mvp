@@ -7,24 +7,24 @@
 -- 1. 全局統計
 -- ============================================
 -- 執行此查詢查看 L1 數據統計
-SELECT 
+SELECT
     '總 L1 記錄' AS metric,
     COUNT(*)::text AS value
 FROM node_l1_config
 UNION ALL
-SELECT 
+SELECT
     '待審核' AS metric,
     COUNT(*)::text AS value
-FROM node_l1_config 
+FROM node_l1_config
 WHERE is_approved = FALSE OR is_approved IS NULL
 UNION ALL
-SELECT 
+SELECT
     '已批准' AS metric,
     COUNT(*)::text AS value
-FROM node_l1_config 
+FROM node_l1_config
 WHERE is_approved = TRUE
 UNION ALL
-SELECT 
+SELECT
     '站點數' AS metric,
     COUNT(DISTINCT node_id)::text AS value
 FROM node_l1_config;
@@ -32,13 +32,13 @@ FROM node_l1_config;
 -- ============================================
 -- 2. 按站點統計
 -- ============================================
-SELECT 
+SELECT
     node_id,
     COUNT(*) FILTER (WHERE is_approved = TRUE) AS approved,
     COUNT(*) FILTER (WHERE is_approved = FALSE OR is_approved IS NULL) AS pending,
     COUNT(*) AS total,
     ROUND(
-        COUNT(*) FILTER (WHERE is_approved = TRUE)::NUMERIC / 
+        COUNT(*) FILTER (WHERE is_approved = TRUE)::NUMERIC /
         NULLIF(COUNT(*), 0) * 100, 1
     ) AS approval_rate_percent
 FROM node_l1_config
@@ -49,7 +49,7 @@ LIMIT 20;
 -- ============================================
 -- 3. 按分類統計
 -- ============================================
-SELECT 
+SELECT
     category,
     COUNT(*) FILTER (WHERE is_approved = TRUE) AS approved,
     COUNT(*) FILTER (WHERE is_approved = FALSE OR is_approved IS NULL) AS pending,
@@ -62,14 +62,14 @@ ORDER BY total DESC;
 -- 4. 查看待審核數據
 -- ============================================
 -- 查看上野站的待審核餐廳
-SELECT 
+SELECT
     p.id,
     p.station_id,
     p.name,
     p.category,
     p.osm_id
 FROM l1_places p
-LEFT JOIN node_l1_config c ON p.id::TEXT = c.source_id 
+LEFT JOIN node_l1_config c ON p.id::TEXT = c.source_id
     AND c.source_table = 'l1_places'
 WHERE (c.is_approved = FALSE OR c.is_approved IS NULL)
 AND p.station_id = 'odpt.Station:JR-East.Ueno'  -- 修改為目標站點
@@ -117,22 +117,22 @@ WHERE source_id = 'your-place-id-here';
 -- ============================================
 -- 8. 驗證數據一致性
 -- ============================================
-SELECT 
+SELECT
     'l1_places 總數' AS source,
     COUNT(*)::text AS count
 FROM l1_places
 UNION ALL
-SELECT 
+SELECT
     'node_l1_config 總數' AS source,
     COUNT(*)::text AS count
 FROM node_l1_config
 UNION ALL
-SELECT 
+SELECT
     'v_l1_pending' AS source,
     COUNT(*)::text AS count
 FROM v_l1_pending
 UNION ALL
-SELECT 
+SELECT
     'v_l1_approved' AS source,
     COUNT(*)::text AS count
 FROM v_l1_approved;
@@ -140,7 +140,7 @@ FROM v_l1_approved;
 -- ============================================
 -- 9. 熱門站點（待審核最多）
 -- ============================================
-SELECT 
+SELECT
     node_id,
     COUNT(*) AS pending_count,
     COUNT(DISTINCT category) AS categories
@@ -164,7 +164,7 @@ BEGIN
     SELECT COUNT(*) INTO v_pending FROM node_l1_config WHERE is_approved = FALSE OR is_approved IS NULL;
     SELECT COUNT(*) INTO v_approved FROM node_l1_config WHERE is_approved = TRUE;
     SELECT ROUND(v_approved::NUMERIC / NULLIF(v_total, 0) * 100, 1) INTO v_rate;
-    
+
     RAISE NOTICE '======================================';
     RAISE NOTICE 'L1 數據統計摘要';
     RAISE NOTICE '======================================';

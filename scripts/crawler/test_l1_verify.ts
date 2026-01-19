@@ -29,10 +29,10 @@ async function verifyL1Storage() {
     try {
         const l1Data = processor.processL1(mockResult);
         console.log(`[Test] Attempting to import L1 data for ${l1Data.url}...`);
-        
+
         // This should not log the "Table not found" warning anymore
         await importer.importL1(l1Data);
-        
+
         console.log('[Test] L1 import call completed.');
         console.log('[Success] If no warning appeared above, the table exists and data was sent.');
 

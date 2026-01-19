@@ -34,7 +34,7 @@ const TAG_DICTIONARY: Tag[] = [
 ];
 
 export class TagEngine {
-    
+
     /**
      * Parses a natural language query into structured Tags.
      * Uses simple tokenization and synonym matching (Mock NLP).
@@ -46,7 +46,7 @@ export class TagEngine {
 
         tokens.forEach(token => {
             // Direct match or synonym match
-            const match = TAG_DICTIONARY.find(t => 
+            const match = TAG_DICTIONARY.find(t =>
                 t.name === token || t.synonyms?.includes(token)
             );
 
@@ -132,7 +132,7 @@ export class TagEngine {
         const dotProduct = vA.reduce((sum, a, i) => sum + a * (vB[i] || 0), 0);
         const magA = Math.sqrt(vA.reduce((sum, a) => sum + a * a, 0));
         const magB = Math.sqrt(vB.reduce((sum, b) => sum + b * b, 0));
-        
+
         if (magA === 0 || magB === 0) return 0;
         return dotProduct / (magA * magB);
     }
@@ -152,15 +152,15 @@ export class TagEngine {
      */
     static resolveConflicts(tags: Tag[]): Tag | null {
         if (!tags.length) return null;
-        
+
         // Sort by weight descending (assumes weight is already dynamic)
         return tags.sort((a, b) => (b.weight || 0) - (a.weight || 0))[0];
     }
 
     /**
      * Maps tags across different schemas/libraries.
-     * @param sourceTag 
-     * @param targetSchema 
+     * @param sourceTag
+     * @param targetSchema
      */
     static mapTag(sourceTag: Tag, targetSchema: string): string {
         // Mock mapping logic

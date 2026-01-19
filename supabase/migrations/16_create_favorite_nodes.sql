@@ -15,4 +15,3 @@ create policy "Users manage own favorite_nodes" on public.favorite_nodes
   for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
-

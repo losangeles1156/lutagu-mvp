@@ -12,14 +12,14 @@ const supabase = createClient(
 
 async function checkRLS() {
     const { data, error } = await supabase.rpc('get_rls_status');
-    
+
     if (error) {
         // If RPC doesn't exist, use raw query
         const { data: tables, error: queryError } = await supabase
             .from('pg_tables')
             .select('tablename, rowsecurity')
             .eq('schemaname', 'public');
-        
+
         if (queryError) {
             // Last resort: query via SQL
             const { data: sqlData, error: sqlError } = await supabase.from('_rpc_helper').select('*').limit(1); // dummy
@@ -32,10 +32,10 @@ async function checkRLS() {
     }
 }
 
-// Since we can't easily run arbitrary SQL via the client without a function, 
+// Since we can't easily run arbitrary SQL via the client without a function,
 // let's just list tables we know about from the migrations and scripts.
 const KNOWN_TABLES = [
-    'cities', 'nodes', 'stations_static', 'l1_places', 'l2_status', 
+    'cities', 'nodes', 'stations_static', 'l1_places', 'l2_status',
     'l3_details', 'fares', 'member_profiles', 'audit_logs', 'security_events',
     'node_intelligence', 'node_facility_profiles'
 ];

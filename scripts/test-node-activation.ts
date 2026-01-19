@@ -1,7 +1,7 @@
 /**
  * Node Activation/Deactivation Test Script
  * Tests the full workflow: L1 approval -> node activation -> frontend display
- * 
+ *
  * Run with: npx ts-node scripts/test-node-activation.ts
  */
 

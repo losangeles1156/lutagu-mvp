@@ -42,7 +42,7 @@ async function main() {
     // 1. Fetch stations without embeddings
     // Note: 'embedding' column might not exist yet if migration isn't applied.
     // We assume migration 20251231_enable_pgvector_stations.sql is applied.
-    
+
     // First check if column exists/fetchable
     const { data: stations, error } = await supabase
         .from('stations_static')
@@ -68,7 +68,7 @@ async function main() {
         // We combine Name and Tags for a rich semantic representation
         const nameStr = JSON.stringify(station.name);
         const tagsStr = JSON.stringify(station.tags || {});
-        
+
         // You can refine this template
         const textToEmbed = `Station: ${nameStr}. Features: ${tagsStr}`;
 
@@ -92,7 +92,7 @@ async function main() {
         // Rate limit / Avoid hitting API limits too hard
         await new Promise(r => setTimeout(r, 500));
     }
-    
+
     console.log('\n=== Batch Complete ===');
     console.log('Run again to process more stations if needed.');
 }

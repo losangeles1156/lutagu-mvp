@@ -1,9 +1,9 @@
 /**
  * ODPT StationFacility API Batch Fetcher
- * 
+ *
  * Fetches L3 facility data directly from ODPT API for all stations missing L3 data.
  * Outputs a SQL migration file for insertion into l3_facilities table.
- * 
+ *
  * Run: npx ts-node --project tsconfig.test.json scripts/fetch_odpt_facilities.ts
  */
 

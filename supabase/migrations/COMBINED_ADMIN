@@ -48,16 +48,16 @@ CREATE OR REPLACE FUNCTION get_all_hubs()
 RETURNS TABLE (id TEXT, name JSONB, location JSONB, ward_id TEXT, is_active BOOLEAN, child_count BIGINT) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
-        n.id, 
-        n.name, 
+    SELECT
+        n.id,
+        n.name,
         jsonb_build_object('type', 'Point', 'coordinates', jsonb_build_array(ST_X(n.coordinates), ST_Y(n.coordinates))) as location,
-        n.ward_id, 
+        n.ward_id,
         COALESCE(h.is_active, TRUE) AS is_active,
         (SELECT COUNT(*) FROM nodes c WHERE c.parent_hub_id = n.id)::BIGINT AS child_count
-    FROM nodes n 
+    FROM nodes n
     LEFT JOIN node_hierarchy h ON n.id = h.node_id
-    WHERE n.parent_hub_id IS NULL 
+    WHERE n.parent_hub_id IS NULL
     ORDER BY n.name->>'zh-TW';
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

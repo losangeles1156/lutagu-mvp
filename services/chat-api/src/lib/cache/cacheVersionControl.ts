@@ -15,7 +15,7 @@ export function enforceCacheVersion(): void {
 
     if (storedVersion !== CURRENT_VERSION) {
         console.log(`[Cache] Version mismatch: ${storedVersion} -> ${CURRENT_VERSION}. Forcing cleanup...`);
-        
+
         // 1. 清除應用程式內的 Memory Cache
         clearAllCaches();
 
@@ -25,8 +25,8 @@ export function enforceCacheVersion(): void {
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key && (
-                key.startsWith('node:') || 
-                key.startsWith('ward:') || 
+                key.startsWith('node:') ||
+                key.startsWith('ward:') ||
                 key.startsWith('l1:') ||
                 key.includes('cache') ||
                 key === 'selected_wards'
@@ -34,12 +34,12 @@ export function enforceCacheVersion(): void {
                 keysToRemove.push(key);
             }
         }
-        
+
         keysToRemove.forEach(key => localStorage.removeItem(key));
 
         // 3. 更新版本號
         localStorage.setItem(CACHE_VERSION_KEY, CURRENT_VERSION);
-        
+
         console.log(`[Cache] Cleanup complete. System version is now ${CURRENT_VERSION}.`);
     }
 }

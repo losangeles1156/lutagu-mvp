@@ -14,7 +14,7 @@ export interface UserContext {
 
 export function ContextSelector() {
     const t = useTranslations('chat');
-    
+
     const contexts: UserContext[] = [
         { id: 'luggage', icon: Briefcase, label: t('contexts.luggage'), color: 'bg-blue-100 text-blue-700 border-blue-200' },
         { id: 'stroller', icon: Baby, label: t('contexts.stroller'), color: 'bg-rose-100 text-rose-700 border-rose-200' },
@@ -27,7 +27,7 @@ export function ContextSelector() {
     const toggleContext = (id: string) => {
         const current = userContext || [];
         const isAdding = !current.includes(id);
-        
+
         if (current.includes(id)) {
             setUserContext(current.filter(c => c !== id));
         } else {

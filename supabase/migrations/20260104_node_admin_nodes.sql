@@ -17,15 +17,15 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         n.id,
         n.name,
         n.location,
         n.ward_id,
         COALESCE(h.is_active, TRUE) AS is_active,
         (
-            SELECT COUNT(*) 
-            FROM nodes c 
+            SELECT COUNT(*)
+            FROM nodes c
             WHERE c.parent_hub_id = n.id
         ) AS child_count
     FROM nodes n
@@ -51,7 +51,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         n.id,
         n.name,
         n.location,
@@ -201,7 +201,7 @@ BEGIN
     SELECT COUNT(*) INTO v_total FROM nodes WHERE ward_id = p_ward_id;
     SELECT COUNT(*) INTO v_hubs FROM nodes WHERE ward_id = p_ward_id AND parent_hub_id IS NULL;
     SELECT COUNT(*) INTO v_children FROM nodes WHERE ward_id = p_ward_id AND parent_hub_id IS NOT NULL;
-    SELECT COUNT(*) INTO v_active 
+    SELECT COUNT(*) INTO v_active
     FROM nodes n
     LEFT JOIN node_hierarchy h ON n.id = h.node_id
     WHERE n.ward_id = p_ward_id
@@ -223,7 +223,7 @@ COMMENT ON FUNCTION get_ward_node_stats IS '獲取行政區節點統計';
 -- 8. 獲取所有行政區列表（核心 9 區）
 -- ============================================
 CREATE OR REPLACE VIEW v_core_wards AS
-SELECT 
+SELECT
     w.id,
     w.name,
     w.code,
@@ -256,7 +256,7 @@ COMMENT ON VIEW v_core_wards IS '核心 9 區行政區列表';
 -- 9. 節點樹狀結構視圖
 -- ============================================
 CREATE OR REPLACE VIEW v_node_tree AS
-SELECT 
+SELECT
     h.id AS hierarchy_id,
     h.node_id,
     COALESCE(h.hub_id, n.parent_hub_id) AS parent_hub_id,
@@ -265,7 +265,7 @@ SELECT
     n.ward_id,
     h.is_active,
     h.display_order,
-    CASE 
+    CASE
         WHEN COALESCE(h.hub_id, n.parent_hub_id) IS NULL THEN 'hub'
         ELSE 'child'
     END AS node_type
@@ -283,14 +283,14 @@ DECLARE
     v_func_count INTEGER;
     v_view_count INTEGER;
 BEGIN
-    SELECT COUNT(*) INTO v_func_count FROM pg_proc 
-    WHERE proname IN ('get_all_hubs', 'get_hub_children', 'merge_nodes_to_hub', 
-                      'unmerge_nodes', 'deactivate_nodes', 'activate_nodes', 
+    SELECT COUNT(*) INTO v_func_count FROM pg_proc
+    WHERE proname IN ('get_all_hubs', 'get_hub_children', 'merge_nodes_to_hub',
+                      'unmerge_nodes', 'deactivate_nodes', 'activate_nodes',
                       'get_ward_node_stats');
-    
-    SELECT COUNT(*) INTO v_view_count FROM pg_views 
+
+    SELECT COUNT(*) INTO v_view_count FROM pg_views
     WHERE viewname IN ('v_core_wards', 'v_node_tree');
-    
+
     RAISE NOTICE '======================================';
     RAISE NOTICE 'Node Admin 節點管理功能已安裝';
     RAISE NOTICE '======================================';

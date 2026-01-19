@@ -24,7 +24,7 @@ const majorHubs = [
     { id: 'odpt:Station:Tokyu.Toyoko.Daikanyama', ward: 'ward:shibuya' },
     { id: 'odpt:Station:TokyoMetro.Fukutoshin.Shibuya', ward: 'ward:shibuya' },
     { id: 'odpt:Station:TokyoMetro.Hanzomon.Shibuya', ward: 'ward:shibuya' },
-    
+
     // Shinagawa Ward
     { id: 'odpt:Station:JR-East.Shinagawa', ward: 'ward:shinagawa' },
     { id: 'odpt:Station:JR-East.Osaki', ward: 'ward:shinagawa' },
@@ -33,7 +33,7 @@ const majorHubs = [
     { id: 'odpt:Station:TokyoMetro.Namboku.Shinagawa', ward: 'ward:shinagawa' },
     { id: 'odpt:Station:Toei.Mita.Tamachi', ward: 'ward:shinagawa' },
     { id: 'odpt:Station:JR-East.Meguro', ward: 'ward:shinagawa' },
-    
+
     // Minato Ward
     { id: 'odpt:Station:Toei.Oedo.Roppongi', ward: 'ward:minato' },
     { id: 'odpt:Station:TokyoMetro.Hibiya.Roppongi', ward: 'ward:minato' },
@@ -42,7 +42,7 @@ const majorHubs = [
     { id: 'odpt:Station:TokyoMetro.Omotesando', ward: 'ward:minato' },
     { id: 'odpt:Station:TokyoMetro.Akasakamitsuke', ward: 'ward:minato' },
     { id: 'odpt:Station:TokyoMetro.Hiroo', ward: 'ward:minato' },
-    
+
     // Chuo Ward
     { id: 'odpt:Station:TokyoMetro.Ginza', ward: 'ward:chuo' },
     { id: 'odpt:Station:TokyoMetro.Nihombashi', ward: 'ward:chuo' },
@@ -52,7 +52,7 @@ const majorHubs = [
     { id: 'odpt:Station:Toei.Hibiya', ward: 'ward:chuo' },
     { id: 'odpt:Station:JR-East.Hatchobori', ward: 'ward:chuo' },
     { id: 'odpt:Station:TokyoMetro.Tsukiji', ward: 'ward:chuo' },
-    
+
     // Shinjuku Ward
     { id: 'odpt:Station:JR-East.Shinjuku', ward: 'ward:shinjuku' },
     { id: 'odpt:Station:TokyoMetro.Marunouchi.Shinjuku', ward: 'ward:shinjuku' },
@@ -62,7 +62,7 @@ const majorHubs = [
     { id: 'odpt:Station:Seibu.Shinjuku', ward: 'ward:shinjuku' },
     { id: 'odpt:Station:JR-East.Iidabashi', ward: 'ward:shinjuku' },
     { id: 'odpt:Station:Toei.Shinjuku.Higashishinjuku', ward: 'ward:shinjuku' },
-    
+
     // Taito Ward
     { id: 'odpt:Station:JR-East.Ueno', ward: 'ward:taito' },
     { id: 'odpt:Station:TokyoMetro.Ueno', ward: 'ward:taito' },
@@ -72,7 +72,7 @@ const majorHubs = [
     { id: 'odpt:Station:TokyoMetro.Ginza.Asakusa', ward: 'ward:taito' },
     { id: 'odpt:Station:Toei.Asakusa', ward: 'ward:taito' },
     { id: 'odpt:Station:Toei.ShinOkachimachi', ward: 'ward:taito' },
-    
+
     // Toshima Ward
     { id: 'odpt:Station:JR-East.Ikebukuro', ward: 'ward:toshima' },
     { id: 'odpt:Station:TokyoMetro.Yurakucho.Ikebukuro', ward: 'ward:toshima' },
@@ -80,7 +80,7 @@ const majorHubs = [
     { id: 'odpt:Station:Tobu.Ikebukuro', ward: 'ward:toshima' },
     { id: 'odpt:Station:JR-East.Otsuka', ward: 'ward:toshima' },
     { id: 'odpt:Station:TokyoMetro.Fukutoshin.Ikebukuro', ward: 'ward:toshima' },
-    
+
     // Other key hubs
     { id: 'odpt:Station:JR-East.Tokyo', ward: 'ward:chuo' },
     { id: 'odpt:Station:JR-East.Akihabara', ward: 'ward:chuo' },
@@ -142,7 +142,7 @@ async function identifyAndMarkHubs() {
     console.log(`✓ Newly marked as hub: ${markedAsHub}`);
     console.log(`✓ Already were hubs: ${alreadyHub}`);
     console.log(`⚠️ Not found in database: ${notFound}`);
-    
+
     console.log('\n--- Found Stations ---');
     for (const id of foundStations) {
         console.log(id);
@@ -150,7 +150,7 @@ async function identifyAndMarkHubs() {
 
     // Now re-run ward assignment
     console.log('\n[Step 2] Re-assigning nodes to wards...');
-    
+
     const { data: wards } = await supabase
         .from('wards')
         .select('id, name_i18n, center_point')
@@ -179,7 +179,7 @@ async function identifyAndMarkHubs() {
     for (const node of nodes) {
         try {
             let coords: [number, number] | null = null;
-            
+
             if (typeof node.coordinates === 'string') {
                 // Parse "POINT(lng lat)" format
                 const match = node.coordinates.match(/POINT\(([^)]+)\)/);
@@ -202,13 +202,13 @@ async function identifyAndMarkHubs() {
 
             for (const ward of wards) {
                 if (!ward.center_point?.coordinates) continue;
-                
+
                 const [lng, lat] = ward.center_point.coordinates;
                 const dist = Math.sqrt(
-                    Math.pow(coords[0] - lng, 2) + 
+                    Math.pow(coords[0] - lng, 2) +
                     Math.pow(coords[1] - lat, 2)
                 );
-                
+
                 if (dist < nearestDist && dist < 0.1) {
                     nearestDist = dist;
                     nearestWard = ward;
@@ -258,7 +258,7 @@ async function identifyAndMarkHubs() {
 
         await supabase
             .from('wards')
-            .update({ 
+            .update({
                 node_count: nodeCount || 0,
                 hub_count: hubCount || 0,
                 updated_at: new Date().toISOString()

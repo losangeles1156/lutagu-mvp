@@ -47,21 +47,21 @@ async function fetchPageContent(url: string): Promise<string> {
 async function extractFacilities(text: string, operator: string) {
     const prompt = `
     You are a data extraction AI. Extract station facility information from the provided text (scraped from a JR East station website).
-    
+
     Target Operator: ${operator}
-    
+
     Extract strictly as a JSON array of objects:
     - type: "elevator", "escalator", "toilet", "barrier_free_entrance", "waiting_room", "ticket_gate"
     - name_ja: A short descriptive name (e.g., "中央改札 エレベーター")
     - name_en: English translation of the name
     - location_desc: The location description found in text (e.g., "3F改札〜1Fホーム")
     - attributes: JSON object with details (e.g., { "wheelchair": true, "ostomate": true })
-    
+
     Rules:
     - Look for "Barrier Free", "Elevator", "Restroom" sections.
     - JR East pages often list facilities in tables.
     - Return ONLY valid JSON, no markdown.
-    
+
     Input Text:
     ${text}
     `;

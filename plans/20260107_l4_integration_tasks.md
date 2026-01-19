@@ -58,12 +58,12 @@ describe('IntentSelector → Dify Integration', () => {
         // Setup
         render(<IntentSelector />);
         fireEvent.click(screen.getByText('路線'));
-        
+
         // Simulate chat input
         const input = '從新宿到涉谷怎麼走？';
         fireEvent.change(getChatInput(), { target: { value: input } });
         fireEvent.click(getSendButton());
-        
+
         // Verify API call includes correct intent
         expect(fetchMock).toHaveBeenCalledWith('/api/dify/chat', expect.objectContaining({
             body: JSON.stringify(expect.objectContaining({
@@ -73,11 +73,11 @@ describe('IntentSelector → Dify Integration', () => {
             }))
         }));
     });
-    
+
     test('選擇無障礙意圖後，Agent 應優先回覆電梯/電坡資訊', () => {
         // Similar setup for accessibility intent
     });
-    
+
     test('多意圖組合時（如 route + accessibility），應正確組合需求', () => {
         // Test combined intents
     });
@@ -238,8 +238,8 @@ return (
                     key={intent.id}
                     onClick={() => toggleIntent(intent.id)}
                     className={`
-                        flex items-center gap-1.5 px-4 py-2.5 rounded-full 
-                        text-xs font-bold border transition-all 
+                        flex items-center gap-1.5 px-4 py-2.5 rounded-full
+                        text-xs font-bold border transition-all
                         min-w-[44px] min-h-[44px]
                         ${isActive
                             ? intent.color + ' shadow-sm scale-105 ring-2 ring-offset-1 ring-current'
@@ -271,9 +271,9 @@ return (
             key={b.id}
             onClick={() => handleQuickButton(b)}
             disabled={isLoading}
-            className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 
-                     text-xs font-black whitespace-nowrap text-slate-700 
-                     hover:border-indigo-200 transition-all 
+            className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-100
+                     text-xs font-black whitespace-nowrap text-slate-700
+                     hover:border-indigo-200 transition-all
                      min-w-[44px] min-h-[44px] touch-target
                      disabled:opacity-60 disabled:cursor-not-allowed active:scale-95"
         >
@@ -292,7 +292,7 @@ return (
                 onClick={() => toggleDemand(demand.id)}
                 disabled={isLoading}
                 className={`
-                    flex items-center gap-2 px-4 py-3 rounded-xl border text-xs font-black 
+                    flex items-center gap-2 px-4 py-3 rounded-xl border text-xs font-black
                     whitespace-nowrap transition-all min-h-[44px] touch-target
                     ${isSelected
                         ? 'bg-indigo-600 border-indigo-600 text-white shadow-md scale-105'
@@ -314,9 +314,9 @@ return (
 {selectedNeed && (
     <button
         onClick={() => setSelectedNeed(null)}
-        className="flex items-center gap-1 px-4 py-2.5 rounded-full 
-                 text-xs font-bold border border-gray-200 text-gray-400 
-                 hover:border-gray-300 hover:text-gray-600 transition-all 
+        className="flex items-center gap-1 px-4 py-2.5 rounded-full
+                 text-xs font-bold border border-gray-200 text-gray-400
+                 hover:border-gray-300 hover:text-gray-600 transition-all
                  min-w-[44px] min-h-[44px] touch-target active:scale-95"
         title={tCommon('clear')}
         aria-label={tCommon('clear')}
@@ -334,7 +334,7 @@ return (
     .touch-target {
         min-height: 48px; /* iOS 建議尺寸 */
     }
-    
+
     button, [role="button"] {
         cursor: pointer; /* 移除 hover 效果 */
     }
@@ -403,7 +403,7 @@ lutagu tab
 
 export default function L4_Dashboard({ ... }) {
     const [chatMode, setChatMode] = useState(false);
-    
+
     return (
         <div className="h-full bg-slate-50">
             {/* 模式切換開關 */}
@@ -425,7 +425,7 @@ export default function L4_Dashboard({ ... }) {
                     </button>
                 </div>
             </div>
-            
+
             {chatMode ? (
                 <L4_Chat data={profileData} variant="strategy" />
             ) : (

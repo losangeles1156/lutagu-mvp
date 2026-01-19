@@ -66,7 +66,7 @@ export function L4FormCard({
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 flex justify-center z-10">
                                 <div className={`rounded-full bg-emerald-500 ring-4 ring-white/80 shadow-sm ${isCompact ? 'w-2 h-2' : 'w-2.5 h-2.5'}`} />
                             </div>
-                            
+
                             {task === 'time' ? (
                                 <div className={`pl-9 pr-12 flex items-center justify-between bg-white/50 border border-slate-100/50 rounded-2xl transition-all ${isCompact ? 'h-10' : 'h-14'}`}>
                                     <div className="flex items-center gap-2 overflow-hidden">

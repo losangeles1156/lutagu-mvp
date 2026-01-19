@@ -327,11 +327,11 @@ async function main() {
     // 3. Merge External Data (Prioritize if missing)
     const externalStations = await fetchExternalStations();
     // Use a Map to check for existing stations to avoid duplicates
-    // But since API data is missing them, we can just concat. 
+    // But since API data is missing them, we can just concat.
     // However, if API returns "Asakusa" and External returns "Asakusa", we might duplicate?
-    // The consolidation logic creates keys based on name. 
+    // The consolidation logic creates keys based on name.
     // "Asakusa" -> group "asakusa".
-    // So they will be merged! 
+    // So they will be merged!
     // Just concat them.
     allStations = allStations.concat(externalStations);
 

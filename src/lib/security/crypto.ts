@@ -46,4 +46,3 @@ export async function decryptJson(payload: EncryptedPayload): Promise<any> {
     const text = new TextDecoder().decode(new Uint8Array(plaintext));
     return JSON.parse(text);
 }
-

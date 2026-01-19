@@ -87,7 +87,7 @@ export async function fetchNodes(params: {
     limit?: number;
 }): Promise<AdminNodeListResponse> {
     const searchParams = new URLSearchParams();
-    
+
     if (params.ward_id) searchParams.set('ward_id', params.ward_id);
     if (params.is_hub !== undefined) searchParams.set('is_hub', String(params.is_hub));
     if (params.is_active !== undefined) searchParams.set('is_active', String(params.is_active));
@@ -96,12 +96,12 @@ export async function fetchNodes(params: {
     if (params.limit) searchParams.set('limit', String(params.limit));
 
     const response = await fetch(`${API_BASE}/nodes?${searchParams}`);
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch nodes');
     }
-    
+
     return response.json();
 }
 
@@ -115,12 +115,12 @@ export async function updateNodes(data: AdminUpdateRequest): Promise<{
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update nodes');
     }
-    
+
     return response.json();
 }
 
@@ -133,12 +133,12 @@ export async function mergeNodes(params: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
     });
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to merge nodes');
     }
-    
+
     return response.json();
 }
 
@@ -150,12 +150,12 @@ export async function unmergeNode(params: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
     });
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to unmerge node');
     }
-    
+
     return response.json();
 }
 
@@ -166,19 +166,19 @@ export async function fetchL1Pending(params: {
     category?: string;
 }): Promise<L1PendingResponse> {
     const searchParams = new URLSearchParams();
-    
+
     if (params.page) searchParams.set('page', String(params.page));
     if (params.limit) searchParams.set('limit', String(params.limit));
     if (params.ward_id) searchParams.set('ward_id', params.ward_id);
     if (params.category) searchParams.set('category', params.category);
 
     const response = await fetch(`${API_BASE}/l1/places/pending?${searchParams}`);
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch pending L1 places');
     }
-    
+
     return response.json();
 }
 
@@ -188,12 +188,12 @@ export async function batchApproveL1(data: BatchApprovalRequest): Promise<BatchA
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to batch approve L1 places');
     }
-    
+
     return response.json();
 }
 
@@ -205,12 +205,12 @@ export async function approveL1Place(placeId: string): Promise<{
     const response = await fetch(`${API_BASE}/l1/places/pending/${placeId}/approve`, {
         method: 'POST',
     });
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to approve L1 place');
     }
-    
+
     return response.json();
 }
 
@@ -223,12 +223,12 @@ export async function rejectL1Place(placeId: string, reason?: string): Promise<{
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
     });
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to reject L1 place');
     }
-    
+
     return response.json();
 }
 

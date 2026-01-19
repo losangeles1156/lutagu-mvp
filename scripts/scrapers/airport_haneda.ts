@@ -23,7 +23,7 @@ async function upsertL1Places(items: any[], category: string) {
         category: category,
         // vibe_tags not in schema, put in tags or special logic? For now omit.
         location: 'POINT(139.784 35.549)', // Haneda Center as string? Or just rely on lat/lng if mapped?
-        // Actually Supabase client usually expects GeoJSON or WKT string for geometry? 
+        // Actually Supabase client usually expects GeoJSON or WKT string for geometry?
         // Or if we use `upsert`, we pass values.
         // Let's pass lat/lng separate columns too if they exist.
         lat: 35.549,
@@ -59,7 +59,7 @@ async function upsertL1Places(items: any[], category: string) {
     // await supabase.from('l1_places').delete().eq('station_id', HANEDA_HUB_ID).eq('category', category);
     // But that might wipe user data if any? Unlikely for this hub.
     // Let's toggle this behavior? For now, append is risky.
-    // Let's try to Match by name using Select first? 
+    // Let's try to Match by name using Select first?
     // Optimization: Read all for this station first.
 
     const { data: existing } = await supabase.from('l1_places').select('id, name').eq('station_id', HANEDA_HUB_ID).eq('category', category);
@@ -124,7 +124,7 @@ async function scrapeCategory(page: any, url: string, category: string) {
 
         // Check Pagination
         // Selector for Next button? We need to guess or inspect.
-        // Assuming there is a "Next >" or similar link. 
+        // Assuming there is a "Next >" or similar link.
         // For MVP, fetch only page 1 effectively unless we find the selector.
         // Let's accept page 1 for now to safeguard.
         hasNext = false;
@@ -160,16 +160,16 @@ async function extractFacilitiesWithLLM(text: string, category: string) {
     const prompt = `
     You are a data extraction AI. Extract facility information from Haneda Airport website text.
     Category: ${category}
-    
+
     Extract as JSON array of objects:
     - type: one of "atm", "money_exchange", "coin_locker", "nursery", "charging_station", "toilet", "clinic"
     - name_ja: Name in Japanese (or infer from context)
     - name_en: Name in English
     - location_desc: Location description (e.g. "Terminal 1 2F")
-    
+
     Input Text:
     ${text.substring(0, 15000)}
-    
+
     Return ONLY JSON array.
     `;
 

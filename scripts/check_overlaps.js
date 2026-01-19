@@ -8,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function checkOverlaps() {
   const stations = ['Ueno', 'Ikebukuro', 'Akihabara', 'Shibuya'];
-  
+
   for (const name of stations) {
     console.log(`\n--- Checking overlaps for ${name} ---`);
     // Search by English name in the JSON or as string

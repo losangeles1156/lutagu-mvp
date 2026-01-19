@@ -1,28 +1,28 @@
 /**
  * L4 Knowledge Client with Node & Tag Integration
- * 
+ *
  * Leverages the project's two main features: Nodes and Tags
  * for more efficient and accurate knowledge retrieval.
- * 
+ *
  * Key Features:
  * - Node-based knowledge retrieval (by station)
  * - Tag-based filtering (by facility category)
  * - Vibe matching (station personality)
  * - Hierarchical search (node -> tag -> knowledge)
- * 
+ *
  * Usage:
- * 
+ *
  * import { NodeTagL4Client } from '@/lib/l4/nodeTagKnowledgeClient';
- * 
+ *
  * const client = new NodeTagL4Client();
- * 
+ *
  * // Get knowledge for a specific node with vibe matching
  * const results = await client.getNodeKnowledge({
  *   nodeId: 'odpt:Station:JR-East.Ueno',
  *   userContext: ['stroller'],
  *   timeContext: 'weekday-morning'
  * });
- * 
+ *
  * // Get shopping-related knowledge
  * const shopping = await client.getKnowledgeByTags({
  *   mainCategory: 'shopping',
@@ -236,7 +236,7 @@ export class NodeTagL4Client {
   ): Promise<KnowledgeResult[]> {
     return this.getNodeKnowledge({
       nodeId: hubNodeId,
-      query: connectingLine 
+      query: connectingLine
         ? `${hubNodeId} 轉乘 ${connectingLine}`
         : `${hubNodeId} 轉乘資訊和建議`,
       maxResults: 3
@@ -305,7 +305,7 @@ export function formatKnowledgeWithContext(results: KnowledgeResult[]): string {
       const icon = result.icon || '💡';
       const tags = result.tag_category?.join('.') || 'general';
       const importance = '⭐'.repeat(Math.min(result.importance, 5));
-      
+
       return `${idx + 1}. ${icon} [${tags}] ${importance}\n   ${result.content}`;
     })
     .join('\n\n');
@@ -321,14 +321,14 @@ export function createStructuredPrompt(
   knowledge: KnowledgeResult[]
 ): string {
   let prompt = `## 使用者問題\n${userQuery}\n\n`;
-  
+
   if (nodeInfo) {
     prompt += `## 節點資訊\n`;
     prompt += `- 車站: ${nodeInfo.name['zh-TW']}\n`;
     prompt += `- 風格: ${nodeInfo.vibe.join(', ')}\n`;
     prompt += `- 類型: ${nodeInfo.is_hub ? '樞紐站' : '一般站點'}\n\n`;
   }
-  
+
   if (facilityTags.length > 0) {
     prompt += `## 附近設施標籤\n`;
     facilityTags.slice(0, 5).forEach(tag => {
@@ -336,11 +336,11 @@ export function createStructuredPrompt(
     });
     prompt += '\n';
   }
-  
+
   if (knowledge.length > 0) {
     prompt += `## 相關知識\n${formatKnowledgeWithContext(knowledge)}\n\n`;
   }
-  
+
   prompt += `## 回答指南\n`;
   prompt += `- 根據節點風格調整回答語氣\n`;
   prompt += `- 優先推薦附近的設施\n`;
@@ -359,7 +359,7 @@ export function extractQueryIntent(query: string): {
   urgency: 'normal' | 'urgent';
 } {
   const lowerQuery = query.toLowerCase();
-  
+
   // Detect action
   if (lowerQuery.match(/購物|逛街|買|shop|purchase/)) {
     return { action: 'shopping', targetTags: ['shopping'], urgency: 'normal' };
@@ -376,6 +376,6 @@ export function extractQueryIntent(query: string): {
   if (lowerQuery.match(/電梯|輪椅|無障礙|elevator|wheelchair|accessible/)) {
     return { action: 'accessibility', targetTags: ['accessibility'], urgency: 'urgent' };
   }
-  
+
   return { action: 'general', urgency: 'normal' };
 }

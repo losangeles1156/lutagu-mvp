@@ -91,7 +91,7 @@ COMMENT ON TABLE node_tags_config IS '節點標籤配置';
 -- 5. Views (不使用 lat/lon，簡化處理)
 -- ============================================
 CREATE OR REPLACE VIEW v_l1_pending AS
-SELECT 
+SELECT
     l1.id,
     l1.station_id AS node_id,
     l1.name,
@@ -101,12 +101,12 @@ SELECT
     c.is_featured,
     c.notes
 FROM l1_places l1
-LEFT JOIN node_l1_config c ON l1.station_id = c.node_id 
+LEFT JOIN node_l1_config c ON l1.station_id = c.node_id
     AND c.source_id = l1.id::TEXT
 WHERE c.is_approved IS NULL OR c.is_approved = FALSE;
 
 CREATE OR REPLACE VIEW v_l1_approved AS
-SELECT 
+SELECT
     l1.id,
     l1.station_id AS node_id,
     l1.name,
@@ -115,7 +115,7 @@ SELECT
     c.is_featured,
     c.display_order
 FROM l1_places l1
-JOIN node_l1_config c ON l1.station_id = c.node_id 
+JOIN node_l1_config c ON l1.station_id = c.node_id
     AND c.source_id = l1.id::TEXT
 WHERE c.is_approved = TRUE
 ORDER BY c.display_order, l1.name;

@@ -27,7 +27,7 @@ async function runStressTest(
 ): Promise<StressTestResult> {
     console.log(`\n🚀 Starting Stress Test Phase: ${phase}`);
     console.log(`   Concurrency: ${concurrency}, Duration: ${durationMs}ms`);
-    
+
     const startTime = Date.now();
     const latencies: number[] = [];
     const errors: string[] = [];
@@ -50,7 +50,7 @@ async function runStressTest(
         const endTime = startTime + durationMs;
         while (Date.now() < endTime) {
             const query = testQueries[Math.floor(Math.random() * testQueries.length)];
-            
+
             try {
                 const reqStart = Date.now();
                 const res = await hybridEngine.processRequest({
@@ -59,7 +59,7 @@ async function runStressTest(
                     context: { current_station: 'odpt.Station:JR-East.Yamanote.Shinjuku' }
                 });
                 const latency = Date.now() - reqStart;
-                
+
                 latencies.push(latency);
                 completed++;
             } catch (err: any) {
@@ -155,7 +155,7 @@ async function main() {
 
     // Health assessment
     const lastResult = results[results.length - 1];
-    const healthScore = Math.min(100, 
+    const healthScore = Math.min(100,
         (lastResult.successfulRequests / lastResult.totalRequests) * 50 +
         Math.max(0, 50 - (lastResult.p95Latency / 10))
     );

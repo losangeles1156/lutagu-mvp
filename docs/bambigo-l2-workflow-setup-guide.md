@@ -53,14 +53,14 @@ CREATE TABLE l2_disruption_history (
 );
 
 -- 索引
-CREATE INDEX idx_disruption_node_time 
+CREATE INDEX idx_disruption_node_time
 ON l2_disruption_history(node_id, created_at DESC);
 
 -- 自動清理 7 天前數據
 CREATE OR REPLACE FUNCTION cleanup_old_disruptions()
 RETURNS void AS $$
 BEGIN
-  DELETE FROM l2_disruption_history 
+  DELETE FROM l2_disruption_history
   WHERE created_at < NOW() - INTERVAL '7 days';
 END;
 $$ LANGUAGE plpgsql;
@@ -170,7 +170,7 @@ $$ LANGUAGE plpgsql;
 app.get('/api/l2/disruption/:nodeId', async (req, res) => {
   const { nodeId } = req.params;
   const data = await redis.get(`lutagu:l2:disruption:${nodeId}`);
-  
+
   if (!data) {
     return res.json({
       node_id: nodeId,
@@ -182,7 +182,7 @@ app.get('/api/l2/disruption/:nodeId', async (req, res) => {
       }
     });
   }
-  
+
   return res.json(JSON.parse(data));
 });
 ```
@@ -192,7 +192,7 @@ app.get('/api/l2/disruption/:nodeId', async (req, res) => {
 ```javascript
 async function getRouteAdvice(from, to, userContext) {
   const status = await getDisruptionStatus(from);
-  
+
   // 使用 l4_hint 直接決策
   switch (status.l4_hint.action) {
     case 'avoid':
@@ -202,7 +202,7 @@ async function getRouteAdvice(from, to, userContext) {
         message: status.l4_hint.message,
         alternatives: await findAlternatives(from, to, status.l4_hint.affected_lines)
       };
-      
+
     case 'consider_alternatives':
       // 嚴重延誤 → 看用戶是否趕時間
       if (userContext.isRushing) {
@@ -217,14 +217,14 @@ async function getRouteAdvice(from, to, userContext) {
         message: status.l4_hint.message,
         delay: status.l4_hint.estimated_delay
       };
-      
+
     case 'minor_delay':
       // 輕微延誤 → 安撫即可
       return {
         type: 'reassurance',
         message: status.l4_hint.message
       };
-      
+
     default:
       return { type: 'normal', message: '運行正常' };
   }

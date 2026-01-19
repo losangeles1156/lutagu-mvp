@@ -30,13 +30,13 @@ test('L4 DecisionEngine + HardCalculationEngine Integration', async (t) => {
 
         // 1. Test Decision Engine
         const staticCards = decisionEngine.evaluate(context);
-        
+
         // We expect at least the Ueno wheelchair tip if it's in stationWisdom.ts
         // Let's check if we got any cards
         console.log(`Static cards found: ${staticCards.length}`);
         staticCards.forEach(c => console.log(` - [${c.priority}] ${c.title}: ${c.description}`));
 
-        // 2. Test Hard Calculation Engine (Real API call might happen here if not mocked, 
+        // 2. Test Hard Calculation Engine (Real API call might happen here if not mocked,
         // but for integration test in this environment we'll see if it runs)
         // Note: hardEngine.evaluate is async
         const dynamicCards = await hardEngine.evaluate(context);
@@ -44,7 +44,7 @@ test('L4 DecisionEngine + HardCalculationEngine Integration', async (t) => {
         dynamicCards.forEach(c => console.log(` - [${c.priority}] ${c.title}: ${c.description}`));
 
         const allCards = [...staticCards, ...dynamicCards].sort((a, b) => b.priority - a.priority);
-        
+
         assert.ok(allCards.length >= 0, 'Should return a list of cards');
         if (allCards.length > 0) {
             assert.ok(allCards[0].priority >= allCards[allCards.length - 1].priority, 'Cards should be sorted by priority');
@@ -64,10 +64,10 @@ test('L4 DecisionEngine + HardCalculationEngine Integration', async (t) => {
         };
 
         const cards = decisionEngine.evaluate(context);
-        
+
         // Check for the wheelchair/stroller barrier card we saw in stationWisdom.ts
         const accessibilityCard = cards.find(c => c.id === 'generic-exit-a1-barrier');
-        
+
         assert.ok(accessibilityCard, 'Should find the accessibility barrier card for Ueno');
         assert.strictEqual(accessibilityCard.type, 'warning');
         assert.ok(accessibilityCard.description.includes('B2 出口'), 'Description should suggest Exit B2');
@@ -85,7 +85,7 @@ test('L4 DecisionEngine + HardCalculationEngine Integration', async (t) => {
 
         const cards = decisionEngine.evaluate(context);
         const shinkansenCard = cards.find(c => c.id === 'ueno-shinkansen-timing');
-        
+
         assert.ok(shinkansenCard, 'Should find the Shinkansen timing card for JR Ueno');
         assert.strictEqual(shinkansenCard.type, 'timing');
         assert.ok(shinkansenCard.priority >= 120, 'Priority should be boosted (70 base + 50 station boost)');

@@ -5,7 +5,7 @@ import { ITool, IToolContext } from './types';
 
 /**
  * Get Navigation Graph Tool
- * 
+ *
  * Allows the Agent to retrieve the pedestrian navigation graph for a specific area.
  * This is used for pathfinding, accessibility analysis, and identifying nearby facilities.
  */
@@ -18,10 +18,10 @@ export const get_navigation_graph = {
             lat: { type: 'number', description: 'Latitude' },
             lon: { type: 'number', description: 'Longitude' },
             radius: { type: 'number', description: 'Search radius in meters (default 500)' },
-            userProfile: { 
-                type: 'string', 
+            userProfile: {
+                type: 'string',
                 enum: ['general', 'wheelchair', 'stroller'],
-                description: 'User profile for filtering (e.g., exclude stairs for wheelchair)' 
+                description: 'User profile for filtering (e.g., exclude stairs for wheelchair)'
             },
             weather: {
                 type: 'string',
@@ -31,12 +31,12 @@ export const get_navigation_graph = {
         },
         required: ['lat', 'lon']
     },
-    execute: async (params: { 
-        lat: number; 
-        lon: number; 
-        radius?: number; 
-        userProfile?: string; 
-        weather?: string; 
+    execute: async (params: {
+        lat: number;
+        lon: number;
+        radius?: number;
+        userProfile?: string;
+        weather?: string;
     }): Promise<ToolResult<NavigationGraphResult>> => {
         try {
             const radius = params.radius || 500;
@@ -44,10 +44,10 @@ export const get_navigation_graph = {
             const weather = params.weather || 'clear';
 
             const result = await NavigationService.getPedestrianGraph(
-                params.lat, 
-                params.lon, 
-                radius, 
-                userProfile, 
+                params.lat,
+                params.lon,
+                radius,
+                userProfile,
                 weather
             );
 

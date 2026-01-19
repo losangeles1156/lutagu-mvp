@@ -231,7 +231,7 @@ async function runMigration() {
     const envPath = process.env.MIGRATION_FILE;
     const selectedPath = argPath || envPath || 'supabase/migrations/20260103_create_hub_metadata.sql';
     const migrationPath = path.resolve(process.cwd(), selectedPath);
-    
+
     if (!fs.existsSync(migrationPath)) {
         console.error('❌ Migration file not found:', migrationPath);
         process.exit(1);
@@ -274,7 +274,7 @@ async function runMigration() {
         console.log('   - Indexes');
         console.log('   - Helper functions: get_hub_members, get_hub_info_by_member');
         console.log('   - Sample data for Tokyo hubs (Ueno, Tokyo, Shinjuku, Ikebukuro)');
-        
+
     } catch (err: any) {
         console.error('❌ Migration failed:', err.message);
         console.log('\n💡 Note: The SQL migration file is ready at:');

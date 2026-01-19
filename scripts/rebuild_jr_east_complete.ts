@@ -120,7 +120,7 @@ async function main() {
             if (!group.originalIds.includes(id)) {
                 group.originalIds.push(id);
             }
-            // Prioritize coordinates if current is Yamanote? 
+            // Prioritize coordinates if current is Yamanote?
             if (railways.some((r: string) => r.includes('Yamanote'))) {
                 group.lat = lat;
                 group.lon = lon;

@@ -77,7 +77,7 @@ async function main() {
 
         // Map to nodes schema
         // nodes: id, name (jsonb), coordinates (geo), city_id, node_type, is_active, updated_at
-        
+
         const lonLat = extractLonLat((s as any).location);
         if (!lonLat) {
             console.warn(`Skipping ${id} due to invalid coordinates`);
@@ -104,7 +104,7 @@ async function main() {
             const { error: upsertErr } = await supabase
                 .from('nodes')
                 .upsert(chunk, { onConflict: 'id' });
-            
+
             if (upsertErr) {
                 console.error(`Error syncing chunk ${i}:`, upsertErr.message);
             } else {
@@ -112,7 +112,7 @@ async function main() {
             }
         }
     }
-    
+
     console.log('Sync complete.');
 }
 

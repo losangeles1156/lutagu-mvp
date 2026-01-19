@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function activateStations() {
     console.log('--- Activating Inactive Stations ---');
-    
+
     const { data: inactiveStations, error: fetchError } = await supabase
         .from('nodes')
         .select('id, name')
@@ -27,7 +27,7 @@ async function activateStations() {
 
     if (inactiveStations && inactiveStations.length > 0) {
         const ids = inactiveStations.map(n => n.id);
-        
+
         // Update in batches of 100
         const batchSize = 100;
         for (let i = 0; i < ids.length; i += batchSize) {
@@ -36,7 +36,7 @@ async function activateStations() {
                 .from('nodes')
                 .update({ is_active: true })
                 .in('id', batch);
-            
+
             if (updateError) {
                 console.error(`Error updating batch ${i / batchSize}:`, updateError);
             } else {

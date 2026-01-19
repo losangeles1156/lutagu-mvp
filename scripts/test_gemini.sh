@@ -9,7 +9,7 @@ check_model() {
     response=$(curl -s -H 'Content-Type: application/json' \
          -d '{"contents":[{"parts":[{"text":"hello"}]}]}' \
          "https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent?key=$GOOGLE_API_KEY")
-    
+
     if echo "$response" | grep -q "candidates"; then
         echo "SUCCESS: $MODEL working" >> gemini_test_result.txt
         echo "$response" >> gemini_test_result.txt

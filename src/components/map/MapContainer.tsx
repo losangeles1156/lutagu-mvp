@@ -83,7 +83,7 @@ function buildViewportKey(input: { swLat: number; swLon: number; neLat: number; 
 /**
  * Deduplicate nodes by ID with version control
  * Keeps the most recent version when duplicates exist
- * 
+ *
  * Version Control Logic:
  * 1. If node doesn't exist in map, add it
  * 2. If node exists, compare versions:
@@ -232,8 +232,8 @@ function MapController({ center, isTooFar, fallback, nodes }: {
         <>
             {center && !isTooFar && (
                 <div className="user-marker">
-                    {/* Leaflet markers need to be inside MapContainer but outside MapController technically 
-                        if using standard components, but we can use useMap and add a manual marker or 
+                    {/* Leaflet markers need to be inside MapContainer but outside MapController technically
+                        if using standard components, but we can use useMap and add a manual marker or
                         just return it if this was a component. Actually, let's put it in AppMap. */}
                 </div>
             )}

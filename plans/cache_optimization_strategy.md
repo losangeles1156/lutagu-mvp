@@ -1,7 +1,7 @@
 # LUTAGU 快取命中率優化策略
 
-**制定日期**: 2026-01-06  
-**目標**: 平均快取命中率 ≥ 95%，最低快取命中率 ≥ 90%  
+**制定日期**: 2026-01-06
+**目標**: 平均快取命中率 ≥ 95%，最低快取命中率 ≥ 90%
 **版本**: v1.0
 
 ---
@@ -74,8 +74,8 @@ getStats(): { size: number; maxSize: number; hitRate: number; hitCount: number; 
         maxSize: this.config.maxSize,
         hitCount: this.hitCount,
         missCount: this.missCount,
-        hitRate: this.hitCount + this.missCount > 0 
-            ? (this.hitCount / (this.hitCount + this.missCount)) * 100 
+        hitRate: this.hitCount + this.missCount > 0
+            ? (this.hitCount / (this.hitCount + this.missCount)) * 100
             : 0
     };
 }
@@ -88,7 +88,7 @@ private missCount: number = 0;
 
 get(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
         this.missCount++;  // 新增
         return null;
@@ -177,7 +177,7 @@ class CacheWarmer {
             if (!cache.has(CacheKeyBuilder.forStation(stationId))) {
                 const data = await dataLoader(stationId);
                 cache.set(
-                    CacheKeyBuilder.forStation(stationId), 
+                    CacheKeyBuilder.forStation(stationId),
                     data,
                     L1_CACHE_CONFIG.hot.ttlMs
                 );
@@ -206,17 +206,17 @@ export class CacheKeyBuilder {
         sortOrder?: 'asc' | 'desc';
     }): string {
         const parts: string[] = ['l1', 'places'];
-        
+
         // 站台 ID 排序後雜湊
         const sortedStations = [...stationIds].sort().join(',');
         parts.push(hashString(sortedStations));
-        
+
         // 標準化選項參數
         if (options.category) parts.push(`cat:${options.category}`);
         if (options.includeCustom !== undefined) parts.push(`custom:${options.includeCustom}`);
         if (options.locale) parts.push(`locale:${options.locale}`);
         if (options.sortBy) parts.push(`sort:${options.sortBy}:${options.sortOrder || 'asc'}`);
-        
+
         return parts.join(':');
     }
 }
@@ -259,7 +259,7 @@ interface CacheMetrics {
     missCount: number;         // 未命中次數
     cacheSize: number;         // 目前快取大小
     memoryUsage: number;       // 記憶體使用量
-    
+
     // 進階指標
     avgAccessTime: number;     // 平均存取時間
     evictionRate: number;      // 淘汰率
@@ -270,7 +270,7 @@ interface CacheMetrics {
 async function monitorCacheMetrics() {
     const l1Cache = getCache('l1_places');
     const stats = l1Cache.getStats();
-    
+
     console.log(`
     === 快取監控報告 ===
     命中率: ${stats.hitRate.toFixed(2)}%
@@ -290,7 +290,7 @@ async function monitorCacheMetrics() {
 describe('Cache Optimization', () => {
     it('should achieve 95%+ hit rate for hot stations', async () => {
         const cache = new CacheService<any>(L1_CACHE_CONFIG.hot);
-        
+
         // 模擬熱門站點訪問模式
         const hotStations = ['tokyo:main', 'shibuya', 'shinjuku'];
         for (let i = 0; i < 100; i++) {
@@ -302,14 +302,14 @@ describe('Cache Optimization', () => {
                 }
             }
         }
-        
+
         const stats = cache.getStats();
         expect(stats.hitRate).toBeGreaterThanOrEqual(95);
     });
 
     it('should maintain 90%+ hit rate for all stations', async () => {
         const cache = new CacheService<any>(L1_CACHE_CONFIG.normal);
-        
+
         // 模擬所有站點訪問模式
         const allStations = generateStationIds(100);
         for (let i = 0; i < 1000; i++) {
@@ -320,7 +320,7 @@ describe('Cache Optimization', () => {
                 cache.set(key, { data: 'test' });
             }
         }
-        
+
         const stats = cache.getStats();
         expect(stats.hitRate).toBeGreaterThanOrEqual(90);
     });

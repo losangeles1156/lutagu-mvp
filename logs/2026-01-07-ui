@@ -69,7 +69,7 @@
 
 ### 4.1 狀態定義
 ```typescript
-type UIStateType = 
+type UIStateType =
   | 'login'           // 登入頁面
   | 'fullscreen'      // 全螢幕對話
   | 'collapsed_desktop' // 桌機收合
@@ -123,13 +123,13 @@ type UIStateType =
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 
 function MyComponent() {
-  const { 
-    uiState, 
-    transitionTo, 
-    messages, 
-    addMessage 
+  const {
+    uiState,
+    transitionTo,
+    messages,
+    addMessage
   } = useUIStateMachine();
-  
+
   // 狀態轉換
   const handleClose = () => {
     transitionTo('collapsed_desktop');
@@ -143,7 +143,7 @@ import { useDeviceType } from '@/hooks/useDeviceType';
 
 function MyComponent() {
   const { deviceType, isMobile, isDesktop } = useDeviceType();
-  
+
   if (isMobile) {
     // 手機專用邏輯
   }

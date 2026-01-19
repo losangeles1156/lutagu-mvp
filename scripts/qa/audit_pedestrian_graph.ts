@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function auditPedestrianGraph() {
   console.log('🔍 Starting Pedestrian Graph Audit...');
-  
+
   // 1. Fetch Stats
   const { count: nodeCount, error: nodeErr } = await supabase.from('pedestrian_nodes').select('*', { count: 'exact', head: true });
   const { count: linkCount, error: linkErr } = await supabase.from('pedestrian_links').select('*', { count: 'exact', head: true });
@@ -53,12 +53,12 @@ async function auditPedestrianGraph() {
     // Check existence of these nodes in batches
     const uniqueNodeIds = Array.from(nodeIds);
     console.log(`Checking ${uniqueNodeIds.length} unique referenced nodes...`);
-    
+
     // Supabase 'in' filter has a limit, so we might need to batch if array is huge.
     // For 1000 links, unique nodes might be ~500-1000. 'in' should handle it or we split.
     // Let's take first 100 to be safe for this script demo.
     const sampleNodeIds = uniqueNodeIds.slice(0, 100);
-    
+
     const { data: existingNodes, error: nodeCheckErr } = await supabase
       .from('pedestrian_nodes')
       .select('node_id')

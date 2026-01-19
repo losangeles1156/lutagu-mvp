@@ -1,6 +1,6 @@
 -- Otemachi L4 Knowledge (Traps & Hacks)
 -- Updating all Tokyo Metro Otemachi nodes to ensure coverage across lines
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [

@@ -20,11 +20,11 @@ export default function Error({
             <div className="w-20 h-20 bg-rose-100 rounded-3xl flex items-center justify-center mb-8 animate-in zoom-in duration-300">
                 <AlertCircle className="w-10 h-10 text-rose-600" />
             </div>
-            
+
             <h1 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
                 糟了！系統發生錯誤
             </h1>
-            
+
             <p className="text-slate-500 max-w-xs mb-10 leading-relaxed font-medium">
                 我們在載入頁面時遇到了一些問題。這可能是由於網路不穩定或系統暫時忙碌。
             </p>

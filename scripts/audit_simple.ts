@@ -46,7 +46,7 @@ async function runAudit() {
     console.log();
 
     console.log('正在獲取車站節點數據...');
-    
+
     // Fetch nodes with only essential columns that definitely exist
     const { data: nodes, error: nodeError } = await supabase
         .from('nodes')
@@ -80,7 +80,7 @@ async function runAudit() {
     for (const nodeId of SEED_NODE_IDS) {
         const node = nodeMap.get(nodeId);
         const name = node?.name?.['zh-TW'] || node?.name?.['ja'] || nodeId.split('.').pop();
-        
+
         if (node) {
             // Count stats
             if (node.is_hub === true) hubCount++;
@@ -91,7 +91,7 @@ async function runAudit() {
             const facilityProfile = node.facility_profile as any;
             const hasL1 = !!facilityProfile && Object.keys(facilityProfile).length > 0;
             const hasFacilityTags = Array.isArray(facilityProfile?.facilityTags) && facilityProfile.facilityTags.length > 0;
-            
+
             if (hasL1) hasL1Count++;
             if (hasFacilityTags) hasFacilityTagsCount++;
 
@@ -184,7 +184,7 @@ async function runAudit() {
     if (hasL1Count < SEED_NODE_IDS.length) {
         console.log(`🔴 優先處理: 需要為 ${SEED_NODE_IDS.length - hasL1Count} 個車站添加 L1 設施數據`);
     }
-    
+
     if (l2Data?.length === 0) {
         console.log(`🔴 優先處理: L2 動態數據完全缺失，需要建立數據收集機制`);
     }

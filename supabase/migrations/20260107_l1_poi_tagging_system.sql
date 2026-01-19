@@ -8,26 +8,26 @@ ALTER TABLE l1_places ADD COLUMN IF NOT EXISTS category_tags JSONB DEFAULT '{}':
 ALTER TABLE l1_places ADD COLUMN IF NOT EXISTS atmosphere_tags JSONB DEFAULT '{}'::jsonb;
 
 -- 2. Create indexes for tag queries
-CREATE INDEX IF NOT EXISTS idx_l1_places_location_tags 
+CREATE INDEX IF NOT EXISTS idx_l1_places_location_tags
 ON l1_places USING GIN(location_tags);
 
-CREATE INDEX IF NOT EXISTS idx_l1_places_category_tags 
+CREATE INDEX IF NOT EXISTS idx_l1_places_category_tags
 ON l1_places USING GIN(category_tags);
 
-CREATE INDEX IF NOT EXISTS idx_l1_places_atmosphere_tags 
+CREATE INDEX IF NOT EXISTS idx_l1_places_atmosphere_tags
 ON l1_places USING GIN(atmosphere_tags);
 
-CREATE INDEX IF NOT EXISTS idx_l1_places_ward_location 
+CREATE INDEX IF NOT EXISTS idx_l1_places_ward_location
 ON l1_places ((location_tags->>'ward'));
 
-CREATE INDEX IF NOT EXISTS idx_l1_places_hub_id 
+CREATE INDEX IF NOT EXISTS idx_l1_places_hub_id
 ON l1_places ((location_tags->>'hub_id'));
 
-CREATE INDEX IF NOT EXISTS idx_l1_places_category_primary 
+CREATE INDEX IF NOT EXISTS idx_l1_places_category_primary
 ON l1_places ((category_tags->>'primary'));
 
-CREATE INDEX IF NOT EXISTS idx_l1_places_chain_brand 
-ON l1_places ((category_tags->>'brand_name')) 
+CREATE INDEX IF NOT EXISTS idx_l1_places_chain_brand
+ON l1_places ((category_tags->>'brand_name'))
 WHERE (category_tags->>'is_chain')::boolean = true;
 
 -- 3. Create brand category mapping table
@@ -149,7 +149,7 @@ BEGIN
     IF v_brand_map.id IS NOT NULL THEN
         -- Use brand mapping
         v_result := v_brand_map.category_tags;
-        
+
         -- Add brand name if not present
         IF NOT (v_result->>'brand_name' = v_brand_map.brand_name) THEN
             v_result := jsonb_set(v_result, '{brand_name}', to_jsonb(v_brand_map.brand_name));
@@ -157,10 +157,10 @@ BEGIN
     ELSE
         -- Auto-detect from OSM tags
         v_detailed := auto_detect_detailed_category(p_category, p_tags);
-        
+
         -- Detect if chain from name patterns
         v_is_chain := detect_chain_from_name(p_name);
-        
+
         -- Estimate price range
         v_price_range := estimate_price_range(p_category, p_tags);
 
@@ -190,7 +190,7 @@ RETURNS TEXT AS $$
 BEGIN
     RETURN CASE p_category
         WHEN 'dining' THEN
-            CASE 
+            CASE
                 WHEN p_tags->>'cuisine' ILIKE '%ramen%' THEN 'ramen'
                 WHEN p_tags->>'cuisine' ILIKE '%sushi%' THEN 'sushi'
                 WHEN p_tags->>'cuisine' ILIKE '%tempura%' THEN 'tempura'
@@ -225,7 +225,7 @@ DECLARE
     ];
 BEGIN
     RETURN EXISTS (
-        SELECT 1 FROM unnest(v_patterns) p 
+        SELECT 1 FROM unnest(v_patterns) p
         WHERE p_name ILIKE '%' || p || '%'
     );
 END;
@@ -240,7 +240,7 @@ RETURNS INT AS $$
 BEGIN
     RETURN CASE p_category
         WHEN 'dining' THEN
-            CASE 
+            CASE
                 WHEN p_tags->>'price_range' = 'high' THEN 4
                 WHEN p_tags->>'price_range' = 'medium' THEN 3
                 WHEN p_tags->>'cuisine' ILIKE '%fast_food%' THEN 1
@@ -268,7 +268,7 @@ RETURNS TEXT AS $$
 BEGIN
     RETURN CASE p_category
         WHEN 'dining' THEN
-            CASE 
+            CASE
                 WHEN p_tags->>'amenity' = 'restaurant' THEN 'restaurant'
                 WHEN p_tags->>'amenity' = 'fast_food' THEN 'fast_food'
                 WHEN p_tags->>'amenity' = 'cafe' THEN 'cafe'
@@ -277,7 +277,7 @@ BEGIN
                 ELSE 'other'
             END
         WHEN 'shopping' THEN
-            CASE 
+            CASE
                 WHEN p_tags->>'shop' ILIKE '%food%' THEN 'grocery'
                 WHEN p_tags->>'shop' ILIKE '%cloth%' THEN 'clothing'
                 WHEN p_tags->>'shop' ILIKE '%electron%' THEN 'electronics'
@@ -301,7 +301,7 @@ DECLARE
     v_poi RECORD;
     v_location_tags JSONB;
     v_category_tags JSONB;
-    v_cursor CURSOR FOR 
+    v_cursor CURSOR FOR
         SELECT id, name, station_id, location, category, tags
         FROM l1_places
         WHERE (p_tag_type = 'all' OR p_tag_type = 'location')
@@ -313,35 +313,35 @@ BEGIN
     LOOP
         FETCH v_cursor INTO v_poi;
         EXIT WHEN NOT FOUND;
-        
+
         BEGIN
             -- Generate location tags
             IF p_tag_type IN ('all', 'location') THEN
                 v_location_tags := generate_location_tags(v_poi.id, v_poi.station_id, v_poi.location);
             END IF;
-            
+
             -- Generate category tags
             IF p_tag_type IN ('all', 'category') THEN
                 v_category_tags := generate_category_tags(v_poi.name, v_poi.category, v_poi.tags);
             END IF;
-            
+
             -- Update record
             UPDATE l1_places
-            SET 
+            SET
                 location_tags = COALESCE(v_location_tags, location_tags),
                 category_tags = COALESCE(v_category_tags, category_tags),
                 updated_at = NOW()
             WHERE id = v_poi.id;
-            
+
             v_updated_count := v_updated_count + 1;
-            
+
         EXCEPTION WHEN OTHERS THEN
             v_error_count := v_error_count + 1;
             RAISE NOTICE 'Error processing POI %: %', v_poi.id, SQLERRM;
         END;
     END LOOP;
     CLOSE v_cursor;
-    
+
     RETURN jsonb_build_object(
         'updated', v_updated_count,
         'errors', v_error_count,
@@ -353,7 +353,7 @@ $$ LANGUAGE plpgsql;
 
 -- 7. Create view for tag statistics
 CREATE OR REPLACE VIEW v_l1_tag_statistics AS
-SELECT 
+SELECT
     'total' AS stat_type,
     COUNT(*)::int AS count,
     COUNT(*) FILTER (WHERE location_tags IS NOT NULL)::int AS with_location_tags,
@@ -385,7 +385,7 @@ COMMENT ON COLUMN l1_places.category_tags IS 'Category tags: primary, secondary,
 COMMENT ON COLUMN l1_places.atmosphere_tags IS 'Atmosphere tags: core, context, style, target_audience, special';
 
 -- 10. Verify migration
-SELECT 'l1_places' AS table_name, 
+SELECT 'l1_places' AS table_name,
        COUNT(*) AS total_records,
        COUNT(*) FILTER (WHERE location_tags IS NOT NULL) AS with_location_tags,
        COUNT(*) FILTER (WHERE category_tags IS NOT NULL) AS with_category_tags,

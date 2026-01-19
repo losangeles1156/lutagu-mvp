@@ -37,10 +37,10 @@ async function verifyL4Database() {
 
     // 2. Check Vector Search RPC (Expect failure if missing, but logging it)
     console.log('🔍 Verifying match_l4_knowledge RPC...');
-    
+
     // Dummy embedding (768 dim)
     const dummyEmbedding = new Array(768).fill(0.1);
-    
+
     const { data: searchData, error: searchError } = await supabase.rpc('match_l4_knowledge', {
         query_embedding: dummyEmbedding,
         match_threshold: 0.0,
@@ -59,10 +59,10 @@ async function verifyL4Database() {
     }
 
     // 3. Check Indexes (Using Service Key to query pg_indexes if possible, or just trying to filter)
-    // We can't query pg_indexes via PostgREST easily. 
+    // We can't query pg_indexes via PostgREST easily.
     // Indirect verification: Check if filtering by 'knowledge_type' is fast? No.
     // We will just report that we verified the table structure via the existence check.
-    
+
     console.log('🔍 Database verification complete.');
 }
 

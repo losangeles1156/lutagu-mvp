@@ -27,7 +27,7 @@ export function UserEditor({ user, onClose, onSave }: UserEditorProps) {
 
         try {
             const body = {
-                // In create mode, if we wanted to support manual user_id input, we'd include it. 
+                // In create mode, if we wanted to support manual user_id input, we'd include it.
                 // But typically user_id comes from Auth. For simple "profile" management, we might assume user exists.
                 // However, the POST /api/members schema allows creating a profile with a specific userId.
                 userId: isEdit ? undefined : userId,

@@ -6,11 +6,11 @@ ALTER TABLE nodes ADD COLUMN IF NOT EXISTS is_hub BOOLEAN DEFAULT false;
 
 -- Update existing records based on the current logic to ensure data consistency
 -- Logic: If parent_hub_id is NULL, it is likely a Hub (default assumption)
-UPDATE nodes 
+UPDATE nodes
 SET is_hub = true
 WHERE parent_hub_id IS NULL;
 
-UPDATE nodes 
+UPDATE nodes
 SET is_hub = false
 WHERE parent_hub_id IS NOT NULL;
 

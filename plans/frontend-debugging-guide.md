@@ -120,15 +120,15 @@ flowchart TD
     A[頁面載入異常] --> B{有錯誤訊息?}
     B -->|是| C{錯誤訊息類型?}
     B -->|否| D{網路請求正常?}
-    
+
     C -->|Syntax Error| E[程式碼語法問題]
     C -->|Type Error| F[TypeScript 類型錯誤]
     C -->|Network Error| G[資源載入問題]
     C -->|CORS Error| H[CORS 跨網域問題]
-    
+
     D -->|有 4xx/5xx| I[後端 API 異常]
     D -->|全部 200 但無渲染| J[前端邏輯問題]
-    
+
     E --> K[檢查最近修改的程式碼]
     F --> L[執行 TypeScript 編譯檢查]
     G --> M[檢查資源路徑與 CDN]
@@ -218,11 +218,11 @@ graph LR
     B -->|200| C[檢查 Response 格式]
     B -->|4xx| D[檢查請求參數]
     B -->|5xx| E[檢查後端服務]
-    
+
     C --> F{格式正確?}
     F -->|是| G[前端資料處理正常]
     F -->|否| H[後端 API 格式異常]
-    
+
     D --> I[401: 檢查 Token]
     D -->|403| J[檢查權限]
     D -->|404| K[檢查 API 路徑]
@@ -372,8 +372,8 @@ module.exports = {
     formats: ['image/avif', 'image/webp'],
   },
   // 確保靜態資源正確處理
-  assetPrefix: process.env.NODE_ENV === 'production' 
-    ? 'https://cdn.yourdomain.com' 
+  assetPrefix: process.env.NODE_ENV === 'production'
+    ? 'https://cdn.yourdomain.com'
     : undefined,
 };
 ```

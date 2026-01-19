@@ -1,6 +1,6 @@
 /**
  * HybridEngine - AI 混合型智慧引擎 (Refactored with SkillRegistry)
- * 
+ *
  * 整合四層架構：
  * L1: Template Engine + POITaggedDecisionEngine (最快)
  * L2: Algorithm Provider (標準)

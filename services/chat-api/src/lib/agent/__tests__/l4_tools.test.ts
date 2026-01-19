@@ -71,13 +71,13 @@ describe('L4 Tool Handlers', () => {
       // Create trips for all hours to ensure coverage regardless of current time
       const trips: { 'odpt:departureTime': string; 'odpt:destinationStation': string[] }[] = [];
       for (let h = 0; h < 24; h++) {
-          trips.push({ 
-              'odpt:departureTime': `${h.toString().padStart(2, '0')}:00`, 
-              'odpt:destinationStation': ['odpt.Station:TokyoMetro.Ginza.Shibuya'] 
+          trips.push({
+              'odpt:departureTime': `${h.toString().padStart(2, '0')}:00`,
+              'odpt:destinationStation': ['odpt.Station:TokyoMetro.Ginza.Shibuya']
           });
-          trips.push({ 
-              'odpt:departureTime': `${h.toString().padStart(2, '0')}:30`, 
-              'odpt:destinationStation': ['odpt.Station:TokyoMetro.Ginza.Shibuya'] 
+          trips.push({
+              'odpt:departureTime': `${h.toString().padStart(2, '0')}:30`,
+              'odpt:destinationStation': ['odpt.Station:TokyoMetro.Ginza.Shibuya']
           });
       }
 

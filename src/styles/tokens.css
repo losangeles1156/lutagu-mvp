@@ -1,7 +1,7 @@
-/* 
+/*
  * LUTAGU Design Tokens
  * 統一管理視覺設計系統
- * 
+ *
  * 使用方式：
  * - CSS: var(--color-primary-600)
  * - Tailwind: @apply text-primary-600
@@ -240,7 +240,7 @@
 
 /*
  * 在 Tailwind 配置中可以這樣使用：
- * 
+ *
  * theme: {
  *   extend: {
  *     colors: {

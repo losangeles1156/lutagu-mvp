@@ -5,7 +5,7 @@ import path from 'path';
 
 /**
  * Lutagu Top Stations Seeding Script
- * 
+ *
  * 目的：為東京核心樞紐站注入高品質的 L1 DNA 資料（景點、設施、氛圍）。
  * 這些資料是 L4 AI Agent 提供智慧建議（如避開擁擠、推薦置物櫃、規劃周邊行程）的基礎。
  */
@@ -44,10 +44,10 @@ const TOP_STATIONS_DNA = [
 
 async function seedTopStations() {
     console.log('🚀 Starting Lutagu Top Stations DNA Seeding...');
-    
+
     for (const station of TOP_STATIONS_DNA) {
         console.log(`Processing ${station.name['zh-TW']}...`);
-        
+
         const { error } = await supabase
             .from('odpt_stations')
             .update({

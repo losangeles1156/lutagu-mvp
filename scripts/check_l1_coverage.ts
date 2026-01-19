@@ -9,28 +9,28 @@ if (!supabaseUrl || !supabaseKey) {
   console.log('請在 Supabase Dashboard 執行以下 SQL 查詢：\n');
   console.log(`
 -- 1. 檢查 Zone A L1 數據覆蓋率
-SELECT 
+SELECT
   COUNT(*) FILTER (WHERE vibe_tags IS NOT NULL) as has_vibe,
   COUNT(*) FILTER (WHERE facility_profile IS NOT NULL) as has_facility,
   COUNT(*) as total,
   ROUND(COUNT(*) FILTER (WHERE vibe_tags IS NOT NULL)::numeric / COUNT(*) * 100) || '%' as vibe_coverage,
   ROUND(COUNT(*) FILTER (WHERE facility_profile IS NOT NULL)::numeric / COUNT(*) * 100) || '%' as facility_coverage
-FROM nodes 
+FROM nodes
 WHERE city_id = 'tokyo_core';
 
 -- 2. 列出缺少 L1 數據的車站
 SELECT id, name->>'zh-TW' as name_zh, vibe_tags, facility_profile
-FROM nodes 
-WHERE city_id = 'tokyo_core' 
+FROM nodes
+WHERE city_id = 'tokyo_core'
   AND (vibe_tags IS NULL OR facility_profile IS NULL)
 ORDER BY id
 LIMIT 20;
 
 -- 3. 抽查已補齊的車站
-SELECT id, name->>'zh-TW' as name_zh, 
+SELECT id, name->>'zh-TW' as name_zh,
   vibe_tags::text as vibe,
   facility_profile::text as facility
-FROM nodes 
+FROM nodes
 WHERE id IN (
   'odpt:Station:JR-East.Akihabara',
   'odpt:Station:JR-East.Shinjuku',
@@ -45,7 +45,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function checkCoverage() {
   console.log('=== Zone A L1 數據覆蓋率檢查 ===\n');
-  
+
   // 查詢覆蓋率
   const { data: coverage, error: covError } = await supabase
     .from('nodes')

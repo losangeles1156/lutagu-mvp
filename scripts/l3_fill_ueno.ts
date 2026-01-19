@@ -41,7 +41,7 @@ async function fetchOverpassAccessibility(lat: number, lon: number) {
         try {
             const controller = new AbortController();
             setTimeout(() => controller.abort(), 60000);
-            
+
             const response = await fetch(endpoint, {
                 method: 'POST',
                 body: `data=${encodeURIComponent(query)}`,
@@ -64,7 +64,7 @@ async function fetchOverpassAccessibility(lat: number, lon: number) {
 
 async function fillUenoL3() {
     console.log('--- Filling L3 Data for Ueno ---');
-    
+
     // Get coordinates
     const { data: nodes } = await supabase
         .from('nodes')
@@ -78,13 +78,13 @@ async function fillUenoL3() {
 
     for (const node of nodes) {
         console.log(`Processing ${node.id}...`);
-        
+
         // 1. Clear existing facilities for this node to avoid duplicates/conflicts
         const { error: deleteError } = await supabase
             .from('l3_facilities')
             .delete()
             .eq('station_id', node.id);
-            
+
         if (deleteError) {
             console.error(`Error clearing facilities for ${node.id}:`, deleteError);
             continue;
@@ -93,7 +93,7 @@ async function fillUenoL3() {
         const coords = node.coordinates as any; // PostGIS Point
         // coords usually come as { type: 'Point', coordinates: [lon, lat] } or similar
         // Need to check structure.
-        
+
         let lon: number, lat: number;
         if (Array.isArray(coords)) {
             [lon, lat] = coords;
@@ -109,10 +109,10 @@ async function fillUenoL3() {
         console.log(`Found ${elements.length} elements.`);
 
         for (const el of elements) {
-            const type = el.tags?.highway === 'elevator' ? 'elevator' : 
-                         (el.tags?.conveying === 'yes' ? 'escalator' : 
+            const type = el.tags?.highway === 'elevator' ? 'elevator' :
+                         (el.tags?.conveying === 'yes' ? 'escalator' :
                          (el.tags?.highway === 'toilets' || el.tags?.amenity === 'toilets' ? 'toilet' : 'other'));
-            
+
             if (type === 'other') continue;
 
             const { error } = await supabase.from('l3_facilities').insert({
@@ -122,7 +122,7 @@ async function fillUenoL3() {
                 attributes: el.tags,
                 source_url: `https://www.openstreetmap.org/${el.type}/${el.id}`
             });
-            
+
             if (error) {
                  console.error('Insert error:', error);
             }

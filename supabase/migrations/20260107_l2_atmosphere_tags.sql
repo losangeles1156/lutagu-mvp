@@ -10,7 +10,7 @@ END $$;
 
 -- 2. 建立氣氛標籤統計視圖
 CREATE OR REPLACE VIEW v_l1_atmosphere_statistics AS
-SELECT 
+SELECT
     category,
     (atmosphere_tags->'core'->>'energy') as energy,
     (atmosphere_tags->'core'->>'style') as style,
@@ -19,7 +19,7 @@ SELECT
     ROUND(AVG((atmosphere_tags->>'confidence')::float)::numeric, 2) as avg_confidence
 FROM l1_places
 WHERE atmosphere_tags IS NOT NULL
-GROUP BY category, 
+GROUP BY category,
     (atmosphere_tags->'core'->>'energy'),
     (atmosphere_tags->'core'->>'style'),
     (atmosphere_tags->'core'->>'crowd_level');
@@ -46,18 +46,18 @@ CREATE INDEX IF NOT EXISTS idx_atmosphere_log_created ON l1_atmosphere_classific
 
 -- 5. 建立分類進度視圖
 CREATE OR REPLACE VIEW v_l1_atmosphere_progress AS
-SELECT 
+SELECT
     'total' as metric,
     COUNT(*) as value
 FROM l1_places
 UNION ALL
-SELECT 
+SELECT
     'classified' as metric,
     COUNT(*) as value
 FROM l1_places
 WHERE atmosphere_tags IS NOT NULL
 UNION ALL
-SELECT 
+SELECT
     'unclassified' as metric,
     COUNT(*) as value
 FROM l1_places
@@ -65,7 +65,7 @@ WHERE atmosphere_tags IS NULL;
 
 -- 6. 建立最近分類記錄視圖
 CREATE OR REPLACE VIEW v_l1_recent_classifications AS
-SELECT 
+SELECT
     l.poi_id,
     p.name as poi_name,
     p.category,
@@ -91,21 +91,21 @@ DECLARE
     v_count INT := 0;
     v_log_id BIGINT;
 BEGIN
-    FOR v_log_id, v_poi_id, v_retry_count IN 
-        SELECT id, poi_id, retry_count 
-        FROM l1_atmosphere_classification_log 
-        WHERE batch_id = p_batch_id 
+    FOR v_log_id, v_poi_id, v_retry_count IN
+        SELECT id, poi_id, retry_count
+        FROM l1_atmosphere_classification_log
+        WHERE batch_id = p_batch_id
         AND status = 'failed'
         AND retry_count < p_max_retries
     LOOP
         -- 更新重試次數
-        UPDATE l1_atmosphere_classification_log 
-        SET retry_count = retry_count + 1 
+        UPDATE l1_atmosphere_classification_log
+        SET retry_count = retry_count + 1
         WHERE id = v_log_id;
-        
+
         v_count := v_count + 1;
     END LOOP;
-    
+
     RETURN v_count;
 END;
 $$ LANGUAGE plpgsql;
@@ -121,7 +121,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         p.category,
         (p.atmosphere_tags->'core'->>'energy')::VARCHAR as energy,
         (p.atmosphere_tags->'core'->>'style')::VARCHAR as style,
@@ -142,9 +142,9 @@ RETURNS BIGINT AS $$
 DECLARE
     v_count BIGINT;
 BEGIN
-    DELETE FROM l1_atmosphere_classification_log 
+    DELETE FROM l1_atmosphere_classification_log
     WHERE created_at < NOW() - (p_days || ' days')::INTERVAL;
-    
+
     GET DIAGNOSTICS v_count = ROW_COUNT;
     RETURN v_count;
 END;

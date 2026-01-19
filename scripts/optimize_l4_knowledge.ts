@@ -70,7 +70,7 @@ Your task is to generate specific, actionable, and quantifyable transit station 
 1. **Specific (具體量化)**: Avoid "far", use "walk 15 mins" or "500m". Avoid "deep", use "B5 floor".
 2. **Actionable (行動導向)**: Tell the user exactly what to do. E.g., "Use the elevator at Exit 3 for luggage."
 3. **No Fluff (拒絕廢話)**: NO adjectives like "convenient", "bustling", "beautiful". ONLY facts.
-4. **Format**: Markdown with H2 (## StationID (Name)), H3 (### Section). 
+4. **Format**: Markdown with H2 (## StationID (Name)), H3 (### Section).
 
 # Required Sections per Station
 - ### Traps（陷阱/警告）
@@ -78,7 +78,7 @@ Your task is to generate specific, actionable, and quantifyable transit station 
 - ### Facilities（設施資訊）
 
 # Output Format
-Generate ONLY the markdown content for the station. 
+Generate ONLY the markdown content for the station.
 Example Output:
 ## odpt:Station:JR-East.Yamanote.Ebisu (惠比壽站)
 ### Traps（陷阱/警告）
@@ -91,7 +91,7 @@ async function generateStationKnowledge(station: { name: string, context: string
     const userPrompt = `
     Target Station: ${station.name}
     Specific Context to Cover: ${station.context}
-    
+
     Please write the expert knowledge markdown for this station following the guidelines.
     `;
 
@@ -127,7 +127,7 @@ async function main() {
     let newContentBuffer = "";
 
     for (const station of TARGET_STATIONS) {
-        // Just for simplicity, we overwrite or append. 
+        // Just for simplicity, we overwrite or append.
         // If the file exists, we check if station already in there.
         if (fs.existsSync(KNOWLEDGE_FILE)) {
             const existing = fs.readFileSync(KNOWLEDGE_FILE, 'utf-8');

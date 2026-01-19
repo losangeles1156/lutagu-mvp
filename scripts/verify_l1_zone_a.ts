@@ -62,19 +62,19 @@ for (const stationId of zoneAStations) {
 console.log('\n=== 驗證 SQL 查詢 ===\n');
 console.log(`
 -- 檢查所有 Zone A 車站的 L1 數據覆蓋率
-SELECT 
+SELECT
   COUNT(*) FILTER (WHERE vibe_tags IS NOT NULL) as has_vibe,
   COUNT(*) FILTER (WHERE facility_profile IS NOT NULL) as has_facility,
   COUNT(*) as total,
   ROUND(COUNT(*) FILTER (WHERE vibe_tags IS NOT NULL)::numeric / COUNT(*) * 100) || '%' as vibe_coverage,
   ROUND(COUNT(*) FILTER (WHERE facility_profile IS NOT NULL)::numeric / COUNT(*) * 100) || '%' as facility_coverage
-FROM nodes 
+FROM nodes
 WHERE city_id = 'tokyo_core';
 
 -- 顯示 vibe_tags 為空或 facility_profile 為空的車站
 SELECT id, name->>'zh-TW' as name_zh
-FROM nodes 
-WHERE city_id = 'tokyo_core' 
+FROM nodes
+WHERE city_id = 'tokyo_core'
   AND (vibe_tags IS NULL OR facility_profile IS NULL)
 ORDER BY id;
 `);

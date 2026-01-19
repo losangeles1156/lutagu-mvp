@@ -6,28 +6,28 @@
 -- Step 1: 確認當前狀態
 SELECT '=== 修復前狀態 ===' as status;
 SELECT id, name->>'zh-TW' as name, ward_id, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id = 'odpt:Station:JR-East.Ikebukuro'
    OR id = 'odpt:Station:TokyoMetro.Ikebukuro'
    OR id = 'odpt:Station:Seibu.Ikebukuro';
 
 -- Step 2: 強制更新池袋站到豐島區
-UPDATE nodes 
+UPDATE nodes
 SET ward_id = 'ward:toshima', is_hub = true, parent_hub_id = NULL
 WHERE id = 'odpt:Station:JR-East.Ikebukuro';
 
-UPDATE nodes 
+UPDATE nodes
 SET ward_id = 'ward:toshima', is_hub = false, parent_hub_id = 'odpt:Station:JR-East.Ikebukuro'
 WHERE id = 'odpt:Station:TokyoMetro.Ikebukuro';
 
-UPDATE nodes 
+UPDATE nodes
 SET ward_id = 'ward:toshima', is_hub = false, parent_hub_id = 'odpt:Station:JR-East.Ikebukuro'
 WHERE id = 'odpt:Station:Seibu.Ikebukuro';
 
 -- Step 3: 驗證修復結果
 SELECT '=== 修復後狀態 ===' as status;
 SELECT id, name->>'zh-TW' as name, ward_id, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id = 'odpt:Station:JR-East.Ikebukuro'
    OR id = 'odpt:Station:TokyoMetro.Ikebukuro'
    OR id = 'odpt:Station:Seibu.Ikebukuro';
@@ -35,14 +35,14 @@ WHERE id = 'odpt:Station:JR-East.Ikebukuro'
 -- Step 4: 確認板橋區的 Hub 站點（不應包含池袋站）
 SELECT '=== 板橋區 Hub 站點 ===' as status;
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:itabashi' AND is_hub = true
 ORDER BY name->>'zh-TW';
 
 -- Step 5: 確認豐島區的 Hub 站點（應包含池袋站）
 SELECT '=== 豐島區 Hub 站點 ===' as status;
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:toshima' AND is_hub = true
 ORDER BY name->>'zh-TW';
 

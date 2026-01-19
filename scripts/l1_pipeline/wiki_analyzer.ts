@@ -14,7 +14,7 @@ interface WikiAnalysisResult {
 
 export async function analyzeWiki(title: string, profile?: StationProfile): Promise<WikiAnalysisResult> {
     console.log(`📘 Analyzing Wiki for: ${title} ${profile ? `(Profile: ${profile.name})` : ''}...`);
-    
+
     // 1. Fetch Wiki Content (JA) + Langlinks
     const endpoint = 'https://ja.wikipedia.org/w/api.php';
     const params = new URLSearchParams({
@@ -30,13 +30,13 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
     try {
         const res = await fetch(`${endpoint}?${params.toString()}`);
         const data = await res.json();
-        
+
         const pages = data.query?.pages;
         if (!pages) throw new Error('No pages found');
-        
+
         const pageId = Object.keys(pages)[0];
         if (pageId === '-1') throw new Error('Page missing');
-        
+
         const page = pages[pageId];
         const contentJa = page.extract as string;
         const langlinks = page.langlinks || [];
@@ -66,10 +66,10 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
                 if (pageZh && pageZh.extract) contentZh = pageZh.extract;
             } catch (e) { console.warn('Failed to fetch ZH wiki', e); }
         }
-        
+
         // 2. Analyze Seasonal Flags (Use JA content)
         const seasonalFlags: string[] = [];
-        
+
         if (matchesAny(contentJa, CONFIG.SEASONAL_KEYWORDS.SAKURA)) seasonalFlags.push('Sakura');
         if (matchesAny(contentJa, CONFIG.SEASONAL_KEYWORDS.AUTUMN)) seasonalFlags.push('Autumn Leaves');
         if (matchesAny(contentJa, CONFIG.SEASONAL_KEYWORDS.HYDRANGEA)) seasonalFlags.push('Hydrangea');
@@ -86,7 +86,7 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
                 weightedKeywords.push({ word: vibe, weight: 10 });
                 rawKeywords.push(vibe);
             });
-            
+
             // Validate Landmarks in Text
             profile.mandatory_landmarks.forEach(lm => {
                 if (contentJa.includes(lm)) {
@@ -146,7 +146,7 @@ export async function analyzeWiki(title: string, profile?: StationProfile): Prom
         // 4. Extract Summaries (First 150 chars)
         // If profile exists, prefer expert description + wiki excerpt
         const cleanText = (text: string) => text.substring(0, 150).replace(/\n/g, ' ') + '...';
-        
+
         let summaryJa = cleanText(contentJa);
         let summaryEn = contentEn ? cleanText(contentEn) : 'Description available in Japanese.';
         let summaryZh = contentZh ? cleanText(contentZh) : '詳細描述僅提供日文版本。';
@@ -244,13 +244,13 @@ Requirements:
                 weightedKeywords: profile.core_vibes.map(v => ({ word: v, weight: 10 }))
             };
         }
-        return { 
-            summary: { ja: '', en: '', zh: '' }, 
+        return {
+            summary: { ja: '', en: '', zh: '' },
             title: { ja: '', en: '', zh: '' },
             tagline: { ja: '', en: '', zh: '' },
-            seasonalFlags: [], 
-            keywords: [], 
-            weightedKeywords: [] 
+            seasonalFlags: [],
+            keywords: [],
+            weightedKeywords: []
         };
     }
 }

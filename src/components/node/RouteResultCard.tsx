@@ -94,7 +94,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
     const railways = (option.railways || []).filter(Boolean);
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="rounded-[2.5rem] bg-white/60 backdrop-blur-xl border border-white/80 shadow-xl shadow-slate-200/20 overflow-hidden group"
@@ -114,7 +114,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                     <span className="text-[10px] font-black uppercase tracking-widest">替代路線 Alternative</span>
                                 </div>
                             )}
-                            
+
                             {railways.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5">
                                     {railways.slice(0, 3).map(rw => {
@@ -172,7 +172,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                         {option.tpi && (
                             <div className="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 flex items-center gap-3">
                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                                    option.tpi.score <= 30 ? 'bg-emerald-500 text-white' : 
+                                    option.tpi.score <= 30 ? 'bg-emerald-500 text-white' :
                                     option.tpi.score <= 60 ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
                                 } shadow-sm`}>
                                     <Zap size={14} />
@@ -192,7 +192,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                         {option.cdr && (
                             <div className="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100/50 flex items-center gap-3">
                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                                    option.cdr.riskLevel === 'low' ? 'bg-emerald-500 text-white' : 
+                                    option.cdr.riskLevel === 'low' ? 'bg-emerald-500 text-white' :
                                     option.cdr.riskLevel === 'medium' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
                                 } shadow-sm`}>
                                     {option.cdr.riskLevel === 'low' ? <ShieldCheck size={14} /> : <AlertTriangle size={14} />}
@@ -302,4 +302,3 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
         </motion.div>
     );
 }
-

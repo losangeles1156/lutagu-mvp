@@ -3,7 +3,7 @@ require('dotenv').config({ path: '.env.local' });
 
 async function main() {
     const { supabaseAdmin } = await import('../src/lib/supabase');
-    
+
     const { data, error } = await supabaseAdmin
         .from('information_schema.tables')
         .select('table_name')

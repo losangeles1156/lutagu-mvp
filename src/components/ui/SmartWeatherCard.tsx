@@ -73,7 +73,7 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
         let isMounted = true;
 
         async function fetchAll() {
-            // If we didn't have initial data, we show loading. 
+            // If we didn't have initial data, we show loading.
             // If we did, we still fetch in background to update/hydrate details.
             if (!initialData) setLoading(true);
 

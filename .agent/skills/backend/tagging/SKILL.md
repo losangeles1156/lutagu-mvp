@@ -34,7 +34,7 @@ allowed-tools: [view_file, mcp_supabase-mcp-server_execute_sql]
 interface NodeTags {
   l1_category: 'dining' | 'shopping' | ...;
   l1_subcategory: string; // e.g., 'ramen'
-  
+
   // 3-5-8 Tags
   tags_core: string[];    // ['拉麵', '豚骨']
   tags_intent: string[];  // ['深夜拉麵推薦', '濃厚湯頭']

@@ -16,7 +16,7 @@ async function runMigration() {
 
     const migrationFile = 'supabase/migrations/20260102_fix_pedestrian_rpc.sql';
     const sqlPath = path.resolve(process.cwd(), migrationFile);
-    
+
     if (!fs.existsSync(sqlPath)) {
         console.error(`❌ File not found: ${migrationFile}`);
         return;

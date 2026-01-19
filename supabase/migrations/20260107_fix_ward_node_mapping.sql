@@ -1,6 +1,6 @@
 -- =============================================================================
 -- 修復：東京車站節點顯示異常 - 行政區映射修正
--- 
+--
 -- 問題：
 -- 1. 豐島區和板橋區都定義了池袋站 (JR-East.Ikebukuro)，導致 ward_id 衝突
 -- 2. 千代田區車站父子關係不完整，導致節點顯示不穩定
@@ -112,7 +112,7 @@ INSERT INTO temp_ward_node_fix (node_id, is_hub, parent_hub_id, ward_id) VALUES
 -- Step 4: 執行修復
 -- 先更新豐島區
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id,
     ward_id = s.ward_id
@@ -121,7 +121,7 @@ WHERE n.id = s.node_id AND s.ward_id = 'ward:toshima';
 
 -- 再更新板橋區
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id,
     ward_id = s.ward_id
@@ -130,7 +130,7 @@ WHERE n.id = s.node_id AND s.ward_id = 'ward:itabashi';
 
 -- 最後更新千代田區
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id,
     ward_id = s.ward_id
@@ -139,58 +139,58 @@ WHERE n.id = s.node_id AND s.ward_id = 'ward:chiyoda';
 
 -- Step 5: 驗證修復結果
 SELECT '=== 豐島區驗證 ===' as section;
-SELECT 
+SELECT
     '豐島區' as ward,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:toshima';
 
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:toshima' AND is_hub = true
 ORDER BY name->>'zh-TW';
 
 SELECT '=== 板橋區驗證 ===' as section;
-SELECT 
+SELECT
     '板橋區' as ward,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:itabashi';
 
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:itabashi' AND is_hub = true
 ORDER BY name->>'zh-TW';
 
 SELECT '=== 千代田區驗證 ===' as section;
-SELECT 
+SELECT
     '千代田區' as ward,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:chiyoda';
 
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:chiyoda' AND is_hub = true
 ORDER BY name->>'zh-TW';
 
 SELECT '=== 池袋站歸屬檢查 ===' as section;
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     ward_id,
     is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id = 'odpt:Station:JR-East.Ikebukuro'
    OR id = 'odpt:Station:TokyoMetro.Ikebukuro';
 

@@ -34,16 +34,16 @@ async function resolveSpokes(query: string): Promise<{ hubName: string, spokeIds
         } else {
             // It's a Spoke
             spokeIds.push(node.id);
-            // Also add its siblings if we want to be generous? 
-            // No, if user asked for specific station, maybe just that. 
-            // But usually "Ueno" matches "JR Ueno" and "Metro Ueno". 
+            // Also add its siblings if we want to be generous?
+            // No, if user asked for specific station, maybe just that.
+            // But usually "Ueno" matches "JR Ueno" and "Metro Ueno".
             // Our search returns both, so we are good.
         }
     }
 
-    return { 
-        hubName: hubNames[0], 
-        spokeIds: Array.from(new Set(spokeIds)) 
+    return {
+        hubName: hubNames[0],
+        spokeIds: Array.from(new Set(spokeIds))
     };
 }
 
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (!fares || fares.length === 0) {
-        return NextResponse.json({ 
+        return NextResponse.json({
             message: `No direct fare found between ${origin.hubName} and ${destination.hubName}.`,
             suggestion: "Transfer might be required."
         });

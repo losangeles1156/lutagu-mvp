@@ -22,7 +22,7 @@ interface GraphLink {
     link_id: string;
     start_node_id: string;
     end_node_id: string;
-    geometry: any; 
+    geometry: any;
     accessibility_rank: string;
     has_elevator_access: boolean;
     distance_meters: number;
@@ -48,20 +48,20 @@ function zoomBucket(zoom: number) {
 
 export function PedestrianLayer() {
     const map = useMap();
-    const { 
-        userProfile, 
-        setRouteEnd, 
-        setRouteStart, 
-        routeStart, 
-        setIsRouteCalculating, 
-        setRoutePath, 
+    const {
+        userProfile,
+        setRouteEnd,
+        setRouteStart,
+        routeStart,
+        setIsRouteCalculating,
+        setRoutePath,
         setRouteSummary,
         mapCenter
     } = useAppStore();
     const [nodes, setNodes] = useState<GraphNode[]>([]);
     const [links, setLinks] = useState<GraphLink[]>([]);
     const [loading, setLoading] = useState(false);
-    
+
     const abortControllerRef = useRef<AbortController | null>(null);
     const routeAbortControllerRef = useRef<AbortController | null>(null);
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -70,7 +70,7 @@ export function PedestrianLayer() {
 
     const handleSetDestination = async (node: GraphNode) => {
         let startPoint = routeStart;
-        
+
         if (!startPoint) {
             if (mapCenter) {
                  startPoint = { lat: mapCenter.lat, lon: mapCenter.lon, name: 'Current Location' };
@@ -80,7 +80,7 @@ export function PedestrianLayer() {
                 return;
             }
         }
-        
+
         const endPoint = { lat: node.coordinates.coordinates[1], lon: node.coordinates.coordinates[0], name: node.description, id: node.id };
 
         const dist = getDistanceKm(startPoint.lat, startPoint.lon, endPoint.lat, endPoint.lon);
@@ -133,11 +133,11 @@ export function PedestrianLayer() {
     };
 
     const handleSetStart = (node: GraphNode) => {
-        setRouteStart({ 
-            lat: node.coordinates.coordinates[1], 
-            lon: node.coordinates.coordinates[0], 
-            name: node.description, 
-            id: node.id 
+        setRouteStart({
+            lat: node.coordinates.coordinates[1],
+            lon: node.coordinates.coordinates[0],
+            name: node.description,
+            id: node.id
         });
         toast.success('Start point set');
         map.closePopup();
@@ -189,14 +189,14 @@ export function PedestrianLayer() {
             const res = await fetch(`/api/navigation/graph?lat=${qLat}&lon=${qLon}&radius=${radius}&user_profile=${profile}`, {
                 signal: controller.signal
             });
-            
+
             if (!res.ok) {
                 // If 4xx or 5xx, throw to catch block
                 throw new Error(`API Error: ${res.status}`);
             }
 
             const json = await res.json();
-            
+
             const nextNodes: GraphNode[] = json.nodes || [];
             const nextLinks: GraphLink[] = json.edges || [];
 
@@ -225,7 +225,7 @@ export function PedestrianLayer() {
 
         // Initial fetch
         fetchData();
-        
+
         map.on('moveend', onMoveEnd);
         return () => {
             map.off('moveend', onMoveEnd);
@@ -250,7 +250,7 @@ export function PedestrianLayer() {
                 // Case 1: GeoJSON Geometry (from RPC)
                 if (link.geometry && typeof link.geometry === 'object' && link.geometry.type === 'LineString') {
                      positions = link.geometry.coordinates.map((c: number[]) => [c[1], c[0]] as [number, number]);
-                } 
+                }
                 // Case 2: Fallback (WKB or missing geometry) - Use Node Coordinates
                 else if (link.start_node_id && link.end_node_id) {
                     const startNode = nodes.find(n => n.id === link.start_node_id);
@@ -265,14 +265,14 @@ export function PedestrianLayer() {
                 }
 
                 if (positions.length === 0) return null;
-                
+
                 const color = link.has_elevator_access ? '#10b981' : '#f59e0b'; // Green vs Amber
-                
+
                 return (
-                    <Polyline 
-                        key={link.id} 
-                        positions={positions} 
-                        pathOptions={{ color, weight: 4, opacity: 0.7 }} 
+                    <Polyline
+                        key={link.id}
+                        positions={positions}
+                        pathOptions={{ color, weight: 4, opacity: 0.7 }}
                     >
                          <Popup>
                             <div className="text-sm">
@@ -289,10 +289,10 @@ export function PedestrianLayer() {
             {nodes.map(node => {
                  const [lon, lat] = node.coordinates.coordinates;
                  return (
-                     <CircleMarker 
-                        key={node.id} 
-                        center={[lat, lon]} 
-                        radius={5} 
+                     <CircleMarker
+                        key={node.id}
+                        center={[lat, lon]}
+                        radius={5}
                         pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.8 }}
                         eventHandlers={{
                             click: (e) => {

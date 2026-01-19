@@ -4,7 +4,7 @@ import path from 'path';
 
 // Core 11 Wards for MVP
 const CORE_WARDS = [
-    'Chiyoda', 'Chuo', 'Minato', 'Shinjuku', 'Shibuya', 
+    'Chiyoda', 'Chuo', 'Minato', 'Shinjuku', 'Shibuya',
     'Toshima', 'Taito', 'Shinagawa', 'Bunkyo', 'Meguro', 'Sumida'
 ];
 
@@ -79,26 +79,26 @@ stations.forEach((s: any) => {
     const name = s.name || s.names?.ja || 'Unknown';
     const ward = s.ward || 'Unknown';
     const operators = s.operators ? s.operators.join(', ') : (s.operator || 'Unknown');
-    
+
     // Check L1 coverage
     const nameEn = s.name_en || s.names?.en || '';
     const clusterId = l1NameIndex.get(name) || l1NameIndex.get(nameEn);
     const hasL1Index = !!clusterId;
     const hasL1Full = !!(clusterId && staticL1Ids.has(clusterId));
-    
+
     // Check L4 coverage (ID or Name)
     const ids = s.ids || (s.id ? [s.id] : []);
     const hasL4Id = ids.some((id: string) => knowledgeIds.has(id));
-    
+
     // Normalize names for comparison (simple check for common variations)
     const nameVariations = [
-        name, 
-        name + '車站', 
+        name,
+        name + '車站',
         name + '駅',
         nameEn,
         nameEn + ' Station'
     ];
-    
+
     // Manual mapping for common Trad/Simp differences in report
     if (name === '浅草') nameVariations.push('淺草', '淺草車站');
     if (name === '新宿') nameVariations.push('新宿車站');
@@ -120,7 +120,7 @@ stations.forEach((s: any) => {
 
     const hasL4Name = nameVariations.some(v => knowledgeNames.has(v));
     const hasL4 = hasL4Id || hasL4Name;
-    
+
     if (hasL1Index) l1Count++;
     if (hasL1Full) l1FullCount++;
     if (hasL4) l4Count++;

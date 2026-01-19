@@ -7,7 +7,7 @@ import { test, describe } from 'node:test';
 // and check if the correct error messages are thrown (which contain operator info).
 
 describe('ODPT Client Token Dispatching', () => {
-    
+
     test('Should identify Tokyo Metro and attempt to use Metro Token', async () => {
         try {
             await odptClient.getStation('odpt.Station:TokyoMetro.Ginza.Ueno');

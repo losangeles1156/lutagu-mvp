@@ -29,19 +29,19 @@ CREATE INDEX IF NOT EXISTS idx_funnel_events_created_at ON funnel_events(created
 ALTER TABLE funnel_events ENABLE ROW LEVEL SECURITY;
 
 -- Allow public to insert events (tracking)
-CREATE POLICY "Allow public insert to funnel_events" 
-ON funnel_events FOR INSERT 
+CREATE POLICY "Allow public insert to funnel_events"
+ON funnel_events FOR INSERT
 WITH CHECK (true);
 
 -- Only service role (admin) can select/analyze
-CREATE POLICY "Allow service role read funnel_events" 
-ON funnel_events FOR SELECT 
+CREATE POLICY "Allow service role read funnel_events"
+ON funnel_events FOR SELECT
 USING (auth.role() = 'service_role');
 
 -- 3. Extend Nudge Logs for Partner Tracking
 -- We add columns to the existing nudge_logs table
-DO $$ 
-BEGIN 
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='nudge_logs' AND column_name='clicked_at') THEN
         ALTER TABLE nudge_logs ADD COLUMN clicked_at timestamptz;
         ALTER TABLE nudge_logs ADD COLUMN conversion_status text DEFAULT 'pending'; -- pending, clicked
@@ -63,7 +63,7 @@ GROUP BY partner_id, DATE_TRUNC('day', created_at);
 CREATE INDEX IF NOT EXISTS idx_partner_performance_date ON partner_performance(date);
 
 -- Insert Default Funnels
-INSERT INTO funnels (name, description, steps) VALUES 
-('ai_chat_to_decision', 'Main User Journey from Chat to Decision', 
+INSERT INTO funnels (name, description, steps) VALUES
+('ai_chat_to_decision', 'Main User Journey from Chat to Decision',
  '[{"step": 1, "name": "query_input"}, {"step": 2, "name": "ai_response_received"}, {"step": 3, "name": "location_selected"}, {"step": 4, "name": "facility_viewed"}, {"step": 5, "name": "external_link_click"}]'::jsonb)
 ON CONFLICT (name) DO NOTHING;

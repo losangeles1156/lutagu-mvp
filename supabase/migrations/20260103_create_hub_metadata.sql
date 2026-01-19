@@ -145,7 +145,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         hm.member_id,
         hm.member_name,
         hm.operator,
@@ -172,7 +172,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         hm.hub_id,
         hm.transfer_type,
         hm.walking_distance_meters,
@@ -204,7 +204,7 @@ DECLARE
 BEGIN
     -- Check if it's a hub
     SELECT EXISTS(SELECT 1 FROM hub_metadata WHERE hub_id = p_station_id AND is_active = TRUE) INTO v_is_hub;
-    
+
     IF v_is_hub THEN
         hub_id := p_station_id;
         SELECT transfer_type, (SELECT COUNT(*) FROM hub_members WHERE hub_id = p_station_id AND is_active = TRUE)
@@ -215,14 +215,14 @@ BEGIN
         is_hub := TRUE;
         RETURN;
     END IF;
-    
+
     -- Check if it's a member of a hub
     SELECT hm.hub_id, hm.transfer_type INTO v_hub_id, v_transfer_type
     FROM hub_metadata hm
     INNER JOIN hub_members hmbr ON hm.hub_id = hmbr.hub_id
     WHERE hmbr.member_id = p_station_id AND hm.is_active = TRUE AND hmbr.is_active = TRUE
     LIMIT 1;
-    
+
     IF v_hub_id IS NOT NULL THEN
         hub_id := v_hub_id;
         transfer_type := v_transfer_type;
@@ -237,7 +237,7 @@ BEGIN
         member_count := 0;
         is_member_of_hub := FALSE;
     END IF;
-    
+
     RETURN;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

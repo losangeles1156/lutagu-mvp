@@ -3,9 +3,9 @@ import fs from 'fs';
 import path from 'path';
 
 const WARDS = [
-    'Minato', 'Shinjuku', 'Bunkyo', 'Taito', 'Sumida', 'Koto', 
-    'Shinagawa', 'Meguro', 'Ota', 'Setagaya', 'Shibuya', 'Nakano', 
-    'Suginami', 'Toshima', 'Kita', 'Arakawa', 'Itabashi', 'Nerima', 
+    'Minato', 'Shinjuku', 'Bunkyo', 'Taito', 'Sumida', 'Koto',
+    'Shinagawa', 'Meguro', 'Ota', 'Setagaya', 'Shibuya', 'Nakano',
+    'Suginami', 'Toshima', 'Kita', 'Arakawa', 'Itabashi', 'Nerima',
     'Adachi', 'Katsushika', 'Edogawa', 'Chiyoda', 'Chuo'
 ];
 

@@ -4,10 +4,10 @@ async function checkYahoo() {
     try {
         const response = await fetch('https://transit.yahoo.co.jp/diainfo/area/4');
         const html = await response.text();
-        
+
         // Very basic extraction of lines with trouble
         const troubleLines = html.match(/<a[^>]*>([^<]+)<\/a>[^<]*<span class="icnTrouble">/g);
-        
+
         if (troubleLines) {
             console.log(`Found ${troubleLines.length} lines with issues on Yahoo Japan:`);
             troubleLines.forEach((line: string) => {

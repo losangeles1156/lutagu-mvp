@@ -519,14 +519,14 @@ UPDATE nodes SET is_hub = false, parent_hub_id = NULL WHERE true;
 
 -- Step 3: 更新 seed_hierarchy_tokyo_23wards 中的節點
 UPDATE nodes n
-SET 
+SET
     is_hub = s.is_hub,
     parent_hub_id = s.parent_hub_id
 FROM seed_hierarchy_tokyo_23wards s
 WHERE n.id = s.node_id;
 
 -- Step 4: 驗證結果 - 按區域分類
-SELECT 
+SELECT
     ward,
     COUNT(*) FILTER (WHERE is_hub = true) as hubs,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone,
@@ -539,21 +539,21 @@ ORDER BY ward;
 
 -- Step 5: 驗證所有 Hub 站點
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE is_hub = true
 ORDER BY name->>'zh-TW';
 
 -- Step 6: 統計總數
-SELECT 
+SELECT
     COUNT(*) FILTER (WHERE is_hub = true) as hubs,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone,
     COUNT(*) FILTER (WHERE parent_hub_id IS NOT NULL) as children,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE id IN (SELECT node_id FROM seed_hierarchy_tokyo_23wards);
 
 -- Step 7: 驗證父子關係
-SELECT 
+SELECT
     p.name->>'zh-TW' as hub_name,
     c.name->>'zh-TW' as child_name,
     c.id as child_id

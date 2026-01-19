@@ -1,7 +1,7 @@
 # LLM Dify Agent 架構確認文件 (優化版)
 
-> **文件日期**: 2026-01-07  
-> **專案名稱**: LUTAGU/LUTAGU MVP  
+> **文件日期**: 2026-01-07
+> **專案名稱**: LUTAGU/LUTAGU MVP
 > **版本**: 1.1 (優化版)
 
 ---
@@ -67,7 +67,7 @@
 
 ### 2.1 Hybrid Intent Classifier (混合意圖分類器)
 
-**核心設計原則**: 
+**核心設計原則**:
 - **優先使用低成本方法** (關鍵詞匹配)
 - **僅在需要時升級到 ML 分類**
 - **結果快取以避免重複計算**
@@ -217,8 +217,8 @@ export class PreDecisionEngine {
 
             const parsed = JSON.parse(result || '{}');
             return {
-                level: parsed.level === 'simple' ? DecisionLevel.LEVEL_1_SIMPLE 
-                    : parsed.level === 'medium' ? DecisionLevel.LEVEL_2_MEDIUM 
+                level: parsed.level === 'simple' ? DecisionLevel.LEVEL_1_SIMPLE
+                    : parsed.level === 'medium' ? DecisionLevel.LEVEL_2_MEDIUM
                     : DecisionLevel.LEVEL_3_COMPLEX,
                 confidence: parsed.confidence || 0.7,
                 suggestedModel: parsed.level === 'complex' ? 'mistral-small-latest' : 'none',
@@ -373,22 +373,22 @@ flowchart TD
     A[使用者請求] --> B{Level 3?}
     B -->|是| C{Mistral API 可用?}
     B -->|否| D[快速路徑處理]
-    
+
     C -->|是| E{Dify 可用?}
     C -->|否| F{成本預算剩餘?}
-    
+
     E -->|是| G[呼叫 Dify Agent]
     E -->|否| H[直接呼叫 Mistral Small]
     F -->|是| H
     F -->|否| I[降級到 Algorithm Engine]
-    
+
     G --> J[生成回覆]
     H --> J
     I --> J
-    
+
     I -->|若 Algorithm 也無法處理| K[返回通用回覆]
     K --> J
-    
+
     D --> J
 ```
 
@@ -466,7 +466,7 @@ flowchart TB
         K[Keyword Matcher<br/>0-1ms]
         M[ML Classifier<br/>5-20ms]
         R[Result Cache<br/>5min TTL]
-        
+
         K -->|Match| R
         M -->|No Match| R
     end
@@ -475,7 +475,7 @@ flowchart TB
         T[Template Engine<br/>Level 1]
         A[Algorithm Engine<br/>Level 2]
         L[LLM Fallback<br/>Level 3]
-        
+
         T --> O[Output]
         A --> O
         L --> O
@@ -495,23 +495,23 @@ flowchart TB
 
     U --> PreDecision
     C --> PreDecision
-    
+
     PreDecision -->|Level 1| T
     PreDecision -->|Level 2| A
     PreDecision -->|Level 3| L
-    
+
     L -->|Dify| D
     L -->|Direct| MS
     L -->|Fallback| MM
-    
+
     T --> CO
     A --> CO
     L --> CO
-    
+
     T --> M
     A --> M
     L --> M
-    
+
     M --> H
     H -->|Update State| PreDecision
 ```
@@ -617,8 +617,8 @@ flowchart TB
 
 ---
 
-> **文件維護**: AI Architect Mode  
-> **版本歷史**:  
-> - v1.0 (2026-01-07): 初始版本  
-> - v1.1 (2026-01-07): 優化預決策流程、成本優化、降級策略  
+> **文件維護**: AI Architect Mode
+> **版本歷史**:
+> - v1.0 (2026-01-07): 初始版本
+> - v1.1 (2026-01-07): 優化預決策流程、成本優化、降級策略
 > **下次 Review**: 2026-02-07

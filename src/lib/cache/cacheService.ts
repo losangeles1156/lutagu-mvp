@@ -70,14 +70,14 @@ export class CacheService<T = any> {
     private cache: Map<string, CacheEntry<T>>;
     private config: CacheConfig;
     private cleanupTimer?: NodeJS.Timeout;
-    
+
     // 效能監控
     private hitCount: number = 0;
     private missCount: number = 0;
     private totalAccessTime: number = 0;
     private accessCount: number = 0;
     private evictionCount: number = 0;
-    
+
     // 熱門站點追蹤
     private stationAccessCount: Map<string, number> = new Map();
 
@@ -104,7 +104,7 @@ export class CacheService<T = any> {
     get(key: string): T | null {
         const startTime = performance.now();
         const entry = this.cache.get(key);
-        
+
         if (!entry) {
             this.recordMiss();
             this.recordAccessTime(performance.now() - startTime);
@@ -126,7 +126,7 @@ export class CacheService<T = any> {
         // 移動到 Map 末尾 (MRU)
         this.cache.delete(key);
         this.cache.set(key, entry);
-        
+
         this.recordHit();
         this.recordAccessTime(performance.now() - startTime);
         return entry.value;
@@ -142,10 +142,10 @@ export class CacheService<T = any> {
         }
 
         const expiresAt = Date.now() + (ttlMs ?? this.config.ttlMs);
-        
+
         // 判斷快取層級
         const layer = this.determineLayer(key, priority);
-        
+
         this.cache.set(key, {
             key,
             value,
@@ -166,7 +166,7 @@ export class CacheService<T = any> {
         }
 
         const ttl = ttlMs ?? this.getLayerTTL(layer);
-        
+
         this.cache.set(key, {
             key,
             value,
@@ -191,12 +191,12 @@ export class CacheService<T = any> {
     has(key: string): boolean {
         const entry = this.cache.get(key);
         if (!entry) return false;
-        
+
         if (Date.now() > entry.expiresAt) {
             this.delete(key);
             return false;
         }
-        
+
         return true;
     }
 
@@ -218,7 +218,7 @@ export class CacheService<T = any> {
      */
     getStats(): CacheStats {
         const layerDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0 };
-        
+
         for (const entry of this.cache.values()) {
             layerDistribution[entry.layer] = (layerDistribution[entry.layer] || 0) + 1;
         }
@@ -228,8 +228,8 @@ export class CacheService<T = any> {
             maxSize: this.config.maxSize,
             hitCount: this.hitCount,
             missCount: this.missCount,
-            hitRate: this.hitCount + this.missCount > 0 
-                ? (this.hitCount / (this.hitCount + this.missCount)) * 100 
+            hitRate: this.hitCount + this.missCount > 0
+                ? (this.hitCount / (this.hitCount + this.missCount)) * 100
                 : 0,
             avgAccessTime: this.accessCount > 0 ? this.totalAccessTime / this.accessCount : 0,
             memoryUsage: this.estimateMemoryUsage(),
@@ -245,8 +245,8 @@ export class CacheService<T = any> {
         return {
             hitCount: this.hitCount,
             missCount: this.missCount,
-            hitRate: this.hitCount + this.missCount > 0 
-                ? (this.hitCount / (this.hitCount + this.missCount)) * 100 
+            hitRate: this.hitCount + this.missCount > 0
+                ? (this.hitCount / (this.hitCount + this.missCount)) * 100
                 : 0,
             size: this.cache.size,
             maxSize: this.config.maxSize,
@@ -287,7 +287,7 @@ export class CacheService<T = any> {
             const priorityOrder = { cold: 0, normal: 1, hot: 2 };
             const priorityDiff = priorityOrder[a[1].priority] - priorityOrder[b[1].priority];
             if (priorityDiff !== 0) return priorityDiff;
-            
+
             // 同優先級下按訪問時間
             return a[1].lastAccessed - b[1].lastAccessed;
         });

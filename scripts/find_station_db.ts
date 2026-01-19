@@ -19,7 +19,7 @@ async function main() {
         .from('stations_static')
         .select('id, name')
         .ilike('id', `%${term}%`);
-    
+
     console.log('\n--- stations_static ---');
     staticData?.forEach(s => console.log(`${s.id} | ${JSON.stringify(s.name)}`));
 

@@ -12,7 +12,7 @@ async function analyzeTopStations() {
     console.log('=== Top 5 Stations Category Breakdown ===\n');
 
     // 1. Find Top 5 Stations
-    // (Since we can't do complex GROUP BY/ORDER BY count easily in one Supabase call without rpc, 
+    // (Since we can't do complex GROUP BY/ORDER BY count easily in one Supabase call without rpc,
     // we fetch counts first or use the logic from monitor script)
 
     // We'll fetch all items first (it's ~33k, manageable for node script) or use a smarter query if possible.

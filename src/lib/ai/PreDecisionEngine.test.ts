@@ -1,6 +1,6 @@
 /**
  * PreDecisionEngine 單元測試
- * 
+ *
  * 測試內容：
  * 1. Level 1 關鍵詞匹配
  * 2. Level 2 關鍵詞匹配
@@ -16,8 +16,8 @@ import assert from 'node:assert';
 // Import test subject
 // ============================================================================
 
-import { 
-    DecisionLevel, 
+import {
+    DecisionLevel,
     classifyIntent,
     clearPreDecisionCache,
     getPreDecisionCacheStats
@@ -42,7 +42,7 @@ describe('PreDecisionEngine', () => {
 
     describe('Level 1 - Keyword Matching', async () => {
         const greetings = ['你好', 'hello', 'hi', '早安', '謝謝', '再見', '阿里嘎多', '好', 'ok'];
-        
+
         for (const greeting of greetings) {
             it(`should match greeting: "${greeting}"`, async () => {
                 const result = await classifyIntent(greeting);
@@ -152,7 +152,7 @@ describe('PreDecisionEngine', () => {
         it('should cache results', async () => {
             const result1 = await classifyIntent('你好');
             const result2 = await classifyIntent('你好');
-            
+
             assert.strictEqual(result1._fromCache, undefined);
             assert.strictEqual(result2._fromCache, true);
         });
@@ -160,7 +160,7 @@ describe('PreDecisionEngine', () => {
         it('should clear cache correctly', async () => {
             await classifyIntent('你好');
             clearPreDecisionCache();
-            
+
             const result = await classifyIntent('你好');
             assert.strictEqual(result._fromCache, undefined);
         });
@@ -196,7 +196,7 @@ describe('PreDecisionEngine', () => {
             assert.ok(result !== null);
             // 複雜查詢應該被分類為 Level 3
             assert.ok(
-                result.level === DecisionLevel.LEVEL_3_COMPLEX || 
+                result.level === DecisionLevel.LEVEL_3_COMPLEX ||
                 result.level === DecisionLevel.LEVEL_2_MEDIUM,
                 `Expected complex or medium, got ${result.level}`
             );
@@ -233,7 +233,7 @@ describe('PreDecisionEngine', () => {
             const start = Date.now();
             await classifyIntent('你好');
             const elapsed = Date.now() - start;
-            
+
             assert.ok(elapsed < 5, `Expected < 5ms, got ${elapsed}ms`);
         });
 
@@ -241,19 +241,19 @@ describe('PreDecisionEngine', () => {
             const start = Date.now();
             await classifyIntent('怎麼去東京');
             const elapsed = Date.now() - start;
-            
+
             assert.ok(elapsed < 20, `Expected < 20ms, got ${elapsed}ms`);
         });
 
         it('should be faster with cache hit', async () => {
             // First call
             await classifyIntent('謝謝');
-            
+
             // Second call (cached) - should be at least as fast
             const start2 = Date.now();
             await classifyIntent('謝謝');
             const time2 = Date.now() - start2;
-            
+
             // Cached call should be very fast (< 1ms)
             assert.ok(time2 <= 1, `Cache hit should be <= 1ms, got ${time2}ms`);
         });
@@ -266,7 +266,7 @@ describe('PreDecisionEngine', () => {
     describe('Decision Result Structure', async () => {
         it('should have all required fields', async () => {
             const result = await classifyIntent('你好');
-            
+
             assert.ok('level' in result, 'Should have level field');
             assert.ok('confidence' in result, 'Should have confidence field');
             assert.ok('suggestedModel' in result, 'Should have suggestedModel field');
@@ -276,7 +276,7 @@ describe('PreDecisionEngine', () => {
 
         it('should have valid confidence range (0-1)', async () => {
             const testInputs = ['你好', '怎麼去', '幫我規劃'];
-            
+
             for (const input of testInputs) {
                 const result = await classifyIntent(input);
                 assert.ok(result.confidence >= 0, `Confidence should be >= 0, got ${result.confidence}`);

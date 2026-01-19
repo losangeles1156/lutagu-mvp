@@ -13,7 +13,7 @@ TRUNCATE TABLE l4_knowledge_embeddings;
 ALTER TABLE l4_knowledge_embeddings ALTER COLUMN embedding TYPE vector(1024);
 
 -- 3. Recreate Index
-CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings 
+CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings
 USING hnsw (embedding vector_cosine_ops);
 
 -- 4. Update RPC function

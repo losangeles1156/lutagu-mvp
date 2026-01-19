@@ -7,12 +7,12 @@ const OUTPUT_FILE = path.resolve(process.cwd(), 'scripts/data/jr_station_ids.jso
 
 const STATIONS = [
     // Yamanote
-    'Tokyo', 'Kanda', 'Akihabara', 'Okachimachi', 'Ueno', 'Uguisudani', 'Nippori', 'Nishi-Nippori', 
-    'Tabata', 'Komagome', 'Sugamo', 'Otsuka', 'Ikebukuro', 'Mejiro', 'Takadanobaba', 'Shin-Okubo', 
-    'Shinjuku', 'Yoyogi', 'Harajuku', 'Shibuya', 'Ebisu', 'Meguro', 'Gotanda', 'Osaki', 'Shinagawa', 
+    'Tokyo', 'Kanda', 'Akihabara', 'Okachimachi', 'Ueno', 'Uguisudani', 'Nippori', 'Nishi-Nippori',
+    'Tabata', 'Komagome', 'Sugamo', 'Otsuka', 'Ikebukuro', 'Mejiro', 'Takadanobaba', 'Shin-Okubo',
+    'Shinjuku', 'Yoyogi', 'Harajuku', 'Shibuya', 'Ebisu', 'Meguro', 'Gotanda', 'Osaki', 'Shinagawa',
     'Takanawa Gateway', 'Tamachi', 'Hamamatsucho', 'Shimbashi', 'Yurakucho',
     // Chuo-Sobu (Local)
-    'Ochanomizu', 'Suidobashi', 'Iidabashi', 'Ichigaya', 'Yotsuya', 'Shinanomachi', 'Sendagaya', 
+    'Ochanomizu', 'Suidobashi', 'Iidabashi', 'Ichigaya', 'Yotsuya', 'Shinanomachi', 'Sendagaya',
     'Okubo', 'Higashi-Nakano', 'Nakano',
     // Sobu (Rapid/Local)
     'Shin-Nihombashi', 'Bakurocho', 'Kinshicho', 'Kameido', 'Ryogoku', 'Asakusabashi'
@@ -53,15 +53,15 @@ async function main() {
 
         const query = `site:jreast.co.jp/estation/stations/ "${name}"`;
         const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-        
+
         process.stdout.write(`Searching for ${name}... `);
 
         try {
             await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-            
+
             // Extract links
             const hrefs = await page.$$eval('a', as => as.map(a => a.href));
-            
+
             let foundId = null;
             for (const href of hrefs) {
                 const match = href.match(/jreast\.co\.jp\/estation\/stations\/(\d+)\.html/);

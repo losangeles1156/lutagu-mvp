@@ -1,6 +1,6 @@
 /**
  * L4 Expert Knowledge Base Quality Audit Script
- * 
+ *
  * Checks for:
  * - Outdated information
  * - Incorrect concepts
@@ -8,9 +8,9 @@
  * - Missing references
  */
 
-import { 
-    RAILWAY_EXPERT_TIPS, 
-    HUB_STATION_TIPS, 
+import {
+    RAILWAY_EXPERT_TIPS,
+    HUB_STATION_TIPS,
     ACCESSIBILITY_GUIDE,
     SPECIAL_LOCATION_TIPS,
     PASS_RECOMMENDATIONS
@@ -44,18 +44,18 @@ interface QualityIssue {
 
 function auditKnowledgeBase(): QualityIssue[] {
     const issues: QualityIssue[] = [];
-    
+
     console.log('╔══════════════════════════════════════════════════════════════╗');
     console.log('║          L4 專家知識庫品質審計報告                               ║');
     console.log('╚══════════════════════════════════════════════════════════════╝\n');
-    
+
     // Audit Railway Tips
     console.log('─'.repeat(60));
     console.log('【1】審計路線建議 (Railway Tips Audit)');
     console.log('─'.repeat(60));
-    
+
     let railwayIssueCount = 0;
-    
+
     for (const [railwayId, tips] of Object.entries(RAILWAY_EXPERT_TIPS)) {
         for (const tip of tips) {
             // Check for potentially outdated patterns
@@ -71,7 +71,7 @@ function auditKnowledgeBase(): QualityIssue[] {
                     railwayIssueCount++;
                 }
             }
-            
+
             // Check for potentially incorrect patterns
             for (const { pattern, reason } of INCORRECT_PATTERNS) {
                 if (pattern.test(tip.text)) {
@@ -86,7 +86,7 @@ function auditKnowledgeBase(): QualityIssue[] {
                 }
             }
         }
-        
+
         // Check for known problematic entries
         if (SUSPICIOUS_CATEGORIES[railwayId as keyof typeof SUSPICIOUS_CATEGORIES]) {
             issues.push({
@@ -99,16 +99,16 @@ function auditKnowledgeBase(): QualityIssue[] {
             railwayIssueCount++;
         }
     }
-    
+
     console.log(`   發現 ${railwayIssueCount} 個潛在問題`);
-    
+
     // Audit Hub Station Tips
     console.log('\n' + '─'.repeat(60));
     console.log('【2】審計樞紐站建議 (Hub Station Tips Audit)');
     console.log('─'.repeat(60));
-    
+
     let stationIssueCount = 0;
-    
+
     for (const [stationId, tips] of Object.entries(HUB_STATION_TIPS)) {
         for (const tip of tips) {
             // Check for construction-related warnings that may be outdated
@@ -122,7 +122,7 @@ function auditKnowledgeBase(): QualityIssue[] {
                 });
                 stationIssueCount++;
             }
-            
+
             // Check for absolute statements that may be incorrect
             if (/(超過|所有|唯一|必須)/.test(tip.text)) {
                 issues.push({
@@ -136,16 +136,16 @@ function auditKnowledgeBase(): QualityIssue[] {
             }
         }
     }
-    
+
     console.log(`   發現 ${stationIssueCount} 個潛在問題`);
-    
+
     // Audit Accessibility Guide
     console.log('\n' + '─'.repeat(60));
     console.log('【3】審計無障礙建議 (Accessibility Guide Audit)');
     console.log('─'.repeat(60));
-    
+
     let accessibilityIssueCount = 0;
-    
+
     for (const [stationId, advice] of Object.entries(ACCESSIBILITY_GUIDE)) {
         // Check for generic responses that may not be accurate
         const values = Object.values(advice).join('');
@@ -160,16 +160,16 @@ function auditKnowledgeBase(): QualityIssue[] {
             accessibilityIssueCount++;
         }
     }
-    
+
     console.log(`   發現 ${accessibilityIssueCount} 個潛在問題`);
-    
+
     // Audit Pass Recommendations
     console.log('\n' + '─'.repeat(60));
     console.log('【4】審計票券建議 (Pass Recommendations Audit)');
     console.log('─'.repeat(60));
-    
+
     let passIssueCount = 0;
-    
+
     for (const pass of PASS_RECOMMENDATIONS) {
         // Check for price information that may be outdated
         if (/¥[\d,]+/.test(pass.price)) {
@@ -186,25 +186,25 @@ function auditKnowledgeBase(): QualityIssue[] {
             }
         }
     }
-    
+
     console.log(`   發現 ${passIssueCount} 個潛在問題`);
-    
+
     // Summary
     console.log('\n' + '═'.repeat(60));
     console.log('                    審計摘要 (Audit Summary)');
     console.log('═'.repeat(60));
-    
+
     const totalIssues = railwayIssueCount + stationIssueCount + accessibilityIssueCount + passIssueCount;
-    
+
     console.log(`\n   🔍 總發現問題數: ${totalIssues}`);
     console.log(`   ⚠️  路線建議問題: ${railwayIssueCount}`);
     console.log(`   ⚠️  站點建議問題: ${stationIssueCount}`);
     console.log(`   ⚠️  無障礙建議問題: ${accessibilityIssueCount}`);
     console.log(`   ⚠️  票券建議問題: ${passIssueCount}`);
-    
+
     if (totalIssues > 0) {
         console.log(`\n   📋 需要審核的項目:\n`);
-        
+
         // Show sample issues
         const sampleIssues = issues.slice(0, 10);
         for (const issue of sampleIssues) {
@@ -212,31 +212,31 @@ function auditKnowledgeBase(): QualityIssue[] {
             console.log(`      ${issue.issue}`);
             console.log(`      → ${issue.suggestion}\n`);
         }
-        
+
         if (issues.length > 10) {
             console.log(`   ... 還有 ${issues.length - 10} 個問題需要審核`);
         }
     }
-    
+
     // Recommendations
     console.log('\n' + '─'.repeat(60));
     console.log('【5】品質改進建議 (Quality Improvement Recommendations)');
     console.log('─'.repeat(60));
-    
+
     console.log(`
    1. 定期更新施工狀態：施工相關資訊應每季審核
-   
+
    2. 驗證轉乘資訊：直通/轉乘資訊可能因運營變更而改變
-   
+
    3. 更新票券價格：參考官方網站定期更新票價資訊
-   
+
    4. 增加數據來源標註：標註資訊更新日期與來源
-   
+
    5. 避免絕對性陳述：使用「建議」「通常」等詞彙替代絕對性描述
     `);
-    
+
     console.log('═'.repeat(60) + '\n');
-    
+
     return issues;
 }
 

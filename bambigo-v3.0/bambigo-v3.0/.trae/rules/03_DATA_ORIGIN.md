@@ -433,15 +433,15 @@ export function detectZone(
   coordinates: { lat: number; lng: number }
 ): 'core' | 'buffer' | 'outer' {
   const point = turf.point([coordinates.lng, coordinates.lat]);
-  
+
   if (turf.booleanPointInPolygon(point, TOKYO_ZONES.core)) {
     return 'core';
   }
-  
+
   if (turf.booleanPointInPolygon(point, TOKYO_ZONES.buffer)) {
     return 'buffer';
   }
-  
+
   return 'outer';
 }
 ```
@@ -572,7 +572,7 @@ const PROPER_NOUNS: Record<string, LocalizedText> = {
     'ja': '丸ノ内線',
     'en': 'Marunouchi Line',
   },
-  
+
   // 車站名稱
   'ueno': {
     'zh-TW': '上野',
@@ -584,7 +584,7 @@ const PROPER_NOUNS: Record<string, LocalizedText> = {
     'ja': '浅草',
     'en': 'Asakusa',
   },
-  
+
   // Vibe Tags
   'shopping_paradise': {
     'zh-TW': '購物天堂',
@@ -610,17 +610,17 @@ export async function translateText(
   targetLangs: string[]
 ): Promise<Record<string, string>> {
   const result: Record<string, string> = { [sourceLang]: text };
-  
+
   for (const targetLang of targetLangs) {
     if (targetLang === sourceLang) continue;
-    
+
     // 先查對照表
     const cached = lookupProperNoun(text);
     if (cached && cached[targetLang]) {
       result[targetLang] = cached[targetLang];
       continue;
     }
-    
+
     // 呼叫 DeepL API
     const response = await fetch('https://api.deepl.com/v2/translate', {
       method: 'POST',
@@ -634,11 +634,11 @@ export async function translateText(
         target_lang: targetLang.toUpperCase(),
       }),
     });
-    
+
     const data = await response.json();
     result[targetLang] = data.translations[0].text;
   }
-  
+
   return result;
 }
 ```
@@ -659,15 +659,15 @@ async function fetchL2Status(nodeId: string): Promise<L2_LiveStatus | null> {
     if (cached) {
       return JSON.parse(cached);
     }
-    
+
     // 嘗試從 ODPT API 取得
     const fresh = await fetchFromODPT(nodeId);
     await redis.setex(`l2:${nodeId}`, 1200, JSON.stringify(fresh));
     return fresh;
-    
+
   } catch (error) {
     console.error('L2 fetch failed:', error);
-    
+
     // 降級：嘗試取得過期的快取
     const stale = await redis.get(`l2:${nodeId}:stale`);
     if (stale) {
@@ -677,7 +677,7 @@ async function fetchL2Status(nodeId: string): Promise<L2_LiveStatus | null> {
         _staleMessage: '資料更新於 30 分鐘前',
       };
     }
-    
+
     // 完全無資料
     return null;
   }
@@ -697,7 +697,7 @@ function renderL2Status(status: L2_LiveStatus | null) {
       </div>
     );
   }
-  
+
   if (status._isStale) {
     return (
       <div className="status-stale">
@@ -706,7 +706,7 @@ function renderL2Status(status: L2_LiveStatus | null) {
       </div>
     );
   }
-  
+
   return <StatusDisplay data={status} />;
 }
 ```

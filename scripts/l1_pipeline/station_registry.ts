@@ -111,16 +111,16 @@ const RAW_STATIONS: TargetStation[] = [
 
     // --- Others (Samples) ---
     /*
-    { 
-        id: 'odpt.Station:JR-East.Yamanote.ShinOkubo', 
-        name: { ja: '新大久保', en: 'Shin-Okubo' }, 
+    {
+        id: 'odpt.Station:JR-East.Yamanote.ShinOkubo',
+        name: { ja: '新大久保', en: 'Shin-Okubo' },
         ward: 'Shinjuku',
         location: { lat: 35.701306, lng: 139.700044 },
         wikiTitle: '新大久保駅'
     },
-    { 
-        id: 'odpt.Station:JR-East.Yamanote.Takadanobaba', 
-        name: { ja: '高田馬場', en: 'Takadanobaba' }, 
+    {
+        id: 'odpt.Station:JR-East.Yamanote.Takadanobaba',
+        name: { ja: '高田馬場', en: 'Takadanobaba' },
         ward: 'Shinjuku',
         location: { lat: 35.712285, lng: 139.703782 },
         wikiTitle: '高田馬場駅'
@@ -247,7 +247,7 @@ function buildStationClusters(includeWardStations: boolean, wardsFilter: Set<str
     // so they will be processed first.
     // Let's ensure Core stations are processed first to be the cluster centers.
 
-    // Sort logic: Core stations (from RAW_STATIONS) first? 
+    // Sort logic: Core stations (from RAW_STATIONS) first?
     // Actually, RAW_STATIONS are already at the beginning of the array.
     // But let's refine the sort:
     // 1. Stations present in RAW_STATIONS (prioritize official IDs over osm: IDs)

@@ -68,8 +68,9 @@ export class TemplateEngine {
                 priority: 100,
                 keywords: ['你好', '您好', 'hello', 'hi', 'hey', '安安', '哈囉', '早安', '午安', '晚安'],
                 patterns: [
-                    /^(你好|您好|hello|hi|hey|安安|哈囉)/i,
-                    /^(早上好|午安|晚安|早安)/i
+                    /^(你好|您好|hello|hi|hey|安安|哈囉)(?:[\s\u3000]*[!！。．\.、，,？?]*)?$/i,
+                    /^(早上好|午安|晚安|早安)(?:[\s\u3000]*[!！。．\.、，,？?]*)?$/i,
+                    /^(こんにちは|こんばんは|おはよう|おはようございます|はじめまして|よろしく|よろしくお願いします|もしもし)(?:[\s\u3000]*[!！。．\.、，,？?]*)?$/i
                 ],
                 responses: {
                     'zh-TW': '你好！我是 LUTAGU，你的東京交通 AI 導航助手。想去哪裡，或者有什麼交通問題都可以問我喔！',
@@ -119,7 +120,7 @@ export class TemplateEngine {
 
     public match(text: string, locale: SupportedLocale = 'zh-TW'): TemplateResponse | null {
         const trimmed = text.trim();
-        
+
         // 1. 優先嘗試 Trie 樹精確匹配 (O(L))
         const templateId = this.trie.search(trimmed);
         if (templateId) {

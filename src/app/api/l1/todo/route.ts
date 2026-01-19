@@ -32,7 +32,7 @@ export async function GET() {
         // We select distinct station_ids from l1_places
         // Using a hack: fetching all stations from l1_places might be heavy if millions of rows.
         // Better: use rpc or a separate 'job_status' table.
-        // MVP: Fetch unique station_ids. 
+        // MVP: Fetch unique station_ids.
         // Since we can't do .distinct() easily, let's try a different approach.
         // For performance, we should probably have a 'last_l1_update' column on nodes, but we don't.
         // Alternative: checking each node strictly is N+1 queries.
@@ -44,10 +44,10 @@ export async function GET() {
 
         const { data: completedData, error: completedError } = await supabase
             .from('l1_places')
-            .select('station_id'); // Warning: this returns ALL rows. 
+            .select('station_id'); // Warning: this returns ALL rows.
 
         // Optimizing: If we have many rows, this will be slow.
-        // Let's assume for MVP < 100k rows is OK. 
+        // Let's assume for MVP < 100k rows is OK.
         // If user deleted rows, we re-ingest.
 
         const completedSet = new Set((completedData || []).map((p: any) => p.station_id));

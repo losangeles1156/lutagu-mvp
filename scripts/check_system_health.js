@@ -37,7 +37,7 @@ async function checkSystem() {
       .from('nodes')
       .select('id, name, is_hub, parent_hub_id, coordinates')
       .or(`name->>en.ilike.%${name}%,name->>ja.ilike.%${name}%`);
-    
+
     if (error) {
       console.error(`Error checking ${name}:`, error);
       continue;

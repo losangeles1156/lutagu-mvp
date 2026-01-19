@@ -1,7 +1,7 @@
 # L1 POI 標籤預處理系統設計文件
 
-> **文件日期**: 2026-01-07  
-> **專案名稱**: LUTAGU/LUTAGU MVP  
+> **文件日期**: 2026-01-07
+> **專案名稱**: LUTAGU/LUTAGU MVP
 > **版本**: 1.0
 
 ---
@@ -41,22 +41,22 @@ flowchart TB
     subgraph POI["L1 POI 資料"]
         P["50,000+ 筆"]
     end
-    
+
     subgraph Tags["三維標籤體系"]
         L["Location 標籤\n地理空間"]
         C["Category 標籤\n類型分類"]
         A["Atmosphere 標籤\n氛圍氣質"]
     end
-    
+
     subgraph Matching["標籤比對"]
         MI["標籤交集"]
         MS["標籤相似度"]
     end
-    
+
     subgraph AI["AI Agent"]
         R["推薦結果"]
     end
-    
+
     P --> Tags
     Tags --> MI
     MI --> MS
@@ -71,14 +71,14 @@ flowchart TB
 interface LocationTags {
     // 行政區（23區）
     ward: string;           // 'shinjuku', 'shibuya', 'taito', 'chiyoda'
-    
+
     // 微型區域（商圈/地段）
     micro_area: string[];   // ['shibuya_center', 'harajuku', 'omotesando']
-    
+
     // 站點隸屬（Hub/Spoke）
     hub_id: string;         // 'odpt:Station:JR-East.Shibuya'
     parent_hub: string;     // 歸屬的 Hub 站點
-    
+
     // 地理範圍（預計算邊界框）
     bounding_box: {
         min_lon: number;
@@ -86,7 +86,7 @@ interface LocationTags {
         max_lon: number;
         max_lat: number;
     };
-    
+
     // 相對位置描述
     relative_position: {
         near_station: boolean;      // 是否在車站周邊
@@ -128,13 +128,13 @@ WHERE location_tags IS NULL;
 interface CategoryTags {
     // 一級類別
     primary: 'dining' | 'shopping' | 'service' | 'attraction' | 'transit' | 'accommodation';
-    
+
     // 二級類別
     secondary: string;
-    
+
     // 詳細類別
     detailed: string;
-    
+
     // 營運特性
     characteristics: {
         is_chain: boolean;           // 是否連鎖店
@@ -143,7 +143,7 @@ interface CategoryTags {
         price_range: 1 | 2 | 3 | 4;  // 1=平價, 4=高價
         seating_capacity?: number;   // 座位數
     };
-    
+
     // 設施標籤（針對餐飲）
     dining_features?: {
         has_takeout: boolean;
@@ -183,22 +183,22 @@ interface CategoryTags {
 interface AtmosphereTags {
     // 核心氛圍標籤（最多 5 個）
     core: string[];
-    
+
     // 情境標籤
     context: string[];
-    
+
     // 風格標籤
     style: string[];
-    
+
     // 目標客群
     target_audience: string[];
-    
+
     // 特殊標籤
     special: string[];
-    
+
     // 相似地點 ID 列表（預計算）
     similar_ids: string[];
-    
+
     // 標籤置信度
     confidence: number;
 }
@@ -245,32 +245,32 @@ flowchart TD
     subgraph Input["輸入資料"]
         RAW["原始 L1 POI 資料\n50,000+ 筆"]
     end
-    
+
     subgraph Step1["Step 1: Location 標籤"]
         G1["地理編碼"]
         G2["匹配行政區"]
         G3["匹配站點 Hub/Spoke"]
         G4["計算相對位置"]
     end
-    
+
     subgraph Step2["Step 2: Category 標籤"]
         C1["解析 OSM Tags"]
         C2["對照 Category 表"]
         C3["識別連鎖品牌"]
         C4["設定價格區間"]
     end
-    
+
     subgraph Step3["Step 3: Atmosphere 標籤"]
         A1["關鍵詞匹配"]
         A2["品牌資料庫比對"]
         A3["LLM 分類 (批次)"]
         A4["相似度計算"]
     end
-    
+
     subgraph Output["輸出"]
         TAGGED["帶標籤的 POI\n存入資料庫"]
     end
-    
+
     RAW --> Step1
     Step1 --> Step2
     Step2 --> Step3
@@ -297,33 +297,33 @@ export async function batchGenerateLocationTags(
 ): Promise<{ processed: number; errors: number }> {
     let processed = 0;
     let errors = 0;
-    
+
     // 1. 獲取未標記的 POI
     const unprocessed = await db.query(`
-        SELECT id, station_id, location 
-        FROM l1_places 
+        SELECT id, station_id, location
+        FROM l1_places
         WHERE location_tags IS NULL
         LIMIT $1
     `, [batchSize]);
-    
+
     for (const poi of unprocessed) {
         try {
             // 2. 地理編碼與行政區匹配
             const ward = await findContainingWard(poi.location);
-            
+
             // 3. 站點 Hub/Spoke 匹配
             const station = await getNearestStation(poi.location);
             const hub = station.parent_hub_id || station.id;
-            
+
             // 4. 相對位置計算
             const nearStation = calculateDistance(poi.location, station.coordinates) < 500;
             const walkingMinutes = Math.round(
                 calculateDistance(poi.location, station.coordinates) / 80
             );
-            
+
             // 5. 微型區域識別
             const microAreas = await findNearbyMicroAreas(poi.location, 500);
-            
+
             // 6. 更新資料庫
             await db.query(`
                 UPDATE l1_places
@@ -338,14 +338,14 @@ export async function batchGenerateLocationTags(
                 walking_minutes: walkingMinutes,
                 station_exit: station.exit_info
             }, poi.id]);
-            
+
             processed++;
         } catch (error) {
             console.error(`Error processing POI ${poi.id}:`, error);
             errors++;
         }
     }
-    
+
     return { processed, errors };
 }
 ```
@@ -458,17 +458,17 @@ export async function batchGenerateAtmosphereTags(
         WHERE atmosphere_tags IS NULL
         LIMIT $1
     `, [batchSize]);
-    
+
     // 2. 批次生成標籤（每批 50 筆，避免 LLM API 過載）
     const batches = chunk(unprocessed, 50);
-    
+
     for (const batch of batches) {
         const prompt = buildAtmospherePrompt(batch);
         const response = await callLLM(prompt);
-        
+
         // 3. 解析 LLM 回應
         const results = parseLLMResponse(response);
-        
+
         // 4. 存入資料庫
         for (const result of results) {
             await db.query(`
@@ -477,7 +477,7 @@ export async function batchGenerateAtmosphereTags(
                 WHERE id = $2
             `, [result, result.id]);
         }
-        
+
         // 5. 避免 API 限流
         await sleep(1000);
     }
@@ -491,14 +491,14 @@ function buildAtmospherePrompt(pois: POI[]): string {
         tags: p.tags,
         description: p.description
     }));
-    
+
     return `
 你是東京旅遊專家。請為以下 ${pois.length} 個地點賦予氛圍標籤：
 
 ${JSON.stringify(poiList, null, 2)}
 
 可選標籤：
-- Core: traditional_culture, classical_architecture, modern_hip, retro_showa, 
+- Core: traditional_culture, classical_architecture, modern_hip, retro_showa,
         nature_zen, nightlife_entertainment, trendy_art, local_community
 - Context: pilgrimage, shopping_spree, food_hunt, photo_spot, family_friendly
 - Style: affordable_chain, luxury_dining, street_food, izakaya_alcohol
@@ -506,7 +506,7 @@ ${JSON.stringify(poiList, null, 2)}
 - Special: famous_landmark, historic_site, filming_location
 
 請以 JSON 格式回應：
-[{"id": "xxx", "core": ["traditional_culture"], "context": ["pilgrimage"], 
+[{"id": "xxx", "core": ["traditional_culture"], "context": ["pilgrimage"],
  "style": [], "target_audience": ["tourist"], "special": ["famous_landmark"]}]
     `.trim();
 }
@@ -528,28 +528,28 @@ DECLARE
 BEGIN
     -- 獲取目標 POI 標籤
     SELECT * INTO v_poi FROM l1_places WHERE id = p_poi_id;
-    
+
     -- 基於標籤計算相似度
     WITH similar AS (
-        SELECT 
+        SELECT
             l2.id,
             (
                 -- Core 標籤相似度 (50%)
-                (array_length((l1.atmosphere_tags->'core')::text[], 1) + 
+                (array_length((l1.atmosphere_tags->'core')::text[], 1) +
                  array_length((l2.atmosphere_tags->'core')::text[], 1) -
-                 array_length((l1.atmosphere_tags->'core'::text[] || 
-                               l2.atmosphere_tags->'core'::text[]) - 
-                              (l1.atmosphere_tags->'core'::text[] * 
+                 array_length((l1.atmosphere_tags->'core'::text[] ||
+                               l2.atmosphere_tags->'core'::text[]) -
+                              (l1.atmosphere_tags->'core'::text[] *
                                l2.atmosphere_tags->'core'::text[]), 1)
-                )::float / 
-                NULLIF(array_length((l1.atmosphere_tags->'core')::text[], 1) + 
+                )::float /
+                NULLIF(array_length((l1.atmosphere_tags->'core')::text[], 1) +
                        array_length((l2.atmosphere_tags->'core')::text[], 1), 0) * 0.5 +
-                
+
                 -- Category 標籤相似度 (30%)
                 CASE WHEN l1.category = l2.category THEN 0.3 ELSE 0 END +
-                
+
                 -- Location 標籤相似度 (20%)
-                CASE WHEN l1.location_tags->>'ward' = l2.location_tags->>'ward' 
+                CASE WHEN l1.location_tags->>'ward' = l2.location_tags->>'ward'
                      THEN 0.2 ELSE 0 END
             ) AS similarity
         FROM l1_places l1
@@ -562,7 +562,7 @@ BEGIN
     SELECT array_agg(id) INTO v_similar
     FROM similar
     WHERE similarity >= p_similarity_threshold;
-    
+
     -- 更新相似 POI 列表
     UPDATE l1_places
     SET atmosphere_tags = jsonb_set(
@@ -583,20 +583,20 @@ $$;
 
 ```sql
 -- 標籤索引
-CREATE INDEX idx_l1_places_location_tags 
+CREATE INDEX idx_l1_places_location_tags
 ON l1_places USING GIN(location_tags);
 
-CREATE INDEX idx_l1_places_category_tags 
+CREATE INDEX idx_l1_places_category_tags
 ON l1_places USING GIN(category_tags);
 
-CREATE INDEX idx_l1_places_atmosphere_core 
+CREATE INDEX idx_l1_places_atmosphere_core
 ON l1_places USING GIN(atmosphere_tags->'core');
 
-CREATE INDEX idx_l1_places_atmosphere_style 
+CREATE INDEX idx_l1_places_atmosphere_style
 ON l1_places USING GIN(atmosphere_tags->'style');
 
 -- 複合標籤查詢索引
-CREATE INDEX idx_l1_poi_tag_composite 
+CREATE INDEX idx_l1_poi_tag_composite
 ON l1_places (category, (location_tags->>'ward'))
 INCLUDE (name, name_i18n, location_tags, atmosphere_tags);
 ```
@@ -624,7 +624,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         l.id,
         l.name,
         l.category,
@@ -634,11 +634,11 @@ BEGIN
             -- 標籤匹配分數
             CASE WHEN p_ward IS NULL OR l.location_tags->>'ward' = p_ward THEN 1 ELSE 0 END +
             CASE WHEN p_category IS NULL OR l.category = p_category THEN 1 ELSE 0 END +
-            CASE WHEN p_core_tags IS NULL OR 
+            CASE WHEN p_core_tags IS NULL OR
                       l.atmosphere_tags->'core' && p_core_tags THEN 1 ELSE 0 END +
-            CASE WHEN p_style_tags IS NULL OR 
+            CASE WHEN p_style_tags IS NULL OR
                       l.atmosphere_tags->'style' && p_style_tags THEN 1 ELSE 0 END +
-            CASE WHEN p_target_audience IS NULL OR 
+            CASE WHEN p_target_audience IS NULL OR
                       l.atmosphere_tags->'target_audience' && p_target_audience THEN 1 ELSE 0 END
         ) AS relevance_score
     FROM l1_places l
@@ -663,10 +663,10 @@ async function recommendPois(
     userQuery: string,
     context: UserContext
 ): Promise<POIRecommendation[]> {
-    
+
     // 1. 解析使用者查詢為標籤
     const tags = parseQueryToTags(userQuery);
-    
+
     // 2. 標籤資料庫查詢（毫秒級）
     const pois = await db.query(`
         SELECT * FROM search_poi_by_tags(
@@ -686,13 +686,13 @@ async function recommendPois(
         tags.targetAudience,
         tags.maxPrice
     ]);
-    
+
     // 3. 如果標籤查詢結果不足，啟用相似 POI
     if (pois.length < 3 && tags.seedPoiId) {
         const similarPois = await getSimilarPois(tags.seedPoiId, 5);
         pois.push(...similarPois);
     }
-    
+
     // 4. 產生推薦理由
     return pois.map(poi => ({
         poi,
@@ -796,6 +796,6 @@ const results = await recommendPois(
 
 ---
 
-> **文件維護**: AI Architect Mode  
-> **版本歷史**: v1.0 (2026-01-07) 初始版本  
+> **文件維護**: AI Architect Mode
+> **版本歷史**: v1.0 (2026-01-07) 初始版本
 > **下次 Review**: 2026-01-21

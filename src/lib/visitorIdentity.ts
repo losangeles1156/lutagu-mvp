@@ -23,4 +23,3 @@ export function getVisitorIdFromRequest(request: Request) {
     const cookies = parseCookieHeader(request.headers.get('cookie'));
     return cookies.get(VISITOR_COOKIE_NAME) || null;
 }
-

@@ -23,7 +23,7 @@ class MetricsCollector {
     public recordRequest(source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge', responseTime: number, isCacheHit: boolean = false) {
         this.metrics.totalRequests++;
         this.metrics.totalResponseTime += responseTime;
-        
+
         if (source === 'template') this.metrics.templateHits++;
         if (source === 'algorithm') this.metrics.algorithmHits++;
         if (source === 'llm') this.metrics.llmRequests++;
@@ -50,7 +50,7 @@ class MetricsCollector {
         const snapshot = this.getSnapshot();
         const llmUsageRate = (snapshot.llmRequests / snapshot.totalRequests) * 100;
         console.log(`[Metrics] LLM Usage Rate: ${llmUsageRate.toFixed(1)}% | Cache Hit Rate: ${(snapshot.cacheHitRate * 100).toFixed(1)}%`);
-        
+
         if (llmUsageRate > 15) {
             console.warn(`[Alert] LLM usage rate exceeded 15%! Current: ${llmUsageRate.toFixed(1)}%`);
         }

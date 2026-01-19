@@ -9,7 +9,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function checkConsistency() {
     console.log('--- Data Consistency Verification Report ---');
-    
+
     // 1. Get sample of L4 data
     const { data: l4Samples, error: l4Error } = await supabase
         .from('l4_knowledge_embeddings')
@@ -56,7 +56,7 @@ async function checkConsistency() {
     console.log('\n--- Summary ---');
     console.log(`Successfully Synced (L1 & L4): ${matched}`);
     console.log(`Missing L1 (only L4 exists): ${missing}`);
-    
+
     if (missing > 0) {
         console.log('\nMissing L1 URLs (possibly from previous failed runs):');
         missingUrls.forEach(url => console.log(`- ${url}`));

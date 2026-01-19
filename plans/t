@@ -122,13 +122,13 @@ MapContainer.HubNodeLayer → filter(n => n.parent_hub_id === null)
 
 -- Step 1: 驗證當前狀態
 SELECT id, name->>'zh-TW' as name, ward_id, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id = 'odpt:Station:JR-East.Ikebukuro'
    OR id = 'odpt:Station:TokyoMetro.Ikebukuro';
 
 -- Step 2: 修正豐島區的定義
 -- 確保 JR 池袋站正確設置為 Hub，隸屬豐島區
-UPDATE nodes 
+UPDATE nodes
 SET ward_id = 'ward:toshima', is_hub = true, parent_hub_id = NULL
 WHERE id = 'odpt:Station:JR-East.Ikebukuro';
 
@@ -141,7 +141,7 @@ WHERE id = 'odpt:Station:JR-East.Ikebukuro';
 
 -- Step 4: 驗證板橋區的正確節點
 SELECT id, name->>'zh-TW' as name
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:itabashi'
 ORDER BY name->>'zh-TW';
 ```
@@ -152,24 +152,24 @@ ORDER BY name->>'zh-TW';
 
 ```sql
 -- 驗證千代田區的主要樞紐站
-SELECT 
-    id, 
-    name->>'zh-TW' as name, 
-    is_hub, 
+SELECT
+    id,
+    name->>'zh-TW' as name,
+    is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:chiyoda'
   AND (is_hub = true OR parent_hub_id IS NOT NULL)
 ORDER BY name->>'zh-TW';
 
 -- 修正東京站及其子站的父子關係
 -- JR 東京站是 Hub
-UPDATE nodes 
+UPDATE nodes
 SET is_hub = true, parent_hub_id = NULL
 WHERE id = 'odpt:Station:JR-East.Tokyo';
 
 -- 東京 Metro 大手町站是 JR 東京站的子站
-UPDATE nodes 
+UPDATE nodes
 SET parent_hub_id = 'odpt:Station:JR-East.Tokyo'
 WHERE id = 'odpt:Station:TokyoMetro.Otemachi'
    OR id = 'odpt:Station:TokyoMetro.Chiyoda.Otemachi'
@@ -177,7 +177,7 @@ WHERE id = 'odpt:Station:TokyoMetro.Otemachi'
 
 -- 驗證銀座線和日比谷線的核心站
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id IN (
     'odpt:Station:TokyoMetro.Ginza',
     'odpt:Station:TokyoMetro.Hibiya',
@@ -215,14 +215,14 @@ CREATE TABLE nodes_backup AS SELECT * FROM nodes WHERE is_hub = true;
 ```typescript
 const visibleNodes = useMemo(() => {
     if (!nodes || nodes.length === 0) return [];
-    
+
     // 在 Ward 模式下，顯示所有該行政區的 Hub
     // 考慮加入一個參數來控制是否嚴格隱藏子節點
     return nodes.filter(n => {
         // 顯示條件：
         // 1. 是 Hub (is_hub = true, parent_hub_id = null)
         // 2. 或者是該行政區的主要站點（需要額外的邏輯判斷）
-        return n.parent_hub_id === null || 
+        return n.parent_hub_id === null ||
                (n.is_hub === true && n.parent_hub_id === null);
     });
 }, [nodes]);
@@ -236,7 +236,7 @@ const visibleNodes = useMemo(() => {
 ```sql
 -- 檢查豐島區的 Hub 站點
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:toshima'
   AND is_hub = true
 ORDER BY name->>'zh-TW';
@@ -250,7 +250,7 @@ ORDER BY name->>'zh-TW';
 ```sql
 -- 檢查板橋區的 Hub 站點（不應包含池袋站）
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:itabashi'
   AND is_hub = true
 ORDER BY name->>'zh-TW';
@@ -265,7 +265,7 @@ ORDER BY name->>'zh-TW';
 ```sql
 -- 檢查千代田區的主要 Hub
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:chiyoda'
   AND is_hub = true
 ORDER BY name->>'zh-TW';

@@ -11,11 +11,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function checkHierarchy() {
     console.log('--- Database Hierarchy Audit ---');
-    
+
     const { count: totalHierarchy, error: countError } = await supabase
         .from('node_hierarchy')
         .select('*', { count: 'exact', head: true });
-        
+
     if (countError) {
         console.error('Error counting node_hierarchy:', countError);
         return;
@@ -26,14 +26,14 @@ async function checkHierarchy() {
         .from('node_hierarchy')
         .select('*', { count: 'exact', head: true })
         .eq('is_active', true);
-        
+
     console.log('Active entries in node_hierarchy:', activeHierarchy);
 
     const { data: sampleHierarchy, error: sampleError } = await supabase
         .from('node_hierarchy')
         .select('*')
         .limit(5);
-        
+
     console.log('Sample hierarchy:', JSON.stringify(sampleHierarchy, null, 2));
 
     // Check if some major stations are missing from node_hierarchy or inactive

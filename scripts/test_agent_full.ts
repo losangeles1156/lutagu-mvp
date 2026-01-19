@@ -59,7 +59,7 @@ async function testSystemHealth() {
         const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Supabase Timeout')), 5000));
         const dbPromise = supabase.from('odpt_stations').select('count', { count: 'exact', head: true });
-        
+
         await Promise.race([dbPromise, timeoutPromise]);
         log('HEALTH', 'Supabase Connection (DB)', 'PASS');
     } catch (e) {
@@ -79,7 +79,7 @@ async function testSystemHealth() {
                     max_tokens: 1
                 })
             }, 5000); // 5s timeout
-            
+
             if (res.ok) log('HEALTH', 'Mistral AI API Connection', 'PASS');
             else log('HEALTH', `Mistral AI API Error: ${res.status} ${res.statusText}`, 'FAIL');
         }
@@ -103,10 +103,10 @@ async function testSystemHealth() {
 
             for (const modelName of candidates) {
                 if (success) break;
-                
+
                 log('HEALTH', `Trying Gemini Model: ${modelName}...`, 'INFO');
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-                
+
                 const payload = {
                     contents: [{ parts: [{ text: "ping" }] }],
                     generationConfig: { maxOutputTokens: 1 }
@@ -151,7 +151,7 @@ async function testCoreFunctions() {
     try {
         const registry = ToolRegistry.getInstance();
         registerStandardTools();
-        
+
         const tools = [
             { id: 'fare_calculator', level: AgentLevel.L2_LIVE },
             { id: 'facility_search', level: AgentLevel.L3_FACILITY },
@@ -180,7 +180,7 @@ async function testCoreFunctions() {
                 origin: "Tokyo",
                 destination: "Shinjuku",
                 ticketType: "IC"
-            }, { 
+            }, {
                 userId: "test-user",
                 sessionId: "test-session",
                 // agentLevel: "L2" // Removing unknown property to fix linter error
@@ -236,24 +236,24 @@ async function testPressureAndEdge() {
     // 5. Pressure Tests
     try {
         log('PRESSURE', 'Starting Pressure & Edge Tests...', 'INFO');
-        
+
         // Concurrent Requests (Simulate 20 tool calls)
         const start = Date.now();
         const promises = [];
         const fareTool = registry.getTool('fare_calculator');
-        
+
         if (fareTool) {
             for (let i = 0; i < 20; i++) {
-                promises.push(fareTool.execute({ 
-                    origin: "Tokyo", 
-                    destination: "Shinjuku", 
-                    ticketType: "IC" 
-                }, { 
-                    userId: "stress-test", 
+                promises.push(fareTool.execute({
+                    origin: "Tokyo",
+                    destination: "Shinjuku",
+                    ticketType: "IC"
+                }, {
+                    userId: "stress-test",
                     sessionId: `session-${i}`
                 } as any));
             }
-            
+
             await Promise.all(promises);
             const duration = Date.now() - start;
             log('PRESSURE', `Executed 20 concurrent tool calls in ${duration}ms`, 'PASS');
@@ -278,7 +278,7 @@ async function testPressureAndEdge() {
 async function run() {
     log('INIT', 'Lutagu Agent Test Suite v1.0');
     log('INIT', `Time: ${new Date().toISOString()}`);
-    
+
     await testSystemHealth();
     await testCoreFunctions();
     await testPressureAndEdge();
@@ -308,7 +308,7 @@ ${failures.length === 0 ? 'System is ready for MVP deployment.' : 'System has cr
     fs.writeFileSync('TEST_REPORT.md', reportContent);
     console.log('\n--- Test Complete ---');
     console.log(`Report generated at ${path.resolve('TEST_REPORT.md')}`);
-    
+
     if (failures.length > 0) process.exit(1);
 }
 

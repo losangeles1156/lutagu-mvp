@@ -35,14 +35,14 @@ export async function POST(request: Request) {
                 // L3 ID strategy: unique per station + osm_id
                 // Use a synthetic ID or rely on osm_id unique constraint?
                 // Let's rely on standard ID but store OSM info in attributes if needed.
-                // Actually, for upsert we need a unique constraint. 
+                // Actually, for upsert we need a unique constraint.
                 // We'll use osm_id if available, but l3_facilities PK is UUID.
                 // So we should query first or use a unique composite key?
                 // Simpler: Just delete old ones? No, expensive.
                 // Better: Add `osm_id` column to l3_facilities if strict upsert needed.
                 // CURRENT SCHEMA: `id` (uuid), `station_id`, `type`, `name_i18n`, `attributes`...
-                // Lacking `osm_id`. I should assume `attributes` stores osm_id for check, 
-                // OR just append. 
+                // Lacking `osm_id`. I should assume `attributes` stores osm_id for check,
+                // OR just append.
                 // WAIT. Schema `003` I created DOES NOT have `osm_id` column explicitly.
                 // I should add it or use `attributes->>'osm_id'`.
 

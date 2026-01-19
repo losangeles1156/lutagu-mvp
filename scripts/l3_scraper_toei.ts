@@ -57,21 +57,21 @@ async function fetchPageContent(url: string): Promise<string> {
 async function extractFacilities(text: string, operator: string) {
     const prompt = `
     You are a data extraction AI. Extract station facility information from the scraping text (Toei Subway website).
-    
+
     Target Operator: ${operator}
-    
+
     Extract strictly as JSON array of objects:
     - type: "elevator", "escalator", "toilet", "barrier_free_entrance", "waiting_room"
     - name_ja: Short descriptive name (e.g. "改札内エレベーター")
     - name_en: English name or null
     - location_desc: Location text found (e.g. "A1出口付近")
     - attributes: JSON object (e.g. { "count": 2, "wheelchair": true })
-    
+
     Rules:
     - Toei pages list counts (e.g. "エスカレーター : 6台"). Capture this in attributes.count.
     - If specific locations aren't listed, generic "Station Facility" is okay.
     - Look for "バリアフリー設備" section.
-    
+
     Input:
     ${text}
     `;

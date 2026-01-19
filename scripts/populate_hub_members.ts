@@ -1,7 +1,7 @@
 /**
  * Populate Hub Members Script
- * 
- * 將 src/lib/constants/stationLines.ts 中的 HUB_STATION_MEMBERS 
+ *
+ * 將 src/lib/constants/stationLines.ts 中的 HUB_STATION_MEMBERS
  * 導入到 Supabase 的 hub_station_members 資料表
  */
 

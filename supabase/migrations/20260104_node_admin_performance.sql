@@ -33,12 +33,12 @@ CREATE INDEX idx_l1_places_osm ON l1_places(osm_id);
 
 -- 只索引已批准的記錄（前端查詢常用）
 DROP INDEX IF EXISTS idx_l1_config_approved;
-CREATE INDEX idx_l1_config_approved ON node_l1_config(node_id, category, display_order) 
+CREATE INDEX idx_l1_config_approved ON node_l1_config(node_id, category, display_order)
 WHERE is_approved = TRUE;
 
 -- 只索引激活的節點
 DROP INDEX IF EXISTS idx_node_hierarchy_active_nodes;
-CREATE INDEX idx_node_hierarchy_active_nodes ON node_hierarchy(node_id, hub_id) 
+CREATE INDEX idx_node_hierarchy_active_nodes ON node_hierarchy(node_id, hub_id)
 WHERE is_active = TRUE;
 
 -- ============================================
@@ -47,7 +47,7 @@ WHERE is_active = TRUE;
 
 -- 讓 v_l1_pending 查詢只需掃描索引
 DROP INDEX IF EXISTS idx_l1_pending_covering;
-CREATE INDEX idx_l1_pending_covering ON node_l1_config(node_id, category, source_id) 
+CREATE INDEX idx_l1_pending_covering ON node_l1_config(node_id, category, source_id)
 INCLUDE (is_approved, is_featured, notes)
 WHERE is_approved = FALSE OR is_approved IS NULL;
 
@@ -57,14 +57,14 @@ WHERE is_approved = FALSE OR is_approved IS NULL;
 
 DROP MATERIALIZED VIEW IF EXISTS mv_l1_stats_cache;
 CREATE MATERIALIZED VIEW mv_l1_stats_cache AS
-SELECT 
+SELECT
     node_id,
     category,
     COUNT(*) FILTER (WHERE is_approved = TRUE) AS approved_count,
     COUNT(*) FILTER (WHERE is_approved = FALSE OR is_approved IS NULL) AS pending_count,
     COUNT(*) AS total_count,
     ROUND(
-        COUNT(*) FILTER (WHERE is_approved = TRUE)::NUMERIC / 
+        COUNT(*) FILTER (WHERE is_approved = TRUE)::NUMERIC /
         NULLIF(COUNT(*), 0) * 100, 2
     ) AS approval_rate_percent,
     NOW() AS cached_at
@@ -92,19 +92,19 @@ COMMENT ON FUNCTION refresh_l1_stats_cache IS '刷新統計緩存';
 
 DROP VIEW IF EXISTS v_l1_quick_stats;
 CREATE VIEW v_l1_quick_stats AS
-SELECT 
+SELECT
     'total' AS stat_type,
     (SELECT COUNT(*) FROM node_l1_config) AS value
 UNION ALL
-SELECT 
+SELECT
     'pending' AS stat_type,
     (SELECT COUNT(*) FROM node_l1_config WHERE is_approved = FALSE OR is_approved IS NULL) AS value
 UNION ALL
-SELECT 
+SELECT
     'approved' AS stat_type,
     (SELECT COUNT(*) FROM node_l1_config WHERE is_approved = TRUE) AS value
 UNION ALL
-SELECT 
+SELECT
     'stations' AS stat_type,
     (SELECT COUNT(DISTINCT node_id) FROM node_l1_config) AS value;
 
@@ -132,7 +132,7 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     WITH filtered AS (
-        SELECT 
+        SELECT
             l1.id,
             l1.station_id AS node_id,
             l1.name,
@@ -142,14 +142,14 @@ BEGIN
             c.is_featured,
             c.notes
         FROM l1_places l1
-        LEFT JOIN node_l1_config c ON l1.station_id = c.node_id 
+        LEFT JOIN node_l1_config c ON l1.station_id = c.node_id
             AND c.source_id = l1.id::TEXT
             AND c.source_table = 'l1_places'
         WHERE (p_node_id IS NULL OR l1.station_id = p_node_id)
             AND (p_category IS NULL OR l1.category = p_category)
             AND (c.is_approved IS NULL OR c.is_approved = FALSE)
     )
-    SELECT 
+    SELECT
         f.*,
         COUNT(*) OVER () AS total_count
     FROM filtered f
@@ -175,10 +175,10 @@ DECLARE
     v_start_time TIMESTAMPTZ;
 BEGIN
     v_start_time := NOW();
-    
+
     -- 使用數組進行批量更新（比逐條更新快 10-100 倍）
     UPDATE node_l1_config
-    SET 
+    SET
         is_approved = TRUE,
         approved_at = NOW(),
         notes = p_notes,
@@ -186,9 +186,9 @@ BEGIN
     WHERE source_id = ANY(p_place_ids)
     AND source_table = 'l1_places'
     AND (is_approved = FALSE OR is_approved IS NULL);
-    
+
     GET DIAGNOSTICS v_count = ROW_COUNT;
-    
+
     RETURN json_build_object(
         'success', TRUE,
         'approved_count', v_count,
@@ -205,13 +205,13 @@ COMMENT ON FUNCTION batch_approve_places_optimized IS '優化的批量批准函�
 
 DROP VIEW IF EXISTS v_l1_top_stations;
 CREATE VIEW v_l1_top_stations AS
-SELECT 
+SELECT
     node_id,
     total_count,
     approved_count,
     pending_count,
     approval_rate_percent,
-    CASE 
+    CASE
         WHEN approval_rate_percent >= 80 THEN 'high'
         WHEN approval_rate_percent >= 50 THEN 'medium'
         ELSE 'low'
@@ -226,7 +226,7 @@ ORDER BY pending_count DESC;
 
 DROP VIEW IF EXISTS v_l1_approval_progress;
 CREATE VIEW v_l1_approval_progress AS
-SELECT 
+SELECT
     c.node_id,
     n.name AS station_name,
     COUNT(DISTINCT c.category) AS total_categories,
@@ -250,16 +250,16 @@ DECLARE
     v_function_count INTEGER;
     v_view_count INTEGER;
 BEGIN
-    SELECT COUNT(*) INTO v_index_count FROM pg_indexes 
+    SELECT COUNT(*) INTO v_index_count FROM pg_indexes
     WHERE tablename IN ('node_l1_config', 'node_hierarchy', 'l1_places')
     AND indexname LIKE 'idx_%';
-    
-    SELECT COUNT(*) INTO v_function_count FROM pg_proc 
+
+    SELECT COUNT(*) INTO v_function_count FROM pg_proc
     WHERE proname LIKE 'l1_%' OR proname LIKE '%l1%';
-    
-    SELECT COUNT(*) INTO v_view_count FROM pg_views 
+
+    SELECT COUNT(*) INTO v_view_count FROM pg_views
     WHERE viewname LIKE 'v_l1_%' OR viewname LIKE 'mv_l1_%';
-    
+
     RAISE NOTICE '======================================';
     RAISE NOTICE 'Phase 3 性能優化完成';
     RAISE NOTICE '======================================';

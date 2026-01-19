@@ -93,9 +93,9 @@ async function main() {
         // Step 3: Get Tables and Column Types from Source
         console.log('\n--- Step 3: Fetching Schema Info ---');
         const tablesRes = await sourceClient.query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
       AND table_type = 'BASE TABLE'
     `);
         const tables = tablesRes.rows.map(r => r.table_name).filter(t => t !== 'spatial_ref_sys');
@@ -141,7 +141,7 @@ async function main() {
 
             console.log(`  Writing ${rows.length} rows to ${table}...`);
 
-            // Get column order based on the first row or just use schema map keys that exist in row? 
+            // Get column order based on the first row or just use schema map keys that exist in row?
             // Better to use keys from the row object to ensure alignment
             const sampleRow = rows[0];
             const cols = Object.keys(sampleRow);

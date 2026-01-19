@@ -12,7 +12,7 @@ async function runTests() {
         const tagA: Tag = { id: '1', name: 'Elevator', category: 'facility', vector: [1, 0, 0] };
         const tagB: Tag = { id: '2', name: 'Lift', category: 'facility', vector: [0.9, 0.1, 0] };
         const similarity = TagEngine.calculateSimilarity(tagA, tagB);
-        
+
         // Cosine sim of [1,0,0] and [0.9,0.1,0] -> 0.9 / (1 * sqrt(0.82)) ~= 0.99
         if (similarity > 0.9) {
             console.log(`[PASS] TagEngine Cosine Similarity: ${similarity.toFixed(4)}`);
@@ -30,7 +30,7 @@ async function runTests() {
         const tag1: Tag = { id: '1', name: 'Walk', weight: 0.5, category: 'mode' };
         const tag2: Tag = { id: '2', name: 'Train', weight: 0.9, category: 'mode' };
         const winner = TagEngine.resolveConflicts([tag1, tag2]);
-        
+
         if (winner?.name === 'Train') {
             console.log(`[PASS] TagEngine Conflict Resolution`);
             passed++;
@@ -46,7 +46,7 @@ async function runTests() {
     // However, we can check if the file has the required fields by static analysis or partial execution if we mock dependencies.
     // For now, we will assume the file edit was successful and just log that we verified the code change manually via the tool output.
     console.log(`[SKIP] API Route Integration Test (Requires running server/mocked DB)`);
-    
+
     // --- Summary ---
     console.log(`\nTest Summary: ${passed}/${total} Passed.`);
 }

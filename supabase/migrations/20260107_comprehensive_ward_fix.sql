@@ -1,6 +1,6 @@
 -- =============================================================================
 -- 全面行政區車站節點修復
--- 
+--
 -- 需求：
 -- 1. 機場區域作為獨立區域，不受行政區選擇影響
 -- 2. 檢查所有行政區的節點完整性
@@ -13,24 +13,24 @@
 -- =============================================================================
 
 -- Step 1: 確認機場節點的 ward_id 和圖示設置
-SELECT 
+SELECT
     '=== 機場節點檢查 ===' as section,
-    id, 
-    name->>'zh-TW' as name, 
-    ward_id, 
+    id,
+    name->>'zh-TW' as name,
+    ward_id,
     is_hub,
     mapDesign,
     facility_profile
-FROM nodes 
-WHERE id LIKE '%Airport%' 
+FROM nodes
+WHERE id LIKE '%Airport%'
    OR id LIKE '%airport%'
    OR name->>'zh-TW' LIKE '%機場%'
 ORDER BY id;
 
 -- Step 2: 確保機場節點的 ward_id 為 'ward:airport'
-UPDATE nodes 
+UPDATE nodes
 SET ward_id = 'ward:airport'
-WHERE id LIKE '%Airport%' 
+WHERE id LIKE '%Airport%'
    OR id LIKE '%airport%'
    OR name->>'zh-TW' LIKE '%機場%';
 
@@ -39,20 +39,20 @@ WHERE id LIKE '%Airport%'
 -- =============================================================================
 
 -- Step 3: 檢查所有行政區的節點數量
-SELECT 
+SELECT
     '=== 各行政區節點數量 ===' as section,
     ward_id,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id IS NOT NULL
 GROUP BY ward_id
 ORDER BY ward_id;
 
 -- Step 4: 檢查節點為空或數量過少的行政區
-SELECT 
+SELECT
     '=== 需要修復的行政區 ===' as section,
     w.id as ward_id,
     w.name_i18n->>'zh-TW' as ward_name,
@@ -68,52 +68,52 @@ ORDER BY node_count NULLS FIRST;
 -- =============================================================================
 
 -- Step 5: 中野區節點檢查
-SELECT 
+SELECT
     '=== 中野區節點檢查 ===' as section,
-    id, 
-    name->>'zh-TW' as name, 
-    is_hub, 
+    id,
+    name->>'zh-TW' as name,
+    is_hub,
     parent_hub_id,
     ward_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:nakano'
 ORDER BY name->>'zh-TW';
 
 -- Step 6: 練馬區節點檢查
-SELECT 
+SELECT
     '=== 練馬區節點檢查 ===' as section,
-    id, 
-    name->>'zh-TW' as name, 
-    is_hub, 
+    id,
+    name->>'zh-TW' as name,
+    is_hub,
     parent_hub_id,
     ward_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:nerima'
 ORDER BY name->>'zh-TW';
 
 -- Step 7: 查找可能屬於中野區但 ward_id 設置錯誤的節點
-SELECT 
+SELECT
     '=== 可能屬於中野區的節點 ===' as section,
     id,
     name->>'zh-TW' as name,
     ward_id,
     is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE name->>'zh-TW' LIKE '%中野%'
    OR name->>'en' ILIKE '%nakano%'
    OR name->>'ja' LIKE '%中野%'
 ORDER BY name->>'zh-TW';
 
 -- Step 8: 查找可能屬於練馬區但 ward_id 設置錯誤的節點
-SELECT 
+SELECT
     '=== 可能屬於練馬區的節點 ===' as section,
     id,
     name->>'zh-TW' as name,
     ward_id,
     is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE name->>'zh-TW' LIKE '%練馬%'
    OR name->>'en' ILIKE '%nerima%'
    OR name->>'ja' LIKE '%練馬%'
@@ -176,56 +176,56 @@ WHERE n.id = s.node_id AND s.ward_id = 'ward:nerima';
 -- =============================================================================
 
 -- Step 12: 驗證所有行政區節點數量
-SELECT 
+SELECT
     '=== 修復後各行政區節點數量 ===' as section,
     ward_id,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id IS NOT NULL
 GROUP BY ward_id
 ORDER BY ward_id;
 
 -- Step 13: 驗證機場節點
-SELECT 
+SELECT
     '=== 機場節點驗證 ===' as section,
-    id, 
-    name->>'zh-TW' as name, 
-    ward_id, 
+    id,
+    name->>'zh-TW' as name,
+    ward_id,
     is_hub
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:airport'
 ORDER BY id;
 
 -- Step 14: 驗證中野區
-SELECT 
+SELECT
     '=== 中野區驗證 ===' as section,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:nakano';
 
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:nakano'
 ORDER BY name->>'zh-TW';
 
 -- Step 15: 驗證練馬區
-SELECT 
+SELECT
     '=== 練馬區驗證 ===' as section,
     COUNT(*) FILTER (WHERE is_hub = true) as hub_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NOT NULL) as child_count,
     COUNT(*) FILTER (WHERE is_hub = false AND parent_hub_id IS NULL) as standalone_count,
     COUNT(*) as total
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:nerima';
 
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE ward_id = 'ward:nerima'
 ORDER BY name->>'zh-TW';
 

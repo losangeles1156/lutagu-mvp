@@ -108,7 +108,7 @@ const THROUGH_SERVICE_PRIMARY_OPERATOR: Record<string, string> = {
     'denenchofu': 'Tokyu',
     'kikuna': 'Tokyu',
 
-    // Tokyo Metro <-> Seibu through-service  
+    // Tokyo Metro <-> Seibu through-service
     'kotakemukaihara': 'TokyoMetro',
     'nerimakasugacho': 'TokyoMetro',
 
@@ -486,14 +486,14 @@ export async function GET(req: Request) {
                     return false;
                 }
             }
-    
+
             if (coreOnly) {
                 const isAirport = n.ward_id === 'ward:airport';
                 const isCoreWard = n.ward_id && [
-                    'ward:chiyoda', 'ward:chuo', 'ward:minato', 'ward:shinjuku', 'ward:bunkyo', 
+                    'ward:chiyoda', 'ward:chuo', 'ward:minato', 'ward:shinjuku', 'ward:bunkyo',
                     'ward:taito', 'ward:sumida', 'ward:koto', 'ward:shinagawa', 'ward:meguro', 'ward:shibuya'
                 ].includes(n.ward_id);
-                
+
                 // Keep if Airport, Core Ward, or Unknown (FAIL OPEN)
                 if (!isAirport && !isCoreWard && n.ward_id) {
                     return false;
@@ -519,7 +519,7 @@ export async function GET(req: Request) {
     // The previous logic for supplementalSeed was causing zombie nodes and is removed.
     const supplementalSeed: any[] = [];
 
-    // If source is supabase, filteredBase contains our DB nodes. 
+    // If source is supabase, filteredBase contains our DB nodes.
     // If source is fallback, filteredBase contains fallback nodes (assigned to candidates earlier).
     // The previous logic was double-dipping or force-injecting seeds.
     // However, checking the logic above:
@@ -599,7 +599,7 @@ export async function GET(req: Request) {
     const uniqueNodes = [];
     const seenCoords = new Set<string>();
 
-    // Priority sorting: 
+    // Priority sorting:
     // 1. Hubs always win over non-hubs
     // 2. Nodes with more complete metadata win (using ID length as proxy)
     const sortedNodes = [...limitedNodes].sort((a: any, b: any) => {

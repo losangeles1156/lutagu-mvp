@@ -16,7 +16,7 @@ declare
   center_point geometry;
 begin
   center_point := ST_SetSRID(ST_MakePoint(center_lon, center_lat), 4326);
-  
+
   return query
   select f.*
   from facilities f
@@ -39,7 +39,7 @@ declare
   center_point geometry;
 begin
   center_point := ST_SetSRID(ST_MakePoint(center_lon, center_lat), 4326);
-  
+
   return query
   select n.*
   from nodes n

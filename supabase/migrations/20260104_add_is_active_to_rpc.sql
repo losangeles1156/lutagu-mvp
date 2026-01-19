@@ -113,10 +113,10 @@ grant execute on function public.nearby_nodes(float, float, int) to anon;
 grant execute on function public.nearby_nodes(float, float, int) to authenticated;
 
 -- Verify the migration
-select 
+select
   'nearby_nodes_v2' as function_name,
   pg_get_functionresult('public.nearby_nodes_v2(float,float,int,int)'::regprocedure) as signature
 union all
-select 
+select
   'nearby_nodes',
   pg_get_functionresult('public.nearby_nodes(float,float,int)'::regprocedure);

@@ -27,7 +27,7 @@ async function inspectTable() {
         const row = data[0];
         console.log('Sample Row Keys:', Object.keys(row));
         console.log('Sample Row Data:', row);
-        
+
         // Check types of specific columns
         console.log('Type of distance_meters:', typeof row.distance_meters);
     } else {

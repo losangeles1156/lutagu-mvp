@@ -28,14 +28,14 @@ async function analyzeStations() {
     console.log('-'.repeat(40));
 
     const operators = ['JR-East', 'TokyoMetro', 'Toei', 'Tokyu', 'Keio', 'Odakyu', 'Seibu', 'Tobu', 'Keisei', 'Yurikomo', 'TWR', 'Mitsubishi', 'Keikyu', 'Keisei'];
-    
+
     for (const op of operators) {
         const { count } = await supabase
             .from('nodes')
             .select('*', { count: 'exact', head: true })
             .like('id', `odpt.Station:${op}.%`)
             .eq('is_active', true);
-        
+
         if (count && count > 0) {
             console.log(`${op.padEnd(15)}: ${count} stations`);
         }

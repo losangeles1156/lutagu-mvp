@@ -66,7 +66,7 @@ async function checkHubsByWard() {
     for (const [wardId, wardHubs] of Object.entries(hubsByWard)) {
         console.log(`\n${wardNames[wardId] || wardId} (${wardId}): ${wardHubs.length} hubs`);
         for (const hub of wardHubs) {
-            const name = typeof hub.name === 'object' 
+            const name = typeof hub.name === 'object'
                 ? (hub.name['zh-TW'] || hub.name['ja'] || hub.name['en'] || hub.id)
                 : (hub.name || hub.id);
             console.log(`  - ${name} (${hub.id})`);
@@ -77,7 +77,7 @@ async function checkHubsByWard() {
         console.log('\n--- Hubs without Ward Assignment ---');
         console.log(`Total: ${hubsWithoutWard.length}`);
         for (const hub of hubsWithoutWard) {
-            const name = typeof hub.name === 'object' 
+            const name = typeof hub.name === 'object'
                 ? (hub.name['zh-TW'] || hub.name['ja'] || hub.name['en'] || hub.id)
                 : (hub.name || hub.id);
             console.log(`  - ${name} (${hub.id})`);

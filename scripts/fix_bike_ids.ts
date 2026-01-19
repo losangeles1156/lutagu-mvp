@@ -52,7 +52,7 @@ async function fixIds() {
                 });
             } else {
                 // If invalid, maybe delete? Or just log.
-                // For now, let's delete them to clean up dashboard? 
+                // For now, let's delete them to clean up dashboard?
                 // Or just leave them broken. Let's leave them.
                 // Actually, if we leave them, the loop will find them again! infinite loop.
                 // We MUST skip them in next query or delete them.

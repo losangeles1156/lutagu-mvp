@@ -211,10 +211,10 @@
 ```typescript
 interface LocationDNA {
   node_id: string;
-  
+
   // AI 人格化描述
   persona_description: LocalizedText;
-  
+
   // 主類別密度分佈（正規化）
   category_vector: {
     dining: number;
@@ -223,17 +223,17 @@ interface LocationDNA {
     culture: number;
     // ... 其他類別
   };
-  
+
   // 特色標籤（Vibe Tags）
   vibe_tags: {
     tag: string;                  // 'budget_hotel_hub'
     display_name: LocalizedText;  // '平價住宿集散地'
     confidence: number;           // 0.88
   }[];
-  
+
   // 詳細類別結構
   categories: L1_Category[];
-  
+
   calculated_at: Date;
 }
 ```
@@ -265,11 +265,11 @@ interface L1_POI {
   distance_meters: number;
   coordinates: { lat: number; lng: number; };
   google_maps_url: string;       // 導航連結
-  
+
   // 營業資訊
   opening_hours?: string;
   opening_hours_display?: LocalizedText;
-  
+
   // 可選資訊
   rating?: number;
   price_range?: 'budget' | 'moderate' | 'expensive';
@@ -297,7 +297,7 @@ interface L1_POI {
 interface L2_LiveStatus {
   node_id: string;
   updated_at: Date;
-  
+
   // 列車運行情報
   transit: {
     lines: {
@@ -313,7 +313,7 @@ interface L2_LiveStatus {
       }[];
     }[];
   };
-  
+
   // 天氣狀況
   weather: {
     temperature: number;
@@ -331,7 +331,7 @@ interface L2_LiveStatus {
       issued_at: Date;
     }[];
   };
-  
+
   // 人潮狀況（MVP：用戶回報）
   crowding: {
     // 用戶回報統計
@@ -451,15 +451,15 @@ interface L2_LiveStatus {
 interface ExternalServiceLink {
   id: string;
   type: 'locker' | 'ecbo_cloak' | 'bike_share' | 'vacan' | 'taxi';
-  
+
   // 顯示資訊
   name: LocalizedText;
   icon: string;
   description: LocalizedText;
-  
+
   // 連結
   url: string;
-  
+
   // 追蹤用
   tracking_id: string;
 }
@@ -511,20 +511,20 @@ const EXTERNAL_SERVICES: ExternalServiceLink[] = [
 interface L3_ServiceFacilities {
   node_id: string;
   updated_at: Date;
-  
+
   // Section A：車站設施
   station_facilities: L3_Facility[];
-  
+
   // Section B：外部服務連結（MVP）
   external_links: ExternalServiceLink[];
-  
+
   // 無障礙評分（綜合）
   accessibility_score: {
     wheelchair: 'full' | 'partial' | 'limited' | 'none';
     stroller: 'full' | 'partial' | 'limited' | 'none';
     visual_impairment: 'full' | 'partial' | 'limited' | 'none';
   };
-  
+
   // 未來擴展：周邊店家設施
   // nearby_facilities?: L3_NearbyFacility[];
 }
@@ -536,7 +536,7 @@ interface L3_Facility {
   location: LocalizedText;       // 相對位置「北口剪票口外左側」
   floor?: string;
   exit?: string;
-  
+
   attributes: {
     accessible_floors?: string[];
     wheelchair_ok?: boolean;
@@ -557,7 +557,7 @@ interface LinkClickEvent {
   node_id: string;
   link_type: string;
   tracking_id: string;
-  
+
   // 用於分析需求優先級
   // 點擊率高 → 優先整合 API
 }
@@ -603,7 +603,7 @@ interface LinkClickEvent {
 ```typescript
 interface ExpertKnowledge {
   id: string;
-  
+
   trigger: {
     station_ids?: string[];
     line_ids?: string[];
@@ -611,7 +611,7 @@ interface ExpertKnowledge {
     user_states?: string[];
     time_patterns?: string[];
   };
-  
+
   type: 'warning' | 'tip' | 'route_advice' | 'ticket_advice' | 'timing';
   icon: string;
   title: LocalizedText;
@@ -662,12 +662,12 @@ interface UserPreferences {
     visual_impairment: boolean;
     elderly: boolean;
   };
-  
+
   luggage: {
     large_luggage: boolean;
     multiple_bags: boolean;
   };
-  
+
   travel_style: {
     rushing: boolean;
     budget: boolean;
@@ -675,7 +675,7 @@ interface UserPreferences {
     avoid_crowd: boolean;
     avoid_rain: boolean;
   };
-  
+
   companions: {
     with_children: boolean;
     family_trip: boolean;

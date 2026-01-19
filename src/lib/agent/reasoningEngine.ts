@@ -125,7 +125,7 @@ Output JSON only.`,
     /**
      * Phase 2: Brain (MiniMax M2.1)
      * Performs Interleaved Thinking and decides Tool Calls.
-     * 
+     *
      * Strategy:
      * - We feed the brain the tools definitions but NOT the full knowledge base.
      * - We want it to use its "Thinking" capability to plan the tool usage.

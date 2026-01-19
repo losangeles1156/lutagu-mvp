@@ -19,4 +19,3 @@ export const UpdateMemberSchema = z.object({
     role: z.enum(['member', 'support', 'admin']).optional(),
     pii: MemberPiiSchema.optional()
 }).strict();
-

@@ -12,11 +12,11 @@ const supabase = createClient(
 
 async function inspectUenoData() {
     console.log('--- Inspecting Ueno Station Data ---');
-    
+
     // 1. Search for Ueno in stations/places
     // Trying common ID patterns for Ueno
     const stationIds = ['odpt.Station:TokyoMetro.Ginza.Ueno', 'odpt.Station:JR-East.Yamanote.Ueno', 'Ueno'];
-    
+
     // Check odpt_stations (if exists) or places table
     console.log('Checking "odpt_stations"...');
     const { data: stations, error: stError } = await supabase
@@ -42,7 +42,7 @@ async function inspectUenoData() {
         .from('facilities') // Check table name validity
         .select('*')
         .eq('station_id', targetId); // Try matching column name
-        
+
     if (facError) {
          // Fallback: maybe table is named differently or column is different
          console.log('Error fetching facilities (first attempt):', facError.message);
@@ -58,7 +58,7 @@ async function inspectUenoData() {
         .from('timetables')
         .select('*', { count: 'exact', head: true })
         .eq('station_id', targetId);
-    
+
     if (timeError) console.log('Error fetching timetables:', timeError.message);
     else console.log(`Timetables count: ${timeCount}`);
 

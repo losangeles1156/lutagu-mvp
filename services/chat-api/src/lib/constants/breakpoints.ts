@@ -19,11 +19,11 @@ export const DEVICE_TYPES = {
 export type DeviceType = 'mobile' | 'tablet' | 'desktop';
 
 // UI 狀態機狀態類型
-export type UIStateType = 
-  | 'login' 
-  | 'fullscreen' 
-  | 'collapsed_desktop' 
-  | 'collapsed_mobile' 
+export type UIStateType =
+  | 'login'
+  | 'fullscreen'
+  | 'collapsed_desktop'
+  | 'collapsed_mobile'
   | 'explore';
 
 // 面板尺寸配置

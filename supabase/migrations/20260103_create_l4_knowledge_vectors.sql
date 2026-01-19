@@ -15,15 +15,15 @@ CREATE TABLE IF NOT EXISTS public.l4_knowledge_embeddings (
     icon TEXT, -- Emoji icon for display
     category TEXT, -- For filtering: 'warning', 'tip', 'pass', 'accessibility', 'crowd', etc.
     subcategory TEXT, -- For filtering: 'transfer', 'facility', 'tourist', etc.
-    
+
     -- Context tags for filtering
     time_context JSONB DEFAULT '[]'::jsonb, -- ['weekday-morning', 'weekday-evening', 'weekend', 'holiday']
     user_context JSONB DEFAULT '[]'::jsonb, -- ['wheelchair', 'stroller', 'largeLuggage', 'vision', 'senior', 'general']
     ward_context JSONB DEFAULT '[]'::jsonb, -- ['新宿區', '港區', etc.]
-    
+
     -- Vector embedding (768 dimensions - Gemini standard)
     embedding vector(768),
-    
+
     -- Metadata
     source TEXT DEFAULT 'expertKnowledgeBase', -- Data source reference
     confidence FLOAT DEFAULT 1.0, -- Confidence score for the knowledge
@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_l4_user_context ON public.l4_knowledge_embeddings
 
 -- Create HNSW index for vector similarity search
 -- Using cosine similarity for semantic search
-CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings 
+CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings
 USING hnsw (embedding vector_cosine_ops);
 
 -- Create function for semantic search with filters
@@ -142,9 +142,9 @@ BEGIN
             0.8 AS base_score
         FROM public.l4_knowledge_embeddings l4
         WHERE l4.entity_id = station_id
-        
+
         UNION
-        
+
         -- Get knowledge for the parent hub station
         SELECT
             l4.id,
@@ -163,14 +163,14 @@ BEGIN
             bk.*,
             1 - (l4.embedding <=> user_query_embedding) AS semantic_score,
             -- Boost score for matching user context
-            CASE 
+            CASE
                 WHEN user_context IS NOT NULL AND l4.user_context @> to_jsonb(user_context)
-                THEN 0.3 ELSE 0.0 
+                THEN 0.3 ELSE 0.0
             END AS context_boost,
             -- Boost score for matching time context
-            CASE 
+            CASE
                 WHEN time_context IS NOT NULL AND l4.time_context @> to_jsonb(ARRAY[time_context])
-                THEN 0.1 ELSE 0.0 
+                THEN 0.1 ELSE 0.0
             END AS time_boost
         FROM base_knowledge bk
         JOIN public.l4_knowledge_embeddings l4 ON bk.id = l4.id

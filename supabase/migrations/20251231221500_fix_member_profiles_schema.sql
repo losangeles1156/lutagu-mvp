@@ -5,7 +5,7 @@ create table if not exists member_profiles (
   role text default 'member',
   preferences jsonb,
   line_user_id text unique,
-  
+
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
   deleted_at timestamptz,

@@ -26,7 +26,7 @@ async function runTestCrawl() {
             const result = await tokyoCrawler.crawl(url);
             if (result) {
                 console.log(`[Success] Scraped: ${result.title}`);
-                
+
                 // Process L1
                 const l1Data = processor.processL1(result);
                 await importer.importL1(l1Data);
@@ -41,7 +41,7 @@ async function runTestCrawl() {
         }
 
         // 3. Test Matcha JP (1 article)
-        const matchaUrls = ['https://matcha-jp.com/jp/1061']; 
+        const matchaUrls = ['https://matcha-jp.com/jp/1061'];
         for (const url of matchaUrls) {
             if (await importer.isAlreadyCrawled(url)) {
                 console.log(`[Skip] ${url} already crawled.`);
@@ -51,7 +51,7 @@ async function runTestCrawl() {
             const result = await matchaCrawler.crawl(url);
             if (result) {
                 console.log(`[Success] Scraped: ${result.title}`);
-                
+
                 // Process L1
                 const l1Data = processor.processL1(result);
                 await importer.importL1(l1Data);
@@ -64,7 +64,7 @@ async function runTestCrawl() {
                 }
             }
         }
-        
+
         console.log('--- Test Crawl Completed ---');
     } catch (error) {
         console.error('Test Crawl Failed:', error);

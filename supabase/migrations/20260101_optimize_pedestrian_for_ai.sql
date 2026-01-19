@@ -17,7 +17,7 @@ SELECT
     CONCAT(
         'Path segment from ', l.start_node_id, ' to ', l.end_node_id, '. ',
         'Distance: ', l.distance_meters, 'm. ',
-        CASE 
+        CASE
             WHEN l.route_structure = 5 THEN 'Type: Elevator. '
             WHEN l.route_structure = 4 THEN 'Type: Stairs. '
             WHEN l.route_structure = 3 THEN 'Type: Crosswalk. '

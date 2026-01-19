@@ -15,7 +15,7 @@ export interface ITool {
     name: string;
     description: string;
     requiredLevel: AgentLevel;
-    
+
     execute(params: any, context: IToolContext): Promise<any>;
 }
 

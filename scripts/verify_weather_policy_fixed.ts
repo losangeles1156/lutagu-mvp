@@ -88,7 +88,7 @@ function runRegionPolicyTests() {
 
 function runSeverityTests() {
     console.log('\n🧪 Verifying Severity Classification...\n');
-    
+
     const severityTests = [
         { title: '気象特別警報報', expected: 'critical' },
         { title: '大雨警報（浸水害）', expected: 'warning' },
@@ -121,7 +121,7 @@ function runSeverityTests() {
 
 function runUserProfileTests() {
     console.log('\n🧪 Verifying User Profile Adjustments...\n');
-    
+
     const profileTests = [
         { severity: 'advisory' as const, profile: 'wheelchair', expected: 'warning' },
         { severity: 'info' as const, profile: 'wheelchair', expected: 'advisory' },

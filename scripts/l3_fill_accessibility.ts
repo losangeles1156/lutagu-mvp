@@ -1,11 +1,11 @@
 
 /**
  * L3 Data Supplement: Accessibility (Elevators & Escalators)
- * 
+ *
  * This script targets:
  * 1. Elevators (highway=elevator)
  * 2. Escalators (highway=steps + conveying=yes)
- * 
+ *
  * It helps identify barrier-free routes near stations.
  */
 
@@ -25,8 +25,8 @@ const OVERPASS_ENDPOINTS = [
     'https://overpass.kumi.systems/api/interpreter'
 ];
 
-const RADIUS_METERS = 150; 
-const DELAY_MS = 1500; 
+const RADIUS_METERS = 150;
+const DELAY_MS = 1500;
 
 interface NodeRecord {
     id: string;
@@ -53,7 +53,7 @@ async function fetchOverpassAccessibility(lat: number, lon: number): Promise<any
     for (let i = 0; i < retries; i++) {
         // Rotate endpoints
         const endpoint = OVERPASS_ENDPOINTS[i % OVERPASS_ENDPOINTS.length];
-        
+
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s hard timeout
@@ -196,7 +196,7 @@ async function main() {
         console.log(`[${++stationsProcessed}/${stations.length}] Checking ${station.name || station.id}...`);
 
         const elements = await fetchOverpassAccessibility(coords.lat, coords.lon);
-        
+
         if (elements.length > 0) {
             const facilitiesToInsert = elements.map(el => transformItem(el, station.id));
 

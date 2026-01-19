@@ -5,13 +5,13 @@
 -- =============================================================================
 
 -- Step 1: First, verify current state
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id
-FROM nodes 
-WHERE id LIKE '%Shinagawa%' 
+FROM nodes
+WHERE id LIKE '%Shinagawa%'
    OR id LIKE '%Takanawa%'
    OR id LIKE '%品川%'
 ORDER BY id;
@@ -21,18 +21,18 @@ ORDER BY id;
 
 -- Step 3: Check which nodes have is_hub = true but shouldn't be hubs
 -- (These are nodes that were incorrectly marked as hubs)
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id,
-    CASE 
+    CASE
         WHEN name->>'zh-TW' LIKE '%山手%' THEN 'Yamanote Line station - should be child of Shinjuku/Tokyo hub'
         WHEN name->>'zh-TW' LIKE '%京浜%' THEN 'Keihin-Tohoku Line station - depends on location'
         ELSE 'Check manually'
     END as note
-FROM nodes 
-WHERE is_hub = true 
+FROM nodes
+WHERE is_hub = true
    AND (id LIKE '%Yamanote%' OR id LIKE '%Keihin%')
 ORDER BY name->>'zh-TW';
 
@@ -41,7 +41,7 @@ ORDER BY name->>'zh-TW';
 
 -- First, let's check what hubs exist
 SELECT id, name->>'zh-TW' as name, is_hub, parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE (name->>'zh-TW' LIKE '%品川%' OR name->>'zh-TW' LIKE '%東京%' OR name->>'zh-TW' LIKE '%新宿%')
    AND parent_hub_id IS NULL
 ORDER BY name->>'zh-TW';
@@ -51,15 +51,15 @@ ORDER BY name->>'zh-TW';
 
 -- If Shinagawa hub doesn't exist, create it or use Tokyo hub
 -- Let's check Tokyo area stations
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id,
     ST_X(coordinates) as lon,
     ST_Y(coordinates) as lat
-FROM nodes 
-WHERE (name->>'zh-TW' LIKE '%品川%' 
+FROM nodes
+WHERE (name->>'zh-TW' LIKE '%品川%'
    OR name->>'zh-TW' LIKE '%高輪%'
    OR name->>'zh-TW' LIKE '%大崎%')
    AND is_active = true
@@ -69,33 +69,33 @@ ORDER BY ST_Y(coordinates) DESC;
 -- For example, set TokyoMetro stations that are at Tokyo station to have parent_hub_id = 'odpt:Station:JR-East.Tokyo'
 
 -- Check Tokyo Metro Otemachi
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id
-FROM nodes 
+FROM nodes
 WHERE id LIKE '%Otemachi%' OR name->>'zh-TW' LIKE '%大手町%';
 
 -- Step 7: Update Otemachi to be a child of Tokyo hub (if Tokyo hub exists)
-UPDATE nodes 
+UPDATE nodes
 SET parent_hub_id = 'odpt:Station:JR-East.Tokyo'
 WHERE id = 'odpt:Station:TokyoMetro.Otemachi'
    AND is_hub = false;
 
 -- Step 8: Summary - Show final state of key stations
-SELECT 
+SELECT
     id,
     name->>'zh-TW' as name,
     is_hub,
     parent_hub_id,
-    CASE 
+    CASE
         WHEN parent_hub_id IS NULL AND is_hub = true THEN 'HUB (correct)'
         WHEN parent_hub_id IS NULL AND is_hub = false THEN 'STANDALONE (correct)'
         WHEN parent_hub_id IS NOT NULL THEN 'CHILD of ' || parent_hub_id
         ELSE 'UNKNOWN'
     END as status
-FROM nodes 
+FROM nodes
 WHERE id IN (
     'odpt:Station:JR-East.Tokyo',
     'odpt:Station:JR-East.Shinjuku',

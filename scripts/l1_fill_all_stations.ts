@@ -169,7 +169,7 @@ async function processStation(station: any) {
     } else if (station.location.coordinates) {
         [lon, lat] = station.location.coordinates;
     }
-    
+
     if (!lat || !lon) {
         console.log(`⚠️ Skipping ${station.name?.en} (Invalid location: ${station.location})`);
         return;
@@ -210,7 +210,7 @@ async function processStation(station: any) {
 
             // Distance
             const dist = Math.round(calculateDistance(lat, lon, pLat, pLon));
-            
+
             // Range Filter
             let limitDist = CONFIG.RANGE_CORE; // Default 300m
             if (WIDE_RANGE_CATS.includes(classification.category)) limitDist = CONFIG.RANGE_WIDE; // 800m

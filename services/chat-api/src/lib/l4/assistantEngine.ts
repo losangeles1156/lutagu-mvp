@@ -830,10 +830,10 @@ function perHopFareForOperator(operatorKey: string): number {
 /**
  * 基於距離（以站數估算）計算票價
  * JR/Metro/Toei 票價都是基於距離，同公司內換乘票價一致
- * 
+ *
  * JR 東日本東京圈票價表（IC卡）：
  * 1-3km: ¥140, 4-6km: ¥160, 7-10km: ¥170, 11-15km: ¥200, 16-20km: ¥220
- * 
+ *
  * Tokyo Metro 票價表（IC卡）：
  * 1-6km: ¥180, 7-11km: ¥200, 12-19km: ¥250, 20-27km: ¥290, 28km+: ¥330
  */
@@ -871,10 +871,10 @@ function estimateFareByDistance(operatorKey: string, hops: number): number {
 
 function edgeTimeMinutes(railwayId: string): number {
     if (railwayId === 'transfer') return 5;
-    
+
     // 快速線路站距較長，耗時較多
     const isRapid = railwayId.includes('Rapid') || railwayId.includes('Express') || railwayId.includes('LimitedExpress') || railwayId.includes('Shinkansen');
-    
+
     // 東京地鐵核心線路站距極短
     const isCoreMetro = railwayId.includes('Ginza') || railwayId.includes('Marunouchi') || railwayId.includes('Hibiya');
 
@@ -883,7 +883,7 @@ function edgeTimeMinutes(railwayId: string): number {
         return isRapid ? 2.5 : 1.8;
     }
     if (railwayId.includes('JR-East')) {
-        return isRapid ? 3.5 : 2.5; 
+        return isRapid ? 3.5 : 2.5;
     }
     return 2.5;
 }
@@ -1053,12 +1053,12 @@ function dijkstraBestPath(params: {
     for (const origin of origins) {
         const startKey = encodeStateKey(origin, null, null);
         dist.set(startKey, 0);
-        costsByKey.set(startKey, { 
-            time: 0, 
-            fare: 0, 
-            transfers: 0, 
-            hops: 0, 
-            railwaySwitches: 0, 
+        costsByKey.set(startKey, {
+            time: 0,
+            fare: 0,
+            transfers: 0,
+            hops: 0,
+            railwaySwitches: 0,
             operatorSwitches: 0,
             transferDistance: 0,
             crowding: 20 // 預設初始擁擠度
@@ -1121,16 +1121,16 @@ function dijkstraBestPath(params: {
                 const operator = lineParts[0];
                 const line = lineParts[1];
                 const toLineId = `odpt.Railway:${operator}.${line}`;
-                
+
                 const distance = getTransferDistance(fromStationId, toLineId);
                 const isOutStation = isOutOfStationTransfer(fromStationId, toLineId);
-                
+
                 let transferTime = distance / 60; // 稍微提高步行速度至 60m/min (東京節奏)
-                
+
                 if (isOutStation) {
                     transferTime += 2; // 降低站外轉乘額外懲罰 (3 -> 2)
                 }
-                
+
                 if (fromOp && toOp && fromOp !== toOp) {
                     transferTime += 1.5; // 跨公司購票/閘門時間 (2 -> 1.5)
                     nextCosts.operatorSwitches += 1;
@@ -1155,10 +1155,10 @@ function dijkstraBestPath(params: {
 
                 let boardingPenalty = 0;
                 // 根據線路類型動態調整候車時間
-                let lineWaitTime = (viaRailwayId.includes('TokyoMetro') || viaRailwayId.includes('Toei')) 
+                let lineWaitTime = (viaRailwayId.includes('TokyoMetro') || viaRailwayId.includes('Toei'))
                     ? BASE_WAIT_TIME * 0.6  // 地鐵班次更密 (0.7 -> 0.6)
                     : BASE_WAIT_TIME;
-                
+
                 if (currentCosts.hops < 4) {
                     lineWaitTime *= 0.6; // 極短途通常發生在繁華區，班次更密且用戶通常會趕車
                 }
@@ -1178,7 +1178,7 @@ function dijkstraBestPath(params: {
                 }
 
                 nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty;
-                
+
                 // 擁擠度簡單估算：某些線路較擁擠
                 if (viaRailwayId.includes('Yamanote') || viaRailwayId.includes('Chuo')) {
                     nextCosts.crowding = Math.min(100, nextCosts.crowding + 5);
@@ -1322,17 +1322,17 @@ export function findRankedRoutes(params: {
             score: (c) => {
                 // 1. 實際行程時間 (65% 權重) - 提高時間權重以更精確匹配 Google Maps
                 const timeScore = c.time * 0.65;
-                
+
                 // 2. 轉乘次數 (15% 權重) - 每次轉乘約等同於 6 分鐘乘車痛感
                 const transferScore = c.transfers * 6 * 0.15;
-                
+
                 // 3. 轉乘距離與補償 (15% 權重)
                 let distancePenalty = 0;
                 if (c.transferDistance > TRANSFER_THRESHOLD) {
                     distancePenalty = (c.transferDistance - TRANSFER_THRESHOLD) * 1.5;
                 }
                 const distanceScore = (c.transferDistance / 100 * 5 + distancePenalty) * 0.15;
-                
+
                 // 4. 列車擁擠度 (5% 權重)
                 const crowdScore = (c.crowding / 10) * 0.05;
 

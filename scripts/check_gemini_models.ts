@@ -27,11 +27,11 @@ async function listModels() {
     }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-    
+
     try {
         console.log('Fetching models from:', url.replace(apiKey, 'HIDDEN_KEY'));
         const response = await fetchWithTimeout(url, { method: 'GET' }, 10000);
-        
+
         if (!response.ok) {
             console.error(`Error: ${response.status} ${response.statusText}`);
             const text = await response.text();

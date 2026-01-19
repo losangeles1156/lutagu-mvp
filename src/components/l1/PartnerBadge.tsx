@@ -47,7 +47,7 @@ export function PartnerBadge({
             {discountInfo && (
                 <div className={`${badge} bg-green-50 rounded-lg border border-green-200`}>
                     <div className="font-medium text-green-700">
-                        {discountInfo.type === 'percent' 
+                        {discountInfo.type === 'percent'
                             ? `🎉 ${discountInfo.value}% OFF`
                             : discountInfo.type === 'fixed'
                             ? `💰 ¥${discountInfo.value} OFF`
@@ -63,7 +63,7 @@ export function PartnerBadge({
 
             {/* 導流按鈕 */}
             {showButton && affiliateUrl && (
-                <a 
+                <a
                     href={affiliateUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -76,7 +76,7 @@ export function PartnerBadge({
 
             {/* 導航按鈕（無導流連結時） */}
             {showButton && !affiliateUrl && navigationUrl && (
-                <a 
+                <a
                     href={navigationUrl}
                     target="_blank"
                     rel="noopener noreferrer"

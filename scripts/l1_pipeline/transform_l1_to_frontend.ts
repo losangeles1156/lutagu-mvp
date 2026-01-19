@@ -103,7 +103,7 @@ function mapVibeTag(tagStr: string): L1_VibeTag {
     // Tokyo
     if (tagStr.includes('Capital Gateway')) return { id: 'capital_gateway', label: { en: 'Capital Gateway', ja: '日本の玄関口', zh: '首都玄關' }, score: 5 };
     if (tagStr.includes('Historical Architecture')) return { id: 'historical_arch', label: { en: 'Historical Architecture', ja: '歴史的建築', zh: '歷史建築' }, score: 4 };
-    
+
     // Asakusa
     if (tagStr.includes('Traditional Japan')) return { id: 'traditional_japan', label: { en: 'Traditional Japan', ja: '日本の伝統', zh: '傳統風情' }, score: 5 };
     if (tagStr.includes('Sightseeing Hub')) return { id: 'sightseeing_hub', label: { en: 'Sightseeing Hub', ja: '観光拠点', zh: '觀光勝地' }, score: 5 };
@@ -123,7 +123,7 @@ function mapVibeTag(tagStr: string): L1_VibeTag {
     if (tagStr.includes('IT Hub')) return { id: 'it_hub', label: { en: 'IT Hub (Bit Valley)', ja: 'IT企業の集積地', zh: 'IT產業聚落' }, score: 4 };
     if (tagStr.includes('Fashion')) return { id: 'fashion', label: { en: 'Fashion Center', ja: 'ファッションの中心', zh: '時尚中心' }, score: 5 };
     if (tagStr.includes('Kawaii')) return { id: 'kawaii', label: { en: 'Kawaii Culture', ja: 'カワイイ文化', zh: '可愛文化' }, score: 5 };
-    
+
     // General / Existing
     if (tagStr.includes('Gourmet Battleground')) {
         return { id: 'gourmet', label: { en: 'Gourmet Battleground', ja: 'グルメ激戦区', zh: '美食激戰區' }, score: 5 };

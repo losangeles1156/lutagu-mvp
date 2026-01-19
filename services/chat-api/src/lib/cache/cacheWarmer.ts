@@ -101,18 +101,18 @@ export class CacheWarmer {
         this.isWarming = true;
         const cacheInstance = cache || getCache('l1_places');
         const hotStations = this.getHotStations();
-        
+
         console.log(`[CacheWarmer] 開始預熱 ${hotStations.length} 個熱門站點`);
 
         for (const station of hotStations) {
             const key = CacheKeyBuilder.forStation(station.stationId);
-            
+
             if (!cacheInstance.has(key)) {
                 try {
                     const data = await this.dataLoader(station.stationId);
                     cacheInstance.set(
-                        key, 
-                        data, 
+                        key,
+                        data,
                         LAYER_CACHE_CONFIG.L1.ttlMs,
                         'hot'
                     );
@@ -168,7 +168,7 @@ export class CacheWarmer {
      * 獲取預熱統計
      */
     getStats(): CacheWarmerStats {
-        return { 
+        return {
             ...this.stats,
             hotStationsCount: this.hotStations.size
         };

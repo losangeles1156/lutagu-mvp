@@ -175,7 +175,7 @@ export class POITaggedDecisionEngine {
 
     private parseQueryIntent(query: string): QueryIntent {
         const lowerQuery = query.toLowerCase();
-        
+
         // Detect category intent
         let category: string | null = null;
         const categoryKeywords: Record<string, string[]> = {
@@ -340,7 +340,7 @@ export class POITaggedDecisionEngine {
     ): Promise<POIDecisionResult[]> {
         // Get similar POIs based on query intent
         // This would use the precomputed similarity table
-        
+
         const { data } = await this.supabase
             .from('l1_poi_similarities')
             .select(`
@@ -387,11 +387,11 @@ export class POITaggedDecisionEngine {
     private buildCacheKey(userContext: UserContext, query: string): string {
         return CacheKeyBuilder.build('poi_decision', {
             query: query.substring(0, 50),
-            location: userContext.location ? 
-                `${userContext.location.lat.toFixed(2)},${userContext.location.lng.toFixed(2)}` : 
+            location: userContext.location ?
+                `${userContext.location.lat.toFixed(2)},${userContext.location.lng.toFixed(2)}` :
                 'any',
-            preferences: userContext.preferences ? 
-                JSON.stringify(userContext.preferences) : 
+            preferences: userContext.preferences ?
+                JSON.stringify(userContext.preferences) :
                 'default'
         });
     }
@@ -440,15 +440,15 @@ export class HybridEngine {
             case 'simple_query':
                 // 使用 L1 POI Tagged Engine (快速、精確)
                 return this.processWithPOITaggedEngine(request);
-            
+
             case 'route_planning':
                 // 使用 Algorithm Provider (標準)
                 return this.processWithAlgorithmProvider(request);
-            
+
             case 'complex_reasoning':
                 // 使用 Decision Engine (深度 AI)
                 return this.processWithDecisionEngine(request);
-            
+
             default:
                 // 預決策引擎 (快取優先)
                 return this.processWithPreDecision(request);
@@ -600,7 +600,7 @@ CREATE INDEX idx_api_log_created ON l1_poi_api_log(created_at DESC);
 
 -- 新增引擎效能監控視圖
 CREATE OR REPLACE VIEW v_l1_engine_performance AS
-SELECT 
+SELECT
     engine_used,
     DATE(created_at) as date,
     COUNT(*) as request_count,
@@ -621,34 +621,34 @@ ORDER BY date DESC, engine_used;
 describe('POITaggedDecisionEngine', () => {
     it('should return POIs matching category query', async () => {
         const engine = createTestEngine();
-        
+
         const results = await engine.decide(
             { userId: 'test_user' },
             '我想吃日本料理'
         );
-        
+
         expect(results.length).toBeGreaterThan(0);
         expect(results[0].category).toBe('dining');
     });
 
     it('should return similar POIs when no exact match', async () => {
         const engine = createTestEngine();
-        
+
         const results = await engine.decide(
             {},
             'xyznonexistent12345'
         );
-        
+
         // Should fallback to similar recommendations
         expect(results.length).toBeGreaterThan(0);
     });
 
     it('should use cache on repeated queries', async () => {
         const engine = createTestEngine();
-        
+
         const results1 = await engine.decide({}, '咖啡廳');
         const results2 = await engine.decide({}, '咖啡廳');
-        
+
         expect(results1).toEqual(results2);
     });
 });

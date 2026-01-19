@@ -24,7 +24,7 @@ async function runBenchmark() {
             context: { current_station: 'odpt.Station:JR-East.Yamanote.Shinjuku' }
         });
         const duration = Date.now() - start;
-        
+
         const actualSource = res?.source || 'llm';
         const success = actualSource === test.expectedSource;
 
@@ -40,7 +40,7 @@ async function runBenchmark() {
     console.table(results);
     const avgDuration = results.reduce((acc, r) => acc + r.duration, 0) / results.length;
     const hitRate = (results.filter(r => r.actual !== 'llm').length / results.length) * 100;
-    
+
     console.log(`\n📊 Summary:`);
     console.log(`- Average Latency: ${avgDuration.toFixed(2)}ms`);
     console.log(`- Non-LLM Hit Rate: ${hitRate.toFixed(1)}%`);

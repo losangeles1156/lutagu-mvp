@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS l1_poi_similarities (
     recommendation_reason TEXT,
     computed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    
+
     UNIQUE(poi_id, similar_poi_id)
 );
 
@@ -25,7 +25,7 @@ CREATE INDEX IF NOT EXISTS idx_similar_computed ON l1_poi_similarities(computed_
 
 -- 3. 建立相似度統計視圖
 CREATE OR REPLACE VIEW v_l1_similarity_statistics AS
-SELECT 
+SELECT
     p.id as poi_id,
     p.name as poi_name,
     p.category,
@@ -58,7 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_job_log_job_id ON l1_similarity_job_log(job_id);
 
 -- 6. 建立相似 POI 查詢視圖（排除過期的）
 CREATE OR REPLACE VIEW v_l1_similar_pois AS
-SELECT 
+SELECT
     s.poi_id,
     p1.name as poi_name,
     s.similar_poi_id,
@@ -77,40 +77,40 @@ ORDER BY s.poi_id, s.similarity_score DESC;
 
 -- 7. 建立相似度分布統計視圖
 CREATE OR REPLACE VIEW v_l1_similarity_distribution AS
-SELECT 
+SELECT
     '0.4-0.5' as range,
     COUNT(*) as count
-FROM l1_poi_similarities 
+FROM l1_poi_similarities
 WHERE similarity_score >= 0.4 AND similarity_score < 0.5 AND expires_at > NOW()
 UNION ALL
-SELECT 
+SELECT
     '0.5-0.6' as range,
     COUNT(*) as count
-FROM l1_poi_similarities 
+FROM l1_poi_similarities
 WHERE similarity_score >= 0.5 AND similarity_score < 0.6 AND expires_at > NOW()
 UNION ALL
-SELECT 
+SELECT
     '0.6-0.7' as range,
     COUNT(*) as count
-FROM l1_poi_similarities 
+FROM l1_poi_similarities
 WHERE similarity_score >= 0.6 AND similarity_score < 0.7 AND expires_at > NOW()
 UNION ALL
-SELECT 
+SELECT
     '0.7-0.8' as range,
     COUNT(*) as count
-FROM l1_poi_similarities 
+FROM l1_poi_similarities
 WHERE similarity_score >= 0.7 AND similarity_score < 0.8 AND expires_at > NOW()
 UNION ALL
-SELECT 
+SELECT
     '0.8-0.9' as range,
     COUNT(*) as count
-FROM l1_poi_similarities 
+FROM l1_poi_similarities
 WHERE similarity_score >= 0.8 AND similarity_score < 0.9 AND expires_at > NOW()
 UNION ALL
-SELECT 
+SELECT
     '0.9-1.0' as range,
     COUNT(*) as count
-FROM l1_poi_similarities 
+FROM l1_poi_similarities
 WHERE similarity_score >= 0.9 AND similarity_score <= 1.0 AND expires_at > NOW();
 
 -- 8. 建立相似 POI 獲取函數
@@ -129,7 +129,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         s.similar_poi_id,
         p.name,
         p.category,
@@ -139,7 +139,7 @@ BEGIN
         s.recommendation_reason
     FROM l1_poi_similarities s
     JOIN l1_places p ON s.similar_poi_id = p.id
-    WHERE s.poi_id = p_poi_id 
+    WHERE s.poi_id = p_poi_id
     AND s.expires_at > NOW()
     ORDER BY s.similarity_score DESC
     LIMIT p_limit;
@@ -152,9 +152,9 @@ RETURNS BIGINT AS $$
 DECLARE
     v_count BIGINT;
 BEGIN
-    DELETE FROM l1_poi_similarities 
+    DELETE FROM l1_poi_similarities
     WHERE expires_at < NOW();
-    
+
     GET DIAGNOSTICS v_count = ROW_COUNT;
     RETURN v_count;
 END;
@@ -165,10 +165,10 @@ CREATE OR REPLACE FUNCTION trigger_similarity_recompute()
 RETURNS TRIGGER AS $$
 BEGIN
     -- 標記該 POI 的現有相似度為過期
-    UPDATE l1_poi_similarities 
+    UPDATE l1_poi_similarities
     SET expires_at = NOW()
     WHERE poi_id = NEW.id OR similar_poi_id = NEW.id;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -183,16 +183,16 @@ DECLARE
     v_count INT := 0;
 BEGIN
     -- 標記現有相似度為過期
-    UPDATE l1_poi_similarities 
+    UPDATE l1_poi_similarities
     SET expires_at = NOW()
     WHERE poi_id = p_poi_id;
-    
+
     -- 返回需要重新計算的數量（供應用程式使用）
     SELECT COUNT(*) INTO v_count
-    FROM l1_places 
-    WHERE id != p_poi_id 
+    FROM l1_places
+    WHERE id != p_poi_id
     AND id NOT IN (SELECT similar_poi_id FROM l1_poi_similarities WHERE poi_id = p_poi_id AND expires_at > NOW());
-    
+
     RETURN v_count;
 END;
 $$ LANGUAGE plpgsql;
@@ -210,14 +210,14 @@ BEGIN
     INSERT INTO l1_similarity_job_log (
         job_id, status, pois_processed, similarities_inserted, error_message
     ) VALUES (
-        p_job_id, 
+        p_job_id,
         p_status,
         (p_stats->>'processed')::INT,
         (p_stats->>'inserted')::INT,
         p_stats->>'error'
     )
     RETURNING id INTO v_id;
-    
+
     RETURN v_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -243,7 +243,7 @@ BEGIN
             'started_at', started_at
         ) FROM l1_similarity_job_log ORDER BY started_at DESC LIMIT 1)
     ) INTO v_result;
-    
+
     RETURN v_result;
 END;
 $$ LANGUAGE plpgsql;

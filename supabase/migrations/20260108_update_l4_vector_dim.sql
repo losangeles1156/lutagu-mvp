@@ -4,7 +4,7 @@ ALTER TABLE public.l4_knowledge_embeddings ALTER COLUMN embedding TYPE vector(10
 
 -- Recreate the HNSW index as the dimension changed
 DROP INDEX IF EXISTS idx_l4_embedding_hnsw;
-CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings 
+CREATE INDEX IF NOT EXISTS idx_l4_embedding_hnsw ON public.l4_knowledge_embeddings
 USING hnsw (embedding vector_cosine_ops);
 
 -- Update the RPC function to accept 1024 dimensions

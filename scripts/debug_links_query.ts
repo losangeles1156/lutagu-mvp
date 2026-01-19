@@ -18,12 +18,12 @@ async function debugLinks() {
         query_lon: 139.777,
         radius_meters: 500
     });
-    
+
     if (!nodes || nodes.length === 0) {
         console.log('No nodes found.');
         return;
     }
-    
+
     const validNodes = nodes.filter((n: any) => n.type === 'node');
     const nodeIds = validNodes.map((n: any) => n.id);
     console.log(`Found ${nodeIds.length} nodes.`);
@@ -40,7 +40,7 @@ async function debugLinks() {
     // 3. Test Fallback Query
     console.log('\n--- Testing Fallback Query ---');
     const idList = nodeIds.map((id: string) => `"${id}"`).join(',');
-    
+
     const { data: fallbackLinks, error: fallbackError } = await supabase
         .from('pedestrian_links')
         .select('*')

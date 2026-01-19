@@ -1,5 +1,5 @@
 -- Azabu-juban L4 Knowledge (Traps & Hacks)
-UPDATE nodes 
+UPDATE nodes
 SET riding_knowledge = $$
 {
   "traps": [

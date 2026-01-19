@@ -19,7 +19,7 @@ async function inspectUenoDetails() {
         .from('fares')
         .select('*', { count: 'exact', head: true })
         .or(`from_station_id.eq.${stationId},to_station_id.eq.${stationId}`);
-    
+
     if (fareError) console.log('Fares error:', fareError.message);
     else console.log(`Fares found: ${fareCount}`);
 
@@ -31,7 +31,7 @@ async function inspectUenoDetails() {
         .from('pois') // Assuming table name
         .select('*')
         .limit(5);
-        
+
     if (poiError) {
          // Maybe 'places' table with type='poi'?
          console.log('POIs table check failed, trying places/nodes...');

@@ -16,7 +16,7 @@ export function useCategoryTranslation() {
      */
     const getCategoryLabel = useCallback((category: string) => {
         if (!category) return '';
-        
+
         // Handle cases where the category might already be a translation key path
         // e.g., "l1.categories.park" -> "park"
         let normalized = category.toLowerCase();
@@ -24,7 +24,7 @@ export function useCategoryTranslation() {
             const parts = normalized.split('.');
             normalized = parts[parts.length - 1];
         }
-        
+
         const key = `categories.${normalized}`;
 
         // 1. Try L1 (General Categories)
@@ -51,13 +51,13 @@ export function useCategoryTranslation() {
      */
     const getSubcategoryLabel = useCallback((subcategory: string) => {
         if (!subcategory) return '';
-        
+
         let normalized = subcategory.toLowerCase();
         if (normalized.includes('.')) {
             const parts = normalized.split('.');
             normalized = parts[parts.length - 1];
         }
-        
+
         const key = `sub.${normalized}`;
 
         // 1. Try Tag Subcategories

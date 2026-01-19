@@ -206,8 +206,8 @@ async function processStation(station: any) {
             // If this OSM ID has been claimed by a previous station, SKIP IT.
             // Note: This relies on processing order. Ideally we process generic stations first or Hubs first?
             // Currently sequential. This effectively assigns the POI to the FIRST station that claims it.
-            // A better approach for "closest station" requires 2-pass, but for now "first come" with 800m overlap 
-            // reduction is a massive improvement over duplicates. 
+            // A better approach for "closest station" requires 2-pass, but for now "first come" with 800m overlap
+            // reduction is a massive improvement over duplicates.
             // Let's stick to simple "if seen, skip" for this iteration to solve the "inflated count" issue immediately.
             if (GLOBAL_SEEN_IDS.has(el.id)) continue;
 

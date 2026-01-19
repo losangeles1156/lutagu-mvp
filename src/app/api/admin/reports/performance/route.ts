@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
     // In a real scenario, this would query logs/analytics DB
     const reportDate = new Date().toISOString().split('T')[0];
-    
+
     const mockMetrics = {
         date: reportDate,
         total_queries: 1250,

@@ -4,7 +4,7 @@
 
 ## 1. 檢查腳本
 - **路徑**: `scripts/check_ueno_viewport.ts`
-- **功能**: 
+- **功能**:
   - 自動呼叫 `/api/nodes/viewport` 驗證上野站是否存在於回傳結果中。
   - 驗證上野站的坐標是否在預期範圍內（誤差 < 0.02 度）。
   - 自動同步檢查結果至問題追蹤系統（`incident_tracking` 資料表或 `incidents.local.json`）。

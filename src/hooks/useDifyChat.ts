@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport, UIMessage } from 'ai';
+import { TextStreamChatTransport, UIMessage } from 'ai';
 import { useTranslations, useLocale } from 'next-intl';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 
@@ -65,7 +65,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
     );
 
     // AI SDK v6 transport-based architecture
-    const transport = useMemo(() => new DefaultChatTransport({
+    const transport = useMemo(() => new TextStreamChatTransport({
         api: '/api/agent/chat',
         body: {
             nodeId: stationId || '',

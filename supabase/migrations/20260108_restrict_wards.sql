@@ -1,7 +1,7 @@
 -- 1. Populate ward_id based on spatial containment
-UPDATE nodes 
-SET ward_id = wards.id 
-FROM wards 
+UPDATE nodes
+SET ward_id = wards.id
+FROM wards
 WHERE ST_Contains(wards.boundary, nodes.coordinates);
 
 -- 2. Force Narita Airport nodes to 'ward:airport' just in case of boundary mismatches
@@ -16,17 +16,17 @@ WHERE (name->>'en' ILIKE '%Narita Airport%' OR name->>'ja' ILIKE '%成田空港%
 UPDATE nodes
 SET is_active = CASE
     WHEN ward_id IN (
-        'ward:chiyoda', 
-        'ward:minato', 
-        'ward:chuo', 
-        'ward:taito', 
-        'ward:bunkyo', 
-        'ward:toshima', 
-        'ward:shinjuku', 
-        'ward:shibuya', 
-        'ward:ota', 
-        'ward:meguro', 
-        'ward:shinagawa', 
+        'ward:chiyoda',
+        'ward:minato',
+        'ward:chuo',
+        'ward:taito',
+        'ward:bunkyo',
+        'ward:toshima',
+        'ward:shinjuku',
+        'ward:shibuya',
+        'ward:ota',
+        'ward:meguro',
+        'ward:shinagawa',
         'ward:airport'
     ) THEN true
     ELSE false

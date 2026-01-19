@@ -1,6 +1,6 @@
 /**
  * Node ID Normalizer
- * 
+ *
  * 統一處理車站 ID 的正規化與變體生成
  * 解決 odpt:Station: vs odpt.Station: 格式不一致問題
  */
@@ -141,7 +141,7 @@ export function extractLineName(id: string): string | null {
 /**
  * 生成所有可能的 ID 變體供資料庫查詢使用
  * 這是解決 ID 不一致問題的核心函數
- * 
+ *
  * @param id - 原始車站 ID
  * @returns 所有可能的 ID 變體陣列
  */
@@ -215,7 +215,7 @@ export function isSameStation(id1: string, id2: string): boolean {
 /**
  * 用於資料庫查詢的 ID 候選列表生成器
  * 結合 getAllIdVariants 和 Hub 成員解析
- * 
+ *
  * @param id - 原始車站 ID
  * @param hubMemberResolver - Hub 成員解析函數 (可選)
  * @returns 用於資料庫查詢的完整 ID 列表

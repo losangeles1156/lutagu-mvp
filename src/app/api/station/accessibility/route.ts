@@ -17,7 +17,7 @@ export async function GET(request: Request) {
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         // 1. Determine Source Dataset for this station
-        // This is a mapping heuristic. 
+        // This is a mapping heuristic.
         // Ueno -> 'hokonavi_ueno'
         // Ueno-okachimachi -> 'odpt_oedo_ueno'
         // Daimon -> 'odpt_oedo_daimon'
@@ -78,11 +78,11 @@ export async function GET(request: Request) {
         // Bayesian Confidence Simulation
         // Base confidence starts high if we have data.
         // Penalize for low link count (sparse data) or old dataset.
-        let confidence = 0.95; 
+        let confidence = 0.95;
         if (!totalLinks || totalLinks < 10) confidence -= 0.2;
-        if (coverage < 50) confidence -= 0.1; // Lower confidence in "goodness" if coverage is low? No, confidence is about data accuracy. 
+        if (coverage < 50) confidence -= 0.1; // Lower confidence in "goodness" if coverage is low? No, confidence is about data accuracy.
         // Let's say confidence is about the "Completeness" of our knowledge.
-        
+
         const suggestions = [
              // Mock suggestions based on station context
             `Check nearby bus stops for alternative access`,

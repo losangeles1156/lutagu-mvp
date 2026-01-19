@@ -17,7 +17,7 @@ async function main() {
     const { count: totalStations, error: stationError } = await supabase
         .from('stations_static')
         .select('*', { count: 'exact', head: true });
-    
+
     if (stationError) {
         console.error('Error fetching stations:', stationError.message);
     } else {
@@ -36,7 +36,7 @@ async function main() {
         else if (s.id.includes('JR-East')) op = 'JR East';
         else if (s.id.includes('Tsukuba')) op = 'Tsukuba Express';
         else if (s.id.includes('Monorail')) op = 'Tokyo Monorail';
-        
+
         operatorCounts[op] = (operatorCounts[op] || 0) + 1;
         cityCounts[s.city_id] = (cityCounts[s.city_id] || 0) + 1;
     });
@@ -46,7 +46,7 @@ async function main() {
 
     console.log('\n--- By City/Zone ---');
     console.log(JSON.stringify(cityCounts, null, 2));
-    
+
     // List all IDs to see what we actually have
     console.log('\n--- All Station IDs ---');
     console.log(stations?.map(s => s.id).join('\n'));
@@ -72,7 +72,7 @@ async function main() {
         'odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal1',
         'odpt.Station:Keisei.KeiseiSkyliner.NaritaAirportTerminal1'
     ];
-    
+
     console.log('\n--- Target Stations Check ---');
     for (const t of targets) {
         // Try exact match or match containing ID part
@@ -82,7 +82,7 @@ async function main() {
             .select('id, name')
             .ilike('id', `%${search}%`)
             .limit(1);
-            
+
         if (hits && hits.length > 0) {
             console.log(`✅ Found similar to ${search}: ${hits[0].id}`);
         } else {

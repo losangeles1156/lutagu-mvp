@@ -11,10 +11,10 @@ async function finalDataRepair() {
 
   // 1. 強制修正東京站 Hub
   const TOKYO_HUB_ID = 'odpt:Station:JR-East.Tokyo';
-  
+
   console.log('修正東京站 Hub 狀態...');
-  await supabase.from('nodes').update({ 
-    is_hub: true, 
+  await supabase.from('nodes').update({
+    is_hub: true,
     parent_hub_id: null,
     ward_id: 'ward:chiyoda'
   }).eq('id', TOKYO_HUB_ID);
@@ -33,13 +33,13 @@ async function finalDataRepair() {
 
   console.log('建立父子關聯...');
   const { error: childError } = await supabase.from('nodes')
-    .update({ 
+    .update({
       parent_hub_id: TOKYO_HUB_ID,
       is_hub: false,
       ward_id: 'ward:chiyoda'
     })
     .in('id', tokyoChildren);
-  
+
   if (childError) console.error('修復子站失敗:', childError);
 
   // 3. 處理 ID 格式不一致導致的漏網之魚

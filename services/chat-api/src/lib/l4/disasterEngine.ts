@@ -1,8 +1,8 @@
-import { 
-  WeatherAlert, 
-  TerrainRisk, 
-  EvacuationSite, 
-  EvacuationResult, 
+import {
+  WeatherAlert,
+  TerrainRisk,
+  EvacuationSite,
+  EvacuationResult,
   EvacuationMode,
   DisasterKind
 } from './types';
@@ -12,7 +12,7 @@ import {
  * 負責處理極端天氣下的避難決策
  */
 export class DisasterDecisionEngine {
-  
+
   /**
    * 核心決策邏輯：根據氣象、地形與專家知識生成避難方案
    */
@@ -23,7 +23,7 @@ export class DisasterDecisionEngine {
     nearbySites: EvacuationSite[],
     locale: string = 'zh'
   ): EvacuationResult {
-    
+
     const primaryAlert = this.getHighestPriorityAlert(alerts);
     let mode: EvacuationMode = 'normal';
     let recommendation = '';
@@ -37,7 +37,7 @@ export class DisasterDecisionEngine {
         if (primaryAlert.level === 'special') {
           if (terrain.isLowLying) {
             mode = 'vertical_evacuation';
-            recommendation = locale === 'ja' 
+            recommendation = locale === 'ja'
               ? '【緊急】浸水のリスクが非常に高いです。地下施設から離れ、3階以上の頑丈な建物へ垂直避難してください。'
               : '【緊急】所在地浸水風險極高。請立即遠離地下設施，移動至 3 樓以上的堅固建築進行「垂直避難」。';
           } else {
@@ -75,7 +75,7 @@ export class DisasterDecisionEngine {
   private static getHighestPriorityAlert(alerts: WeatherAlert[]): WeatherAlert | null {
     if (alerts.length === 0) return null;
     const priority = { 'special': 3, 'warning': 2, 'advisory': 1 };
-    return alerts.reduce((prev, curr) => 
+    return alerts.reduce((prev, curr) =>
       (priority[curr.level] > priority[prev.level]) ? curr : prev
     );
   }

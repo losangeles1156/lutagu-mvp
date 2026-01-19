@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
-    
+
     if (!userId) {
       return NextResponse.json({
         success: false,
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    
+
     // If Supabase is not configured, return default preferences
     if (!supabase) {
       const defaultPrefs: UserPreferences = {
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         source: 'web',
         created_at: Date.now()
       };
-      
+
       return NextResponse.json({
         success: true,
         preferences: defaultPrefs,
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
         source: 'web',
         created_at: Date.now()
       };
-      
+
       return NextResponse.json({
         success: true,
         preferences: defaultPrefs,
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: PreferencesUpdateRequest = await request.json();
     const { preferences: updates, source = 'web', device_id } = body;
-    
+
     if (!updates?.user_id) {
       return NextResponse.json({
         success: false,
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
 
     const userId = updates.user_id;
     const supabase = getSupabaseClient();
-    
+
     // If Supabase is not configured, return demo response
     if (!supabase) {
       const demoPrefs: UserPreferences = {
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         source: source,
         created_at: Date.now()
       };
-      
+
       return NextResponse.json({
         success: true,
         preferences: demoPrefs,
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString();
     const newVersion = (existing?.version || 0) + 1;
-    
+
     // Generate data hash
     const dataToHash = {
       preferred_facility_types: updates.preferred_facility_types || existing?.preferred_facility_types,
@@ -290,7 +290,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
-    
+
     if (!userId) {
       return NextResponse.json({
         success: false,
@@ -299,7 +299,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient();
-    
+
     // If Supabase is not configured, return demo response
     if (!supabase) {
       return NextResponse.json({

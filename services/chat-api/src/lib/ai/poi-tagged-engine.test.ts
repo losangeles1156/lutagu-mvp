@@ -16,7 +16,7 @@ const mockSupabaseData: Record<string, any[]> = {
             category: 'dining',
             location_tags: { station_id: 'tokyo_station', station_name: '東京車站', ward: '千代田區' },
             category_tags: { primary: 'dining', secondary: 'japanese_food', characteristics: { is_chain: false, price_range: 2 } },
-            atmosphere_tags: { 
+            atmosphere_tags: {
                 core: { energy: 'lively', style: 'modern', crowd_level: 'moderate' },
                 scenes: { business: true, dating: true, family: false, solo: true, friends: true, tourist: true },
                 environment: { indoor: true, outdoor: false, smoking: 'prohibited', noise_level: 3 },
@@ -163,9 +163,9 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             // Same query with different spacing
             const results1 = await engine.decide({}, '我想 吃 日本料理');
             const results2 = await engine.decide({}, '我想吃日本料理');
-            
+
             assert.equal(results1.length, results2.length);
-            
+
             // Check cache stats
             const stats = engine.getCacheStats();
             assert.ok(stats.localSize > 0);
@@ -212,7 +212,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
     describe('Result Processing', () => {
         it('should return results with relevance scores', async () => {
             const results = await engine.decide({}, '餐廳');
-            
+
             results.forEach((result: any) => {
                 assert.ok(result.relevanceScore >= 0);
                 assert.ok(result.relevanceScore <= 1);
@@ -221,7 +221,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
 
         it('should return matched criteria', async () => {
             const results = await engine.decide({}, '日本料理');
-            
+
             results.forEach((result: any) => {
                 assert.ok(Array.isArray(result.matchedCriteria));
             });
@@ -229,7 +229,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
 
         it('should include location tags in results', async () => {
             const results = await engine.decide({}, '餐廳');
-            
+
             results.forEach((result: any) => {
                 assert.ok(result.locationTags !== undefined);
             });
@@ -237,7 +237,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
 
         it('should include category tags in results', async () => {
             const results = await engine.decide({}, '餐廳');
-            
+
             results.forEach((result: any) => {
                 assert.ok(result.categoryTags !== undefined);
             });
@@ -247,10 +247,10 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
     describe('Caching', () => {
         it('should cache results', async () => {
             const query = '咖啡廳';
-            
+
             // First call
             await engine.decide({}, query);
-            
+
             // Check cache has entries
             const stats = engine.getCacheStats();
             assert.ok(stats.localSize > 0);
@@ -258,9 +258,9 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
 
         it('should clear cache correctly', async () => {
             await engine.decide({}, '測試查詢');
-            
+
             engine.clearCache();
-            
+
             const stats = engine.getCacheStats();
             assert.equal(stats.localSize, 0);
         });
@@ -269,7 +269,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             await engine.decide({}, '餐廳');
             await engine.decide({}, '餐廳');
             await engine.decide({}, '餐廳');
-            
+
             const stats = engine.getCacheStats();
             assert.ok(stats.topQueries.length > 0);
         });
@@ -283,7 +283,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
                     priceRange: [1, 2]
                 }
             }, '吃飯');
-            
+
             assert.ok(results.length > 0);
         });
 
@@ -291,7 +291,7 @@ describe('POITaggedDecisionEngine (Optimized)', () => {
             const results = await engine.decide({
                 location: { lat: 35.6762, lng: 139.6503 }
             }, '餐廳');
-            
+
             assert.ok(results.length > 0);
         });
     });
@@ -356,7 +356,7 @@ describe('Query Statistics', () => {
         await engine.decide({}, '日本料理');
         await engine.decide({}, '日本料理');
         await engine.decide({}, '咖啡廳');
-        
+
         const popular = engine.getPopularQueries(5);
         assert.ok(popular.length > 0);
         assert.equal(popular[0], '日本料理');
@@ -366,7 +366,7 @@ describe('Query Statistics', () => {
         await engine.decide({}, '拉麵');
         await engine.decide({}, '拉麵');
         await engine.decide({}, '壽司');
-        
+
         const stats = engine.getCacheStats();
         assert.ok(stats.topQueries.length > 0);
     });

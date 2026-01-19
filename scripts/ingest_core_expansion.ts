@@ -13,9 +13,9 @@ const supabase = createClient(
 
 const ODPT_API_URL = "https://api.odpt.org/api/v4/odpt:Station";
 // Try multiple env var names for ODPT Token
-const ODPT_TOKEN = process.env.ODPT_AUTH_TOKEN || 
-                   process.env.NEXT_PUBLIC_ODPT_TOKEN || 
-                   process.env.ODPT_API_TOKEN || 
+const ODPT_TOKEN = process.env.ODPT_AUTH_TOKEN ||
+                   process.env.NEXT_PUBLIC_ODPT_TOKEN ||
+                   process.env.ODPT_API_TOKEN ||
                    process.env.ODPT_API_TOKEN_BACKUP;
 
 // Target Operators
@@ -69,7 +69,7 @@ const STATION_COORDS: Record<string, [number, number]> = {
     'Hamamatsucho': [139.7571, 35.6554],
     'Shimbashi': [139.7583, 35.6664],
     'Yurakucho': [139.7628, 35.6749],
-    
+
     // Monorail
     'HanedaAirportTerminal1': [139.7846, 35.5492],
     'HanedaAirportTerminal2': [139.7885, 35.5532],
@@ -141,7 +141,7 @@ async function main() {
         for (const s of stations) {
             const id = s['owl:sameAs'];
             const railway = s['odpt:railway'];
-            
+
             // --- Filtering Logic ---
             let shouldIngest = false;
 
@@ -149,7 +149,7 @@ async function main() {
             if (operator.includes('TokyoMetro') || operator.includes('Toei') || operator.includes('TokyoMonorail')) {
                 shouldIngest = true;
             }
-            
+
             // 2. JR East (Yamanote Line Only)
             else if (operator.includes('JR-East')) {
                 const railways = Array.isArray(railway) ? railway : [railway];
@@ -175,7 +175,7 @@ async function main() {
             // Extract Coordinates
             let lat = s['geo:lat'];
             let lon = s['geo:long'];
-            
+
             // Fallback for missing coords (rare in ODPT but possible)
             if (!lat || !lon) {
                 const enName = s['odpt:stationTitle']?.en || '';
@@ -189,13 +189,13 @@ async function main() {
             }
 
             const nameI18n = getLocaleName(s['odpt:stationTitle']);
-            
+
             // Hub Logic (Simple heuristic for now)
-            const isHub = 
-                nameI18n.en.includes('Tokyo') || 
-                nameI18n.en.includes('Shinjuku') || 
-                nameI18n.en.includes('Shibuya') || 
-                nameI18n.en.includes('Ikebukuro') || 
+            const isHub =
+                nameI18n.en.includes('Tokyo') ||
+                nameI18n.en.includes('Shinjuku') ||
+                nameI18n.en.includes('Shibuya') ||
+                nameI18n.en.includes('Ikebukuro') ||
                 nameI18n.en.includes('Ueno') ||
                 nameI18n.en.includes('Otemachi') ||
                 nameI18n.en.includes('Ginza') ||
@@ -224,7 +224,7 @@ async function main() {
             const { error } = await supabase
                 .from('stations_static')
                 .upsert(toInsert, { onConflict: 'id' });
-            
+
             if (error) {
                 console.error(`❌ Error inserting ${operator}:`, error.message);
             } else {

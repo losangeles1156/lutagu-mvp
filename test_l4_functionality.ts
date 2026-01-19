@@ -21,19 +21,19 @@ async function logTest(name: string, status: 'PASS' | 'FAIL' | 'SKIP', message: 
 
 async function testDatabaseFunctionality() {
     console.log('\n=== 資料庫功能測試 ===\n');
-    
+
     // 1. 直接查詢資料表來驗證表是否存在
     const { data: tableData, error: tableError } = await supabase
         .from('l4_knowledge_embeddings')
         .select('id')
         .limit(1);
-    
+
     if (tableError) {
         await logTest('l4_knowledge_embeddings 表可訪問', 'FAIL', tableError.message);
     } else {
         await logTest('l4_knowledge_embeddings 表可訪問', 'PASS', '表可正常訪問');
     }
-    
+
     // 2. 嘗試插入資料來驗證 RLS 和寫入權限
     const testData = {
         knowledge_type: 'test',
@@ -43,49 +43,49 @@ async function testDatabaseFunctionality() {
         icon: '🧪',
         category: 'test'
     };
-    
+
     const { data: insertResult, error: insertError } = await supabase
         .from('l4_knowledge_embeddings')
         .insert(testData)
         .select('id')
         .single();
-    
+
     if (insertError) {
         await logTest('資料插入功能', 'FAIL', insertError.message);
     } else {
         await logTest('資料插入功能', 'PASS', `成功插入，ID: ${insertResult.id}`);
-        
+
         // 3. 驗證讀取功能
         const { data: readResult, error: readError } = await supabase
             .from('l4_knowledge_embeddings')
             .select('id, knowledge_type, entity_id, content')
             .eq('id', insertResult.id)
             .single();
-        
+
         if (readError) {
             await logTest('資料讀取功能', 'FAIL', readError.message);
         } else {
             await logTest('資料讀取功能', 'PASS', `成功讀取: ${readResult.entity_id}`);
         }
-        
+
         // 4. 清理測試資料
         const { error: deleteError } = await supabase
             .from('l4_knowledge_embeddings')
             .delete()
             .eq('id', insertResult.id);
-        
+
         if (deleteError) {
             await logTest('資料清理功能', 'FAIL', deleteError.message);
         } else {
             await logTest('資料清理功能', 'PASS', '測試資料已清理');
         }
     }
-    
+
     // 5. 檢查現有知識數據數量
     const { count, error: countError } = await supabase
         .from('l4_knowledge_embeddings')
         .select('*', { count: 'exact', head: true });
-    
+
     if (countError) {
         await logTest('知識數據計數', 'FAIL', countError.message);
     } else {
@@ -99,12 +99,12 @@ async function testDatabaseFunctionality() {
 
 async function testToolDefinitions() {
     console.log('\n=== 工具定義測試 ===\n');
-    
+
     const { AGENT_TOOLS, TOOL_HANDLERS } = await import('./src/lib/agent/toolDefinitions');
-    
+
     // 1. 檢查必要工具是否存在
     const requiredTools = ['get_timetable', 'get_fare', 'get_route', 'get_train_status', 'get_weather'];
-    
+
     for (const toolName of requiredTools) {
         const toolExists = AGENT_TOOLS.some(t => t.function.name === toolName);
         if (toolExists) {
@@ -113,10 +113,10 @@ async function testToolDefinitions() {
             await logTest(`工具 ${toolName} 定義`, 'FAIL', '未定義');
         }
     }
-    
+
     // 2. 檢查 TOOL_HANDLERS
     const requiredHandlers = ['get_timetable', 'get_fare', 'get_route'];
-    
+
     for (const handlerName of requiredHandlers) {
         const handlerExists = (TOOL_HANDLERS as Record<string, any>)[handlerName];
         if (handlerExists) {
@@ -125,7 +125,7 @@ async function testToolDefinitions() {
             await logTest(`處理器 ${handlerName}`, 'FAIL', '未註冊');
         }
     }
-    
+
     // 3. 檢查工具參數定義
     const timetableTool = AGENT_TOOLS.find(t => t.function.name === 'get_timetable');
     if (timetableTool) {
@@ -133,14 +133,14 @@ async function testToolDefinitions() {
         const hasOperator = timetableTool.function.parameters.properties.operator;
         await logTest('get_timetable 參數定義', 'PASS', `stationId: ${!!hasStationId}, operator: ${!!hasOperator}`);
     }
-    
+
     const fareTool = AGENT_TOOLS.find(t => t.function.name === 'get_fare');
     if (fareTool) {
         const hasFromStation = fareTool.function.parameters.properties.fromStation;
         const hasToStation = fareTool.function.parameters.properties.toStation;
         await logTest('get_fare 參數定義', 'PASS', `fromStation: ${!!hasFromStation}, toStation: ${!!hasToStation}`);
     }
-    
+
     const routeTool = AGENT_TOOLS.find(t => t.function.name === 'get_route');
     if (routeTool) {
         const hasFromStation = routeTool.function.parameters.properties.fromStation;
@@ -151,7 +151,7 @@ async function testToolDefinitions() {
 
 async function testAPIRoute() {
     console.log('\n=== API 端點測試 ===\n');
-    
+
     // 檢查環境變數
     const mistralKey = process.env.MISTRAL_API_KEY;
     if (mistralKey) {
@@ -159,25 +159,25 @@ async function testAPIRoute() {
     } else {
         await logTest('MISTRAL_API_KEY 設定', 'FAIL', '未設定');
     }
-    
+
     const odptKey = process.env.ODPT_API_KEY;
     if (odptKey) {
         await logTest('ODPT_API_KEY 設定', 'PASS', '已設定');
     } else {
         await logTest('ODPT_API_KEY 設定', 'FAIL', '未設定');
     }
-    
+
     // 檢查 API 路由檔案是否存在
     const fs = await import('fs');
     const routePath = './src/app/api/agent/chat/route.ts';
     if (fs.existsSync(routePath)) {
         await logTest('chat/route.ts 存在', 'PASS', '檔案存在');
-        
+
         const content = fs.readFileSync(routePath, 'utf-8');
         const hasTimetableRule = content.includes("get_timetable");
         const hasFareRule = content.includes("get_fare");
         const hasRouteRule = content.includes("get_route");
-        
+
         if (hasTimetableRule && hasFareRule && hasRouteRule) {
             await logTest('系統提示包含新工具規則', 'PASS', 'get_timetable, get_fare, get_route 都已包含');
         } else {
@@ -190,13 +190,13 @@ async function testAPIRoute() {
 
 async function testODPTClient() {
     console.log('\n=== ODPT Client 測試 ===\n');
-    
+
     try {
         const { odptClient } = await import('./src/lib/odpt/client');
-        
+
         const hasGetFares = typeof odptClient.getFares === 'function';
         const hasGetStationTimetable = typeof odptClient.getStationTimetable === 'function';
-        
+
         if (hasGetFares && hasGetStationTimetable) {
             await logTest('ODPT Client 方法', 'PASS', 'getFares 和 getStationTimetable 都存在');
         } else {
@@ -211,32 +211,32 @@ async function runAllTests() {
     console.log('========================================');
     console.log('L4 功能全面測試');
     console.log('========================================\n');
-    
+
     await testDatabaseFunctionality();
     await testToolDefinitions();
     await testAPIRoute();
     await testODPTClient();
-    
+
     console.log('\n========================================');
     console.log('測試結果摘要');
     console.log('========================================\n');
-    
+
     const passed = testResults.filter(r => r.status === 'PASS').length;
     const failed = testResults.filter(r => r.status === 'FAIL').length;
     const skipped = testResults.filter(r => r.status === 'SKIP').length;
-    
+
     console.log(`總測試數: ${testResults.length}`);
     console.log(`✅ 通過: ${passed}`);
     console.log(`❌ 失敗: ${failed}`);
     console.log(`⏭️ 跳過: ${skipped}`);
-    
+
     if (failed > 0) {
         console.log('\n失敗的測試:');
         testResults.filter(r => r.status === 'FAIL').forEach(r => {
             console.log(`  - ${r.name}: ${r.message}`);
         });
     }
-    
+
     console.log('\n========================================');
     console.log('L4 功能修復狀態');
     console.log('========================================');
@@ -250,7 +250,7 @@ async function runAllTests() {
     console.log('待執行:');
     console.log('1. 執行 supabase/migrations/20260104_l4_knowledge_seed.sql');
     console.log('2. 前端測試 L4_Bambi.tsx 互動功能');
-    
+
     return failed === 0;
 }
 

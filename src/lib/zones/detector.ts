@@ -44,7 +44,7 @@ export class ZoneDetector {
         try {
             const radiusMeters = this.config.bufferRadiusKm * 1000;
 
-            // Use the RPC 'nearby_nodes' or similar check. 
+            // Use the RPC 'nearby_nodes' or similar check.
             // Optimized query: just check existence of ONE node within radius.
             let data: any = null;
             let error: any = null;

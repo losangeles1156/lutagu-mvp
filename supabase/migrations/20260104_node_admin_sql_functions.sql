@@ -15,7 +15,7 @@ DECLARE
     v_result JSON;
 BEGIN
     UPDATE node_l1_config
-    SET 
+    SET
         is_approved = TRUE,
         approved_at = NOW(),
         notes = p_notes,
@@ -46,7 +46,7 @@ DECLARE
     v_result JSON;
 BEGIN
     UPDATE node_l1_config
-    SET 
+    SET
         is_approved = FALSE,
         notes = p_notes,
         updated_at = NOW()
@@ -77,7 +77,7 @@ DECLARE
     v_count INTEGER;
 BEGIN
     UPDATE node_l1_config c
-    SET 
+    SET
         is_approved = TRUE,
         approved_at = NOW(),
         notes = p_notes,
@@ -113,7 +113,7 @@ DECLARE
     v_count INTEGER;
 BEGIN
     UPDATE node_l1_config c
-    SET 
+    SET
         is_approved = TRUE,
         approved_at = NOW(),
         notes = p_notes,
@@ -204,7 +204,7 @@ BEGIN
     SELECT COUNT(*) INTO v_pending_count FROM v_l1_pending;
     SELECT COUNT(*) INTO v_approved_count FROM v_l1_approved;
     SELECT COUNT(*) INTO v_config_total FROM node_l1_config;
-    
+
     -- 檢查未匹配的記錄
     SELECT COUNT(*) INTO v_unmatched
     FROM l1_places l
@@ -241,7 +241,7 @@ BEGIN
 
     -- 重新插入所有 l1_places
     INSERT INTO node_l1_config (node_id, category, source_table, source_id, is_approved)
-    SELECT 
+    SELECT
         station_id AS node_id,
         category,
         'l1_places' AS source_table,

@@ -36,7 +36,7 @@ async function main() {
         console.log('✅ wards table already exists');
     } else {
         console.log('📦 Creating wards table...');
-        
+
         // Execute SQL (needs service role for schema changes)
         const { data, error } = await supabase.rpc('exec_sql', { sql });
 

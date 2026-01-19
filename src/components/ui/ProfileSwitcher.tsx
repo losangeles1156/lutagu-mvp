@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/stores/appStore';
-import { User2, Armchair, Baby } from 'lucide-react'; 
+import { User2, Armchair, Baby } from 'lucide-react';
 
 export function ProfileSwitcher({ className }: { className?: string }) {
     const { userProfile, setUserProfile } = useAppStore();
@@ -23,7 +23,7 @@ export function ProfileSwitcher({ className }: { className?: string }) {
     const Icon = current.icon;
 
     return (
-        <button 
+        <button
             onClick={cycleProfile}
             className={`glass-effect rounded-2xl p-3.5 hover:bg-white transition-all text-gray-500 flex items-center justify-center ${className || ''}`}
             aria-label={`Switch profile: ${current.label}`}

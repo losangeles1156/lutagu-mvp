@@ -8,7 +8,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 async function diagnoseOverlaps() {
   console.log('--- 診斷東京站位置的重疊節點 ---');
-  
+
   // 東京站大約坐標 [139.767, 35.681]
   // 查詢所有在該範圍內但名稱不是「東京」的節點
   const { data: nodes, error } = await supabase
@@ -28,7 +28,7 @@ async function diagnoseOverlaps() {
   const ghostNodes = nodes.filter(n => {
     if (!n.coordinates || !n.coordinates.coordinates) return false;
     const [lon, lat] = n.coordinates.coordinates;
-    return Math.abs(lon - TOKYO_STATION_COORDS[0]) < threshold && 
+    return Math.abs(lon - TOKYO_STATION_COORDS[0]) < threshold &&
            Math.abs(lat - TOKYO_STATION_COORDS[1]) < threshold;
   });
 

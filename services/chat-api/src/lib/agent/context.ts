@@ -1,6 +1,6 @@
 /**
  * AgentRuntimeContext - 統一情境注入機制
- * 
+ *
  * 為 Agent 提供「當下」的意識，包含：
  * - 時間：用於判斷末班車、營業時間
  * - 地點：當前 Node ID

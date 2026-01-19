@@ -39,8 +39,8 @@ async function main() {
 
     const formatted = targetStations.map(s => ({
         id: s.id,
-        slug: s.name.en.toLowerCase().replace(/[-\s]+/g, '_').replace(/[()]/g, ''), // Toei often uses underscores? Let's check. 
-        // Metro URL was jimbocho.html. 
+        slug: s.name.en.toLowerCase().replace(/[-\s]+/g, '_').replace(/[()]/g, ''), // Toei often uses underscores? Let's check.
+        // Metro URL was jimbocho.html.
         // Let's assume standard slug for now, but Toei might differ.
         // Actually Jimbocho was just 'jimbocho'.
         // Let's print raw EN name to decide.

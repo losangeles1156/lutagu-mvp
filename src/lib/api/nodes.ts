@@ -543,7 +543,7 @@ export async function fetchNodeConfig(nodeId: string) {
     };
 
     // 1. Populate L1 Data
-    // Logic: 
+    // Logic:
     // - If Child: Merge Self + Parent (Hub)
     // - If Hub: Merge Self + All Children (Aggregation)
 

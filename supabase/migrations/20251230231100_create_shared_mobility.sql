@@ -8,14 +8,14 @@ create table if not exists shared_mobility_stations (
   capacity int,
   vehicle_types text[], -- ['bike', 'ebike']
   app_deeplink text,
-  
+
   -- Dynamic Status (updated frequently)
   bikes_available int default 0,
   docks_available int default 0,
   is_renting boolean default true,
   is_returning boolean default true,
   status_updated_at timestamptz,
-  
+
   created_at timestamptz default now()
 );
 

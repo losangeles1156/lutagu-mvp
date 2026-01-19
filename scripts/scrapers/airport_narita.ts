@@ -125,16 +125,16 @@ async function extractFacilitiesWithLLM(text: string, category: string) {
     const prompt = `
     You are a data extraction AI. Extract facility information from Narita Airport website text.
     Category: ${category}
-    
+
     Extract as JSON array of objects:
     - type: one of "atm", "money_exchange", "coin_locker", "nursery", "charging_station", "toilet", "clinic"
     - name_ja: Name in Japanese (or infer from context)
     - name_en: Name in English
     - location_desc: Location description (e.g. "Terminal 1 2F")
-    
+
     Input Text:
     ${text.substring(0, 15000)}
-    
+
     Return ONLY JSON array.
     `;
 
@@ -214,7 +214,7 @@ async function main() {
     // I should provide a complete script.
 
     // Uncomment to run L1 again if needed
-    // await scrapeNarita(); 
+    // await scrapeNarita();
 
     console.log('Starting Puppeteer for Facilities...');
     const browser = await puppeteer.launch({ headless: true });

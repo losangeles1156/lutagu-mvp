@@ -198,7 +198,14 @@ export function getPartnerUrl(partnerId: string, dynamicParams?: Record<string, 
     const partner = PARTNER_REGISTRY[partnerId];
     if (!partner) return '';
 
-    const url = new URL(partner.baseUrl);
+    let url: URL;
+    try {
+        url = new URL(partner.baseUrl);
+    } catch {
+        return '';
+    }
+
+    if (url.protocol !== 'https:') return '';
 
     // Add static tracking params
     if (partner.trackingParams) {
@@ -215,4 +222,48 @@ export function getPartnerUrl(partnerId: string, dynamicParams?: Record<string, 
     }
 
     return url.toString();
+}
+
+export function getPartnerIdFromUrl(inputUrl: string): string | null {
+    if (!inputUrl) return null;
+
+    let target: URL;
+    try {
+        target = new URL(inputUrl);
+    } catch {
+        return null;
+    }
+
+    if (!/^https?:$/.test(target.protocol)) return null;
+
+    const targetHost = target.host;
+    for (const partner of Object.values(PARTNER_REGISTRY)) {
+        try {
+            const base = new URL(partner.baseUrl);
+            if (base.host === targetHost) return partner.id;
+        } catch {
+            continue;
+        }
+    }
+
+    return null;
+}
+
+export function getSafeExternalUrl(inputUrl: string): string | null {
+    if (!inputUrl) return null;
+
+    let url: URL;
+    try {
+        url = new URL(inputUrl);
+    } catch {
+        return null;
+    }
+
+    if (!/^https?:$/.test(url.protocol)) return null;
+    if (url.username || url.password) return null;
+
+    const normalized = url.toString();
+    if (normalized.length > 2048) return null;
+
+    return normalized;
 }

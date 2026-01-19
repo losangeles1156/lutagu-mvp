@@ -2,7 +2,7 @@
 // Testing Semantic Search API
 async function runTest() {
     console.log('Testing Semantic Search API...');
-    
+
     const queries = [
         "上野站有電梯嗎？",
         "東京站去迪士尼要走很久嗎？",
@@ -13,7 +13,7 @@ async function runTest() {
         console.log(`\nQuery: ${q}`);
         const response = await fetch('http://localhost:3001/api/l4/semantic-search', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Origin': 'http://localhost:3001'
             },

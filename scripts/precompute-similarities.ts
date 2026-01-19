@@ -1,9 +1,9 @@
 /**
  * Phase 3: Similar POI Precomputation Script
- * 
+ *
  * Purpose: Precompute similar POIs based on tags (location, category, atmosphere)
  * This enables fast similarity lookups without real-time computation
- * 
+ *
  * Usage:
  *   npx tsx scripts/precompute-similarities.ts \
  *     --batch-size 100 \
@@ -134,14 +134,14 @@ function calculateCategorySimilarity(poi1: POI, poi2: POI): number {
 function calculateLocationSimilarity(poi1: POI, poi2: POI): number {
     const loc1 = poi1.location_tags;
     const loc2 = poi2.location_tags;
-    
+
     // Same station = 1.0
     if (loc1?.station_id === loc2?.station_id) return 1.0;
     if (loc1?.hub_id === loc2?.hub_id) return 0.9;
-    
+
     // Same ward = 0.8
     if (loc1?.ward === loc2?.ward) return 0.8;
-    
+
     // Calculate distance if coordinates available
     if (poi1.coordinates && poi2.coordinates) {
         const distance = Math.sqrt(
@@ -150,39 +150,39 @@ function calculateLocationSimilarity(poi1: POI, poi2: POI): number {
         );
         // Approximate: 1 degree ≈ 111km
         const distanceKm = distance * 111;
-        
+
         if (distanceKm <= 0.5) return 0.6;
         if (distanceKm <= 1) return 0.5;
         if (distanceKm <= 2) return 0.4;
         if (distanceKm <= 5) return 0.2;
     }
-    
+
     return 0.1;
 }
 
 function calculateAtmosphereSimilarity(poi1: POI, poi2: POI): number {
     const atm1 = poi1.atmosphere_tags;
     const atm2 = poi2.atmosphere_tags;
-    
+
     if (!atm1 || !atm2) return 0.5; // Default when no atmosphere data
-    
+
     const core1 = atm1.core as Record<string, string> | undefined;
     const core2 = atm2.core as Record<string, string> | undefined;
-    
+
     if (!core1 || !core2) return 0.5;
-    
+
     // Energy similarity
     const energySim = core1.energy === core2.energy ? 1.0 : 0.5;
-    
+
     // Style similarity
     const styleSim = core1.style === core2.style ? 1.0 : 0.6;
-    
+
     // Scenes overlap
     const scenes1 = atm1.scenes as Record<string, boolean> | undefined;
     const scenes2 = atm2.scenes as Record<string, boolean> | undefined;
     let sceneOverlap = 0;
     let sceneCount = 0;
-    
+
     if (scenes1 && scenes2) {
         const keys = Object.keys(scenes1);
         for (const key of keys) {
@@ -191,17 +191,17 @@ function calculateAtmosphereSimilarity(poi1: POI, poi2: POI): number {
         }
         sceneOverlap = sceneCount > 0 ? sceneOverlap / sceneCount : 0;
     }
-    
+
     return energySim * 0.3 + styleSim * 0.3 + sceneOverlap * 0.4;
 }
 
 function calculatePriceSimilarity(poi1: POI, poi2: POI): number {
     const cat1 = poi1.category_tags as Record<string, unknown> | undefined;
     const cat2 = poi2.category_tags as Record<string, unknown> | undefined;
-    
+
     const price1 = (cat1?.characteristics as Record<string, number> | undefined)?.price_range || 2;
     const price2 = (cat2?.characteristics as Record<string, number> | undefined)?.price_range || 2;
-    
+
     const diff = Math.abs(price1 - price2);
     return Math.max(0, 1 - diff * 0.3);
 }
@@ -211,7 +211,7 @@ function calculateOverallSimilarity(poi1: POI, poi2: POI): { score: number; brea
     const locationScore = calculateLocationSimilarity(poi1, poi2);
     const atmosphereScore = calculateAtmosphereSimilarity(poi1, poi2);
     const priceScore = calculatePriceSimilarity(poi1, poi2);
-    
+
     const breakdown: SimilarityBreakdown = {
         category_score: categoryScore,
         location_score: locationScore,
@@ -219,19 +219,19 @@ function calculateOverallSimilarity(poi1: POI, poi2: POI): { score: number; brea
         price_score: priceScore,
         popularity_score: 0.5, // Placeholder
     };
-    
-    const score = 
+
+    const score =
         categoryScore * config.similarityWeights.category +
         locationScore * config.similarityWeights.location +
         atmosphereScore * config.similarityWeights.atmosphere +
         priceScore * config.similarityWeights.price;
-    
+
     return { score, breakdown };
 }
 
 function generateRecommendationReason(poi1: POI, poi2: POI, breakdown: SimilarityBreakdown): string {
     const reasons: string[] = [];
-    
+
     if (breakdown.category_score >= 0.7) {
         reasons.push('同類型店家');
     }
@@ -247,23 +247,23 @@ function generateRecommendationReason(poi1: POI, poi2: POI, breakdown: Similarit
     if (breakdown.price_score >= 0.7) {
         reasons.push('價格相近');
     }
-    
+
     return reasons.length > 0 ? reasons.slice(0, 2).join('、') : '相似推薦';
 }
 
 function findCommonTags(poi1: POI, poi2: POI): string[] {
     const tags1 = new Set();
     const tags2 = new Set();
-    
+
     // Add category tags
     const cat1 = poi1.category_tags as Record<string, string> | undefined;
     const cat2 = poi2.category_tags as Record<string, string> | undefined;
-    
+
     if (cat1?.primary) tags1.add(String(cat1.primary));
     if (cat1?.secondary) tags1.add(String(cat1.secondary));
     if (cat2?.primary) tags2.add(String(cat2.primary));
     if (cat2?.secondary) tags2.add(String(cat2.secondary));
-    
+
     // Intersection
     const common = [...tags1].filter(t => tags2.has(t));
     return common.slice(0, 5) as string[];
@@ -274,12 +274,12 @@ async function getAllPOIs(): Promise<POI[]> {
         .from('l1_places')
         .select('id, name, category, location_tags, category_tags, atmosphere_tags, location')
         .not('category', 'is', null);
-    
+
     if (error) {
         console.error('Error fetching POIs:', error);
         return [];
     }
-    
+
     return (data || []).map(poi => {
         let coordinates = null;
         if (poi.location) {
@@ -290,7 +290,7 @@ async function getAllPOIs(): Promise<POI[]> {
                 }
             } catch (e) {}
         }
-        
+
         return {
             ...poi,
             coordinates
@@ -303,20 +303,20 @@ async function getProcessedPOIs(): Promise<Set<string>> {
         .from('l1_poi_similarities')
         .select('poi_id')
         .gte('expires_at', new Date().toISOString());
-    
+
     return new Set((data || []).map(r => r.poi_id));
 }
 
 async function batchInsertSimilarities(similarities: PrecomputedSimilarity[]): Promise<void> {
     if (similarities.length === 0) return;
-    
+
     const { error } = await supabase
         .from('l1_poi_similarities')
         .upsert(similarities, {
             onConflict: 'poi_id,similar_poi_id',
             ignoreDuplicates: false
         });
-    
+
     if (error) {
         console.error('Error inserting similarities:', error);
     }
@@ -341,45 +341,45 @@ async function main() {
     console.log(`Job ID: ${jobId}`);
     console.log(`Config:`, config);
     console.log('');
-    
+
     // Fetch all POIs
     console.log('Loading POIs...');
     const pois = await getAllPOIs();
     console.log(`Loaded ${pois.length} POIs`);
-    
+
     // Get already processed POIs
     const processedPOIs = await getProcessedPOIs();
     const unprocessedPOIs = pois.filter(p => !processedPOIs.has(p.id));
     console.log(`Unprocessed: ${unprocessedPOIs.length}, Already processed: ${processedPOIs.size}`);
     console.log('');
-    
+
     if (unprocessedPOIs.length === 0) {
         console.log('All POIs have been processed. No new computations needed.');
         return;
     }
-    
+
     const semaphore = new Semaphore(config.workers);
     const allSimilarities: PrecomputedSimilarity[] = [];
     let totalProcessed = 0;
     let totalInserted = 0;
-    
+
     console.log(`Processing ${unprocessedPOIs.length} POIs with ${config.workers} workers...`);
-    
+
     for (let i = 0; i < unprocessedPOIs.length; i++) {
         const poi = unprocessedPOIs[i];
-        
+
         await semaphore.acquire();
-        
+
         (async () => {
             try {
                 const poiSimilarities: PrecomputedSimilarity[] = [];
-                
+
                 // Calculate similarity with all other POIs
                 for (const candidate of pois) {
                     if (candidate.id === poi.id) continue;
-                    
+
                     const { score, breakdown } = calculateOverallSimilarity(poi, candidate);
-                    
+
                     if (score >= config.minSimilarity) {
                         poiSimilarities.push({
                             poi_id: poi.id,
@@ -393,40 +393,40 @@ async function main() {
                         });
                     }
                 }
-                
+
                 // Sort by score and limit
                 poiSimilarities.sort((a, b) => b.similarity_score - a.similarity_score);
                 const limitedSimilarities = poiSimilarities.slice(0, config.maxPerPOI);
-                
+
                 // Batch insert
                 if (limitedSimilarities.length > 0) {
                     await batchInsertSimilarities(limitedSimilarities);
                     totalInserted += limitedSimilarities.length;
                 }
-                
+
                 totalProcessed++;
-                
+
                 if (totalProcessed % 20 === 0) {
                     console.log(`Progress: ${totalProcessed}/${unprocessedPOIs.length} (${((totalProcessed / unprocessedPOIs.length) * 100).toFixed(1)}%)`);
                     await logJobProgress(jobId, 'running', { processed: totalProcessed, inserted: totalInserted });
                 }
-                
+
             } finally {
                 semaphore.release();
             }
         })();
-        
+
         // Small delay to avoid overwhelming the database
         if (i % 10 === 0) {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
     }
-    
+
     // Wait for all workers to complete
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     await logJobProgress(jobId, 'completed', { processed: totalProcessed, inserted: totalInserted });
-    
+
     console.log('\n=== Summary ===');
     console.log(`Total POIs processed: ${totalProcessed}`);
     console.log(`Total similarities inserted: ${totalInserted}`);

@@ -1,7 +1,7 @@
 # LUTAGU Agent DSL 完整設定檔
 
-> **版本**: 3.0.0  
-> **格式**: Dify DSL (YAML)  
+> **版本**: 3.0.0
+> **格式**: Dify DSL (YAML)
 > **說明**: 可直接匯入 Dify 的完整 Agent 設定
 
 ---

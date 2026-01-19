@@ -3,9 +3,9 @@ import fs from 'fs';
 
 const stations = JSON.parse(fs.readFileSync('scripts/data/stations_by_ward.json', 'utf8'));
 const targets = [
-    'Osaki', 'Takadanobaba', 'Nishi-Funabashi', 'Minami-Senju', 
-    'Tamachi', 'Gotanda', 'Uguisudani', 'Sugamo', 'Akabane', 
-    'Yotsuya', 'Ogikubo', 'Asakusabashi', 'Suidobashi', 
+    'Osaki', 'Takadanobaba', 'Nishi-Funabashi', 'Minami-Senju',
+    'Tamachi', 'Gotanda', 'Uguisudani', 'Sugamo', 'Akabane',
+    'Yotsuya', 'Ogikubo', 'Asakusabashi', 'Suidobashi',
     'Shin-Kiba', 'Kameido', 'Ichigaya'
 ];
 

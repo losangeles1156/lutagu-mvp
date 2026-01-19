@@ -44,7 +44,7 @@ async function extractFacilities(text: string, operator: string) {
     Extract station facilities (elevator, toilet, barrier_free) from this ${operator} website text.
     Return strictly JSON array (no markdown) with objects:
     { type, name_ja, name_en, location_desc, attributes }
-    
+
     Text: ${text.slice(0, 15000)}
     `;
 

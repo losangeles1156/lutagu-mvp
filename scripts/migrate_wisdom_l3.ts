@@ -38,7 +38,7 @@ async function migrateWisdomSmart() {
     // Heuristic:
     // 1. Exact match (rare due to format diff)
     // 2. Format adjustment: Replace ':' with '.' and check.
-    // 3. Suffix match: if Wisdom Key is "odpt:Station:TokyoMetro.Ueno", 
+    // 3. Suffix match: if Wisdom Key is "odpt:Station:TokyoMetro.Ueno",
     //    we look for DB IDs that START with "odpt.Station:TokyoMetro." AND END with ".Ueno".
 
     const wisdomKeys = Object.keys(STATION_WISDOM);
@@ -56,7 +56,7 @@ async function migrateWisdomSmart() {
 
         // Strategy B: Parse Operator and Station Name from Wisdom Key
         // keys usually look like: "odpt:Station:TokyoMetro.Ueno"
-        // parts: ["odpt", "Station", "Operator", "StationName"]? 
+        // parts: ["odpt", "Station", "Operator", "StationName"]?
         // Actually split by ":" then "."?
 
         // Let's parse loosely.
@@ -89,11 +89,11 @@ async function migrateWisdomSmart() {
 
             // Fallback for tricky ones?
             // "odpt:Station:TokyoMetro.Ginza" -> might match "odpt.Station:TokyoMetro.Ginza.Ginza"
-            // The logic above: operator="TokyoMetro", name="Ginza". 
+            // The logic above: operator="TokyoMetro", name="Ginza".
             // node "odpt.Station:TokyoMetro.Ginza.Ginza" ends with ".Ginza". It should match!
 
             // What about "odpt:Station:JR-East.Tokyo"?
-            // DB: "odpt.Station:JR-East.Chuo.Tokyo"? 
+            // DB: "odpt.Station:JR-East.Chuo.Tokyo"?
             // operator="JR-East", name="Tokyo". Match!
 
             continue;

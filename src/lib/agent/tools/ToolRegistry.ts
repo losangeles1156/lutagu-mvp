@@ -25,8 +25,8 @@ export class ToolRegistry implements IToolRegistry {
     }
 
     getToolsByLevel(level: AgentLevel): ITool[] {
-        // Return tools that are AT or BELOW the requested level? 
-        // Or strictly matching? 
+        // Return tools that are AT or BELOW the requested level?
+        // Or strictly matching?
         // Usually higher levels can access lower level tools.
         // Let's implement strict level matching for grouping, or access control.
         return Array.from(this.tools.values()).filter(t => t.requiredLevel === level);
