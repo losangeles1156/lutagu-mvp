@@ -1,5 +1,5 @@
 {
-    "name": "JMA Weather Alert Sync",
+    "name": "JMA Weather Alert Sync (HTTP)",
     "nodes": [
         {
             "parameters": {
@@ -44,7 +44,7 @@
         },
         {
             "parameters": {
-                "jsCode": "// Parse JMA Weather Alerts for Tokyo Region\nconst data = $input.first().json;\nconst alerts = [];\n\n// Severity mapping\nconst severityMap = {\n  '注意報': 'advisory',\n  '警報': 'warning',\n  '特別警報': 'emergency'\n};\n\n// Alert type mapping\nconst alertTypeMap = {\n  '大雪': 'heavy_snow',\n  '暴風雪': 'blizzard',\n  '大雨': 'heavy_rain',\n  '暴風': 'storm',\n  '洪水': 'flood',\n  '高潮': 'storm_surge',\n  '波浪': 'high_waves',\n  '雷': 'thunder',\n  '濃霧': 'dense_fog',\n  '乾燥': 'dry_air',\n  '低温': 'low_temp',\n  '霜': 'frost',\n  '着氷': 'icing',\n  '着雪': 'snow_accretion',\n  '地震': 'earthquake'\n};\n\nif (data?.areaTypes) {\n  for (const areaType of data.areaTypes) {\n    for (const area of (areaType.areas || [])) {\n      for (const warning of (area.warnings || [])) {\n        if (warning.status !== '発表') continue;\n        \n        const alertCode = warning.code || '';\n        const alertType = alertTypeMap[alertCode] || 'other';\n        const kindName = warning.kind?.name || '注意報';\n        const severity = severityMap[kindName] || 'advisory';\n        \n        alerts.push({\n          alert_type: alertType,\n          severity: severity,\n          affected_regions: [area.code, 'tokyo'],\n          title: `${kindName}: ${alertCode}`,\n          subtitle: `${severity.toUpperCase()}: ${alertType.replace('_', ' ')}`,\n          content: {\n            ja: warning.text || '詳細情報は気象庁ウェブサイトをご確認ください。',\n            en: warning.text || 'Please check JMA website for details.',\n            zh: warning.text || '請查看氣象廳網站以獲取詳細資訊。'\n          },\n          region: 'tokyo',\n          source: 'jma',\n          valid_from: new Date().toISOString(),\n          valid_until: null,\n          data_type: 'jma_alert',\n          timestamp: new Date().toISOString()\n        });\n      }\n    }\n  }\n}\n\n// If no alerts found, create a \"no alerts\" log entry\nif (alerts.length === 0) {\n  return [{ json: { log: 'No active alerts from JMA', timestamp: new Date().toISOString() } }];\n}\n\nreturn alerts.map(a => ({ json: a }));"
+                "jsCode": "// Parse JMA Weather Alerts for Tokyo Region\nconst data = $input.first().json;\nconst alerts = [];\n\n// Severity mapping\nconst severityMap = {\n  '注意報': 'advisory',\n  '警報': 'warning',\n  '特別警報': 'emergency'\n};\n\n// Alert type mapping\nconst alertTypeMap = {\n  '大雪': 'heavy_snow',\n  '暴風雪': 'blizzard',\n  '大雨': 'heavy_rain',\n  '暴風': 'storm',\n  '洪水': 'flood',\n  '高潮': 'storm_surge',\n  '波浪': 'high_waves',\n  '雷': 'thunder',\n  '濃霧': 'dense_fog',\n  '乾燥': 'dry_air',\n  '低温': 'low_temp',\n  '霜': 'frost',\n  '着氷': 'icing',\n  '着雪': 'snow_accretion',\n  '地震': 'earthquake'\n};\n\nif (data?.areaTypes) {\n  for (const areaType of data.areaTypes) {\n    for (const area of (areaType.areas || [])) {\n      for (const warning of (area.warnings || [])) {\n        if (warning.status !== '発表') continue;\n        \n        const alertCode = warning.code || '';\n        const alertType = alertTypeMap[alertCode] || 'other';\n        const kindName = warning.kind?.name || '注意報';\n        const severity = severityMap[kindName] || 'advisory';\n        \n        alerts.push({\n          alert_type: alertType,\n          severity: severity,\n          affected_regions: [area.code, 'tokyo'],\n          title: `${kindName}: ${alertCode}`,\n          subtitle: `${severity.toUpperCase()}: ${alertType.replace('_', ' ')}`,\n          content: {\n            ja: warning.text || '詳細情報は気象庁ウェブサイトをご確認ください。',\n            en: warning.text || 'Please check JMA website for details.',\n            zh: warning.text || '請查看氣象廳網站以獲取詳細資訊。'\n          },\n          region: 'tokyo',\n          source: 'jma',\n          valid_from: new Date().toISOString(),\n          valid_until: null,\n          data_type: 'jma_alert',\n          timestamp: new Date().toISOString()\n        });\n      }\n    }\n  }\n}\n\n// If no alerts found, create a \"no alerts\" log entry\nif (alerts.length === 0) {\n  return [{ json: { _skip: true, log: 'No active alerts from JMA', timestamp: new Date().toISOString() } }];\n}\n\nreturn alerts.map(a => ({ json: a }));"
             },
             "id": "code-parse",
             "name": "Parse JMA Response",
@@ -65,11 +65,11 @@
                     },
                     "conditions": [
                         {
-                            "leftValue": "={{ $json.alert_type }}",
-                            "rightValue": "",
+                            "leftValue": "={{ $json._skip }}",
+                            "rightValue": true,
                             "operator": {
-                                "type": "string",
-                                "operation": "exists"
+                                "type": "boolean",
+                                "operation": "notEquals"
                             }
                         }
                     ],
@@ -87,75 +87,40 @@
         },
         {
             "parameters": {
-                "operation": "upsert",
-                "tableId": "weather_alerts",
-                "conflictType": "noRefresh",
-                "dataToSend": "defineBelow",
-                "fieldsToSend": {
-                    "values": [
+                "method": "POST",
+                "url": "https://evubeqeaafdjnuocyhmb.supabase.co/rest/v1/weather_alerts",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
                         {
-                            "fieldName": "alert_type",
-                            "fieldValue": "={{ $json.alert_type }}"
+                            "name": "Content-Type",
+                            "value": "application/json"
                         },
                         {
-                            "fieldName": "severity",
-                            "fieldValue": "={{ $json.severity }}"
-                        },
-                        {
-                            "fieldName": "affected_regions",
-                            "fieldValue": "={{ $json.affected_regions }}"
-                        },
-                        {
-                            "fieldName": "title",
-                            "fieldValue": "={{ $json.title }}"
-                        },
-                        {
-                            "fieldName": "subtitle",
-                            "fieldValue": "={{ $json.subtitle }}"
-                        },
-                        {
-                            "fieldName": "content",
-                            "fieldValue": "={{ $json.content }}"
-                        },
-                        {
-                            "fieldName": "region",
-                            "fieldValue": "={{ $json.region }}"
-                        },
-                        {
-                            "fieldName": "source",
-                            "fieldValue": "={{ $json.source }}"
-                        },
-                        {
-                            "fieldName": "valid_from",
-                            "fieldValue": "={{ $json.valid_from }}"
-                        },
-                        {
-                            "fieldName": "valid_until",
-                            "fieldValue": "={{ $json.valid_until }}"
-                        },
-                        {
-                            "fieldName": "data_type",
-                            "fieldValue": "={{ $json.data_type }}"
-                        },
-                        {
-                            "fieldName": "timestamp",
-                            "fieldValue": "={{ $json.timestamp }}"
+                            "name": "Prefer",
+                            "value": "resolution=merge-duplicates"
                         }
                     ]
-                }
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify($json) }}",
+                "options": {}
             },
-            "id": "supabase-upsert",
-            "name": "Upsert to Supabase",
-            "type": "n8n-nodes-base.supabase",
-            "typeVersion": 1,
+            "id": "http-supabase",
+            "name": "POST to Supabase REST API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
             "position": [
                 880,
                 0
             ],
             "credentials": {
-                "supabaseApi": {
-                    "id": "YOUR_SUPABASE_CREDENTIAL_ID",
-                    "name": "Supabase (lutagu-mvp)"
+                "httpHeaderAuth": {
+                    "id": "CREATE_NEW_CREDENTIAL",
+                    "name": "Supabase API Key (需建立)"
                 }
             }
         }
@@ -198,7 +163,7 @@
             "main": [
                 [
                     {
-                        "node": "Upsert to Supabase",
+                        "node": "POST to Supabase REST API",
                         "type": "main",
                         "index": 0
                     }
@@ -219,6 +184,6 @@
         }
     ],
     "triggerCount": 0,
-    "updatedAt": "2026-01-19T15:20:00.000Z",
-    "versionId": "1"
+    "updatedAt": "2026-01-19T15:34:00.000Z",
+    "versionId": "2"
 }
