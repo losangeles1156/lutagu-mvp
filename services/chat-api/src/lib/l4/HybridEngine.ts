@@ -264,6 +264,22 @@ export class HybridEngine {
                 activeKnowledgeSnippet += `\nStation Weather: ${enrichedData.weather_condition}`;
             }
 
+            // Extreme Weather Knowledge Injection
+            const isExtremeWeatherQuery = /(?:大雪|積雪|雪害|暴風雪|寒流|降雪|停駛|停運|運休|見合わせ|運転見合わせ|道路管制|封路|高速公路封閉|颱風|台風|暴風|地震|揺れ|snow|typhoon|earthquake)/i.test(text);
+            if (isExtremeWeatherQuery) {
+                logs.push('[Knowledge] Extreme Weather Query Detected - Injecting Expert Knowledge');
+                const extremeWeatherKnowledge = `
+[Extreme Weather Guide]
+- JR 在來線：積雪 20cm 以上可能減班，30cm 以上可能停駛。
+- 東京Metro / 都營地鐵：全線地下化，通常不受積雪影響（地面段除外）。
+- 新幹線：東海道新幹線（關原區間）較易受影響，北陸・上越有除雪設備。
+- 大雪時建議：優先使用地下鐵，避免山手線外側 JR 線。
+- 查詢道路狀況：日本道路交通情報センター (jartic.or.jp)。
+- 攜帶物品：防滑鞋、備用乾襪、行動電源、現金。
+`;
+                activeKnowledgeSnippet += extremeWeatherKnowledge;
+            }
+
             const systemPrompt = this.buildSystemPrompt(locale);
             const userPrompt = this.buildUserPrompt(text, { ...context, wisdomSummary: activeKnowledgeSnippet } as any);
 
@@ -382,8 +398,11 @@ export class HybridEngine {
     private async checkAlgorithms(text: string, locale: SupportedLocale, context?: RequestContext): Promise<HybridResponse | null> {
         const lowerText = text.toLowerCase();
 
+        // Exclude general weather knowledge queries from L2 status check
+        const isExtremeWeatherContext = /(?:大雪|積雪|雪害|暴風雪|寒流|颱風|台風|地震|天氣|気象)/i.test(text);
+
         const isOperationStatusQuery = /(?:遅延|遅れ|delay|延誤|誤點|晚點|運行状況|運行狀況|運転状況|status|平常運転|運転見合わせ|見合わせ|運休|停運|停駛)/i.test(text);
-        if (isOperationStatusQuery) {
+        if (isOperationStatusQuery && !isExtremeWeatherContext) {
             const lineHints: Array<{
                 railwayId: string;
                 operatorKey: string;
