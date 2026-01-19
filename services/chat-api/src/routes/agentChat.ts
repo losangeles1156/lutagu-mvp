@@ -65,22 +65,9 @@ agentChatRouter.post('/', async (req, res) => {
         res.setHeader('Transfer-Encoding', 'chunked');
         res.setHeader('X-Content-Type-Options', 'nosniff');
 
-        // Helpers for Vercel AI SDK Data Protocol (Text Stream)
-        // 0: text-start
-        // 1: text-delta
-        // 2: text-end (optional, closing stream implies end)
-
-        const textId = 'text-1';
-
-        // Send initial part
-        res.write(`0:"${textId}"\n`);
-
         const sendUpdate = (delta: string) => {
-            // Protocol: 1:"text_delta_content"\n
-            // Need to JSON stringify the delta to escape newlines/quotes properly
-            if (delta) {
-                res.write(`0:${JSON.stringify(delta)}\n`);
-            }
+            if (!delta) return;
+            res.write(delta);
         };
 
         const sendThinking = (step: string) => {
@@ -90,35 +77,29 @@ agentChatRouter.post('/', async (req, res) => {
         try {
             sendThinking(locale === 'en' ? 'Thinking...' : '思考中...');
 
+            let streamedAnyToken = false;
+
             const result = await hybridEngine.processRequest({
                 text: query,
                 locale,
                 context,
                 onProgress: (step) => sendThinking(step),
                 onToken: (delta) => {
+                    streamedAnyToken = true;
                     sendUpdate(delta);
                 }
             });
 
             if (result) {
-                if (result.reasoning) {
-                    // Send final reasoning block if exists
-                    sendUpdate(`[THINKING]${result.reasoning}[/THINKING]\n`);
+                // Note: reasoning field is for internal logging only, not sent to users
+                // Only send content to prevent debug info leakage (Fixed: Issue #AI-CHAT-001)
+                if (!streamedAnyToken && result.content) {
+                    sendUpdate(result.content);
                 }
-                // If the engine didn't stream tokens (e.g. from cache or logic), send content now
-                if (result.content && !result.reasoning) { // Simple check, usually onToken handles it for LLM
-                    // Note: If onToken was called, appending content again might duplicate.
-                    // HybridEngine should guarantee onToken calls for LLM. 
-                    // For template/algorithm responses, they might not stream onToken.
-                    // Let's rely on checking if onToken was ever called? 
-                    // Actually, HybridEngine implementation calls onToken for LLM.
-                    // For templates/others, it might just return result.
-                    // Let's send result.content only if it's NOT LLM source (safe bet) or strictly check.
-                    if (result.source !== 'llm') {
-                        sendUpdate(result.content);
-                    }
-                } else if (result.source === 'llm' && !result.content) {
-                    // LLM failed to produce content?
+
+                // Log reasoning internally for debugging (not exposed to users)
+                if (result.reasoning && process.env.NODE_ENV === 'development') {
+                    console.log('[Debug] Reasoning:', result.reasoning);
                 }
             } else {
                 const msg = locale === 'en' ? "I'm not sure, could you clarify?" : '抱歉，我不太理解您的意思。';

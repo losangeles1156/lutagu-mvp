@@ -24,6 +24,7 @@ import { StrategyContext } from '@/lib/ai/strategyEngine';
 import { AgentRouter } from '@/lib/ai/AgentRouter';
 import { executeSkill, skillRegistry } from './skills/SkillRegistry';
 import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
+import { getTrainStatus } from '@/lib/odpt/service';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -195,7 +196,8 @@ export class HybridEngine {
 
                 if (poiMatch && poiMatch.confidence >= 0.6) {
                     bestMatch = poiMatch;
-                } else if (algorithmMatch && algorithmMatch.confidence >= 0.8) {
+                } else if (algorithmMatch && algorithmMatch.confidence >= 0.65) {
+                    // Lowered from 0.8 to 0.65 to accept more valid algorithm results (Fixed: Issue #AI-CHAT-002)
                     bestMatch = algorithmMatch;
                 }
             }
@@ -369,15 +371,128 @@ export class HybridEngine {
     private async checkAlgorithms(text: string, locale: SupportedLocale, context?: RequestContext): Promise<HybridResponse | null> {
         const lowerText = text.toLowerCase();
 
+        const isOperationStatusQuery = /(?:遅延|遅れ|delay|延誤|誤點|晚點|運行状況|運行狀況|運転状況|status|平常運転|運転見合わせ|見合わせ|運休|停運|停駛)/i.test(text);
+        if (isOperationStatusQuery) {
+            const lineHints: Array<{
+                railwayId: string;
+                operatorKey: string;
+                match: RegExp;
+                names: { 'zh-TW': string; ja: string; en: string };
+            }> = [
+                {
+                    railwayId: 'odpt.Railway:TokyoMetro.Ginza',
+                    operatorKey: 'TokyoMetro',
+                    match: /(?:銀座線|ginza\s*line)/i,
+                    names: { 'zh-TW': '銀座線', ja: '銀座線', en: 'Ginza Line' }
+                },
+                {
+                    railwayId: 'odpt.Railway:TokyoMetro.Marunouchi',
+                    operatorKey: 'TokyoMetro',
+                    match: /(?:丸ノ内線|丸之內線|marunouchi\s*line)/i,
+                    names: { 'zh-TW': '丸之內線', ja: '丸ノ内線', en: 'Marunouchi Line' }
+                },
+                {
+                    railwayId: 'odpt.Railway:TokyoMetro.Hibiya',
+                    operatorKey: 'TokyoMetro',
+                    match: /(?:日比谷線|hibiya\s*line)/i,
+                    names: { 'zh-TW': '日比谷線', ja: '日比谷線', en: 'Hibiya Line' }
+                },
+                {
+                    railwayId: 'odpt.Railway:JR-East.Yamanote',
+                    operatorKey: 'JR-East',
+                    match: /(?:山手線|yamanote\s*line)/i,
+                    names: { 'zh-TW': '山手線', ja: '山手線', en: 'Yamanote Line' }
+                }
+            ];
+
+            const hint = lineHints.find(h => h.match.test(text)) || null;
+            try {
+                const list = await getTrainStatus(hint?.operatorKey);
+                const filtered = hint ? list.filter((it: any) => it?.['odpt:railway'] === hint.railwayId) : list;
+                const top = filtered[0];
+
+                const pickLocaleKey = ((): 'ja' | 'en' | 'zh-TW' => {
+                    if (locale.startsWith('ja')) return 'ja';
+                    if (locale.startsWith('en')) return 'en';
+                    return 'zh-TW';
+                })();
+
+                const infoTextObj = top?.['odpt:trainInformationText'];
+                const infoText = ((): string => {
+                    if (typeof infoTextObj === 'string') return infoTextObj;
+                    if (!infoTextObj || typeof infoTextObj !== 'object') return '';
+                    return (infoTextObj as any)[pickLocaleKey] || (infoTextObj as any).ja || (infoTextObj as any).en || '';
+                })();
+
+                const statusRaw = top?.['odpt:trainInformationStatus'];
+                const statusStr = typeof statusRaw === 'string'
+                    ? statusRaw
+                    : (statusRaw && typeof statusRaw === 'object')
+                        ? ((statusRaw as any)[pickLocaleKey] || (statusRaw as any).ja || (statusRaw as any).en || '')
+                        : '';
+
+                const hasIssue = /(?:遅れ|遅延|運転見合わせ|運休|ダイヤ乱れ|delay|suspend|disrupt|issue)/i.test(`${statusStr} ${infoText}`);
+
+                const lineName = hint
+                    ? (locale.startsWith('ja') ? hint.names.ja : locale.startsWith('en') ? hint.names.en : hint.names['zh-TW'])
+                    : (locale.startsWith('ja') ? '路線' : locale.startsWith('en') ? 'the line' : '路線');
+
+                const content = (() => {
+                    if (!top) {
+                        return locale.startsWith('ja')
+                            ? `${lineName}の運行状況は現在確認できませんでした。別の路線名で試してください。`
+                            : locale.startsWith('en')
+                                ? `I couldn’t confirm the current service status for ${lineName}. Try specifying the exact line name.`
+                                : `目前無法確認 ${lineName} 的運行狀態，請再指定更精確的路線名稱。`;
+                    }
+
+                    if (!hasIssue) {
+                        return locale.startsWith('ja')
+                            ? `${lineName}は概ね平常運転です。${infoText || ''}`.trim()
+                            : locale.startsWith('en')
+                                ? `${lineName} appears to be running normally. ${infoText || ''}`.trim()
+                                : `${lineName} 目前看起來大致正常運行。${infoText || ''}`.trim();
+                    }
+
+                    return locale.startsWith('ja')
+                        ? `${lineName}で遅延・乱れの可能性があります。${infoText || statusStr}`.trim()
+                        : locale.startsWith('en')
+                            ? `${lineName} may have delays or disruptions. ${infoText || statusStr}`.trim()
+                            : `${lineName} 可能有延誤或異常。${infoText || statusStr}`.trim();
+                })();
+
+                return {
+                    source: 'algorithm',
+                    type: 'text',
+                    content,
+                    data: {
+                        railwayId: hint?.railwayId,
+                        operator: hint?.operatorKey,
+                        status: statusStr,
+                        text: infoText
+                    },
+                    confidence: hint ? 0.92 : 0.85,
+                    reasoning: 'Checked live operation status.'
+                };
+            } catch {
+                return null;
+            }
+        }
+
         // Route Intent
         if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
             // Regex handles: [From] Origin [To/WalkTo/GoTo] Dest
             // Excludes "步行", "走路" from station name capture
             // Order sensitive: Match longer separators (步行到) before shorter ones (到)
-            const zhMatch = text.match(/(?:從|from)?\s*([^到去前往步行走路\s]+)\s*(?:步行到|走路去|到|去|前往|to)\s*([^?\s？！!，,。]+)/) || text.match(/([^从\s]+)\s*到\s*([^?\s？！!，,。]+)/);
-            const enMatch = text.match(/from\s+([a-zA-Z\s]+)\s+to\s+([a-zA-Z\s]+)/i);
-            const origin = zhMatch?.[1] || enMatch?.[1];
-            const dest = zhMatch?.[2] || enMatch?.[2];
+            // Fixed: Limit station name capture to avoid capturing route modifiers (最快/最省錢/路線)
+            const zhMatch = text.match(/(?:從|from)?\s*([^到去前往步行走路\s]{1,10})\s*(?:步行到|走路去|到|去|前往|to)\s*([^?\s？！!，,。的最快省便宜路線]{1,10})/) || text.match(/([^从\s]{1,10})\s*到\s*([^?\s？！!，,。的最快省便宜路線]{1,10})/);
+            const enMatch = text.match(/from\s+([a-zA-Z\s]{1,20})\s+to\s+([a-zA-Z\s]{1,20})/i);
+            let origin = zhMatch?.[1] || enMatch?.[1];
+            let dest = zhMatch?.[2] || enMatch?.[2];
+
+            // Trim whitespace and validate station names
+            origin = origin?.trim();
+            dest = dest?.trim();
 
             if (origin && dest) {
                 try {
@@ -391,8 +506,20 @@ export class HybridEngine {
                             confidence: 0.95,
                             reasoning: 'Calculated route via algorithm.'
                         };
+                    } else {
+                        // Return fallback response when stations parsed but no routes found
+                        return {
+                            source: 'algorithm',
+                            type: 'text',
+                            content: locale.startsWith('zh') ? `無法找到從 ${origin} 到 ${dest} 的路線，請確認站點名稱是否正確。` : `Unable to find routes from ${origin} to ${dest}. Please verify the station names.`,
+                            data: { origin, dest },
+                            confidence: 0.65,
+                            reasoning: 'Station names parsed but no routes found.'
+                        };
                     }
-                } catch (e) { }
+                } catch (e) {
+                    console.error('[checkAlgorithms] Route finding error:', e);
+                }
             }
         }
 
