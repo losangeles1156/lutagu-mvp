@@ -482,13 +482,18 @@ export class HybridEngine {
         // Route Intent
         if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
             // Regex handles: [From] Origin [To/WalkTo/GoTo] Dest
-            // Excludes "步行", "走路" from station name capture
-            // Order sensitive: Match longer separators (步行到) before shorter ones (到)
-            // Fixed: Limit station name capture to avoid capturing route modifiers (最快/最省錢/路線)
-            const zhMatch = text.match(/(?:從|from)?\s*([^到去前往步行走路\s]{1,10})\s*(?:步行到|走路去|到|去|前往|to)\s*([^?\s？！!，,。的最快省便宜路線]{1,10})/) || text.match(/([^从\s]{1,10})\s*到\s*([^?\s？！!，,。的最快省便宜路線]{1,10})/);
+            // Fixed: More precise station name capture with multiple pattern attempts
+            // Pattern 1: Match "XX站到YY站" or "從XX站到YY站" (most reliable)
+            const stationMatch = text.match(/(?:從|从)?\s*([^\s我想要現]{1,10}站)\s*(?:到|去|前往)\s*([^\s]{1,10}站)/);
+            // Pattern 2: Match "從XX到YY" (no "站" suffix but has "從")
+            const fromToMatch = !stationMatch && text.match(/(?:從|从)\s*([^到去前往我想要現在\s]{1,10})\s*(?:到|去|前往)\s*([^?\s？！!，,。的最快省便宜路線]{1,10})/);
+            // Pattern 3: Match "XX到YY" (no "從" and no "站" suffix, most lenient)
+            const simpleMatch = !stationMatch && !fromToMatch && text.match(/([^從从到去前往步行走路想我要現在\s]{1,10})\s*(?:到|去)\s*([^?\s？！!，,。的最快省便宜路線想要]{1,10})/);
+            // Pattern 4: English pattern
             const enMatch = text.match(/from\s+([a-zA-Z\s]{1,20})\s+to\s+([a-zA-Z\s]{1,20})/i);
-            let origin = zhMatch?.[1] || enMatch?.[1];
-            let dest = zhMatch?.[2] || enMatch?.[2];
+
+            let origin = stationMatch?.[1] || fromToMatch?.[1] || simpleMatch?.[1] || enMatch?.[1];
+            let dest = stationMatch?.[2] || fromToMatch?.[2] || simpleMatch?.[2] || enMatch?.[2];
 
             // Trim whitespace and validate station names
             origin = origin?.trim();
