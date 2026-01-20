@@ -234,3 +234,80 @@ export const retryClients = {
         jitterRange: 0.1
     })
 };
+
+export type CircuitState = 'closed' | 'open' | 'half_open';
+
+export interface CircuitBreakerConfig {
+    name: string;
+    failureThreshold: number;
+    resetTimeoutMs: number;
+    halfOpenSuccessThreshold: number;
+}
+
+export class CircuitBreaker {
+    private state: CircuitState = 'closed';
+    private failureCount = 0;
+    private successCount = 0;
+    private openedAt = 0;
+    private config: CircuitBreakerConfig;
+
+    constructor(config: CircuitBreakerConfig) {
+        this.config = config;
+    }
+
+    public getState(): CircuitState {
+        return this.state;
+    }
+
+    private canAttempt(now: number): boolean {
+        if (this.state === 'closed') return true;
+        if (this.state === 'open' && now - this.openedAt >= this.config.resetTimeoutMs) {
+            this.state = 'half_open';
+            this.successCount = 0;
+            return true;
+        }
+        return this.state === 'half_open';
+    }
+
+    private open(now: number): void {
+        this.state = 'open';
+        this.openedAt = now;
+        this.failureCount = 0;
+        this.successCount = 0;
+    }
+
+    private close(): void {
+        this.state = 'closed';
+        this.failureCount = 0;
+        this.successCount = 0;
+        this.openedAt = 0;
+    }
+
+    public async execute<T>(operation: () => Promise<T>): Promise<T> {
+        const now = Date.now();
+        if (!this.canAttempt(now)) {
+            const error = new Error(`${this.config.name}_circuit_open`);
+            (error as any).code = 'CIRCUIT_OPEN';
+            throw error;
+        }
+
+        try {
+            const result = await operation();
+            if (this.state === 'half_open') {
+                this.successCount += 1;
+                if (this.successCount >= this.config.halfOpenSuccessThreshold) {
+                    this.close();
+                }
+            } else {
+                this.failureCount = 0;
+            }
+            return result;
+        } catch (error) {
+            this.failureCount += 1;
+            if (this.state === 'half_open' || this.failureCount >= this.config.failureThreshold) {
+                this.open(Date.now());
+            }
+            throw error;
+        }
+    }
+}

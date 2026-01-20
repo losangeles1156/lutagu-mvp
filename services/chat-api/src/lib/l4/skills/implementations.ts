@@ -125,7 +125,7 @@ Tone: Friendly, enthusiastic, like a local friend.
 Output in Traditional Chinese (Taiwan).`,
             userPrompt: `Recommend places for: ${input}`,
             taskType: 'chat', // Uses DeepSeek V3
-            model: 'deepseek-v3.2',
+            model: 'deepseek-v3',
             temperature: 0.8 // More creative for recommendations
         });
 
@@ -383,7 +383,7 @@ User is at crowded ${targetStation}.
 Task: Recommend these quieter alternatives.`,
                     userPrompt: input,
                     taskType: 'chat', // DeepSeek for "Vibe" description
-                    model: 'deepseek-v3.2'
+                    model: 'deepseek-v3'
                 });
             } catch (e) { }
 

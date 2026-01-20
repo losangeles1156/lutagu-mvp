@@ -41,8 +41,8 @@ export const mistralSmall = geminiFlashLite; // Legacy alias
 export const geminiBrain = zeabur('gemini-3-flash-preview');
 export const minimaxBrain = minimax('MiniMax-M2.1');
 
-// 3. Synthesizer / Chat: DeepSeek V3.2
-export const deepseekChat = deepseek('deepseek-v3.2');
+// 3. Synthesizer / Chat: DeepSeek V3
+export const deepseekChat = deepseek('deepseek-v3');
 export const geminiFlashFull = zeabur('gemini-2.5-flash'); // Fallback
 
 // =============================================================================

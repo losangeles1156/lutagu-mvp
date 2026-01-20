@@ -30,7 +30,10 @@ export class AnomalyDetector {
             return { isAnomaly: true, reason: 'Empty input' };
         }
 
-        if (trimmed.length >= 4 && !/[\p{L}\p{N}]/u.test(trimmed)) {
+        const hasAlphaNumeric = /[\p{L}\p{N}]/u.test(trimmed);
+        const hasEmoji = /\p{Extended_Pictographic}/u.test(trimmed);
+
+        if (trimmed.length >= 4 && !hasAlphaNumeric && !hasEmoji) {
             return { isAnomaly: true, reason: 'No alphanumeric content' };
         }
 

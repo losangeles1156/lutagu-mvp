@@ -9,7 +9,19 @@ const SESSION_EXPIRY_MINUTES = 30;
 
 export function getVisitorId(): string | null {
     if (typeof window === 'undefined') return null;
-    return Cookies.get(VISITOR_COOKIE_NAME) || null;
+
+    let vid = Cookies.get(VISITOR_COOKIE_NAME);
+
+    // Auto-generate visitor_id if not exists (persistent across sessions)
+    if (!vid) {
+        vid = uuidv4();
+        Cookies.set(VISITOR_COOKIE_NAME, vid, {
+            expires: 365, // 1 year persistence
+            sameSite: 'Lax'
+        });
+    }
+
+    return vid;
 }
 
 export function getSessionId(): string | null {

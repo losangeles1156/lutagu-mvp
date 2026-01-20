@@ -11,10 +11,10 @@ export interface LLMParams {
 }
 
 function resolveTimeoutMs(taskType: LLMParams['taskType'] | undefined) {
-    if (taskType === 'classification' || taskType === 'simple') return 10000;
-    if (taskType === 'chat' || taskType === 'synthesis') return 20000;
-    if (taskType === 'reasoning' || taskType === 'context_heavy') return 30000;
-    return 20000;
+    if (taskType === 'classification' || taskType === 'simple') return 15000;
+    if (taskType === 'chat' || taskType === 'synthesis') return 45000;
+    if (taskType === 'reasoning' || taskType === 'context_heavy') return 90000;
+    return 45000;
 }
 
 function resolveMaxTokens(params: LLMParams) {
@@ -56,12 +56,10 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return result;
     }
 
-    // 3. Chat / Creative / Long Output -> DeepSeek V3 (High Output CP value)
+    // 3. Chat / Creative / Long Output -> Gemini 3 Flash Preview (Stable & High Quality)
     if (taskType === 'synthesis' || taskType === 'chat') {
-        // Fallback to Gemini 3 if DeepSeek key missing (DeepSeek is optional optimization)
-        if (process.env.DEEPSEEK_API_KEY) {
-            return generateDeepSeekResponse(params);
-        }
+        // DeepSeek is currently causing API errors (Invalid model / Auth).
+        // Temporarily switched to Gemini 3 Flash Preview as primary.
         return generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
     }
 
@@ -168,6 +166,7 @@ async function generateGeminiResponse(params: GeminiParams): Promise<string | nu
         }
 
         const data: any = await res.json();
+        console.log(`[Gemini Debug] Status: ${res.status}, Model: ${targetModel}, Data:`, JSON.stringify(data).slice(0, 200)); // Log first 200 chars
         let content = data?.choices?.[0]?.message?.content || null;
         if (content) content = content.replace(/\[THINKING\][\s\S]*?\[\/THINKING\]/g, '').trim();
         return content;
@@ -194,7 +193,7 @@ async function generateDeepSeekResponse(params: LLMParams): Promise<string | nul
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
             body: JSON.stringify({
-                model: 'deepseek-v3', // Standard name for V3
+                model: 'deepseek-chat', // Standard name compatible with Zeabur/LiteLLM
                 messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
                 temperature,
                 max_tokens: maxTokens

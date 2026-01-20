@@ -4,8 +4,16 @@ import { hybridEngine, HybridResponse } from '@/lib/l4/HybridEngine';
 import { logUserActivity } from '@/lib/activityLogger';
 import { getVisitorIdFromRequest } from '@/lib/visitorIdentity';
 import { writeAuditLog, writeSecurityEvent } from '@/lib/security/audit';
+import { CircuitBreaker } from '@/lib/utils/retry';
 
 export const chatRouter = express.Router();
+
+const strategyBreaker = new CircuitBreaker({
+    name: 'strategy_engine',
+    failureThreshold: 3,
+    resetTimeoutMs: 20000,
+    halfOpenSuccessThreshold: 1
+});
 
 type SupportedLocale = 'zh-TW' | 'en' | 'ja';
 
@@ -54,7 +62,9 @@ chatRouter.post('/', async (req: Request, res: Response) => {
         let strategyContext: any = null;
         if (userLocation?.lat && userLocation?.lon) {
             try {
-                strategyContext = await StrategyEngine.getSynthesis(userLocation.lat, userLocation.lon, locale);
+                strategyContext = await strategyBreaker.execute(() =>
+                    StrategyEngine.getSynthesis(userLocation.lat, userLocation.lon, locale)
+                );
             } catch (e) {
                 console.error('Strategy Engine Error:', e);
             }

@@ -3,8 +3,16 @@ import { hybridEngine, RequestContext } from '@/lib/l4/HybridEngine';
 import { StrategyEngine } from '@/lib/ai/strategyEngine';
 import { randomUUID } from 'crypto';
 import { generateRequestId, getTimestamp, getElapsedMs, logAIChatMetric } from '@/lib/monitoring/performanceLogger';
+import { CircuitBreaker } from '@/lib/utils/retry';
 
 export const agentChatRouter = Router();
+
+const strategyBreaker = new CircuitBreaker({
+    name: 'strategy_engine',
+    failureThreshold: 3,
+    resetTimeoutMs: 20000,
+    halfOpenSuccessThreshold: 1
+});
 
 agentChatRouter.post('/', async (req, res) => {
     try {
@@ -12,6 +20,8 @@ agentChatRouter.post('/', async (req, res) => {
         const startTime = getTimestamp();
         const body = req.body;
         const locale = body.locale || 'zh-TW';
+        const { text, locale: inputLocale, context: reqContext } = req.body; // Renamed 'context' to 'reqContext' to avoid conflict
+        console.log('[AgentChat Debug] Request Received:', JSON.stringify({ text, locale: inputLocale }));
 
         // Helper to extract text from various payload formats
         const extractText = (value: any): string => {
@@ -72,7 +82,9 @@ agentChatRouter.post('/', async (req, res) => {
         if (!context.strategyContext) {
             try {
                 if (context.userLocation) {
-                    context.strategyContext = await StrategyEngine.getSynthesis(context.userLocation.lat, context.userLocation.lng, locale);
+                    context.strategyContext = await strategyBreaker.execute(() =>
+                        StrategyEngine.getSynthesis(context.userLocation.lat, context.userLocation.lng, locale)
+                    );
                 } else {
                     // Fallback: If nodeId is provided, we can try to look it up if StrategyEngine supports it in future.
                     // For now, proceed without strategy context if no lat/lon.
@@ -109,6 +121,8 @@ agentChatRouter.post('/', async (req, res) => {
         const inputHasAlphaNumeric = /[\p{L}\p{N}]/u.test(query);
         const inputHasCjk = /[\u4e00-\u9fa5\u3040-\u30ff]/.test(query);
         const inputHasEmoji = /\p{Extended_Pictographic}/u.test(query);
+        const inputIsEmojiOnly = inputHasEmoji && !inputHasAlphaNumeric && !inputHasCjk;
+        const inputIsCjkOnly = inputHasCjk && !inputHasAlphaNumeric;
 
         const sendUpdate = (delta: string) => {
             if (!delta) return;
@@ -202,12 +216,30 @@ agentChatRouter.post('/', async (req, res) => {
                     dataMuxHit,
                     usedFallback,
                     anomalyReason,
+                    anomalyDetected: Boolean(anomalyReason),
                     hasStrategyContext: Boolean(context.strategyContext),
                     inputHasAlphaNumeric,
                     inputHasCjk,
-                    inputHasEmoji
+                    inputHasEmoji,
+                    inputIsEmojiOnly,
+                    inputIsCjkOnly
                 }
             });
+
+            // === Performance Alerts ===
+            const SLOW_THRESHOLD_MS = 15000;
+            if (responseTimeMs > SLOW_THRESHOLD_MS) {
+                console.warn(`[AgentChat] SLOW_RESPONSE: ${responseTimeMs}ms (threshold: ${SLOW_THRESHOLD_MS}ms)`, {
+                    requestId,
+                    query: query.substring(0, 50),
+                    decisionSource,
+                    usedFallback
+                });
+            }
+            if (hadError) {
+                console.error(`[AgentChat] ERROR_ALERT:`, { requestId, errorMessage });
+            }
+
             // End stream
             res.end();
         }

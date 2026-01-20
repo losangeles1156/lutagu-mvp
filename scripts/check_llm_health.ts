@@ -65,7 +65,7 @@ async function main() {
     console.log('--- Diagnosis Start ---');
     // Test Zeabur Key for both models
     await testLLM('gemini-3-flash-preview', 'ZEABUR_API_KEY');
-    await testLLM('deepseek-v3.2', 'ZEABUR_API_KEY');
+    await testLLM('deepseek-v3', 'ZEABUR_API_KEY');
     console.log('--- Diagnosis End ---');
 }
 

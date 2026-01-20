@@ -29,8 +29,6 @@ aiDiagnosticsRouter.get('/', async (req, res) => {
 
         const records = data || [];
         const total = records.length;
-        const counters = <T extends string>(key: T) => ({ key, count: 0 });
-
         const byDecisionSource = new Map<string, number>();
         const byDecisionLevel = new Map<string, number>();
         const byAnomalyReason = new Map<string, number>();
@@ -44,6 +42,8 @@ aiDiagnosticsRouter.get('/', async (req, res) => {
         let totalLatency = 0;
         let totalInput = 0;
         let totalOutput = 0;
+        let anomalyDetected = 0;
+        let anomalyFalsePositive = 0;
         let alphaNumericMissing = 0;
         let emojiOnly = 0;
         let cjkOnly = 0;
@@ -80,10 +80,16 @@ aiDiagnosticsRouter.get('/', async (req, res) => {
             const inputHasAlphaNumeric = Boolean(meta.inputHasAlphaNumeric);
             const inputHasEmoji = Boolean(meta.inputHasEmoji);
             const inputHasCjk = Boolean(meta.inputHasCjk);
+            const inputIsEmojiOnly = Boolean(meta.inputIsEmojiOnly) || (inputHasEmoji && !inputHasAlphaNumeric && !inputHasCjk);
+            const inputIsCjkOnly = Boolean(meta.inputIsCjkOnly) || (inputHasCjk && !inputHasAlphaNumeric);
+            const isAnomaly = Boolean(meta.anomalyDetected ?? anomalyReason);
+
+            if (isAnomaly) anomalyDetected += 1;
+            if (isAnomaly && inputHasAlphaNumeric) anomalyFalsePositive += 1;
 
             if (!inputHasAlphaNumeric) alphaNumericMissing += 1;
-            if (inputHasEmoji && !inputHasAlphaNumeric && !inputHasCjk) emojiOnly += 1;
-            if (inputHasCjk && !inputHasAlphaNumeric) cjkOnly += 1;
+            if (inputIsEmojiOnly) emojiOnly += 1;
+            if (inputIsCjkOnly) cjkOnly += 1;
         }
 
         const asSortedArray = (m: Map<string, number>) =>
@@ -95,6 +101,8 @@ aiDiagnosticsRouter.get('/', async (req, res) => {
             window_hours: hours,
             total,
             error_rate: total > 0 ? errorCount / total : 0,
+            anomaly_rate: total > 0 ? anomalyDetected / total : 0,
+            anomaly_false_positive_rate: anomalyDetected > 0 ? anomalyFalsePositive / anomalyDetected : 0,
             avg_latency_ms: total > 0 ? totalLatency / total : 0,
             avg_input_length: total > 0 ? totalInput / total : 0,
             avg_output_length: total > 0 ? totalOutput / total : 0,
@@ -109,6 +117,7 @@ aiDiagnosticsRouter.get('/', async (req, res) => {
             input_patterns: {
                 alpha_numeric_missing: alphaNumericMissing,
                 emoji_only: emojiOnly,
+                emoji_only_rate: total > 0 ? emojiOnly / total : 0,
                 cjk_only: cjkOnly
             }
         };

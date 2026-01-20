@@ -119,7 +119,7 @@ export async function generateL1DNA(
         userPrompt,
         taskType: 'chat', // Trinity: DeepSeek V3 (Creative)
         temperature: 0.7,
-        model: 'deepseek-v3.2' // Explicitly request DeepSeek
+        model: 'deepseek-v3' // Explicitly request DeepSeek
     });
 
     // Parse result

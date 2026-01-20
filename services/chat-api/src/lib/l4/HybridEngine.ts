@@ -16,6 +16,7 @@ import { DataNormalizer } from './utils/Normalization';
 import { feedbackStore } from './monitoring/FeedbackStore';
 import { AnomalyDetector } from './utils/AnomalyDetector';
 import { getJSTTime } from '@/lib/utils/timeUtils';
+import { CircuitBreaker } from '@/lib/utils/retry';
 import { POITaggedDecisionEngine } from '@/lib/ai/poi-tagged-decision-engine';
 import { preDecisionEngine, DecisionLevel } from '@/lib/ai/PreDecisionEngine';
 import { generateLLMResponse } from '@/lib/ai/llmService';
@@ -154,7 +155,9 @@ export class HybridEngine {
             if (decision.level === DecisionLevel.LEVEL_3_COMPLEX) {
                 try {
                     if (params.onProgress) params.onProgress(locale === 'en' ? "Analyzing intent..." : "正在分析意圖...");
-                    const agentDecision = await AgentRouter.selectTool(text, skillRegistry.getSkills());
+                    const agentDecision = await agentRouterBreaker.execute(() =>
+                        AgentRouter.selectTool(text, skillRegistry.getSkills())
+                    );
                     if (agentDecision) {
                         if (params.onProgress) params.onProgress(locale === 'en' ? `Using tool: ${agentDecision.toolName}` : `正在調用工具：${agentDecision.toolName}`);
                         logs.push(`[Deep Research] Agent Decision: ${agentDecision.toolName} (Reason: ${agentDecision.reasoning})`);
@@ -172,9 +175,14 @@ export class HybridEngine {
                             }
                         }
                     }
-                } catch (agentError) {
-                    console.error('[HybridEngine] Agent Router Failed:', agentError);
-                    logs.push(`[Error] Agent Router: ${agentError}`);
+                } catch (agentError: any) {
+                    const isCircuitOpen = agentError?.code === 'CIRCUIT_OPEN' || String(agentError).includes('circuit_open');
+                    if (isCircuitOpen) {
+                        logs.push('[CircuitBreaker] agent_router_open');
+                    } else {
+                        console.error('[HybridEngine] Agent Router Failed:', agentError);
+                        logs.push(`[Error] Agent Router: ${agentError}`);
+                    }
                 }
             }
 
@@ -209,11 +217,13 @@ export class HybridEngine {
             if (!bestMatch && context?.currentStation) {
                 logs.push(`[L3/L4] Checking DataMux Enrichment...`);
                 try {
-                    enrichedData = await DataMux.enrichStationData(context.currentStation, {
-                        userId: context.userId || 'anon',
-                        locale: locale,
-                        userProfile: 'general'
-                    });
+                    enrichedData = await dataMuxBreaker.execute(() =>
+                        DataMux.enrichStationData(context.currentStation as string, {
+                            userId: context.userId || 'anon',
+                            locale: locale,
+                            userProfile: 'general'
+                        })
+                    );
 
                     // FIX: Don't set bestMatch here. Just let enrichedData flow to LLM Fallback.
                     // This allows generic queries like "Time" or "Weather" to be answered by LLM with context.
@@ -233,8 +243,13 @@ export class HybridEngine {
                         };
                     }
                     */
-                } catch (e) {
-                    console.error('[HybridEngine] DataMux Enrichment failed:', e);
+                } catch (e: any) {
+                    const isCircuitOpen = e?.code === 'CIRCUIT_OPEN' || String(e).includes('circuit_open');
+                    if (isCircuitOpen) {
+                        logs.push('[CircuitBreaker] data_mux_open');
+                    } else {
+                        console.error('[HybridEngine] DataMux Enrichment failed:', e);
+                    }
                 }
             }
 
@@ -300,34 +315,47 @@ export class HybridEngine {
             const userPrompt = this.buildUserPrompt(text, { ...context, wisdomSummary: activeKnowledgeSnippet } as any);
 
             let llmResponse: string | null = null;
-            if (params.onToken) {
-                const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
-                const result: any = streamWithFallback({
-                    model,
-                    system: systemPrompt,
-                    messages: [{ role: 'user', content: userPrompt }]
-                });
+            try {
+                // TEMPORARY FIX: Disable streaming path to avoid legacy breaker and model issues
+                if (false && params.onToken) {
+                    const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
+                    llmResponse = await llmBreaker.execute(async () => {
+                        const result: any = streamWithFallback({
+                            model,
+                            system: systemPrompt,
+                            messages: [{ role: 'user', content: userPrompt }]
+                        });
 
-                let acc = '';
-                const textStream: any = result?.textStream;
-                if (textStream && typeof textStream[Symbol.asyncIterator] === 'function') {
-                    for await (const delta of textStream as AsyncIterable<string>) {
-                        acc += delta;
-                        params.onToken(delta);
-                    }
-                    llmResponse = acc;
+                        let acc = '';
+                        const textStream: any = result?.textStream;
+                        if (textStream && typeof textStream[Symbol.asyncIterator] === 'function') {
+                            for await (const delta of textStream as AsyncIterable<string>) {
+                                acc += delta;
+                                params.onToken(delta);
+                            }
+                            return acc;
+                        }
+                        const finalText = (await result.text) || null;
+                        if (finalText) params.onToken(finalText);
+                        return finalText;
+                    });
                 } else {
-                    llmResponse = (await result.text) || null;
-                    if (llmResponse) params.onToken(llmResponse);
+                    console.log('[HybridEngine] Calling LLM directly (Bypassing Breaker)...');
+                    llmResponse = await generateLLMResponse({
+                        systemPrompt,
+                        userPrompt,
+                        taskType: 'chat',
+                        temperature: 0.7
+                    });
                 }
-            } else {
-                llmResponse = await generateLLMResponse({
-                    systemPrompt,
-                    userPrompt,
-                    taskType: 'chat',
-                    temperature: 0.7,
-                    model: 'deepseek-v3.2'
-                });
+            } catch (e: any) {
+                const isCircuitOpen = e?.code === 'CIRCUIT_OPEN' || String(e).includes('circuit_open');
+                if (isCircuitOpen) {
+                    logs.push('[CircuitBreaker] llm_fallback_open');
+                } else {
+                    console.error('[HybridEngine] LLM fallback failed:', e);
+                    logs.push(`[Error] LLM fallback: ${e}`);
+                }
             }
 
             if (llmResponse) {
@@ -670,6 +698,27 @@ Use the provided "Hacks" and "Traps" context whenever relevant.
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 }
+
+const agentRouterBreaker = new CircuitBreaker({
+    name: 'agent_router',
+    failureThreshold: 3,
+    resetTimeoutMs: 20000,
+    halfOpenSuccessThreshold: 1
+});
+
+const dataMuxBreaker = new CircuitBreaker({
+    name: 'data_mux',
+    failureThreshold: 3,
+    resetTimeoutMs: 20000,
+    halfOpenSuccessThreshold: 1
+});
+
+const llmBreaker = new CircuitBreaker({
+    name: 'llm_fallback',
+    failureThreshold: 2,
+    resetTimeoutMs: 60000,
+    halfOpenSuccessThreshold: 1
+});
 
 function normalizeLocale(locale: string): string {
     if (locale.startsWith('zh')) return 'zh-TW';
