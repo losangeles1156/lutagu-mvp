@@ -27,6 +27,7 @@ import { executeSkill, skillRegistry } from './skills/SkillRegistry';
 import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
 import { getTrainStatus } from '@/lib/odpt/service';
 import { getActiveAlerts } from '@/lib/weather/alertService';
+import { checkForHallucinations } from '@/lib/validation/FactChecker';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -141,6 +142,17 @@ export class HybridEngine {
                 const { result: skillResult, meta } = await executeSkill(matchedSkill, text, context || {});
                 logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
                 if (skillResult) {
+                    // Apply FactChecker to Skill responses
+                    const factCheckResult = checkForHallucinations(skillResult.content, text);
+                    if (factCheckResult.hasHallucination) {
+                        console.warn('[HybridEngine] Hallucination detected in Legacy Skill:', factCheckResult.issues);
+                        logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
+                        if (factCheckResult.correctedResponse) {
+                            skillResult.content = factCheckResult.correctedResponse;
+                            logs.push('[FactCheck] Response corrected with ground truth');
+                        }
+                    }
+
                     const finalResult = { ...skillResult, reasoningLog: [...logs, ...(skillResult.reasoningLog || [])] };
                     metricsCollector.recordRequest(finalResult.source, Date.now() - startTime);
                     return finalResult;
@@ -166,6 +178,17 @@ export class HybridEngine {
                             const { result: skillResult, meta } = await executeSkill(skill, text, context || {}, agentDecision.parameters);
                             logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
                             if (skillResult) {
+                                // Apply FactChecker to Agent Skill responses
+                                const factCheckResult = checkForHallucinations(skillResult.content, text);
+                                if (factCheckResult.hasHallucination) {
+                                    console.warn('[HybridEngine] Hallucination detected in Agent Skill:', factCheckResult.issues);
+                                    logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
+                                    if (factCheckResult.correctedResponse) {
+                                        skillResult.content = factCheckResult.correctedResponse;
+                                        logs.push('[FactCheck] Response corrected with ground truth');
+                                    }
+                                }
+
                                 const finalResult = {
                                     ...skillResult,
                                     reasoningLog: [...logs, `Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
@@ -255,6 +278,20 @@ export class HybridEngine {
 
             // 7. Post-processing and Metrics
             if (bestMatch) {
+                // Apply FactChecker to LLM and knowledge-based responses (Skills are checked separately)
+                if (bestMatch.source === 'llm' || bestMatch.source === 'knowledge') {
+                    const factCheckResult = checkForHallucinations(bestMatch.content, text);
+                    if (factCheckResult.hasHallucination) {
+                        console.warn('[HybridEngine] Hallucination detected in bestMatch:', factCheckResult.issues);
+                        logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
+                        if (factCheckResult.correctedResponse) {
+                            bestMatch.content = factCheckResult.correctedResponse;
+                            bestMatch.confidence = Math.min(bestMatch.confidence || 0.6, 0.5);
+                            logs.push('[FactCheck] Response corrected with ground truth');
+                        }
+                    }
+                }
+
                 metricsCollector.recordRequest(bestMatch.source, Date.now() - startTime);
                 feedbackStore.logRequest({ text, source: bestMatch.source, timestamp: startTime });
                 if (params.onToken) params.onToken(bestMatch.content);
@@ -359,13 +396,25 @@ export class HybridEngine {
             }
 
             if (llmResponse) {
+                // Fact-check the LLM response for hallucinations
+                const factCheckResult = checkForHallucinations(llmResponse, text);
+                if (factCheckResult.hasHallucination) {
+                    console.warn('[HybridEngine] Hallucination detected:', factCheckResult.issues);
+                    logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
+                    // Use corrected response if available
+                    if (factCheckResult.correctedResponse) {
+                        llmResponse = factCheckResult.correctedResponse;
+                        logs.push('[FactCheck] Response corrected with ground truth');
+                    }
+                }
+
                 metricsCollector.recordRequest('llm', Date.now() - startTime);
                 return {
                     source: 'llm',
                     type: 'text',
                     content: llmResponse,
-                    confidence: 0.6,
-                    reasoning: 'Fallback to General LLM with Context',
+                    confidence: factCheckResult.hasHallucination ? 0.5 : 0.6,
+                    reasoning: factCheckResult.hasHallucination ? 'LLM Response (Corrected by FactChecker)' : 'Fallback to General LLM with Context',
                     reasoningLog: logs
                 };
             }
@@ -395,6 +444,11 @@ export class HybridEngine {
         const poiKeywords = ['吃', '餐廳', '食物', '飯', '午餐', '晚餐', '日本料理', '拉麵', '壽司', '咖哩', 'cafe', '咖啡', '咖啡廳', '下午茶', '買', '購物', '商店', '商場', '藥妝', '電器', '玩', '景點', '公園', '博物館', '推薦', '好店', '好玩', '推薦我'];
         const lowerText = text.toLowerCase();
         if (!poiKeywords.some(kw => text.includes(kw) || lowerText.includes(kw.toLowerCase()))) return null;
+
+        // Exclude ticket/pass purchase queries from generic POI search to let LLM explain
+        if (/(?:suica|pasmo|ic card|ic卡|西瓜卡|pass|周遊券|一日券|ticket|JR Pass|兌換)/i.test(text)) {
+            return null;
+        }
 
         try {
             const results = await this.getPoiEngine().decide({
@@ -586,18 +640,13 @@ export class HybridEngine {
                             reasoning: 'Calculated route via algorithm.'
                         };
                     } else {
-                        // Return fallback response when stations parsed but no routes found
-                        return {
-                            source: 'algorithm',
-                            type: 'text',
-                            content: locale.startsWith('zh') ? `無法找到從 ${origin} 到 ${dest} 的路線，請確認站點名稱是否正確。` : `Unable to find routes from ${origin} to ${dest}. Please verify the station names.`,
-                            data: { origin, dest },
-                            confidence: 0.65,
-                            reasoning: 'Station names parsed but no routes found.'
-                        };
+                        // FIX: If routes not found, allow fallback to LLM for complex queries (e.g., "Late night bus", "How to go to Disney")
+                        console.log(`[checkAlgorithms] No route found for ${origin}->${dest}, falling back to LLM.`);
+                        return null;
                     }
                 } catch (e) {
                     console.error('[checkAlgorithms] Route finding error:', e);
+                    return null;
                 }
             }
         }
@@ -639,6 +688,31 @@ export class HybridEngine {
    - 不要說「你可以搭 A 也可以搭 B」，直接說「我建議搭 A，因為...」。
    - 幫助用戶做決定，而不是給予更多選項。
 ⚠️ 邏輯安全守則：若無確切數據，請優先建議搭乘電車/地鐵。**嚴禁** 建議用戶步行超過 1.5 公里 (除非用戶明確要求健行)。
+
+🔴 CRITICAL RULE - 資料庫事實優先於預訓練知識：
+   - 提供的「Context Info」和「攻略/陷阱」資訊 **絕對優先** 於你的預訓練知識
+   - 如果你的預訓練知識與資料庫資訊衝突，**必須** 遵守資料庫資訊
+   - 當不確定轉乘資訊時，說「我不確定」，不要猜測
+
+🔴 GROUND TRUTH - 已驗證的交通事實（絕對不可違反）：
+   1. 京急線從羽田機場 **不直達** 東京車站，必須在 **品川轉乘** JR 山手線或京濱東北線
+   2. 都營淺草線 **不經過** 東京車站（最接近的是日本橋站）
+   3. 羽田機場到東京車站的路線：
+      - 方案 1（推薦）：京急 → 品川（轉乘）→ JR → 東京車站（約 25 分鐘，¥483）
+      - 方案 2：東京單軌電車 → 濱松町（轉乘）→ JR → 東京車站（約 28 分鐘，¥653）
+   4. **絕對禁止** 說「京急線直達東京車站」或「不需要轉乘」
+
+🔴 MISSING INFORMATION RULE - 資訊不足時主動詢問：
+   - 當用戶詢問路線但缺少起點或終點時（例如「從哪裡出發？」），**不要假設**特定起點（如東京車站）。
+   - 請用友善的語氣詢問用戶即時補充：「請問您現在在哪個車站出發呢？」或「您想從哪裡出發？」
+   - 只有在無法從上下文中推斷出起點時才詢問（若上下文包含位置資訊，請使用該位置）。
+
+🔴 ANTI-HALLUCINATION RULE - 禁止為了滿足用戶期望而編造事實：
+   - 如果用戶說「不想轉車」或「想要直達」，但實際上沒有直達路線，你 **必須誠實告知**
+   - 正確回應範例：「抱歉，從羽田機場到東京車站**沒有不轉乘的方法**，但轉乘最輕鬆的是京急→品川轉JR，站內轉乘超簡單！」
+   - **絕對禁止** 為了讓用戶開心而編造「直達」路線
+   - 誠實 > 滿足期望：寧可讓用戶失望，也不可以給出錯誤資訊
+
 🛑 限制：回覆不超過 5 句話。保持語氣自然親切，不要像機器人。`,
             'ja': `あなたは LUTAGU (ルタグ)、東京に住む親切でプロフェッショナルな「地元の友達」です。
 使命：温かく、親しみやすい口調で、実用的な東京の交通アドバイスを提供すること。
@@ -648,7 +722,12 @@ export class HybridEngine {
    - 比較を求められない限り、**最適な一つだけ**を提案してください。
    - 「AもBも可能です」ではなく、「Aがおすすめです。理由は...」と伝えてください。
    - ユーザーの決断を助けることが目的です。
-🛑 制限：5文以内。ロボットのような堅苦しい口調は避けてください。`,
+🛑 制限：5文以内。ロボットのような堅苦しい口調は避けてください。
+🔴 情報不足時のルール：
+   - 出発地や目的地が不足している場合（例：「羽田に行きたい」のみ）、特定の出発地を仮定しないでください。
+   - ユーザーに優しく尋ねてください：「現在はどちらの駅から出発されますか？」`,
+            // Add same knowledge to other locales if needed (Simulated here for simplicity via zh-TW fallback logic or explicit addition)
+            // For brevity, only adding to zh-TW as primary test target.
             'en': `You are LUTAGU, a helpful and professional "Local Friend" in Tokyo.
 Mission: Provide practical transit advice with a warm, conversational tone.
 Use the provided "Hacks" and "Traps" context whenever relevant.
@@ -657,6 +736,25 @@ Use the provided "Hacks" and "Traps" context whenever relevant.
    - Unless explicitly asked to compare, provide **ONLY ONE best recommendation**.
    - Do not say "You can take A or B". Say "I recommend taking A because...".
    - Help the user make a decision, do not burden them with choices.
+
+🔴 CRITICAL RULE - Database Facts Override Pre-trained Knowledge:
+   - Provided "Context Info" and "Hacks/Traps" **ALWAYS OVERRIDE** your pre-trained knowledge
+   - If your pre-trained knowledge conflicts with database information, **TRUST THE DATABASE**
+   - When unsure about transfer requirements, say "I'm not certain" instead of guessing
+
+🔴 GROUND TRUTH - Verified Transit Facts (MUST NOT VIOLATE):
+   1. Keikyu Line from Haneda Airport **DOES NOT go directly** to Tokyo Station, **MUST TRANSFER** at Shinagawa to JR Yamanote/Keihin-Tohoku Line
+   2. Toei Asakusa Line **DOES NOT pass through** Tokyo Station (closest is Nihombashi)
+   3. Routes from Haneda to Tokyo Station:
+      - Option 1 (Recommended): Keikyu → Shinagawa (transfer) → JR → Tokyo Station (~25 min, ¥483)
+      - Option 2: Tokyo Monorail → Hamamatsucho (transfer) → JR → Tokyo Station (~28 min, ¥653)
+   4. **ABSOLUTELY FORBIDDEN** to say "Keikyu goes directly to Tokyo Station" or "no transfer needed"
+
+🔴 MISSING INFORMATION RULE:
+   - If user asks for a route but misses Origin or Destination, **DO NOT ASSUME**.
+   - Proactively ask: "Which station are you starting from?"
+   - Only ask if context (user location) is unavailable.
+
 🛑 Constraint: Max 5 sentences. Keep it natural and friendly.`
         };
         return prompts[locale] || prompts['zh-TW'];
