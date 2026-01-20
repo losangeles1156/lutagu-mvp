@@ -66,18 +66,34 @@ export class TemplateEngine {
             {
                 id: 'greeting',
                 priority: 100,
-                keywords: ['你好', '您好', 'hello', 'hi', 'hey', '安安', '哈囉', '早安', '午安', '晚安'],
+                keywords: ['你好', '您好', 'hello', 'hi', 'hey', '安安', '哈囉', '早安', '午安', '晚安', 'こんにちは', 'こんばんは', 'おはよう', 'おはようございます', 'はじめまして', 'よろしく', 'よろしくお願いします', 'もしもし'],
                 patterns: [
                     /^(你好|您好|hello|hi|hey|安安|哈囉)(?:[\s\u3000]*[!！。．\.、，,？?]*)?$/i,
                     /^(早上好|午安|晚安|早安)(?:[\s\u3000]*[!！。．\.、，,？?]*)?$/i,
                     /^(こんにちは|こんばんは|おはよう|おはようございます|はじめまして|よろしく|よろしくお願いします|もしもし)(?:[\s\u3000]*[!！。．\.、，,？?]*)?$/i
                 ],
                 responses: {
-                    'zh-TW': '你好！我是 LUTAGU，你的東京交通 AI 導航助手。想去哪裡，或者有什麼交通問題都可以問我喔！',
-                    'zh': '你好！我是 LUTAGU，你的东京交通 AI 导航助手。想去哪里，或者有什么交通问题都可以问我喔！',
-                    'en': 'Hello! I am LUTAGU, your Tokyo transport AI assistant. How can I help you navigate today?',
-                    'ja': 'こんにちは！私は LUTAGU です。東京の交通案内をお手傳いします。何かお困りですか？',
-                    'ar': 'مرحباً! أنا LUTAGU، مساعدك الذكي للمواصلات في طوكيو. كيف يمكنني مساعدتك اليوم؟'
+                    'zh-TW': '你好！我是 Lutagu AI，你的東京交通助手。我可以幫你查詢地鐵路線、提供車站導航，或回答旅遊相關問題。請問今天要在此去哪裡？',
+                    'zh': '你好！我是 Lutagu AI，你的东京交通助手。我可以帮你查询地铁路线、提供车站导航，或回答旅游相关问题。请问今天要在此去哪里？',
+                    'en': 'Hello! I am Lutagu AI, your Tokyo transit assistant. I can help with subway routes, station navigation, and travel tips. Where are you heading today?',
+                    'ja': 'こんにちは！Lutagu AI、東京の交通アシスタントです。地下鉄のルート案内や駅のナビゲーション、旅行に関する質問にお答えします。今日はどちらへ行かれますか？',
+                    'ar': 'مرحباً! أنا Lutagu AI، مساعدك في تنقلات طوكيو. يمكنني مساعدتك في مسارات المترو، والتنقل في المحطات، ونصائح السفر. إلى أين تتجه اليوم؟'
+                }
+            },
+            {
+                id: 'live-status-help',
+                priority: 92,
+                patterns: [
+                    /(?:延誤|誤點|停駛|停運|運行|運轉|運行狀態|狀態|異常|停電)/i,
+                    /(?:遅延|運休|運行状況|運転見合わせ)/i,
+                    /(?:delay|delayed|disruption|suspend|suspended|status|power outage|blackout)/i
+                ],
+                responses: {
+                    'zh-TW': '我可以看即時運行狀態。請告訴我你目前在哪一站（或在地圖選擇車站/開啟定位），我就能用即時資料回覆延誤原因與替代建議。',
+                    'zh': '我可以看即时运行状态。请告诉我你目前在哪一站（或在地图选择车站/开启定位），我就能用即时资料回复延误原因与替代建议。',
+                    'en': 'I can check live service status. Tell me your current station (or select one on the map / enable location) so I can use live data to reply with the cause and a backup option.',
+                    'ja': '運行状況を確認できます。今いる駅名（または地図で駅を選択／位置情報を有効化）を教えてください。遅延理由と代替案を即時データで返します。',
+                    'ar': 'يمكنني التحقق من حالة التشغيل الفورية. أخبرني بمحطتك الحالية (أو اختر محطة على الخريطة/فعّل الموقع) لأجيب باستخدام البيانات الفورية مع السبب وخيار بديل.'
                 }
             },
             {

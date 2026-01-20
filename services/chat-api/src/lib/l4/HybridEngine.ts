@@ -628,25 +628,29 @@ export class HybridEngine {
             dest = dest?.trim();
 
             if (origin && dest) {
-                try {
-                    const routes = await algorithmProvider.findRoutes({ originName: origin, destinationName: dest, locale });
-                    if (routes && routes.length > 0) {
-                        return {
-                            source: 'algorithm',
-                            type: 'route',
-                            content: locale.startsWith('zh') ? `為您找到從 ${origin} 到 ${dest} 的路線建議。` : `Found routes from ${origin} to ${dest}.`,
-                            data: { routes },
-                            confidence: 0.95,
-                            reasoning: 'Calculated route via algorithm.'
-                        };
-                    } else {
-                        // FIX: If routes not found, allow fallback to LLM for complex queries (e.g., "Late night bus", "How to go to Disney")
-                        console.log(`[checkAlgorithms] No route found for ${origin}->${dest}, falling back to LLM.`);
+                const originId = DataNormalizer.lookupStationId(origin);
+                const destId = DataNormalizer.lookupStationId(dest);
+
+                if (originId && destId) {
+                    try {
+                        const routes = await algorithmProvider.findRoutes({ originId, destinationId: destId, locale });
+                        if (routes && routes.length > 0) {
+                            return {
+                                source: 'algorithm',
+                                type: 'route',
+                                content: locale.startsWith('zh') ? `為您找到從 ${origin} 到 ${dest} 的路線建議。` : `Found routes from ${origin} to ${dest}.`,
+                                data: { routes },
+                                confidence: 0.95,
+                                reasoning: 'Calculated route via algorithm.'
+                            };
+                        } else {
+                            console.log(`[checkAlgorithms] No route found for ${origin}->${dest}, falling back to LLM.`);
+                            return null;
+                        }
+                    } catch (e) {
+                        console.error('[checkAlgorithms] Route finding error:', e);
                         return null;
                     }
-                } catch (e) {
-                    console.error('[checkAlgorithms] Route finding error:', e);
-                    return null;
                 }
             }
         }

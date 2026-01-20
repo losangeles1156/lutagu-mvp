@@ -6,10 +6,7 @@
  */
 
 import {
-  JourneyLeg,
   TransferWindow,
-  CDRResult,
-  LastTrainRisk,
   RiskLevel,
   DEFAULT_REASONING_CONFIG
 } from '../types';
@@ -28,10 +25,10 @@ export function calcTransferSuccessRate(window: TransferWindow): number {
 
   // 機率模型：緩衝時間 vs 成功率
   if (effectiveBuffer >= 10) return 0.99;  // 充裕
-  if (effectiveBuffer >= 5)  return 0.90;  // 安全
-  if (effectiveBuffer >= 3)  return 0.70;  // 有風險
-  if (effectiveBuffer >= 1)  return 0.40;  // 高風險
-  if (effectiveBuffer >= 0)  return 0.20;  // 極高風險
+  if (effectiveBuffer >= 5) return 0.90;  // 安全
+  if (effectiveBuffer >= 3) return 0.70;  // 有風險
+  if (effectiveBuffer >= 1) return 0.40;  // 高風險
+  if (effectiveBuffer >= 0) return 0.20;  // 極高風險
   return 0.05; // 幾乎不可能
 }
 
@@ -258,6 +255,37 @@ export function calcLastTrainRisk(
     safeDepartureDeadline: earliestDeadline,
     alternativeOptions
   };
+}
+
+export interface JourneyLeg {
+  line: string; // railwayId
+  lineName: string;
+  fromStation: string;
+  toStation: string;
+  scheduledDeparture: Date;
+  scheduledArrival: Date;
+  currentDelayMinutes: number; // Live data or 0
+}
+
+export interface CDRResult {
+  overallSuccessRate: number; // 0-1
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  bottleneckLegIndex: number; // Index of the leg causing most risk, or -1 if none
+  bottleneckReason?: string; // Optional reason for the bottleneck
+  legSuccessRates: number[]; // Success rate for each transfer
+  recommendation: string;
+}
+
+export interface LastTrainRisk {
+  hasRisk: boolean;
+  missedLines: {
+    line: string;
+    lineName: string;
+    lastTrainTime: Date;
+    reason: string;
+  }[];
+  safeDepartureDeadline: Date | null;
+  alternativeOptions: string[];
 }
 
 export function scanCascadeImpact(

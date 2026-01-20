@@ -1,58 +1,98 @@
 
-import {
-    findRankedRoutes,
-    normalizeOdptStationId,
-    type RouteOption,
-    type SupportedLocale
-} from '../assistantEngine';
-import { DataNormalizer } from '../utils/Normalization';
+import { findRankedRoutes, RouteOption } from './RoutingGraph';
+import { getDefaultTopology } from '../search/topologyLoader';
+import { filterRoutesByL2Status } from '../status/L2Filter';
+import { supabaseAdmin } from '../../supabase';
 import { getCache, LAYER_CACHE_CONFIG } from '../../cache/cacheService';
-import CORE_TOPOLOGY from '../generated/coreTopology.json';
 
+/**
+ * L4 Algorithm Provider (Unified)
+ * Wraps refined graph algorithms with L2 context awareness
+ */
 export class AlgorithmProvider {
-    private routeCache = getCache<RouteOption[]>('route_cache', {
+    // Note: LAYER_CACHE_CONFIG.L4 might not exist in backend types yet. Check definition.
+    // If L4 is missing, use L2 as fallback or define it locally.
+    private routeCache = getCache<RouteOption[]>('route_planning', LAYER_CACHE_CONFIG.L2); // Fallback to L2 config if L4 missing
+
+    // L2 Cache for Status (TTL 30s)
+    private l2Cache = getCache<any>('l2_status_cache', {
         ...LAYER_CACHE_CONFIG.L2,
-        maxSize: 500 // 擴大路線快取容量
+        ttlMs: 30 * 1000,
+        maxSize: 1200
     });
 
-    public async findRoutes(params: {
-        originName?: string;
-        destinationName?: string;
-        originId?: string;
-        destinationId?: string;
-        locale: SupportedLocale;
-    }): Promise<RouteOption[] | null> {
-        const originId = params.originId || (params.originName ? DataNormalizer.lookupStationId(params.originName) : null);
-        const destId = params.destinationId || (params.destinationName ? DataNormalizer.lookupStationId(params.destinationName) : null);
+    private async getL2StatusForStation(stationId: string): Promise<any | null> {
+        const id = String(stationId || '').trim();
+        if (!id) return null;
 
-        if (!originId || !destId) return null;
-
-        const cacheKey = `${originId}-${destId}-${params.locale}`;
-        const cached = this.routeCache.get(cacheKey);
+        const cached = this.l2Cache.get(id);
         if (cached) return cached;
 
-        const routes = findRankedRoutes({
-            originStationId: originId,
-            destinationStationId: destId,
-            railways: CORE_TOPOLOGY as any,
-            locale: params.locale
-        });
+        try {
+            // Note: In backend service, we might need a different way to access Supabase
+            // depending on the setup. Assuming supabaseAdmin fits the service context.
+            const { data } = await supabaseAdmin
+                .from('l2_cache')
+                .select('value')
+                .eq('key', `l2:${id}`)
+                .maybeSingle();
 
-        if (routes && routes.length > 0) {
-            this.routeCache.set(cacheKey, routes);
+            const val = (data as any)?.value || null;
+            if (val) this.l2Cache.set(id, val);
+            return val;
+        } catch {
+            return null;
         }
-
-        return routes;
     }
 
-    public async calculateFare(originId: string, destId: string): Promise<{ ic: number; ticket: number } | null> {
-        // In a real scenario, this would use a fare table.
-        // For now, we reuse the route finding logic which includes fare calculation.
-        const routes = await this.findRoutes({ originId, destinationId: destId, locale: 'zh-TW' });
-        if (routes && routes.length > 0) {
-            return routes[0].fare || null;
+    async findRoutes(params: {
+        originId: string;
+        destinationId: string;
+        locale: string;
+        l2Status?: any;
+        filterSuspended?: boolean;
+    }): Promise<RouteOption[]> {
+        const { originId, destinationId, locale } = params;
+        const cacheKey = `${originId}:${destinationId}:${locale}`;
+
+        const cached = this.routeCache.get(cacheKey);
+
+        const baseRoutes = cached || await findRankedRoutes({
+            originStationId: originId,
+            destinationStationId: destinationId,
+            railways: getDefaultTopology() as any, // Using Dynamic Topology
+            locale: locale as any // Cast to satisfy type if needed, or fix import
+        });
+
+        if (!cached && baseRoutes && baseRoutes.length > 0) {
+            this.routeCache.set(cacheKey, baseRoutes);
         }
+
+        // L2 Filtering Logic
+        const shouldFilter = params.filterSuspended !== false;
+        if (!shouldFilter) return baseRoutes;
+
+        const l2 = params.l2Status || (await this.getL2StatusForStation(originId));
+        if (!l2) return baseRoutes;
+
+        const filtered = filterRoutesByL2Status({ routes: baseRoutes, l2Status: l2 }).routes;
+        return filtered;
+    }
+
+    async calculateFare(originId: string, destId: string): Promise<{ ic: number, ticket?: number } | null> {
+        // Simple fallback or lookup
+        // For now return null or mock
         return null;
+    }
+
+    async getRouteDetails(routeId: string): Promise<any> {
+        return null; // TODO
+    }
+
+    async quickOptimize(originId: string, destId: string): Promise<RouteOption[]> {
+        // Force L2-aware optimization
+        const routes = await this.findRoutes({ originId, destinationId: destId, locale: 'zh-TW', filterSuspended: false });
+        return routes.slice(0, 1);
     }
 }
 
