@@ -117,9 +117,9 @@ export async function generateL1DNA(
     const result = await generateLLMResponse({
         systemPrompt,
         userPrompt,
-        taskType: 'chat', // Trinity: DeepSeek V3 (Creative)
+        taskType: 'chat', // Trinity: DeepSeek V3.2 (Creative)
         temperature: 0.7,
-        model: 'deepseek-v3' // Explicitly request DeepSeek
+        model: 'deepseek-v3.2' // Corrected model name for Zeabur AI Hub
     });
 
     // Parse result

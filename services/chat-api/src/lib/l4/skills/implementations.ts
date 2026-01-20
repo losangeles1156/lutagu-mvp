@@ -3,6 +3,7 @@ import { RequestContext } from '../HybridEngine';
 import { DataMux } from '@/lib/data/DataMux';
 import { SignalCollector } from '@/lib/analytics/SignalCollector';
 import { generateLLMResponse } from '@/lib/ai/llmService';
+import { DataNormalizer } from '../utils/Normalization';
 import {
     FARE_RULES_SKILL,
     ACCESSIBILITY_MASTER_SKILL,
@@ -181,7 +182,7 @@ Output in Traditional Chinese.`,
         return {
             source: 'knowledge',
             type: 'expert_tip', // Alert type
-            content: synthesis || `緊急情況請撥打 119 (救護車) 或 #7119 (醫療諮詢)。請向站務員尋求協助："Kibun ga warui desu" (我不舒服)。`,
+            content: synthesis || `緊急情況請撥打 119 (救護車) 或 #7119 (醫療諮詢)。請向站務員尋求協助並說明你不舒服。`,
             data: { strategy: 'medical_assistance', symptom },
             confidence: 0.99,
             reasoning: 'Executed Medical Skill (Gemini 3)'
@@ -197,10 +198,23 @@ export class FareRulesSkill extends BaseSkill {
         });
     }
 
+    canHandle(input: string, _context: RequestContext): boolean {
+        const text = String(input || '').toLowerCase();
+        const anti = /(?:錢不是問題|不在乎錢|錢不重要|不要管錢|不管錢|money is not a problem|price is not an issue)/i;
+        const fare = /(?:票價|車資|費用|多少錢|多少円|多少日幣|多少日元|jr\s*pass|suica|pasmo|ic\s*卡|ic\s*card|一日券|周遊券|定期券|回數券|折扣|優惠票|買票|購票|售票|ticket|fare|cost|price|pass)/i;
+        if (anti.test(text) && !fare.test(text)) return false;
+        return fare.test(text);
+    }
+
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
         console.log(`[Deep Research] Triggering Fare Rules (Expert RAG)... Params:`, params);
         // Use params.query if available (Agentic), else fallback to input (Regex)
         const query = params?.query || input;
+        const text = String(query || '').toLowerCase();
+        const fare = /(?:票價|車資|費用|多少錢|多少円|多少日幣|多少日元|jr\s*pass|suica|pasmo|ic\s*卡|ic\s*card|一日券|周遊券|定期券|回數券|折扣|優惠票|買票|購票|售票|ticket|fare|cost|price|pass)/i;
+        if (!fare.test(text)) {
+            return null;
+        }
 
         const rules = await DataMux.searchExpertRules(query);
         const ruleContext = rules.map(r => `- ${r.content}`).join('\n');
@@ -208,16 +222,18 @@ export class FareRulesSkill extends BaseSkill {
         let synthesis;
         try {
             synthesis = await generateLLMResponse({
-                systemPrompt: `You are a Tokyo Transit Expert. Answer based ONLY on these rules:\n${ruleContext}\n\nIf the rules don't cover it, say 'I'm not sure specifically about that, but generally...' and give safe advice. Be concise.`,
+                systemPrompt: `你是東京交通票價專家。請只根據以下規則回答：\n${ruleContext}\n\n若規則未涵蓋，請說「我不太確定，但一般情況是...」並給出安全建議。請用繁體中文且簡潔。`,
                 userPrompt: query,
-                taskType: 'reasoning', // ✅ Explicit: RAG synthesis requires Logic/Brain (Gemini 3 Flash Preview)
-                temperature: 0.1 // Precision required
+                taskType: 'reasoning',
+                temperature: 0.1
             });
         } catch (e) {
-            synthesis = `(AI Synthesis Unavailable) Based on rules: ${rules[0]?.content}`;
+            synthesis = `目前無法合成回覆，但根據規則：${rules[0]?.content || '暫無資料'}`;
         }
 
-        if (!synthesis) synthesis = `(AI Synthesis Unavailable) Based on rules: ${rules[0]?.content}`;
+        if (!synthesis || !/[\u4e00-\u9fa5]/.test(synthesis)) {
+            synthesis = `根據規則：${rules.map(r => r.content).join('；') || '暫無資料'}`;
+        }
 
         // Signal
         SignalCollector.collectSignal({ stationId: context.currentStation || 'general', policyCategory: 'expert_rule', intentTarget: 'Fare/Ticket Rule', unmetNeed: false });
@@ -243,34 +259,55 @@ export class AccessibilitySkill extends BaseSkill {
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
         console.log(`[Deep Research] Triggering Accessibility Master... Params:`, params);
-        const targetStation = params?.station_id || context.currentStation || '';
+        const stationInput = params?.station_id || context.currentStation || '';
+        const targetStation = DataNormalizer.lookupStationId(stationInput) || stationInput;
+        if (!targetStation) {
+            return {
+                source: 'knowledge',
+                type: 'expert_tip',
+                content: '要提供無障礙路線，需要先知道車站名稱。請告訴我你目前在或要去的車站。',
+                data: { strategy: 'accessibility_master', facilities: [] },
+                confidence: 0.4,
+                reasoning: 'Missing station id'
+            };
+        }
         const graph = await DataMux.getFacilityGraph(targetStation);
 
+        if (!graph || graph.length === 0) {
+            return {
+                source: 'knowledge',
+                type: 'expert_tip',
+                content: `目前沒有 ${targetStation} 的無障礙資料。我可以先提供通用建議：找「電梯」標示，避開僅樓梯出口。若你願意，告訴我具體出口或目的地，我再幫你判斷。`,
+                data: { strategy: 'accessibility_master', facilities: [] },
+                confidence: 0.5,
+                reasoning: 'No facility graph'
+            };
+        }
+
         if (graph) {
-            // Agentic Synthesis
+            let synthesis: string | undefined;
             try {
-                const synthesis = await generateLLMResponse({
+                synthesis = await generateLLMResponse({
                     systemPrompt: `Data: ${JSON.stringify(graph)}.
 User Needs: Wheelchair/Stroller accessible route.
 Task: Explain the best elevator route clearly based on the data. Be reassuring.`,
                     userPrompt: input,
-                    taskType: 'classification', // Lite is enough for data-to-text
+                    taskType: 'classification',
                     temperature: 0.3
                 });
-
-                SignalCollector.collectSignal({ stationId: targetStation, policyCategory: 'barrier_free', intentTarget: 'Elevator Route', unmetNeed: false });
-
-                return {
-                    source: 'knowledge',
-                    type: 'expert_tip',
-                    content: synthesis || `收到！針對${targetStation}無障礙需求，請走這條路線：\n找尋標示「エレベーター (Elevator)」的出口...`,
-                    data: { strategy: 'accessibility_master', facilities: graph },
-                    confidence: 0.95,
-                    reasoning: 'Executed Accessibility Master Skill'
-                };
             } catch (e) {
-                // Fallback
             }
+
+            SignalCollector.collectSignal({ stationId: targetStation, policyCategory: 'barrier_free', intentTarget: 'Elevator Route', unmetNeed: false });
+
+            return {
+                source: 'knowledge',
+                type: 'expert_tip',
+                content: synthesis || `收到！針對${targetStation}無障礙需求，請走這條路線：\n找尋標示「電梯」的出口...`,
+                data: { strategy: 'accessibility_master', facilities: graph },
+                confidence: 0.95,
+                reasoning: 'Executed Accessibility Master Skill'
+            };
         }
         return null;
     }

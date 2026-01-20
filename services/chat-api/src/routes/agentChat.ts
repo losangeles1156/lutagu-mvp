@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { hybridEngine, RequestContext } from '@/lib/l4/HybridEngine';
 import { StrategyEngine } from '@/lib/ai/strategyEngine';
+import { extractOdptStationIds } from '@/lib/l4/assistantEngine';
 import { randomUUID } from 'crypto';
 import { generateRequestId, getTimestamp, getElapsedMs, logAIChatMetric } from '@/lib/monitoring/performanceLogger';
 import { CircuitBreaker } from '@/lib/utils/retry';
@@ -57,7 +58,7 @@ agentChatRouter.post('/', async (req, res) => {
             extractText(body.message) ||
             extractText(lastMessage?.content ?? lastMessage?.parts ?? lastMessage?.text ?? lastMessage) ||
             'Hello';
-        const nodeId = body.nodeId || body.current_station || body.currentStation || body.stationId;
+        const rawNodeId = body.nodeId || body.current_station || body.currentStation || body.stationId;
         const userId = body.userId || `anon-${randomUUID()}`;
         const sessionId = body.sessionId || userId;
 
@@ -71,6 +72,11 @@ agentChatRouter.post('/', async (req, res) => {
                 .filter(Boolean)
                 .slice(-8)
             : [];
+
+        const recentText = recentMessages.map((m: any) => m?.content || '').join(' ');
+        const inferredStations = extractOdptStationIds(`${query} ${recentText}`);
+        const inferredStationId = inferredStations.length > 0 ? inferredStations[inferredStations.length - 1] : undefined;
+        const nodeId = rawNodeId || inferredStationId;
 
         // Build Context
         const context: RequestContext = {

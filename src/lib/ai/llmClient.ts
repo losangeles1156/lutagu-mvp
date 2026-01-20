@@ -33,9 +33,12 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
 
     // 0. Explicit model override (highest priority)
     if (explicitModel) {
-        if (explicitModel.includes('deepseek')) return generateDeepSeekResponse(params);
+        // Route deepseek models (including deepseek-v3.2) via Zeabur generic endpoint
+        if (explicitModel.includes('deepseek')) return generateZeaburGenericResponse(params);
         if (explicitModel.includes('gemini')) return generateGeminiResponse(params);
-        if (explicitModel.includes('minimax')) return generateMiniMaxResponse(params);
+        if (explicitModel.toLowerCase().includes('minimax')) return generateMiniMaxResponse(params);
+        // Route GPT models (gpt-5-mini, etc.) via Zeabur generic endpoint
+        if (explicitModel.includes('gpt')) return generateZeaburGenericResponse(params);
     }
 
     // --- Trinity Architecture Strategy ---
@@ -56,13 +59,10 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return result;
     }
 
-    // 3. Chat / Creative / Long Output -> DeepSeek V3 (High Output CP value)
+    // 3. Chat / Creative / Long Output -> DeepSeek V3.2 (Zeabur AI Hub - High CP Value)
     if (taskType === 'synthesis' || taskType === 'chat') {
-        // Fallback to Gemini 3 if DeepSeek key missing (DeepSeek is optional optimization)
-        if (process.env.DEEPSEEK_API_KEY) {
-            return generateDeepSeekResponse(params);
-        }
-        return generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
+        // DeepSeek V3.2 via Zeabur AI Hub (corrected model name)
+        return generateZeaburGenericResponse({ ...params, model: 'deepseek-v3.2' });
     }
 
     // 4. Default Fallback
@@ -173,6 +173,58 @@ async function generateGeminiResponse(params: GeminiParams): Promise<string | nu
         return content;
     } catch (error) {
         console.error('Gemini API Failed:', error);
+        return null;
+    }
+}
+
+/**
+ * Generic Zeabur AI Hub handler for non-Gemini models (e.g., deepseek-v3.2, gpt-5-mini)
+ */
+async function generateZeaburGenericResponse(params: LLMParams): Promise<string | null> {
+    const { systemPrompt, userPrompt, temperature = 0.4, model } = params;
+
+    if (!model) {
+        console.error('[Zeabur Generic] No model specified');
+        return null;
+    }
+
+    const endpoint = `https://hnd1.aihub.zeabur.ai/v1/chat/completions`;
+    const apiKey = process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
+    const maxTokens = resolveMaxTokens(params);
+
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({
+                model: model,
+                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+                temperature,
+                max_tokens: maxTokens
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+            const errText = await res.text();
+            console.error(`[Zeabur Generic] API Error (${model}):`, res.status, errText);
+            return null;
+        }
+
+        const data: any = await res.json();
+        let content = data?.choices?.[0]?.message?.content || null;
+        if (content) content = content.replace(/\[THINKING\][\s\S]*?\[\/THINKING\]/g, '').trim();
+        return content;
+    } catch (error: any) {
+        if (error.name === 'AbortError') {
+            console.error(`[Zeabur Generic] Request Timeout (${model})`);
+        } else {
+            console.error(`[Zeabur Generic] API Call Failed (${model}):`, error);
+        }
         return null;
     }
 }

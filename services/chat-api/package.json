@@ -20,7 +20,8 @@
         "zod": "^4.3.5",
         "lru-cache": "^11.2.4",
         "ioredis": "^5.9.0",
-        "uuid": "^13.0.0"
+        "uuid": "^13.0.0",
+        "zustand": "^4.5.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",

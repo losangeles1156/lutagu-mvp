@@ -546,7 +546,19 @@ export class HybridEngine {
                 })();
 
                 const infoTextObj = top?.['odpt:trainInformationText'];
-                const infoText = ((): string => {
+                const pickLocalizedText = (value: any): string => {
+                    if (!value) return '';
+                    if (typeof value === 'string') {
+                        if (locale.startsWith('zh') && /[\u3040-\u30ff]/.test(value)) return '';
+                        return value;
+                    }
+                    if (typeof value !== 'object') return '';
+                    if (locale.startsWith('ja')) return (value as any).ja || '';
+                    if (locale.startsWith('en')) return (value as any).en || '';
+                    return (value as any)['zh-TW'] || (value as any)['zh-Hant'] || (value as any).zh || '';
+                };
+                const infoText = pickLocalizedText(infoTextObj);
+                const infoTextForDetection = ((): string => {
                     if (typeof infoTextObj === 'string') return infoTextObj;
                     if (!infoTextObj || typeof infoTextObj !== 'object') return '';
                     return (infoTextObj as any)[pickLocaleKey] || (infoTextObj as any).ja || (infoTextObj as any).en || '';
@@ -558,8 +570,9 @@ export class HybridEngine {
                     : (statusRaw && typeof statusRaw === 'object')
                         ? ((statusRaw as any)[pickLocaleKey] || (statusRaw as any).ja || (statusRaw as any).en || '')
                         : '';
+                const localizedStatusStr = pickLocalizedText(statusRaw);
 
-                const hasIssue = /(?:遅れ|遅延|運転見合わせ|運休|ダイヤ乱れ|delay|suspend|disrupt|issue)/i.test(`${statusStr} ${infoText}`);
+                const hasIssue = /(?:遅れ|遅延|運転見合わせ|運休|ダイヤ乱れ|delay|suspend|disrupt|issue)/i.test(`${statusStr} ${infoTextForDetection}`);
 
                 const lineName = hint
                     ? (locale.startsWith('ja') ? hint.names.ja : locale.startsWith('en') ? hint.names.en : hint.names['zh-TW'])
@@ -583,10 +596,10 @@ export class HybridEngine {
                     }
 
                     return locale.startsWith('ja')
-                        ? `${lineName}で遅延・乱れの可能性があります。${infoText || statusStr}`.trim()
+                        ? `${lineName}で遅延・乱れの可能性があります。${infoText || localizedStatusStr || statusStr}`.trim()
                         : locale.startsWith('en')
-                            ? `${lineName} may have delays or disruptions. ${infoText || statusStr}`.trim()
-                            : `${lineName} 可能有延誤或異常。${infoText || statusStr}`.trim();
+                            ? `${lineName} may have delays or disruptions. ${infoText || localizedStatusStr || statusStr}`.trim()
+                            : `${lineName} 可能有延誤或異常。${infoText || localizedStatusStr || statusStr}`.trim();
                 })();
 
                 return {
@@ -596,7 +609,7 @@ export class HybridEngine {
                     data: {
                         railwayId: hint?.railwayId,
                         operator: hint?.operatorKey,
-                        status: statusStr,
+                        status: localizedStatusStr || statusStr,
                         text: infoText
                     },
                     confidence: hint ? 0.92 : 0.85,
@@ -685,6 +698,7 @@ export class HybridEngine {
         const prompts: Record<string, string> = {
             'zh-TW': `你是 LUTAGU (鹿引)，一位住在東京、熱心又專業的「在地好友」。
 你的使命：用溫暖、口語且像真實朋友對話的方式，提供東京交通決策。
+請全程使用繁體中文回答，避免夾雜日文或英文。
 請善用提供給你的「攻略 (Hacks)」與「陷阱 (Traps)」資訊。
 ✅ 格式要求：可以使用 Markdown 加粗關鍵字 (如 **平台號碼**、**出口名稱**)。可以使用條列式說明多個步驟。
 ⚠️ 核心原則【一個建議 (One Suggestion)】：
