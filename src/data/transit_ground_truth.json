@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Transit Ground Truth Database",
+  "description": "正確的東京交通路線資訊，用於防止 AI 知識幻覺",
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-20",
+
+  "routes": {
+    "haneda_to_tokyo_station": {
+      "origin": {
+        "name": "羽田機場",
+        "name_en": "Haneda Airport",
+        "station_ids": [
+          "odpt.Station:Keikyu.Airport.HanedaAirportTerminal1and2",
+          "odpt.Station:Keikyu.Airport.HanedaAirportTerminal3",
+          "odpt.Station:TokyoMonorail.HanedaAirportTerminal3"
+        ]
+      },
+      "destination": {
+        "name": "東京車站",
+        "name_en": "Tokyo Station",
+        "station_ids": [
+          "odpt.Station:JR-East.Yamanote.Tokyo",
+          "odpt.Station:JR-East.KeihinTohoku.Tokyo",
+          "odpt.Station:JR-East.Tokaido.Tokyo"
+        ]
+      },
+      "requires_transfer": true,
+      "correct_routes": [
+        {
+          "name": "京急線 + JR（推薦）",
+          "name_en": "Keikyu + JR (Recommended)",
+          "legs": [
+            {
+              "leg_number": 1,
+              "from": "羽田機場第1・2航廈",
+              "from_en": "Haneda Airport Terminal 1 & 2",
+              "to": "品川",
+              "to_en": "Shinagawa",
+              "line": "京急機場快特",
+              "line_en": "Keikyu Airport Express",
+              "line_id": "odpt.Railway:Keikyu.Main",
+              "time_minutes": 11,
+              "fare_yen": 300
+            },
+            {
+              "leg_number": 2,
+              "from": "品川",
+              "from_en": "Shinagawa",
+              "to": "東京車站",
+              "to_en": "Tokyo Station",
+              "line": "JR 山手線 / 京濱東北線",
+              "line_en": "JR Yamanote Line / Keihin-Tohoku Line",
+              "line_ids": ["odpt.Railway:JR-East.Yamanote", "odpt.Railway:JR-East.KeihinTohoku"],
+              "time_minutes": 9,
+              "fare_yen": 183
+            }
+          ],
+          "total_time_minutes": 25,
+          "total_fare_yen": 483,
+          "transfer_station": "品川",
+          "transfer_station_en": "Shinagawa",
+          "notes": "最常用的路線，速度快且票價合理"
+        },
+        {
+          "name": "東京單軌電車 + JR",
+          "name_en": "Tokyo Monorail + JR",
+          "legs": [
+            {
+              "leg_number": 1,
+              "from": "羽田機場第3航廈",
+              "from_en": "Haneda Airport Terminal 3",
+              "to": "濱松町",
+              "to_en": "Hamamatsucho",
+              "line": "東京單軌電車",
+              "line_en": "Tokyo Monorail",
+              "line_id": "odpt.Railway:TokyoMonorail",
+              "time_minutes": 17,
+              "fare_yen": 500
+            },
+            {
+              "leg_number": 2,
+              "from": "濱松町",
+              "from_en": "Hamamatsucho",
+              "to": "東京車站",
+              "to_en": "Tokyo Station",
+              "line": "JR 山手線",
+              "line_en": "JR Yamanote Line",
+              "line_id": "odpt.Railway:JR-East.Yamanote",
+              "time_minutes": 6,
+              "fare_yen": 153
+            }
+          ],
+          "total_time_minutes": 28,
+          "total_fare_yen": 653,
+          "transfer_station": "濱松町",
+          "transfer_station_en": "Hamamatsucho",
+          "notes": "適合國際線旅客（第3航廈）"
+        }
+      ],
+      "incorrect_claims": [
+        {
+          "claim": "京急線直達東京車站",
+          "claim_en": "Keikyu Line goes directly to Tokyo Station",
+          "why_incorrect": "京急線只直達品川站，需要在品川轉乘 JR 才能到東京車站",
+          "why_incorrect_en": "Keikyu Line only goes directly to Shinagawa, requiring transfer to JR to reach Tokyo Station"
+        },
+        {
+          "claim": "不需要轉乘",
+          "claim_en": "No transfer needed",
+          "why_incorrect": "所有從羽田機場到東京車站的路線都需要至少轉乘一次",
+          "why_incorrect_en": "All routes from Haneda Airport to Tokyo Station require at least one transfer"
+        },
+        {
+          "claim": "京急可以直接到東京",
+          "claim_en": "Keikyu goes directly to Tokyo",
+          "why_incorrect": "京急線與都營淺草線直通運轉，但淺草線不經過東京車站",
+          "why_incorrect_en": "Keikyu through-runs with Toei Asakusa Line, but Asakusa Line does not pass through Tokyo Station"
+        }
+      ],
+      "key_facts": [
+        "京急線從羽田機場只直達品川站",
+        "京急線與都營淺草線直通運轉，但不經過東京車站",
+        "從羽田機場到東京車站必須轉乘（品川或濱松町）",
+        "品川是最常用的轉乘站"
+      ],
+      "key_facts_en": [
+        "Keikyu Line from Haneda Airport only goes directly to Shinagawa",
+        "Keikyu through-runs with Toei Asakusa Line, but does not pass through Tokyo Station",
+        "Transfer is required from Haneda Airport to Tokyo Station (at Shinagawa or Hamamatsucho)",
+        "Shinagawa is the most commonly used transfer station"
+      ]
+    },
+
+    "haneda_to_shinagawa": {
+      "origin": {
+        "name": "羽田機場",
+        "name_en": "Haneda Airport"
+      },
+      "destination": {
+        "name": "品川",
+        "name_en": "Shinagawa"
+      },
+      "requires_transfer": false,
+      "correct_routes": [
+        {
+          "name": "京急機場快特（直達）",
+          "name_en": "Keikyu Airport Express (Direct)",
+          "legs": [
+            {
+              "leg_number": 1,
+              "from": "羽田機場第1・2航廈",
+              "to": "品川",
+              "line": "京急機場快特",
+              "line_en": "Keikyu Airport Express",
+              "time_minutes": 11,
+              "fare_yen": 300
+            }
+          ],
+          "total_time_minutes": 11,
+          "total_fare_yen": 300,
+          "notes": "最快速的選擇，完全不需轉乘"
+        }
+      ],
+      "key_facts": [
+        "京急機場快特從羽田機場直達品川，不需轉乘",
+        "這是從羽田機場進入東京市區最快的方式之一"
+      ]
+    },
+
+    "narita_to_tokyo_station": {
+      "origin": {
+        "name": "成田機場",
+        "name_en": "Narita Airport"
+      },
+      "destination": {
+        "name": "東京車站",
+        "name_en": "Tokyo Station"
+      },
+      "requires_transfer": false,
+      "correct_routes": [
+        {
+          "name": "N'EX 成田特快（直達）",
+          "name_en": "Narita Express (Direct)",
+          "legs": [
+            {
+              "leg_number": 1,
+              "from": "成田機場",
+              "to": "東京車站",
+              "line": "N'EX 成田特快",
+              "time_minutes": 53,
+              "fare_yen": 3070
+            }
+          ],
+          "total_time_minutes": 53,
+          "total_fare_yen": 3070,
+          "notes": "直達東京車站，無需轉乘"
+        },
+        {
+          "name": "Skyliner + Metro（需轉乘）",
+          "name_en": "Skyliner + Metro (Transfer Required)",
+          "legs": [
+            {
+              "leg_number": 1,
+              "from": "成田機場",
+              "to": "日暮里",
+              "line": "Skyliner",
+              "time_minutes": 36,
+              "fare_yen": 2570
+            },
+            {
+              "leg_number": 2,
+              "from": "日暮里",
+              "to": "東京車站",
+              "line": "JR 山手線",
+              "time_minutes": 12,
+              "fare_yen": 154
+            }
+          ],
+          "total_time_minutes": 53,
+          "total_fare_yen": 2724,
+          "transfer_station": "日暮里",
+          "notes": "速度相近但需轉乘"
+        }
+      ],
+      "key_facts": [
+        "N'EX 成田特快是從成田機場到東京車站唯一的直達選擇",
+        "Skyliner 更快但需要在日暮里或上野轉乘"
+      ]
+    }
+  },
+
+  "common_misconceptions": [
+    {
+      "misconception": "京急線直達東京車站",
+      "truth": "京急線只直達品川站，需要轉乘 JR",
+      "affected_routes": ["haneda_to_tokyo_station"]
+    },
+    {
+      "misconception": "都營淺草線經過東京車站",
+      "truth": "都營淺草線不經過東京車站，最接近的站是日本橋",
+      "affected_routes": ["haneda_to_tokyo_station"]
+    },
+    {
+      "misconception": "羽田機場有 JR 直達東京車站",
+      "truth": "羽田機場沒有 JR 車站（只有京急和單軌電車），需要在品川或濱松町轉乘",
+      "affected_routes": ["haneda_to_tokyo_station"]
+    }
+  ],
+
+  "validation_rules": [
+    {
+      "rule_id": "direct_claim_check",
+      "description": "檢測回應中的「直達」聲稱",
+      "trigger_patterns": ["直達", "不需轉乘", "直接到達", "direct", "no transfer"],
+      "action": "verify_against_ground_truth"
+    },
+    {
+      "rule_id": "haneda_tokyo_check",
+      "description": "特別檢查羽田機場到東京車站的路線",
+      "trigger_keywords": ["羽田", "東京車站", "Haneda", "Tokyo Station"],
+      "required_mention": "品川轉乘",
+      "action": "ensure_transfer_mentioned"
+    }
+  ]
+}
