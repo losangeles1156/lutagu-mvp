@@ -11,13 +11,76 @@ type RouteResultCardProps = {
     locale: SupportedLocale;
 };
 
-function formatRailwayLabel(railwayId: string, locale: SupportedLocale) {
+// Railway name translations
+const RAILWAY_LABELS: Record<string, { ja: string; en: string; zh: string }> = {
+    // JR Lines
+    'Yamanote': { ja: '山手線', en: 'Yamanote Line', zh: '山手線' },
+    'KeihinTohoku': { ja: '京浜東北線', en: 'Keihin-Tohoku Line', zh: '京濱東北線' },
+    'KeihinTohokuRapid': { ja: '京浜東北線快速', en: 'Keihin-Tohoku Rapid', zh: '京濱東北線快速' },
+    'Chuo': { ja: '中央線', en: 'Chuo Line', zh: '中央線' },
+    'ChuoRapid': { ja: '中央線快速', en: 'Chuo Rapid', zh: '中央線快速' },
+    'Sobu': { ja: '総武線', en: 'Sobu Line', zh: '總武線' },
+    'SobuRapid': { ja: '総武線快速', en: 'Sobu Rapid', zh: '總武線快速' },
+    'Tokaido': { ja: '東海道線', en: 'Tokaido Line', zh: '東海道線' },
+    'Yokosuka': { ja: '横須賀線', en: 'Yokosuka Line', zh: '橫須賀線' },
+    'Keiyo': { ja: '京葉線', en: 'Keiyo Line', zh: '京葉線' },
+    'Joban': { ja: '常磐線', en: 'Joban Line', zh: '常磐線' },
+    'Saikyo': { ja: '埼京線', en: 'Saikyo Line', zh: '埼京線' },
+    'Utsunomiya': { ja: '宇都宮線', en: 'Utsunomiya Line', zh: '宇都宮線' },
+    'Takasaki': { ja: '高崎線', en: 'Takasaki Line', zh: '高崎線' },
+    'ShonanShinjuku': { ja: '湘南新宿ライン', en: 'Shonan-Shinjuku Line', zh: '湘南新宿線' },
+    'UenoTokyo': { ja: '上野東京ライン', en: 'Ueno-Tokyo Line', zh: '上野東京線' },
+    // Tokyo Metro
+    'Ginza': { ja: '銀座線', en: 'Ginza Line', zh: '銀座線' },
+    'Marunouchi': { ja: '丸ノ内線', en: 'Marunouchi Line', zh: '丸之內線' },
+    'Hibiya': { ja: '日比谷線', en: 'Hibiya Line', zh: '日比谷線' },
+    'Tozai': { ja: '東西線', en: 'Tozai Line', zh: '東西線' },
+    'Chiyoda': { ja: '千代田線', en: 'Chiyoda Line', zh: '千代田線' },
+    'Yurakucho': { ja: '有楽町線', en: 'Yurakucho Line', zh: '有樂町線' },
+    'Hanzomon': { ja: '半蔵門線', en: 'Hanzomon Line', zh: '半藏門線' },
+    'Namboku': { ja: '南北線', en: 'Namboku Line', zh: '南北線' },
+    'Fukutoshin': { ja: '副都心線', en: 'Fukutoshin Line', zh: '副都心線' },
+    // Toei Lines
+    'Asakusa': { ja: '浅草線', en: 'Asakusa Line', zh: '淺草線' },
+    'Mita': { ja: '三田線', en: 'Mita Line', zh: '三田線' },
+    'Shinjuku': { ja: '新宿線', en: 'Shinjuku Line', zh: '新宿線' },
+    'Oedo': { ja: '大江戸線', en: 'Oedo Line', zh: '大江戶線' },
+    // Private Railways
+    'Keikyu': { ja: '京急線', en: 'Keikyu Line', zh: '京急線' },
+    'Keio': { ja: '京王線', en: 'Keio Line', zh: '京王線' },
+    'Inokashira': { ja: '井の頭線', en: 'Inokashira Line', zh: '井之頭線' },
+    'Odakyu': { ja: '小田急線', en: 'Odakyu Line', zh: '小田急線' },
+    'Tokyu': { ja: '東急線', en: 'Tokyu Line', zh: '東急線' },
+    'Toyoko': { ja: '東横線', en: 'Toyoko Line', zh: '東橫線' },
+    'DenEnToshi': { ja: '田園都市線', en: 'Den-en-toshi Line', zh: '田園都市線' },
+    'Seibu': { ja: '西武線', en: 'Seibu Line', zh: '西武線' },
+    'Tobu': { ja: '東武線', en: 'Tobu Line', zh: '東武線' },
+    'Keisei': { ja: '京成線', en: 'Keisei Line', zh: '京成線' },
+    // Monorail & Others
+    'Monorail': { ja: 'モノレール', en: 'Tokyo Monorail', zh: '東京單軌電車' },
+    'Rinkai': { ja: 'りんかい線', en: 'Rinkai Line', zh: '臨海線' },
+    'Yurikamome': { ja: 'ゆりかもめ', en: 'Yurikamome', zh: '百合海鷗號' },
+    'NipporiToneri': { ja: '日暮里舎人ライナー', en: 'Nippori-Toneri Liner', zh: '日暮里舍人線' },
+    'Tsukuba': { ja: 'つくばエクスプレス', en: 'Tsukuba Express', zh: '筑波快線' },
+};
+
+function formatRailwayLabel(railwayId: string, locale: SupportedLocale): string {
     const raw = (railwayId || '').split(':').pop() || railwayId;
     const parts = raw.split('.');
-    const line = parts[parts.length - 1] || raw;
-    if (locale === 'ja') return `${line} 線`;
-    if (locale === 'en') return `${line} Line`;
-    return `${line} 線`;
+    const lineKey = parts[parts.length - 1] || raw;
+
+    // Try to find translation
+    const translation = RAILWAY_LABELS[lineKey];
+    if (translation) {
+        if (locale === 'ja') return translation.ja;
+        if (locale === 'en') return translation.en;
+        return translation.zh; // Default to Traditional Chinese
+    }
+
+    // Fallback: add "線" suffix
+    if (locale === 'ja') return `${lineKey} 線`;
+    if (locale === 'en') return `${lineKey} Line`;
+    return `${lineKey} 線`;
 }
 
 function getRailwayColorClasses(railwayId?: string) {
@@ -139,9 +202,8 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
 
                     <button
                         onClick={() => setExpanded(v => !v)}
-                        className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-sm ${
-                            expanded ? 'bg-slate-900 text-white' : 'bg-white/80 text-slate-400 hover:text-indigo-600 hover:bg-white'
-                        }`}
+                        className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-sm ${expanded ? 'bg-slate-900 text-white' : 'bg-white/80 text-slate-400 hover:text-indigo-600 hover:bg-white'
+                            }`}
                     >
                         {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
@@ -171,10 +233,9 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                     <div className="mt-3 grid grid-cols-2 gap-3">
                         {option.tpi && (
                             <div className="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                                    option.tpi.score <= 30 ? 'bg-emerald-500 text-white' :
-                                    option.tpi.score <= 60 ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
-                                } shadow-sm`}>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${option.tpi.score <= 30 ? 'bg-emerald-500 text-white' :
+                                        option.tpi.score <= 60 ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
+                                    } shadow-sm`}>
                                     <Zap size={14} />
                                 </div>
                                 <div className="min-w-0">
@@ -182,8 +243,8 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                     <div className="text-xs font-black text-slate-700 truncate">
                                         {option.tpi.score} - {
                                             locale === 'ja' ? (option.tpi.level === 'easy' ? '快適' : option.tpi.level === 'normal' ? '普通' : '大変') :
-                                            locale === 'en' ? option.tpi.level.toUpperCase() :
-                                            (option.tpi.level === 'easy' ? '輕鬆' : option.tpi.level === 'normal' ? '普通' : '辛苦')
+                                                locale === 'en' ? option.tpi.level.toUpperCase() :
+                                                    (option.tpi.level === 'easy' ? '輕鬆' : option.tpi.level === 'normal' ? '普通' : '辛苦')
                                         }
                                     </div>
                                 </div>
@@ -191,10 +252,9 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                         )}
                         {option.cdr && (
                             <div className="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100/50 flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                                    option.cdr.riskLevel === 'low' ? 'bg-emerald-500 text-white' :
-                                    option.cdr.riskLevel === 'medium' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
-                                } shadow-sm`}>
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${option.cdr.riskLevel === 'low' ? 'bg-emerald-500 text-white' :
+                                        option.cdr.riskLevel === 'medium' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
+                                    } shadow-sm`}>
                                     {option.cdr.riskLevel === 'low' ? <ShieldCheck size={14} /> : <AlertTriangle size={14} />}
                                 </div>
                                 <div className="min-w-0">
@@ -202,8 +262,8 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                     <div className="text-xs font-black text-slate-700 truncate">
                                         {Math.round(option.cdr.overallSuccessRate * 100)}% {
                                             locale === 'ja' ? (option.cdr.riskLevel === 'low' ? '低リスク' : 'リスクあり') :
-                                            locale === 'en' ? option.cdr.riskLevel.toUpperCase() :
-                                            (option.cdr.riskLevel === 'low' ? '低風險' : '有風險')
+                                                locale === 'en' ? option.cdr.riskLevel.toUpperCase() :
+                                                    (option.cdr.riskLevel === 'low' ? '低風險' : '有風險')
                                         }
                                     </div>
                                 </div>

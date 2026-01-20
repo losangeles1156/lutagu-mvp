@@ -1791,22 +1791,92 @@ function buildLabelHelpers(params: { railways: RailwayTopology[]; locale: Suppor
     const stationTitleMap = new Map<string, string>();
     const railwayTitleMap = new Map<string, string>();
 
+    // Japanese to Traditional Chinese character conversion for common station names
+    const jaToZhMap: Record<string, string> = {
+        // Common kanji differences
+        '浜': '濱', '駅': '站', '渋': '澀',
+        '関': '關', '県': '縣', '辺': '邊', '広': '廣', '応': '應',
+        '学': '學', '芸': '藝', '庁': '廳', '営': '營', '専': '專',
+        '対': '對', '楽': '樂', '実': '實', '図': '圖', '写': '寫',
+        '発': '發', '変': '變', '続': '續', '観': '觀', '覧': '覽',
+        '売': '賣', '読': '讀', '画': '畫', '亜': '亞', '円': '圓',
+        // Full station name replacements
+        '浜松町': '濱松町', '秋葉原': '秋葉原', '新宿': '新宿', '渋谷': '澀谷',
+        '品川': '品川', '東京': '東京', '上野': '上野', '池袋': '池袋',
+        '新橋': '新橋', '大手町': '大手町', '銀座': '銀座', '有楽町': '有樂町',
+        '表参道': '表參道', '恵比寿': '惠比壽', '目黒': '目黑', '五反田': '五反田',
+        '大崎': '大崎', '田町': '田町', '高輪ゲートウェイ': '高輪Gateway',
+        '原宿': '原宿', '代々木': '代代木', '高田馬場': '高田馬場',
+        '目白': '目白', '駒込': '駒込', '巣鴨': '巢鴨', '大塚': '大塚',
+        '御徒町': '御徒町', '神田': '神田', '御茶ノ水': '御茶之水',
+        '飯田橋': '飯田橋', '市ケ谷': '市谷', '四ツ谷': '四谷',
+        '中野': '中野', '荻窪': '荻窪', '吉祥寺': '吉祥寺',
+        '三鷹': '三鷹', '国分寺': '國分寺', '立川': '立川',
+        '大門': '大門', '羽田': '羽田', '成田': '成田',
+        '横浜': '橫濱', '川崎': '川崎', '鶴見': '鶴見', '蒲田': '蒲田',
+        '押上': '押上', '浅草': '淺草', '日本橋': '日本橋',
+        '六本木': '六本木', '赤坂': '赤坂', '溜池山王': '溜池山王',
+    };
+
+    // Railway translations
+    const railwayZhMap: Record<string, string> = {
+        '山手線': '山手線', '京浜東北線': '京濱東北線', '中央線': '中央線',
+        '総武線': '總武線', '東海道線': '東海道線', '横須賀線': '橫須賀線',
+        '銀座線': '銀座線', '丸ノ内線': '丸之內線', '日比谷線': '日比谷線',
+        '東西線': '東西線', '千代田線': '千代田線', '有楽町線': '有樂町線',
+        '半蔵門線': '半藏門線', '南北線': '南北線', '副都心線': '副都心線',
+        '浅草線': '淺草線', '三田線': '三田線', '新宿線': '新宿線',
+        '大江戸線': '大江戶線', '京急線': '京急線', '京王線': '京王線',
+        '井の頭線': '井之頭線', '小田急線': '小田急線', '東急線': '東急線',
+        'モノレール': '東京單軌電車', 'ゆりかもめ': '百合海鷗號',
+        'つくばエクスプレス': '筑波快線', 'りんかい線': '臨海線',
+    };
+
+    // Function to convert Japanese text to Traditional Chinese
+    const convertJaToZh = (text: string): string => {
+        if (locale !== 'zh-TW') return text;
+        let result = text;
+        // First try full word replacements
+        for (const [ja, zh] of Object.entries(jaToZhMap)) {
+            if (ja.length > 1) { // Only full words first
+                result = result.replace(new RegExp(ja, 'g'), zh);
+            }
+        }
+        // Then single character replacements
+        for (const [ja, zh] of Object.entries(jaToZhMap)) {
+            if (ja.length === 1) {
+                result = result.replace(new RegExp(ja, 'g'), zh);
+            }
+        }
+        return result;
+    };
+
     railways.forEach(r => {
-        const rTitle =
+        let rTitle =
             locale === 'ja'
                 ? r.title?.ja
                 : locale === 'en'
                     ? r.title?.en
                     : (r.title?.['zh-TW'] || r.title?.ja || r.title?.en);
+
+        // Apply railway translation
+        if (rTitle && locale === 'zh-TW') {
+            rTitle = railwayZhMap[rTitle] || convertJaToZh(rTitle);
+        }
         if (rTitle) railwayTitleMap.set(normalizeOdptStationId(r.railwayId), rTitle);
 
         r.stationOrder.forEach(s => {
-            const sTitle =
+            let sTitle =
                 locale === 'ja'
                     ? s.title?.ja
                     : locale === 'en'
                         ? s.title?.en
                         : (s.title?.['zh-TW'] || s.title?.ja || s.title?.en);
+
+            // Apply station name translation
+            if (sTitle && locale === 'zh-TW') {
+                sTitle = jaToZhMap[sTitle] || convertJaToZh(sTitle);
+            }
             if (sTitle) stationTitleMap.set(normalizeOdptStationId(s.station), sTitle);
         });
     });
@@ -1816,7 +1886,9 @@ function buildLabelHelpers(params: { railways: RailwayTopology[]; locale: Suppor
         if (stationTitleMap.has(normalized)) return stationTitleMap.get(normalized)!;
         const raw = normalized.split(':').pop() || normalized;
         const parts = raw.split('.');
-        return parts[parts.length - 1] || raw;
+        const fallback = parts[parts.length - 1] || raw;
+        // Apply translation to fallback as well
+        return locale === 'zh-TW' ? (jaToZhMap[fallback] || convertJaToZh(fallback)) : fallback;
     };
 
     const railwayLabel = (railwayId: string) => {
@@ -1824,7 +1896,9 @@ function buildLabelHelpers(params: { railways: RailwayTopology[]; locale: Suppor
         if (railwayTitleMap.has(normalized)) return railwayTitleMap.get(normalized)!;
         const raw = String(railwayId || '').split(':').pop() || String(railwayId || '');
         const parts = raw.split('.');
-        return parts[parts.length - 1] || raw;
+        const fallback = parts[parts.length - 1] || raw;
+        // Apply translation to fallback as well
+        return locale === 'zh-TW' ? (railwayZhMap[fallback] || convertJaToZh(fallback)) : fallback;
     };
 
     return { stationLabel, railwayLabel };
