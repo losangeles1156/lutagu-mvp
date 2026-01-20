@@ -200,22 +200,8 @@ export class PreDecisionEngine {
             return { ...cached, _fromCache: true };
         }
 
-        // 2. Level 1 快速匹配 (0-1ms) - 先匹配問候語等最高優先級
-        const level1Match = this.matchLevel1Keywords(normalizedText);
-        if (level1Match.matched) {
-            const result: PreDecisionResult = {
-                level: DecisionLevel.LEVEL_1_SIMPLE,
-                confidence: level1Match.confidence,
-                suggestedModel: 'none',
-                reason: `匹配 Level 1 關鍵詞: ${level1Match.category}`,
-                estimatedLatency: 1
-            };
-            this.setCache(cacheKey, result);
-            logPreDecision('level1_keyword', Date.now() - startTime);
-            return result;
-        }
-
-        // 3. Level 2 快速匹配 (0-1ms) - 在 Level 1 不匹配時才檢查
+        // 2. Level 2 快速匹配 (0-1ms) - 優先檢查具體意圖（如「去羽田」）
+        // 避免「你好，我要去羽田」被 Level 1 (你好) 攔截
         const level2Match = this.matchLevel2Keywords(normalizedText);
         if (level2Match.matched) {
             const result: PreDecisionResult = {
@@ -227,6 +213,21 @@ export class PreDecisionEngine {
             };
             this.setCache(cacheKey, result);
             logPreDecision('level2_keyword', Date.now() - startTime);
+            return result;
+        }
+
+        // 3. Level 1 快速匹配 (0-1ms) - 在 Level 2 不匹配時才檢查
+        const level1Match = this.matchLevel1Keywords(normalizedText);
+        if (level1Match.matched) {
+            const result: PreDecisionResult = {
+                level: DecisionLevel.LEVEL_1_SIMPLE,
+                confidence: level1Match.confidence,
+                suggestedModel: 'none',
+                reason: `匹配 Level 1 關鍵詞: ${level1Match.category}`,
+                estimatedLatency: 1
+            };
+            this.setCache(cacheKey, result);
+            logPreDecision('level1_keyword', Date.now() - startTime);
             return result;
         }
 
