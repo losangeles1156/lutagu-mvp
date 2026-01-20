@@ -46,12 +46,16 @@ agentChatRouter.post('/', async (req, res) => {
             return '';
         };
 
+        const lastMessage = Array.isArray(body.messages)
+            ? body.messages[body.messages.length - 1]
+            : null;
+
         const query =
             extractText(body.text) ||
             extractText(body.input) ||
             extractText(body.prompt) ||
             extractText(body.message) ||
-            extractText(body.messages?.[body.messages?.length - 1]) ||
+            extractText(lastMessage?.content ?? lastMessage?.parts ?? lastMessage?.text ?? lastMessage) ||
             'Hello';
         const nodeId = body.nodeId || body.current_station || body.currentStation || body.stationId;
         const userId = body.userId || `anon-${randomUUID()}`;
@@ -135,12 +139,20 @@ agentChatRouter.post('/', async (req, res) => {
         };
 
         try {
+            const trimmedQuery = String(query || '').trim();
+            if (!trimmedQuery) {
+                const msg = locale === 'en' ? "Please enter your question again." : '請重新輸入問題。';
+                sendUpdate(msg);
+                res.end();
+                return;
+            }
+
             sendThinking(locale === 'en' ? 'Thinking...' : '思考中...');
 
             let streamedAnyToken = false;
 
             const result = await hybridEngine.processRequest({
-                text: query,
+                text: trimmedQuery,
                 locale,
                 context,
                 onProgress: (step) => sendThinking(step),

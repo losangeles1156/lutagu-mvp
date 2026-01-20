@@ -13,6 +13,36 @@ export async function POST(req: NextRequest) {
             body = {};
         }
 
+        const extractText = (value: any): string => {
+            if (!value) return '';
+            if (typeof value === 'string') return value;
+            if (Array.isArray(value)) {
+                return value
+                    .map((part) => {
+                        if (!part) return '';
+                        if (typeof part === 'string') return part;
+                        if (typeof part?.text === 'string') return part.text;
+                        if (typeof part?.content === 'string') return part.content;
+                        if (Array.isArray(part?.content)) return extractText(part.content);
+                        return '';
+                    })
+                    .join('')
+                    .trim();
+            }
+            if (typeof value?.text === 'string') return value.text;
+            if (typeof value?.content === 'string') return value.content;
+            if (Array.isArray(value?.content)) return extractText(value.content);
+            return '';
+        };
+
+        if (!body?.text) {
+            const lastMessage = Array.isArray(body?.messages)
+                ? body.messages[body.messages.length - 1]
+                : null;
+            const inferredText = extractText(lastMessage?.content ?? lastMessage?.parts ?? lastMessage?.text ?? lastMessage);
+            if (inferredText) body.text = inferredText;
+        }
+
         const locale = typeof body?.locale === 'string' ? body.locale : 'zh-TW';
         const fallbackMessage = locale.startsWith('ja')
             ? 'すみません、現在AIサービスに接続できません。少し後で再試行してください。'
@@ -39,7 +69,7 @@ export async function POST(req: NextRequest) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: rawBody || JSON.stringify(body)
+            body: JSON.stringify(body)
         });
 
         if (!upstreamRes.ok || !upstreamRes.body) {
