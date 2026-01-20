@@ -123,8 +123,16 @@ export default function middleware(req: NextRequest) {
 
     const isApi = pathname.startsWith('/api');
     if (isApi) {
-        const sameOrigin = enforceSameOriginApi(req);
-        if (!sameOrigin.ok) return NextResponse.json({ error: 'Forbidden' }, { status: sameOrigin.status });
+        // Exempt AI chat endpoints from same-origin check
+        // These endpoints use AI SDK TextStreamChatTransport which may not send Origin header correctly
+        const isExemptedChatEndpoint = pathname.startsWith('/api/agent/chat') ||
+            pathname.startsWith('/api/chat') ||
+            pathname.startsWith('/api/agent/hybrid');
+
+        if (!isExemptedChatEndpoint) {
+            const sameOrigin = enforceSameOriginApi(req);
+            if (!sameOrigin.ok) return NextResponse.json({ error: 'Forbidden' }, { status: sameOrigin.status });
+        }
 
         const edgeRl = enforceEdgeRateLimitApi(req);
         if (!edgeRl.ok) {
