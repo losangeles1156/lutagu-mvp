@@ -261,6 +261,7 @@ export class AccessibilitySkill extends BaseSkill {
         console.log(`[Deep Research] Triggering Accessibility Master... Params:`, params);
         const stationInput = params?.station_id || context.currentStation || '';
         const targetStation = DataNormalizer.lookupStationId(stationInput) || stationInput;
+        const displayStation = DataNormalizer.getStationDisplayName(targetStation, 'zh-TW') || stationInput;
         if (!targetStation) {
             return {
                 source: 'knowledge',
@@ -277,7 +278,7 @@ export class AccessibilitySkill extends BaseSkill {
             return {
                 source: 'knowledge',
                 type: 'expert_tip',
-                content: `目前沒有 ${targetStation} 的無障礙資料。我可以先提供通用建議：找「電梯」標示，避開僅樓梯出口。若你願意，告訴我具體出口或目的地，我再幫你判斷。`,
+                content: `目前沒有 ${displayStation} 的無障礙資料。我可以先提供通用建議：找「電梯」標示，避開僅樓梯出口。若你願意，告訴我具體出口或目的地，我再幫你判斷。`,
                 data: { strategy: 'accessibility_master', facilities: [] },
                 confidence: 0.5,
                 reasoning: 'No facility graph'
@@ -303,7 +304,7 @@ Task: Explain the best elevator route clearly based on the data. Be reassuring.`
             return {
                 source: 'knowledge',
                 type: 'expert_tip',
-                content: synthesis || `收到！針對${targetStation}無障礙需求，請走這條路線：\n找尋標示「電梯」的出口...`,
+                content: synthesis || `收到！針對${displayStation}無障礙需求，請走這條路線：\n找尋標示「電梯」的出口...`,
                 data: { strategy: 'accessibility_master', facilities: graph },
                 confidence: 0.95,
                 reasoning: 'Executed Accessibility Master Skill'
