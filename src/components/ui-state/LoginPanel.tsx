@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchNearbyNodes } from '@/lib/api/nodes';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { logger } from '@/lib/utils/logger';
 
 export function LoginPanel() {
   const t = useTranslations('login');
@@ -78,7 +79,7 @@ export function LoginPanel() {
             setBottomSheetOpen(true);
           }
         } catch (err) {
-          console.warn('[LoginPanel] Failed to fetch nearest node:', err);
+          logger.warn('LoginPanel: Failed to fetch nearest node', err);
         }
 
         transitionTo(targetState);

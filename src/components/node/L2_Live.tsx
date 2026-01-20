@@ -8,6 +8,7 @@ import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { SmartWeatherCard } from '@/components/ui/SmartWeatherCard';
 import { HubInfoHeader, HubMembersList } from '@/components/map/HubMembersList';
+import { logger } from '@/lib/utils/logger';
 import { LiveFlightBoard } from '@/components/node/LiveFlightBoard';
 import { trackFunnelEvent } from '@/lib/tracking';
 import { PartnerNudgeCard } from '@/components/marketing/PartnerNudgeCard';
@@ -299,7 +300,7 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                         hubName={getLocaleString(data.name, locale)}
                         onMemberClick={(memberId) => {
                             // Handle member click - could navigate or show more info
-                            console.log('Member clicked:', memberId);
+                            logger.debug('Hub member clicked', { memberId });
                         }}
                     />
                 </div>
@@ -452,7 +453,7 @@ const CrowdFeedbackCard = memo(({ stationId, initialCrowd, tL2 }: { stationId: s
                 })
             });
         } catch (e) {
-            console.error('Vote failed', e);
+            logger.error('L2 status vote failed', e);
         }
     };
 

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useIntentClassifier, type IntentClassificationResult } from '@/hooks/useIntentClassifier';
 import type { L4IntentKind } from '@/lib/l4/assistantEngine';
+import { logger } from '@/lib/utils/logger';
 
 interface IntentSelectorProps {
     value: L4IntentKind | null;
@@ -60,7 +61,7 @@ export function IntentSelector({
             }
         },
         onError: (error) => {
-            console.error('Intent classification error:', error);
+            logger.error('Intent classification error', error);
         }
     });
 

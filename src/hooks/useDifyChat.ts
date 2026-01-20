@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useChat } from '@ai-sdk/react';
 import { TextStreamChatTransport, UIMessage } from 'ai';
 import { useTranslations, useLocale } from 'next-intl';
@@ -85,7 +86,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
     } = useChat({
         transport,
         onError: (error: Error) => {
-            console.error('Chat Error:', error);
+            logger.error('Chat Error:', error);
             setIsOffline(true);
             setThinkingStep('');
             onError?.(error);
@@ -335,7 +336,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
         //         }
         //     }
         // } catch (err) {
-        //     console.error('[HybridEngine] API Error:', err);
+        //     logger.error('[HybridEngine] API Error:', err);
         // }
 
         // Visualizing steps
@@ -348,7 +349,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
             onComplete?.();
             metricsCollector.recordRequest('llm', Date.now() - startTime);
         } catch (error) {
-            console.error('Chat Error:', error);
+            logger.error('Chat Error:', error);
             setIsOffline(true);
             setThinkingStep('');
         }

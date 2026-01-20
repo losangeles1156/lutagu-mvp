@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useAppStore } from '../stores/appStore';
 import { ZoneDetector } from '../lib/zones/detector';
 import { tokyoCoreAdapter } from '../lib/adapters/tokyo';
@@ -37,7 +38,7 @@ export function useZoneAwareness() {
 
                     // Handle unstable GPS signal (e.g. accuracy > 500m)
                     if (accuracy > 500) {
-                        console.warn('[useZoneAwareness] Low GPS accuracy:', accuracy);
+                        logger.warn('[useZoneAwareness] Low GPS accuracy:', accuracy);
                         // We still use it but maybe we shouldn't reset if it's just a temporary jump
                     }
 
@@ -61,13 +62,13 @@ export function useZoneAwareness() {
                                 setZone(detectedZone);
                             }
                         } catch (zoneError) {
-                            console.warn('[useZoneAwareness] Zone detection error:', zoneError);
+                            logger.warn('[useZoneAwareness] Zone detection error:', zoneError);
                             // Fallback to core zone on detection error
                             if (isSubscribed) setZone('core');
                         }
                     }
                 } catch (positionError) {
-                    console.error('[useZoneAwareness] Position processing error:', positionError);
+                    logger.error('[useZoneAwareness] Position processing error:', positionError);
                     if (isSubscribed) {
                         setZone('core');
                         setIsTooFar(true);
@@ -80,16 +81,16 @@ export function useZoneAwareness() {
 
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        console.warn('[useZoneAwareness] Geolocation permission denied');
+                        logger.warn('[useZoneAwareness] Geolocation permission denied');
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        console.warn('[useZoneAwareness] Geolocation position unavailable');
+                        logger.warn('[useZoneAwareness] Geolocation position unavailable');
                         break;
                     case error.TIMEOUT:
-                        console.warn('[useZoneAwareness] Geolocation timeout');
+                        logger.warn('[useZoneAwareness] Geolocation timeout');
                         break;
                     default:
-                        console.warn('[useZoneAwareness] Unknown geolocation error:', error.message);
+                        logger.warn('[useZoneAwareness] Unknown geolocation error:', error.message);
                 }
 
                 setZone('core'); // Fallback to "Virtual Core"

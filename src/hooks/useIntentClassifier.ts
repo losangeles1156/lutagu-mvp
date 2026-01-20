@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useLocale, useTranslations } from 'next-intl';
 import type { L4IntentKind } from '@/lib/l4/assistantEngine';
 
@@ -91,7 +92,7 @@ export function useIntentClassifier(options: UseIntentClassifierOptions): UseInt
             if (error instanceof Error && error.name === 'AbortError') {
                 return null;
             }
-            console.error('Intent classification error:', error);
+            logger.error('Intent classification error:', error);
             onError?.(error instanceof Error ? error : new Error('Unknown classification error'));
             return null;
         } finally {

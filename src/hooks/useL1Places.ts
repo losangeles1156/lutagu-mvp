@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/appStore';
 import { useLocale } from 'next-intl';
@@ -70,7 +71,7 @@ export function useL1Places() {
                 .eq('status', 'approved');
 
             if (customError) {
-                console.warn('[useL1Places] Error fetching custom places:', customError);
+                logger.warn('[useL1Places] Error fetching custom places:', customError);
             } else if (customData && customData.length > 0) {
                 for (const row of customData) {
                     let coords: [number, number] = [0, 0];
@@ -108,7 +109,7 @@ export function useL1Places() {
                 }
             }
         } catch (err) {
-            console.warn('[useL1Places] Error fetching custom places:', err);
+            logger.warn('[useL1Places] Error fetching custom places:', err);
         }
 
         // 獲取 OSM 景點
@@ -215,7 +216,7 @@ export function useL1Places() {
                 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
                 if (!supabaseUrl || !supabaseKey) {
-                    console.warn('[useL1Places] Supabase credentials missing, using local fallback');
+                    logger.warn('[useL1Places] Supabase credentials missing, using local fallback');
                     const stationIds = buildStationIdSearchCandidates(nodeId);
                     const fallbackPlaces: L1Place[] = [];
 
@@ -282,7 +283,7 @@ export function useL1Places() {
                     setPlaces(result);
                 }
             } catch (err) {
-                console.error('[useL1Places] Error:', err);
+                logger.error('[useL1Places] Error:', err);
             } finally {
                 if (currentFetchId === fetchIdRef.current) {
                     setLoading(false);

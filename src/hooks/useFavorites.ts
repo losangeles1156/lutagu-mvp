@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { getSupabase } from '@/lib/supabase'; // Fallback
 import { Session } from '@supabase/supabase-js';
 
@@ -43,7 +44,7 @@ export function useFavorites() {
                         }
                     }
                 } catch (e) {
-                    console.error('Failed to fetch favorites', e);
+                    logger.error('Failed to fetch favorites', e);
                 }
             } else {
                 // Guest: Load from localStorage
@@ -56,7 +57,7 @@ export function useFavorites() {
                         }
                     }
                 } catch (e) {
-                    console.error('Failed to load guest favorites', e);
+                    logger.error('Failed to load guest favorites', e);
                 }
             }
 
@@ -111,7 +112,7 @@ export function useFavorites() {
                     });
                 }
             } catch (e) {
-                console.error('Failed to toggle favorite', e);
+                logger.error('Failed to toggle favorite', e);
                 // Revert on error
                 setFavorites(prev => {
                     const next = new Set(prev);
@@ -130,7 +131,7 @@ export function useFavorites() {
 
                 localStorage.setItem(GUEST_FAVORITES_KEY, JSON.stringify(next));
             } catch (e) {
-                console.error('Failed to save guest favorites', e);
+                logger.error('Failed to save guest favorites', e);
             }
         }
     }, [favorites, session]);

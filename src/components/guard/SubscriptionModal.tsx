@@ -7,6 +7,7 @@ import { getSupabase } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
+import { logger } from '@/lib/utils/logger';
 
 const MAX_INPUT_LENGTH = 200;
 
@@ -185,7 +186,7 @@ export function SubscriptionModal() {
             setTripGuardSummary(nextSummary);
             setTimeout(() => setSubscriptionModalOpen(false), 800);
         } catch (error) {
-            console.error(error);
+            logger.error('Failed to activate trip guard subscription', error);
             setErrorText(tTripGuard('error') || '订阅失败，请稍后重试');
         } finally {
             setIsLoading(false);
