@@ -83,8 +83,9 @@ const TrainLineItem = memo(({ line, tL2, locale, compact = false }: { line: any,
         );
     }
 
-    const statusDetail = String(line.status_detail || '');
+    const statusDetail = String(line._displayStatusDetail || line.status_detail || '');
     const delayMinutes = typeof line.delay_minutes === 'number' ? line.delay_minutes : null;
+    const hasLineIdentity = Boolean(line._hasLineIdentity || line.railway_id || line.line_name);
 
     const statusTheme = (() => {
         if (statusDetail === 'canceled') {
@@ -135,7 +136,7 @@ const TrainLineItem = memo(({ line, tL2, locale, compact = false }: { line: any,
                         : `延誤 30 分鐘以內${delayMinutes !== null ? `（${delayMinutes} 分）` : ''}`
             };
         }
-        if (line.status === 'suspended') {
+        if ((line._displayStatus || line.status) === 'suspended') {
             return {
                 wrapper: 'bg-rose-50 border-l-4 border-rose-500',
                 badge: 'bg-rose-600 text-white',
@@ -143,7 +144,7 @@ const TrainLineItem = memo(({ line, tL2, locale, compact = false }: { line: any,
                 defaultText: locale === 'ja' ? '運行に影響があります' : locale === 'en' ? 'Service disruption' : '運行受影響'
             };
         }
-        if (line.status === 'delay') {
+        if ((line._displayStatus || line.status) === 'delay') {
             return {
                 wrapper: 'bg-amber-50 border-l-4 border-amber-400',
                 badge: 'bg-amber-500 text-white',
@@ -178,7 +179,7 @@ const TrainLineItem = memo(({ line, tL2, locale, compact = false }: { line: any,
                         </span>
                     </h4>
 
-                    {line.status !== 'normal' && statusTheme.badgeText && (
+                    {hasLineIdentity && (line._displayStatus || line.status) !== 'normal' && statusTheme.badgeText && (
                         <span className={`px-2 py-0.5 text-[9px] font-black rounded-full shrink-0 ${statusTheme.badge}`}>
                             {statusTheme.badgeText}
                         </span>
@@ -186,7 +187,7 @@ const TrainLineItem = memo(({ line, tL2, locale, compact = false }: { line: any,
                 </div>
                 <div className="flex justify-between items-center">
                     <p className="text-[10px] text-gray-500 truncate pr-2">
-                        {line.message
+                        {hasLineIdentity && line.message
                             ? translateDisruption(getLocaleString(line.message, locale), locale)
                             : statusTheme.defaultText
                         }
@@ -252,17 +253,36 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
     const displayLines = useMemo(() => {
         if (!isAirport) return lines;
         // Prioritize express
-        return lines.sort((a: any, b: any) => {
-            const isExpressA = a.name?.en?.includes('Express') || a.name?.en?.includes('Liner') || a.name?.en?.includes('Monorail');
-            const isExpressB = b.name?.en?.includes('Express') || b.name?.en?.includes('Liner') || b.name?.en?.includes('Monorail');
+        return [...lines].sort((a: any, b: any) => {
+            // Helper to get check string
+            const getName = (n: any) => (typeof n.name === 'string' ? n.name : n.name?.en || '').toLowerCase();
+            const nameA = getName(a);
+            const nameB = getName(b);
+
+            // Check for express keywords (English or localized if possible)
+            const isExpressA = nameA.includes('express') || nameA.includes('liner') || nameA.includes('monorail') || nameA.includes('特急') || nameA.includes('ライナー');
+            const isExpressB = nameB.includes('express') || nameB.includes('liner') || nameB.includes('monorail') || nameB.includes('特急') || nameB.includes('ライナー');
+
             return (isExpressB ? 1 : 0) - (isExpressA ? 1 : 0);
         });
     }, [lines, isAirport]);
 
+    const displayLinesForUi = useMemo(() => {
+        return displayLines.map((line: any) => {
+            const hasLineIdentity = Boolean(line.railway_id || line.line_name);
+            return {
+                ...line,
+                _displayStatus: hasLineIdentity ? line.status : 'normal',
+                _displayStatusDetail: hasLineIdentity ? line.status_detail : 'normal',
+                _hasLineIdentity: hasLineIdentity
+            };
+        });
+    }, [displayLines]);
+
     // Re-derive for layout with sorted lines
-    const delayedLines = displayLines.filter((l: any) => String(l.status_detail || (l.status === 'normal' ? 'normal' : 'unknown')) !== 'normal');
-    const normalLines = displayLines.filter((l: any) => String(l.status_detail || (l.status === 'normal' ? 'normal' : 'unknown')) === 'normal');
-    const isBusyHub = displayLines.length > 4;
+    const delayedLines = displayLinesForUi.filter((l: any) => String(l._displayStatusDetail || (l._displayStatus === 'normal' ? 'normal' : 'unknown')) !== 'normal');
+    const normalLines = displayLinesForUi.filter((l: any) => String(l._displayStatusDetail || (l._displayStatus === 'normal' ? 'normal' : 'unknown')) === 'normal');
+    const isBusyHub = displayLinesForUi.length > 4;
 
 
 

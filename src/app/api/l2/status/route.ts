@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { STATION_LINES, LINES, StationLineDef, OPERATOR_COLORS } from '@/lib/constants/stationLines';
+import { STATION_LINES, LINES, StationLineDef, OPERATOR_COLORS, ODPT_LINE_SEGMENT_BY_NAME_EN } from '@/lib/constants/stationLines';
 import { getLiveWeather } from '@/lib/weather/service';
 
 // API Keys
@@ -116,6 +116,26 @@ function normalizeLineToken(input: string) {
         .replace(/^tokyometro/, '')
         .replace(/line$/g, '')
         .replace(/[\-_.:]/g, '');
+}
+
+function normalizeRailwayId(input: string) {
+    return String(input || '').trim().replace(/^odpt:Railway:/, 'odpt.Railway:');
+}
+
+function getExpectedRailwayIds(lineDef: StationLineDef): string[] {
+    const segment = ODPT_LINE_SEGMENT_BY_NAME_EN[lineDef.name.en];
+    if (!segment) return [];
+
+    const operatorToken = lineDef.operator === 'Metro'
+        ? 'TokyoMetro'
+        : lineDef.operator === 'Toei'
+            ? 'Toei'
+            : lineDef.operator === 'JR'
+                ? 'JR-East'
+                : null;
+
+    if (!operatorToken) return [];
+    return [`odpt.Railway:${operatorToken}.${segment}`];
 }
 
 type LineStatusDetail = 'normal' | 'delay_minor' | 'delay_major' | 'halt' | 'canceled' | 'unknown';
@@ -256,21 +276,11 @@ function pickWorstSeverity(disruptions: any[]) {
 }
 
 function matchDisruptionToLine(lineDef: any, disruption: any) {
-    // 1. Check ID/Railway Match (New)
-    if (disruption.railway_id) {
-        // Construct approximate ODPT ID from lineDef (e.g. "Ginza" + "Metro" -> "TokyoMetro.Ginza")
-        // This is fuzzy but robust enough for the major lines
-        const lineSlug = lineDef.name.en.replace(' Line', '').replace('-', '');
-        const opPrefix = lineDef.operator === 'Metro' ? 'TokyoMetro' : lineDef.operator === 'Toei' ? 'Toei' : lineDef.operator === 'JR' ? 'JR-East' : 'Keikyu';
-        // Check if disruption.railway_id contains these tokens
-        if (disruption.railway_id.includes(opPrefix) && disruption.railway_id.includes(lineSlug)) {
-            return true;
-        }
+    const railwayId = normalizeRailwayId(disruption?.railway_id || '');
+    if (railwayId) {
+        const expected = getExpectedRailwayIds(lineDef);
+        if (expected.length > 0) return expected.includes(railwayId);
     }
-
-    const lineColor = String(lineDef?.color || '').toLowerCase();
-    const dColor = String(disruption?.line_color || '').toLowerCase();
-    if (lineColor && dColor && lineColor === dColor) return true;
 
     const enA = String(lineDef?.name?.en || '');
     const jaA = String(lineDef?.name?.ja || '');
@@ -279,11 +289,11 @@ function matchDisruptionToLine(lineDef: any, disruption: any) {
 
     const nEnA = normalizeLineToken(enA);
     const nEnB = normalizeLineToken(enB);
-    if (nEnA && nEnB && (nEnA === nEnB || nEnB.includes(nEnA) || nEnA.includes(nEnB))) return true;
+    if (nEnA && nEnB && nEnA === nEnB) return true;
 
     const nJaA = normalizeLineToken(jaA);
     const nJaB = normalizeLineToken(jaB);
-    if (nJaA && nJaB && (nJaA === nJaB || nJaB.includes(nJaA) || nJaA.includes(nJaB))) return true;
+    if (nJaA && nJaB && nJaA === nJaB) return true;
 
     return false;
 }
@@ -455,6 +465,7 @@ export async function GET(request: Request) {
         const combinedDisruptions = [...filteredDbDisruptions, ...liveTrainInfo];
 
         const lineStatusArray = lines.map(lineDef => {
+            const expectedRailwayId = getExpectedRailwayIds(lineDef)[0];
             const matching = combinedDisruptions.filter((d: any) => matchDisruptionToLine(lineDef, d));
 
             if (matching.length > 0) {
@@ -544,8 +555,10 @@ export async function GET(request: Request) {
                 return {
                     line: lineDef.name.en,
                     name: lineDef.name,
+                    line_name: lineDef.name,
                     operator: lineDef.operator,
                     color: lineDef.color,
+                    railway_id: expectedRailwayId,
                     status,
                     status_detail: isActuallyNormal ? 'normal' : classified.detail,
                     delay_minutes: isActuallyNormal ? null : classified.delayMinutes,
@@ -558,8 +571,10 @@ export async function GET(request: Request) {
             return {
                 line: lineDef.name.en,
                 name: lineDef.name,
+                line_name: lineDef.name,
                 operator: lineDef.operator,
                 color: lineDef.color,
+                railway_id: expectedRailwayId,
                 status: 'normal',
                 status_detail: 'normal',
                 delay_minutes: null,

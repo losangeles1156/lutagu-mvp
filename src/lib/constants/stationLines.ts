@@ -476,7 +476,7 @@ export function getStationIdVariants(id: string) {
     return Array.from(variants);
 }
 
-const ODPT_LINE_SEGMENT_BY_NAME_EN: Record<string, string> = {
+export const ODPT_LINE_SEGMENT_BY_NAME_EN: Record<string, string> = {
     'Ginza Line': 'Ginza',
     'Marunouchi Line': 'Marunouchi',
     'Hibiya Line': 'Hibiya',
