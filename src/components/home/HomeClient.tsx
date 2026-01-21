@@ -1,12 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
 import { HomeLogic } from './HomeLogic';
-import { AppOverlays } from './AppOverlays';
 import { BottomNavBar } from './BottomNavBar';
 import { NodeProfile } from '@/lib/api/nodes';
+
+// Lazy load heavy overlay components to reduce TBT
+const AppOverlays = dynamic(
+    () => import('./AppOverlays').then(m => ({ default: m.AppOverlays })),
+    { ssr: false }
+);
 
 interface HomeClientProps {
     header: React.ReactNode;

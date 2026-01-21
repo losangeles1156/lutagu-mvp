@@ -1,14 +1,23 @@
 'use client';
 
 import { useEffect, useState, useCallback, ReactNode, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useUIStateMachine, initializeUIState, isCollapsedState, canEnterExploreMode } from '@/stores/uiStateMachine';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAppStore } from '@/stores/appStore';
-import { LoginPanel } from '@/components/ui-state/LoginPanel';
-import { ChatCollapsedPanel } from '@/components/ui-state/ChatCollapsedPanel';
 import { Sparkles, Map as MapIcon, MessageSquare } from 'lucide-react';
+
+// Lazy load heavy UI state components to reduce TBT
+const LoginPanel = dynamic(
+  () => import('@/components/ui-state/LoginPanel').then(m => ({ default: m.LoginPanel })),
+  { ssr: false }
+);
+const ChatCollapsedPanel = dynamic(
+  () => import('@/components/ui-state/ChatCollapsedPanel').then(m => ({ default: m.ChatCollapsedPanel })),
+  { ssr: false }
+);
 
 // 常量定義
 const MOBILE_BREAKPOINT = 768;

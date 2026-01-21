@@ -519,6 +519,205 @@ fn requires_challenge(operator_id: &str) -> bool {
     operator_id.contains("JR-East") || operator_id.contains("Keikyu") || operator_id.contains("Seibu") || operator_id.contains("Tobu") || operator_id.contains("Tokyu")
 }
 
+async fn build_disruptions(state: &AppState, lines: &Vec<LineDef>) -> Vec<Disruption> {
+    let (odpt, yahoo_list, jr_east_snapshot) = tokio::join!(
+        fetch_odpt_disruptions(state, lines),
+        fetch_yahoo_status_cached(state),
+        fetch_jr_east_snapshot_cached(state)
+    );
+
+    let mut disruptions = odpt;
+    let mut odpt_railways: HashSet<String> = disruptions.iter().map(|d| d.railway_id.clone()).collect();
+
+    let mut yahoo_by_railway: HashMap<String, YahooStatus> = HashMap::new();
+    for y in yahoo_list {
+        if let Some(mapped) = yahoo_to_odpt_map().get(&y.name) {
+            yahoo_by_railway.entry(mapped.clone()).or_insert(y.clone());
+        }
+    }
+
+    for (railway_id, yahoo) in yahoo_by_railway.into_iter() {
+        if odpt_railways.contains(&railway_id) {
+            continue;
+        }
+
+        let (ok, derived) = should_inject_yahoo(&railway_id, jr_east_snapshot.as_ref());
+        if !ok { continue; }
+
+        let derived_tag = derived.as_deref().filter(|v| *v != "unknown").map(|v| format!(" [JR-East: {}]", v)).unwrap_or_default();
+        let message = format!("[Yahoo] {}: {}{}", yahoo.name, yahoo.status, derived_tag);
+        let combined = format!("{} {}", yahoo.status, derived.clone().unwrap_or_default());
+        let (mut detail, delay_minutes) = classify_status_detail(&combined, &combined, &combined);
+        if detail == "unknown" {
+            detail = match derived.as_deref() {
+                Some("suspended") => "halt".to_string(),
+                Some("delay") => "delay_minor".to_string(),
+                _ => "delay_minor".to_string(),
+            };
+        }
+        let severity = if detail == "halt" || detail == "canceled" { "critical" } else if detail == "delay_major" { "major" } else if detail == "delay_minor" { "minor" } else { "minor" };
+
+        disruptions.push(Disruption {
+            railway_id: railway_id.clone(),
+            status_text: "Service Update".to_string(),
+            message_ja: message.clone(),
+            message_en: message.clone(),
+            delay_minutes,
+            detail,
+            severity: severity.to_string(),
+            source: "yahoo".to_string(),
+        });
+        odpt_railways.insert(railway_id);
+    }
+
+    disruptions
+}
+
+async fn fetch_yahoo_status_cached(state: &AppState) -> Vec<YahooStatus> {
+    let cache_key = "external:yahoo:status:v1";
+    if let Some(cached) = state.memory.get(cache_key).await {
+        if let Ok(list) = serde_json::from_value::<Vec<YahooStatus>>(cached) {
+            return list;
+        }
+    }
+
+    if let Some(redis) = &state.redis {
+        if let Ok(Some(cached)) = redis_get_json(redis, cache_key).await {
+            if let Ok(list) = serde_json::from_value::<Vec<YahooStatus>>(cached.clone()) {
+                state.memory.set(cache_key.to_string(), cached, Duration::from_secs(30)).await;
+                return list;
+            }
+        }
+    }
+
+    let list = fetch_yahoo_status(&state.http).await;
+    let value = serde_json::to_value(&list).unwrap_or(Value::Null);
+    state.memory.set(cache_key.to_string(), value.clone(), Duration::from_secs(30)).await;
+    if let Some(redis) = &state.redis {
+        let _ = redis_set_json(redis, cache_key, &value, 60).await;
+    }
+    list
+}
+
+async fn fetch_yahoo_status(client: &reqwest::Client) -> Vec<YahooStatus> {
+    let url = "https://transit.yahoo.co.jp/diainfo/area/4";
+    let res = client
+        .get(url)
+        .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .header("Accept-Language", "ja-JP,ja;q=0.9")
+        .send()
+        .await;
+
+    let Ok(resp) = res else { return vec![]; };
+    if !resp.status().is_success() { return vec![]; }
+    let Ok(html) = resp.text().await else { return vec![]; };
+
+    let mut results = Vec::new();
+    let re = Regex::new(r"<a[^>]*>([^<]+)</a>[^<]*<span class=\"icnTrouble\">").ok();
+    if let Some(regex) = re {
+        for cap in regex.captures_iter(&html) {
+            if let Some(name) = cap.get(1) {
+                let name = name.as_str().trim().to_string();
+                if !name.is_empty() {
+                    results.push(YahooStatus { name, status: "Trouble (Delay/Suspension)".to_string() });
+                }
+            }
+        }
+    }
+    results
+}
+
+async fn fetch_jr_east_snapshot_cached(state: &AppState) -> Option<JrEastSnapshot> {
+    let cache_key = "external:jreast:kanto:snapshot:v1";
+    if let Some(cached) = state.memory.get(cache_key).await {
+        if let Ok(snapshot) = serde_json::from_value::<JrEastSnapshot>(cached) {
+            return Some(snapshot);
+        }
+    }
+
+    if let Some(redis) = &state.redis {
+        if let Ok(Some(cached)) = redis_get_json(redis, cache_key).await {
+            if let Ok(snapshot) = serde_json::from_value::<JrEastSnapshot>(cached.clone()) {
+                state.memory.set(cache_key.to_string(), cached, Duration::from_secs(60)).await;
+                return Some(snapshot);
+            }
+        }
+    }
+
+    let url = "https://traininfo.jreast.co.jp/train_info/kanto.aspx";
+    let res = state.http
+        .get(url)
+        .header("user-agent", "Lutagu/l2-status")
+        .header("accept", "text/html,application/xhtml+xml")
+        .header("accept-language", "ja-JP,ja;q=0.9,en;q=0.5")
+        .send()
+        .await;
+
+    let Ok(resp) = res else { return None; };
+    let Ok(html) = resp.text().await else { return None; };
+
+    let hints: HashSet<String> = jr_east_railway_hint_ja().values().cloned().collect();
+    let mut line_status_text_map_ja: HashMap<String, String> = HashMap::new();
+    let tag_re = Regex::new(r"<[^>]+>").ok();
+
+    for hint in hints {
+        if let Some(idx) = html.find(&hint) {
+            let start = idx.saturating_sub(200);
+            let end = usize::min(html.len(), idx + 400);
+            let window = &html[start..end];
+            let cleaned = if let Some(re) = &tag_re {
+                re.replace_all(window, " ").to_string()
+            } else {
+                window.to_string()
+            };
+            let cleaned = cleaned.split_whitespace().collect::<Vec<_>>().join(" ");
+            line_status_text_map_ja.insert(hint, cleaned);
+        }
+    }
+
+    let snapshot = JrEastSnapshot {
+        fetched_at: Utc::now().to_rfc3339(),
+        line_status_text_map_ja,
+    };
+
+    let value = serde_json::to_value(&snapshot).unwrap_or(Value::Null);
+    state.memory.set(cache_key.to_string(), value.clone(), Duration::from_secs(60)).await;
+    if let Some(redis) = &state.redis {
+        let _ = redis_set_json(redis, cache_key, &value, 120).await;
+    }
+    Some(snapshot)
+}
+
+fn should_inject_yahoo(railway_id: &str, snapshot: Option<&JrEastSnapshot>) -> (bool, Option<String>) {
+    if !railway_id.starts_with("odpt.Railway:JR-East.") {
+        return (true, None);
+    }
+
+    let hint = jr_east_railway_hint_ja().get(railway_id).cloned();
+    let Some(hint_ja) = hint else { return (true, None); };
+
+    let snippet = snapshot.and_then(|s| s.line_status_text_map_ja.get(&hint_ja)).cloned();
+    let derived = derive_official_status_from_text(snippet.as_deref());
+    if derived == "normal" { return (false, Some(derived)); }
+    let derived = if derived == "unknown" { None } else { Some(derived) };
+    (true, derived)
+}
+
+fn derive_official_status_from_text(text: Option<&str>) -> String {
+    let Some(raw) = text else { return "unknown".to_string(); };
+    let lower = raw.to_lowercase();
+    if lower.contains("平常") || lower.contains("通常") || lower.contains("normal") {
+        return "normal".to_string();
+    }
+    if lower.contains("運休") || lower.contains("運転見合わせ") || lower.contains("見合わせ") || lower.contains("suspended") {
+        return "suspended".to_string();
+    }
+    if lower.contains("遅延") || lower.contains("遅れ") || lower.contains("delay") {
+        return "delay".to_string();
+    }
+    "unknown".to_string()
+}
+
 async fn fetch_odpt_disruptions(state: &AppState, lines: &Vec<LineDef>) -> Vec<Disruption> {
     let mut operators = Vec::new();
     for line in lines {
@@ -589,7 +788,7 @@ fn map_disruption_from_odpt(item: &Value) -> Option<Disruption> {
     let (detail, delay_minutes) = classify_status_detail(&status_text, &message_ja, &message_en);
     let severity = if detail == "halt" || detail == "canceled" { "critical" } else if detail == "delay_major" { "major" } else if detail == "delay_minor" { "minor" } else { "minor" };
 
-    Some(Disruption { railway_id, status_text, message_ja, message_en, delay_minutes, detail, severity: severity.to_string() })
+    Some(Disruption { railway_id, status_text, message_ja, message_en, delay_minutes, detail, severity: severity.to_string(), source: "odpt".to_string() })
 }
 
 fn looks_normal(status_text: &str, ja: &str, en: &str) -> bool {
@@ -627,7 +826,11 @@ fn build_line_status(lines: Vec<LineDef>, disruptions: Vec<Disruption>) -> Vec<L
     let mut result = Vec::new();
     for line in lines {
         let mut matched: Vec<Disruption> = disruptions.iter().filter(|d| match_line(&line, d)).cloned().collect();
-        matched.sort_by(|a, b| rank_disruption(b).cmp(&rank_disruption(a)));
+        matched.sort_by(|a, b| {
+            let score_b = disruption_match_score(&line, b);
+            let score_a = disruption_match_score(&line, a);
+            score_b.cmp(&score_a).then_with(|| rank_disruption(b).cmp(&rank_disruption(a)))
+        });
         if let Some(primary) = matched.first() {
             let msg = LocalizedText { ja: primary.message_ja.clone(), en: primary.message_en.clone(), zh: primary.message_ja.clone() };
             result.push(LineStatus {
@@ -663,12 +866,18 @@ fn build_line_status(lines: Vec<LineDef>, disruptions: Vec<Disruption>) -> Vec<L
 }
 
 fn rank_disruption(d: &Disruption) -> i64 {
-    let mut rank = 0;
+    let mut rank = source_rank(&d.source) * 100;
     if d.detail == "halt" || d.detail == "canceled" { rank += 30; }
     if d.detail == "delay_major" { rank += 20; }
     if d.detail == "delay_minor" { rank += 10; }
     if d.severity == "critical" { rank += 5; }
     rank
+}
+
+fn source_rank(source: &str) -> i64 {
+    if source == "odpt" { return 3; }
+    if source == "yahoo" { return 2; }
+    1
 }
 
 fn match_line(line: &LineDef, disruption: &Disruption) -> bool {
@@ -678,6 +887,18 @@ fn match_line(line: &LineDef, disruption: &Disruption) -> bool {
     let id_token = normalize_token(&line.id);
     if !id_token.is_empty() && id_token.contains(&rail_token) { return true; }
     false
+}
+
+fn disruption_match_score(line: &LineDef, disruption: &Disruption) -> i64 {
+    let mut score = 0;
+    if disruption.railway_id == line.id { score += 40; }
+    if line.id.contains(&disruption.railway_id) || disruption.railway_id.contains(&line.id) { score += 30; }
+    let line_token = normalize_token(&line.name.en);
+    let rail_token = disruption.railway_id.split('.').last().map(normalize_token).unwrap_or_default();
+    if !line_token.is_empty() && line_token == rail_token { score += 20; }
+    let id_token = normalize_token(&line.id);
+    if !id_token.is_empty() && id_token.contains(&rail_token) { score += 10; }
+    score
 }
 
 fn normalize_token(s: &str) -> String {
