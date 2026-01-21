@@ -1,10 +1,8 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { SystemMenu } from '@/components/ui/SystemMenu';
 
-export function AppHeader() {
-    const tCommon = useTranslations('common');
+export async function AppHeader() {
+    const tCommon = await getTranslations('common');
 
     return (
         <header className="px-4 py-3 flex items-center justify-between bg-white/95 backdrop-blur-sm" role="banner">
