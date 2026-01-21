@@ -581,9 +581,7 @@ function AppMap() {
                 <div className="pointer-events-auto">
                     <JapanTimeClock />
                 </div>
-                <div className="pointer-events-auto">
-                    <SystemMenu variant="floating" />
-                </div>
+                {/* SystemMenu removed - already rendered in AppHeader to avoid duplicate login button */}
             </div>
 
             <span id="map-instructions" className="sr-only">

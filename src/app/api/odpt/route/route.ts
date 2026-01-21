@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+    buildRouteOptionFromPath,
     findRankedRoutes,
     findStationIdsByName,
     normalizeOdptStationId,
     filterRoutesByL2Status,
     type RailwayTopology,
     type RouteStep,
+    type RouteCosts,
+    type RouteOption,
 } from '@/lib/l4/assistantEngine';
 import CORE_TOPOLOGY from '@/lib/l4/generated/coreTopology.json';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -23,6 +26,101 @@ interface RouteResponse {
     }>;
     error?: string;
     error_code?: string;
+}
+
+type RustRouteCosts = {
+    time: number;
+    transfers: number;
+    hops: number;
+    transfer_distance: number;
+    crowding: number;
+};
+
+type RustRoute = {
+    key: string;
+    path: string[];
+    edge_railways: string[];
+    costs: RustRouteCosts;
+};
+
+type RustRouteResponse = {
+    routes: RustRoute[];
+    error?: string;
+};
+
+async function fetchRustRoutes(params: {
+    rustApiUrl: string;
+    fromIds: string[];
+    toIds: string[];
+    maxHops: number;
+    locale: string;
+    railways: RailwayTopology[];
+}): Promise<RouteOption[] | null> {
+    const { rustApiUrl, fromIds, toIds, maxHops, locale, railways } = params;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1500);
+    try {
+        const query = new URLSearchParams({
+            from_ids: fromIds.join(','),
+            to_ids: toIds.join(','),
+            max_hops: String(maxHops)
+        });
+        const res = await fetch(`${rustApiUrl}/l4/route?${query.toString()}`, {
+            signal: controller.signal,
+            headers: {
+                'accept': 'application/json'
+            }
+        });
+        if (!res.ok) return null;
+        const data = (await res.json()) as RustRouteResponse;
+        if (!data || !Array.isArray(data.routes)) return null;
+
+        const t = (zh: string, ja: string, en: string) => (locale.startsWith('ja') ? ja : locale.startsWith('en') ? en : zh);
+        const labelMap: Record<string, string> = {
+            smart: t('最佳建議', 'おすすめ', 'Best Route'),
+            fastest: t('最快到達', '最速', 'Fastest'),
+            fewest_transfers: t('最少轉乘', '乗換最少', 'Fewest transfers'),
+            comfort: t('最舒適', 'らくらく', 'Comfortable')
+        };
+
+        const options: RouteOption[] = [];
+        const signatureSet = new Set<string>();
+
+        for (const route of data.routes) {
+            if (!route || !Array.isArray(route.path) || !Array.isArray(route.edge_railways)) continue;
+            if (route.path.length < 2 || route.edge_railways.length !== route.path.length - 1) continue;
+            const signature = `${route.path.join('>')}|${route.edge_railways.join(',')}`;
+            if (signatureSet.has(signature)) continue;
+
+            const costs: RouteCosts = {
+                time: Number(route.costs?.time ?? 0),
+                fare: 0,
+                transfers: Number(route.costs?.transfers ?? 0),
+                hops: Number(route.costs?.hops ?? 0),
+                railwaySwitches: 0,
+                operatorSwitches: 0,
+                transferDistance: Number(route.costs?.transfer_distance ?? 0),
+                crowding: Number(route.costs?.crowding ?? 0)
+            };
+
+            const label = labelMap[route.key] || labelMap.smart;
+            options.push(buildRouteOptionFromPath({
+                path: route.path,
+                edgeRailways: route.edge_railways,
+                railways,
+                locale: locale.startsWith('ja') ? 'ja' : locale.startsWith('en') ? 'en' : 'zh-TW',
+                label,
+                costs
+            }));
+            signatureSet.add(signature);
+        }
+
+        return options.length > 0 ? options : null;
+    } catch {
+        return null;
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 export async function GET(req: Request) {
@@ -126,14 +224,25 @@ export async function GET(req: Request) {
 
     try {
         const railways: RailwayTopology[] = CORE_TOPOLOGY as unknown as RailwayTopology[];
+        const rustApiUrl = process.env.L4_ROUTING_API_URL;
+        const maxHops = 35;
 
-        const routeOptionsBase = findRankedRoutes({
-            originStationId: fromIds,
-            destinationStationId: toIds,
-            railways,
-            maxHops: 35,
-            locale,
-        });
+        const routeOptionsBase = (rustApiUrl
+            ? await fetchRustRoutes({
+                rustApiUrl,
+                fromIds,
+                toIds,
+                maxHops,
+                locale,
+                railways
+            })
+            : null) || findRankedRoutes({
+                originStationId: fromIds,
+                destinationStationId: toIds,
+                railways,
+                maxHops,
+                locale,
+            });
 
         let routeOptions = routeOptionsBase;
         let removedDueToL2 = 0;

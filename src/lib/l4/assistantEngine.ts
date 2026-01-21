@@ -1325,7 +1325,7 @@ function getAdjacency(railways: RailwayTopology[]) {
 
 import { TRANSFER_DATABASE, getTransferDistance, isOutOfStationTransfer, getHubBufferMinutes } from './data/transferDatabase';
 
-type RouteCosts = {
+export type RouteCosts = {
     time: number;
     fare: number;
     transfers: number;           // 總轉乘次數
@@ -1917,7 +1917,7 @@ function decodeStateKey(key: string): { station: string; lastRailway: string | n
     };
 }
 
-function buildRouteOptionFromPath(params: {
+export function buildRouteOptionFromPath(params: {
     path: string[];
     edgeRailways: string[];
     railways: RailwayTopology[];
