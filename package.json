@@ -24,6 +24,8 @@
     "@ai-sdk/openai": "^3.0.7",
     "@ai-sdk/react": "^3.0.23",
     "@google/generative-ai": "^0.24.1",
+    "@grpc/grpc-js": "^1.14.3",
+    "@grpc/proto-loader": "^0.8.0",
     "@mistralai/mistralai": "^1.11.0",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-tabs": "^1.1.13",

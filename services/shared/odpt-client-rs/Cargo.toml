@@ -1,0 +1,45 @@
+[package]
+name = "odpt-client"
+version = "0.1.0"
+edition = "2021"
+authors = ["Antigravity <antigravity@gemini.com>"]
+description = "Standardized, type-safe, and cached ODPT API client for Rust services"
+
+[dependencies]
+# Async Runtime
+tokio = { version = "1.38", features = ["full"] }
+
+# HTTP Client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error Handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+
+# Rate Limiting
+governor = "0.6"
+nonzero_ext = "0.3"
+
+# Utilities
+async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+url = "2.5"
+
+# Caching (Optional)
+redis = { version = "0.26", features = ["tokio-comp"], optional = true }
+moka = { version = "0.12", features = ["future"] } # High performance local cache
+
+[features]
+default = []
+redis-cache = ["redis"]
+
+[dev-dependencies]
+tokio-test = "0.4"
+wiremock = "0.6" # For mocking HTTP server in tests

@@ -1,0 +1,10 @@
+# Exclude local build artifacts
+target/
+.git/
+.gitignore
+
+# Explicitly include manifest files
+!Cargo.toml
+!Cargo.lock
+!Dockerfile
+!src/

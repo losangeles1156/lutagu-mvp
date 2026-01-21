@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { IdMatcher } from '../src/lib/utils/idMatcher';
+import { upsertKnowledge } from '../src/lib/api/vectorClient';
+import crypto from 'crypto';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
@@ -264,7 +266,7 @@ async function main() {
 
     console.log(`\n--- Generating SQL for ${globalKnowledge.size} unique nodes ---`);
 
-    // Generate SQL
+    // Generate SQL & Upsert Vectors
     for (const [nodeId, data] of globalKnowledge.entries()) {
         const safeData: any = {
             traps: data.traps.map((t: any) => ({ ...t, advice: t.advice || undefined })),
@@ -281,6 +283,43 @@ SET riding_knowledge = '${jsonStr}'
 WHERE id = '${nodeId}';
 `;
         fs.appendFileSync(OUTPUT_SQL, sql + '\n');
+
+        // Upsert Vectors to Qdrant
+        console.log(`[VECTOR] Ingesting ${nodeId}...`);
+        try {
+            // Sequential processing for items within a node to respect rate limits
+            // Traps
+            for (let idx = 0; idx < data.traps.length; idx++) {
+                const t = data.traps[idx];
+                const rawId = `${nodeId}#trap_${idx}`;
+                const hash = crypto.createHash('md5').update(rawId).digest('hex');
+                const uuid = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
+                const content = `Trap at ${nodeId}: ${t.title}. ${t.description}`;
+                await upsertKnowledge(uuid, content, ['trap', nodeId]);
+            }
+
+            // Hacks
+            for (let idx = 0; idx < data.hacks.length; idx++) {
+                const h = data.hacks[idx];
+                const rawId = `${nodeId}#hack_${idx}`;
+                const hash = crypto.createHash('md5').update(rawId).digest('hex');
+                const uuid = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
+                const content = `Hack at ${nodeId}: ${h.title}. ${h.description}`;
+                await upsertKnowledge(uuid, content, ['hack', nodeId]);
+            }
+
+            // Facilities
+            for (let idx = 0; idx < data.facilities.length; idx++) {
+                const f = data.facilities[idx];
+                const rawId = `${nodeId}#facility_${idx}`;
+                const hash = crypto.createHash('md5').update(rawId).digest('hex');
+                const uuid = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
+                const content = `Facility at ${nodeId}: ${f.type} at ${f.location}`;
+                await upsertKnowledge(uuid, content, ['facility', f.type, nodeId]);
+            }
+        } catch (err) {
+            console.error(`[VECTOR] Failed to ingest ${nodeId}:`, err);
+        }
     }
 
     console.log(`\nDone! SQL written to ${OUTPUT_SQL}`);

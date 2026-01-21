@@ -13,10 +13,18 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
+
+interface VectorSearchResult {
+  id: string;
+  score: number;
+  content: string;
+  tags: string[];
+}
+
 export async function searchL4Knowledge(params: {
   query: string;
   stationId?: string;
-  knowledgeType?: string;
+  knowledgeType?: string; // Kept for compatibility, but vector search tags should overlap
   userContext?: string[];
   timeContext?: string;
   topK?: number;
@@ -32,73 +40,58 @@ export async function searchL4Knowledge(params: {
     threshold = 0.5
   } = params;
 
-  const embedding = await generateEmbedding(query);
-  const supabase = getSupabaseClient();
+  const vectorServiceUrl = process.env.VECTOR_SEARCH_SERVICE_URL;
 
-  let results: any[] = [];
-
-  try {
-    const { data, error } = await supabase
-      .rpc('match_l4_knowledge', {
-        query_embedding: embedding,
-        match_threshold: threshold,
-        match_count: topK,
-        filter_knowledge_type: knowledgeType || null,
-        filter_entity_id: stationId || null,
-        filter_category: null,
-        filter_user_context: userContext.length > 0 ? userContext : null,
-        filter_time_context: timeContext ? [timeContext] : null
-      });
-
-    console.log(`[L4Search] Query: "${query}", Station: "${stationId}", Found: ${data?.length || 0} items`);
-    if (data && data.length > 0) {
-      console.log(`[L4Search] Top similarity: ${data[0].similarity}`);
-    }
-
-    if (error) {
-      if (error.code === 'PGRST202' || error.message?.includes('not found')) {
-        // Fallback
-        let queryBuilder = supabase
-          .from('l4_knowledge_embeddings')
-          .select('*');
-
-        if (knowledgeType) queryBuilder = queryBuilder.eq('knowledge_type', knowledgeType);
-        // Use ilike for more robust ID matching (e.g., handling prefixes)
-        if (stationId) {
-          queryBuilder = queryBuilder.ilike('entity_id', `%${stationId}%`);
-        } else {
-          // CRITICAL FIX: If stationId is missing, do NOT return random data from the top of the table.
-          // Return empty unless we are sure what to search for.
-          return [];
-        }
-
-        const { data: fallbackData, error: fallbackError } = await queryBuilder.limit(topK * 2);
-        if (fallbackError) throw fallbackError;
-
-        results = (fallbackData || []).map(item => ({
-          ...item,
-          similarity: 0.8
-        }));
-      } else {
-        throw error;
-      }
-    } else {
-      results = data || [];
-    }
-
-    // STRICT FILTERING: Ensure results strictly match the requested stationId
-    // This guards against RPC ignoring filters or semantic bleed-over
-    if (stationId && results.length > 0) {
-      results = results.filter(r => {
-        if (!r.entity_id) return false;
-        // Allow if ID implies containment either way (e.g., simple ID vs full URN)
-        return r.entity_id.includes(stationId) || stationId.includes(r.entity_id);
-      });
-    }
-  } catch (err) {
-    console.error('searchL4Knowledge Error:', err);
-    throw err;
+  if (!vectorServiceUrl) {
+    console.warn('VECTOR_SEARCH_SERVICE_URL not set. Falling back to empty results.');
+    return [];
   }
 
-  return results;
+  // Construct search query
+  // We can enhance the query with context if needed
+  let finalQuery = query;
+  if (stationId) {
+    finalQuery += ` related to ${stationId}`;
+  }
+
+  try {
+    const response = await fetch(`${vectorServiceUrl}/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: finalQuery,
+        limit: topK,
+        threshold: threshold
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Vector Service Error: ${response.status} ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    const results: VectorSearchResult[] = data.results || [];
+
+    console.log(`[L4Search] Query: "${finalQuery}", Found: ${results.length} items`);
+
+    // Client-side filtering if necessary (e.g. strict ID matching if vector search is too fuzzy)
+    // The vector service returns 'content' and 'tags'.
+    // We map it to the expected interface if easier, or just return as is.
+    // The current consumers expect: { content, category, ... } 
+
+    return results.map(r => ({
+      content: r.content,
+      similarity: r.score,
+      category: r.tags.length > 0 ? r.tags[0] : 'general',
+      entity_id: r.id
+    }));
+
+  } catch (err) {
+    console.error('searchL4Knowledge Error:', err);
+    // Fail gracefully or throw depending on requirements
+    return [];
+  }
 }
+

@@ -1,0 +1,8 @@
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/shared/odpt-client-rs/target/debug/deps/percent_encoding-da65008b411bfe11.d: /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs
+
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/shared/odpt-client-rs/target/debug/deps/libpercent_encoding-da65008b411bfe11.rlib: /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs
+
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/shared/odpt-client-rs/target/debug/deps/libpercent_encoding-da65008b411bfe11.rmeta: /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs
+
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs:
