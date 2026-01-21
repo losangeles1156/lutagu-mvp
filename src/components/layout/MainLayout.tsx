@@ -94,10 +94,11 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
     transitionTo(isMobile ? 'collapsed_mobile' : 'collapsed_desktop');
   }, [isMobile, transitionTo]);
 
-  // 渲染登入頁面
-  if (uiState === 'login') {
-    return <LoginPanel />;
-  }
+  // 移除早前的 return <LoginPanel />，改為 overlay 渲染
+  // if (uiState === 'login') {
+  //   return <LoginPanel />;
+  // }
+
 
   // 渲染全螢幕對話
   if (uiState === 'fullscreen') {
@@ -204,6 +205,8 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
             {bottomBar}
           </div>
         )}
+        {/* Login Overlay */}
+        {uiState === 'login' && <div className="fixed inset-0 z-[100]"><LoginPanel /></div>}
       </div>
     );
   }
@@ -267,6 +270,8 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
           {bottomBar}
         </div>
       )}
+      {/* Login Overlay */}
+      {uiState === 'login' && <div className="fixed inset-0 z-[100]"><LoginPanel /></div>}
     </div>
   );
 }
