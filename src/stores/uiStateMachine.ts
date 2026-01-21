@@ -204,7 +204,14 @@ export const useUIStateMachine = create<UIStateMachineState>()(
     }),
     {
       name: 'lutagu-ui-state',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => {
+        if (typeof window !== 'undefined') return localStorage;
+        return {
+          getItem: () => null,
+          setItem: () => { },
+          removeItem: () => { },
+        };
+      }),
       partialize: (state) => ({
         lastState: state.lastState,
         sessionStartTime: state.sessionStartTime,
