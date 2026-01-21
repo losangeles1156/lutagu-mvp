@@ -7,10 +7,11 @@ use axum::{
 };
 use chrono::{DateTime, Duration as ChronoDuration, Utc};
 use redis::AsyncCommands;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{postgres::PgPoolOptions, Row};
-use std::{collections::HashMap, env, net::SocketAddr, sync::Arc, time::{Duration, SystemTime, UNIX_EPOCH}};
+use std::{collections::{HashMap, HashSet}, env, net::SocketAddr, sync::{Arc, OnceLock}, time::{Duration, SystemTime, UNIX_EPOCH}};
 use tokio::sync::RwLock;
 
 const ODPT_BASE_URL_STANDARD: &str = "https://api.odpt.org/api/v4";
@@ -144,6 +145,70 @@ struct Disruption {
     delay_minutes: Option<i64>,
     detail: String,
     severity: String,
+    source: String,
+}
+
+#[derive(Clone)]
+struct YahooStatus {
+    name: String,
+    status: String,
+}
+
+#[derive(Clone)]
+struct JrEastSnapshot {
+    fetched_at: String,
+    line_status_text_map_ja: HashMap<String, String>,
+}
+
+static YAHOO_TO_ODPT_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
+static JR_EAST_RAILWAY_HINT_JA: OnceLock<HashMap<String, String>> = OnceLock::new();
+
+fn yahoo_to_odpt_map() -> &'static HashMap<String, String> {
+    YAHOO_TO_ODPT_MAP.get_or_init(|| {
+        let mut map = HashMap::new();
+        map.insert("ＪＲ山手線".to_string(), "odpt.Railway:JR-East.Yamanote".to_string());
+        map.insert("ＪＲ京浜東北根岸線".to_string(), "odpt.Railway:JR-East.KeihinTohoku".to_string());
+        map.insert("ＪＲ京浜東北線".to_string(), "odpt.Railway:JR-East.KeihinTohoku".to_string());
+        map.insert("ＪＲ中央線快速電車".to_string(), "odpt.Railway:JR-East.ChuoKaisoku".to_string());
+        map.insert("ＪＲ中央・総武各駅停車".to_string(), "odpt.Railway:JR-East.ChuoSobu".to_string());
+        map.insert("ＪＲ総武線快速電車".to_string(), "odpt.Railway:JR-East.SobuKaisoku".to_string());
+        map.insert("ＪＲ埼京川越線".to_string(), "odpt.Railway:JR-East.Saikyo".to_string());
+        map.insert("ＪＲ埼京線".to_string(), "odpt.Railway:JR-East.Saikyo".to_string());
+        map.insert("ＪＲ湘南新宿ライン".to_string(), "odpt.Railway:JR-East.ShonanShinjuku".to_string());
+        map.insert("東京メトロ銀座線".to_string(), "odpt.Railway:TokyoMetro.Ginza".to_string());
+        map.insert("東京メトロ丸ノ內線".to_string(), "odpt.Railway:TokyoMetro.Marunouchi".to_string());
+        map.insert("東京メトロ日比谷線".to_string(), "odpt.Railway:TokyoMetro.Hibiya".to_string());
+        map.insert("東京メトロ東西線".to_string(), "odpt.Railway:TokyoMetro.Tozai".to_string());
+        map.insert("東京メトロ千代田線".to_string(), "odpt.Railway:TokyoMetro.Chiyoda".to_string());
+        map.insert("東京メトロ有楽町線".to_string(), "odpt.Railway:TokyoMetro.Yurakucho".to_string());
+        map.insert("東京メトロ半蔵門線".to_string(), "odpt.Railway:TokyoMetro.Hanzomon".to_string());
+        map.insert("東京メトロ南北線".to_string(), "odpt.Railway:TokyoMetro.Namboku".to_string());
+        map.insert("東京メトロ副都心線".to_string(), "odpt.Railway:TokyoMetro.Fukutoshin".to_string());
+        map.insert("都営浅草線".to_string(), "odpt.Railway:Toei.Asakusa".to_string());
+        map.insert("都営三田線".to_string(), "odpt.Railway:Toei.Mita".to_string());
+        map.insert("都営新宿線".to_string(), "odpt.Railway:Toei.Shinjuku".to_string());
+        map.insert("都営大江戸線".to_string(), "odpt.Railway:Toei.Oedo".to_string());
+        map.insert("ゆりかもめ".to_string(), "odpt.Railway:Yurikamome.Yurikamome".to_string());
+        map.insert("りんかい線".to_string(), "odpt.Railway:TWR.Rinkai".to_string());
+        map
+    })
+}
+
+fn jr_east_railway_hint_ja() -> &'static HashMap<String, String> {
+    JR_EAST_RAILWAY_HINT_JA.get_or_init(|| {
+        let mut map = HashMap::new();
+        map.insert("odpt.Railway:JR-East.Yamanote".to_string(), "山手線".to_string());
+        map.insert("odpt.Railway:JR-East.KeihinTohoku".to_string(), "京浜東北線".to_string());
+        map.insert("odpt.Railway:JR-East.ChuoKaisoku".to_string(), "中央線快速".to_string());
+        map.insert("odpt.Railway:JR-East.ChuoSobu".to_string(), "中央・総武各駅停車".to_string());
+        map.insert("odpt.Railway:JR-East.SobuKaisoku".to_string(), "総武快速線".to_string());
+        map.insert("odpt.Railway:JR-East.Saikyo".to_string(), "埼京線".to_string());
+        map.insert("odpt.Railway:JR-East.ShonanShinjuku".to_string(), "湘南新宿ライン".to_string());
+        map.insert("odpt.Railway:JR-East.Tokaido".to_string(), "東海道線".to_string());
+        map.insert("odpt.Railway:JR-East.Keiyo".to_string(), "京葉線".to_string());
+        map.insert("odpt.Railway:JR-East.Joban".to_string(), "常磐線".to_string());
+        map
+    })
 }
 
 #[tokio::main]
@@ -232,7 +297,7 @@ async fn l2_status(State(state): State<AppState>, Query(query): Query<StatusQuer
     let crowd_reports = crowd.unwrap_or_default();
 
     let lines = derive_lines(node.transit_lines.clone());
-    let disruptions = fetch_odpt_disruptions(&state, &lines).await;
+    let disruptions = build_disruptions(&state, &lines).await;
     let line_status = build_line_status(lines.clone(), disruptions);
 
     let has_suspension = line_status.iter().any(|l| l.status_detail == "halt" || l.status_detail == "canceled" || l.status == "suspended");

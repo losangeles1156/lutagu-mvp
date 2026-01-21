@@ -36,6 +36,9 @@ export default async function RootLayout({
                 <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
                 <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
+                {/* LCP Optimization: Preload hero image to eliminate Load Delay */}
+                <link rel="preload" href="/images/map-placeholder.jpg" as="image" fetchPriority="high" />
+
                 <meta name="application-name" content="LUTAGU" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
