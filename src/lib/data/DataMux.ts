@@ -6,12 +6,36 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 // L2 Status Fetcher (Reuse existing logic or call API)
 async function fetchL2Status(stationId: string): Promise<any> {
-    // Ideally we call the internal API or reuse service logic
-    // For now, let's assume we can fetch from DB view or simplified logic
-    // But since this runs on server, we can query DB directly
+    // 1. Try Cache (l2_cache table)
+    const { data: cached } = await supabaseAdmin
+        .from('l2_cache')
+        .select('value')
+        .eq('key', `l2:${stationId}`)
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle();
+
+    if (cached?.value) {
+        return cached.value;
+    }
+
+    // 2. Fallback: Call Rust Service
+    const serviceUrl = process.env.L2_STATUS_API_URL;
+    if (serviceUrl) {
+        try {
+            console.log(`[DataMux] Fetching real-time L2 from ${serviceUrl}`);
+            const res = await fetch(`${serviceUrl}/l2/status?stationId=${stationId}`, { next: { revalidate: 30 } });
+            if (res.ok) {
+                return await res.json();
+            }
+        } catch (e) {
+            console.warn('[DataMux] L2 Service call failed', e);
+        }
+    }
+
+    // 3. Fallback: Old Snapshot (Weather/Crowd only)
     const { data } = await supabaseAdmin
         .from('transit_dynamic_snapshot')
-        .select('weather_info, crowd_level, line_status')
+        .select('weather_info, crowd_level')
         .eq('station_id', stationId)
         .maybeSingle();
     return data || {};
