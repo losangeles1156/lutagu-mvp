@@ -267,6 +267,23 @@ function lineStatusDetailRank(detail: LineStatusDetail): number {
     return 0;
 }
 
+function getDisruptionSource(input: any): 'odpt' | 'yahoo' | 'snapshot' | 'unknown' {
+    const id = String(input?.['@id'] || input?.['owl:sameAs'] || input?.id || '');
+    const secondarySource = String(input?.secondary_source || '').toLowerCase();
+    if (id.startsWith('synthetic:yahoo:') || id.startsWith('yahoo:')) return 'yahoo';
+    if (secondarySource.includes('yahoo')) return 'yahoo';
+    if (input?.source === 'snapshot') return 'snapshot';
+    if (input?.railway_id || input?.['odpt:railway']) return 'odpt';
+    return 'unknown';
+}
+
+function getDisruptionSourceRank(source: string): number {
+    if (source === 'odpt') return 3;
+    if (source === 'yahoo') return 2;
+    if (source === 'snapshot') return 1;
+    return 0;
+}
+
 function pickWorstSeverity(disruptions: any[]) {
     const order = ['none', 'minor', 'major', 'critical'];
     return disruptions.reduce(
@@ -435,6 +452,8 @@ export async function GET(request: Request) {
             const textJa = (typeof textObj === 'object' && textObj) ? textObj.ja : textObj;
             const textEn = (typeof textObj === 'object' && textObj) ? textObj.en : '';
 
+            const source = getDisruptionSource(item);
+
             return {
                 severity: (item.secondary_status && item.secondary_status !== 'normal') ? 'major' : 'minor',
                 railway_id: item['odpt:railway'],
@@ -451,7 +470,8 @@ export async function GET(request: Request) {
                     ja: textJa || '',
                     en: textEn || '',
                     zh: textJa || ''
-                }
+                },
+                source
             };
         }).filter(Boolean);
 
@@ -460,7 +480,10 @@ export async function GET(request: Request) {
         const filteredDbDisruptions = (baseData as any).disruption_data?.disruptions?.filter((d: any) => {
             const msg = d.message?.ja || d.status_label?.ja || '';
             return !msg.includes('平常') && !msg.includes('通常') && !msg.includes('ダイヤ乱れは解消');
-        }) || [];
+        }).map((d: any) => ({
+            ...d,
+            source: d.source || 'snapshot'
+        })) || [];
 
         const combinedDisruptions = [...filteredDbDisruptions, ...liveTrainInfo];
 
@@ -499,14 +522,26 @@ export async function GET(request: Request) {
                                 return 0;
                             })();
 
+                            const source = getDisruptionSource(d);
+                            const sourceRank = getDisruptionSourceRank(source);
+                            const disruptionRailway = normalizeRailwayId(d?.railway_id || d?.['odpt:railway'] || '');
+                            const exactRailwayMatch = expectedRailwayId
+                                ? normalizeRailwayId(expectedRailwayId) === disruptionRailway
+                                : false;
+
                             return {
                                 d,
                                 classified,
                                 rank: lineStatusDetailRank(classified.detail),
-                                severityRank
+                                severityRank,
+                                sourceRank,
+                                exactRailwayMatch
                             };
                         })
-                        .sort((a, b) => b.rank - a.rank || b.severityRank - a.severityRank);
+                        .sort((a, b) => Number(b.exactRailwayMatch) - Number(a.exactRailwayMatch)
+                            || b.sourceRank - a.sourceRank
+                            || b.rank - a.rank
+                            || b.severityRank - a.severityRank);
                     return scored[0] || null;
                 })();
 
@@ -796,4 +831,7 @@ export async function GET(request: Request) {
     extractDelayMinutesFromText,
     classifyLineStatusFromText,
     lineStatusDetailRank,
+    getDisruptionSource,
+    getDisruptionSourceRank,
+    normalizeRailwayId,
 };

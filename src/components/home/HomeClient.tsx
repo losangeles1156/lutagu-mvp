@@ -1,0 +1,48 @@
+'use client';
+
+import { useState } from 'react';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
+import { HomeLogic } from './HomeLogic';
+import { AppOverlays } from './AppOverlays';
+import { BottomNavBar } from './BottomNavBar';
+import { NodeProfile } from '@/lib/api/nodes';
+
+interface HomeClientProps {
+    header: React.ReactNode;
+    mapPanel: React.ReactNode;
+    chatPanel: React.ReactNode;
+}
+
+export function HomeClient({ header, mapPanel, chatPanel }: HomeClientProps) {
+    const [nodeData, setNodeData] = useState<any>(null);
+    const [profile, setProfile] = useState<NodeProfile | null>(null);
+    const [hydrated, setHydrated] = useState(false);
+
+    // Quick hydration fix similar to original page
+    useState(() => {
+        if (typeof window !== 'undefined') {
+            setHydrated(true);
+        }
+    });
+
+    if (!hydrated) {
+        return <div className="min-h-screen bg-white" />;
+    }
+
+    return (
+        <div className="relative min-h-screen bg-white">
+            <OfflineIndicator />
+            <HomeLogic setNodeData={setNodeData} setProfile={setProfile} />
+
+            <MainLayout
+                header={header} // Server Component slot
+                mapPanel={mapPanel} // Client Component slot (Dynamic)
+                chatPanel={chatPanel} // Client Component slot (Dynamic)
+                bottomBar={<BottomNavBar nodeData={nodeData} />} // Client Component with local state
+            />
+
+            <AppOverlays nodeData={nodeData} profile={profile} />
+        </div>
+    );
+}

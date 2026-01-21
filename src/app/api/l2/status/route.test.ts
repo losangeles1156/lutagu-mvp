@@ -12,6 +12,9 @@ const __private__ = (GET as any).__private__ as {
         messageEn?: string;
         messageZh?: string;
     }) => { status: 'normal' | 'delay' | 'suspended'; detail: string; delayMinutes: number | null };
+    getDisruptionSource: (input: any) => 'odpt' | 'yahoo' | 'snapshot' | 'unknown';
+    getDisruptionSourceRank: (source: string) => number;
+    normalizeRailwayId: (input: string) => string;
 };
 
 test('extractDelayMinutesFromText extracts Japanese delay minutes', () => {
@@ -87,4 +90,25 @@ test('classifyLineStatusFromText returns normal on normal keywords', () => {
         assert.equal(r.detail, 'normal');
         assert.equal(r.delayMinutes, null);
     }
+});
+
+test('getDisruptionSource classifies by ids and fields', () => {
+    assert.equal(__private__.getDisruptionSource({ railway_id: 'odpt.Railway:TokyoMetro.Ginza' }), 'odpt');
+    assert.equal(__private__.getDisruptionSource({ '@id': 'synthetic:yahoo:odpt.Railway:JR-East.Yamanote' }), 'yahoo');
+    assert.equal(__private__.getDisruptionSource({ secondary_source: 'Yahoo Transit' }), 'yahoo');
+    assert.equal(__private__.getDisruptionSource({ source: 'snapshot' }), 'snapshot');
+    assert.equal(__private__.getDisruptionSource({}), 'unknown');
+});
+
+test('getDisruptionSourceRank prioritizes odpt over yahoo and snapshot', () => {
+    assert.ok(__private__.getDisruptionSourceRank('odpt') > __private__.getDisruptionSourceRank('yahoo'));
+    assert.ok(__private__.getDisruptionSourceRank('yahoo') > __private__.getDisruptionSourceRank('snapshot'));
+    assert.ok(__private__.getDisruptionSourceRank('snapshot') > __private__.getDisruptionSourceRank('unknown'));
+});
+
+test('normalizeRailwayId normalizes odpt railway prefix', () => {
+    assert.equal(
+        __private__.normalizeRailwayId('odpt:Railway:TokyoMetro.Ginza'),
+        'odpt.Railway:TokyoMetro.Ginza'
+    );
 });
