@@ -20,9 +20,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // 🚀 Performance: Dynamic imports for code splitting
+import { MapSkeleton } from '@/components/map/MapSkeleton';
+
 const MapContainer = dynamic(
     () => import('@/components/map/MapContainer'),
-    { ssr: false, loading: () => <div className="w-full h-screen bg-gray-100 animate-pulse" /> }
+    { ssr: false, loading: () => <MapSkeleton /> }
 );
 
 const ChatPanel = dynamic(

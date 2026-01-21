@@ -52,6 +52,10 @@ const nextConfig = {
   }
 };
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 if (isProd) {
   const withPWA = require('next-pwa')({
     dest: 'public',
@@ -60,7 +64,7 @@ if (isProd) {
     disable: process.env.NODE_ENV === 'development',
     buildExcludes: [/middleware-manifest\.json$/],
   });
-  module.exports = withPWA(withNextIntl(nextConfig));
+  module.exports = withBundleAnalyzer(withPWA(withNextIntl(nextConfig)));
 } else {
-  module.exports = withNextIntl(nextConfig);
+  module.exports = withBundleAnalyzer(withNextIntl(nextConfig));
 }

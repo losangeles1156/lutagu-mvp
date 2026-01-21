@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { STATION_LINES, LINES, StationLineDef, OPERATOR_COLORS, ODPT_LINE_SEGMENT_BY_NAME_EN } from '@/lib/constants/stationLines';
-import { getLiveWeather } from '@/lib/weather/service';
+import { resolveStationWeather } from '@/lib/weather/service';
 
 // API Keys
 const API_KEY_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN; // Permanent (Metro/Toei)
@@ -600,60 +600,25 @@ export async function GET(request: Request) {
         const stationHasDelay = finalStatusCode !== 'NORMAL';
 
 
-        const weatherInfo = await (async () => {
-            const w: any = baseData.weather_info;
-            const t = w?.update_time ? Date.parse(String(w.update_time)) : NaN;
-
-            // If we have data and it's fresh (< 3 hours), use it
-            if (w && Number.isFinite(t) && (Date.now() - t < 3 * 60 * 60 * 1000)) {
-                return w;
+        let coordsLat = 35.6895;
+        let coordsLon = 139.6917;
+        if (nodeRes.data?.coordinates) {
+            const coords = nodeRes.data.coordinates as any;
+            if (coords.coordinates && Array.isArray(coords.coordinates)) {
+                coordsLon = coords.coordinates[0];
+                coordsLat = coords.coordinates[1];
+            } else if (Array.isArray(coords) && coords.length >= 2) {
+                coordsLon = coords[0];
+                coordsLat = coords[1];
             }
+        }
 
-            // Otherwise, try to fetch live
-            try {
-                // Try to get coords from nodes table if not in baseData
-                let lat = 35.6895; // Default Tokyo Center
-                let lon = 139.6917;
-
-                if (nodeRes.data?.coordinates) {
-                    const coords = nodeRes.data.coordinates as any;
-                    if (coords.coordinates && Array.isArray(coords.coordinates)) {
-                        // PostGIS geojson format: { type: "Point", coordinates: [lon, lat] }
-                        lon = coords.coordinates[0];
-                        lat = coords.coordinates[1];
-                    } else if (Array.isArray(coords) && coords.length >= 2) {
-                        // Array format: [lon, lat] or [lat, lon] - common in JSONB
-                        lon = coords[0];
-                        lat = coords[1];
-                    }
-                }
-
-                const live = await getLiveWeather(lat, lon);
-                return {
-                    temp: live.temp,
-                    condition: live.condition,
-                    wind: live.wind,
-                    label: live.label,
-                    emoji: live.emoji,
-                    humidity: live.humidity,
-                    precipitationProbability: live.precipitationProbability,
-                    update_time: new Date().toISOString()
-                };
-            } catch (e) {
-                console.warn(`[L2 API] Live weather fetch failed for ${stationId}, falling back to DB:`, e);
-
-                // Final fallback: Last known weather in the system
-                const { data: fallback } = await supabaseAdmin
-                    .from('transit_dynamic_snapshot')
-                    .select('weather_info')
-                    .not('weather_info', 'is', null)
-                    .order('updated_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
-
-                return fallback?.weather_info || null;
-            }
-        })();
+        const weatherInfo = await resolveStationWeather({
+            stationId,
+            coordinates: { lat: coordsLat, lon: coordsLon },
+            snapshotWeather: baseData.weather_info,
+            snapshotUpdatedAt: baseData.updated_at
+        });
 
         // Calculate Crowd Level from Reports
         // Distribution: [Level 1, Level 2, Level 3, Level 4, Level 5]

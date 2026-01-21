@@ -1,6 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase';
+import { resolveStationWeather } from '@/lib/weather/service';
 import { getJSTTime } from '@/lib/utils/timeUtils';
 import { TagEngine, TagContext } from '@/lib/tagging/TagEngine';
 import { reasoningTools } from '@/lib/l4/reasoningTools';
@@ -49,20 +50,26 @@ export const tools = {
         execute: async ({ stationId }) => {
             const { data: cache } = await supabaseAdmin
                 .from('weather_cache')
-                .select('value')
+                .select('value, updated_at')
                 .eq('station_id', stationId)
                 .maybeSingle();
 
-            if (cache?.value) {
-                const val = cache.value as any;
+            const resolved = await resolveStationWeather({
+                stationId,
+                snapshotWeather: cache?.value,
+                snapshotUpdatedAt: cache?.updated_at || null
+            });
+
+            const alert = cache?.value?.alert;
+            if (resolved) {
                 return {
-                    temp: val.temp ?? 20,
-                    condition: val.condition ?? 'unknown',
-                    humidity: val.humidity,
-                    alert: val.alert
+                    temp: resolved.temp,
+                    condition: resolved.condition,
+                    humidity: resolved.humidity,
+                    alert
                 };
             }
-            return { temp: 20, condition: 'unknown' };
+            return { temp: 20, condition: 'unknown', alert };
         }
     }),
 

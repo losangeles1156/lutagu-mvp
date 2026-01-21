@@ -4,6 +4,145 @@ import { WEATHER_REGION_POLICY } from './policy';
 import { generateLLMResponse } from '@/lib/ai/llmClient';
 import { createHash } from 'crypto';
 
+type WeatherSource = 'snapshot' | 'weather_cache' | 'open_meteo' | 'snapshot_fallback' | 'unknown';
+
+export type ResolvedWeather = {
+    temp: number;
+    humidity: number;
+    wind: number;
+    condition: string;
+    label: string;
+    emoji: string;
+    precipitationProbability: number | null;
+    source: WeatherSource;
+    confidence: number;
+    update_time: string | null;
+};
+
+function isFreshTime(value: string | null | undefined, maxAgeMs: number) {
+    if (!value) return false;
+    const t = Date.parse(String(value));
+    if (!Number.isFinite(t)) return false;
+    return Date.now() - t < maxAgeMs;
+}
+
+function normalizeWeather(input: Partial<ResolvedWeather>): ResolvedWeather {
+    return {
+        temp: input.temp ?? 20,
+        humidity: input.humidity ?? 50,
+        wind: input.wind ?? 2,
+        condition: input.condition ?? 'Unknown',
+        label: input.label ?? input.condition ?? 'Unknown',
+        emoji: input.emoji ?? '☁️',
+        precipitationProbability: input.precipitationProbability ?? null,
+        source: input.source ?? 'unknown',
+        confidence: input.confidence ?? 0.3,
+        update_time: input.update_time ?? null
+    };
+}
+
+export async function resolveStationWeather(params: {
+    stationId?: string;
+    coordinates?: { lat: number; lon: number };
+    snapshotWeather?: any;
+    snapshotUpdatedAt?: string | null;
+}): Promise<ResolvedWeather | null> {
+    const snapshot = params.snapshotWeather as any;
+    if (snapshot?.update_time && isFreshTime(snapshot.update_time, 3 * 60 * 60 * 1000)) {
+        return normalizeWeather({
+            temp: snapshot.temp,
+            humidity: snapshot.humidity,
+            wind: snapshot.wind,
+            condition: snapshot.condition,
+            label: snapshot.label,
+            emoji: snapshot.emoji,
+            precipitationProbability: snapshot.precipitationProbability ?? null,
+            source: 'snapshot',
+            confidence: 0.9,
+            update_time: snapshot.update_time
+        });
+    }
+
+    if (params.stationId) {
+        try {
+            const { data: cache } = await supabaseAdmin
+                .from('weather_cache')
+                .select('value, updated_at')
+                .eq('station_id', params.stationId)
+                .maybeSingle();
+
+            if (cache?.value) {
+                const val = cache.value as any;
+                const updatedAt = cache.updated_at || val?.updated_at || val?.update_time || params.snapshotUpdatedAt || null;
+                if (isFreshTime(updatedAt, 3 * 60 * 60 * 1000)) {
+                    return normalizeWeather({
+                        temp: val.temp,
+                        humidity: val.humidity,
+                        wind: val.wind,
+                        condition: val.condition,
+                        label: val.label || val.condition,
+                        emoji: val.emoji,
+                        precipitationProbability: val.precipitationProbability ?? null,
+                        source: 'weather_cache',
+                        confidence: 0.85,
+                        update_time: updatedAt
+                    });
+                }
+            }
+        } catch {
+        }
+    }
+
+    try {
+        const lat = params.coordinates?.lat ?? 35.6895;
+        const lon = params.coordinates?.lon ?? 139.6917;
+        const live = await getLiveWeather(lat, lon);
+        return normalizeWeather({
+            temp: live.temp,
+            humidity: live.humidity,
+            wind: live.wind,
+            condition: live.condition,
+            label: live.label,
+            emoji: live.emoji,
+            precipitationProbability: live.precipitationProbability,
+            source: 'open_meteo',
+            confidence: 0.8,
+            update_time: new Date().toISOString()
+        });
+    } catch {
+    }
+
+    if (params.stationId) {
+        try {
+            const { data: fallback } = await supabaseAdmin
+                .from('transit_dynamic_snapshot')
+                .select('weather_info')
+                .not('weather_info', 'is', null)
+                .order('updated_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            if (fallback?.weather_info) {
+                const w = fallback.weather_info as any;
+                return normalizeWeather({
+                    temp: w.temp,
+                    humidity: w.humidity,
+                    wind: w.wind,
+                    condition: w.condition,
+                    label: w.label,
+                    emoji: w.emoji,
+                    precipitationProbability: w.precipitationProbability ?? null,
+                    source: 'snapshot_fallback',
+                    confidence: 0.5,
+                    update_time: w.update_time ?? null
+                });
+            }
+        } catch {
+        }
+    }
+
+    return null;
+}
+
 // Helper to translate/summarize alert using AI with Caching
 
 // Helper to translate/summarize alert using AI with Caching

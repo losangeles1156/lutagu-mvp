@@ -5,19 +5,15 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { NodeDisplayProvider } from '@/providers/NodeDisplayProvider';
+import Script from 'next/script';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
     title: 'LUTAGU',
     description: 'City Emotional Navigation',
     manifest: '/manifest.json',
 };
-
-// ... imports
-import Script from 'next/script';
-
-// ...
 
 export default async function RootLayout({
     children,
@@ -33,6 +29,13 @@ export default async function RootLayout({
     return (
         <html lang={locale}>
             <head>
+                {/* Performance: Preconnect to external resources */}
+                <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossOrigin="anonymous" />
+                <link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossOrigin="anonymous" />
+                <link rel="preconnect" href="https://c.basemaps.cartocdn.com" crossOrigin="anonymous" />
+                <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+                <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
                 <meta name="application-name" content="LUTAGU" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
