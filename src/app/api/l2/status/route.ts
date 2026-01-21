@@ -328,6 +328,33 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing station_id or stationId' }, { status: 400 });
     }
 
+    const rustApiUrl = process.env.L2_STATUS_API_URL;
+    if (rustApiUrl && !refresh) {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 1500);
+            const rustRes = await fetch(`${rustApiUrl}/l2/status?station_id=${encodeURIComponent(stationId)}`, {
+                signal: controller.signal,
+                headers: {
+                    'accept': 'application/json'
+                }
+            });
+            clearTimeout(timeout);
+
+            if (rustRes.ok) {
+                const rustData = await rustRes.json();
+                if (rustData && !rustData.error) {
+                    return NextResponse.json(rustData, {
+                        headers: {
+                            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
+                        }
+                    });
+                }
+            }
+        } catch {
+        }
+    }
+
     try {
         const [snapshotRes, historyRes, crowdReportsRes, nodeRes] = await Promise.all([
             supabaseAdmin

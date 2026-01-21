@@ -1,4 +1,4 @@
-'use client';
+
 
 /**
  * MapSkeleton - Skeleton loading UI for MapContainer
@@ -17,14 +17,12 @@ export function MapSkeleton() {
                 {/* 
                   Using direct img tag or Next.js Image with priority is crucial here.
                   We use a standard img tag for simplicity and guaranteed browser preload behavior 
-                  in this specific Skeleton context where optimization is manual.
-                  But Next.js Image is better for automatic sizing. Let's use standard img to avoid config issues with Image component in minimal setup? 
-                  Actually, Image component with 'priority' is standard best practice in Next.js.
+                  in this specific Skeleton context.
                 */}
                 <img
-                    src="/images/map-placeholder.png"
-                    alt=""
-                    className="w-full h-full object-cover opacity-50 blur-[2px] scale-105"
+                    src="/images/map-placeholder.jpg"
+                    alt="Map background"
+                    className="w-full h-full object-cover scale-105"
                     fetchPriority="high"
                 />
             </div>
