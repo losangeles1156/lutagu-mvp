@@ -11,7 +11,7 @@ async function fetchL2Status(stationId: string): Promise<any> {
     // But since this runs on server, we can query DB directly
     const { data } = await supabaseAdmin
         .from('transit_dynamic_snapshot')
-        .select('weather_info, crowd_level')
+        .select('weather_info, crowd_level, line_status')
         .eq('station_id', stationId)
         .maybeSingle();
     return data || {};
@@ -63,6 +63,7 @@ export class DataMux {
 
         const enrichedData: any = {
             // L2: Weather & Crowd
+            l2_status: l2Data, // Pass full L2 object (lines, weather, crowd) to frontend
             weather_condition: l2Data.weather_info?.condition || 'Unknown',
             crowd_level: l2Data.crowd_level || 'low',
 
