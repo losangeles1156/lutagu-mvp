@@ -17,18 +17,8 @@ interface HomeClientProps {
 export function HomeClient({ header, mapPanel, chatPanel }: HomeClientProps) {
     const [nodeData, setNodeData] = useState<any>(null);
     const [profile, setProfile] = useState<NodeProfile | null>(null);
-    const [hydrated, setHydrated] = useState(false);
 
-    // Quick hydration fix similar to original page
-    useState(() => {
-        if (typeof window !== 'undefined') {
-            setHydrated(true);
-        }
-    });
-
-    if (!hydrated) {
-        return <div className="min-h-screen bg-white" />;
-    }
+    // Quick hydration fix removed to allow SSR content (Header) to show immediately
 
     return (
         <div className="relative min-h-screen bg-white">
