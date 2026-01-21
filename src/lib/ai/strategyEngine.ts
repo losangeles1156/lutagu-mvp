@@ -40,13 +40,30 @@ async function buildStrategyContextFromNode(params: {
 }): Promise<StrategyContext> {
     const { identityNode, effectiveNode, locale, l2CacheKeyId } = params;
 
-    const { data: l2Cache } = await supabaseAdmin
-        .from('l2_cache')
-        .select('*')
-        .eq('key', `l2:${l2CacheKeyId}`)
-        .maybeSingle();
 
-    const l2Status = l2Cache?.value || { delay: 0, congestion: 1, transferIntensity: 0 };
+
+    // Use Rust L2 Service with fallback or direct response
+    let l2Status: any = { delay: 0, congestion: 1, transferIntensity: 0 };
+
+    try {
+        const { fetchL2Status } = await import('@/lib/api/rustServices');
+        const rustStatus = await fetchL2Status(l2CacheKeyId);
+
+        if (rustStatus) {
+            // Polyfill 'delay' for compatibility with triggers
+            const maxDelay = Array.isArray(rustStatus.line_status)
+                ? Math.max(0, ...rustStatus.line_status.map((l: any) => l.delay_minutes || 0))
+                : 0;
+
+            l2Status = {
+                ...rustStatus,
+                delay: maxDelay,
+                has_issues: (rustStatus.line_status?.length || 0) > 0 || maxDelay > 0
+            };
+        }
+    } catch (e) {
+        console.warn('[StrategyEngine] L2 fetch failed, using default:', e);
+    }
 
     const commercialActions: any[] = [];
     const rules: CommercialRule[] = Array.isArray(effectiveNode?.commercial_rules) ? effectiveNode.commercial_rules : [];
