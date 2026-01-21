@@ -1,7 +1,15 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = 'https://evubeqeaafdjnuocyhmb.supabase.co';
-const supabaseKey = 'sb_secret_jUaJsEyA1WxxJfIz3q2iZA_HxKuVaHt';
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('Error: Missing environment variables. Please check .env.local');
+    process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -42,7 +50,7 @@ async function verifyData() {
 
     // 驗證 OSM ID 存在
     const withOsmId = recentToilets.filter(t => t.attributes?.osm_id).length;
-    console.log(`\n✅ 資料完整性: ${withOsmId}/${recentToilets.length} (${(withOsmId/recentToilets.length*100).toFixed(1)}%) 包含 OSM ID`);
+    console.log(`\n✅ 資料完整性: ${withOsmId}/${recentToilets.length} (${(withOsmId / recentToilets.length * 100).toFixed(1)}%) 包含 OSM ID`);
 }
 
 verifyData().catch(console.error);
