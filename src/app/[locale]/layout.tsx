@@ -13,6 +13,16 @@ export const metadata: Metadata = {
     title: 'LUTAGU',
     description: 'City Emotional Navigation',
     manifest: '/manifest.json',
+    alternates: {
+        canonical: './',
+        languages: {
+            'en': '/en',
+            'zh': '/zh',
+            'zh-TW': '/zh-TW',
+            'ja': '/ja',
+            'ar': '/ar',
+        },
+    },
 };
 
 export default async function RootLayout({

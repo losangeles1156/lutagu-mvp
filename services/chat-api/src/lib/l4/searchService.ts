@@ -82,9 +82,12 @@ export async function searchL4Knowledge(params: {
     // The current consumers expect: { content, category, ... } 
 
     return results.map(r => ({
+      id: r.id,
       content: r.content,
       similarity: r.score,
       category: r.tags.length > 0 ? r.tags[0] : 'general',
+      knowledge_type: r.tags.length > 0 ? r.tags[0] : 'general',
+      tags: r.tags,
       entity_id: r.id
     }));
 
