@@ -6,7 +6,7 @@ use axum::{
     Json, Router,
 };
 use ordered_float::NotNan;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{
     cmp::Reverse,
     collections::{BinaryHeap, HashMap, HashSet},
@@ -89,6 +89,69 @@ struct TransferInfo {
     walking_distance_meters: f64,
     base_tpi: f64,
     floor_difference: f64,
+}
+
+#[derive(Deserialize)]
+struct TransferInfoJson {
+    walking_distance_meters: Option<f64>,
+    base_tpi: Option<f64>,
+    floor_difference: Option<f64>,
+}
+
+fn load_json_file<T: DeserializeOwned>(path: &str) -> Option<T> {
+    let content = fs::read_to_string(path).ok()?;
+    serde_json::from_str(&content).ok()
+}
+
+fn transfer_db_overrides() -> Option<HashMap<String, HashMap<String, TransferInfo>>> {
+    static OVERRIDES: OnceLock<Option<HashMap<String, HashMap<String, TransferInfo>>>> =
+        OnceLock::new();
+    OVERRIDES
+        .get_or_init(|| {
+            let path = env::var("L4_TRANSFER_DB_PATH").ok()?;
+            let raw: HashMap<String, HashMap<String, TransferInfoJson>> = load_json_file(&path)?;
+            let mut mapped: HashMap<String, HashMap<String, TransferInfo>> = HashMap::new();
+            for (station, lines) in raw {
+                let station_id = normalize_station_id(&station);
+                let mut line_map: HashMap<String, TransferInfo> = HashMap::new();
+                for (line, info) in lines {
+                    let line_id = normalize_line_id(&line);
+                    line_map.insert(
+                        line_id,
+                        TransferInfo {
+                            walking_distance_meters: info.walking_distance_meters.unwrap_or(0.0),
+                            base_tpi: info.base_tpi.unwrap_or(0.0),
+                            floor_difference: info.floor_difference.unwrap_or(0.0),
+                        },
+                    );
+                }
+                let entry = mapped.entry(station_id).or_insert_with(HashMap::new);
+                for (line_id, info) in line_map {
+                    entry.insert(line_id, info);
+                }
+            }
+            Some(mapped)
+        })
+        .clone()
+}
+
+fn preset_tpi_overrides() -> Option<HashMap<String, HashMap<String, f64>>> {
+    static OVERRIDES: OnceLock<Option<HashMap<String, HashMap<String, f64>>>> = OnceLock::new();
+    OVERRIDES
+        .get_or_init(|| {
+            let path = env::var("L4_PRESET_TPI_PATH").ok()?;
+            let raw: HashMap<String, HashMap<String, f64>> = load_json_file(&path)?;
+            let mut mapped: HashMap<String, HashMap<String, f64>> = HashMap::new();
+            for (station, lines) in raw {
+                let station_id = normalize_station_id(&station);
+                let entry = mapped.entry(station_id).or_insert_with(HashMap::new);
+                for (line, value) in lines {
+                    entry.insert(normalize_line_id(&line), value);
+                }
+            }
+            Some(mapped)
+        })
+        .clone()
 }
 
 fn transfer_db() -> &'static HashMap<String, HashMap<String, TransferInfo>> {
@@ -187,7 +250,63 @@ fn transfer_db() -> &'static HashMap<String, HashMap<String, TransferInfo>> {
             "odpt.Station:JR-East.Yamanote.Kanda".to_string(),
             kanda,
         );
+        if let Some(overrides) = transfer_db_overrides() {
+            for (station, lines) in overrides {
+                let entry = db.entry(station).or_insert_with(HashMap::new);
+                for (line, info) in lines {
+                    entry.insert(line, info);
+                }
+            }
+        }
+        db
+    })
+}
 
+fn preset_tpi() -> &'static HashMap<String, HashMap<String, f64>> {
+    static DB: OnceLock<HashMap<String, HashMap<String, f64>>> = OnceLock::new();
+    DB.get_or_init(|| {
+        let mut db: HashMap<String, HashMap<String, f64>> = HashMap::new();
+
+        let mut tokyo = HashMap::new();
+        tokyo.insert("odpt.Railway:JR-East.Keiyo".to_string(), 85.0);
+        tokyo.insert("odpt.Railway:TokyoMetro.Marunouchi".to_string(), 30.0);
+        db.insert("odpt.Station:JR-East.Tokaido.Tokyo".to_string(), tokyo);
+
+        let mut shinjuku = HashMap::new();
+        shinjuku.insert("odpt.Railway:Toei.Oedo".to_string(), 70.0);
+        shinjuku.insert("odpt.Railway:TokyoMetro.Marunouchi".to_string(), 35.0);
+        shinjuku.insert("odpt.Railway:Odakyu.Odawara".to_string(), 25.0);
+        db.insert("odpt.Station:JR-East.Yamanote.Shinjuku".to_string(), shinjuku);
+
+        let mut shibuya = HashMap::new();
+        shibuya.insert("odpt.Railway:TokyoMetro.Fukutoshin".to_string(), 65.0);
+        shibuya.insert("odpt.Railway:TokyoMetro.Ginza".to_string(), 40.0);
+        shibuya.insert("odpt.Railway:Tokyu.Toyoko".to_string(), 50.0);
+        db.insert("odpt.Station:JR-East.Yamanote.Shibuya".to_string(), shibuya);
+
+        let mut ikebukuro = HashMap::new();
+        ikebukuro.insert("odpt.Railway:TokyoMetro.Yurakucho".to_string(), 50.0);
+        ikebukuro.insert("odpt.Railway:TokyoMetro.Marunouchi".to_string(), 35.0);
+        ikebukuro.insert("odpt.Railway:Seibu.Ikebukuro".to_string(), 30.0);
+        db.insert("odpt.Station:JR-East.Yamanote.Ikebukuro".to_string(), ikebukuro);
+
+        let mut ueno = HashMap::new();
+        ueno.insert("odpt.Railway:TokyoMetro.Ginza".to_string(), 40.0);
+        ueno.insert("odpt.Railway:TokyoMetro.Hibiya".to_string(), 45.0);
+        db.insert("odpt.Station:JR-East.Yamanote.Ueno".to_string(), ueno);
+
+        let mut akihabara = HashMap::new();
+        akihabara.insert("odpt.Railway:TokyoMetro.Hibiya".to_string(), 25.0);
+        akihabara.insert("odpt.Railway:TX.TsukubaExpress".to_string(), 35.0);
+        db.insert("odpt.Station:JR-East.Yamanote.Akihabara".to_string(), akihabara);
+        if let Some(overrides) = preset_tpi_overrides() {
+            for (station, lines) in overrides {
+                let entry = db.entry(station).or_insert_with(HashMap::new);
+                for (line, value) in lines {
+                    entry.insert(line, value);
+                }
+            }
+        }
         db
     })
 }
@@ -264,7 +383,7 @@ fn get_transfer_distance(from_station_id: &str, to_line_id: &str) -> f64 {
 
     let from_parts: Vec<&str> = from_station_id.split('.').collect();
     let to_parts: Vec<&str> = to_line_id.split('.').collect();
-    if from_parts.len() > 2 && to_parts.len() > 1 && from_parts[2] == to_parts[1] {
+    if from_parts.len() > 2 && to_parts.len() > 2 && from_parts[2] == to_parts[2] {
         100.0
     } else {
         250.0
@@ -285,6 +404,10 @@ fn is_out_of_station_transfer(from_station_id: &str, to_line_id: &str, distance:
 
 fn normalize_station_id(input: &str) -> String {
     input.trim().replace("odpt:Station:", "odpt.Station:")
+}
+
+fn normalize_line_id(input: &str) -> String {
+    input.trim().replace("odpt:Railway:", "odpt.Railway:")
 }
 
 fn parse_ids(param: Option<String>) -> Vec<String> {
@@ -452,10 +575,19 @@ fn find_best_route(
                 }
                 transfer_time += hub_buffer;
 
+                let mut tpi_applied = false;
                 if let Some(station_info) = transfer_db().get(from_station_id) {
                     if let Some(info) = station_info.get(&to_line_id) {
                         transfer_time += info.base_tpi / 10.0;
                         transfer_time += info.floor_difference * 0.5;
+                        tpi_applied = true;
+                    }
+                }
+                if !tpi_applied {
+                    if let Some(station_info) = preset_tpi().get(from_station_id) {
+                        if let Some(base_tpi) = station_info.get(&to_line_id) {
+                            transfer_time += base_tpi / 10.0;
+                        }
                     }
                 }
 
@@ -555,8 +687,7 @@ async fn main() -> anyhow::Result<()> {
 
     let port: u16 = env::var("PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(8787);
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await?;
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+    axum::serve(listener, app).await?;
     Ok(())
 }

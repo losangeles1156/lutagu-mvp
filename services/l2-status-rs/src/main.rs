@@ -34,7 +34,6 @@ struct Config {
     odpt_key_challenge: Option<String>,
 }
 
-#[derive(Clone)]
 struct MemoryCache {
     inner: RwLock<HashMap<String, CacheEntry>>,
 }
@@ -148,13 +147,13 @@ struct Disruption {
     source: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 struct YahooStatus {
     name: String,
     status: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 struct JrEastSnapshot {
     fetched_at: String,
     line_status_text_map_ja: HashMap<String, String>,
@@ -336,7 +335,7 @@ async fn redis_get_json(client: &redis::Client, key: &str) -> anyhow::Result<Opt
     Ok(val.and_then(|v| serde_json::from_str(&v).ok()))
 }
 
-async fn redis_set_json(client: &redis::Client, key: &str, value: &Value, ttl_secs: usize) -> anyhow::Result<()> {
+async fn redis_set_json(client: &redis::Client, key: &str, value: &Value, ttl_secs: u64) -> anyhow::Result<()> {
     let mut conn = client.get_multiplexed_async_connection().await?;
     let payload = serde_json::to_string(value)?;
     let _: () = conn.set_ex(key, payload, ttl_secs).await?;
@@ -613,7 +612,7 @@ async fn fetch_yahoo_status(client: &reqwest::Client) -> Vec<YahooStatus> {
     let Ok(html) = resp.text().await else { return vec![]; };
 
     let mut results = Vec::new();
-    let re = Regex::new(r"<a[^>]*>([^<]+)</a>[^<]*<span class=\"icnTrouble\">").ok();
+    let re = Regex::new(r#"<a[^>]*>([^<]+)</a>[^<]*<span class="icnTrouble">"#).ok();
     if let Some(regex) = re {
         for cap in regex.captures_iter(&html) {
             if let Some(name) = cap.get(1) {
@@ -811,11 +810,11 @@ fn classify_status_detail(status_text: &str, ja: &str, en: &str) -> (String, Opt
 
 fn extract_delay_minutes(text: &str) -> Option<i64> {
     let re = regex::Regex::new(r"(\d{1,3})\s*分").ok()?;
-    let mut max_val = None;
+    let mut max_val: Option<i64> = None;
     for cap in re.captures_iter(text) {
         if let Some(m) = cap.get(1) {
             if let Ok(v) = m.as_str().parse::<i64>() {
-                max_val = Some(max_val.map(|x| x.max(v)).unwrap_or(v));
+                max_val = Some(max_val.map(|x: i64| x.max(v)).unwrap_or(v));
             }
         }
     }

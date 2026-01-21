@@ -1,0 +1,12 @@
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/deps/crc-2c634e2f85d11a20.d: /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/lib.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc128.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc16.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc32.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc64.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc8.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/table.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/util.rs
+
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/deps/libcrc-2c634e2f85d11a20.rmeta: /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/lib.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc128.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc16.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc32.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc64.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc8.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/table.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/util.rs
+
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/lib.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc128.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc16.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc32.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc64.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/crc8.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/table.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/crc-3.4.0/src/util.rs:

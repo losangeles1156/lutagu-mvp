@@ -1,0 +1,12 @@
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/deps/thiserror-ba80ea5cee30bd87.d: /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/lib.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/aserror.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/display.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/var.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/private.rs /Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/build/thiserror-b84c3459e91921f8/out/private.rs
+
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/deps/libthiserror-ba80ea5cee30bd87.rmeta: /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/lib.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/aserror.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/display.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/var.rs /Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/private.rs /Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/build/thiserror-b84c3459e91921f8/out/private.rs
+
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/lib.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/aserror.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/display.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/var.rs:
+/Users/zhuangzixian/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/private.rs:
+/Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/build/thiserror-b84c3459e91921f8/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/zhuangzixian/Documents/LUTAGU_MVP/services/l2-status-rs/target/debug/build/thiserror-b84c3459e91921f8/out
