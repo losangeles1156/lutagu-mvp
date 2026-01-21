@@ -14,9 +14,14 @@ impl SupabaseClient {
         let database_url = env::var("DATABASE_URL")
             .expect("DATABASE_URL must be set");
 
+        // Use session pooler (port 5432) instead of transaction pooler (6543)
+        // Transaction pooler doesn't support prepared statements
+        let connection_url = database_url
+            .replace(":6543/", ":5432/");
+
         let pool = PgPoolOptions::new()
-            .max_connections(20)
-            .connect_lazy(&database_url)?;
+            .max_connections(10)
+            .connect_lazy(&connection_url)?;
 
         Ok(Self { pool })
     }
