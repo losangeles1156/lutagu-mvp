@@ -12,6 +12,7 @@ const nextConfig = {
       transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
     },
   },
+
   async rewrites() {
     const cdnBase = process.env.NEXT_PUBLIC_DATA_CDN_BASE_URL;
     if (!isProd || !cdnBase) return [];

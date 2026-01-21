@@ -4,6 +4,8 @@ import { AppHeader } from '@/components/home/AppHeader';
 import { MapSection } from '@/components/home/MapSection';
 import { ChatSection } from '@/components/home/ChatSection';
 
+
+
 /**
  * LUTAGU Home Page (Server Component)
  * 
