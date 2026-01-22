@@ -78,6 +78,8 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
             lines: (source.line_status || []).map((l: any, idx: number) => ({
                 id: l.railway_id || l.id || `${l.operator || 'unknown'}:${l.line || idx}`,
                 name: getLocaleString(l.name, locale) || l.line || l.name,
+                railway_id: l.railway_id,
+                line_name: l.line_name || l.line,
                 operator: l.operator || 'Metro',
                 color: l.color || '#999999',
                 status: l.status || 'normal',

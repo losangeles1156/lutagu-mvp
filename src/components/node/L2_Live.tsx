@@ -226,8 +226,6 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
         updatedAt: undefined
     });
 
-
-
     // [New] Airport Logic
     const isHaneda = data.id === 'odpt:Station:Airport.Haneda' || data.name?.en?.includes('Haneda');
     const isNarita = data.id === 'odpt:Station:Airport.Narita' || data.name?.en?.includes('Narita');
@@ -361,8 +359,18 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
 
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-1">
                     {lines.length === 0 ? (
-                        <div className="p-8 text-center text-gray-400 text-xs">
-                            {tL2('noLiveData', { defaultValue: 'No live line data available' })}
+                        <div className="p-8 text-center space-y-3">
+                            <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-50 rounded-full">
+                                <Zap size={24} className="text-gray-300" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-gray-700">
+                                    {tL2('noLiveDataTitle', { defaultValue: '暫無即時運行數據' })}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    {tL2('noLiveDataDesc', { defaultValue: '請稍後重試或選擇其他車站' })}
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-1">

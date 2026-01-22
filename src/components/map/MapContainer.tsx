@@ -11,7 +11,7 @@ import { useLocale } from 'next-intl';
 // [OPTIMIZED] New Hooks
 import { useViewportBounds } from '@/hooks/map/useViewportBounds';
 import { useVisibleMarkers } from '@/hooks/map/useVisibleMarkers';
-import { useNodes, useHubDetails, useNodeError, useNodeLoading } from '@/providers/NodeDisplayProvider';
+import { useNodeDisplay, useNodes, useHubDetails, useNodeError, useNodeLoading } from '@/providers/NodeDisplayProvider';
 import { MapController_Optimized } from './MapController_Optimized';
 
 import { ViewportNodeLoader_Optimized } from './ViewportNodeLoader_Optimized';
@@ -141,6 +141,10 @@ export function MapContainer() {
     const { zone, userLocation, isTooFar, centerFallback } = useZoneAwareness();
     const [key, setKey] = useState(0);
     const locale = useLocale();
+    const allNodes = useNodes();
+    const nodeLoading = useNodeLoading();
+    const nodeError = useNodeError();
+    const { reset } = useNodeDisplay();
 
     // Default center
     const defaultCenter: [number, number] = [centerFallback.lat, centerFallback.lon];
@@ -171,7 +175,7 @@ export function MapContainer() {
                         center={userLocation}
                         isTooFar={isTooFar}
                         fallback={centerFallback}
-                        nodes={[]}
+                        nodes={allNodes}
                     />
 
                     {/* [OPTIMIZATION] Using new optimized loader */}
@@ -206,6 +210,26 @@ export function MapContainer() {
 
                 </LeafletMapContainer>
             </MapErrorBoundary>
+
+            {(nodeLoading || nodeError) && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[600] px-4">
+                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-xs font-bold text-slate-600 shadow-lg backdrop-blur">
+                        <span>{nodeError ? '節點載入失敗' : '載入節點中'}</span>
+                        {nodeError && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    reset();
+                                    setKey(k => k + 1);
+                                }}
+                                className="rounded-xl bg-slate-900 px-3 py-1.5 text-[10px] font-black text-white"
+                            >
+                                重試
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* UI Overlays (Simplified for Prototype - Removing "Optimized Map Active" banner for final) */}
             {/* Only showing clean overlay if needed, or removing entirely as this is now PROD code */}

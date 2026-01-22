@@ -4,6 +4,7 @@ import '../globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { ToastProvider } from '@/components/ui/Toast';
 import { NodeDisplayProvider } from '@/providers/NodeDisplayProvider';
 import Script from 'next/script';
 
@@ -43,7 +44,8 @@ export default async function RootLayout({
                 <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossOrigin="anonymous" />
                 <link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossOrigin="anonymous" />
                 <link rel="preconnect" href="https://c.basemaps.cartocdn.com" crossOrigin="anonymous" />
-                <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+                <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
                 {/* LCP Optimization: Preload hero image to eliminate Load Delay */}
@@ -83,7 +85,9 @@ export default async function RootLayout({
                 <NextIntlClientProvider messages={messages}>
                     <ErrorBoundary>
                         <NodeDisplayProvider>
-                            {children}
+                            <ToastProvider>
+                                {children}
+                            </ToastProvider>
                         </NodeDisplayProvider>
                     </ErrorBoundary>
                 </NextIntlClientProvider>

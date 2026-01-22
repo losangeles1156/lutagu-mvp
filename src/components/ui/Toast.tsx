@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -21,17 +21,21 @@ let toastCount = 0;
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
     const [toasts, setToasts] = useState<Toast[]>([]);
-    const t = useTranslations('common');
-
-    const showToast = (message: string, type: ToastType = 'info') => {
+    const showToast = useCallback((message: string, type: ToastType = 'info') => {
         const id = `toast-${++toastCount}`;
         setToasts(prev => [...prev, { id, message, type }]);
 
-        // Auto-remove after 3 seconds
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));
         }, 3000);
-    };
+    }, []);
+
+    useEffect(() => {
+        setGlobalToast(showToast);
+        return () => {
+            setGlobalToast(() => undefined);
+        };
+    }, [showToast]);
 
     const removeToast = (id: string) => {
         setToasts(prev => prev.filter(t => t.id !== id));

@@ -79,6 +79,46 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
     const [isKnowledgeLoading, setIsKnowledgeLoading] = useState(false);
     const [knowledgeFilter, setKnowledgeFilter] = useState<'all' | 'traps' | 'hacks'>('all');
 
+    const fallbackKnowledge = useMemo<L4Knowledge>(() => {
+        const tips = uiLocale.startsWith('ja')
+            ? [
+                'リアルタイム運行情報を確認する',
+                '乗換ルートと出口案内を先に決める',
+                '混雑時は迂回ルートを検討する'
+            ]
+            : uiLocale.startsWith('en')
+                ? [
+                    'Check live line status first',
+                    'Plan transfers and exits before moving',
+                    'Consider alternate routes during crowds'
+                ]
+                : [
+                    '查看即時列車資訊',
+                    '先確認轉乘路線與出口位置',
+                    '尖峰時段可考慮替代路線'
+                ];
+
+        return {
+            traps: [],
+            hacks: tips.map((tip, index) => ({
+                icon: '💡',
+                title: tip,
+                description: '',
+                advice: ''
+            })),
+            facilities: []
+        };
+    }, [uiLocale]);
+
+    const displayKnowledge = useMemo(() => {
+        const hasTips = Boolean(l4Knowledge && ((l4Knowledge.traps?.length || 0) > 0 || (l4Knowledge.hacks?.length || 0) > 0));
+        return hasTips ? l4Knowledge : fallbackKnowledge;
+    }, [l4Knowledge, fallbackKnowledge]);
+
+    // ✅ Fallback: Ensure l4Knowledge has default value if undefined (though logic below handles undefined mostly)
+    // The components (AIIntelligenceHub, ExpertKnowledgeSection) handle undefined, but let's confirm.
+    // Actually, let's keep it as is but rely on the debug to tell us if it's missing.
+
     const mapDemandToPreferences = useCallback((d: L4DemandState): UserPreferences => ({
         accessibility: { wheelchair: d.wheelchair, stroller: d.stroller, visual_impairment: d.vision, elderly: d.senior },
         luggage: { large_luggage: d.largeLuggage, multiple_bags: false },
@@ -135,8 +175,8 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
         l2: { lines: [], weather: { temp: 0, condition: 'Clear', windSpeed: 0 }, crowd: { level: 2, trend: 'stable' as const, userVotes: { total: 0, distribution: [0, 0, 0, 0, 0] } } },
         l3_facilities: [],
         l4_cards: [],
-        l4_knowledge: l4Knowledge
-    }) as any, [stationId, l4Knowledge]);
+        l4_knowledge: displayKnowledge
+    }) as any, [stationId, displayKnowledge]);
 
     // Fetch recommendations
     useEffect(() => {
@@ -439,7 +479,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                             className="px-4 py-6 space-y-8"
                         >
                             <AIIntelligenceHub
-                                l4Knowledge={l4Knowledge}
+                                l4Knowledge={displayKnowledge}
                                 knowledgeFilter={knowledgeFilter}
                                 onFilterChange={setKnowledgeFilter}
                                 onStartChat={() => setViewMode('chat')}
@@ -470,7 +510,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                             />
 
                             <ExpertKnowledgeSection
-                                l4Knowledge={l4Knowledge}
+                                l4Knowledge={displayKnowledge}
                                 knowledgeFilter={knowledgeFilter}
                                 uiLocale={uiLocale}
                                 t={t}

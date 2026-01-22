@@ -74,9 +74,12 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
 
     // Derive all values BEFORE any hooks to avoid conditional hook calls
-    const isMajor = node.tier === 'major' || node.is_hub;
+    // [FIX] Robust Hub Detection: Check explicit is_hub OR implied hub (no parent + has members)
+    // [ENHANCED] More aggressive Hub detection: parent_hub_id === null is a strong indicator
+    const isExplicitHub = node.is_hub === true || node.parent_hub_id === null;
     const hasMembers = hubDetails && hubDetails.member_count > 0;
     const memberCount = hubDetails?.member_count || 0;
+    const isMajor = node.tier === 'major' || isExplicitHub || hasMembers;
 
     // Coordinate Parsing - memoized (MUST be before early return)
     const coords = useMemo(() => {

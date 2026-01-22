@@ -7,7 +7,8 @@ import { useNodeStore } from '@/stores/nodeStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useUserStore } from '@/stores/userStore';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
-import { fetchNodeConfig } from '@/lib/api/nodes';
+import { fetchNodeConfig, findFallbackNodeForId } from '@/lib/api/nodes';
+import type { NodeProfile } from '@/lib/api/nodes';
 import { getSupabase } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -22,6 +23,8 @@ export function HomeLogic({
     const searchParams = useSearchParams();
     const nodeRequestSeqRef = useRef(0);
     const ONBOARDING_VERSION = 1;
+    const [didHandleParams, setDidHandleParams] = useState(false);
+    const [hadDeepLink, setHadDeepLink] = useState(false);
 
     // Migrated Store Hooks
     const currentNodeId = useNodeStore(s => s.currentNodeId);
@@ -48,12 +51,16 @@ export function HomeLogic({
 
     // 1. URL params handling
     useEffect(() => {
-        const tab = searchParams.get('tab');
-        const node = searchParams.get('node');
-        const sheet = searchParams.get('sheet');
-        const q = searchParams.get('q');
-        const nodeTab = searchParams.get('nodeTab');
-        const demo = searchParams.get('demo');
+        const rawSearch = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+        const getParam = (key: string) => searchParams.get(key) ?? rawSearch?.get(key);
+
+        const tab = getParam('tab');
+        const node = getParam('node');
+        const sheet = getParam('sheet');
+        const q = getParam('q');
+        const nodeTab = getParam('nodeTab');
+        const demo = getParam('demo');
+        const hasDeepLink = Boolean(tab || node || sheet || q || nodeTab || demo);
 
         let changed = false;
 
@@ -75,15 +82,19 @@ export function HomeLogic({
             setNodeActiveTab(nodeTab);
             changed = true;
         }
+        setHadDeepLink(hasDeepLink);
+        setDidHandleParams(true);
         if (changed) router.replace(window.location.pathname);
     }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
 
     // 2. Onboarding check
     useEffect(() => {
+        if (!didHandleParams) return;
+        if (hadDeepLink) return;
         if (isBottomSheetOpen) return;
         if (onboardingSeenVersion >= ONBOARDING_VERSION) return;
         setIsOnboardingOpen(true);
-    }, [isBottomSheetOpen, onboardingSeenVersion, setIsOnboardingOpen, ONBOARDING_VERSION]);
+    }, [didHandleParams, hadDeepLink, isBottomSheetOpen, onboardingSeenVersion, setIsOnboardingOpen, ONBOARDING_VERSION]);
 
     // 3. Session handling
     useEffect(() => {
@@ -99,16 +110,67 @@ export function HomeLogic({
     useEffect(() => {
         if (currentNodeId) {
             const seq = ++nodeRequestSeqRef.current;
+            const fallbackNode = findFallbackNodeForId(currentNodeId);
+            const fallbackProfile: NodeProfile = {
+                node_id: currentNodeId,
+                category_counts: {
+                    medical: 0,
+                    shopping: 0,
+                    dining: 0,
+                    leisure: 0,
+                    education: 0,
+                    finance: 0
+                },
+                vibe_tags: [],
+                l3_facilities: [],
+                l4_cards: [],
+                l2_status: {
+                    congestion: 2,
+                    line_status: [
+                        { line: 'Transit', status: 'normal' }
+                    ],
+                    weather: { temp: 20, condition: 'Clear' }
+                }
+            };
+
+            if (fallbackNode) {
+                setNodeData(fallbackNode);
+                setProfile(fallbackProfile);
+            }
+
             fetchNodeConfig(currentNodeId)
                 .then(({ node, profile }) => {
                     if (seq !== nodeRequestSeqRef.current) return;
-                    setNodeData(node);
-                    setProfile(profile);
+                    setNodeData(node || fallbackNode || null);
+                    setProfile(profile || fallbackProfile || null);
                 })
                 .catch(() => {
                     if (seq !== nodeRequestSeqRef.current) return;
-                    setNodeData(null);
-                    setProfile(null);
+                    if (!fallbackNode) {
+                        setNodeData(null);
+                        setProfile(null);
+                        return;
+                    }
+                    setNodeData(fallbackNode);
+                    if (typeof window !== 'undefined') {
+                        void (async () => {
+                            try {
+                                const res = await fetch(`/api/l2/status?station_id=${encodeURIComponent(currentNodeId)}`);
+                                if (seq !== nodeRequestSeqRef.current) return;
+                                if (res.ok) {
+                                    const l2 = await res.json();
+                                    setProfile({ ...fallbackProfile, l2_status: l2 });
+                                    return;
+                                }
+                            } catch {
+                            }
+                            if (seq === nodeRequestSeqRef.current) {
+                                setProfile(fallbackProfile);
+                            }
+                        })();
+                        return;
+                    }
+                    setProfile(fallbackProfile);
                 });
         } else {
             nodeRequestSeqRef.current += 1;

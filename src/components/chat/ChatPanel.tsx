@@ -291,6 +291,15 @@ export function ChatPanel() {
     }, [isResizing]);
 
     // Handlers
+    const handleRestart = useCallback(() => {
+        demoRunTokenRef.current++;
+        setIsDemoPlaying(false);
+        clearMessages();
+        clearStoreMessages();
+        setDemoMode(false);
+        hasBootstrappedRef.current = false;
+    }, [clearMessages, clearStoreMessages, setDemoMode]);
+
     const handleAction = useCallback((action: ChatAction) => {
         if (action.type === 'navigate') {
             const coords = action.metadata?.coordinates || TARGETS[action.target] || DEFAULT_COORDS;
@@ -319,7 +328,7 @@ export function ChatPanel() {
             const q = decodeURIComponent(action.target.slice('chat:'.length));
             append({ role: 'user', content: q });
         }
-    }, [transitionTo, clearMessages, clearStoreMessages, setDemoMode, activeDemoId, runDemoPlayback, append]); // Added useCallback deps
+    }, [transitionTo, clearMessages, clearStoreMessages, setDemoMode, activeDemoId, runDemoPlayback, append, handleRestart]);
 
     const handleFeedback = useCallback(async (index: number, score: number) => {
         const msg = displayMessages[index];
@@ -344,16 +353,7 @@ export function ChatPanel() {
             logger.error('Feedback submission failed:', error);
             showToast?.(tChat('feedbackError', { defaultValue: 'Failed to send feedback' }), 'error');
         }
-    }, [displayMessages, sessionId, showToast, tChat]); // Added useCallback deps
-
-    const handleRestart = useCallback(() => {
-        demoRunTokenRef.current++;
-        setIsDemoPlaying(false);
-        clearMessages();
-        clearStoreMessages();
-        setDemoMode(false);
-        hasBootstrappedRef.current = false;
-    }, [clearMessages, clearStoreMessages, setDemoMode]);
+    }, [displayMessages, sessionId, showToast, tChat]);
 
     const handleSend = useCallback((text: string) => {
         if (text.trim()) {

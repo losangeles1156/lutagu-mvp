@@ -7,6 +7,7 @@ import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
 import { HomeLogic } from './HomeLogic';
 import { BottomNavBar } from './BottomNavBar';
 import { NodeProfile } from '@/lib/api/nodes';
+import { NodeDisplayProvider } from '@/providers/NodeDisplayProvider';
 
 // Lazy load heavy overlay components to reduce TBT
 const AppOverlays = dynamic(
@@ -31,12 +32,14 @@ export function HomeClient({ header, mapPanel, chatPanel }: HomeClientProps) {
             <OfflineIndicator />
             <HomeLogic setNodeData={setNodeData} setProfile={setProfile} />
 
-            <MainLayout
-                header={header} // Server Component slot
-                mapPanel={mapPanel} // Client Component slot (Dynamic)
-                chatPanel={chatPanel} // Client Component slot (Dynamic)
-                bottomBar={<BottomNavBar nodeData={nodeData} />} // Client Component with local state
-            />
+            <NodeDisplayProvider>
+                <MainLayout
+                    header={header}
+                    mapPanel={mapPanel}
+                    chatPanel={chatPanel}
+                    bottomBar={<BottomNavBar nodeData={nodeData} />}
+                />
+            </NodeDisplayProvider>
 
             <AppOverlays nodeData={nodeData} profile={profile} />
         </div>

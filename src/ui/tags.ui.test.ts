@@ -20,7 +20,14 @@ async function startNextDev(port: number): Promise<StartedServer> {
     const isWindows = process.platform === 'win32';
     const command = isWindows ? 'npx.cmd' : 'npx';
     const proc = spawn(command, ['next', 'dev', '-p', String(port)], {
-        env: { ...process.env, PORT: String(port) },
+        env: {
+            ...process.env,
+            PORT: String(port),
+            NEXT_PUBLIC_SUPABASE_URL: '',
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+            SUPABASE_SERVICE_KEY: '',
+            SUPABASE_SERVICE_ROLE_KEY: ''
+        },
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: isWindows // Use shell on Windows for proper PATH resolution
     });
@@ -97,26 +104,64 @@ async function clickOnboardingHubButton(page: any): Promise<void> {
 
 async function clickNodeTabByIndex(page: any, index: number): Promise<void> {
     await page.waitForFunction(() => {
-        const tablist = document.querySelector('[role="tablist"]');
-        if (!tablist) return false;
-        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return false;
+        const tabs = Array.from(nodeTablist.querySelectorAll('[role="tab"]'));
         return tabs.length >= 4;
     }, { timeout: 60_000 });
 
     await page.evaluate((i: number) => {
-        const tablist = document.querySelector('[role="tablist"]');
-        if (!tablist) return;
-        const buttons = Array.from(tablist.querySelectorAll('[role="tab"]')) as HTMLButtonElement[];
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return;
+        const buttons = Array.from(nodeTablist.querySelectorAll('[role="tab"]')) as HTMLButtonElement[];
         const target = buttons[i];
         if (target) target.click();
     }, index);
 }
 
 async function waitForActiveTabByIndex(page: any, index: number): Promise<void> {
+    await page.waitForFunction(() => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (nodeTablist) return true;
+        const hubsSection = document.querySelector('[aria-labelledby="onboarding-hubs-title"]');
+        return Boolean(hubsSection);
+    }, { timeout: 60_000 });
+
+    await page.evaluate(() => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (nodeTablist) return;
+        const hubsSection = document.querySelector('[aria-labelledby="onboarding-hubs-title"]');
+        const firstHub = hubsSection?.querySelector('button') as HTMLButtonElement | null;
+        if (firstHub) firstHub.click();
+    });
+
     await page.waitForFunction((i: number) => {
-        const tablist = document.querySelector('[role="tablist"]');
-        if (!tablist) return false;
-        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return false;
+        const tabs = Array.from(nodeTablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
+        return tabs.length > i;
+    }, { timeout: 60_000 }, index);
+
+    await page.evaluate((i: number) => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return;
+        const tabs = Array.from(nodeTablist.querySelectorAll('[role="tab"]')) as HTMLButtonElement[];
+        const t = tabs[i];
+        if (!t) return;
+        if (t.getAttribute('aria-selected') !== 'true') t.click();
+    }, index);
+
+    await page.waitForFunction((i: number) => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return false;
+        const tabs = Array.from(nodeTablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
         const t = tabs[i];
         return Boolean(t) && t.getAttribute('aria-selected') === 'true';
     }, { timeout: 60_000 }, index);
@@ -167,6 +212,26 @@ async function waitForSpotsCountAtLeast(page: any, min: number): Promise<void> {
     }, { timeout: 60_000 }, min);
 }
 
+async function seedUserStorage(page: any, locale: 'zh-TW' | 'ja' | 'en'): Promise<void> {
+    await page.evaluateOnNewDocument((loc: 'zh-TW' | 'ja' | 'en') => {
+        const payload = {
+            state: {
+                agentUserId: 'test-user',
+                locale: loc,
+                accessibilityMode: false,
+                userContext: [],
+                onboardingSeenVersion: 1,
+                isTripGuardActive: false,
+                isLineBound: false,
+                tripGuardSubscriptionId: null,
+                tripGuardSummary: null
+            },
+            version: 0
+        };
+        localStorage.setItem('lutagu-user-storage', JSON.stringify(payload));
+    }, locale);
+}
+
 test('UI renders level badges in node tabs', { timeout: 180_000 }, async (t) => {
     const port = pickAvailablePort();
     const server = await startNextDev(port);
@@ -203,6 +268,7 @@ test('UI renders level badges in node tabs', { timeout: 180_000 }, async (t) => 
     });
 
     const page = await browser.newPage();
+    await seedUserStorage(page, 'en');
     await page.goto(`${server.url}/en/?node=odpt.Station:TokyoMetro.Ginza.Ueno&sheet=1&nodeTab=dna`, { waitUntil: 'domcontentloaded' });
 
     await waitForActiveTabByIndex(page, 0);
@@ -252,6 +318,7 @@ test('UI renders route result card after destination search', { timeout: 180_000
     });
 
     const page = await browser.newPage();
+    await seedUserStorage(page, 'en');
     await page.setRequestInterception(true);
     page.on('request', (req) => {
         const url = req.url();

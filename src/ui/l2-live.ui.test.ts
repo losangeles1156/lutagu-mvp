@@ -19,7 +19,14 @@ async function startNextDev(port: number): Promise<StartedServer> {
     const isWindows = process.platform === 'win32';
     const command = isWindows ? 'npx.cmd' : 'npx';
     const proc = spawn(command, ['next', 'dev', '-p', String(port)], {
-        env: { ...process.env, PORT: String(port) },
+        env: {
+            ...process.env,
+            PORT: String(port),
+            NEXT_PUBLIC_SUPABASE_URL: '',
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+            SUPABASE_SERVICE_KEY: '',
+            SUPABASE_SERVICE_ROLE_KEY: ''
+        },
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: isWindows
     });
@@ -87,11 +94,67 @@ function preparePuppeteerHome(prefix: string): string {
     return dir;
 }
 
+async function seedUserStorage(page: any, locale: 'zh-TW' | 'ja' | 'en'): Promise<void> {
+    await page.evaluateOnNewDocument((loc: 'zh-TW' | 'ja' | 'en') => {
+        const payload = {
+            state: {
+                agentUserId: 'test-user',
+                locale: loc,
+                accessibilityMode: false,
+                userContext: [],
+                onboardingSeenVersion: 1,
+                isTripGuardActive: false,
+                isLineBound: false,
+                tripGuardSubscriptionId: null,
+                tripGuardSummary: null
+            },
+            version: 0
+        };
+        localStorage.setItem('lutagu-user-storage', JSON.stringify(payload));
+    }, locale);
+}
+
 async function waitForActiveTabByIndex(page: any, index: number): Promise<void> {
+    await page.waitForFunction(() => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (nodeTablist) return true;
+        const hubsSection = document.querySelector('[aria-labelledby="onboarding-hubs-title"]');
+        return Boolean(hubsSection);
+    }, { timeout: 60_000 });
+
+    await page.evaluate(() => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (nodeTablist) return;
+        const hubsSection = document.querySelector('[aria-labelledby="onboarding-hubs-title"]');
+        const firstHub = hubsSection?.querySelector('button') as HTMLButtonElement | null;
+        if (firstHub) firstHub.click();
+    });
+
     await page.waitForFunction((i: number) => {
-        const tablist = document.querySelector('[role="tablist"]');
-        if (!tablist) return false;
-        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return false;
+        const tabs = Array.from(nodeTablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
+        return tabs.length > i;
+    }, { timeout: 60_000 }, index);
+
+    await page.evaluate((i: number) => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return;
+        const tabs = Array.from(nodeTablist.querySelectorAll('[role="tab"]')) as HTMLButtonElement[];
+        const t = tabs[i];
+        if (!t) return;
+        if (t.getAttribute('aria-selected') !== 'true') t.click();
+    }, index);
+
+    await page.waitForFunction((i: number) => {
+        const tablists = Array.from(document.querySelectorAll('[role="tablist"]')) as HTMLElement[];
+        const nodeTablist = tablists.find(tl => tl.querySelector('[role="tab"]'));
+        if (!nodeTablist) return false;
+        const tabs = Array.from(nodeTablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
         const t = tabs[i];
         return Boolean(t) && t.getAttribute('aria-selected') === 'true';
     }, { timeout: 60_000 }, index);
@@ -133,6 +196,7 @@ test('L2 UI shows delay severity and translates disruption cause', { timeout: 18
     });
 
     const page = await browser.newPage();
+    await seedUserStorage(page, 'en');
     await page.setRequestInterception(true);
 
     page.on('request', (req) => {
@@ -232,6 +296,7 @@ test('L2 UI shows delay severity and translates disruption cause (zh-TW)', { tim
     });
 
     const page = await browser.newPage();
+    await seedUserStorage(page, 'zh-TW');
     await page.setRequestInterception(true);
 
     page.on('request', (req) => {
