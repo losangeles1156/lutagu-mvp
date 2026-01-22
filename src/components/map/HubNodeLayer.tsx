@@ -4,6 +4,11 @@ import { useMemo, useState, useCallback } from 'react';
 import { useMap, useMapEvents } from 'react-leaflet';
 import { NodeDatum } from '@/lib/api/nodes';
 import { NodeMarker } from './NodeMarker';
+import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
+import '@changey/react-leaflet-markercluster/dist/styles.min.css';
+// Note: Some versions might require leaflet.markercluster/dist/MarkerCluster.css directly if included in deps
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // Interface for hub details from API
 interface HubMemberInfo {
@@ -34,6 +39,7 @@ interface HubNodeLayerProps {
     currentNodeId?: string | null;  // Currently selected node for highlighting
     expandedHubId?: string | null;
     expandedNodeIds?: string[] | null;
+    enableClustering?: boolean;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -56,7 +62,8 @@ export function HubNodeLayer({
     showAllNodes = false,
     currentNodeId = null,
     expandedHubId = null,
-    expandedNodeIds = null
+    expandedNodeIds = null,
+    enableClustering = false
 }: HubNodeLayerProps) {
     const map = useMap();
     const [zoom, setZoom] = useState(map.getZoom());
@@ -157,22 +164,42 @@ export function HubNodeLayer({
         return [...expandedGroup, ...otherHubs.slice(0, Math.max(0, maxNodes - expandedGroup.length))];
     }, [nodes, showAllNodes, viewportBounds, hubDetails, maxNodes, expandedHubId, expandedNodeIds, locale]);
 
-    return (
-        <>
-            {visibleNodes.map((node) => {
-                const details = hubDetails[node.id];
-                return (
-                    <NodeMarker
-                        key={node.id}
-                        node={node}
-                        hubDetails={details}
-                        zone={zone}
-                        locale={locale}
-                        zoom={clampedZoom}
-                        isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
-                    />
-                );
-            })}
-        </>
-    );
+    // [OPTIMIZATION] If clustering is enabled, we still use visibleNodes but we might want to relax the 'maxNodes' limit
+    // However, existing logic slices 'visibleNodes' at the end of useMemo.
+    // If we want clustering to show *more* nodes, we arguably should change the slicing logic above.
+    // But modifying the complex useMemo is risky without full refactor.
+    // For now, we cluster whatever is passed (which is strictly viewport filtered & density limited).
+    // To truly benefit from clustering, we should probably bypass the density limit (slice) when clustering is on.
+    // But that requires refactoring useMemo.
+    // Let's assume for this step we cluster what we have, improving overlap visuals.
+
+    const markers = visibleNodes.map((node) => {
+        const details = hubDetails[node.id];
+        return (
+            <NodeMarker
+                key={node.id}
+                node={node}
+                hubDetails={details}
+                zone={zone}
+                locale={locale}
+                zoom={clampedZoom}
+                isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
+            />
+        );
+    });
+
+    if (enableClustering) {
+        return (
+            <MarkerClusterGroup
+                chunkedLoading
+                maxClusterRadius={60}
+                spiderfyOnMaxZoom={true}
+                showCoverageOnHover={false}
+            >
+                {markers}
+            </MarkerClusterGroup>
+        );
+    }
+
+    return <>{markers}</>;
 }

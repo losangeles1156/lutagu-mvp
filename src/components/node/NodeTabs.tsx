@@ -14,7 +14,7 @@ import {
 import { L1_DNA } from '@/components/node/L1_DNA';
 import { L2_Live } from '@/components/node/L2_Live';
 import { L3_Facilities } from '@/components/node/L3_Facilities';
-import L4_Dashboard from '@/components/node/L4_Dashboard';
+import L4_Dashboard from '@/components/node/L4_Dashboard_Optimized';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
