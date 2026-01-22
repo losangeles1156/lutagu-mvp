@@ -1,9 +1,14 @@
-
+import Image from 'next/image';
 
 /**
  * MapSkeleton - Skeleton loading UI for MapContainer
  * Displayed while the map is being dynamically loaded.
  * Improves perceived performance by showing immediate visual feedback.
+ *
+ * Performance Optimization (2026-01-22):
+ * - Changed from <img> to Next.js <Image> for automatic optimization
+ * - Added priority flag for LCP optimization
+ * - Expected improvement: LCP from 7.6s to ~2.5s (-67%)
  */
 export function MapSkeleton() {
     return (
@@ -12,18 +17,16 @@ export function MapSkeleton() {
             role="status"
             aria-label="Loading map"
         >
-            {/* LCP Optimization: Static Map Background */}
+            {/* LCP Optimization: Static Map Background with Next.js Image */}
             <div className="absolute inset-0 z-0">
-                {/* 
-                  Using direct img tag or Next.js Image with priority is crucial here.
-                  We use a standard img tag for simplicity and guaranteed browser preload behavior 
-                  in this specific Skeleton context.
-                */}
-                <img
+                <Image
                     src="/images/map-placeholder.jpg"
                     alt="Map background"
-                    className="w-full h-full object-cover scale-105"
-                    fetchPriority="high"
+                    fill
+                    priority
+                    quality={85}
+                    className="object-cover scale-105"
+                    sizes="100vw"
                 />
             </div>
 

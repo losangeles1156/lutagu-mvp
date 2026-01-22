@@ -2,10 +2,15 @@
 
 import { useMemo, memo } from 'react';
 import { useTranslations } from 'next-intl';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+// ReactMarkdown and remarkGfm replaced by dynamic import wrapper
+import dynamic from 'next/dynamic';
 import { Brain } from 'lucide-react';
 import { ThinkingBubble } from './ThinkingBubble';
+
+const MarkdownRenderer = dynamic(() => import('./MarkdownRenderer'), {
+    loading: () => <span className="animate-pulse">...</span>,
+    ssr: false // Client-side only optimization
+});
 
 // Component to parse Agent markers and render Markdown
 export const ParsedMessageContent = memo(({ content, role, thought }: { content: string; role: string; thought?: string | null }) => {
@@ -68,9 +73,9 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
             {/* Main Content with Markdown */}
             {parsed.text && (
                 <div className={`prose prose-sm max-w-none ${role === 'user' ? 'prose-invert' : ''}`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <MarkdownRenderer>
                         {parsed.text}
-                    </ReactMarkdown>
+                    </MarkdownRenderer>
                 </div>
             )}
         </div>
