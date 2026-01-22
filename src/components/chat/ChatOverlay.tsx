@@ -5,7 +5,11 @@ import { logger } from '@/lib/utils/logger';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useNodeStore } from '@/stores/nodeStore';
+import { useUserStore } from '@/stores/userStore';
+import { useMapStore } from '@/stores/mapStore';
+
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAgentChat } from '@/hooks/useAgentChat';
@@ -24,27 +28,33 @@ export function ChatOverlay() {
     const tChat = useTranslations('chat');
     const tHome = useTranslations('Home');
     const tL2 = useTranslations('l2');
-    const {
-        isChatOpen,
-        setChatOpen,
-        messages: storeMessages,
-        addMessage: addStoreMessage,
-        clearMessages: clearStoreMessages,
-        currentNodeId,
-        setCurrentNode,
-        setBottomSheetOpen,
-        agentUserId,
-        agentConversationId,
-        setAgentConversationId,
-        userContext,
-        userProfile,
-        pendingChatInput,
-        pendingChatAutoSend,
-        setPendingChat,
-        isDemoMode,
-        activeDemoId,
-        setDemoMode
-    } = useAppStore();
+    // UI Store
+    const isChatOpen = useUIStore(s => s.isChatOpen);
+    const setChatOpen = useUIStore(s => s.setChatOpen);
+    const storeMessages = useUIStore(s => s.messages);
+    const addStoreMessage = useUIStore(s => s.addMessage);
+    const clearStoreMessages = useUIStore(s => s.clearMessages);
+    const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
+    const pendingChatInput = useUIStore(s => s.pendingChatInput);
+    const pendingChatAutoSend = useUIStore(s => s.pendingChatAutoSend);
+    const setPendingChat = useUIStore(s => s.setPendingChat);
+    const isDemoMode = useUIStore(s => s.isDemoMode);
+    const activeDemoId = useUIStore(s => s.activeDemoId);
+    const setDemoMode = useUIStore(s => s.setDemoMode);
+    const agentConversationId = useUIStore(s => s.agentConversationId);
+    const setAgentConversationId = useUIStore(s => s.setAgentConversationId);
+
+    // Node Store
+    const currentNodeId = useNodeStore(s => s.currentNodeId);
+    const setCurrentNode = useNodeStore(s => s.setCurrentNode);
+
+    // User Store
+    const agentUserId = useUserStore(s => s.agentUserId);
+    const userContext = useUserStore(s => s.userContext);
+    const userProfile = useUserStore(s => s.userProfile);
+
+    // Map Store
+
 
     const { zone } = useZoneAwareness();
     const [l2Status, setL2Status] = useState<any>(null);
@@ -122,7 +132,7 @@ export function ChatOverlay() {
             const lang = (locale === 'ja' || locale === 'en' || locale === 'zh-TW') ? locale : 'zh';
 
             // Clear messages and add user message
-            useAppStore.setState({
+            useUIStore.setState({
                 messages: [{
                     role: 'user',
                     content: script.userMessage[lang]
@@ -145,7 +155,7 @@ export function ChatOverlay() {
                     await new Promise(r => setTimeout(r, 30));
                     displayedText += responseText.slice(i, i + chunkSize);
 
-                    useAppStore.setState(state => {
+                    useUIStore.setState(state => {
                         const newMessages = [...state.messages];
                         const lastMsg = newMessages[newMessages.length - 1];
                         if (lastMsg && lastMsg.role === 'assistant') {
@@ -156,7 +166,7 @@ export function ChatOverlay() {
                 }
 
                 // Finish stream, add actions
-                useAppStore.setState(state => {
+                useUIStore.setState(state => {
                     const newMessages = [...state.messages];
                     const lastMsg = newMessages[newMessages.length - 1];
                     if (lastMsg && lastMsg.role === 'assistant') {
@@ -308,8 +318,8 @@ export function ChatOverlay() {
                 'shinjuku': [35.6896, 139.7006]
             };
             const coords = action.metadata?.coordinates || targets[action.target] || [35.6895, 139.6917];
-            useAppStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
-            useAppStore.getState().setChatOpen(false);
+            useMapStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
+            useUIStore.getState().setChatOpen(false);
         } else if (action.type === 'details') {
             if (action.target) {
                 setCurrentNode(action.target);
@@ -414,7 +424,7 @@ export function ChatOverlay() {
 
         // Optimistic update
         if (isDemoMode) {
-            useAppStore.setState(state => {
+            useUIStore.setState(state => {
                 const newMessages = [...state.messages];
                 newMessages[index] = { ...msg, feedback: { score } };
                 return { messages: newMessages };
@@ -496,7 +506,7 @@ export function ChatOverlay() {
                 </div>
                 <button
                     onClick={() => {
-                        useAppStore.getState().setTripGuardActive(true);
+                        useUIStore.getState().setTripGuardActive(true);
                         setChatOpen(false);
                     }}
                     className="px-4 py-2 bg-white text-indigo-600 text-[10px] font-black rounded-full hover:bg-indigo-50 transition-all active:scale-95 shadow-md"

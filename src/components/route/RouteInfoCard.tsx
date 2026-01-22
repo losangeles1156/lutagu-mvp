@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useAppStore } from '@/stores/appStore';
+import { useRouteStore } from '@/stores/routeStore';
 import { X, Navigation, Clock } from 'lucide-react';
 
 export function RouteInfoCard() {
-    const { routeSummary, clearRoute, isRouteCalculating } = useAppStore();
+    const { routeSummary, clearRoute, isRouteCalculating } = useRouteStore();
 
     if (!routeSummary && !isRouteCalculating) return null;
 

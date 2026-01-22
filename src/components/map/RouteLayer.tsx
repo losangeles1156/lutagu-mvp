@@ -3,7 +3,7 @@
 
 import { useEffect } from 'react';
 import { useMap, Polyline, Marker, Popup } from 'react-leaflet';
-import { useAppStore } from '@/stores/appStore';
+import { useRouteStore } from '@/stores/routeStore';
 import L from 'leaflet';
 import { MapPin, Flag } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -27,7 +27,7 @@ const createIcon = (icon: React.ReactNode, color: string) => {
 
 export function RouteLayer() {
     const map = useMap();
-    const { routePath, routeStart, routeEnd } = useAppStore();
+    const { routePath, routeStart, routeEnd } = useRouteStore();
 
     useEffect(() => {
         if (routePath && routePath.length > 0) {

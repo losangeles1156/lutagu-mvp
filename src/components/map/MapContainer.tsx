@@ -5,7 +5,7 @@ import { Component, ReactNode, useState, useMemo, useEffect } from 'react';
 import { MapContainer as LeafletMapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
-import { useAppStore } from '@/stores/appStore';
+import { useNodeStore } from '@/stores/nodeStore';
 import { useLocale } from 'next-intl';
 
 // [OPTIMIZED] New Hooks
@@ -31,7 +31,7 @@ function VirtualizedNodeLayer({ zone, locale }: { zone: 'core' | 'buffer' | 'out
     const allNodes = useNodes();
     const hubDetails = useHubDetails();
     const error = useNodeError();
-    const currentNodeId = useAppStore(s => s.currentNodeId);
+    const currentNodeId = useNodeStore(s => s.currentNodeId);
 
     // [OPTIMIZATION] 1. Track Map Bounds decoupled from render loop
     const mapBounds = useViewportBounds();

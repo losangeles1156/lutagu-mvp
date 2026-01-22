@@ -23,7 +23,7 @@ import { RouteResultCard } from '@/components/node/RouteResultCard';
 import { InsightCards } from '@/components/node/InsightCards';
 import { StrategyCards } from '@/components/node/StrategyCards';
 import type { MatchedStrategyCard, UserPreferences, RecommendRequest } from '@/types/lutagu_l4';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
 import { L4FormCard } from '@/components/node/L4FormCard';
 import { L4DemandChips } from '@/components/node/L4DemandChips';
 import { L4TemplateSelector, L4TemplateList } from '@/components/node/L4TemplateSelector';
@@ -63,7 +63,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
     const tL4 = useTranslations('l4');
     const uiLocale = useLocale() as SupportedLocale;
     const stationId = useMemo(() => normalizeOdptStationId(String(currentNodeId || '').trim()), [currentNodeId]);
-    const setChatOpen = useAppStore(state => state.setChatOpen);
+    const setChatOpen = useUIStore(state => state.setChatOpen);
     const { fetchJson: fetchJsonCached } = useApiFetch();
 
     const [viewMode, setViewMode] = useState<L4ViewMode>('recommendations');

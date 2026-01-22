@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
-import { useAppStore } from '@/stores/appStore';
+import { useMapStore } from '@/stores/mapStore';
 
 interface Coordinates {
     lat: number;
@@ -23,7 +23,7 @@ export function useMapCentering(
     fallback: Coordinates
 ) {
     const map = useMap();
-    const mapCenter = useAppStore(state => state.mapCenter);
+    const mapCenter = useMapStore(state => state.mapCenter);
     const lastTargetRef = useRef<Coordinates | null>(null);
 
     // Determine target priority: 

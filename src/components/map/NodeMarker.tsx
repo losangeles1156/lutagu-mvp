@@ -2,7 +2,8 @@
 
 import { Marker } from 'react-leaflet';
 import L from 'leaflet';
-import { useAppStore } from '@/stores/appStore';
+import { useNodeStore } from '@/stores/nodeStore';
+import { useUIStore } from '@/stores/uiStore';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Crown, MapPin, Train, Link2, Plane } from 'lucide-react';
 import { OPERATOR_COLORS, getPrimaryOperator, getOperatorAbbreviation, STATION_LINES } from '@/lib/constants/stationLines';
@@ -69,8 +70,8 @@ const AIRPORT_TERMINAL_IDS = [
 ];
 
 function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSelected = false, onClick }: NodeMarkerProps) {
-    const setCurrentNode = useAppStore(s => s.setCurrentNode);
-    const setBottomSheetOpen = useAppStore(s => s.setBottomSheetOpen);
+    const setCurrentNode = useNodeStore(s => s.setCurrentNode);
+    const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
 
     // Derive all values BEFORE any hooks to avoid conditional hook calls
     const isMajor = node.tier === 'major' || node.is_hub;

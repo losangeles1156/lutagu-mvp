@@ -1,13 +1,17 @@
 'use client';
 
 import { logger } from '@/lib/utils/logger';
+import { useMapStore } from '@/stores/mapStore';
 
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useChat } from '@ai-sdk/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useNodeStore } from '@/stores/nodeStore';
+import { useUserStore } from '@/stores/userStore';
+
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { useAgentChat } from '@/hooks/useAgentChat';
@@ -50,37 +54,25 @@ export function ChatPanel() {
     const transitionTo = useUIStateMachine(state => state.transitionTo);
 
     // App Store State
-    const {
-        isDemoMode,
-        currentNodeId,
-        storeMessages,
-        addMessage: addStoreMessage,
-        clearMessages: clearStoreMessages,
-        setPendingChat,
-        pendingChatInput,
-        pendingChatAutoSend,
-        setDemoMode,
-        activeDemoId,
+    // Mod Stores
+    const isDemoMode = useUIStore(s => s.isDemoMode);
+    const activeDemoId = useUIStore(s => s.activeDemoId);
+    const setDemoMode = useUIStore(s => s.setDemoMode);
 
-        setAgentConversationId,
-        agentConversationId,
-        agentUserId
-    } = useAppStore(state => ({
-        isDemoMode: state.isDemoMode,
-        activeDemoId: state.activeDemoId,
-        setDemoMode: state.setDemoMode,
-        currentNodeId: state.currentNodeId,
-        setCurrentNode: state.setCurrentNode,
-        agentUserId: state.agentUserId,
-        agentConversationId: state.agentConversationId,
-        setAgentConversationId: state.setAgentConversationId,
-        storeMessages: state.messages,
-        addMessage: state.addMessage,
-        clearMessages: state.clearMessages,
-        setPendingChat: state.setPendingChat,
-        pendingChatInput: state.pendingChatInput,
-        pendingChatAutoSend: state.pendingChatAutoSend,
-    }));
+    const currentNodeId = useNodeStore(s => s.currentNodeId);
+    const setCurrentNode = useNodeStore(s => s.setCurrentNode);
+
+    const agentUserId = useUserStore(s => s.agentUserId);
+
+    // UI Store (Chat)
+    const storeMessages = useUIStore(s => s.messages);
+    const addStoreMessage = useUIStore(s => s.addMessage);
+    const clearStoreMessages = useUIStore(s => s.clearMessages);
+    const setPendingChat = useUIStore(s => s.setPendingChat);
+    const pendingChatInput = useUIStore(s => s.pendingChatInput);
+    const pendingChatAutoSend = useUIStore(s => s.pendingChatAutoSend);
+    const agentConversationId = useUIStore(s => s.agentConversationId);
+    const setAgentConversationId = useUIStore(s => s.setAgentConversationId);
 
     // Toast
     const showToast = useToast();
@@ -160,7 +152,7 @@ export function ChatPanel() {
 
         setIsDemoPlaying(true);
         setMessages([] as any);
-        useAppStore.setState({ messages: [] as any });
+        useUIStore.setState({ messages: [] as any });
 
         const vars = {
             time: script.mockContext?.time?.[lang] ?? '',
@@ -320,7 +312,7 @@ export function ChatPanel() {
                 'shinjuku': [35.6896, 139.7006]
             };
             const coords = action.metadata?.coordinates || targets[action.target] || [35.6895, 139.6917];
-            useAppStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
+            useMapStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
             transitionTo('collapsed_desktop');
             trackFunnelEvent({
                 step_name: 'location_selected',

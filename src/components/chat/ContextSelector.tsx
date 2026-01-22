@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Briefcase, Baby, UserMinus, Clock } from 'lucide-react';
-import { useAppStore } from '@/stores/appStore';
+import { useUserStore } from '@/stores/userStore';
 import { useTranslations } from 'next-intl';
 
 export interface UserContext {
@@ -22,7 +22,8 @@ export function ContextSelector() {
         { id: 'rush', icon: Clock, label: t('contexts.rush'), color: 'bg-amber-100 text-amber-700 border-amber-200' }
     ];
 
-    const { userContext, setUserContext } = useAppStore();
+    const userContext = useUserStore(s => s.userContext);
+    const setUserContext = useUserStore(s => s.setUserContext);
 
     const toggleContext = (id: string) => {
         const current = userContext || [];

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { MessageSquare, MessageSquarePlus } from 'lucide-react';
-import { useAppStore } from '@/stores/appStore';
+import { useNodeStore } from '@/stores/nodeStore';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 
 const FeedbackHub = dynamic(
@@ -18,7 +18,7 @@ interface BottomNavBarProps {
 export function BottomNavBar({ nodeData }: BottomNavBarProps) {
     const tNav = useTranslations('nav');
     const tCommon = useTranslations('common');
-    const { currentNodeId } = useAppStore();
+    const currentNodeId = useNodeStore(s => s.currentNodeId);
     const { transitionTo } = useUIStateMachine();
 
     return (

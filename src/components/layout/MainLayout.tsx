@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useUIStateMachine, initializeUIState, isCollapsedState, canEnterExploreMode } from '@/stores/uiStateMachine';
 import { useDeviceType } from '@/hooks/useDeviceType';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
 import { Sparkles, Map as MapIcon, MessageSquare } from 'lucide-react';
 
 // Lazy load heavy UI state components to reduce TBT
@@ -45,7 +45,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
     backupMessages
   } = useUIStateMachine();
 
-  const { setIsMobile } = useAppStore();
+  const { setIsMobile } = useUIStore();
   const tCommon = useTranslations('common');
   const tChat = useTranslations('chat');
 
@@ -85,8 +85,8 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
     // 如果是從全螢幕（演示模式）關閉，清除訊息與會話以進入「全新對話」狀態
     if (uiState === 'fullscreen') {
       useUIStateMachine.setState({ messages: [] });
-      useAppStore.getState().resetAgentConversation();
-      useAppStore.setState({ messages: [] });
+      useUIStore.getState().resetAgentConversation();
+      useUIStore.setState({ messages: [] }); // Clear messages in uiStore too
     } else {
       backupMessages();
     }

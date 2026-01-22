@@ -3,7 +3,9 @@
 import { useCallback, useRef, useEffect, useState, type MouseEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useNodeStore } from '@/stores/nodeStore';
+import { useUserStore } from '@/stores/userStore';
 import { useAgentChat } from '@/hooks/useAgentChat';
 import { useTranslations } from 'next-intl';
 import {
@@ -34,11 +36,9 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     backupMessages
   } = useUIStateMachine();
 
-  const {
-    setAgentConversationId,
-    currentNodeId,
-    userProfile,
-  } = useAppStore();
+  const setAgentConversationId = useUIStore(s => s.setAgentConversationId);
+  const currentNodeId = useNodeStore(s => s.currentNodeId);
+  const userProfile = useUserStore(s => s.userProfile);
 
   const { sendMessage, isLoading, clearMessages: clearAgentMessages } = useAgentChat({
     stationId: currentNodeId || '',

@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAppStore } from '@/stores/appStore';
+
+import { useNodeStore } from '@/stores/nodeStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useUserStore } from '@/stores/userStore';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { fetchNodeConfig } from '@/lib/api/nodes';
 import { getSupabase } from '@/lib/supabase';
@@ -20,19 +23,21 @@ export function HomeLogic({
     const nodeRequestSeqRef = useRef(0);
     const ONBOARDING_VERSION = 1;
 
-    const {
-        currentNodeId,
-        isBottomSheetOpen,
-        setBottomSheetOpen,
-        setCurrentNode,
-        setActiveTab,
-        onboardingSeenVersion,
-        setChatOpen,
-        setIsOnboardingOpen,
-        setPendingChat,
-        setNodeActiveTab,
-        setDemoMode
-    } = useAppStore();
+    // Migrated Store Hooks
+    const currentNodeId = useNodeStore(s => s.currentNodeId);
+    const setCurrentNode = useNodeStore(s => s.setCurrentNode);
+
+    const isBottomSheetOpen = useUIStore(s => s.isBottomSheetOpen);
+    const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
+    const activeTab = useUIStore(s => s.activeTab);
+    const setActiveTab = useUIStore(s => s.setActiveTab);
+    const setChatOpen = useUIStore(s => s.setChatOpen);
+    const setIsOnboardingOpen = useUIStore(s => s.setIsOnboardingOpen);
+    const setPendingChat = useUIStore(s => s.setPendingChat);
+    const setNodeActiveTab = useUIStore(s => s.setNodeActiveTab);
+    const setDemoMode = useUIStore(s => s.setDemoMode);
+
+    const onboardingSeenVersion = useUserStore(s => s.onboardingSeenVersion);
 
     const { transitionTo } = useUIStateMachine();
 

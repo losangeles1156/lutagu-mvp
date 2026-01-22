@@ -18,7 +18,7 @@ import L4_Dashboard from '@/components/node/L4_Dashboard_Optimized';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
 
 const TABS = [
     { id: 'dna', icon: Compass, tone: 'sky', primary: false },
@@ -54,8 +54,8 @@ const TAB_STYLES: Record<TabId, { active: string; inactive: string; dot: string 
 
 export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any }) {
     // L2: Use store state for deep link support
-    const storeNodeTab = useAppStore(state => state.nodeActiveTab);
-    const setNodeActiveTab = useAppStore(state => state.setNodeActiveTab);
+    const storeNodeTab = useUIStore(state => state.nodeActiveTab);
+    const setNodeActiveTab = useUIStore(state => state.setNodeActiveTab);
     const [localTab, setLocalTab] = useState<TabId>('lutagu');
 
     // Use store tab if available, otherwise use local state

@@ -2,7 +2,8 @@
 
 import React from 'react';
 
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useUserStore } from '@/stores/userStore';
 import { getSupabase } from '@/lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
@@ -30,14 +31,13 @@ export function SubscriptionModal() {
     const tCommon = useTranslations('common');
     const tValidation = useTranslations('validation'); // Add validation translations
 
-    const {
-        isSubscriptionModalOpen,
-        setSubscriptionModalOpen,
-        isTripGuardActive,
-        setTripGuardActive,
-        setTripGuardSubscriptionId,
-        setTripGuardSummary,
-    } = useAppStore();
+    const isSubscriptionModalOpen = useUIStore(s => s.isSubscriptionModalOpen);
+    const setSubscriptionModalOpen = useUIStore(s => s.setSubscriptionModalOpen);
+
+    const isTripGuardActive = useUserStore(s => s.isTripGuardActive);
+    const setTripGuardActive = useUserStore(s => s.setTripGuardActive);
+    const setTripGuardSubscriptionId = useUserStore(s => s.setTripGuardSubscriptionId);
+    const setTripGuardSummary = useUserStore(s => s.setTripGuardSummary);
     const router = useRouter();
     const [isLoading, setIsLoading] = React.useState(false);
     const [inputText, setInputText] = React.useState('');

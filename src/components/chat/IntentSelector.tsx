@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Route, Clock, Info, Ticket, Cloud, Calendar, MoreHorizontal } from 'lucide-react';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
 import { useTranslations } from 'next-intl';
 
 export interface IntentOption {
@@ -16,7 +16,8 @@ export function IntentSelector() {
     const t = useTranslations('chat.intent');
     const tCommon = useTranslations('common');
 
-    const { selectedNeed, setSelectedNeed } = useAppStore();
+    const selectedNeed = useUIStore(s => s.selectedNeed);
+    const setSelectedNeed = useUIStore(s => s.setSelectedNeed);
 
     const intents: IntentOption[] = [
         { id: 'route', icon: Route, label: t('route'), color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },

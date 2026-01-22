@@ -4,7 +4,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { Send, Bot, Loader2, Maximize2, Minimize2, X, RotateCcw } from 'lucide-react';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useMapStore } from '@/stores/mapStore';
 import { useAgentChat } from '@/hooks/useAgentChat';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { MessageBubble } from '../chat/MessageBubble';
@@ -27,9 +28,9 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
     const { id: stationId, name } = data || {};
     const dragControls = useDragControls();
 
-    const setChatOpen = useAppStore(s => s.setChatOpen);
-    const chatDisplayMode = useAppStore(s => s.chatDisplayMode);
-    const setChatDisplayMode = useAppStore(s => s.setChatDisplayMode);
+    const setChatOpen = useUIStore(s => s.setChatOpen);
+    const chatDisplayMode = useUIStore(s => s.chatDisplayMode);
+    const setChatDisplayMode = useUIStore(s => s.setChatDisplayMode);
 
     const displayName = (name?.zh && name?.zh !== tL4('station') && name?.zh !== 'Station')
         ? name.zh
@@ -104,8 +105,8 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         if (action.type === 'navigate') {
             const coords = action.metadata?.coordinates as [number, number] | undefined;
             if (coords && coords.length === 2) {
-                useAppStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
-                useAppStore.getState().setChatOpen(false);
+                useMapStore.getState().setMapCenter({ lat: coords[0], lon: coords[1] });
+                useUIStore.getState().setChatOpen(false);
                 return;
             }
         }

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import { NodeDatum } from '@/lib/api/nodes';
-import { useAppStore } from '@/stores/appStore';
+import { useMapStore } from '@/stores/mapStore';
 import { useMapCentering } from '@/hooks/map/useMapCentering';
 import { useNodeSelection } from '@/hooks/map/useNodeSelection';
 
@@ -27,7 +27,7 @@ export function MapController_Optimized({
     nodes = []
 }: MapControllerProps) {
     const map = useMap();
-    const mapCenter = useAppStore(state => state.mapCenter);
+    const mapCenter = useMapStore(state => state.mapCenter);
 
     // 1. Handle System Centering priorities
     useMapCentering(center, isTooFar, fallback);

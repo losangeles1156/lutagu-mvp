@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppStore } from '@/stores/appStore';
+
 import { X, MessageCircle, ShieldCheck, BellRing } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

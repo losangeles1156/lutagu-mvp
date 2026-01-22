@@ -1,14 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useUserStore } from '@/stores/userStore';
 import { LineBindingModal } from './LineBindingModal';
 import { Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export function TripGuardStatus() {
     const tTripGuard = useTranslations('tripGuard');
-    const { isTripGuardActive, isLineBound, setLineBound, setSubscriptionModalOpen } = useAppStore();
+    const setSubscriptionModalOpen = useUIStore(s => s.setSubscriptionModalOpen);
+    const isTripGuardActive = useUserStore(s => s.isTripGuardActive);
+    const isLineBound = useUserStore(s => s.isLineBound);
+    const setLineBound = useUserStore(s => s.setLineBound);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
 

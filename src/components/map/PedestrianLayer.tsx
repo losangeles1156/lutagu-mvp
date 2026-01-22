@@ -5,7 +5,9 @@ import { logger } from '@/lib/utils/logger';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useMap, Polyline, CircleMarker, Popup } from 'react-leaflet';
-import { useAppStore } from '@/stores/appStore';
+import { useMapStore } from '@/stores/mapStore';
+import { useRouteStore } from '@/stores/routeStore';
+import { useUserStore } from '@/stores/userStore';
 import { toast } from 'sonner';
 import { getDistanceKm } from '@/lib/utils/geoUtils';
 import L from 'leaflet';
@@ -48,16 +50,16 @@ function zoomBucket(zoom: number) {
 
 export function PedestrianLayer() {
     const map = useMap();
+    const userProfile = useUserStore(s => s.userProfile);
+    const mapCenter = useMapStore(s => s.mapCenter);
     const {
-        userProfile,
-        setRouteEnd,
-        setRouteStart,
         routeStart,
+        setRouteStart,
+        setRouteEnd,
         setIsRouteCalculating,
         setRoutePath,
-        setRouteSummary,
-        mapCenter
-    } = useAppStore();
+        setRouteSummary
+    } = useRouteStore();
     const [nodes, setNodes] = useState<GraphNode[]>([]);
     const [links, setLinks] = useState<GraphLink[]>([]);
     const [loading, setLoading] = useState(false);
@@ -73,8 +75,8 @@ export function PedestrianLayer() {
 
         if (!startPoint) {
             if (mapCenter) {
-                 startPoint = { lat: mapCenter.lat, lon: mapCenter.lon, name: 'Current Location' };
-                 setRouteStart(startPoint);
+                startPoint = { lat: mapCenter.lat, lon: mapCenter.lon, name: 'Current Location' };
+                setRouteStart(startPoint);
             } else {
                 toast.error('Cannot determine start location');
                 return;
@@ -85,7 +87,7 @@ export function PedestrianLayer() {
 
         const dist = getDistanceKm(startPoint.lat, startPoint.lon, endPoint.lat, endPoint.lon);
         if (dist < 0.05) {
-             toast.warning('Destination is very close (< 50m)');
+            toast.warning('Destination is very close (< 50m)');
         }
 
         setRouteEnd(endPoint);
@@ -249,7 +251,7 @@ export function PedestrianLayer() {
 
                 // Case 1: GeoJSON Geometry (from RPC)
                 if (link.geometry && typeof link.geometry === 'object' && link.geometry.type === 'LineString') {
-                     positions = link.geometry.coordinates.map((c: number[]) => [c[1], c[0]] as [number, number]);
+                    positions = link.geometry.coordinates.map((c: number[]) => [c[1], c[0]] as [number, number]);
                 }
                 // Case 2: Fallback (WKB or missing geometry) - Use Node Coordinates
                 else if (link.start_node_id && link.end_node_id) {
@@ -257,10 +259,10 @@ export function PedestrianLayer() {
                     const endNode = nodes.find(n => n.id === link.end_node_id);
 
                     if (startNode && endNode && startNode.coordinates && endNode.coordinates) {
-                         // Swap [lon, lat] to [lat, lon] for Leaflet
-                         const startPos = [startNode.coordinates.coordinates[1], startNode.coordinates.coordinates[0]] as [number, number];
-                         const endPos = [endNode.coordinates.coordinates[1], endNode.coordinates.coordinates[0]] as [number, number];
-                         positions = [startPos, endPos];
+                        // Swap [lon, lat] to [lat, lon] for Leaflet
+                        const startPos = [startNode.coordinates.coordinates[1], startNode.coordinates.coordinates[0]] as [number, number];
+                        const endPos = [endNode.coordinates.coordinates[1], endNode.coordinates.coordinates[0]] as [number, number];
+                        positions = [startPos, endPos];
                     }
                 }
 
@@ -274,7 +276,7 @@ export function PedestrianLayer() {
                         positions={positions}
                         pathOptions={{ color, weight: 4, opacity: 0.7 }}
                     >
-                         <Popup>
+                        <Popup>
                             <div className="text-sm">
                                 <p><strong>Rank:</strong> {link.accessibility_rank}</p>
                                 <p><strong>Elevator:</strong> {link.has_elevator_access ? 'Yes' : 'No'}</p>
@@ -287,16 +289,16 @@ export function PedestrianLayer() {
 
             {/* Render Nodes */}
             {nodes.map(node => {
-                 const [lon, lat] = node.coordinates.coordinates;
-                 return (
-                     <CircleMarker
+                const [lon, lat] = node.coordinates.coordinates;
+                return (
+                    <CircleMarker
                         key={node.id}
                         center={[lat, lon]}
                         radius={5}
                         pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.8 }}
                         eventHandlers={{
                             click: (e) => {
-                                 L.DomEvent.stopPropagation(e);
+                                L.DomEvent.stopPropagation(e);
                             }
                         }}
                     >
@@ -304,7 +306,7 @@ export function PedestrianLayer() {
                             <div className="p-2 min-w-[200px]">
                                 <h3 className="font-bold mb-2 text-sm">{node.description || 'Pedestrian Node'}</h3>
                                 <div className="flex flex-col gap-2">
-                                     <button
+                                    <button
                                         className="bg-blue-600 text-white px-3 py-2 rounded-md text-xs font-bold hover:bg-blue-700 transition-colors w-full shadow-sm"
                                         onClick={() => handleSetDestination(node)}
                                     >
@@ -320,7 +322,7 @@ export function PedestrianLayer() {
                             </div>
                         </Popup>
                     </CircleMarker>
-                 );
+                );
             })}
         </>
     );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMap } from 'react-leaflet';
-import { useAppStore } from '@/stores/appStore';
+import { useNodeStore } from '@/stores/nodeStore';
 import { NodeDatum, fetchNodeConfig } from '@/lib/api/nodes';
 import { logger } from '@/lib/utils/logger';
 
@@ -12,7 +12,7 @@ import { logger } from '@/lib/utils/logger';
  */
 export function useNodeSelection(nodes: NodeDatum[]) {
     const map = useMap();
-    const currentNodeId = useAppStore(state => state.currentNodeId);
+    const currentNodeId = useNodeStore(state => state.currentNodeId);
     const [prevNodeId, setPrevNodeId] = useState<string | null>(null);
 
     useEffect(() => {

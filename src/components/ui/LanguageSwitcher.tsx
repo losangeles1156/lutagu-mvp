@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation'; // Keep this for query params
 import { Globe } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { useAppStore } from '@/stores/appStore';
+import { useUserStore } from '@/stores/userStore';
 
 interface LanguageSwitcherProps {
     className?: string;
@@ -20,7 +20,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
     const searchParams = useSearchParams();
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const { setLocale } = useAppStore();
+    const setLocale = useUserStore(s => s.setLocale);
 
     // Close dropdown when clicking outside
     useEffect(() => {

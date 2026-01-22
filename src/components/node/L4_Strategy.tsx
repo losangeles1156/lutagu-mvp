@@ -5,7 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { StationUIProfile } from '@/lib/types/stationStandard';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { Sparkles, Send, User, Bot, Loader2, Clock, Briefcase, Wallet, Armchair, Baby, Compass, MapPin, CheckCircle2, Mic, Maximize2, Layout, LayoutPanelTop, Square } from 'lucide-react';
-import { useAppStore } from '@/stores/appStore';
+
+import { useUIStore } from '@/stores/uiStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useAgentChat } from '@/hooks/useAgentChat';
 import ReactMarkdown from 'react-markdown';
@@ -31,9 +32,9 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
     const locale = useLocale();
     const { zone } = useZoneAwareness();
     const { id: stationId, name } = data || {};
-    const isMobile = useAppStore(s => s.isMobile);
-    const chatDisplayMode = useAppStore(s => s.chatDisplayMode);
-    const setChatDisplayMode = useAppStore(s => s.setChatDisplayMode);
+    const isMobile = useUIStore(s => s.isMobile);
+    const chatDisplayMode = useUIStore(s => s.chatDisplayMode);
+    const setChatDisplayMode = useUIStore(s => s.setChatDisplayMode);
 
     // Robust Name Resolution
     const displayName = useMemo(() => {

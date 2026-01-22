@@ -1,10 +1,11 @@
 'use client';
 
-import { useAppStore } from '@/stores/appStore';
+import { useUserStore } from '@/stores/userStore';
 import { User2, Armchair, Baby } from 'lucide-react';
 
 export function ProfileSwitcher({ className }: { className?: string }) {
-    const { userProfile, setUserProfile } = useAppStore();
+    const userProfile = useUserStore(s => s.userProfile);
+    const setUserProfile = useUserStore(s => s.setUserProfile);
 
     const profiles = [
         { id: 'general', icon: User2, label: 'General' },

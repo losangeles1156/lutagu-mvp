@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/stores/appStore';
+import { useNodeStore } from '@/stores/nodeStore';
 import { useLocale } from 'next-intl';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { buildStationIdSearchCandidates } from '@/lib/api/nodes';
@@ -52,7 +52,7 @@ export interface L1Place {
 }
 
 export function useL1Places() {
-    const { currentNodeId } = useAppStore();
+    const currentNodeId = useNodeStore(s => s.currentNodeId);
     const [places, setPlaces] = useState<L1Place[]>([]);
     const [loading, setLoading] = useState(false);
     const locale = useLocale();

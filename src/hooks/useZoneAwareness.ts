@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/utils/logger';
-import { useAppStore } from '../stores/appStore';
+import { useMapStore } from '@/stores/mapStore';
 import { ZoneDetector } from '../lib/zones/detector';
 import { tokyoCoreAdapter } from '../lib/adapters/tokyo';
 import { calculateDistance } from '../lib/utils/distance';
@@ -15,7 +15,8 @@ const detector = new ZoneDetector({
 });
 
 export function useZoneAwareness() {
-    const { setZone, currentZone } = useAppStore();
+    const setZone = useMapStore(s => s.setZone);
+    const currentZone = useMapStore(s => s.currentZone);
     const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null);
     const [isTooFar, setIsTooFar] = useState(false);
 

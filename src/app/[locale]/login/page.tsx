@@ -8,7 +8,7 @@ import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
 import { getSupabase } from '@/lib/supabase';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
-import { useAppStore } from '@/stores/appStore';
+import { useUserStore } from '@/stores/userStore';
 import { DEMO_SCENARIOS } from '@/lib/l4/demoScenarios';
 import { LoginChatPanel } from '@/components/chat/LoginChatPanel';
 
@@ -39,7 +39,7 @@ function normalizeNextPath(nextPath: string | null, locale: string) {
 
 export default function LoginPage() {
     const locale = useLocale();
-    const storeLocale = useAppStore(s => s.locale);
+    const storeLocale = useUserStore(s => s.locale);
     const router = useRouter();
     const t = useTranslations('login');
     const tOnboarding = useTranslations('onboarding');

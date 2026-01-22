@@ -1,7 +1,10 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useAppStore } from '@/stores/appStore';
+import { useNodeStore } from '@/stores/nodeStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useUserStore } from '@/stores/userStore';
+import { useMapStore } from '@/stores/mapStore';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { SubscriptionModal } from '@/components/guard/SubscriptionModal';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
@@ -28,18 +31,18 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
     const tOnboarding = useTranslations('onboarding');
     const locale = useLocale();
 
-    const {
-        currentNodeId,
-        isBottomSheetOpen,
-        setBottomSheetOpen,
-        setCurrentNode,
-        isOnboardingOpen,
-        setIsOnboardingOpen,
-        setOnboardingSeenVersion,
-        setMapCenter,
-        setNodeActiveTab,
-        setDemoMode
-    } = useAppStore();
+    const currentNodeId = useNodeStore(s => s.currentNodeId);
+    const setCurrentNode = useNodeStore(s => s.setCurrentNode);
+
+    const isBottomSheetOpen = useUIStore(s => s.isBottomSheetOpen);
+    const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
+    const isOnboardingOpen = useUIStore(s => s.isOnboardingOpen);
+    const setIsOnboardingOpen = useUIStore(s => s.setIsOnboardingOpen);
+    const setNodeActiveTab = useUIStore(s => s.setNodeActiveTab);
+    const setDemoMode = useUIStore(s => s.setDemoMode);
+
+    const setOnboardingSeenVersion = useUserStore(s => s.setOnboardingSeenVersion);
+    const setMapCenter = useMapStore(s => s.setMapCenter);
 
     const { transitionTo } = useUIStateMachine();
     const [showSkipConfirm, setShowSkipConfirm] = useState(false);

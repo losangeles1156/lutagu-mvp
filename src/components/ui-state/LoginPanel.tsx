@@ -4,7 +4,10 @@
 import { useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
-import { useAppStore } from '@/stores/appStore';
+import { useUIStore } from '@/stores/uiStore';
+import { useNodeStore } from '@/stores/nodeStore';
+import { useUserStore } from '@/stores/userStore';
+import { useMapStore } from '@/stores/mapStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { Sparkles, MapPin, Compass, X, Bot, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -21,13 +24,12 @@ export function LoginPanel() {
   const router = useRouter();
 
   const { transitionTo, setPendingInput, clearMessages, isMobile } = useUIStateMachine();
-  const {
-    setAgentConversationId,
-    setMapCenter,
-    setCurrentNode,
-    setBottomSheetOpen,
-    setNodeActiveTab
-  } = useAppStore();
+  const setAgentConversationId = useUIStore(s => s.setAgentConversationId);
+  const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
+  const setNodeActiveTab = useUIStore(s => s.setNodeActiveTab);
+
+  const setMapCenter = useMapStore(s => s.setMapCenter);
+  const setCurrentNode = useNodeStore(s => s.setCurrentNode);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,7 +47,7 @@ export function LoginPanel() {
         localStorage.setItem('agentUserId', agentUserId);
       }
     }
-    useAppStore.setState({ agentUserId });
+    useUserStore.setState({ agentUserId });
     setAgentConversationId(null);
     clearMessages();
     setPendingInput('');
