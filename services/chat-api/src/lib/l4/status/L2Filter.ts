@@ -1,5 +1,5 @@
 
-import { RouteOption } from '../algorithms/RoutingGraph';
+import { RouteOption } from '../types/RoutingTypes';
 
 function normalizeOdptRailwayId(input: string): string {
     const s = String(input || '').trim();

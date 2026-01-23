@@ -1,0 +1,45 @@
+name: Monthly L3 Data Refresh
+
+on:
+  schedule:
+    # Run at 04:00 UTC (12:00 JST/11:00 CST) on the 1st of every month
+    - cron: '0 4 1 * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  refresh-l3-facilities:
+    name: Refresh L3 Facilities (Toilets)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            services/etl-pipeline-rs/target/
+          key: ${{ runner.os }}-cargo-etl-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build ETL Pipeline
+        working-directory: services/etl-pipeline-rs
+        run: cargo build --release
+
+      - name: Run Toilet Data Supplement
+        working-directory: services/etl-pipeline-rs
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          cargo run --release -- fill-toilets \
+            --radius 200 \
+            --delay 100 \
+            --workers 20

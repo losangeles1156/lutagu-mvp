@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { STATION_LINES, LINES, StationLineDef, OPERATOR_COLORS, ODPT_LINE_SEGMENT_BY_NAME_EN } from '@/lib/constants/stationLines';
 import { resolveStationWeather } from '@/lib/weather/service';
+import { rustL2Client } from '@/lib/services/RustL2Client';
 
 // API Keys
 const API_KEY_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN; // Permanent (Metro/Toei)
@@ -328,31 +329,15 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing station_id or stationId' }, { status: 400 });
     }
 
-    const rustApiUrl = process.env.L2_STATUS_API_URL;
-    if (rustApiUrl && !refresh) {
-        try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 1500);
-            const rustRes = await fetch(`${rustApiUrl}/l2/status?station_id=${encodeURIComponent(stationId)}`, {
-                signal: controller.signal,
-                headers: {
-                    'accept': 'application/json'
-                }
-            });
-            clearTimeout(timeout);
+    // Unified Rust Client Call
+    const rustData = !refresh ? await rustL2Client.getStatus(stationId) : null;
 
-            if (rustRes.ok) {
-                const rustData = await rustRes.json();
-                if (rustData && !rustData.error) {
-                    return NextResponse.json(rustData, {
-                        headers: {
-                            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
-                        }
-                    });
-                }
+    if (rustData) {
+        return NextResponse.json(rustData, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
             }
-        } catch {
-        }
+        });
     }
 
     try {
@@ -854,7 +839,7 @@ export async function GET(request: Request) {
     }
 }
 
-;(GET as any).__private__ = {
+; (GET as any).__private__ = {
     extractDelayMinutesFromText,
     classifyLineStatusFromText,
     lineStatusDetailRank,

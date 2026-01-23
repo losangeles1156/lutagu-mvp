@@ -1,5 +1,7 @@
 
-import { findRankedRoutes, RouteOption } from './RoutingGraph';
+import { RouteOption } from '../types/RoutingTypes';
+import { rustL4Client } from '../../services/RustL4Client';
+import { rustL2Client } from '../../services/RustL2Client';
 import { getDefaultTopology } from '../search/topologyLoader';
 import { filterRoutesByL2Status } from '../status/L2Filter';
 import { supabaseAdmin } from '../../supabase';
@@ -29,15 +31,7 @@ export class AlgorithmProvider {
         if (cached) return cached;
 
         try {
-            // Note: In backend service, we might need a different way to access Supabase
-            // depending on the setup. Assuming supabaseAdmin fits the service context.
-            const { data } = await supabaseAdmin
-                .from('l2_cache')
-                .select('value')
-                .eq('key', `l2:${id}`)
-                .maybeSingle();
-
-            const val = (data as any)?.value || null;
+            const val = await rustL2Client.getStatus(id);
             if (val) this.l2Cache.set(id, val);
             return val;
         } catch {
@@ -57,11 +51,11 @@ export class AlgorithmProvider {
 
         const cached = this.routeCache.get(cacheKey);
 
-        const baseRoutes = cached || await findRankedRoutes({
-            originStationId: originId,
-            destinationStationId: destinationId,
-            railways: getDefaultTopology() as any, // Using Dynamic Topology
-            locale: locale as any // Cast to satisfy type if needed, or fix import
+        const baseRoutes = cached || await rustL4Client.findRoutes({
+            originId: originId,
+            destinationId: destinationId,
+            locale: locale as any,
+            railways: getDefaultTopology() as any
         });
 
         if (!cached && baseRoutes && baseRoutes.length > 0) {
