@@ -14,9 +14,10 @@ import {
     buildAmenitySuggestion, buildL4DefaultQuestionTemplates, buildFareSuggestion, buildRouteSuggestion,
     buildStatusSuggestion, buildTimetableSuggestion, classifyQuestion, extractOdptStationIds,
     filterFaresForOrigin, filterTimetablesForStation, findDemoScenario, normalizeOdptStationId,
-    type L4DemandState, type L4IntentKind, type L4QuestionTemplate, type L4TemplateCategory,
-    type L4Suggestion, type EnrichedRouteOption, type SupportedLocale,
+    type L4IntentKind, type L4QuestionTemplate, type L4TemplateCategory,
+    type L4Suggestion, type EnrichedRouteOption,
 } from '@/lib/l4/assistantEngine';
+import type { L4DemandState, SupportedLocale } from '@/lib/l4/types/RoutingTypes';
 import type { DemoScenario } from '@/lib/l4/demoScenarios';
 import { RouteResultCard } from '@/components/node/RouteResultCard';
 import { InsightCards } from '@/components/node/InsightCards';

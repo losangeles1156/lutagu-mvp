@@ -4,7 +4,7 @@ import { StationAutocomplete } from '@/components/ui/StationAutocomplete';
 import type { Station } from '@/types/station';
 import { ArrowRightLeft, MapPin, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { SupportedLocale } from '@/lib/l4/assistantEngine';
+import type { SupportedLocale } from '@/lib/l4/types/RoutingTypes';
 
 interface L4FormCardProps {
     originInput: string;

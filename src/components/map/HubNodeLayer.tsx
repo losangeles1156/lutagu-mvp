@@ -30,6 +30,8 @@ interface HubDetails {
     members?: HubMemberInfo[];
 }
 
+type NodePriority = 'hub' | 'transfer' | 'cluster' | 'single';
+
 interface HubNodeLayerProps {
     nodes: NodeDatum[];
     hubDetails: Record<string, HubDetails>;
@@ -48,10 +50,31 @@ function clamp(value: number, min: number, max: number) {
 
 // [PERF] Max nodes to render based on zoom level
 function getMaxNodesForZoom(zoom: number): number {
-    if (zoom >= 16) return 200;  // High zoom: show more detail
-    if (zoom >= 14) return 100;  // Medium zoom
+    if (zoom >= 15) return 200;  // High zoom: show more detail
+    if (zoom >= 13) return 100;  // Medium zoom
     if (zoom >= 12) return 50;   // Low zoom: only major hubs
     return 30;                    // Very low zoom: minimal
+}
+
+function getLabelCapForZoom(zoom: number): number {
+    if (zoom >= 17) return 350;
+    if (zoom >= 15) return 200;
+    if (zoom >= 13) return 80;
+    return 30;
+}
+
+function getClusterCellSizeMeters(zoom: number): number {
+    if (zoom < 13) return 600;
+    if (zoom < 15) return 300;
+    return 150;
+}
+
+function metersToLat(meters: number): number {
+    return meters / 111320;
+}
+
+function metersToLon(meters: number, lat: number): number {
+    return meters / (111320 * Math.cos((lat * Math.PI) / 180));
 }
 
 export function HubNodeLayer({
@@ -112,9 +135,11 @@ export function HubNodeLayer({
 
         // Define Thresholds
         // Zoom < 13: Only Mega Hubs (4+ lines)
-        // Zoom 13-14: Major Hubs (2+ lines)
+        // Zoom 13-14: All Hubs
         // Zoom >= 15: All Stations
         const minMemberCount = clampedZoom < 13 ? 4 : (clampedZoom < 15 ? 2 : 0);
+        const showAllForZoom = showAllNodes || clampedZoom >= 15;
+        const showAllHubsForZoom = clampedZoom >= 13;
 
         // Filter Step 1: Eligibility & Viewport
         const inViewCandidates = nodes.filter(n => {
@@ -136,10 +161,12 @@ export function HubNodeLayer({
             }
 
             // 4. Default Visibility Logic (Hub vs Child)
-            if (showAllNodes) return true;
+            if (showAllForZoom) return true;
 
-            // By default, only show hubs (parent_hub_id == null) or localized stations
-            if (n.parent_hub_id !== null) return false;
+            const isExplicitHub = n.is_hub === true || n.parent_hub_id === null;
+            if (!isExplicitHub) return false;
+
+            if (showAllHubsForZoom) return true;
 
             // 5. LOD Connectivity Check
             const count = hubDetails[n.id]?.member_count || 0;
@@ -178,6 +205,98 @@ export function HubNodeLayer({
     // But that requires refactoring useMemo.
     // Let's assume for this step we cluster what we have, improving overlap visuals.
 
+    const labelSet = useMemo(() => {
+        if (!visibleNodes || visibleNodes.length === 0) return new Set<string>();
+
+        const selectedIds = new Set<string>();
+        if (currentNodeId) selectedIds.add(currentNodeId);
+        if (expandedHubId) selectedIds.add(expandedHubId);
+        if (expandedNodeIds) expandedNodeIds.forEach(id => selectedIds.add(id));
+
+        const cellSizeMeters = getClusterCellSizeMeters(clampedZoom);
+        const cellMap = new Map<string, NodeDatum[]>();
+        const cellSizeLat = metersToLat(cellSizeMeters);
+
+        visibleNodes.forEach(node => {
+            const [lon, lat] = node.location.coordinates;
+            const cellSizeLon = metersToLon(cellSizeMeters, lat);
+            const latKey = Math.floor(lat / cellSizeLat);
+            const lonKey = Math.floor(lon / cellSizeLon);
+            const key = `${latKey}:${lonKey}`;
+            const list = cellMap.get(key) || [];
+            list.push(node);
+            cellMap.set(key, list);
+        });
+
+        const clusterRepSet = new Set<string>();
+        if (clampedZoom >= 13 && clampedZoom < 15) {
+            cellMap.forEach(nodesInCell => {
+                if (nodesInCell.length < 3) return;
+                const sorted = [...nodesInCell].sort((a, b) => {
+                    const aCount = hubDetails[a.id]?.member_count || 0;
+                    const bCount = hubDetails[b.id]?.member_count || 0;
+                    if (aCount !== bCount) return bCount - aCount;
+                    return a.id.localeCompare(b.id);
+                });
+                clusterRepSet.add(sorted[0].id);
+            });
+        }
+
+        const priorityWeight: Record<NodePriority, number> = {
+            hub: 1000,
+            transfer: 700,
+            cluster: 400,
+            single: 100
+        };
+
+        const candidates = visibleNodes.map(node => {
+            const details = hubDetails[node.id];
+            const memberCount = details?.member_count || 0;
+            const transferComplexity = details?.transfer_complexity;
+            const isExplicitHub = node.is_hub === true || node.parent_hub_id === null;
+            const isImportantHub = isExplicitHub && (memberCount >= 4 || node.tier === 'major');
+            const isTransfer = isExplicitHub && (memberCount >= 2 || transferComplexity === 'high' || transferComplexity === 'complex');
+            const isClusterRep = clusterRepSet.has(node.id);
+
+            let priority: NodePriority = 'single';
+            if (isImportantHub) priority = 'hub';
+            else if (isTransfer) priority = 'transfer';
+            else if (isClusterRep) priority = 'cluster';
+
+            const score = priorityWeight[priority] + memberCount * 10 + (selectedIds.has(node.id) ? 5000 : 0);
+            return { node, priority, score };
+        });
+
+        const zoomAllowsPriority = (priority: NodePriority) => {
+            if (clampedZoom < 13) return priority === 'hub';
+            if (clampedZoom < 15) return priority !== 'single';
+            return true;
+        };
+
+        const forced = new Set<string>();
+        candidates.forEach(c => {
+            if (c.priority === 'hub') forced.add(c.node.id);
+        });
+        selectedIds.forEach(id => forced.add(id));
+
+        const cap = getLabelCapForZoom(clampedZoom);
+
+        const sorted = candidates
+            .filter(c => zoomAllowsPriority(c.priority) && !forced.has(c.node.id))
+            .sort((a, b) => {
+                if (a.score !== b.score) return b.score - a.score;
+                return a.node.id.localeCompare(b.node.id);
+            });
+
+        const labelIds = new Set<string>(forced);
+        for (const c of sorted) {
+            if (labelIds.size >= cap) break;
+            labelIds.add(c.node.id);
+        }
+
+        return labelIds;
+    }, [visibleNodes, hubDetails, clampedZoom, currentNodeId, expandedHubId, expandedNodeIds]);
+
     const markers = visibleNodes.map((node) => {
         const details = hubDetails[node.id];
         return (
@@ -189,6 +308,7 @@ export function HubNodeLayer({
                 locale={locale}
                 zoom={clampedZoom}
                 isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
+                showLabelOverride={labelSet.has(node.id)}
             />
         );
     });

@@ -15,19 +15,31 @@ export function EmptyState({ onSend }: EmptyStateProps) {
         {
             icon: Clock,
             text: t('quickQuestions.status.text'),
-            label: t('quickQuestions.status.label')
+            label: t('quickQuestions.status.label'),
+            prompt: t('quickQuestions.status.prompt')
         },
         {
             icon: Accessibility,
             text: t('quickQuestions.accessibility.text'),
-            label: t('quickQuestions.accessibility.label')
+            label: t('quickQuestions.accessibility.label'),
+            prompt: t('quickQuestions.accessibility.prompt')
         },
         {
             icon: Compass,
             text: t('quickQuestions.route.text'),
-            label: t('quickQuestions.route.label')
+            label: t('quickQuestions.route.label'),
+            prompt: t('quickQuestions.route.prompt')
         }
     ];
+
+    const getSendText = (q: typeof quickQuestions[0]) => {
+        // If translation is missing, next-intl might return the key path.
+        // We fallback to text if prompt looks like a key or is essentially empty
+        if (!q.prompt || q.prompt.includes('quickQuestions.')) {
+            return q.text;
+        }
+        return q.prompt;
+    };
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">
@@ -42,7 +54,7 @@ export function EmptyState({ onSend }: EmptyStateProps) {
                 {quickQuestions.map((q, idx) => (
                     <button
                         key={idx}
-                        onClick={() => onSend(q.text)}
+                        onClick={() => onSend(getSendText(q))}
                         className="w-full flex items-center gap-3 p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200 rounded-xl transition-all group active:scale-[0.98] text-left"
                     >
                         <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">

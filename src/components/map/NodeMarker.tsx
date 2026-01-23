@@ -45,6 +45,7 @@ interface NodeMarkerProps {
     locale?: string;
     zoom?: number;
     isSelected?: boolean;
+    showLabelOverride?: boolean;
     onClick?: (node: any) => void;
 }
 
@@ -69,7 +70,7 @@ const AIRPORT_TERMINAL_IDS = [
     'odpt.Station:Keisei.NaritaSkyAccess.NaritaAirportTerminal2and3'
 ];
 
-function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSelected = false, onClick }: NodeMarkerProps) {
+function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSelected = false, showLabelOverride, onClick }: NodeMarkerProps) {
     const setCurrentNode = useNodeStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
 
@@ -124,14 +125,26 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     // [LOD] Progressive Label Disclosure - 漸進式標籤顯示策略
     // Priority hierarchy (highest to lowest):
     // 1. ALWAYS: Selected nodes (immediate user focus)
-    // 2. Zoom ≥ 12: Hub stations with members (樞紐站優先 - major transfer points)
-    // 3. Zoom ≥ 14: Major/Explicit hubs (主要車站 - important landmarks)
-    // 4. Zoom ≥ 16: All stations (所有車站 - full detail view)
-    // This ensures Hub prominence at city-level zoom while reducing label clutter
-    const showLabel = isSelected ||                  // Priority 1: User selection
-        (hasMembers && zoom >= 12) ||                // Priority 2: Hubs at city view
-        (isMajor && zoom >= 14) ||                   // Priority 3: Major stations
-        (zoom >= 16);                                // Priority 4: All stations
+    // 2. ALWAYS: Hub stations (樞紐站永遠顯示站名 - critical for navigation)
+    //    - Includes stations with members (hasMembers) OR explicit hubs (isExplicitHub)
+    // 3. Zoom ≥ 13: Major stations (主要車站 - important landmarks)
+    // 4. Zoom ≥ 15: All stations (所有車站 - full detail view)
+    //
+    // CRITICAL FIX: Hub stations should ALWAYS show their station names regardless of zoom level,
+    // as they are the primary navigation landmarks. This ensures users can always identify
+    // major transfer hubs like Tokyo (東京), Ueno (上野), Shibuya (渋谷), Shinjuku (新宿), etc.
+    //
+    // MUST be memoized since it depends on zoom (which changes frequently)
+    const showLabel = useMemo(() => {
+        if (showLabelOverride !== undefined) {
+            return showLabelOverride || isSelected;
+        }
+        return isSelected ||
+            hasMembers ||
+            isExplicitHub ||
+            (isMajor && zoom >= 13) ||
+            (zoom >= 15);
+    }, [showLabelOverride, isSelected, hasMembers, isExplicitHub, isMajor, zoom]);
 
     // Transfer type badge styling (MUST be before early return)
     const transferBadge = useMemo(() => {
@@ -155,9 +168,10 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     }, [onClick, node, setCurrentNode, setBottomSheetOpen]);
 
     // [PERF] Generate cache key for icon (MUST be before early return)
+    // CRITICAL: Must include zoom in cache key since icon size and label visibility depend on zoom
     const iconCacheKey = useMemo(() => {
-        return `${node.id}:${isSelected}:${isMajor}:${hasMembers}:${memberCount}:${baseColor}:${showLabel}:${label}`;
-    }, [node.id, isSelected, isMajor, hasMembers, memberCount, baseColor, showLabel, label]);
+        return `${node.id}:${isSelected}:${isMajor}:${hasMembers}:${memberCount}:${baseColor}:${showLabel}:${label}:${zoom}`;
+    }, [node.id, isSelected, isMajor, hasMembers, memberCount, baseColor, showLabel, label, zoom]);
 
     // [PERF] Memoize entire icon creation with caching (MUST be before early return)
     const leafletIcon = useMemo(() => {

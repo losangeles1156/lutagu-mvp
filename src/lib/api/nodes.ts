@@ -29,6 +29,7 @@ export interface NodeDatum {
     is_hub: boolean;
     parent_hub_id: string | null;
     zone: string;
+    tier?: 'major' | 'minor';
     // Version control fields
     updated_at?: number;  // Unix timestamp (milliseconds) for version control
     version?: number;     // Incremental version number

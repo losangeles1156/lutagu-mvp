@@ -3,7 +3,8 @@
 import { useMemo } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { L4QuestionTemplate, L4TemplateCategory, SupportedLocale } from '@/lib/l4/assistantEngine';
+import type { L4QuestionTemplate, L4TemplateCategory } from '@/lib/l4/assistantEngine';
+import type { SupportedLocale } from '@/lib/l4/types/RoutingTypes';
 
 interface L4TemplateSelectorProps {
     templates: L4QuestionTemplate[];

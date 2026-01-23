@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { EnrichedRouteOption, SupportedLocale, RouteStep } from '@/lib/l4/assistantEngine';
+import type { EnrichedRouteOption } from '@/lib/l4/assistantEngine';
+import type { SupportedLocale, RouteStep } from '@/lib/l4/types/RoutingTypes';
 import { ChevronDown, ChevronUp, Clock, CreditCard, Repeat, Navigation2, Sparkles, Zap, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -234,7 +235,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                         {option.tpi && (
                             <div className="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 flex items-center gap-3">
                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${option.tpi.score <= 30 ? 'bg-emerald-500 text-white' :
-                                        option.tpi.score <= 60 ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
+                                    option.tpi.score <= 60 ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
                                     } shadow-sm`}>
                                     <Zap size={14} />
                                 </div>
@@ -253,7 +254,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                         {option.cdr && (
                             <div className="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100/50 flex items-center gap-3">
                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${option.cdr.riskLevel === 'low' ? 'bg-emerald-500 text-white' :
-                                        option.cdr.riskLevel === 'medium' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
+                                    option.cdr.riskLevel === 'medium' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
                                     } shadow-sm`}>
                                     {option.cdr.riskLevel === 'low' ? <ShieldCheck size={14} /> : <AlertTriangle size={14} />}
                                 </div>

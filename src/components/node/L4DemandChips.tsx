@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { SupportedLocale } from '@/lib/l4/assistantEngine';
+import type { SupportedLocale } from '@/lib/l4/types/RoutingTypes';
 import type { L4DemandState } from '@/lib/l4/types/RoutingTypes';
 
 type SimplifiedDemand = 'optimalRoute' | 'saveMoney' | 'accessibility' | 'expertTips' | 'avoidCrowds' | 'fastTrack';

@@ -1,4 +1,5 @@
-import type { L4Suggestion, SupportedLocale } from '@/lib/l4/assistantEngine';
+import type { L4Suggestion } from '@/lib/l4/assistantEngine';
+import type { SupportedLocale } from '@/lib/l4/types/RoutingTypes';
 
 export function InsightCards({ suggestion, locale, visible }: { suggestion: L4Suggestion; locale: SupportedLocale; visible: boolean }) {
     if (!visible) return null;

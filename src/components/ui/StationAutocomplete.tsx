@@ -5,7 +5,7 @@ import { logger } from '@/lib/utils/logger';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Loader2, MapPin } from 'lucide-react';
 import type { Station } from '@/types/station';
-import type { SupportedLocale } from '@/lib/l4/assistantEngine';
+import type { SupportedLocale } from '@/lib/l4/types/RoutingTypes';
 
 interface StationAutocompleteProps {
     value: string;
