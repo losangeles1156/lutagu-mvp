@@ -846,10 +846,7 @@ export const TOOL_HANDLERS = {
     },
 
     // Legacy L4 tool names (kept for backwards compatibility)
-    get_timetable_l4: async (params: { stationId: string; operator?: string }, context: any) => {
-        const tool = new TimetableTool();
-        return await tool.execute({ station: params.stationId, operator: params.operator }, context);
-    },
+
 
     get_fare_l4: async (params: { fromStation: string; toStation: string }, context: any) => {
         const tool = new FareTool();
