@@ -19,14 +19,17 @@ export class RerankService {
      * @returns Array of RerankResult, sorted by relevance score (descending).
      */
     static async rerank(query: string, documents: string[], topK?: number): Promise<RerankResult[]> {
-        'use cache';
-        const { cacheLife, cacheTag } = await import('next/cache');
-        cacheLife('weeks');
-        cacheTag('rerank-v1');
-
         if (!documents || documents.length === 0) return [];
 
-        return this.performRerank(query, documents, topK);
+        const cacheKey = `rerank:${this.model}:${this.hashString(query)}:${this.hashString(documents.join('|'))}`;
+
+        return getCached(
+            cacheKey,
+            async () => {
+                return this.performRerank(query, documents, topK);
+            },
+            60 * 60 * 24 * 7 // Cache for 7 days
+        );
     }
 
     private static async performRerank(query: string, documents: string[], topK?: number): Promise<RerankResult[]> {

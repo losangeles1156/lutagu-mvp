@@ -6,8 +6,6 @@ const isProd = process.env.NODE_ENV === 'production';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // 🚀 Enable Next.js Cache Components (PPR + 'use cache')
-  cacheComponents: true,
   // 🚀 Performance: Enable tree-shaking for Lucide icons
   modularizeImports: {
     'lucide-react': {
