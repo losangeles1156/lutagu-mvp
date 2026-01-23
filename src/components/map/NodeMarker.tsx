@@ -120,7 +120,18 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     }, [isSelected, isAirport, primaryOperator]);
 
     const label = useMemo(() => getLocaleString(node.name, locale) || node.id, [node.name, node.id, locale]);
-    const showLabel = isSelected || hasMembers || isMajor || (zoom >= 15);
+
+    // [LOD] Progressive Label Disclosure - 漸進式標籤顯示策略
+    // Priority hierarchy (highest to lowest):
+    // 1. ALWAYS: Selected nodes (immediate user focus)
+    // 2. Zoom ≥ 12: Hub stations with members (樞紐站優先 - major transfer points)
+    // 3. Zoom ≥ 14: Major/Explicit hubs (主要車站 - important landmarks)
+    // 4. Zoom ≥ 16: All stations (所有車站 - full detail view)
+    // This ensures Hub prominence at city-level zoom while reducing label clutter
+    const showLabel = isSelected ||                  // Priority 1: User selection
+        (hasMembers && zoom >= 12) ||                // Priority 2: Hubs at city view
+        (isMajor && zoom >= 14) ||                   // Priority 3: Major stations
+        (zoom >= 16);                                // Priority 4: All stations
 
     // Transfer type badge styling (MUST be before early return)
     const transferBadge = useMemo(() => {
@@ -161,8 +172,21 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         const shapeClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[18px]' : 'rounded-full'));
         const ringRadiusClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[22px]' : 'rounded-full'));
 
-        const markerSize = isAirport || isMajor || hasMembers ? 56 : 48;
-        const iconSize = isAirport ? 26 : (isMajor ? 24 : 22);
+        // [LOD OPTIMIZATION] Dynamic sizing based on zoom
+        const isZoomedOut = zoom < 14;
+
+        // Enhanced Visual Hierarchy: Hubs become LARGER at low zoom to stand out
+        // Minor nodes shrink significantly to reduce clutter
+        const baseSize = isAirport || isMajor || hasMembers ? 56 : 48;
+        const markerSize = (isAirport || isMajor || hasMembers)
+            ? (isZoomedOut ? 64 : 56)          // Hubs ENLARGED at low zoom for prominence
+            : (isZoomedOut ? 28 : 48);         // Non-hubs shrink MORE at low zoom
+
+        // Icon sizes scale with marker size for consistency
+        const baseIconSize = isAirport ? 26 : (isMajor ? 24 : 22);
+        const iconSize = (isAirport || isMajor || hasMembers)
+            ? (isZoomedOut ? 28 : baseIconSize)  // Larger icon for hubs at low zoom
+            : (isZoomedOut ? 14 : baseIconSize); // Smaller icon for minor nodes at low zoom
 
         // [PERF] Simplified markup for mobile - removed heavy animations
         const iconMarkup = renderToStaticMarkup(

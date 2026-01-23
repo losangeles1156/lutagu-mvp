@@ -1,11 +1,10 @@
 
 import {
-    findRankedRoutes,
-    type RouteOption,
-    type SupportedLocale,
-    filterRoutesByL2Status,
-    getDefaultTopology
+    getDefaultTopology,
+    type SupportedLocale
 } from '../assistantEngine';
+import { RouteOption } from '@/lib/l4/types/RoutingTypes';
+import { filterRoutesByL2Status } from '../utils/routeFiltering';
 import { DataNormalizer } from '../utils/Normalization';
 import { getCache, LAYER_CACHE_CONFIG } from '../../cache/cacheService';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -115,15 +114,10 @@ export class AlgorithmProvider {
                 rustRoutes = this.mapRustRoutesToOptions(rustResp.routes, params.locale);
             }
         } catch (e) {
-            console.warn('[AlgorithmProvider] Rust route fetch failed, falling back to local:', e);
+            console.warn('[AlgorithmProvider] Rust route fetch failed:', e);
         }
 
-        const baseRoutes = cached || rustRoutes || findRankedRoutes({
-            originStationId: originId,
-            destinationStationId: destId,
-            railways: getDefaultTopology() as any,
-            locale: params.locale
-        });
+        const baseRoutes = cached || rustRoutes || [];
 
         if (!cached && baseRoutes && baseRoutes.length > 0) {
             this.routeCache.set(cacheKey, baseRoutes);

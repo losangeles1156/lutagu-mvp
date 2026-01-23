@@ -104,65 +104,70 @@ export function HubNodeLayer({
     // 2. is_active status - filter out inactive nodes
     // 3. parent_hub_id - only show hubs (parent_hub_id IS NULL)
     // 4. Zoom density control - limit nodes at low zoom
+    // [OPTIMIZED] LOD Logic: Filter based on Hub Importance (member_count) vs Zoom
     const visibleNodes = useMemo(() => {
         if (!nodes || nodes.length === 0) return [];
 
         const expandedSet = expandedNodeIds ? new Set(expandedNodeIds) : null;
 
-        const eligibleNodes = nodes.filter(n => {
-            // Skip if is_active = false (from node_hierarchy)
-            const isActive = (n as any).is_active ??
-                (n as any).hierarchy?.is_active ??
-                (n as any).node_hierarchy?.is_active ??
-                true;
+        // Define Thresholds
+        // Zoom < 13: Only Mega Hubs (4+ lines)
+        // Zoom 13-14: Major Hubs (2+ lines)
+        // Zoom >= 15: All Stations
+        const minMemberCount = clampedZoom < 13 ? 4 : (clampedZoom < 15 ? 2 : 0);
+
+        // Filter Step 1: Eligibility & Viewport
+        const inViewCandidates = nodes.filter(n => {
+            // 1. Must be active
+            const isActive = (n as any).is_active ?? (n as any).hierarchy?.is_active ?? true;
             if (isActive === false) return false;
 
+            // 2. Always show nodes related to current selection
+            if (n.id === currentNodeId) return true;
+            if (n.parent_hub_id === expandedHubId) return true; // Children of expanded
+            if (n.id === expandedHubId) return true;            // The expanded hub itself
+            if (expandedSet && expandedSet.has(n.id)) return true;
+
+            // 3. Viewport Check
+            const [lon, lat] = n.location.coordinates;
+            if (lat < viewportBounds.swLat || lat > viewportBounds.neLat ||
+                lon < viewportBounds.swLng || lon > viewportBounds.neLng) {
+                return false;
+            }
+
+            // 4. Default Visibility Logic (Hub vs Child)
             if (showAllNodes) return true;
 
-            if (n.parent_hub_id === null) return true;
-            if (expandedHubId && n.parent_hub_id === expandedHubId) return true;
-            if (expandedSet && expandedSet.has(n.id)) return true;
-            return false;
+            // By default, only show hubs (parent_hub_id == null) or localized stations
+            if (n.parent_hub_id !== null) return false;
+
+            // 5. LOD Connectivity Check
+            const count = hubDetails[n.id]?.member_count || 0;
+            return count >= minMemberCount;
         });
 
-        const inViewNodes = eligibleNodes.filter(n => {
-            const [lon, lat] = n.location.coordinates;
-            return lat >= viewportBounds.swLat &&
-                lat <= viewportBounds.neLat &&
-                lon >= viewportBounds.swLng &&
-                lon <= viewportBounds.neLng;
+        // Step 2: Sorting (Priority to Connectivity)
+        // If expanded, keep expanded group at top/together logic if needed, 
+        // but for now, simple sort is enough as long as we don't slice out the selected one.
+
+        inViewCandidates.sort((a, b) => {
+            // Always prioritize selected/expanded
+            const aIsSelected = a.id === expandedHubId || a.id === currentNodeId;
+            const bIsSelected = b.id === expandedHubId || b.id === currentNodeId;
+            if (aIsSelected && !bIsSelected) return -1;
+            if (!aIsSelected && bIsSelected) return 1;
+
+            const aCount = hubDetails[a.id]?.member_count || 0;
+            const bCount = hubDetails[b.id]?.member_count || 0;
+            return bCount - aCount;
         });
 
-        if (!expandedHubId) {
-            const prioritized = [...inViewNodes].sort((a, b) => {
-                const aCount = hubDetails[a.id]?.member_count || 0;
-                const bCount = hubDetails[b.id]?.member_count || 0;
-                return bCount - aCount;
-            });
-            return prioritized.slice(0, maxNodes);
-        }
+        // Step 3: Hard Cap (Safety Valve)
+        // Allow more nodes if we are zoomed in
+        const safetyLimit = clampedZoom >= 15 ? 300 : (clampedZoom >= 13 ? 100 : 40);
 
-        const expandedGroup = inViewNodes
-            .filter(n => n.id === expandedHubId || n.parent_hub_id === expandedHubId || (expandedSet && expandedSet.has(n.id)))
-            .sort((a, b) => {
-                if (a.id === expandedHubId && b.id !== expandedHubId) return -1;
-                if (b.id === expandedHubId && a.id !== expandedHubId) return 1;
-                const aName = String((a as any).name?.[locale] || (a as any).name?.['zh-TW'] || (a as any).name?.en || a.id);
-                const bName = String((b as any).name?.[locale] || (b as any).name?.['zh-TW'] || (b as any).name?.en || b.id);
-                return aName.localeCompare(bName);
-            });
-
-        const otherHubs = inViewNodes
-            .filter(n => n.parent_hub_id === null && n.id !== expandedHubId)
-            .sort((a, b) => {
-                const aCount = hubDetails[a.id]?.member_count || 0;
-                const bCount = hubDetails[b.id]?.member_count || 0;
-                return bCount - aCount;
-            });
-
-        if (expandedGroup.length >= maxNodes) return expandedGroup.slice(0, maxNodes);
-        return [...expandedGroup, ...otherHubs.slice(0, Math.max(0, maxNodes - expandedGroup.length))];
-    }, [nodes, showAllNodes, viewportBounds, hubDetails, maxNodes, expandedHubId, expandedNodeIds, locale]);
+        return inViewCandidates.slice(0, safetyLimit);
+    }, [nodes, showAllNodes, viewportBounds, hubDetails, clampedZoom, expandedHubId, expandedNodeIds, currentNodeId]);
 
     // [OPTIMIZATION] If clustering is enabled, we still use visibleNodes but we might want to relax the 'maxNodes' limit
     // However, existing logic slices 'visibleNodes' at the end of useMemo.

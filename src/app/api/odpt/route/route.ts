@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-    buildRouteOptionFromPath,
-    findRankedRoutes,
     findStationIdsByName,
     normalizeOdptStationId,
-    filterRoutesByL2Status,
 } from '@/lib/l4/assistantEngine';
+import { filterRoutesByL2Status } from '@/lib/l4/utils/routeFiltering';
 import {
     type RailwayTopology,
     type RouteStep,
@@ -135,41 +133,21 @@ export async function GET(req: Request) {
 
     try {
         const railways: RailwayTopology[] = CORE_TOPOLOGY as unknown as RailwayTopology[];
-        const rustApiUrl = process.env.L4_ROUTING_API_URL;
         const maxHops = 35;
 
-        // Use RustL4Client if API URL is set, otherwise fall back to legacy algorithm
-        const rustRouteOptions = process.env.L4_ROUTING_API_URL
-            ? await rustL4Client.findRoutes({
-                originId: fromIds[0], // Rust client typically takes single ID, or we loop. Legacy 'fromIds' is array.
-                destinationId: toIds[0],
-                // Note: Rust service supports comma-separated in client if we pass raw params, 
-                // but client takes single strings in signature above. 
-                // Actually the RustL4Client we generated takes `originId: string`.
-                // However, the backend Rust service supports multiple. 
-                // For simplicity, we'll iterate or take the first valid ones as primary candidate.
-                // Or better, let's update RustL4Client to match backend capability or just use primary.
-                // Assuming primary ID is sufficient for new routing engine which handles aliases internally.
-                maxHops,
-                locale,
-                railways
-            })
-            : [];
+        // Use RustL4Client
+        const rustRouteOptions = await rustL4Client.findRoutes({
+            originId: fromIds[0],
+            destinationId: toIds[0],
+            maxHops,
+            locale,
+            railways
+        });
 
-        const routeOptionsBase = rustRouteOptions.length > 0
-            ? rustRouteOptions
-            : findRankedRoutes({
-                originStationId: fromIds,
-                destinationStationId: toIds,
-                railways,
-                maxHops,
-                locale,
-            });
-
-        let routeOptions = routeOptionsBase;
+        let routeOptions = rustRouteOptions;
         let removedDueToL2 = 0;
 
-        if (routeOptionsBase.length > 0) {
+        if (routeOptions.length > 0) {
             let l2Status: any = null;
 
             try {
@@ -201,14 +179,14 @@ export async function GET(req: Request) {
             }
 
             if (l2Status) {
-                const filtered = filterRoutesByL2Status({ routes: routeOptionsBase, l2Status });
-                routeOptions = filtered.routes as unknown as typeof routeOptionsBase;
+                const filtered = filterRoutesByL2Status({ routes: routeOptions, l2Status });
+                routeOptions = filtered.routes;
                 removedDueToL2 = filtered.removed.length;
             }
         }
 
         if (routeOptions.length === 0) {
-            const isDisruption = routeOptionsBase.length > 0 && removedDueToL2 > 0;
+            const isDisruption = rustRouteOptions.length > 0 && removedDueToL2 > 0;
             const errorCode = isDisruption ? 'no_usable_due_to_disruption' : 'no_direct_route';
             const cacheControl = isDisruption
                 ? 'public, s-maxage=30, stale-while-revalidate=30'
