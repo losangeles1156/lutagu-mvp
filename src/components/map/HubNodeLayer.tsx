@@ -255,7 +255,7 @@ export function HubNodeLayer({
             const transferComplexity = details?.transfer_complexity;
             const isExplicitHub = node.is_hub === true || node.parent_hub_id === null;
             const isImportantHub = isExplicitHub && (memberCount >= 4 || node.tier === 'major');
-            const isTransfer = isExplicitHub && (memberCount >= 2 || transferComplexity === 'high' || transferComplexity === 'complex');
+            const isTransfer = isExplicitHub && (memberCount >= 2 || transferComplexity === 'high' || transferComplexity === 'complex' || (clampedZoom >= 13 && clampedZoom < 15));
             const isClusterRep = clusterRepSet.has(node.id);
 
             let priority: NodePriority = 'single';

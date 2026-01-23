@@ -70,7 +70,7 @@ export const CROWD_DISPATCHER_SKILL = {
 
 export const LUGGAGE_LOGISTICS_SKILL = {
     name: 'luggage-logistics',
-    keywords: ['locker', 'coin locker', 'baggage', 'luggage', 'heavy', 'store', 'keep', 'yamato', 'sagawa', 'hands-free', '寄物', '置物櫃', '行李', '重', '寄放', '宅急便'],
+    keywords: ['locker', 'coin locker', 'baggage', 'luggage', 'heavy', 'store', 'keep', 'yamato', 'sagawa', 'hands-free', '寄物', '置物櫃', '行李', '寄放', '宅急便'],
     content: `
 # Luggage Logistics Skill (Deep Research)
 > **MIGRATED**: Content has been moved to \`.agent/skills/strategies/deep-research/luggage-logistics.md\`.

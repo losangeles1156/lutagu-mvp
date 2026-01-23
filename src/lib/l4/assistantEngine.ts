@@ -2,6 +2,7 @@ import { DEMO_SCENARIOS, DemoScenario } from './demoScenarios';
 import CORE_TOPOLOGY from './generated/coreTopology.json';
 import PRIVATE_RAILWAYS_TOPOLOGY from './generated/extraTopology.json';
 import { RouteOption, RouteStep, RailwayTopology, L4DemandState, L4DataSource, RouteStepKind } from '@/lib/l4/types/RoutingTypes';
+export type { RouteOption, RouteStep, RailwayTopology, L4DemandState, L4DataSource, RouteStepKind } from '@/lib/l4/types/RoutingTypes';
 import { SEED_NODES } from '../nodes/seedNodes';
 import { parsePointWKT, getDistanceKm } from '../utils/geoUtils';
 import { RAPID_SERVICE_PATTERNS, RAPID_STATION_ALIASES } from './data/rapidServicePatterns';
@@ -1257,6 +1258,62 @@ function getAdjacency(railways: RailwayTopology[]) {
     return adj;
 }
 
+class MinHeap<T> {
+    private readonly items: Array<{ value: T; priority: number }> = [];
+
+    get size() {
+        return this.items.length;
+    }
+
+    push(value: T, priority: number) {
+        const node = { value, priority };
+        this.items.push(node);
+        this.bubbleUp(this.items.length - 1);
+    }
+
+    pop(): { value: T; priority: number } | undefined {
+        if (this.items.length === 0) return undefined;
+        const top = this.items[0];
+        const last = this.items.pop()!;
+        if (this.items.length > 0) {
+            this.items[0] = last;
+            this.bubbleDown(0);
+        }
+        return top;
+    }
+
+    private bubbleUp(index: number) {
+        while (index > 0) {
+            const parent = Math.floor((index - 1) / 2);
+            if (this.items[parent].priority <= this.items[index].priority) break;
+            const tmp = this.items[parent];
+            this.items[parent] = this.items[index];
+            this.items[index] = tmp;
+            index = parent;
+        }
+    }
+
+    private bubbleDown(index: number) {
+        const len = this.items.length;
+        while (true) {
+            const left = index * 2 + 1;
+            const right = left + 1;
+            let smallest = index;
+            if (left < len && this.items[left].priority < this.items[smallest].priority) {
+                smallest = left;
+            }
+            if (right < len && this.items[right].priority < this.items[smallest].priority) {
+                smallest = right;
+            }
+            if (smallest === index) break;
+            const tmp = this.items[smallest];
+            this.items[smallest] = this.items[index];
+            this.items[index] = tmp;
+            index = smallest;
+        }
+    }
+}
+
 
 
 import { TRANSFER_DATABASE, getTransferDistance, isOutOfStationTransfer, getHubBufferMinutes } from './data/transferDatabase';
@@ -1333,6 +1390,533 @@ function estimateFareByDistance(operatorKey: string, hops: number): number {
         return 380;
     }
     return 200;
+}
+
+function edgeTimeMinutes(railwayId: string): number {
+    if (railwayId === 'transfer') return 5;
+    const isRapid = railwayId.includes('Rapid') || railwayId.includes('Express') || railwayId.includes('LimitedExpress') || railwayId.includes('Shinkansen');
+    const isCoreMetro = railwayId.includes('Ginza') || railwayId.includes('Marunouchi') || railwayId.includes('Hibiya');
+
+    if (railwayId.includes('TokyoMetro') || railwayId.includes('Toei')) {
+        if (isCoreMetro) return 1.5;
+        return isRapid ? 2.5 : 1.8;
+    }
+    if (railwayId.includes('JR-East')) {
+        return isRapid ? 3.5 : 2.5;
+    }
+    return 2.5;
+}
+
+function buildLabelHelpers(params: { railways: RailwayTopology[]; locale: SupportedLocale }) {
+    const { railways, locale } = params;
+    const stationTitleMap = new Map<string, string>();
+    const railwayTitleMap = new Map<string, string>();
+
+    railways.forEach(r => {
+        const rTitle =
+            locale === 'ja'
+                ? r.title?.ja
+                : locale === 'en'
+                    ? r.title?.en
+                    : (r.title?.['zh-TW'] || r.title?.ja || r.title?.en);
+        if (rTitle) railwayTitleMap.set(normalizeOdptStationId(r.railwayId), rTitle);
+
+        r.stationOrder.forEach(s => {
+            const sTitle =
+                locale === 'ja'
+                    ? s.title?.ja
+                    : locale === 'en'
+                        ? s.title?.en
+                        : (s.title?.['zh-TW'] || s.title?.ja || s.title?.en);
+            if (sTitle) stationTitleMap.set(normalizeOdptStationId(s.station), sTitle);
+        });
+    });
+
+    const stationLabel = (stationId: string) => {
+        const normalized = normalizeOdptStationId(stationId);
+        if (stationTitleMap.has(normalized)) return stationTitleMap.get(normalized)!;
+        const raw = normalized.split(':').pop() || normalized;
+        const parts = raw.split('.');
+        return parts[parts.length - 1] || raw;
+    };
+
+    const railwayLabel = (railwayId: string) => {
+        const normalized = normalizeOdptStationId(railwayId);
+        if (railwayTitleMap.has(normalized)) return railwayTitleMap.get(normalized)!;
+        const raw = String(railwayId || '').split(':').pop() || String(railwayId || '');
+        const parts = raw.split('.');
+        return parts[parts.length - 1] || raw;
+    };
+
+    return { stationLabel, railwayLabel };
+}
+
+function encodeStateKey(station: string, lastRailway: string | null, lastOperator: string | null): string {
+    return `${station}\u0001${lastRailway || ''}\u0001${lastOperator || ''}`;
+}
+
+function decodeStateKey(key: string): { station: string; lastRailway: string | null; lastOperator: string | null } {
+    const [station, lastRailway, lastOperator] = key.split('\u0001');
+    return {
+        station,
+        lastRailway: lastRailway ? lastRailway : null,
+        lastOperator: lastOperator ? lastOperator : null,
+    };
+}
+
+function buildRouteOptionFromPath(params: {
+    path: string[];
+    edgeRailways: string[];
+    railways: RailwayTopology[];
+    locale: SupportedLocale;
+    label: string;
+    costs: RouteCosts;
+}): RouteOption {
+    const { path, edgeRailways, railways, locale, label, costs } = params;
+    const t = (zh: string, ja: string, en: string) => (locale === 'ja' ? ja : locale === 'en' ? en : zh);
+    const { stationLabel, railwayLabel } = buildLabelHelpers({ railways, locale });
+
+    const origin = path[0];
+    const dest = path[path.length - 1];
+    const steps: RouteStep[] = [
+        {
+            kind: 'origin',
+            text: `${t('出發', '出発', 'Origin')}: ${stationLabel(origin)}`,
+            icon: '🏠',
+        },
+    ];
+
+    let currentRailway = edgeRailways.length > 0 ? edgeRailways[0] : '';
+    let segmentStart = origin;
+
+    for (let i = 0; i < edgeRailways.length; i++) {
+        const rw = edgeRailways[i];
+        if (rw !== currentRailway) {
+            const segmentEnd = path[i];
+            if (currentRailway === 'transfer') {
+                steps.push({ kind: 'transfer', text: `${t('站內轉乘', '乗換', 'Transfer')}`, icon: '🚶' });
+            } else {
+                steps.push({
+                    kind: 'train',
+                    text: `${t('乘坐', '乗車', 'Take')} ${railwayLabel(currentRailway)}: ${stationLabel(segmentStart)} → ${stationLabel(segmentEnd)}`,
+                    railwayId: currentRailway,
+                    icon: '🚃',
+                });
+            }
+            currentRailway = rw;
+            segmentStart = segmentEnd;
+        }
+    }
+
+    if (currentRailway !== '') {
+        const lastEnd = dest;
+        if (currentRailway === 'transfer') {
+            steps.push({ kind: 'transfer', text: `${t('站內轉乘', '乗換', 'Transfer')}`, icon: '🚶' });
+        } else {
+            steps.push({
+                kind: 'train',
+                text: `${t('乘坐', '乗車', 'Take')} ${railwayLabel(currentRailway)}: ${stationLabel(segmentStart)} → ${stationLabel(lastEnd)}`,
+                railwayId: currentRailway,
+                icon: '🚃',
+            });
+        }
+    }
+
+    steps.push({ kind: 'destination', text: `${t('到達', '到着', 'Destination')}: ${stationLabel(dest)}`, icon: '📍' });
+
+    const uniqueRailways = Array.from(new Set(edgeRailways.filter(rw => rw !== 'transfer')));
+    const transfers = edgeRailways.filter(rw => rw === 'transfer').length;
+
+    const hopsByOperator: Record<string, number> = {};
+    for (const rw of edgeRailways) {
+        if (rw === 'transfer') continue;
+        const op = operatorKeyFromRailwayId(rw);
+        hopsByOperator[op] = (hopsByOperator[op] || 0) + 1;
+    }
+
+    let totalFare = 0;
+    for (const [op, hopCount] of Object.entries(hopsByOperator)) {
+        totalFare += estimateFareByDistance(op, hopCount);
+    }
+
+    return {
+        label,
+        steps,
+        sources: [{ type: 'odpt:Railway', verified: true }],
+        railways: uniqueRailways,
+        transfers,
+        duration: Math.max(1, Math.round(costs.time)),
+        fare: { ic: Math.max(0, Math.round(totalFare)), ticket: Math.max(0, Math.round(totalFare + 10)) },
+    };
+}
+
+function dijkstraBestPath(params: {
+    origins: string[];
+    dests: string[];
+    adj: Map<string, Array<{ to: string; railwayId: string }>>;
+    maxHops: number;
+    score: (c: RouteCosts) => number;
+}): { path: string[]; edgeRailways: string[]; costs: RouteCosts } | null {
+    const { origins, dests, adj, maxHops, score } = params;
+
+    const dist = new Map<string, number>();
+    const costsByKey = new Map<string, RouteCosts>();
+    const prev = new Map<string, { prevKey: string; fromStation: string; viaRailwayId: string }>();
+    const heap = new MinHeap<{ key: string }>();
+
+    const destSet = new Set(dests);
+
+    const BASE_WAIT_TIME = 2.0;
+
+    for (const origin of origins) {
+        const startKey = encodeStateKey(origin, null, null);
+        dist.set(startKey, 0);
+        costsByKey.set(startKey, {
+            time: 0,
+            fare: 0,
+            transfers: 0,
+            hops: 0,
+            railwaySwitches: 0,
+            operatorSwitches: 0,
+            transferDistance: 0,
+            crowding: 20
+        });
+        heap.push({ key: startKey }, 0);
+    }
+
+    while (heap.size > 0) {
+        const current = heap.pop()!;
+        const currentKey = current.value.key;
+        const currentCosts = costsByKey.get(currentKey);
+        if (!currentCosts) continue;
+        const currentDist = dist.get(currentKey);
+        if (typeof currentDist === 'number' && current.priority > currentDist) continue;
+
+        const decoded = decodeStateKey(currentKey);
+        if (destSet.has(decoded.station)) {
+            const path: string[] = [decoded.station];
+            const edgeRailways: string[] = [];
+            let k = currentKey;
+            while (costsByKey.get(k)?.hops! > 0) {
+                const p = prev.get(k);
+                if (!p) break;
+                edgeRailways.unshift(p.viaRailwayId);
+                path.unshift(p.fromStation);
+                k = p.prevKey;
+            }
+            return { path, edgeRailways, costs: currentCosts };
+        }
+
+        if (currentCosts.hops >= maxHops) continue;
+        const edges = adj.get(decoded.station) || [];
+
+        for (const e of edges) {
+            const nextStation = e.to;
+            const viaRailwayId = e.railwayId;
+
+            const nextCosts: RouteCosts = {
+                time: currentCosts.time,
+                fare: currentCosts.fare,
+                transfers: currentCosts.transfers,
+                hops: currentCosts.hops + 1,
+                railwaySwitches: currentCosts.railwaySwitches,
+                operatorSwitches: currentCosts.operatorSwitches,
+                transferDistance: currentCosts.transferDistance,
+                crowding: currentCosts.crowding,
+            };
+
+            if (viaRailwayId === 'transfer') {
+                const decoded = decodeStateKey(currentKey);
+                const fromStationId = decoded.station;
+                const toStationId = nextStation;
+                const fromOp = inferOdptOperatorFromStationId(fromStationId);
+                const toOp = inferOdptOperatorFromStationId(toStationId);
+
+                const stationIdParts = nextStation.split(':');
+                const lineAndStation = stationIdParts[1] || '';
+                const lineParts = lineAndStation.split('.');
+                const operator = lineParts[0];
+                const line = lineParts[1];
+                const toLineId = `odpt.Railway:${operator}.${line}`;
+
+                const distance = getTransferDistance(fromStationId, toLineId);
+                const isOutStation = isOutOfStationTransfer(fromStationId, toLineId);
+
+                let transferTime = distance / 60;
+
+                if (isOutStation) {
+                    transferTime += 2;
+                }
+
+                if (fromOp && toOp && fromOp !== toOp) {
+                    transferTime += 1.5;
+                    nextCosts.operatorSwitches += 1;
+                }
+
+                let hubBuffer = getHubBufferMinutes(fromStationId);
+                if (currentCosts.hops < 4) {
+                    hubBuffer *= 0.4;
+                } else if (currentCosts.hops < 8) {
+                    hubBuffer *= 0.7;
+                }
+                transferTime += hubBuffer;
+
+                nextCosts.time += transferTime;
+                nextCosts.transfers += 1;
+                nextCosts.transferDistance += distance;
+            } else {
+                const operatorKey = operatorKeyFromRailwayId(viaRailwayId);
+                const isRailwaySwitch = decoded.lastRailway && decoded.lastRailway !== viaRailwayId;
+                const isOperatorSwitch = decoded.lastOperator && decoded.lastOperator !== operatorKey;
+
+                let boardingPenalty = 0;
+                let lineWaitTime = (viaRailwayId.includes('TokyoMetro') || viaRailwayId.includes('Toei'))
+                    ? BASE_WAIT_TIME * 0.6
+                    : BASE_WAIT_TIME;
+
+                if (currentCosts.hops < 4) {
+                    lineWaitTime *= 0.6;
+                }
+
+                if (isRailwaySwitch) {
+                    boardingPenalty = 2 + lineWaitTime;
+                    nextCosts.transfers += 1;
+                    if (isOperatorSwitch) {
+                        nextCosts.operatorSwitches += 1;
+                    } else {
+                        nextCosts.railwaySwitches += 1;
+                    }
+                } else if (!decoded.lastRailway) {
+                    boardingPenalty = lineWaitTime;
+                }
+
+                nextCosts.time += edgeTimeMinutes(viaRailwayId) + boardingPenalty;
+
+                if (viaRailwayId.includes('Yamanote') || viaRailwayId.includes('Chuo')) {
+                    nextCosts.crowding = Math.min(100, nextCosts.crowding + 5);
+                }
+            }
+
+            const nextLastRailway = viaRailwayId === 'transfer' ? decoded.lastRailway : viaRailwayId;
+            const nextLastOperator =
+                viaRailwayId === 'transfer' ? decoded.lastOperator : operatorKeyFromRailwayId(viaRailwayId);
+
+            const nextKey = encodeStateKey(nextStation, nextLastRailway, nextLastOperator);
+            const nextPriority = score(nextCosts);
+
+            const prevBest = dist.get(nextKey);
+            if (prevBest === undefined || nextPriority < prevBest) {
+                dist.set(nextKey, nextPriority);
+                costsByKey.set(nextKey, nextCosts);
+                prev.set(nextKey, { prevKey: currentKey, fromStation: decoded.station, viaRailwayId });
+                heap.push({ key: nextKey }, nextPriority);
+            }
+        }
+    }
+
+    return null;
+}
+
+export function enrichRoutesWithL4Scores(
+    routes: RouteOption[],
+    userDemand: L4DemandState,
+    locale: string = 'zh'
+): EnrichedRouteOption[] {
+    return routes.map(route => {
+        let totalTpiScore = 0;
+        let transferCount = 0;
+
+        route.steps.forEach(step => {
+            if (step.kind === 'transfer') {
+                const tpiInput: TPIInput = {
+                    transfer: {
+                        fromStationId: 'mock-station',
+                        fromLineId: 'mock-line-a',
+                        toStationId: 'mock-station',
+                        toLineId: 'mock-line-b',
+                        walkingDistanceMeters: 300,
+                        floorDifference: 2,
+                        verticalMethod: 'stairs' as const,
+                        complexity: {
+                            turnCount: 3,
+                            signageClarity: 2,
+                            exitCount: 8,
+                            underConstruction: false
+                        },
+                        baseTpi: 20,
+                        peakHourMultiplier: 1.2
+                    },
+                    crowdLevel: 'normal' as const,
+                    userHasLuggage: userDemand.largeLuggage,
+                    userAccessibilityNeeds: {
+                        wheelchair: userDemand.wheelchair || false,
+                        stroller: userDemand.stroller || false,
+                        elderly: userDemand.senior || false,
+                        visualImpairment: false
+                    }
+                };
+
+                const tpiResult = calcTransferPainIndex(tpiInput, undefined, locale);
+                totalTpiScore += tpiResult.score;
+                transferCount++;
+            }
+        });
+
+        const avgTpi = transferCount > 0 ? totalTpiScore / transferCount : 0;
+        const routeTpi: TPIResult = {
+            score: Math.round(avgTpi),
+            level: avgTpi <= 20 ? 'easy' : avgTpi <= 40 ? 'normal' : avgTpi <= 60 ? 'hard' : avgTpi <= 80 ? 'difficult' : 'extreme',
+            breakdown: { distance: 20, vertical: 20, complexity: 20, crowd: 20, userModifier: 20 },
+            recommendation: '這是一條評估後的路徑建議'
+        };
+
+        const legs: JourneyLeg[] = [];
+        let currentTime = new Date();
+
+        route.steps.forEach(step => {
+            if (step.kind === 'train') {
+                legs.push({
+                    line: step.railwayId || 'unknown',
+                    lineName: step.text,
+                    fromStation: 'station-a',
+                    toStation: 'station-b',
+                    scheduledDeparture: new Date(currentTime.getTime()),
+                    scheduledArrival: new Date(currentTime.getTime() + 10 * 60000),
+                    currentDelayMinutes: 0
+                });
+                currentTime = new Date(currentTime.getTime() + 15 * 60000);
+            }
+        });
+
+        const cdrResult = calcCascadeDelayRisk(legs, locale);
+
+        return {
+            ...route,
+            transfers: route.transfers || 0,
+            tpi: routeTpi,
+            cdr: cdrResult
+        };
+    });
+}
+
+export function findRankedRoutes(params: {
+    originStationId: string | string[];
+    destinationStationId: string | string[];
+    railways: RailwayTopology[];
+    maxHops?: number;
+    locale?: SupportedLocale;
+    userDemand?: L4DemandState;
+}): EnrichedRouteOption[] {
+    const originIds = Array.isArray(params.originStationId)
+        ? params.originStationId.map(normalizeOdptStationId)
+        : [normalizeOdptStationId(params.originStationId)];
+    const destIds = Array.isArray(params.destinationStationId)
+        ? params.destinationStationId.map(normalizeOdptStationId)
+        : [normalizeOdptStationId(params.destinationStationId)];
+
+    const railways = params.railways || [];
+    const maxHops = Math.max(4, params.maxHops ?? 30);
+    const locale = params.locale || 'zh-TW';
+    const t = (zh: string, ja: string, en: string) => (locale === 'ja' ? ja : locale === 'en' ? en : zh);
+
+    const TRANSFER_THRESHOLD = 150;
+
+    const candidates: Array<{ key: string; label: string; score: (c: RouteCosts) => number }> = [
+        {
+            key: 'smart',
+            label: t('最佳建議', 'おすすめ', 'Best Route'),
+            score: (c) => {
+                const timeScore = c.time * 0.65;
+                const transferScore = c.transfers * 6 * 0.15;
+                let distancePenalty = 0;
+                if (c.transferDistance > TRANSFER_THRESHOLD) {
+                    distancePenalty = (c.transferDistance - TRANSFER_THRESHOLD) * 1.5;
+                }
+                const distanceScore = (c.transferDistance / 100 * 5 + distancePenalty) * 0.15;
+                const crowdScore = (c.crowding / 10) * 0.05;
+                return timeScore + transferScore + distanceScore + crowdScore;
+            },
+        },
+        {
+            key: 'fastest',
+            label: t('最快到達', '最速', 'Fastest'),
+            score: (c) => c.time + c.transfers * 3,
+        },
+        {
+            key: 'fewest_transfers',
+            label: t('最少轉乘', '乗換最少', 'Fewest transfers'),
+            score: (c) => c.transfers * 1000 + c.time,
+        },
+        {
+            key: 'comfort',
+            label: t('最舒適', 'らくらく', 'Comfortable'),
+            score: (c) => c.transfers * 60 + c.transferDistance * 0.3 + c.time,
+        },
+    ];
+
+    const results: RouteOption[] = [];
+    const signatureToIndex = new Map<string, number>();
+    const usedLabels = new Set<string>();
+    const adj = getAdjacency(railways);
+
+    for (const cand of candidates) {
+        const found = dijkstraBestPath({
+            origins: originIds,
+            dests: destIds,
+            adj,
+            maxHops,
+            score: cand.score
+        });
+        if (!found) continue;
+        const signature = `${found.path.join('>')}|${found.edgeRailways.join(',')}`;
+        const existingIndex = signatureToIndex.get(signature);
+        if (typeof existingIndex === 'number') {
+            if (results.length < 2 && !usedLabels.has(cand.label)) {
+                const base = results[existingIndex];
+                results.push({
+                    ...base,
+                    label: cand.label,
+                });
+                usedLabels.add(cand.label);
+            }
+            continue;
+        }
+
+        results.push(
+            buildRouteOptionFromPath({
+                path: found.path,
+                edgeRailways: found.edgeRailways,
+                railways,
+                locale,
+                label: cand.label,
+                costs: found.costs,
+            })
+        );
+        signatureToIndex.set(signature, results.length - 1);
+        usedLabels.add(cand.label);
+    }
+
+    if (results.length === 0) {
+        return [];
+    }
+
+    const userDemand = params.userDemand || {
+        wheelchair: false, stroller: false, vision: false, senior: false,
+        largeLuggage: false, lightLuggage: true,
+        rushing: false, budget: false, comfort: true, avoidCrowds: false, avoidRain: false
+    };
+
+    return enrichRoutesWithL4Scores(results, userDemand, locale.startsWith('ja') ? 'ja' : locale.startsWith('en') ? 'en' : 'zh');
+}
+
+export function findSimpleRoutes(params: {
+    originStationId: string | string[];
+    destinationStationId: string | string[];
+    railways: RailwayTopology[];
+    maxHops?: number;
+    locale?: SupportedLocale;
+}): RouteOption[] {
+    return findRankedRoutes(params);
 }
 
 export interface TrafficCondition {

@@ -85,7 +85,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
 
     // AI SDK v6 transport-based architecture
     const transport = useMemo(() => new TextStreamChatTransport({
-        api: '/api/agent/chat',
+        api: '/api/agent/chat-phased',
         body: {
             nodeId: stationId || '',
             stationName: stationName || '',

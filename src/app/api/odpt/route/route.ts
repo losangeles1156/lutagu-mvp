@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
     findStationIdsByName,
+    findRankedRoutes,
     normalizeOdptStationId,
 } from '@/lib/l4/assistantEngine';
 import { filterRoutesByL2Status } from '@/lib/l4/utils/routeFiltering';
@@ -135,7 +136,6 @@ export async function GET(req: Request) {
         const railways: RailwayTopology[] = CORE_TOPOLOGY as unknown as RailwayTopology[];
         const maxHops = 35;
 
-        // Use RustL4Client
         const rustRouteOptions = await rustL4Client.findRoutes({
             originId: fromIds[0],
             destinationId: toIds[0],
@@ -144,7 +144,50 @@ export async function GET(req: Request) {
             railways
         });
 
-        let routeOptions = rustRouteOptions;
+        let routeOptions: RouteOption[] = rustRouteOptions;
+
+        const fastestLabel = String(locale || 'zh-TW').startsWith('ja')
+            ? '最速'
+            : String(locale || 'zh-TW').startsWith('en')
+                ? 'Fastest'
+                : '最快到達';
+
+        if (routeOptions.length < 2 || !routeOptions.some(r => r.label === fastestLabel)) {
+            const jsRoutes = findRankedRoutes({
+                originStationId: fromIds,
+                destinationStationId: toIds,
+                maxHops,
+                locale,
+                railways
+            });
+
+            if (routeOptions.length === 0) {
+                routeOptions = jsRoutes;
+            } else if (jsRoutes.length > 0) {
+                const signature = (r: RouteOption) => r.steps.map(s => `${s.kind}:${s.railwayId ?? ''}:${s.text}`).join('|');
+                const seen = new Set(routeOptions.map(signature));
+                for (const r of jsRoutes) {
+                    if (routeOptions.length >= 2 && routeOptions.some(x => x.label === fastestLabel)) break;
+                    const sig = signature(r);
+                    if (seen.has(sig)) continue;
+                    seen.add(sig);
+                    routeOptions.push(r);
+                }
+
+                if (!routeOptions.some(r => r.label === fastestLabel)) {
+                    const fastest = jsRoutes.find(r => r.label === fastestLabel);
+                    if (fastest) {
+                        const sig = signature(fastest);
+                        if (seen.has(sig)) {
+                            const base = routeOptions.find(r => signature(r) === sig);
+                            if (base) routeOptions.push({ ...base, label: fastestLabel });
+                        } else {
+                            routeOptions.push(fastest);
+                        }
+                    }
+                }
+            }
+        }
         let removedDueToL2 = 0;
 
         if (routeOptions.length > 0) {

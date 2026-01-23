@@ -36,7 +36,7 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         // Route deepseek models (including deepseek-v3.2) via Zeabur generic endpoint
         if (explicitModel.includes('deepseek')) return generateZeaburGenericResponse(params);
         if (explicitModel.includes('gemini')) return generateGeminiResponse(params);
-        if (explicitModel.toLowerCase().includes('minimax')) return generateMiniMaxResponse(params);
+
         // Route GPT models (gpt-5-mini, etc.) via Zeabur generic endpoint
         if (explicitModel.includes('gpt')) return generateZeaburGenericResponse(params);
     }
@@ -48,67 +48,20 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
     }
 
-    // 2. Logic / Reasoning / Precision -> Gemini 2.0 Flash Exp
+    // 2. Logic / Reasoning / Precision -> Gemini 3 Flash Preview (Gemini 2.0 based)
     if (taskType === 'reasoning' || taskType === 'context_heavy') {
         const result = await generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
-        // Fallback to MiniMax-M2.1 if Gemini 2.0 fails (User Request: backup role)
-        if (!result && process.env.MINIMAX_API_KEY) {
-            console.warn('[LLM] Gemini 2.0 Flash failed, falling back to MiniMax M2.1');
-            return generateMiniMaxResponse(params);
-        }
         return result;
     }
 
     // 3. Chat / Creative / Long Output -> DeepSeek V3.2 (Zeabur AI Hub - High CP Value)
     if (taskType === 'synthesis' || taskType === 'chat') {
-        // DeepSeek V3.2 via Zeabur AI Hub (corrected model name)
+        // DeepSeek V3.2 via Zeabur AI Hub
         return generateZeaburGenericResponse({ ...params, model: 'deepseek-v3.2' });
     }
 
     // 4. Default Fallback
     return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
-}
-
-// ... existing MiniMax function ...
-async function generateMiniMaxResponse(params: LLMParams): Promise<string | null> {
-    // ... keep existing code ...
-    const { systemPrompt, userPrompt, temperature = 0.2 } = params;
-    const endpoint = 'https://api.minimax.io/v1/chat/completions';
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
-    const maxTokens = resolveMaxTokens(params);
-
-    try {
-        const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.MINIMAX_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'MiniMax-M2.1',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                reasoning_split: true,
-                temperature,
-                max_tokens: maxTokens
-            }),
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (!res.ok) {
-            console.error(`[MiniMax] API Error ${res.status}`);
-            return null;
-        }
-        const data: any = await res.json();
-        return data?.choices?.[0]?.message?.content || null;
-    } catch (error) {
-        console.error('[MiniMax] API Call Failed:', error);
-        return null;
-    }
 }
 
 interface GeminiParams extends LLMParams {
@@ -229,56 +182,4 @@ async function generateZeaburGenericResponse(params: LLMParams): Promise<string 
     }
 }
 
-async function generateDeepSeekResponse(params: LLMParams): Promise<string | null> {
-    const { systemPrompt, userPrompt, temperature = 0.4 } = params;
-
-    // Zeabur AI Hub supports DeepSeek via same endpoint
-    const endpoint = `https://hnd1.aihub.zeabur.ai/v1/chat/completions`;
-    // Use dedicated DeepSeek key (lutagu-mvp) or fallback to main Zeabur key
-    const apiKey = process.env.DEEPSEEK_API_KEY || process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), resolveTimeoutMs(params.taskType));
-    const maxTokens = resolveMaxTokens(params);
-
-    try {
-        const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-            body: JSON.stringify({
-                model: 'deepseek-v3', // Standard name for V3
-                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
-                temperature,
-                max_tokens: maxTokens
-            }),
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (!res.ok) {
-            const errText = await res.text();
-            console.error('[DeepSeek] API Error:', res.status, errText);
-            // Fallback for 429/Error
-            if (res.status === 429 || res.status >= 500) {
-                console.warn('[DeepSeek] Falling back to Gemini 3 due to server error/limit');
-                return generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
-            }
-            return null;
-        }
-
-        const data: any = await res.json();
-        let content = data?.choices?.[0]?.message?.content || null;
-        if (content) content = content.replace(/\[THINKING\][\s\S]*?\[\/THINKING\]/g, '').trim();
-        return content;
-    } catch (error: any) {
-        if (error.name === 'AbortError') {
-            console.error('[DeepSeek] Request Timeout');
-        } else {
-            console.error('[DeepSeek] API Call Failed:', error);
-        }
-        return null;
-    }
-}
-
-// Remove Mistral legacy function to save space if not used, or keep as dead code.
-// Keeping strictly requested changes.
+// End of file

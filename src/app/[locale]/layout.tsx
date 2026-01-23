@@ -6,6 +6,7 @@ import { getMessages } from 'next-intl/server';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { ToastProvider } from '@/components/ui/Toast';
 import { NodeDisplayProvider } from '@/providers/NodeDisplayProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
@@ -84,11 +85,13 @@ export default async function RootLayout({
                 )}
                 <NextIntlClientProvider messages={messages}>
                     <ErrorBoundary>
-                        <NodeDisplayProvider>
-                            <ToastProvider>
-                                {children}
-                            </ToastProvider>
-                        </NodeDisplayProvider>
+                        <AuthProvider>
+                            <NodeDisplayProvider>
+                                <ToastProvider>
+                                    {children}
+                                </ToastProvider>
+                            </NodeDisplayProvider>
+                        </AuthProvider>
                     </ErrorBoundary>
                 </NextIntlClientProvider>
             </body>

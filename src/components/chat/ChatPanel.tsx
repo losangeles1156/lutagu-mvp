@@ -24,6 +24,7 @@ import { MessageBubble } from './MessageBubble';
 import { trackFunnelEvent } from '@/lib/tracking';
 import { ChatHeader } from './ChatHeader';
 import { ChatInput } from './ChatInput';
+import { SkeletonMessageBubble } from './SkeletonMessageBubble';
 
 const MIN_HEIGHT = 200;
 const MAX_HEIGHT = 600;
@@ -402,15 +403,21 @@ export function ChatPanel() {
                             />
                         ))}
 
-                        {(isLoading || thinkingStep) && (
+                        {/* Optimistic UI: Show skeleton immediately when loading, before content arrives */}
+                        {isLoading && (
                             displayMessages.length === 0 ||
                             displayMessages[displayMessages.length - 1]?.role !== 'assistant' ||
                             !displayMessages[displayMessages.length - 1]?.content
                         ) && (
-                                <div className="flex justify-start">
-                                    <ThinkingBubble content={thinkingStep || tL4('thinking.initializing')} isThinking={true} />
-                                </div>
+                                <SkeletonMessageBubble />
                             )}
+
+                        {/* ThinkingBubble: Show thinking step if available */}
+                        {thinkingStep && (
+                            <div className="flex justify-start">
+                                <ThinkingBubble content={thinkingStep} isThinking={true} />
+                            </div>
+                        )}
 
                         <div ref={messagesEndRef} />
                     </div>

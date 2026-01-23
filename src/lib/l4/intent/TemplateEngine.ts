@@ -42,6 +42,27 @@ class KeywordTrie {
     }
 }
 
+// Wasm Module Integration
+let wasmMatcher: any = null;
+
+// Dynamic import for server-side Wasm loading
+const loadWasm = async () => {
+    try {
+        if (!wasmMatcher) {
+            // @ts-ignore
+            const wasm = await import('@/lib/wasm/l1-template-rs/l1_template_rs.js');
+            await wasm.default(); // Initialize Wasm
+            wasmMatcher = new wasm.L1Matcher();
+            console.log('[TemplateEngine] Rust Wasm Matcher Loaded 🚀');
+        }
+    } catch (e) {
+        console.warn('[TemplateEngine] Failed to load Wasm Matcher, falling back to JS:', e);
+    }
+};
+
+// Initialize proactively
+loadWasm();
+
 export class TemplateEngine {
     private templates: IntentTemplate[] = [];
     private trie = new KeywordTrie();
@@ -136,6 +157,26 @@ export class TemplateEngine {
 
     public match(text: string, locale: SupportedLocale = 'zh-TW'): TemplateResponse | null {
         const trimmed = text.trim();
+
+        // 0. Rust Wasm 匹配 (Priority)
+        if (wasmMatcher) {
+            try {
+                const rustMatch = wasmMatcher.match_intent(trimmed);
+                if (rustMatch) {
+                    const template = this.templates.find(t => t.id === rustMatch.template_id);
+                    if (template) {
+                        const res = template.responses[locale] || template.responses['en'];
+                        if (typeof res === 'function') {
+                            const params = rustMatch.params ? [trimmed, rustMatch.params.get('target')] : [trimmed];
+                            return res(params as any);
+                        }
+                        return { type: 'text', content: res };
+                    }
+                }
+            } catch (e) {
+                // Fallback silently if Wasm errors
+            }
+        }
 
         // 1. 優先嘗試 Trie 樹精確匹配 (O(L))
         const templateId = this.trie.search(trimmed);

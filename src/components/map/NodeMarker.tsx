@@ -137,7 +137,7 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     // MUST be memoized since it depends on zoom (which changes frequently)
     const showLabel = useMemo(() => {
         if (showLabelOverride !== undefined) {
-            return showLabelOverride || isSelected;
+            return isSelected || showLabelOverride || hasMembers || isExplicitHub;
         }
         return isSelected ||
             hasMembers ||

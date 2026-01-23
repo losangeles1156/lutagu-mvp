@@ -32,9 +32,8 @@ export {
 } from './cacheMonitor';
 
 export {
-    RedisCacheService,
-    type RedisConfig,
-    type RedisCacheConfig,
     getRedisCache,
-    initRedisCache
+    initRedisCacheFromEnv,
+    getCached,
+    invalidateCache
 } from './redisCacheService';

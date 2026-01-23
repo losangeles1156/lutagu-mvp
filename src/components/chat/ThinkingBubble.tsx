@@ -7,6 +7,17 @@ interface ThinkingBubbleProps {
     isThinking?: boolean;
 }
 
+// Animated typing dots component
+function TypingDots() {
+    return (
+        <span className="inline-flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:0ms]" />
+            <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:150ms]" />
+            <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:300ms]" />
+        </span>
+    );
+}
+
 export function ThinkingBubble({ content, isThinking = false }: ThinkingBubbleProps) {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -25,8 +36,12 @@ export function ThinkingBubble({ content, isThinking = false }: ThinkingBubblePr
                 )}>
                     <BrainCircuit className="w-3 h-3" />
                 </div>
-                <span>
-                    {isThinking ? "Lutagu is thinking..." : "Thought Process"}
+                <span className="flex items-center gap-1.5">
+                    {isThinking ? (
+                        <>Lutagu is thinking <TypingDots /></>
+                    ) : (
+                        "Thought Process"
+                    )}
                 </span>
                 {isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
             </button>
@@ -42,3 +57,4 @@ export function ThinkingBubble({ content, isThinking = false }: ThinkingBubblePr
         </div>
     );
 }
+

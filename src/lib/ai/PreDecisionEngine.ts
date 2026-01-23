@@ -300,7 +300,7 @@ reason 必須在 10 個中文字以內，格式：
 {"level": "simple|medium|complex", "confidence": 0.0-1.0, "reason": "理由"}`,
                 userPrompt: prompt,
                 temperature: 0.1,
-                taskType: 'classification'
+                taskType: 'classification' // Will route to gemini-2.5-flash-lite
             });
 
             const parsed = this.parseClassificationResult(result);

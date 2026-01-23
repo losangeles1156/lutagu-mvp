@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { IdMatcher } from '../src/lib/utils/idMatcher';
-import { upsertKnowledge } from '../src/lib/api/vectorClient';
+import { EmbeddingService } from '../src/lib/ai/embeddingService';
 import crypto from 'crypto';
 
 // Load environment variables
@@ -284,10 +284,36 @@ WHERE id = '${nodeId}';
 `;
         fs.appendFileSync(OUTPUT_SQL, sql + '\n');
 
-        // Upsert Vectors to Qdrant
+        // Upsert Vectors directly to Supabase
         console.log(`[VECTOR] Ingesting ${nodeId}...`);
+
+        // Helper for direct upsert
+        const directUpsert = async (uuid: string, content: string, knowledgeType: string, tags: string[], entityId: string) => {
+            try {
+                // Generate Embedding (Voyage-4)
+                const embedding = await EmbeddingService.generateEmbedding(content, 'db');
+
+                // Insert into DB
+                const { error } = await supabase
+                    .from('l4_knowledge_embeddings')
+                    .upsert({
+                        id: uuid,
+                        content: content,
+                        embedding: embedding,
+                        knowledge_type: knowledgeType,
+                        entity_id: entityId,
+                        tags_core: tags,
+                        tags_intent: [], // Defaults
+                        updated_at: new Date().toISOString()
+                    });
+
+                if (error) console.error(`[DB] Insert failed for ${uuid}:`, error.message);
+            } catch (e: any) {
+                console.error(`[EMB] Failed to generate embedding for ${uuid}:`, e.message);
+            }
+        };
+
         try {
-            // Sequential processing for items within a node to respect rate limits
             // Traps
             for (let idx = 0; idx < data.traps.length; idx++) {
                 const t = data.traps[idx];
@@ -295,7 +321,7 @@ WHERE id = '${nodeId}';
                 const hash = crypto.createHash('md5').update(rawId).digest('hex');
                 const uuid = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
                 const content = `Trap at ${nodeId}: ${t.title}. ${t.description}`;
-                await upsertKnowledge(uuid, content, ['trap', nodeId]);
+                await directUpsert(uuid, content, 'trap', ['trap', nodeId], nodeId);
             }
 
             // Hacks
@@ -305,7 +331,7 @@ WHERE id = '${nodeId}';
                 const hash = crypto.createHash('md5').update(rawId).digest('hex');
                 const uuid = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
                 const content = `Hack at ${nodeId}: ${h.title}. ${h.description}`;
-                await upsertKnowledge(uuid, content, ['hack', nodeId]);
+                await directUpsert(uuid, content, 'hack', ['hack', nodeId], nodeId);
             }
 
             // Facilities
@@ -315,8 +341,9 @@ WHERE id = '${nodeId}';
                 const hash = crypto.createHash('md5').update(rawId).digest('hex');
                 const uuid = `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
                 const content = `Facility at ${nodeId}: ${f.type} at ${f.location}`;
-                await upsertKnowledge(uuid, content, ['facility', f.type, nodeId]);
+                await directUpsert(uuid, content, 'facility', ['facility', f.type, nodeId], nodeId);
             }
+
         } catch (err) {
             console.error(`[VECTOR] Failed to ingest ${nodeId}:`, err);
         }

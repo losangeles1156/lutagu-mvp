@@ -1,0 +1,15 @@
+{
+  "name": "l1-template-rs",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "l1_template_rs_bg.wasm",
+    "l1_template_rs.js",
+    "l1_template_rs.d.ts"
+  ],
+  "main": "l1_template_rs.js",
+  "types": "l1_template_rs.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

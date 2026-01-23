@@ -67,15 +67,15 @@ LUTAGU is a PWA-based **Urban Empathy Navigation Service** for Tokyo.
 ## 3. Technical Stack
 
 ### 3.1 Core Intelligence
-- **Multi-Model Architecture** (via Vercel AI SDK):
+- **Multi-Model Architecture** (Trip Trinity):
   - **Gatekeeper**: Gemini 2.5 Flash Lite (intent classification, routing)
-  - **Brain**: MiniMax-M2.1 (complex reasoning, strategic decisions)
-  - **Synthesizer**: Gemini 3 Flash Preview (natural language generation, voice)
-  - **Fallback**: Gemini 2.5 Flash (backup when primary models fail)
-- **Embedding Model**: Google Gemini text-embedding-004
-  - **Dimensions**: 768 (zero-padded to 1536 for compatibility)
-  - **Fallback**: MiniMax Embo-01 (if Gemini rate limited)
-  - **Rate Limits**: 1500 RPM (Gemini) vs 10 RPM (MiniMax free tier)
+  - **Brain**: Gemini 3 Flash Preview (logic, deep reasoning)
+  - **Synthesizer**: DeepSeek V3.2 (chat, long-context synthesis)
+  - **Fallback**: MiniMax-M2.1 (backup role)
+- **Embedding Model**: Voyage AI (voyage-4)
+  - **Dimensions**: 1024 (native)
+  - **Fallback**: Google Gemini text-embedding-004 (768 padded to 1024)
+  - **Rate Limits**: Configured in Zeabur/Voyage dashboard
 - **Model Provider**: Zeabur AI Hub (unified gateway)
 - **Orchestration**: Custom L4 Decision Engine + Agent tools
 - **Development Core**: Claude Code / Trae SOLO Mode

@@ -47,6 +47,18 @@ function haversineMeters(a: { lat: number; lon: number }, b: { lat: number; lon:
     return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
 }
 
+function createTimeoutFetch(timeoutMs: number) {
+    return async (input: RequestInfo | URL, init?: RequestInit) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            return await fetch(input, { ...init, signal: controller.signal });
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    };
+}
+
 function parseLocation(loc: any): { coordinates: [number, number] } {
     if (!loc) return { coordinates: [0, 0] };
     if (Array.isArray(loc) && loc.length >= 2) {
@@ -358,7 +370,10 @@ export async function GET(req: Request) {
         return NextResponse.json(cached.data);
     }
 
-    await ensureRedis();
+    await Promise.race([
+        ensureRedis(),
+        new Promise<void>(resolve => setTimeout(resolve, 800))
+    ]);
     const sharedKey = `viewport:${cacheKey}`;
     const sharedCached = await redisCache.get(sharedKey);
     if (sharedCached) {
@@ -399,43 +414,50 @@ export async function GET(req: Request) {
     } else {
         try {
             if (!supabaseUrl || !supabaseKey) {
-                console.error('[Viewport] Missing Supabase Credentials for fallback ingestion');
-                statusCode = 500;
-                return NextResponse.json({ error: 'Missing configuration' }, { status: 500 });
-            }
-            supabaseClient = createClient(supabaseUrl, supabaseKey);
-            let data: any = null;
-            let error: any = null;
-
-            ({ data, error } = await supabaseClient.rpc('nearby_nodes_v2', {
-                center_lat: center.lat,
-                center_lon: center.lon,
-                radius_meters: Math.round(radiusMeters),
-                max_results: 700
-            }));
-
-            if (error) {
-                ({ data, error } = await supabaseClient.rpc('nearby_nodes', {
-                    center_lat: center.lat,
-                    center_lon: center.lon,
-                    radius_meters: Math.round(radiusMeters)
-                }));
-            }
-
-            if (error) {
                 degraded = true;
                 source = 'fallback';
                 candidates = getFallbackNodes();
-
-                console.warn('[api/nodes/viewport] Supabase RPC failed, using fallback', {
-                    code: (error as any).code,
-                    message: (error as any).message
-                });
+                console.warn('[api/nodes/viewport] Supabase not configured, using fallback');
             } else {
-                // Filter out inactive nodes (Phase 4: only return approved data)
-                candidates = ((data as any[] | null | undefined) || []).filter(
-                    (n: any) => (n as any).is_active !== false
-                );
+                supabaseClient = createClient(supabaseUrl, supabaseKey, {
+                    global: {
+                        fetch: createTimeoutFetch(6000),
+                    },
+                });
+            }
+            let data: any = null;
+            let error: any = null;
+
+            if (!degraded) {
+                ({ data, error } = await supabaseClient.rpc('nearby_nodes_v2', {
+                    center_lat: center.lat,
+                    center_lon: center.lon,
+                    radius_meters: Math.round(radiusMeters),
+                    max_results: 700
+                }));
+
+                if (error) {
+                    ({ data, error } = await supabaseClient.rpc('nearby_nodes', {
+                        center_lat: center.lat,
+                        center_lon: center.lon,
+                        radius_meters: Math.round(radiusMeters)
+                    }));
+                }
+
+                if (error) {
+                    degraded = true;
+                    source = 'fallback';
+                    candidates = getFallbackNodes();
+
+                    console.warn('[api/nodes/viewport] Supabase RPC failed, using fallback', {
+                        code: (error as any).code,
+                        message: (error as any).message
+                    });
+                } else {
+                    candidates = ((data as any[] | null | undefined) || []).filter(
+                        (n: any) => (n as any).is_active !== false
+                    );
+                }
             }
         } catch (err: any) {
             degraded = true;
@@ -568,7 +590,7 @@ export async function GET(req: Request) {
     const hubDetails: Record<string, HubDetails> = {};
 
     if (supabaseClient && limitedNodes.length > 0) {
-        const hubIds = limitedNodes.filter(n => n.is_hub).map(n => n.id);
+        const hubIds = limitedNodes.filter(n => n.is_hub || n.parent_hub_id === null).map(n => n.id);
 
         if (hubIds.length > 0) {
             const [metadataMap, membersMap] = await Promise.all([
@@ -581,8 +603,6 @@ export async function GET(req: Request) {
                 const members = membersMap.get(hubId) || [];
                 const memberCount = members.length;
 
-                // [FIX] Always generate hubDetails for all hub nodes
-                // This ensures all stations display properly with labels on the map
                 hubDetails[hubId] = {
                     member_count: memberCount,
                     transfer_type: metadata?.transfer_type || 'indoor',

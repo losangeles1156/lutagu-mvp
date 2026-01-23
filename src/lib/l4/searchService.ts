@@ -1,6 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
-import { generateEmbedding } from '@/lib/ai/embedding';
+import { EmbeddingService } from '@/lib/ai/embeddingService';
 
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -32,7 +32,8 @@ export async function searchL4Knowledge(params: {
     threshold = 0.5
   } = params;
 
-  const embedding = await generateEmbedding(query);
+  // Use the verified Voyage 4 embedding service
+  const embedding = await EmbeddingService.generateEmbedding(query, 'query');
   const supabase = getSupabaseClient();
 
   let results: any[] = [];
@@ -41,8 +42,8 @@ export async function searchL4Knowledge(params: {
     const { data, error } = await supabase
       .rpc('match_l4_knowledge', {
         query_embedding: embedding,
-        match_threshold: threshold,
-        match_count: topK,
+        match_threshold: threshold, // Keep threshold low to recall more candidates
+        match_count: topK * 4,     // Fetch 4x candidates for reranker to re-order
         filter_knowledge_type: knowledgeType || null,
         filter_entity_id: stationId || null,
         filter_category: null,
@@ -100,5 +101,33 @@ export async function searchL4Knowledge(params: {
     throw err;
   }
 
-  return results;
+  // Reranking Step (Voyage 2.5 Lite)
+  if (results.length > 0) {
+    const { RerankService } = await import('@/lib/ai/RerankService');
+    const documents = results.map(r => r.content);
+
+    if (documents.length > 0) {
+      try {
+        const reranked = await RerankService.rerank(query, documents, topK);
+
+        // Map reranked indices back to original result objects
+        const reorderedResults = reranked.map(r => {
+          const original = results[r.index];
+          return {
+            ...original,
+            similarity: r.relevance_score, // Update score with rerank score
+            _vectorScore: original.similarity
+          };
+        });
+
+        // Replace results with reranked list
+        results = reorderedResults;
+        console.log(`[L4Search] Reranked ${documents.length} items. Top score: ${results[0]?.similarity}`);
+      } catch (e) {
+        console.warn('[L4Search] Rerank failed, using vector order:', e);
+      }
+    }
+  }
+
+  return results.slice(0, topK);
 }

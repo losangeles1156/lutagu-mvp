@@ -1,5 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import { rateLimit } from '@/lib/security/rateLimit';
 
 const VISITOR_COOKIE_NAME = 'bg_vid';
@@ -118,7 +119,7 @@ const intlMiddleware = createMiddleware({
     localePrefix: 'as-needed'
 });
 
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
     const pathname = req.nextUrl.pathname;
 
     const isApi = pathname.startsWith('/api');
@@ -156,6 +157,27 @@ export default function middleware(req: NextRequest) {
     }
 
     const res = intlMiddleware(req);
+
+    // Supabase Auth Integration
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (supabaseUrl && supabaseAnonKey) {
+        const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+            cookies: {
+                getAll() {
+                    return req.cookies.getAll();
+                },
+                setAll(cookiesToSet) {
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        req.cookies.set(name, value);
+                        res.cookies.set(name, value, options);
+                    });
+                },
+            },
+        });
+        await supabase.auth.getUser();
+    }
 
     ensureVisitorId(req, res);
     return res;

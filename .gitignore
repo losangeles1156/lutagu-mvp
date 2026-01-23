@@ -74,6 +74,11 @@ scripts/*.json
 !scripts/test_ai_chat.ts
 !scripts/verify_l4_client.ts
 !scripts/verify_l2_client.ts
+!scripts/benchmark_l1_performance.ts
+!scripts/benchmark_rerank.ts
+!scripts/ingest_letsgojp.ts
+!scripts/verify_upgrade.ts
+!scripts/verify_letsgojp_data.ts
 
 # Local env files
 .env*.local

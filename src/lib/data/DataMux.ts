@@ -4,35 +4,19 @@ import { generateLLMResponse } from '@/lib/ai/llmClient';
 import { searchL4Knowledge } from '@/lib/l4/searchService';
 import { supabaseAdmin } from '@/lib/supabase';
 
-// L2 Status Fetcher (Reuse existing logic or call API)
+import { getL2StatusCached } from '@/lib/cache/l2CacheService';
+import { getCached } from '@/lib/cache/redisCacheService';
+
+// L2 Status Fetcher (Delegated to specialized cache service)
 async function fetchL2Status(stationId: string): Promise<any> {
-    // 1. Try Cache (l2_cache table)
-    const { data: cached } = await supabaseAdmin
-        .from('l2_cache')
-        .select('value')
-        .eq('key', `l2:${stationId}`)
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle();
-
-    if (cached?.value) {
-        return cached.value;
+    try {
+        const status = await getL2StatusCached(stationId);
+        if (status) return status;
+    } catch (e) {
+        console.warn('[DataMux] L2 Cache Service failed, falling back to snapshot', e);
     }
 
-    // 2. Fallback: Call Rust Service
-    const serviceUrl = process.env.L2_STATUS_API_URL;
-    if (serviceUrl) {
-        try {
-            console.log(`[DataMux] Fetching real-time L2 from ${serviceUrl}`);
-            const res = await fetch(`${serviceUrl}/l2/status?stationId=${stationId}`, { next: { revalidate: 30 } });
-            if (res.ok) {
-                return await res.json();
-            }
-        } catch (e) {
-            console.warn('[DataMux] L2 Service call failed', e);
-        }
-    }
-
-    // 3. Fallback: Old Snapshot (Weather/Crowd only)
+    // Fallback: Old Snapshot (Weather/Crowd only)
     const { data } = await supabaseAdmin
         .from('transit_dynamic_snapshot')
         .select('weather_info, crowd_level')
@@ -41,14 +25,20 @@ async function fetchL2Status(stationId: string): Promise<any> {
     return data || {};
 }
 
-// L3 Facility Fetcher
+// L3 Facility Fetcher (Cached 1h)
 async function fetchL3Facilities(stationId: string): Promise<any> {
-    const { data } = await supabaseAdmin
-        .from('station_facilities')
-        .select('*')
-        .eq('station_id', stationId)
-        .maybeSingle();
-    return data || {};
+    return getCached(
+        `l3:facilities:${stationId}`,
+        async () => {
+            const { data } = await supabaseAdmin
+                .from('station_facilities')
+                .select('*')
+                .eq('station_id', stationId)
+                .maybeSingle();
+            return data || {};
+        },
+        3600 // 1 hour TTL
+    );
 }
 
 interface DataMuxContext {
@@ -74,11 +64,15 @@ export class DataMux {
         const [l2Data, l3Data, l4Knowledge] = await Promise.all([
             fetchL2Status(stationId),
             fetchL3Facilities(stationId),
-            searchL4Knowledge({
-                query: `Important tips for ${stationId}`,
-                stationId: stationId,
-                topK: 5
-            })
+            getCached(
+                `l4:tips:${stationId}`,
+                () => searchL4Knowledge({
+                    query: `Important tips for ${stationId}`,
+                    stationId: stationId,
+                    topK: 5
+                }),
+                1800 // 30 min TTL
+            )
         ]);
 
         // 2. Direct Aggregation (No LLM Latency)
@@ -331,43 +325,8 @@ export class DataMux {
             return [ruleBase[0]];
         }
 
-        return results.slice(0, 3); // Top 3
-    }
+        return results;
 
-    private static async checkCache(stationId: string, locale: string, userProfile: string): Promise<any | null> {
-        try {
-            const { data } = await supabaseAdmin
-                .from('l4_data_mux_cache')
-                .select('result')
-                .eq('station_id', stationId)
-                .eq('locale', locale)
-                .eq('user_profile', userProfile)
-                .gt('expires_at', new Date().toISOString())
-                .maybeSingle();
-
-            return data?.result || null;
-        } catch (e) {
-            console.warn('[DataMux] Cache read failed', e);
-            return null;
-        }
-    }
-
-    private static async saveCache(stationId: string, locale: string, userProfile: string, result: any): Promise<void> {
-        try {
-            const expiresAt = new Date();
-            expiresAt.setHours(expiresAt.getHours() + 24); // 24h TTL
-
-            await supabaseAdmin
-                .from('l4_data_mux_cache')
-                .upsert({
-                    station_id: stationId,
-                    locale: locale,
-                    user_profile: userProfile,
-                    result: result,
-                    expires_at: expiresAt.toISOString()
-                }, { onConflict: 'station_id, locale, user_profile' });
-        } catch (e) {
-            console.warn('[DataMux] Cache write failed', e);
-        }
     }
 }
+
