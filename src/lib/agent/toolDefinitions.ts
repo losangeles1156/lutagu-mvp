@@ -4,7 +4,9 @@ import { buildStationIdSearchCandidates } from '@/lib/api/nodes';
 import { WeatherTool, TrainStatusTool, FareTool, TimetableTool } from './tools/standardTools';
 import { odptClient } from '@/lib/odpt/client';
 import { getJSTTime } from '@/lib/utils/timeUtils';
-import { findSimpleRoutes, RailwayTopology, normalizeOdptStationId, findStationIdsByName } from '@/lib/l4/assistantEngine';
+import { normalizeOdptStationId, findStationIdsByName } from '@/lib/l4/assistantEngine';
+import { RailwayTopology, SupportedLocale, RouteOption, RouteStep } from '@/lib/l4/types/RoutingTypes';
+import { algorithmProvider } from '@/lib/l4/algorithms/AlgorithmProvider';
 import { NavigationService } from '@/lib/navigation/NavigationService';
 import { searchL4Knowledge } from '@/lib/l4/searchService';
 import CORE_TOPOLOGY from '@/lib/l4/generated/coreTopology.json';
@@ -781,13 +783,11 @@ export const TOOL_HANDLERS = {
             cacheKey,
             async () => {
                 try {
-                    // Use findSimpleRoutes with correct params format
-                    const routes = findSimpleRoutes({
-                        originStationId: resolvedFrom,
-                        destinationStationId: resolvedTo,
-                        railways: CORE_TOPOLOGY as any[],
-                        maxHops: 15,
-                        locale: locale as any
+                    // Use algorithmProvider for routing
+                    const routes = await algorithmProvider.findRoutes({
+                        originId: resolvedFrom,
+                        destinationId: resolvedTo,
+                        locale: locale as SupportedLocale
                     });
 
                     if (!routes || routes.length === 0) {
@@ -810,7 +810,7 @@ export const TOOL_HANDLERS = {
 
                     response += `🔎 ODPT: ${resolvedFrom} → ${resolvedTo}\n`;
 
-                    routes.slice(0, 2).forEach((route, idx) => {
+                    routes.slice(0, 2).forEach((route: RouteOption, idx: number) => {
                         const label = locale === 'zh-TW'
                             ? `選項 ${idx + 1}: ${route.label}`
                             : locale === 'ja'
@@ -818,7 +818,7 @@ export const TOOL_HANDLERS = {
                                 : `Option ${idx + 1}: ${route.label}`;
 
                         response += `\n${label}\n`;
-                        route.steps.forEach(step => {
+                        route.steps.forEach((step: RouteStep) => {
                             response += `  ${step.icon || '•'} ${step.text}\n`;
                         });
 
