@@ -349,7 +349,7 @@ Tone: Helpful.`,
             type: 'action',
             content: synthesis || (full
                 ? `⚠️ ${targetStation} 站內置物櫃目前全滿！\n建議前往南口的 **${status.nearbyStorage[0].name}** 寄放 (費用 ${status.nearbyStorage[0].price})。`
-                : `✅ 目前 ${status.lockers.find((l: any) => l.status === 'available').location} 的置物櫃還有空位喔！`),
+                : `✅ 目前 ${targetStation} 的置物櫃（${status.lockers.find((l: any) => l.status === 'available').location}）還有空位喔！`),
             data: { strategy: 'luggage_logistics', status },
             confidence: 0.98,
             reasoning: 'Executed Luggage Logistics Skill'

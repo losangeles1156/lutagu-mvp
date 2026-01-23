@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+target/
+tmp_*
 .pnp
 .pnp.js
 
@@ -69,6 +71,9 @@ scripts/*.json
 !scripts/verify_l2_optimization.ts
 !scripts/serialize_topology.ts
 !scripts/check_llm_health.ts
+!scripts/test_ai_chat.ts
+!scripts/verify_l4_client.ts
+!scripts/verify_l2_client.ts
 
 # Local env files
 .env*.local

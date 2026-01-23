@@ -75,6 +75,7 @@ export class RustL4Client {
             return this.transformToLegacyFormat(data, railways, locale);
         } catch (error) {
             // console.error('[RustL4Client] Request failed:', error);
+
             return [];
         }
     }

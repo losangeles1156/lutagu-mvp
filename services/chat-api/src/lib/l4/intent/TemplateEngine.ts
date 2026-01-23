@@ -73,11 +73,11 @@ export class TemplateEngine {
                     /^(こんにちは|こんばんは|おはよう|おはようございます|はじめまして|よろしく|よろしくお願いします|もしもし)(?:[\s\u3000]*[!！。．\.、，,？?]*)?$/i
                 ],
                 responses: {
-                    'zh-TW': '你好！我是 Lutagu AI，你的東京交通助手。我可以幫你查詢地鐵路線、提供車站導航，或回答旅遊相關問題。請問今天要在此去哪裡？',
-                    'zh': '你好！我是 Lutagu AI，你的东京交通助手。我可以帮你查询地铁路线、提供车站导航，或回答旅游相关问题。请问今天要在此去哪里？',
-                    'en': 'Hello! I am Lutagu AI, your Tokyo transit assistant. I can help with subway routes, station navigation, and travel tips. Where are you heading today?',
-                    'ja': 'こんにちは！Lutagu AI、東京の交通アシスタントです。地下鉄のルート案内や駅のナビゲーション、旅行に関する質問にお答えします。今日はどちらへ行かれますか？',
-                    'ar': 'مرحباً! أنا Lutagu AI، مساعدك في تنقلات طوكيو. يمكنني مساعدتك في مسارات المترو، والتنقل في المحطات، ونصائح السفر. إلى أين تتجه اليوم؟'
+                    'zh-TW': '你好！我是 LUTAGU，你的東京交通助手。我可以幫你查詢地鐵路線、提供車站導航，或回答旅遊相關問題。請問今天要在此去哪裡？',
+                    'zh': '你好！我是 LUTAGU，你的东京交通助手。我可以帮你查询地铁路线、提供车站导航，或回答旅游相关问题。请问今天要在此去哪里？',
+                    'en': 'Hello! I am LUTAGU, your Tokyo transit assistant. I can help with subway routes, station navigation, and travel tips. Where are you heading today?',
+                    'ja': 'こんにちは！LUTAGU、東京の交通アシスタントです。地下鉄のルート案内や駅のナビゲーション、旅行に関する質問にお答えします。今日はどちらへ行かれますか？',
+                    'ar': 'مرحباً! أنا LUTAGU، مساعدك في تنقلات طوكيو. يمكنني مساعدتك في مسارات المترو، والتنقل في المحطات، ونصائح السفر. إلى أين تتجه اليوم؟'
                 }
             },
             {

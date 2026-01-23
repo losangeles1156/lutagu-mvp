@@ -16,7 +16,12 @@
     "crawl:l3:toilets": "tsx scripts/l3_fill_toilets.ts",
     "crawl:l3:access": "tsx scripts/l3_fill_accessibility.ts",
     "security:scan": "npm audit --audit-level=high",
-    "analyze": "cross-env ANALYZE=true next build"
+    "analyze": "cross-env ANALYZE=true next build",
+    "services:start": "pm2 start ecosystem.config.js",
+    "services:stop": "pm2 stop ecosystem.config.js",
+    "services:restart": "pm2 restart ecosystem.config.js",
+    "services:delete": "pm2 delete ecosystem.config.js",
+    "services:logs": "pm2 logs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.6",
@@ -78,6 +83,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
     "jest": "^30.2.0",
+    "pm2": "^6.0.14",
     "postcss": "^8",
     "puppeteer": "^24.34.0",
     "sharp": "^0.34.5",
