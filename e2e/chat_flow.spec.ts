@@ -3,30 +3,34 @@ import { test, expect, Page } from '@playwright/test';
 test.describe('AI Chat Flow', () => {
 
     test.beforeEach(async ({ page }) => {
-        // Grant geolocation to avoid prompt hanging the LoginPanel logic
         await page.context().grantPermissions(['geolocation']);
+
+        // Determinstic Login Bypass via LocalStorage Injection
+        // We inject a dummy message to force initializeUIState() to switch to collapsed mode immediately
+        // This avoids waiting for the LoginPanel UI to load
+        const state = {
+            state: {
+                messages: [{
+                    id: 'init-bypass',
+                    role: 'assistant',
+                    content: 'Welcome',
+                    timestamp: Date.now()
+                }],
+                sessionStartTime: Date.now(),
+                version: 0
+            },
+            version: 0
+        };
+
+        await page.addInitScript((storage) => {
+            window.localStorage.setItem('lutagu-ui-state', JSON.stringify(storage));
+        }, state);
+
         await page.goto('/ja');
 
-        // Graceful Login Bypass
-        const loginOverlay = page.locator('.fixed.inset-0.z-\\[100\\]');
-        const mainUiBtn = page.locator('button:has-text("LUTAGU AI")').first();
-
-        // Wait longer for initial render (30s)
-        try {
-            await expect(loginOverlay.or(mainUiBtn)).toBeVisible({ timeout: 30000 });
-        } catch (e) {
-            console.log("Timeout waiting for initial UI state");
-        }
-
-        if (await loginOverlay.isVisible()) {
-            const browseBtn = page.locator('button:has(svg.lucide-compass)').first();
-            // If overlay wrapper is present, we MUST wait for the content to appear
-            await expect(browseBtn).toBeVisible({ timeout: 15000 });
-            await browseBtn.click();
-
-            // Wait for overlay to be gone
-            await expect(loginOverlay).not.toBeVisible({ timeout: 10000 });
-        }
+        // Wait for main UI to be visible instead of LoginOverlay
+        // The floating "LUTAGU AI" button should appear
+        await expect(page.locator('button:has-text("LUTAGU AI")')).toBeVisible({ timeout: 30000 });
     });
 
     // Helper to mock streaming response (kept for reference or future use)
