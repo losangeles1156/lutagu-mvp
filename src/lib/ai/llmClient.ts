@@ -48,9 +48,9 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
     }
 
-    // 2. Logic / Reasoning / Precision -> Gemini 3 Flash Preview (Gemini 2.0 based)
+    // 2. Logic / Reasoning / Precision -> Gemini 1.5 Flash (Stable)
     if (taskType === 'reasoning' || taskType === 'context_heavy') {
-        const result = await generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
+        const result = await generateGeminiResponse({ ...params, model: 'gemini-1.5-flash' });
         return result;
     }
 

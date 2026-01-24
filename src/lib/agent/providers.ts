@@ -37,8 +37,8 @@ const minimax = createOpenAI({
 export const geminiFlashLite = zeabur('gemini-2.5-flash-lite');
 export const mistralSmall = geminiFlashLite; // Legacy alias
 
-// 2. Brain / Logic: Gemini 3 Flash Preview (Primary), MiniMax M2.1 (Backup)
-export const geminiBrain = zeabur('gemini-3-flash-preview');
+// 2. Brain / Logic: Gemini 1.5 Flash (Primary), MiniMax M2.1 (Backup)
+export const geminiBrain = zeabur('gemini-1.5-flash');
 export const minimaxBrain = minimax('MiniMax-M2.1');
 
 // 3. Synthesizer / Chat: DeepSeek V3
