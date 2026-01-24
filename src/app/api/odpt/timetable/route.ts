@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BASE_URL = 'https://api.odpt.org/api/v4/odpt:StationTimetable';
-
+import { odptClient } from '@/lib/odpt/client';
 import { getJSTTime } from '@/lib/utils/timeUtils';
+
+export const runtime = 'nodejs';
 
 // Helper: Get JST Time and Day
 function getJSTContext() {
@@ -10,7 +10,6 @@ function getJSTContext() {
     const currentMinutes = hour * 60 + minute;
 
     // ODPT Calendar mapping logic
-    // 'isHoliday' from getJSTTime covers both Weekends (Sat/Sun) and Public Holidays.
     const calendarSelector = isHoliday ? ['SaturdayHoliday', 'Holiday', 'Saturday'] : ['Weekday'];
 
     return { currentMinutes, calendarSelector };
@@ -23,27 +22,14 @@ export async function GET(req: NextRequest) {
 
     if (!station) return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
 
-    // Normalize station ID for ODPT API: must use "odpt:Station:" prefix
+    // Normalize station ID to use colon (standard for ODPT API params)
     const apiStationId = station.replace(/^odpt[.:]Station:/, 'odpt:Station:');
-
-    const ODPT_API_KEY = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN || process.env.ODPT_API_TOKEN_BACKUP;
-    if (!ODPT_API_KEY) return NextResponse.json({ error: 'Missing API Key' }, { status: 500 });
 
     const { currentMinutes, calendarSelector } = getJSTContext();
 
-    // Fetch Timetables for this station
-    const odptSearchParams = new URLSearchParams({
-        'odpt:station': apiStationId,
-        'acl:consumerKey': ODPT_API_KEY
-    });
-    const apiUrl = `${BASE_URL}?${odptSearchParams.toString()}`;
-
     try {
-        const res = await fetch(apiUrl, { next: { revalidate: 3600 } });
-        if (!res.ok) throw new Error('ODPT API Error');
-        const data = await res.json();
-
-        const tables = Array.isArray(data) ? data : [];
+        // Use odptClient to handle Operator Strategy (Dev/Challenge/Public) and Token selection
+        const tables = await odptClient.getStationTimetable(apiStationId);
 
         // Filter by Calendar
         const relevantTables = tables.filter((t: any) => {
@@ -72,6 +58,8 @@ export async function GET(req: NextRequest) {
             const upcoming = trips.map((trip: any) => {
                 const [h, m] = trip['odpt:departureTime'].split(':').map(Number);
                 const tripMinutes = h * 60 + m;
+                // Handle late night trains (next day) if needed, but simple logic for now
+                // ODPT usually uses 24h+ format (e.g. 25:00) so this comparison holds
                 return { ...trip, minutes: tripMinutes };
             })
                 .filter((trip: any) => trip.minutes >= currentMinutes)
@@ -97,6 +85,6 @@ export async function GET(req: NextRequest) {
 
     } catch (error) {
         console.error('Timetable API Error:', error);
-        return NextResponse.json({ error: 'Failed' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed', details: String(error) }, { status: 500 });
     }
 }
