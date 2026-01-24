@@ -3,11 +3,20 @@
 import { useTranslations } from 'next-intl';
 import type { OdptStationTimetable } from '@/lib/odpt/types';
 
+/** Hub 組成資訊，用於智慧 fallback 顯示 */
+export interface HubInfo {
+    isHubStation: boolean;
+    hasMetro: boolean;
+    hasJR: boolean;
+    hasPrivate: boolean;
+}
+
 interface TimetableModuleProps {
     timetables: OdptStationTimetable[] | null;
     stationId: string;
     locale: string;
     selectedDirection?: string | null;
+    hubInfo?: HubInfo;
 }
 
 function getLocalizedStationName(id: string, locale: string): string {
@@ -120,7 +129,7 @@ function isJRStation(stationId: string): boolean {
     return stationId.includes('JR-East') || stationId.includes('JR.East');
 }
 
-export function TimetableModule({ timetables, stationId, locale, selectedDirection }: TimetableModuleProps) {
+export function TimetableModule({ timetables, stationId, locale, selectedDirection, hubInfo }: TimetableModuleProps) {
     const t = useTranslations('l4.dashboard');
     const now = new Date();
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -133,26 +142,73 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
         const isJR = isJRStation(stationId);
         const stationName = getLocalizedStationName(stationId, locale);
 
+        // 智慧判斷 Hub 組成
+        const isHub = hubInfo?.isHubStation ?? false;
+        const hubHasMetro = hubInfo?.hasMetro ?? false;
+        const hubHasJR = hubInfo?.hasJR ?? isJR;
+
+        // 根據 Hub 組成決定 fallback 訊息
+        let message: string;
+        let subMessage: string;
+
+        if (isHub && hubHasMetro && !hubHasJR) {
+            // Hub 有 Metro 但無 JR，數據應該可用但可能是 API 問題
+            message = locale.startsWith('ja')
+                ? 'ODPT API から時刻表を取得できませんでした'
+                : locale.startsWith('en')
+                    ? 'Could not retrieve timetable from ODPT API'
+                    : '無法從 ODPT API 取得時刻表';
+            subMessage = locale.startsWith('ja')
+                ? 'API接続に問題がある可能性があります。しばらくしてからお試しください。'
+                : locale.startsWith('en')
+                    ? 'There may be an API connection issue. Please try again later.'
+                    : '可能是 API 連線問題，請稍後再試。';
+        } else if (!isHub && isJR) {
+            // 單一 JR 站點（非 Hub）
+            message = locale.startsWith('ja')
+                ? 'JR線の時刻表はODPT APIでは提供されていません'
+                : locale.startsWith('en')
+                    ? 'JR timetables are not available via ODPT API'
+                    : 'JR 時刻表不在 ODPT API 提供範圍';
+            subMessage = locale.startsWith('ja')
+                ? 'JR東日本の公式サイトをご確認ください。'
+                : locale.startsWith('en')
+                    ? 'Please check the official JR East website.'
+                    : '請前往 JR 東日本官方網站查看。';
+        } else if (isHub && hubHasMetro && hubHasJR) {
+            // Hub 有 Metro 也有 JR，但數據為空
+            message = locale.startsWith('ja')
+                ? '時刻表を取得できませんでした'
+                : locale.startsWith('en')
+                    ? 'Unable to retrieve timetable'
+                    : '無法取得時刻表';
+            subMessage = locale.startsWith('ja')
+                ? 'JR線はODPT非対応。地下鉄はAPI接続に問題がある可能性があります。'
+                : locale.startsWith('en')
+                    ? 'JR lines are not in ODPT. Metro may have API issues.'
+                    : 'JR 線不在 ODPT，Metro 可能有 API 問題。';
+        } else {
+            // 預設 fallback
+            message = t('timetable.noData', { defaultValue: '時刻表が見つかりません' });
+            subMessage = locale.startsWith('ja')
+                ? '駅の掲示板または公式サイトをご確認ください。'
+                : locale.startsWith('en')
+                    ? 'Please check the station display or official website.'
+                    : '請確認車站告示牌或官方網站。';
+        }
+
         return (
             <div className="flex flex-col items-center justify-center p-8 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/60 text-center">
                 <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center text-3xl shadow-sm mb-4">
-                    🕰️
+                    {hubHasMetro && !hubHasJR ? '⚠️' : isJR || hubHasJR ? '🚃' : '🕰️'}
                 </div>
 
-                <p className="text-sm font-black text-slate-600">
-                    {t('timetable.noData', { defaultValue: '時刻表が見つかりません' })}
-                </p>
-                <p className="text-xs text-slate-400 mt-2 max-w-[220px] leading-relaxed">
-                    {locale.startsWith('ja')
-                        ? '駅の掲示板または公式サイトをご確認ください。'
-                        : locale.startsWith('en')
-                            ? 'Please check the station display or official website.'
-                            : '請確認車站告示牌或官方網站。'}
-                </p>
+                <p className="text-sm font-black text-slate-600">{message}</p>
+                <p className="text-xs text-slate-400 mt-2 max-w-[220px] leading-relaxed">{subMessage}</p>
 
                 <div className="flex flex-wrap gap-2 mt-4 justify-center">
-                    {/* If JR station, show direct JR link */}
-                    {jrUrl && (
+                    {/* JR 官網連結 */}
+                    {(isJR || hubHasJR) && jrUrl && (
                         <a
                             href={jrUrl}
                             target="_blank"
@@ -163,7 +219,7 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
                             <span>JR {stationName}</span>
                         </a>
                     )}
-                    {/* Generic search link */}
+                    {/* 通用搜尋連結 */}
                     <a
                         href={`https://www.google.com/search?q=${stationName}+station+timetable+東京`}
                         target="_blank"

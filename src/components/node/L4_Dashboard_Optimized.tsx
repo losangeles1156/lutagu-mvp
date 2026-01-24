@@ -38,6 +38,7 @@ import {
     AIIntelligenceHub,
     ExpertKnowledgeSection
 } from './dashboard';
+import type { HubInfo } from './dashboard/TimetableModule';
 
 interface L4DashboardProps {
     currentNodeId: string;
@@ -331,6 +332,23 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                 .finally(() => { setIsLoading(false); });
         }
     }, [task, stationId, timetableData, fetchJsonCached]);
+
+    // Compute Hub Info for TimetableModule smart fallback
+    const hubInfo = useMemo((): HubInfo => {
+        const allMembers = resolveHubStationMembers(stationId);
+        const hasMetro = allMembers.some(id => id.includes('TokyoMetro') || id.includes('Toei'));
+        const hasJR = allMembers.some(id => id.includes('JR-East'));
+        const hasPrivate = allMembers.some(id =>
+            id.includes('Keio') || id.includes('Keikyu') || id.includes('Keisei') ||
+            id.includes('Odakyu') || id.includes('Seibu') || id.includes('Tobu') || id.includes('Tokyu')
+        );
+        return {
+            isHubStation: allMembers.length > 1,
+            hasMetro,
+            hasJR,
+            hasPrivate
+        };
+    }, [stationId]);
 
     const askWithText = async (rawText: string) => {
         const text = String(rawText || '').trim();
@@ -649,7 +667,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                     </a>
                                 </div>
                             )}
-                            {task === 'time' && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">{isLoading && !timetableData ? <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div> : <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</motion.div>}
+                            {task === 'time' && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">{isLoading && !timetableData ? <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-slate-400" /></div> : <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} hubInfo={hubInfo} />}</motion.div>}
                             <AnimatePresence mode="wait">{(suggestion || activeDemo || activeKind) && (
                                 <motion.div key={activeKind || 'results'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="space-y-4">
                                     {activeDemo && (
@@ -679,7 +697,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                             </div>
                                         </div>
                                     )}
-                                    {activeKind && activeKind !== 'unknown' && activeKind !== 'route' && <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm"><div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">{t('details')}</div>{activeKind === 'fare' && <FareModule fares={fareData} locale={uiLocale} />}{activeKind === 'timetable' && <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} />}</div>}
+                                    {activeKind && activeKind !== 'unknown' && activeKind !== 'route' && <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm"><div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">{t('details')}</div>{activeKind === 'fare' && <FareModule fares={fareData} locale={uiLocale} />}{activeKind === 'timetable' && <TimetableModule timetables={timetableData} stationId={stationId} locale={uiLocale} selectedDirection={selectedDirection} hubInfo={hubInfo} />}</div>}
                                     {suggestion && activeKind === 'route' ? <div className="space-y-4"><InsightCards suggestion={suggestion} locale={uiLocale} visible={wantsExpertTips} /><div className="space-y-3">{suggestion.options.map((opt, idx) => <RouteResultCard key={`${opt.label}-${idx}`} option={{ ...opt, transfers: Number(opt.transfers ?? 0) }} rank={idx} locale={uiLocale} />)}</div></div> : suggestion ? <SuggestionModule suggestion={suggestion} /> : null}
                                 </motion.div>
                             )}</AnimatePresence>

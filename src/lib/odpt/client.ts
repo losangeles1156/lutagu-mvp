@@ -77,16 +77,14 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
         baseUrl = API_CHALLENGE;
         token = TOKENS.JR_EAST;
         if (!token) {
-            console.warn(`[ODPT Client] ODPT_API_KEY_JR_EAST missing for ${operator}. Graceful skip.`);
-            return [] as any;
+            throw new Error(`[ODPT Client] ODPT_API_KEY_JR_EAST is missing. Configure this environment variable for ${operator} data.`);
         }
     } else {
         // Strategy C: Metro, MIR -> Developer API, Metro Token
         baseUrl = API_DEV;
         token = TOKENS.METRO;
         if (!token) {
-            console.warn('[ODPT Client] ODPT_API_KEY_METRO missing. Graceful skip.');
-            return [] as any;
+            throw new Error('[ODPT Client] ODPT_API_KEY_METRO is missing. Configure this environment variable for Metro data.');
         }
     }
 
