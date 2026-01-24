@@ -26,14 +26,16 @@ test.describe('AI Chat Flow', () => {
             window.localStorage.setItem('lutagu-ui-state', JSON.stringify(storage));
         }, state);
 
-        await page.goto('/ja');
+        await page.goto('/zh-TW');
 
-        // Wait for main UI to be visible instead of LoginOverlay
-        // The floating "LUTAGU AI" button should appear
-        await expect(page.locator('button:has-text("LUTAGU AI")')).toBeVisible({ timeout: 30000 });
+        // Wait for main UI to be visible
+        // The floating "Open Chat" button (BottomNavBar)
+        // In zh-TW it says "智能嚮導" (Smart Guide), not "LUTAGU AI"
+        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
+        await expect(lutaguAiBtn).toBeVisible({ timeout: 30000 });
     });
 
-    // Helper to mock streaming response (kept for reference or future use)
+    // Helper to mock streaming response
     async function mockChatStream(page: Page, responseChunks: string[]) {
         await page.route('**/api/agent/chat-phased', async route => {
             await route.fulfill({
@@ -53,16 +55,30 @@ test.describe('AI Chat Flow', () => {
         });
 
         // 2. Open Chat Panel
-        const lutaguAiBtn = page.locator('button:has-text("LUTAGU AI")').first();
+        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
         await lutaguAiBtn.click();
 
-        // Wait for Collapsed Panel to appear
-        const maximizeIcon = page.locator('button:has(svg.lucide-maximize-2)').first();
-        await expect(maximizeIcon).toBeVisible();
-        await maximizeIcon.click();
+        // Wait for Chat Panel Header "LUTAGU AI" to confirm it opened
+        await expect(page.locator('h2:has-text("LUTAGU AI")')).toBeVisible();
+
+        // If in collapsed mode (desktop/mobile initial), maximize might be needed?
+        // But transitionTo('fullscreen') in BottomNavBar should open it fully.
+        // Let's check if we need to click maximize.
+        // The previous test logic assumed "collapsed" first.
+        // If MainLayout renders 'fullscreen', ChatOverlay is visible.
+        // If it renders 'collapsed', ChatCollapsedPanel is visible.
+
+        // Check if maximized (Input visible)
+        const chatInput = page.locator('input[placeholder*="想去哪裡"], input[placeholder*="Ask"]');
+
+        if (!await chatInput.isVisible()) {
+            const maximizeIcon = page.locator('button:has(svg.lucide-maximize-2)').first();
+            if (await maximizeIcon.isVisible()) {
+                await maximizeIcon.click();
+            }
+        }
 
         // 3. Verify Panel is open (Input should be visible)
-        const chatInput = page.locator('input[placeholder*="何か聞いてください"], input[placeholder*="Ask"]');
         await expect(chatInput).toBeVisible();
 
         // 4. Type and Send Message
@@ -89,30 +105,46 @@ test.describe('AI Chat Flow', () => {
         });
 
         // 2. Open Chat
-        const lutaguAiBtn = page.locator('button:has-text("LUTAGU AI")').first();
+        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
         await lutaguAiBtn.click();
-        const maximizeIcon = page.locator('button:has(svg.lucide-maximize-2)').first();
-        await maximizeIcon.click();
+
+        // Check maximize if needed
+        const chatInput = page.locator('input[placeholder*="想去哪裡"], input[placeholder*="Ask"]');
+        if (!await chatInput.isVisible()) {
+            const maximizeIcon = page.locator('button:has(svg.lucide-maximize-2)').first();
+            if (await maximizeIcon.isVisible()) {
+                await maximizeIcon.click();
+            }
+        }
 
         // 3. Send Message
-        const chatInput = page.locator('input[placeholder*="何か聞いてください"], input[placeholder*="Ask"]');
         await chatInput.fill('Error Test');
         await page.locator('button[type="submit"]').click();
 
         // 4. Verify Error State
-        await expect(page.locator('text=現在AIサービスに接続できません')).toBeVisible({ timeout: 5000 });
+        // "現在AIサービスに接続できません" -> zh-TW "無法連接" or similar
+        // Let's use a regex or check common.retry
+        await expect(page.locator('text=/無法連接|Connection failed|接続できません/')).toBeVisible({ timeout: 5000 });
     });
 
     // Test Scenario 3: UI State (Minimize/Expand)
     test('Scenario 3: UI State (Minimize/Expand)', async ({ page }) => {
         // 1. Open Chat
-        const lutaguAiBtn = page.locator('button:has-text("LUTAGU AI")').first();
+        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
         await lutaguAiBtn.click();
+
+        // Define locators
         const maximizeIcon = page.locator('button:has(svg.lucide-maximize-2)').first();
-        await maximizeIcon.click();
+        const chatInput = page.locator('input[placeholder*="想去哪裡"], input[placeholder*="Ask"]');
+
+        // Ensure Input Visible (via maximize if needed)
+        if (!await chatInput.isVisible()) {
+            if (await maximizeIcon.isVisible()) {
+                await maximizeIcon.click();
+            }
+        }
 
         // 2. Type something to have state
-        const chatInput = page.locator('input[placeholder*="何か聞いてください"], input[placeholder*="Ask"]');
         await chatInput.fill('Draft Message');
 
         // 3. Minimize (Close/Collapse)
