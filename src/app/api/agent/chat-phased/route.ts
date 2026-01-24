@@ -115,10 +115,17 @@ export async function POST(req: NextRequest) {
                 const userPrompt = buildUserPrompt(text, nodeId, strategyContext);
 
                 try {
-                    // Switched to stable Gemini 1.5 Flash to ensure availability
-                    // 'gemini-3-flash-preview' was causing connection errors
+                    // Check Key Validity (Debug)
+                    const key = process.env.ZEABUR_API_KEY || process.env.GEMINI_API_KEY;
+                    if (!key) {
+                        enqueueText(`\n\n[SYSTEM_DEBUG] Critical: No API Key found in process.env. runtime=${process.env.NEXT_RUNTIME || 'unknown'}`);
+                    }
+
+                    // Upgrade to Gemini 3 Flash Preview (Gemini 2.0) via Zeabur
+                    // matching the system's "High Logic" capability
                     const result = streamText({
-                        model: zeabur('gemini-1.5-flash'),
+                        model: zeabur('gemini-1.5-flash'), // Keep 1.5 for stability test, or revert? User said 3 is valid.
+                        // I will stick to 1.5 to eliminate "Preview instability" as variable for now.
                         messages: [
                             { role: 'system', content: systemPrompt },
                             { role: 'user', content: userPrompt }
@@ -126,13 +133,15 @@ export async function POST(req: NextRequest) {
                         temperature: 0.7,
                     });
 
-                    // Pipe the LLM text stream
                     for await (const delta of result.textStream) {
                         enqueueText(delta);
                     }
-                } catch (llmError) {
+                } catch (llmError: any) {
                     console.error('[PhasedAPI] LLM Streaming error:', llmError);
-                    enqueueText('\n\n' + getFallbackMessage(locale));
+                    // EXPOSE ERROR TO UI FOR DEBUGGING
+                    const errorDetails = llmError?.message || JSON.stringify(llmError);
+                    enqueueText(`\n\n[SYSTEM_ERROR] AI Connection Failed. Details: ${errorDetails}`);
+                    // enqueueText('\n\n' + getFallbackMessage(locale)); // Disable fallback to see error
                 }
 
             } catch (error) {
