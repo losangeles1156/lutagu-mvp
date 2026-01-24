@@ -16,7 +16,11 @@ interface RustRouteResponse {
     error?: string;
 }
 
-const RUST_SERVICE_URL = process.env.L4_SERVICE_URL || 'http://localhost:8787';
+const RUST_SERVICE_URL = process.env.L4_SERVICE_URL || process.env.L4_ROUTING_API_URL || 'http://localhost:8787';
+
+if (RUST_SERVICE_URL.includes('localhost') && process.env.NODE_ENV === 'production') {
+    console.error('⚠️ [RustL4Client] RUST_SERVICE_URL is defaulting to localhost in production!');
+}
 
 // Helper types for localization
 type SupportedLocale = 'zh' | 'zh-TW' | 'ja' | 'en' | 'ar';

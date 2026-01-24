@@ -5,34 +5,26 @@ test.describe('AI Chat Flow', () => {
     test.beforeEach(async ({ page }) => {
         await page.context().grantPermissions(['geolocation']);
 
-        // Determinstic Login Bypass via LocalStorage Injection
-        // We inject a dummy message to force initializeUIState() to switch to collapsed mode immediately
-        // This avoids waiting for the LoginPanel UI to load
-        const state = {
-            state: {
-                messages: [{
-                    id: 'init-bypass',
-                    role: 'assistant',
-                    content: 'Welcome',
-                    timestamp: Date.now()
-                }],
-                sessionStartTime: Date.now(),
-                version: 0
-            },
-            version: 0
-        };
-
-        await page.addInitScript((storage) => {
-            window.localStorage.setItem('lutagu-ui-state', JSON.stringify(storage));
-        }, state);
-
         await page.goto('/zh-TW');
 
-        // Wait for main UI to be visible
-        // The floating "Open Chat" button (BottomNavBar)
-        // In zh-TW it says "智能嚮導" (Smart Guide), not "LUTAGU AI"
-        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
-        await expect(lutaguAiBtn).toBeVisible({ timeout: 30000 });
+        // Wait for hydration
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(2000);
+
+        // Find the "先逛逛" button using text matching
+        const browseBtn = page.locator('button', { hasText: '先逛逛' }).first();
+
+        // If we're on the login page, click "先逛逛" to bypass
+        if (await browseBtn.count() > 0 && await browseBtn.isVisible()) {
+            // Use force:true to click through any overlays
+            await browseBtn.click({ force: true });
+            await page.waitForTimeout(2000); // Give it time to transition
+        }
+
+        // The AI guide button should be visible
+        // Use a very permissive selector to ensure we find it
+        const aiGuideBtn = page.locator('button').filter({ hasText: /智能嚮導|AI Guide/ }).first();
+        await expect(aiGuideBtn).toBeVisible({ timeout: 20000 });
     });
 
     // Helper to mock streaming response
@@ -55,8 +47,8 @@ test.describe('AI Chat Flow', () => {
         });
 
         // 2. Open Chat Panel
-        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
-        await lutaguAiBtn.click();
+        const aiBtn = page.locator('button', { hasText: '智能嚮導' });
+        await aiBtn.click();
 
         // Wait for Chat Panel Header "LUTAGU AI" to confirm it opened
         await expect(page.locator('h2:has-text("LUTAGU AI")')).toBeVisible();
@@ -105,8 +97,8 @@ test.describe('AI Chat Flow', () => {
         });
 
         // 2. Open Chat
-        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
-        await lutaguAiBtn.click();
+        const aiBtn = page.locator('button', { hasText: '智能嚮導' });
+        await aiBtn.click();
 
         // Check maximize if needed
         const chatInput = page.locator('input[placeholder*="想去哪裡"], input[placeholder*="Ask"]');
@@ -130,8 +122,8 @@ test.describe('AI Chat Flow', () => {
     // Test Scenario 3: UI State (Minimize/Expand)
     test('Scenario 3: UI State (Minimize/Expand)', async ({ page }) => {
         // 1. Open Chat
-        const lutaguAiBtn = page.locator('button').filter({ hasText: /智能嚮導|Smart Guide|LUTAGU AI/ }).first();
-        await lutaguAiBtn.click();
+        const aiBtn = page.locator('button', { hasText: '智能嚮導' });
+        await aiBtn.click();
 
         // Define locators
         const maximizeIcon = page.locator('button:has(svg.lucide-maximize-2)').first();

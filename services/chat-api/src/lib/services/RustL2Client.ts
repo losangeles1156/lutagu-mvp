@@ -1,5 +1,9 @@
 
-const RUST_L2_URL = process.env.L2_SERVICE_URL || 'http://localhost:8081';
+const RUST_L2_URL = process.env.L2_SERVICE_URL || process.env.L2_STATUS_API_URL || 'http://localhost:8081';
+
+if (RUST_L2_URL.includes('localhost') && process.env.NODE_ENV === 'production') {
+    console.error('⚠️ [RustL2Client] RUST_L2_URL is defaulting to localhost in production!');
+}
 
 export interface LineStatus {
     line: string;

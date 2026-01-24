@@ -23,7 +23,7 @@ export interface DemoScenario {
 
 export const DEMO_SCENARIOS: DemoScenario[] = [
   {
-    id: '01_overtourism',
+    id: 'overtourism',
     title: '解決過度觀光：從使用者感受出發的在地避人建議',
     title_ja: 'オーバーツーリズムの解決：ユーザーの感性に寄り添ったローカルな穴場提案',
     title_en: 'Solving Overtourism: Local Hidden Gem Recommendations Based on User Feelings',
@@ -54,7 +54,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     ]
   },
   {
-    id: '02_disruption',
+    id: 'disruption',
     title: '應對交通中斷：專家知識引導的最優決策',
     title_ja: '交通機関の乱れへの対応：専門知識に基づいた最適な意思決定',
     title_en: 'Handling Traffic Disruptions: Optimal Decision Making Guided by Expert Knowledge',
@@ -85,7 +85,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     ]
   },
   {
-    id: '03_handsfree',
+    id: 'handsfree',
     title: '實踐空手觀光：動態解決行李寄放難題',
     title_ja: '手ぶら観光の実現：荷物預かりの課題を動的に解決',
     title_en: 'Hands-free Tourism: Dynamically Solving Luggage Storage Challenges',
@@ -120,7 +120,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     ]
   },
   {
-    id: '04_accessibility',
+    id: 'accessibility',
     title: '無障礙導航：為家庭與行動不便者設計的貼心路徑',
     title_ja: 'バリアフリーナビ：家族や移動が困難な方のための親切なルート設計',
     title_en: 'Accessibility Navigation: Thoughtful Paths for Families and People with Limited Mobility',

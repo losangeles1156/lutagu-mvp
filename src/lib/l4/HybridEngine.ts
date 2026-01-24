@@ -27,6 +27,7 @@ import { executeSkill, skillRegistry } from './skills/SkillRegistry';
 import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
 import { getPartnerUrl } from '@/config/partners';
 import { STATION_MAP } from '@/lib/api/nodes';
+import { searchVectorDB, VectorSearchResult } from '@/lib/api/vectorService';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -280,6 +281,21 @@ export class HybridEngine {
                 const t = k.traps?.slice(0, 3).map((it: any) => `[Trap] ${it.title}: ${it.desc}`).join('\n') || '';
                 const h = k.hacks?.slice(0, 3).map((it: any) => `[Hack] ${it.title}: ${it.desc}`).join('\n') || '';
                 activeKnowledgeSnippet = `Station Knowledge:\n${t}\n${h}`;
+            }
+
+            // Vector DB RAG: Search for relevant expert knowledge
+            let vectorKnowledge = '';
+            try {
+                const vectorResults = await searchVectorDB(text, 3);
+                if (vectorResults.length > 0) {
+                    logs.push(`[VectorService] Found ${vectorResults.length} relevant knowledge chunks`);
+                    vectorKnowledge = vectorResults
+                        .map((r: VectorSearchResult) => `[RAG] ${r.payload.content}`)
+                        .join('\n');
+                    activeKnowledgeSnippet = vectorKnowledge + (activeKnowledgeSnippet ? '\n\n' + activeKnowledgeSnippet : '');
+                }
+            } catch (e) {
+                logs.push(`[VectorService] Search failed: ${e}`);
             }
 
             const systemPrompt = this.buildSystemPrompt(locale);

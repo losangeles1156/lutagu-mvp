@@ -1,6 +1,6 @@
 # LUTAGU AI 對話功能測試報告
 
-**測試時間**: 2026-01-24 03:54:44
+**測試時間**: 2026-01-24 11:44:15
 **測試環境**: development
 **API 端點**: http://localhost:3000/api/agent/chat
 

@@ -31,18 +31,23 @@ async fn main() -> anyhow::Result<()> {
     // Check Key Collection (Synchronous Initialization)
     let collection_name = "expert_knowledge";
     
-    // For migration: Always delete and recreate to ensure dimension matches (1024)
-    info!("Syncing collection: {}", collection_name);
-    let _ = client_arc.delete_collection(collection_name).await;
+    // Conditional initialization: Only create if collection doesn't exist (Persistent Mode)
+    info!("Checking collection: {}", collection_name);
     
-    let create_request = CreateCollectionBuilder::new(collection_name)
-        .vectors_config(VectorParamsBuilder::new(1024, Distance::Cosine))
-        .build();
+    let collection_exists = client_arc.collection_info(collection_name).await.is_ok();
     
-    let res = client_arc.create_collection(&create_request).await;
-    match res {
-        Ok(_) => info!("Collection created successfully!"),
-        Err(e) => tracing::error!("Failed to create collection: {}", e),
+    if !collection_exists {
+        info!("Collection '{}' not found, creating...", collection_name);
+        let create_request = CreateCollectionBuilder::new(collection_name)
+            .vectors_config(VectorParamsBuilder::new(1024, Distance::Cosine))
+            .build();
+        
+        match client_arc.create_collection(&create_request).await {
+            Ok(_) => info!("Collection '{}' created successfully!", collection_name),
+            Err(e) => tracing::error!("Failed to create collection: {}", e),
+        }
+    } else {
+        info!("Collection '{}' already exists, skipping creation.", collection_name);
     }
 
     // Start HTTP Server (Cloud Run compatible)

@@ -59,8 +59,39 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }));
 
 // Health check
-app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'chat-api', timestamp: new Date().toISOString() });
+app.get('/health', async (_req, res) => {
+    const health: any = {
+        status: 'ok',
+        service: 'chat-api',
+        timestamp: new Date().toISOString(),
+        dependencies: {
+            l4_routing: 'unknown',
+            l2_status: 'unknown'
+        }
+    };
+
+    try {
+        const l4Url = process.env.L4_SERVICE_URL || process.env.L4_ROUTING_API_URL || 'http://localhost:8787';
+        const l2Url = process.env.L2_SERVICE_URL || process.env.L2_STATUS_API_URL || 'http://localhost:8081';
+
+        // Simple ping/health probe
+        const [l4Res, l2Res] = await Promise.allSettled([
+            fetch(`${l4Url}/l4/route?from=test&to=test`, { method: 'GET' }).catch(() => null),
+            fetch(`${l2Url}/health`, { method: 'GET' }).catch(() => null)
+        ]);
+
+        health.dependencies.l4_routing = l4Res.status === 'fulfilled' && l4Res.value ? 'reachable' : 'unreachable';
+        health.dependencies.l2_status = l2Res.status === 'fulfilled' && l2Res.value ? 'reachable' : 'unreachable';
+
+        if (health.dependencies.l4_routing === 'unreachable' || health.dependencies.l2_status === 'unreachable') {
+            health.status = 'degraded';
+        }
+    } catch (e) {
+        health.status = 'error';
+        health.error = String(e);
+    }
+
+    res.json(health);
 });
 
 // Routes

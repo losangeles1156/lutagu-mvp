@@ -291,7 +291,7 @@ async fn main() -> anyhow::Result<()> {
 
     let db_opts = PgConnectOptions::from_str(&config.database_url)?
         .statement_cache_capacity(0)
-        .log_statements(log::LevelFilter::Debug);
+        .log_statements(log::LevelFilter::Off);
 
     let pool = PgPoolOptions::new()
         .max_connections(10)
@@ -478,17 +478,19 @@ async fn load_snapshot(pool: &sqlx::PgPool, station_id: &str) -> anyhow::Result<
     for variant in &variants {
         if !validate_id_safe(variant) { continue; }
         
-        let sql = format!("SELECT status_code, reason_ja, reason_zh_tw, weather_info, updated_at FROM transit_dynamic_snapshot WHERE station_id = '{}' ORDER BY updated_at DESC LIMIT 1", variant);
+        let sql = format!("SELECT status_code, reason_ja, reason_zh_tw, weather_info::text as weather_info_text, updated_at FROM transit_dynamic_snapshot WHERE station_id = '{}' ORDER BY updated_at DESC LIMIT 1", variant);
         let row = sqlx::query(&sql)
             // No .bind() -> Simple Query Protocol
             .fetch_optional(pool)
             .await?;
         if let Some(r) = row {
+            let weather_info_text: Option<String> = r.try_get("weather_info_text").ok();
+            let weather_info = weather_info_text.and_then(|t| serde_json::from_str(&t).ok());
             return Ok(SnapshotRow {
                 status_code: r.try_get("status_code").ok(),
                 reason_ja: r.try_get("reason_ja").ok(),
                 reason_zh_tw: r.try_get("reason_zh_tw").ok(),
-                weather_info: r.try_get("weather_info").ok(),
+                weather_info,
                 updated_at: r.try_get("updated_at").ok(),
             });
         }
@@ -513,16 +515,19 @@ async fn load_node(pool: &sqlx::PgPool, station_id: &str) -> anyhow::Result<Node
     for variant in &variants {
         if !validate_id_safe(variant) { continue; }
 
-        let sql = format!("SELECT transit_lines, coordinates FROM nodes WHERE id = '{}' LIMIT 1", variant);
+        let sql = format!("SELECT transit_lines::text as transit_lines_text, coordinates::text as coordinates_text FROM nodes WHERE id = '{}' LIMIT 1", variant);
         let row = sqlx::query(&sql)
-            // No .bind() -> Simple Query Protocol
             .fetch_optional(pool)
             .await?;
         if let Some(r) = row {
             tracing::info!("Found match for variant: {}", variant);
+            let transit_lines_text: Option<String> = r.try_get("transit_lines_text").ok();
+            let transit_lines = transit_lines_text.and_then(|t| serde_json::from_str(&t).ok());
+            let coordinates_text: Option<String> = r.try_get("coordinates_text").ok();
+            let coordinates = coordinates_text.and_then(|t| serde_json::from_str(&t).ok());
             return Ok(NodeRow {
-                transit_lines: r.try_get("transit_lines").ok(),
-                coordinates: r.try_get("coordinates").ok(),
+                transit_lines,
+                coordinates,
             });
         }
     }
@@ -896,7 +901,7 @@ async fn fetch_odpt_disruptions(state: &AppState, lines: &Vec<LineDef>) -> Vec<D
 }
 
 async fn fetch_train_info_for_operator(client: &reqwest::Client, base: &str, operator_id: &str, token: String) -> Vec<Value> {
-    let mut params = vec![("odpt:operator", operator_id), ("acl:consumerKey", token.as_str())];
+    let params = vec![("odpt:operator", operator_id), ("acl:consumerKey", token.as_str())];
     let url = format!("{}/odpt:TrainInformation", base);
     let res = client.get(url).query(&params).send().await;
     if let Ok(resp) = res {
