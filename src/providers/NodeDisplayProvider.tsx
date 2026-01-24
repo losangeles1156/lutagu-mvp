@@ -3,19 +3,7 @@
 import React, { createContext, useContext, useReducer, useCallback, ReactNode, useEffect } from 'react';
 
 // Types
-export interface NodeDatum {
-    id: string;
-    city_id: string;
-    name: { [locale: string]: string };
-    type: string;
-    location: { coordinates: [number, number] };
-    geohash: string;
-    vibe: string | null;
-    is_hub: boolean;
-    parent_hub_id: string | null;
-    zone: string;
-    ward_id?: string | null;
-}
+import { NodeDatum } from '@/lib/api/nodes';
 
 export interface HubMember {
     member_id: string;

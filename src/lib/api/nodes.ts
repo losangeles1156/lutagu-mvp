@@ -153,6 +153,26 @@ export interface LiveStatus {
     updated_at?: string;
 }
 
+// L4: Mobility Strategy
+export interface ActionNudge {
+    type: 'primary' | 'secondary';
+    title: string;
+    content: string;
+    advice: string;
+}
+
+export interface NodeProfile {
+    node_id: string;
+    category_counts: CategoryCounts;
+    vibe_tags: string[] | Record<string, any>; // Allow raw JSONB or string[]
+    l2_status?: LiveStatus;
+    l3_facilities?: L3Facility[];
+    l4_cards?: ActionCard[];
+    l1_dna?: L1_DNA_Data;
+    l4_knowledge?: any; // Maps to L4Knowledge in frontend
+    external_links?: { title: LocaleString; url: string; icon?: string; bg?: string; tracking_id?: string; type?: string }[];
+}
+
 
 export async function fetchNearbyNodes(lat: number, lon: number, radiusMeters: number = 2000) {
     try {

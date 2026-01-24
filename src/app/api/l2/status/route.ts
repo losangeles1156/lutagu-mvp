@@ -413,8 +413,10 @@ export async function GET(request: Request) {
                 const operator = match[1];
                 const line = match[2];
                 const station = match[3];
-                // Try various combinations
+                // Try various combinations (including full format with line name)
                 const candidates = [
+                    `odpt.Station:${operator}.${line}.${station}`, // Exact match with line name
+                    `odpt:Station:${operator}.${line}.${station}`, // With colon prefix
                     `odpt:Station:${operator}.${station}`,
                     `odpt.Station:${operator}.${station}`,
                     `odpt:Station:${operator}.${line === 'Oedo' ? 'Shinjuku' : station}`, // Special case for Oedo Shinjuku
