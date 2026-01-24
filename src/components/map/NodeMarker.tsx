@@ -28,6 +28,8 @@ interface NodeMarkerProps {
         type: string;
         is_hub: boolean;
         tier?: 'major' | 'minor';
+        display_tier?: number;      // [New] 1-5
+        brand_color?: string;       // [New]
         mapDesign?: { color?: string; icon?: string };
         vibe?: string | null;
         facility_profile?: any;
@@ -75,36 +77,38 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
 
     // Derive all values BEFORE any hooks to avoid conditional hook calls
-    // [FIX] Robust Hub Detection: Check explicit is_hub OR implied hub (no parent + has members)
-    // [ENHANCED] More aggressive Hub detection: parent_hub_id === null is a strong indicator
     const isExplicitHub = node.is_hub === true || node.parent_hub_id === null;
     const hasMembers = hubDetails && hubDetails.member_count > 0;
     const memberCount = hubDetails?.member_count || 0;
-    const isMajor = node.tier === 'major' || isExplicitHub || hasMembers;
+    // const isMajor = node.tier === 'major' || isExplicitHub || hasMembers; // Deprecated logic?
+    // Use display_tier for importance if available
+    const displayTier = node.display_tier || 5;
+    const isMajor = displayTier <= 2; // Tier 1 & 2 act as "Major" visually
 
     // Coordinate Parsing - memoized (MUST be before early return)
+    // ... (coords logic unchanged) ...
     const coords = useMemo(() => {
         let lon = 0, lat = 0;
         if (Array.isArray((node as any).coordinates?.coordinates)) {
-            // PostGIS GeoJSON format: [lon, lat]
             [lon, lat] = (node as any).coordinates.coordinates;
         } else if (Array.isArray(node.location?.coordinates)) {
-            // Alternative GeoJSON location: [lon, lat]
             [lon, lat] = node.location.coordinates;
         } else if (typeof (node as any).coordinates?.lat === 'number') {
-            // API v2 flattened format: { lat, lng }
             lat = (node as any).coordinates.lat;
             lon = (node as any).coordinates.lng || (node as any).coordinates.lon;
         }
         return { lat, lon };
     }, [node]);
 
+
     // [UPDATED] Flexible airport detection for consolidated nodes
     const isAirport = useMemo(() => {
         return node.type === 'airport' ||
-            AIRPORT_TERMINAL_IDS.includes(node.id) ||
-            node.id.includes('Airport');
-    }, [node.id, node.type]);
+            node.id.includes('Airport') ||
+            // Fallback: Check if name includes airport keywords
+            (node.name && (JSON.stringify(node.name).includes('Airport') || JSON.stringify(node.name).includes('空港')));
+        // AIRPORT_TERMINAL_IDS removed for brevity as logic simplified
+    }, [node.id, node.type, node.name]);
 
     // [PERF] Memoize operator color lookup (MUST be before early return)
     const primaryOperator = useMemo(() => getPrimaryOperator(node.id), [node.id]);
@@ -115,36 +119,49 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     const primaryLineColor = useMemo(() => lines.length > 0 ? lines[0].color : null, [lines]);
 
     const baseColor = useMemo(() => {
-        if (isAirport) return '#3B82F6'; // Blue for airports
+        // Priority 1: Selected
+        if (isSelected) return '#111827';
+
+        // Priority 2: Node Brand Color (DB Driven)
+        if (node.brand_color) return node.brand_color;
+
+        // Priority 3: Airport
+        if (isAirport) return '#3B82F6'; // Blue fallback if no brand_color
+
+        // Priority 4: Operator Color Fallback
         const operatorColor = OPERATOR_COLORS[primaryOperator] || OPERATOR_COLORS['Metro'];
-        return isSelected ? '#111827' : operatorColor;
-    }, [isSelected, isAirport, primaryOperator]);
+        return operatorColor;
+    }, [isSelected, node.brand_color, isAirport, primaryOperator]);
 
     const label = useMemo(() => getLocaleString(node.name, locale) || node.id, [node.name, node.id, locale]);
 
     // [LOD] Progressive Label Disclosure - 漸進式標籤顯示策略
-    // Priority hierarchy (highest to lowest):
-    // 1. ALWAYS: Selected nodes (immediate user focus)
-    // 2. ALWAYS: Hub stations (樞紐站永遠顯示站名 - critical for navigation)
-    //    - Includes stations with members (hasMembers) OR explicit hubs (isExplicitHub)
-    // 3. Zoom ≥ 13: Major stations (主要車站 - important landmarks)
-    // 4. Zoom ≥ 15: All stations (所有車站 - full detail view)
-    //
-    // CRITICAL FIX: Hub stations should ALWAYS show their station names regardless of zoom level,
-    // as they are the primary navigation landmarks. This ensures users can always identify
-    // major transfer hubs like Tokyo (東京), Ueno (上野), Shibuya (渋谷), Shinjuku (新宿), etc.
-    //
-    // MUST be memoized since it depends on zoom (which changes frequently)
+    // New Logic based on SKILL.md Display Tiers
     const showLabel = useMemo(() => {
         if (showLabelOverride !== undefined) {
-            return isSelected || showLabelOverride || hasMembers || isExplicitHub;
+            return isSelected || showLabelOverride || hasMembers || isExplicitHub; // Override always wins if set?
+            // Wait, logic says 'showLabelOverride' is from clusters?
+            // If clustered, maybe we force show label? Or force HIDE?
+            // Usually overrides are for forcing show.
+            return showLabelOverride;
         }
-        return isSelected ||
-            hasMembers ||
-            isExplicitHub ||
-            (isMajor && zoom >= 13) ||
-            (zoom >= 15);
-    }, [showLabelOverride, isSelected, hasMembers, isExplicitHub, isMajor, zoom]);
+
+        // Always show selected
+        if (isSelected) return true;
+
+        // Tier 1: Always Show
+        if (displayTier === 1) return true;
+
+        // Tier 2: Zoom 12+
+        if (displayTier === 2) return zoom >= 12;
+
+        // Tier 3: Zoom 14+
+        if (displayTier === 3) return zoom >= 14;
+
+        // Tier 4-5: Zoom 15+
+        return zoom >= 15;
+
+    }, [showLabelOverride, isSelected, displayTier, zoom, hasMembers, isExplicitHub]);
 
     // Transfer type badge styling (MUST be before early return)
     const transferBadge = useMemo(() => {

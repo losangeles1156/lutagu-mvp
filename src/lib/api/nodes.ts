@@ -12,12 +12,6 @@ function getLoc(obj: any) {
     return obj['zh-TW'] || obj.zh || obj.en || obj.ja || '';
 }
 
-
-
-// Types aligning with DB schema
-// Version 2.0: Added version control for cache invalidation
-// Version 3.0: Added data_hash for change detection
-
 export interface NodeDatum {
     id: string;
     city_id: string;
@@ -29,7 +23,13 @@ export interface NodeDatum {
     is_hub: boolean;
     parent_hub_id: string | null;
     zone: string;
-    tier?: 'major' | 'minor';
+    // [Updated] Display Rules Fields
+    display_tier: number;       // 1-5 (Default 5)
+    min_zoom_level: number;     // Default 16
+    daily_passengers?: number;
+    brand_color?: string;       // HEX color
+    primary_operator?: string;
+
     // Version control fields
     updated_at?: number;  // Unix timestamp (milliseconds) for version control
     version?: number;     // Incremental version number
@@ -39,7 +39,6 @@ export interface NodeDatum {
 
 /**
  * Ensures location is always a GeoJSON-like object { coordinates: [lon, lat] }
- * Handles: WKT strings, Objects with coordinates, or raw DB geography format
  */
 export function parseLocation(loc: any): { coordinates: [number, number] } {
     if (!loc) return { coordinates: [0, 0] };
@@ -52,12 +51,10 @@ export function parseLocation(loc: any): { coordinates: [number, number] } {
         return { coordinates: [loc.coordinates.coordinates[0], loc.coordinates.coordinates[1]] };
     }
 
-    // Case 1: Already correct object
     if (loc.coordinates && Array.isArray(loc.coordinates)) {
         return { coordinates: [loc.coordinates[0], loc.coordinates[1]] };
     }
 
-    // Case 2: WKT String (e.g. "POINT(139.7774 35.7141)")
     if (typeof loc === 'string' && loc.startsWith('POINT')) {
         const matches = loc.match(/\(([^)]+)\)/);
         if (matches) {
@@ -66,7 +63,6 @@ export function parseLocation(loc: any): { coordinates: [number, number] } {
         }
     }
 
-    // Case 3: Standard object from PostGIS (Sometime it's {type: "Point", coordinates: [...]})
     if (loc.type === 'Point' && loc.coordinates) {
         return { coordinates: loc.coordinates as [number, number] };
     }
@@ -75,24 +71,19 @@ export function parseLocation(loc: any): { coordinates: [number, number] } {
 }
 
 function normalizeNodeRow(n: any) {
-    // Standardize node type: Prioritize DB schema node_type, convert to lowercase
     const type = String(n?.node_type ?? n?.type ?? 'station').toLowerCase();
     const location = parseLocation(n?.location ?? n?.coordinates);
 
-    // Unified is_hub logic: Prioritize explicit value, otherwise check parent_hub_id
     const explicitIsHub = n?.is_hub;
     const isHub = typeof explicitIsHub === 'boolean'
         ? explicitIsHub
         : (n?.parent_hub_id === null || n?.parent_hub_id === undefined);
 
-    // Parse version control fields
-    // updated_at: Unix timestamp (milliseconds) from DB or ISO string
     let updatedAt: number | undefined;
     if (n?.updated_at) {
         if (typeof n.updated_at === 'number') {
             updatedAt = n.updated_at;
         } else if (typeof n.updated_at === 'string') {
-            // Convert ISO string to Unix timestamp
             updatedAt = new Date(n.updated_at).getTime();
         }
     }
@@ -105,11 +96,16 @@ function normalizeNodeRow(n: any) {
         geohash: typeof n?.geohash === 'string' ? n.geohash : String(n?.geohash ?? ''),
         city_id: typeof n?.city_id === 'string' ? n.city_id : String(n?.city_id ?? ''),
         zone: typeof n?.zone === 'string' ? n.zone : String(n?.zone ?? 'core'),
-        // Version control fields
+
+        display_tier: typeof n?.display_tier === 'number' ? n.display_tier : 5,
+        min_zoom_level: typeof n?.min_zoom_level === 'number' ? n.min_zoom_level : 16,
+        daily_passengers: typeof n?.daily_passengers === 'number' ? n.daily_passengers : undefined,
+        brand_color: typeof n?.brand_color === 'string' ? n.brand_color : undefined,
+        primary_operator: typeof n?.primary_operator === 'string' ? n.primary_operator : undefined,
+
         version: typeof n?.version === 'number' ? n.version : (n?.version ?? undefined),
         updated_at: updatedAt,
         data_hash: typeof n?.data_hash === 'string' ? n.data_hash : (n?.data_hash ?? undefined),
-        // Ward ID for ward-based node grouping
         ward_id: typeof n?.ward_id === 'string' ? n.ward_id : (n?.ward_id ?? undefined)
     };
 }
@@ -155,29 +151,6 @@ export interface LiveStatus {
         wind?: number;
     };
     updated_at?: string;
-}
-
-// L3: Service Facilities - Deprecated in favor of L3Facility
-// export interface ServiceFacility { ... }
-
-// L4: Mobility Strategy
-export interface ActionNudge {
-    type: 'primary' | 'secondary';
-    title: string;
-    content: string;
-    advice: string;
-}
-
-export interface NodeProfile {
-    node_id: string;
-    category_counts: CategoryCounts;
-    vibe_tags: string[] | Record<string, any>; // Allow raw JSONB or string[]
-    l2_status?: LiveStatus;
-    l3_facilities?: L3Facility[];
-    l4_cards?: ActionCard[];
-    l1_dna?: L1_DNA_Data;
-    l4_knowledge?: any; // Maps to L4Knowledge in frontend
-    external_links?: { title: LocaleString; url: string; icon?: string; bg?: string; tracking_id?: string; type?: string }[];
 }
 
 

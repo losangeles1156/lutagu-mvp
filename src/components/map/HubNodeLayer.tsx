@@ -133,68 +133,75 @@ export function HubNodeLayer({
 
         const expandedSet = expandedNodeIds ? new Set(expandedNodeIds) : null;
 
-        // Define Thresholds
-        // Zoom < 13: Only Mega Hubs (4+ lines)
-        // Zoom 13-14: All Hubs
-        // Zoom >= 15: All Stations
-        const minMemberCount = clampedZoom < 13 ? 4 : (clampedZoom < 15 ? 2 : 0);
-        const showAllForZoom = showAllNodes || clampedZoom >= 15;
-        const showAllHubsForZoom = clampedZoom >= 13;
+        // [New] SKILL.md Logic: simple check against min_zoom_level
+        // Tier 1 (Super Hub): min_zoom 1
+        // Tier 2 (Major Hub): min_zoom 12
+        // Tier 3 (Minor Hub): min_zoom 14
+        // Tier 4 (Regular): min_zoom 15
+        // Tier 5 (Local): min_zoom 16
 
-        // Filter Step 1: Eligibility & Viewport
-        const inViewCandidates = nodes.filter(n => {
+        // Exception: Always show selected nodes and their families
+        return nodes.filter(n => {
             // 1. Must be active
             const isActive = (n as any).is_active ?? (n as any).hierarchy?.is_active ?? true;
             if (isActive === false) return false;
 
-            // 2. Always show nodes related to current selection
+            // 2. Always show nodes related to current selection (Override)
             if (n.id === currentNodeId) return true;
             if (n.parent_hub_id === expandedHubId) return true; // Children of expanded
             if (n.id === expandedHubId) return true;            // The expanded hub itself
             if (expandedSet && expandedSet.has(n.id)) return true;
 
-            // 3. Viewport Check
+            // 3. Viewport Check (Performance)
             const [lon, lat] = n.location.coordinates;
             if (lat < viewportBounds.swLat || lat > viewportBounds.neLat ||
                 lon < viewportBounds.swLng || lon > viewportBounds.neLng) {
                 return false;
             }
 
-            // 4. Default Visibility Logic (Hub vs Child)
-            if (showAllForZoom) return true;
+            // 4. Force Show All Mode (e.g. Ward Mode)
+            if (showAllNodes) return true;
 
-            const isExplicitHub = n.is_hub === true || n.parent_hub_id === null;
-            if (!isExplicitHub) return false;
+            // 5. [Core Logic] Display Tier Check
+            // Use DB min_zoom_level if available, otherwise fallback logic
+            if (n.min_zoom_level && clampedZoom >= n.min_zoom_level) {
+                return true;
+            }
 
-            if (showAllHubsForZoom) return true;
+            // Fallback for legacy nodes (display_tier 5 assumed if missing)
+            // If display_tier is missing, it defaults to 5 (Zoom 16+)
+            // But we already set defaults in normalization.
+            // Double check logic:
+            if (!n.min_zoom_level) {
+                // Legacy Fallback (should normally be covered by normalization)
+                if (clampedZoom >= 16) return true;
+            }
 
-            // 5. LOD Connectivity Check
-            const count = hubDetails[n.id]?.member_count || 0;
-            return count >= minMemberCount;
+            return false;
         });
 
-        // Step 2: Sorting (Priority to Connectivity)
-        // If expanded, keep expanded group at top/together logic if needed, 
-        // but for now, simple sort is enough as long as we don't slice out the selected one.
+        // Sorting: Prioritize Tier 1 > Tier 2 > Others
+        // And always keep selected on top.
+    }, [nodes, showAllNodes, viewportBounds, clampedZoom, expandedHubId, expandedNodeIds, currentNodeId]);
 
-        inViewCandidates.sort((a, b) => {
-            // Always prioritize selected/expanded
-            const aIsSelected = a.id === expandedHubId || a.id === currentNodeId;
-            const bIsSelected = b.id === expandedHubId || b.id === currentNodeId;
-            if (aIsSelected && !bIsSelected) return -1;
-            if (!aIsSelected && bIsSelected) return 1;
+    // Sort logic removed from here as filter handles visibility directly. 
+    // Marker render order can be handled by Z-index if needed.
+    // However, we might want to ensure 'visibleNodes' is sorted by importance for rendering order (render important last to be on top).
+    // Let's create a sorted version for rendering:
 
-            const aCount = hubDetails[a.id]?.member_count || 0;
-            const bCount = hubDetails[b.id]?.member_count || 0;
-            return bCount - aCount;
+    const sortedVisibleNodes = useMemo(() => {
+        return [...visibleNodes].sort((a, b) => {
+            // Lower Tier (1) is more important, should be rendered LAST (on top) in some map engines, 
+            // BUT in React Leaflet, we use zIndexOffset. 
+            // Let's just sort by Tier for consistency.
+            const tierA = a.display_tier || 5;
+            const tierB = b.display_tier || 5;
+            if (tierA !== tierB) return tierB - tierA; // Render 5 first (bottom), 1 last (top) ?
+            // actually default render order is array order. Last is top.
+            // So higher importance (lower tier number) should be later in array.
+            return tierB - tierA;
         });
-
-        // Step 3: Hard Cap (Safety Valve)
-        // Allow more nodes if we are zoomed in
-        const safetyLimit = clampedZoom >= 15 ? 300 : (clampedZoom >= 13 ? 100 : 40);
-
-        return inViewCandidates.slice(0, safetyLimit);
-    }, [nodes, showAllNodes, viewportBounds, hubDetails, clampedZoom, expandedHubId, expandedNodeIds, currentNodeId]);
+    }, [visibleNodes]);
 
     // [OPTIMIZATION] If clustering is enabled, we still use visibleNodes but we might want to relax the 'maxNodes' limit
     // However, existing logic slices 'visibleNodes' at the end of useMemo.
@@ -254,7 +261,8 @@ export function HubNodeLayer({
             const memberCount = details?.member_count || 0;
             const transferComplexity = details?.transfer_complexity;
             const isExplicitHub = node.is_hub === true || node.parent_hub_id === null;
-            const isImportantHub = isExplicitHub && (memberCount >= 4 || node.tier === 'major');
+            // [SKILL ALIGNMENT] Use display_tier <= 2 for aggregation priority
+            const isImportantHub = isExplicitHub && (node.display_tier !== undefined ? node.display_tier <= 2 : (memberCount >= 4 || (node as any).tier === 'major'));
             const isTransfer = isExplicitHub && (memberCount >= 2 || transferComplexity === 'high' || transferComplexity === 'complex' || (clampedZoom >= 13 && clampedZoom < 15));
             const isClusterRep = clusterRepSet.has(node.id);
 
@@ -297,7 +305,7 @@ export function HubNodeLayer({
         return labelIds;
     }, [visibleNodes, hubDetails, clampedZoom, currentNodeId, expandedHubId, expandedNodeIds]);
 
-    const markers = visibleNodes.map((node) => {
+    const markers = sortedVisibleNodes.map((node) => {
         const details = hubDetails[node.id];
         return (
             <NodeMarker

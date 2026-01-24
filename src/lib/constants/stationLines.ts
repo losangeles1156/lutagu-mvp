@@ -58,7 +58,7 @@ export const LINES = {
 
 // Operator Colors for Map Icons (Official Brand Colors)
 export const OPERATOR_COLORS: Record<string, string> = {
-    'JR': '#006400',           // JR East - Dark Green (深綠色)
+    'JR': '#00AC4E',           // JR East - Official Green
     'Metro': '#149BDF',        // Tokyo Metro - Heart Blue 官方企業色
     'Toei': '#008E48',         // Toei - Leaf Green 銀杏葉綠 (官方色)
     'Keikyu': '#8B0000',       // Keikyu - Dark Red (深紅色)

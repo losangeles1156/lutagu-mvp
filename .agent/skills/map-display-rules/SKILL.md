@@ -76,7 +76,7 @@ description: >
 | 鐵道公司 | 品牌色 (HEX) | 適用範例 |
 |---------|-------------|---------|
 | **JR 東日本** | `#00AC4E` (綠色) | 上野、東京、池袋、新宿、澀谷、品川、秋葉原 |
-| **東京 Metro** | `#009BBF` (藍綠色) | 銀座、大手町、日本橋 |
+| **東京 Metro** | `#149BDF` (藍綠色) | 銀座、大手町、日本橋 |
 | **都營地下鐵** | `#B6007A` (洋紅色) | 新橋、押上 |
 | **京急電鐵** | `#E31E24` (紅色) | 泉岳寺、品川 (京急優先時) |
 | **東武鐵道** | `#003DA5` (深藍色) | 淺草、押上 (東武優先時) |
@@ -92,7 +92,7 @@ description: >
 3. **特殊案例**:
    - 成田機場 → 京成電鐵藍色 (`#003DA5`)
    - 羽田機場 → 東京單軌藍色 (`#0071BC`)
-   - 銀座 → 東京 Metro 藍綠色 (`#009BBF`)
+   - 銀座 → 東京 Metro 藍綠色 (`#149BDF`)
 
 #### 圖標規範
 - **尺寸**:
@@ -162,7 +162,7 @@ function shouldShowLabel(node: Node, currentZoom: number): boolean {
 function getNodeColor(node: Node): string {
   const operatorPriority = [
     { name: 'JR東日本', color: '#00AC4E' },
-    { name: '東京メトロ', color: '#009BBF' },
+    { name: '東京メトロ', color: '#149BDF' },
     { name: '東京都交通局', color: '#B6007A' },
     { name: '京急電鉄', color: '#E31E24' },
     { name: '東武鉄道', color: '#003DA5' },
