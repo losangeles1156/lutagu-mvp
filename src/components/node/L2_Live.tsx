@@ -16,6 +16,32 @@ import { PARTNER_REGISTRY } from '@/config/partners';
 import { DisruptionBanner } from '@/components/guard/DisruptionBanner';
 import { useTripGuardStore } from '@/stores/tripGuardStore';
 import { Bell } from 'lucide-react';
+import { LINES } from '@/lib/constants/stationLines';
+
+/**
+ * Enriches line data with localized names from stationLines.ts
+ */
+function enrichLineWithI18n(line: any): any {
+    // Find match by English key (normalize for comparison)
+    const normalize = (s: string) => String(s || '').toLowerCase().replace(/[- ]/g, '');
+    const lineKey = normalize(line.name || line.line);
+
+    const matchKey = Object.keys(LINES).find(k => {
+        const def = LINES[k as keyof typeof LINES];
+        return normalize(def.name.en) === lineKey;
+    });
+
+    if (matchKey) {
+        const lineDef = LINES[matchKey as keyof typeof LINES];
+        return {
+            ...line,
+            name: lineDef.name, // Overwrite with i18n object {ja, en, zh}
+            color: line.color || lineDef.color,
+            operator: line.operator || lineDef.operator
+        };
+    }
+    return line; // Return as-is if no match
+}
 
 // Types for Hub information
 interface HubMemberInfo {
@@ -267,11 +293,13 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
 
     const displayLinesForUi = useMemo(() => {
         return displayLines.map((line: any) => {
-            const hasLineIdentity = Boolean(line.railway_id || line.line_name);
+            // [FIX] Enrich line with localized name from stationLines.ts
+            const enrichedLine = enrichLineWithI18n(line);
+            const hasLineIdentity = Boolean(enrichedLine.railway_id || enrichedLine.line_name || enrichedLine.name);
             return {
-                ...line,
-                _displayStatus: hasLineIdentity ? line.status : 'normal',
-                _displayStatusDetail: hasLineIdentity ? line.status_detail : 'normal',
+                ...enrichedLine,
+                _displayStatus: hasLineIdentity ? enrichedLine.status : 'normal',
+                _displayStatusDetail: hasLineIdentity ? enrichedLine.status_detail : 'normal',
                 _hasLineIdentity: hasLineIdentity
             };
         });

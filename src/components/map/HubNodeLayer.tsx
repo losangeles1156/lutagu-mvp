@@ -305,34 +305,60 @@ export function HubNodeLayer({
         return labelIds;
     }, [visibleNodes, hubDetails, clampedZoom, currentNodeId, expandedHubId, expandedNodeIds]);
 
-    const markers = sortedVisibleNodes.map((node) => {
-        const details = hubDetails[node.id];
-        return (
-            <NodeMarker
-                key={node.id}
-                node={node}
-                hubDetails={details}
-                zone={zone}
-                locale={locale}
-                zoom={clampedZoom}
-                isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
-                showLabelOverride={labelSet.has(node.id)}
-            />
-        );
-    });
+    // [FIX] Separate Tier 1-2 nodes so they are never clustered
+    const tier1And2Markers = sortedVisibleNodes
+        .filter(node => node.display_tier && node.display_tier <= 2)
+        .map((node) => {
+            const details = hubDetails[node.id];
+            return (
+                <NodeMarker
+                    key={node.id}
+                    node={node}
+                    hubDetails={details}
+                    zone={zone}
+                    locale={locale}
+                    zoom={clampedZoom}
+                    isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
+                    showLabelOverride={labelSet.has(node.id)}
+                />
+            );
+        });
+
+    const otherMarkers = sortedVisibleNodes
+        .filter(node => !node.display_tier || node.display_tier > 2)
+        .map((node) => {
+            const details = hubDetails[node.id];
+            return (
+                <NodeMarker
+                    key={node.id}
+                    node={node}
+                    hubDetails={details}
+                    zone={zone}
+                    locale={locale}
+                    zoom={clampedZoom}
+                    isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
+                    showLabelOverride={labelSet.has(node.id)}
+                />
+            );
+        });
 
     if (enableClustering) {
         return (
-            <MarkerClusterGroup
-                chunkedLoading
-                maxClusterRadius={60}
-                spiderfyOnMaxZoom={true}
-                showCoverageOnHover={false}
-            >
-                {markers}
-            </MarkerClusterGroup>
+            <>
+                {/* Tier 1-2: Never clustered, always visible */}
+                {tier1And2Markers}
+                {/* Tier 3-5: Clustered */}
+                <MarkerClusterGroup
+                    chunkedLoading
+                    maxClusterRadius={60}
+                    spiderfyOnMaxZoom={true}
+                    showCoverageOnHover={false}
+                >
+                    {otherMarkers}
+                </MarkerClusterGroup>
+            </>
         );
     }
 
-    return <>{markers}</>;
+    return <>{[...tier1And2Markers, ...otherMarkers]}</>;
 }

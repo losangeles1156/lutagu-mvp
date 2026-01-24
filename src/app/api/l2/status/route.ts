@@ -397,6 +397,7 @@ export async function GET(request: Request) {
 
         // Step 1: Try direct match
         let lines = STATION_LINES[stationId] || [];
+        console.log(`[L2 API Debug] Step 1 (stationId=${stationId}): Found ${lines.length} lines`);
 
         // Step 2: Try with prefix swap (odpt.Station: <-> odpt:Station:)
         if (lines.length === 0) {
@@ -404,6 +405,7 @@ export async function GET(request: Request) {
                 ? stationId.replace(/^odpt\.Station:/, 'odpt:Station:')
                 : stationId.replace(/^odpt:Station:/, 'odpt.Station:');
             lines = STATION_LINES[swappedId] || [];
+            console.log(`[L2 API Debug] Step 2 (swappedId=${swappedId}): Found ${lines.length} lines`);
         }
 
         // Step 3: Try extracting station slug and matching (for Operator.Line.Station format)
@@ -421,10 +423,16 @@ export async function GET(request: Request) {
                     `odpt.Station:${operator}.${station}`,
                     `odpt:Station:${operator}.${line === 'Oedo' ? 'Shinjuku' : station}`, // Special case for Oedo Shinjuku
                 ];
+                console.log(`[L2 API Debug] Step 3 candidates:`, candidates);
                 for (const candidate of candidates) {
                     lines = STATION_LINES[candidate] || [];
-                    if (lines.length > 0) break;
+                    if (lines.length > 0) {
+                        console.log(`[L2 API Debug] Step 3 matched: ${candidate} (${lines.length} lines)`);
+                        break;
+                    }
                 }
+            } else {
+                console.log(`[L2 API Debug] Step 3 regex match failed for: ${stationId}`);
             }
         }
 
@@ -443,9 +451,13 @@ export async function GET(request: Request) {
         if (lines.length === 0) {
             lines = await getNodeTransitLines(stationId, nodeRes.data?.transit_lines);
             if (lines.length > 0) {
-                console.log(`[L2 API] Resolved ${lines.length} lines from nodes.transit_lines for ${stationId}`);
+                console.log(`[L2 API] Step 5: Resolved ${lines.length} lines from nodes.transit_lines for ${stationId}`);
+            } else {
+                console.warn(`[L2 API] WARNING: No lines found for ${stationId} after all 5 steps!`);
             }
         }
+
+        console.log(`[L2 API] Final result: ${lines.length} lines found for ${stationId}`);
 
         const trainStatus = await getTrainStatus(); // Fetches all lines cached
 
@@ -717,7 +729,12 @@ export async function GET(request: Request) {
             },
             updated_at: new Date().toISOString(),
             is_stale: false,
-            disruption_history: Array.isArray(historyRows) ? historyRows : []
+            disruption_history: Array.isArray(historyRows) ? historyRows : [],
+            _debug: {
+                station_id: stationId,
+                lines_found: lines.length,
+                line_status_count: lineStatusArray.length
+            }
         };
 
         const dbFresh = (() => {

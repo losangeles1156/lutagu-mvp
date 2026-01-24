@@ -85,7 +85,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-3 w-40 bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-2xl border border-black/[0.05] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[300]">
+                <div className="fixed right-4 top-20 w-40 bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-2xl border border-black/[0.05] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[9999]">
                     <div className="p-1">
                         {['zh', 'en', 'ja'].map((l) => (
                             <button
