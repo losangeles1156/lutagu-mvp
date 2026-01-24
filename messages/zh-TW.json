@@ -273,7 +273,9 @@
         "vacanDesc": "即時查看周邊餐廳與設施的空位狀況",
         "vacanCta": "開啟 VACAN 地圖",
         "vacanSub": "探索周邊空位",
-        "noLiveData": "暫無即時運行數據"
+        "noLiveData": "暫無即時運行數據",
+        "noLiveDataTitle": "全線正常運行",
+        "noLiveDataDesc": "目前無延誤或異常通報。"
     },
     "l3": {
         "servicesTitle": "服務設施",

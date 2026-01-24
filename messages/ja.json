@@ -251,6 +251,8 @@
         "warningAlert": "気象警報",
         "weatherAlert": "気象警報",
         "noLiveData": "運行情報がありません",
+        "noLiveDataTitle": "運行情報なし",
+        "noLiveDataDesc": "現在、報告されている遅延やトラブルはありません。",
         "liveFlightTitle": "リアルタイムフライト情報",
         "tokyoWide": "TOKYO WIDE",
         "vacanTitle": "混雑マップ",

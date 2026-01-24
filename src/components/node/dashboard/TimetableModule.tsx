@@ -30,6 +30,96 @@ function getLocalizedStationName(id: string, locale: string): string {
     return entry[lang] || entry['en'] || base;
 }
 
+// JR official timetable URL mapping for Tokyo stations
+// Coverage: Full Yamanote Line (30 stations) + Core 11 Wards JR stations
+// Source: JR East official website (https://www.jreast.co.jp/estation/)
+const JR_TIMETABLE_URLS: Record<string, string> = {
+    // === YAMANOTE LINE (山手線) - Complete 30 stations ===
+    'Tokyo': 'https://www.jreast.co.jp/estation/stations/1039.html',
+    'Kanda': 'https://www.jreast.co.jp/estation/stations/526.html',
+    'Akihabara': 'https://www.jreast.co.jp/estation/stations/47.html',
+    'Okachimachi': 'https://www.jreast.co.jp/estation/stations/323.html',
+    'Ueno': 'https://www.jreast.co.jp/estation/stations/204.html',
+    'Uguisudani': 'https://www.jreast.co.jp/estation/stations/198.html',
+    'Nippori': 'https://www.jreast.co.jp/estation/stations/1155.html',
+    'NishiNippori': 'https://www.jreast.co.jp/estation/stations/1156.html',
+    'Nishi-Nippori': 'https://www.jreast.co.jp/estation/stations/1156.html', // Alias
+    'Tabata': 'https://www.jreast.co.jp/estation/stations/959.html',
+    'Komagome': 'https://www.jreast.co.jp/estation/stations/716.html',
+    'Sugamo': 'https://www.jreast.co.jp/estation/stations/905.html',
+    'Otsuka': 'https://www.jreast.co.jp/estation/stations/355.html',
+    'Ikebukuro': 'https://www.jreast.co.jp/estation/stations/108.html',
+    'Mejiro': 'https://www.jreast.co.jp/estation/stations/1480.html',
+    'Takadanobaba': 'https://www.jreast.co.jp/estation/stations/965.html',
+    'ShinOkubo': 'https://www.jreast.co.jp/estation/stations/854.html',
+    'Shin-Okubo': 'https://www.jreast.co.jp/estation/stations/854.html', // Alias
+    'Shinjuku': 'https://www.jreast.co.jp/estation/stations/866.html',
+    'Yoyogi': 'https://www.jreast.co.jp/estation/stations/1604.html',
+    'Harajuku': 'https://www.jreast.co.jp/estation/stations/1271.html',
+    'Shibuya': 'https://www.jreast.co.jp/estation/stations/800.html',
+    'Ebisu': 'https://www.jreast.co.jp/estation/stations/254.html',
+    'Meguro': 'https://www.jreast.co.jp/estation/stations/1472.html',
+    'Gotanda': 'https://www.jreast.co.jp/estation/stations/703.html',
+    'Osaki': 'https://www.jreast.co.jp/estation/stations/330.html',
+    'Shinagawa': 'https://www.jreast.co.jp/estation/stations/788.html',
+    'TakanawaGateway': 'https://www.jreast.co.jp/estation/stations/1735.html',
+    'Takanawa-Gateway': 'https://www.jreast.co.jp/estation/stations/1735.html', // Alias
+    'Tamachi': 'https://www.jreast.co.jp/estation/stations/980.html',
+    'Hamamatsucho': 'https://www.jreast.co.jp/estation/stations/1247.html',
+    'Shimbashi': 'https://www.jreast.co.jp/estation/stations/871.html',
+    'Yurakucho': 'https://www.jreast.co.jp/estation/stations/1616.html',
+
+    // === CHUO LINE (中央線) - Core 11 Wards ===
+    'Ochanomizu': 'https://www.jreast.co.jp/estation/stations/341.html',
+    'Suidobashi': 'https://www.jreast.co.jp/estation/stations/906.html',
+    'Iidabashi': 'https://www.jreast.co.jp/estation/stations/105.html',
+    'Ichigaya': 'https://www.jreast.co.jp/estation/stations/103.html',
+    'Yotsuya': 'https://www.jreast.co.jp/estation/stations/1601.html',
+    'Shinanomachi': 'https://www.jreast.co.jp/estation/stations/803.html',
+    'Sendagaya': 'https://www.jreast.co.jp/estation/stations/931.html',
+
+    // === SOBU LINE (総武線) - Core 11 Wards ===
+    'Ryogoku': 'https://www.jreast.co.jp/estation/stations/1646.html',
+    'Kinshicho': 'https://www.jreast.co.jp/estation/stations/597.html',
+    'Kameido': 'https://www.jreast.co.jp/estation/stations/525.html',
+    'Asakusabashi': 'https://www.jreast.co.jp/estation/stations/38.html',
+    'Akihabarasobu': 'https://www.jreast.co.jp/estation/stations/47.html', // Same as Yamanote
+
+    // === KEIHIN-TOHOKU LINE (京浜東北線) - North Extension ===
+    'Oji': 'https://www.jreast.co.jp/estation/stations/348.html',
+    'Akabane': 'https://www.jreast.co.jp/estation/stations/20.html',
+    'Higashi-Jujo': 'https://www.jreast.co.jp/estation/stations/1310.html',
+    'Jujo': 'https://www.jreast.co.jp/estation/stations/842.html',
+    'Kami-Nakazato': 'https://www.jreast.co.jp/estation/stations/515.html',
+
+    // === KEIYO LINE (京葉線) - Koto Ward ===
+    'Shin-Kiba': 'https://www.jreast.co.jp/estation/stations/844.html',
+    'ShinKiba': 'https://www.jreast.co.jp/estation/stations/844.html', // Alias
+    'Kasairinkaikoen': 'https://www.jreast.co.jp/estation/stations/512.html',
+    'Maihama': 'https://www.jreast.co.jp/estation/stations/1415.html', // Disney
+
+    // === TOKAIDO/YOKOSUKA LINE (東海道線/横須賀線) ===
+    'Kawasaki': 'https://www.jreast.co.jp/estation/stations/538.html',
+
+    // === OTHER CORE STATIONS ===
+    'NishiOgikubo': 'https://www.jreast.co.jp/estation/stations/1152.html',
+    'Ogikubo': 'https://www.jreast.co.jp/estation/stations/335.html',
+    'Nakano': 'https://www.jreast.co.jp/estation/stations/1077.html',
+};
+
+// Check if station is JR and get official timetable URL
+function getJROfficialTimetableUrl(stationId: string): string | null {
+    if (!stationId.includes('JR-East') && !stationId.includes('JR.East')) {
+        return null;
+    }
+    const baseName = String(stationId || '').split(/[:.]/).pop() || '';
+    return JR_TIMETABLE_URLS[baseName] || null;
+}
+
+function isJRStation(stationId: string): boolean {
+    return stationId.includes('JR-East') || stationId.includes('JR.East');
+}
+
 export function TimetableModule({ timetables, stationId, locale, selectedDirection }: TimetableModuleProps) {
     const t = useTranslations('l4.dashboard');
     const now = new Date();
@@ -39,13 +129,60 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
     const items = timetables || [];
 
     if (!items.length) {
+        const jrUrl = getJROfficialTimetableUrl(stationId);
+        const isJR = isJRStation(stationId);
+        const stationName = getLocalizedStationName(stationId, locale);
+
         return (
-            <div className="flex flex-col items-center justify-center p-12 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/60 text-center">
-                <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center text-3xl shadow-sm mb-4">🕰️</div>
-                <p className="text-sm font-black text-slate-600">
-                    {t('timetable.noData')}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">{t('timetable.noDataSub')}</p>
+            <div className="flex flex-col items-center justify-center p-8 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/60 text-center">
+                <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center text-3xl shadow-sm mb-4">
+                    {isJR ? '🚃' : '🕰️'}
+                </div>
+
+                {isJR ? (
+                    <>
+                        <p className="text-sm font-black text-slate-600">
+                            {locale.startsWith('ja')
+                                ? 'JR線の時刻表はODPT APIでは提供されていません'
+                                : locale.startsWith('en')
+                                    ? 'JR timetables are not available via ODPT API'
+                                    : 'JR線時刻表不在 ODPT API 提供範圍內'}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-2 max-w-[220px] leading-relaxed">
+                            {locale.startsWith('ja')
+                                ? 'JR東日本の公式サイトで時刻表をご確認ください。'
+                                : locale.startsWith('en')
+                                    ? 'Please check the official JR East website for timetables.'
+                                    : '請前往 JR 東日本官方網站查看時刻表。'}
+                        </p>
+                        {jrUrl && (
+                            <a
+                                href={jrUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-500 text-white text-sm font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                            >
+                                <span>🔗</span>
+                                <span>
+                                    {locale.startsWith('ja')
+                                        ? `${stationName}駅 公式時刻表`
+                                        : locale.startsWith('en')
+                                            ? `${stationName} Station Timetable`
+                                            : `${stationName}站 官方時刻表`}
+                                </span>
+                            </a>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <p className="text-sm font-black text-slate-600">
+                            {t('timetable.noData', { defaultValue: '時刻表が見つかりません' })}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-2 max-w-[200px] leading-relaxed">
+                            {t('timetable.checkStation', { defaultValue: '駅の掲示板または公式アプリをご確認ください。' })}
+                        </p>
+                    </>
+                )}
             </div>
         );
     }

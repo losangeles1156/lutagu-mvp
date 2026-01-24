@@ -245,6 +245,8 @@
         "delayOccurred": "Delays Reported",
         "weatherAlert": "Weather Alert",
         "noLiveData": "No live line data available",
+        "noLiveDataTitle": "Good Service",
+        "noLiveDataDesc": "No delays or disruptions reported at this time.",
         "liveFlightTitle": "Live Flight Status",
         "tokyoWide": "TOKYO WIDE",
         "vacanTitle": "Crowd Map",

@@ -236,6 +236,8 @@
         "delayOccurred": "發生延誤",
         "weatherAlert": "天候警報",
         "noLiveData": "目前沒有即時列車資訊",
+        "noLiveDataTitle": "全线正常运行",
+        "noLiveDataDesc": "目前无延误或异常通报。",
         "liveFlightTitle": "即時航班資訊",
         "tokyoWide": "TOKYO WIDE",
         "vacanTitle": "人潮地圖",

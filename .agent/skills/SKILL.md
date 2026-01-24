@@ -11,6 +11,7 @@ description: >
 
 | Skill Domain | 說明 | 觸發關鍵字 |
 | :--- | :--- | :--- |
+| [Map Display Rules](./map-display-rules/SKILL.md) | 地圖節點五層級顯示、Hub 聚合、鐵道公司配色規範 | map, 地圖, node, hub, zoom, 顯示, 聚合, 車站, tier |
 | [Project UI](./project/ui-spec/SKILL.md) | 產品 UI/UX 規範與分頁架構 | ui, ux, 介面, 設計, L1, L2, L3, L4 |
 | [Supabase Security](./backend/supabase-security/SKILL.md) | DB 安全性、RLS 與 Audit Log | migration, RLS, policy, 權限, security |
 | [Tagging System](./backend/tagging/SKILL.md) | L1 3-5-8 標籤策略與分類 | tagging, 標籤, 分類, 3-5-8, DNA, 搜尋 |

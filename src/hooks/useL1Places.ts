@@ -184,10 +184,45 @@ export function useL1Places() {
             return (a.distance_meters || 0) - (b.distance_meters || 0);
         });
 
+
+        // [Enhanced Deduplication] Remove duplicates by Name + Proximity (e.g. multiple PocketChange entries)
+        const seen = new Set<string>();
+        const uniquePlaces: L1Place[] = [];
+
+        for (const place of allPlaces) {
+            const normalizedName = (place.name || '').toLowerCase().trim();
+            if (!normalizedName) {
+                uniquePlaces.push(place);
+                continue;
+            }
+
+            // Create a spatial key (round coordinates to ~11m precision to catch near-duplicates)
+            // But better: Check against already added places
+            let isDuplicate = false;
+            for (const added of uniquePlaces) {
+                const addedName = (added.name || '').toLowerCase().trim();
+                if (addedName === normalizedName) {
+                    const dist = calculateDistance(
+                        place.location.coordinates[1], place.location.coordinates[0],
+                        added.location.coordinates[1], added.location.coordinates[0]
+                    );
+                    // If same name and within 200m, consider duplicate
+                    if (dist < 200) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!isDuplicate) {
+                uniquePlaces.push(place);
+            }
+        }
+
         const categoryGroups: Record<string, L1Place[]> = {};
         const limitedPlaces: L1Place[] = [];
 
-        for (const place of allPlaces) {
+        for (const place of uniquePlaces) {
             const cat = place.category || 'default';
             if (!categoryGroups[cat]) categoryGroups[cat] = [];
 
