@@ -10,8 +10,8 @@ use redis::AsyncCommands;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::{postgres::PgPoolOptions, Row};
-use std::{collections::{HashMap, HashSet}, env, net::SocketAddr, sync::{Arc, OnceLock}, time::{Duration, SystemTime, UNIX_EPOCH}};
+use sqlx::{postgres::{PgPoolOptions, PgConnectOptions}, Row, ConnectOptions};
+use std::{collections::{HashMap, HashSet}, env, net::SocketAddr, sync::{Arc, OnceLock}, time::{Duration, SystemTime, UNIX_EPOCH}, str::FromStr};
 use tokio::sync::RwLock;
 
 const ODPT_BASE_URL_STANDARD: &str = "https://api.odpt.org/api/v4";
@@ -210,8 +210,78 @@ fn jr_east_railway_hint_ja() -> &'static HashMap<String, String> {
     })
 }
 
+/// Generate all possible ID variants for a Tokyo station
+/// Handles: odpt:Station: <-> odpt.Station:, Operator.Line.Station <-> Operator.Station
+fn get_station_id_variants(station_id: &str) -> Vec<String> {
+    let mut variants = HashSet::new();
+    variants.insert(station_id.to_string());
+    
+    // 1. Basic prefix swaps
+    if station_id.starts_with("odpt.Station:") {
+        let alt = station_id.replace("odpt.Station:", "odpt:Station:");
+        variants.insert(alt);
+    } else if station_id.starts_with("odpt:Station:") {
+        let alt = station_id.replace("odpt:Station:", "odpt.Station:");
+        variants.insert(alt);
+    }
+    
+    // 2. Extract components
+    let operators = ["TokyoMetro", "Toei", "JR-East", "Keikyu", "Tokyu", "Odakyu", "Keio", "Seibu", "Tobu"];
+    let metro_lines = ["Ginza", "Marunouchi", "Hibiya", "Tozai", "Chiyoda", "Yurakucho", "Hanzomon", "Namboku", "Fukutoshin"];
+    let toei_lines = ["Asakusa", "Mita", "Shinjuku", "Oedo"];
+    let jr_lines = ["Yamanote", "KeihinTohoku", "Chuo", "ChuoKaisoku", "ChuoSobu", "Sobu", "SobuKaisoku", "Joban", "Keiyo", "Saikyo", "ShonanShinjuku"];
+    
+    // Parse station ID to extract operator and station name
+    let clean_id = station_id
+        .replace("odpt.Station:", "")
+        .replace("odpt:Station:", "");
+    
+    let parts: Vec<&str> = clean_id.split('.').collect();
+    
+    if parts.len() >= 2 {
+        let operator = parts[0];
+        let station_name = parts[parts.len() - 1];
+        
+        // Generate logical ID (Operator.Station)
+        variants.insert(format!("odpt:Station:{}.{}", operator, station_name));
+        variants.insert(format!("odpt.Station:{}.{}", operator, station_name));
+        
+        // Generate physical IDs with common lines
+        let lines: &[&str] = match operator {
+            "TokyoMetro" => &metro_lines,
+            "Toei" => &toei_lines,
+            "JR-East" => &jr_lines,
+            _ => &[],
+        };
+        
+        for line in lines.iter() {
+            variants.insert(format!("odpt.Station:{}.{}.{}", operator, line, station_name));
+            variants.insert(format!("odpt:Station:{}.{}.{}", operator, line, station_name));
+        }
+    }
+    
+    // 3. Handle common alternative operators
+    for op in operators.iter() {
+        if station_id.contains(op) {
+            let parts: Vec<&str> = clean_id.split('.').collect();
+            if let Some(station_name) = parts.last() {
+                variants.insert(format!("odpt:Station:{}.{}", op, station_name));
+                variants.insert(format!("odpt.Station:{}.{}", op, station_name));
+            }
+        }
+    }
+    
+    variants.into_iter().collect()
+}
+
+fn validate_id_safe(id: &str) -> bool {
+    id.chars().all(|c| c.is_alphanumeric() || c == '.' || c == ':' || c == '-' || c == '_')
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt::init();
+
     let config = Config {
         database_url: env::var("DATABASE_URL").unwrap_or_default(),
         redis_url: env::var("REDIS_URL").ok(),
@@ -219,9 +289,13 @@ async fn main() -> anyhow::Result<()> {
         odpt_key_challenge: env::var("ODPT_API_TOKEN_BACKUP").ok(),
     };
 
+    let db_opts = PgConnectOptions::from_str(&config.database_url)?
+        .statement_cache_capacity(0)
+        .log_statements(log::LevelFilter::Debug);
+
     let pool = PgPoolOptions::new()
         .max_connections(10)
-        .connect(&config.database_url)
+        .connect_with(db_opts)
         .await?;
 
     let redis = match &config.redis_url {
@@ -260,6 +334,10 @@ async fn health() -> impl IntoResponse {
 async fn l2_status(State(state): State<AppState>, Query(query): Query<StatusQuery>) -> impl IntoResponse {
     let station_id = query.station_id.or(query.stationId).unwrap_or_default();
     let station_id = station_id.trim().to_string();
+    
+    // Log incoming request
+    tracing::info!("l2_status request: station_id={}", station_id);
+
     if station_id.is_empty() {
         return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":"Missing station_id"})));
     }
@@ -291,11 +369,23 @@ async fn l2_status(State(state): State<AppState>, Query(query): Query<StatusQuer
         load_crowd_reports(&state.pool, &station_id)
     );
 
+    if let Err(e) = &node {
+        tracing::error!("Failed to load node: {:?}", e);
+    }
+
     let snapshot = snapshot.unwrap_or_default();
     let node = node.unwrap_or_default();
     let crowd_reports = crowd.unwrap_or_default();
 
+    tracing::info!("Loaded data: snapshot_weather={:?}, transit_lines={:?}, crowd_reports={}", 
+        snapshot.weather_info.is_some(), 
+        node.transit_lines.is_some(), 
+        crowd_reports.len()
+    );
+
     let lines = derive_lines(node.transit_lines.clone());
+    tracing::info!("Derived lines: count={}, lines={:?}", lines.len(), lines.iter().map(|l| &l.id).collect::<Vec<_>>());
+
     let disruptions = build_disruptions(&state, &lines).await;
     let line_status = build_line_status(lines.clone(), disruptions);
 
@@ -377,45 +467,96 @@ struct NodeRow {
 }
 
 async fn load_snapshot(pool: &sqlx::PgPool, station_id: &str) -> anyhow::Result<SnapshotRow> {
-    let row = sqlx::query("select status_code, reason_ja, reason_zh_tw, weather_info, updated_at from transit_dynamic_snapshot where station_id = $1 order by updated_at desc limit 1")
-        .bind(station_id)
-        .fetch_optional(pool)
-        .await?;
-    if let Some(r) = row {
-        Ok(SnapshotRow {
-            status_code: r.try_get("status_code").ok(),
-            reason_ja: r.try_get("reason_ja").ok(),
-            reason_zh_tw: r.try_get("reason_zh_tw").ok(),
-            weather_info: r.try_get("weather_info").ok(),
-            updated_at: r.try_get("updated_at").ok(),
-        })
-    } else {
-        Ok(SnapshotRow::default())
+    // Use ID variants for robust matching
+    let variants = get_station_id_variants(station_id);
+    
+    if variants.is_empty() {
+        return Ok(SnapshotRow::default());
     }
+    
+    // Try each variant until we find a match
+    for variant in &variants {
+        if !validate_id_safe(variant) { continue; }
+        
+        let sql = format!("SELECT status_code, reason_ja, reason_zh_tw, weather_info, updated_at FROM transit_dynamic_snapshot WHERE station_id = '{}' ORDER BY updated_at DESC LIMIT 1", variant);
+        let row = sqlx::query(&sql)
+            // No .bind() -> Simple Query Protocol
+            .fetch_optional(pool)
+            .await?;
+        if let Some(r) = row {
+            return Ok(SnapshotRow {
+                status_code: r.try_get("status_code").ok(),
+                reason_ja: r.try_get("reason_ja").ok(),
+                reason_zh_tw: r.try_get("reason_zh_tw").ok(),
+                weather_info: r.try_get("weather_info").ok(),
+                updated_at: r.try_get("updated_at").ok(),
+            });
+        }
+    }
+    
+    Ok(SnapshotRow::default())
 }
+
+
 
 async fn load_node(pool: &sqlx::PgPool, station_id: &str) -> anyhow::Result<NodeRow> {
-    let row = sqlx::query("select transit_lines, coordinates from nodes where id = $1 limit 1")
-        .bind(station_id)
-        .fetch_optional(pool)
-        .await?;
-    if let Some(r) = row {
-        Ok(NodeRow {
-            transit_lines: r.try_get("transit_lines").ok(),
-            coordinates: r.try_get("coordinates").ok(),
-        })
-    } else {
-        Ok(NodeRow::default())
+    // Use ID variants for robust matching
+    let variants = get_station_id_variants(station_id);
+    tracing::info!("load_node variants: {:?}", variants);
+    
+    // Build dynamic OR query for better sqlx compatibility
+    if variants.is_empty() {
+        return Ok(NodeRow::default());
     }
+    
+    // Try each variant until we find a match
+    for variant in &variants {
+        if !validate_id_safe(variant) { continue; }
+
+        let sql = format!("SELECT transit_lines, coordinates FROM nodes WHERE id = '{}' LIMIT 1", variant);
+        let row = sqlx::query(&sql)
+            // No .bind() -> Simple Query Protocol
+            .fetch_optional(pool)
+            .await?;
+        if let Some(r) = row {
+            tracing::info!("Found match for variant: {}", variant);
+            return Ok(NodeRow {
+                transit_lines: r.try_get("transit_lines").ok(),
+                coordinates: r.try_get("coordinates").ok(),
+            });
+        }
+    }
+    
+    tracing::warn!("No matching node found for station_id: {}", station_id);
+    Ok(NodeRow::default())
 }
 
+
+
 async fn load_crowd_reports(pool: &sqlx::PgPool, station_id: &str) -> anyhow::Result<Vec<i64>> {
-    let rows = sqlx::query("select crowd_level from transit_crowd_reports where station_id = $1 and created_at > now() - interval '30 minutes'")
-        .bind(station_id)
-        .fetch_all(pool)
-        .await?;
-    Ok(rows.into_iter().filter_map(|r| r.try_get::<i64, _>("crowd_level").ok()).collect())
+    // Use ID variants for robust matching
+    let variants = get_station_id_variants(station_id);
+    let mut all_reports = Vec::new();
+    
+    for variant in &variants {
+        if !validate_id_safe(variant) { continue; }
+
+        let sql = format!("SELECT crowd_level FROM transit_crowd_reports WHERE station_id = '{}' AND created_at > now() - interval '30 minutes'", variant);
+        let rows = sqlx::query(&sql)
+            // No .bind() -> Simple Query Protocol
+            .fetch_all(pool)
+            .await?;
+        for r in rows {
+            if let Ok(level) = r.try_get::<i64, _>("crowd_level") {
+                all_reports.push(level);
+            }
+        }
+    }
+    
+    Ok(all_reports)
 }
+
+
 
 fn compute_crowd(reports: Vec<i64>, station_has_delay: bool) -> (i64, CrowdVotes) {
     let mut distribution = vec![0, 0, 0, 0, 0];

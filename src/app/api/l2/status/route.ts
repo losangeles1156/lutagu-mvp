@@ -4,6 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { STATION_LINES, LINES, StationLineDef, OPERATOR_COLORS, ODPT_LINE_SEGMENT_BY_NAME_EN } from '@/lib/constants/stationLines';
 import { resolveStationWeather } from '@/lib/weather/service';
 import { rustL2Client } from '@/lib/services/RustL2Client';
+import { getAllIdVariants, normalizeToLogicalId } from '@/lib/nodes/nodeIdNormalizer';
+import { logger } from '@/lib/utils/logger';
 
 // API Keys
 const API_KEY_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN; // Permanent (Metro/Toei)
@@ -329,15 +331,30 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing station_id or stationId' }, { status: 400 });
     }
 
-    // Unified Rust Client Call
-    const rustData = !refresh ? await rustL2Client.getStatus(stationId) : null;
+    // Unified Rust Client Call (Re-enabled with enhanced fallback)
+    // Rust client is faster but may have cold-start issues or return empty line_status
+    const normalizedId = normalizeToLogicalId(stationId);
+    logger.info('[L2 API] Request received', { stationId, normalizedId, refresh });
 
-    if (rustData) {
-        return NextResponse.json(rustData, {
-            headers: {
-                'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
+    let rustData = null;
+    if (!refresh) {
+        try {
+            rustData = await rustL2Client.getStatus(normalizedId);
+            // Validate Rust response has actual line data
+            if (rustData && rustData.line_status && rustData.line_status.length > 0) {
+                logger.info('[L2 API] Rust client success', { stationId, lineCount: rustData.line_status.length });
+                return NextResponse.json(rustData, {
+                    headers: {
+                        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+                        'X-L2-Source': 'rust'
+                    }
+                });
+            } else {
+                logger.debug('[L2 API] Rust returned empty line_status, fallback to Node.js', { stationId });
             }
-        });
+        } catch (e) {
+            logger.warn('[L2 API] Rust client error, fallback to Node.js', { stationId, error: e });
+        }
     }
 
     try {
@@ -392,72 +409,36 @@ export async function GET(request: Request) {
         };
 
         // Transform Flat DB columns to Frontend Interface
-        // Normalize stationId to find matching STATION_LINES entry
-        // Handle various ID formats: odpt:Station:Operator.Line.Station, odpt.Station:Operator.Line.Station, etc.
+        // Use nodeIdNormalizer for unified ID resolution
+        const idVariants = getAllIdVariants(stationId);
+        logger.debug('[L2 API] ID variants generated', { stationId, variantCount: idVariants.length });
 
-        // Step 1: Try direct match
-        let lines = STATION_LINES[stationId] || [];
-        console.log(`[L2 API Debug] Step 1 (stationId=${stationId}): Found ${lines.length} lines`);
+        // Try all ID variants against STATION_LINES
+        let lines: StationLineDef[] = [];
+        let matchedVariant: string | null = null;
 
-        // Step 2: Try with prefix swap (odpt.Station: <-> odpt:Station:)
-        if (lines.length === 0) {
-            const swappedId = stationId.startsWith('odpt.Station:')
-                ? stationId.replace(/^odpt\.Station:/, 'odpt:Station:')
-                : stationId.replace(/^odpt:Station:/, 'odpt.Station:');
-            lines = STATION_LINES[swappedId] || [];
-            console.log(`[L2 API Debug] Step 2 (swappedId=${swappedId}): Found ${lines.length} lines`);
-        }
-
-        // Step 3: Try extracting station slug and matching (for Operator.Line.Station format)
-        if (lines.length === 0) {
-            const match = stationId.match(/[.:](TokyoMetro|Toei|JR-East)[.:]([A-Za-z]+)[.:](.+)$/);
-            if (match) {
-                const operator = match[1];
-                const line = match[2];
-                const station = match[3];
-                // Try various combinations (including full format with line name)
-                const candidates = [
-                    `odpt.Station:${operator}.${line}.${station}`, // Exact match with line name
-                    `odpt:Station:${operator}.${line}.${station}`, // With colon prefix
-                    `odpt:Station:${operator}.${station}`,
-                    `odpt.Station:${operator}.${station}`,
-                    `odpt:Station:${operator}.${line === 'Oedo' ? 'Shinjuku' : station}`, // Special case for Oedo Shinjuku
-                ];
-                console.log(`[L2 API Debug] Step 3 candidates:`, candidates);
-                for (const candidate of candidates) {
-                    lines = STATION_LINES[candidate] || [];
-                    if (lines.length > 0) {
-                        console.log(`[L2 API Debug] Step 3 matched: ${candidate} (${lines.length} lines)`);
-                        break;
-                    }
-                }
-            } else {
-                console.log(`[L2 API Debug] Step 3 regex match failed for: ${stationId}`);
+        for (const variant of idVariants) {
+            const found = STATION_LINES[variant];
+            if (found && found.length > 0) {
+                lines = found;
+                matchedVariant = variant;
+                break;
             }
         }
 
-        // Step 4: For specific known patterns, hard-code the mapping
-        if (lines.length === 0) {
-            const lowerId = stationId.toLowerCase();
-            if (lowerId.includes('oedo.shinjuku')) {
-                lines = STATION_LINES['odpt:Station:Toei.Shinjuku'] || [];
-            } else if (lowerId.includes('hibiya.akihabara')) {
-                lines = STATION_LINES['odpt:Station:JR-East.Akihabara'] ||
-                    STATION_LINES['odpt.Station:TokyoMetro.Hibiya.Akihabara'] || [];
-            }
-        }
-
-        // Step 5: Final fallback - dynamically fetch from nodes.transit_lines
+        // Fallback: dynamically fetch from nodes.transit_lines
         if (lines.length === 0) {
             lines = await getNodeTransitLines(stationId, nodeRes.data?.transit_lines);
             if (lines.length > 0) {
-                console.log(`[L2 API] Step 5: Resolved ${lines.length} lines from nodes.transit_lines for ${stationId}`);
-            } else {
-                console.warn(`[L2 API] WARNING: No lines found for ${stationId} after all 5 steps!`);
+                logger.info('[L2 API] Resolved lines from nodes.transit_lines', { stationId, lineCount: lines.length });
             }
         }
 
-        console.log(`[L2 API] Final result: ${lines.length} lines found for ${stationId}`);
+        if (lines.length > 0) {
+            logger.debug('[L2 API] Lines resolved', { stationId, matchedVariant, lineCount: lines.length });
+        } else {
+            logger.warn('[L2 API] No lines found for station', { stationId, idVariants: idVariants.slice(0, 5) });
+        }
 
         const trainStatus = await getTrainStatus(); // Fetches all lines cached
 
@@ -729,12 +710,7 @@ export async function GET(request: Request) {
             },
             updated_at: new Date().toISOString(),
             is_stale: false,
-            disruption_history: Array.isArray(historyRows) ? historyRows : [],
-            _debug: {
-                station_id: stationId,
-                lines_found: lines.length,
-                line_status_count: lineStatusArray.length
-            }
+            disruption_history: Array.isArray(historyRows) ? historyRows : []
         };
 
         const dbFresh = (() => {
