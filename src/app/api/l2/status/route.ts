@@ -336,11 +336,18 @@ export async function GET(request: Request) {
     const normalizedId = normalizeToLogicalId(stationId);
     logger.info('[L2 API] Request received', { stationId, normalizedId, refresh });
 
+    // [ROLLBACK 2026-01-24] Rust L2 service disabled
+    // Reason: User reported critical issues with Rust L2 Client
+    // Action: Force fallback to Node.js implementation
+    // To re-enable: Uncomment the Rust client block below and remove this line
+    const rustData = null;
+
+    /*
+    // Original Rust client block (disabled)
     let rustData = null;
     if (!refresh) {
         try {
             rustData = await rustL2Client.getStatus(normalizedId);
-            // Validate Rust response has actual line data
             if (rustData && rustData.line_status && rustData.line_status.length > 0) {
                 logger.info('[L2 API] Rust client success', { stationId, lineCount: rustData.line_status.length });
                 return NextResponse.json(rustData, {
@@ -356,6 +363,7 @@ export async function GET(request: Request) {
             logger.warn('[L2 API] Rust client error, fallback to Node.js', { stationId, error: e });
         }
     }
+    */
 
     try {
         const [snapshotRes, historyRes, crowdReportsRes, nodeRes] = await Promise.all([

@@ -48,9 +48,9 @@ export async function generateLLMResponse(params: LLMParams): Promise<string | n
         return generateGeminiResponse({ ...params, model: 'gemini-2.5-flash-lite' });
     }
 
-    // 2. Logic / Reasoning / Precision -> Gemini 1.5 Flash (Stable)
+    // 2. Logic / Reasoning / Precision -> Gemini 3 Flash Preview (Smarter & Faster)
     if (taskType === 'reasoning' || taskType === 'context_heavy') {
-        const result = await generateGeminiResponse({ ...params, model: 'gemini-1.5-flash' });
+        const result = await generateGeminiResponse({ ...params, model: 'gemini-3-flash-preview' });
         return result;
     }
 
@@ -68,7 +68,7 @@ interface GeminiParams extends LLMParams {
     model?: string;
 }
 
-async function generateGeminiResponse(params: GeminiParams): Promise<string | null> {
+export async function generateGeminiResponse(params: GeminiParams): Promise<string | null> {
     const { systemPrompt, userPrompt, temperature = 0.2, model = 'gemini-2.5-flash-lite' } = params;
 
     // Strict model mapping for Zeabur AI Hub
@@ -133,7 +133,7 @@ async function generateGeminiResponse(params: GeminiParams): Promise<string | nu
 /**
  * Generic Zeabur AI Hub handler for non-Gemini models (e.g., deepseek-v3.2, gpt-5-mini)
  */
-async function generateZeaburGenericResponse(params: LLMParams): Promise<string | null> {
+export async function generateZeaburGenericResponse(params: LLMParams): Promise<string | null> {
     const { systemPrompt, userPrompt, temperature = 0.4, model } = params;
 
     if (!model) {

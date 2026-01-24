@@ -47,6 +47,7 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         isLoading,
         thinkingStep,
         suggestedQuestions,
+        quickButtons,
         sendMessage,
         clearMessages,
         messagesEndRef
@@ -197,18 +198,20 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                     </div>
                 )}
 
-                {suggestedQuestions.length > 0 && !thinkingStep && (
+                {/* Suggested Questions & Quick Actions */}
+                {!thinkingStep && (suggestedQuestions.length > 0 || quickButtons.length > 0) && (
                     <div className="flex flex-col gap-2 mt-2 px-1">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">{tL4('suggestedQuestions')}</p>
                         <div className="flex flex-wrap gap-2">
-                            {suggestedQuestions.map((q, i) => (
+                            {/* Priority: Suggested (Contextual) > Quick (Default) */}
+                            {(suggestedQuestions.length > 0 ? suggestedQuestions.map(q => ({ label: q, prompt: q })) : quickButtons).map((btn, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => handleSend(q)}
+                                    onClick={() => handleSend(btn.prompt || btn.label)}
                                     disabled={isLoading}
                                     className="text-left bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-colors shadow-sm disabled:opacity-50"
                                 >
-                                    {q}
+                                    {btn.label}
                                 </button>
                             ))}
                         </div>

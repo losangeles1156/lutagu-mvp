@@ -5,6 +5,7 @@ import { usePathname, useRouter } from '@/navigation';
 import { useSearchParams } from 'next/navigation'; // Keep this for query params
 import { Globe } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { useUserStore } from '@/stores/userStore';
 
@@ -84,8 +85,11 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                 <Globe size={22} className={isOpen ? 'rotate-12 text-indigo-600' : ''} aria-hidden="true" />
             </button>
 
-            {isOpen && (
-                <div className="fixed right-4 top-20 w-40 bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-2xl border border-black/[0.05] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[100000]">
+            {isOpen && typeof document !== 'undefined' && createPortal(
+                <div
+                    className="fixed right-4 top-20 w-40 bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-2xl border border-black/[0.05] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[100000]"
+                    style={{ top: containerRef.current ? containerRef.current.getBoundingClientRect().bottom + 8 : 80, right: containerRef.current ? window.innerWidth - containerRef.current.getBoundingClientRect().right : 16 }}
+                >
                     <div className="p-1">
                         {['zh', 'en', 'ja'].map((l) => (
                             <button
@@ -101,7 +105,8 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                             </button>
                         ))}
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

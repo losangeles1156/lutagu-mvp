@@ -18,6 +18,7 @@ import { ContextSelector } from './ContextSelector';
 import { demoScripts } from '@/data/demoScripts';
 import { trackFunnelEvent } from '@/lib/tracking';
 import { getPartnerIdFromUrl, getSafeExternalUrl } from '@/config/partners';
+import { useDemoPlayback } from '@/hooks/useDemoPlayback';
 
 export function buildL2StatusUrl(stationId: string) {
     return `/api/l2/status?station_id=${encodeURIComponent(stationId)}`;
@@ -120,73 +121,20 @@ export function ChatOverlay() {
         await sendMessage(text);
     }, [sendMessage]);
 
+    const { startPlayback, stopPlayback } = useDemoPlayback({
+        setMessages
+    });
+
     useEffect(() => {
         if (!isChatOpen) {
             hasBootstrappedRef.current = false;
+            stopPlayback();
             return;
         }
 
         // Demo Mode Logic
         if (isDemoMode && activeDemoId && demoScripts[activeDemoId]) {
-            const script = demoScripts[activeDemoId];
-            const lang = (locale === 'ja' || locale === 'en' || locale === 'zh-TW') ? locale : 'zh';
-
-            // Clear messages and add user message
-            useUIStore.setState({
-                messages: [{
-                    role: 'user',
-                    content: script.userMessage[lang]
-                }]
-            });
-
-            // Simulate Assistant Response
-            setTimeout(async () => {
-                addStoreMessage({
-                    role: 'assistant',
-                    content: '',
-                    isLoading: true
-                });
-
-                const responseText = script.assistantResponse[lang];
-                let displayedText = '';
-                const chunkSize = 2;
-
-                for (let i = 0; i < responseText.length; i += chunkSize) {
-                    await new Promise(r => setTimeout(r, 30));
-                    displayedText += responseText.slice(i, i + chunkSize);
-
-                    useUIStore.setState(state => {
-                        const newMessages = [...state.messages];
-                        const lastMsg = newMessages[newMessages.length - 1];
-                        if (lastMsg && lastMsg.role === 'assistant') {
-                            lastMsg.content = displayedText;
-                        }
-                        return { messages: newMessages };
-                    });
-                }
-
-                // Finish stream, add actions
-                useUIStore.setState(state => {
-                    const newMessages = [...state.messages];
-                    const lastMsg = newMessages[newMessages.length - 1];
-                    if (lastMsg && lastMsg.role === 'assistant') {
-                        lastMsg.isLoading = false;
-                        lastMsg.actions = [
-                            ...script.actions.map(a => ({
-                                ...a,
-                                label: a.label[lang]
-                            })),
-                            {
-                                type: 'discovery',
-                                label: tChat('restartChat'), // Use translation key
-                                target: 'internal:restart'
-                            }
-                        ];
-                    }
-                    return { messages: newMessages };
-                });
-            }, 600);
-
+            startPlayback(activeDemoId);
             return;
         }
 

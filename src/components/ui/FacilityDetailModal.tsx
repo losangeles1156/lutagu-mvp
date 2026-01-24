@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useState, useEffect, useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, MapPin, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -95,9 +96,12 @@ export function FacilityDetailModal({ facility, onClose }: FacilityDetailModalPr
         };
     }, [isOpen, onClose]);
 
-    if (!facility) return null;
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
 
-    return (
+    if (!facility || !mounted) return null;
+
+    return createPortal(
         <>
             {/* Backdrop */}
             <div
@@ -213,6 +217,7 @@ export function FacilityDetailModal({ facility, onClose }: FacilityDetailModalPr
                     </div>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }

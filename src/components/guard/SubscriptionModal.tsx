@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useUIStore } from '@/stores/uiStore';
 import { useUserStore } from '@/stores/userStore';
@@ -29,7 +30,7 @@ export function SubscriptionModal() {
     const locale = useLocale();
     const tTripGuard = useTranslations('tripGuard');
     const tCommon = useTranslations('common');
-    const tValidation = useTranslations('validation'); // Add validation translations
+    const tValidation = useTranslations('validation');
 
     const isSubscriptionModalOpen = useUIStore(s => s.isSubscriptionModalOpen);
     const setSubscriptionModalOpen = useUIStore(s => s.setSubscriptionModalOpen);
@@ -46,6 +47,9 @@ export function SubscriptionModal() {
     const [errorText, setErrorText] = React.useState<string | null>(null);
     const [activeSubscriptionId, setActiveSubscriptionId] = React.useState<string | null>(null);
     const [validationMessage, setValidationMessage] = React.useState<string | null>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => { setMounted(true); }, []);
 
     // 即時驗證
     React.useEffect(() => {
@@ -170,7 +174,7 @@ export function SubscriptionModal() {
             }
 
             if (!data?.success) {
-                setErrorText(tTripGuard('error') || '订阅失败，请稍后重试');
+                setErrorText(tTripGuard('error') || '订阅失败，请稍后重試');
                 setParsedPreview(data?.parsed || null);
                 return;
             }
@@ -187,7 +191,7 @@ export function SubscriptionModal() {
             setTimeout(() => setSubscriptionModalOpen(false), 800);
         } catch (error) {
             logger.error('Failed to activate trip guard subscription', error);
-            setErrorText(tTripGuard('error') || '订阅失败，请稍后重试');
+            setErrorText(tTripGuard('error') || '订阅失败，请稍后重試');
         } finally {
             setIsLoading(false);
         }
@@ -224,7 +228,7 @@ export function SubscriptionModal() {
 
             if (!res.ok) {
                 const data = await res.json().catch(() => null);
-                setErrorText(typeof data?.error === 'string' ? data.error : tTripGuard('error') || '关闭失败，请稍后重试');
+                setErrorText(typeof data?.error === 'string' ? data.error : tTripGuard('error') || '关闭失败，请稍后重試');
                 return;
             }
 
@@ -233,15 +237,15 @@ export function SubscriptionModal() {
             setTripGuardSummary(null);
             setSubscriptionModalOpen(false);
         } catch {
-            setErrorText(tTripGuard('error') || '关闭失败，请稍后重试');
+            setErrorText(tTripGuard('error') || '关闭失败，请稍后重試');
         } finally {
             setIsLoading(false);
         }
     };
 
-    if (!isSubscriptionModalOpen) return null;
+    if (!isSubscriptionModalOpen || !mounted) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative overflow-hidden">
 
@@ -334,6 +338,7 @@ export function SubscriptionModal() {
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

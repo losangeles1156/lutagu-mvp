@@ -38,6 +38,11 @@ export interface UseAgentChatReturn {
     thinkingStep: string;
     sendMessage: (text: string, userProfile?: string) => Promise<void>;
     clearMessages: () => void;
+    quickButtons: QuickButton[];
+    suggestedQuestions: string[];
+    messagesEndRef: React.RefObject<HTMLDivElement>;
+    userId: string;
+    sessionId: string;
 }
 
 // Quick button configuration type
@@ -289,7 +294,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
     }, [aiMessages]);
 
     // Generate quick buttons based on locale
-    const quickButtons = useCallback((): QuickButton[] => {
+    const quickButtons = useMemo((): QuickButton[] => {
         const displayName = stationName || '車站';
         const id = stationId || '';
 

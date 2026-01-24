@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, MessageCircle, ShieldCheck, BellRing } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -9,8 +9,9 @@ export function LineBindingModal({ isOpen, onClose }: { isOpen: boolean, onClose
     const tTripGuard = useTranslations('tripGuard');
     const [isBinding, setIsBinding] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-    if (!isOpen) return null;
+    useEffect(() => { setMounted(true); }, []);
 
     const handleBind = () => {
         setIsBinding(true);
@@ -24,7 +25,9 @@ export function LineBindingModal({ isOpen, onClose }: { isOpen: boolean, onClose
         }, 1500);
     };
 
-    return (
+    if (!isOpen || !mounted) return null;
+
+    return createPortal(
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
                 <div className="p-8 text-center">
@@ -70,6 +73,7 @@ export function LineBindingModal({ isOpen, onClose }: { isOpen: boolean, onClose
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

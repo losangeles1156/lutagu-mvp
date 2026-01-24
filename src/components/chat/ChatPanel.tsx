@@ -25,6 +25,7 @@ import { trackFunnelEvent } from '@/lib/tracking';
 import { ChatHeader } from './ChatHeader';
 import { ChatInput } from './ChatInput';
 import { SkeletonMessageBubble } from './SkeletonMessageBubble';
+import { useDemoPlayback } from '@/hooks/useDemoPlayback';
 
 const MIN_HEIGHT = 200;
 const MAX_HEIGHT = 600;
@@ -66,8 +67,6 @@ export function ChatPanel() {
 
     const showToast = useToast();
 
-    // UI Local State
-    const [isDemoPlaying, setIsDemoPlaying] = useState(false);
 
     // Agent Chat Hook Integration
     const {
@@ -102,140 +101,15 @@ export function ChatPanel() {
     const resizeStartY = useRef(0);
     const resizeStartHeight = useRef(DEFAULT_HEIGHT);
     const hasBootstrappedRef = useRef(false);
-    const demoRunTokenRef = useRef(0);
 
-    const sleep = useCallback((ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms)), []);
-
-    const resolveLang = useCallback(() => {
-        return (locale === 'ja' || locale === 'en' || locale === 'zh-TW') ? locale : 'zh';
-    }, [locale]);
-
-    const renderDemoTemplate = useCallback((template: string, vars: Record<string, string>) => {
-        return template
-            .replace(/\{\{\s*time\s*\}\}/g, vars.time ?? '')
-            .replace(/\{\{\s*weather\s*\}\}/g, vars.weather ?? '');
-    }, []);
-
-    const updateAssistantMessage = useCallback((assistantMsgId: string, content: string, isLoading: boolean, data?: any) => {
-        setMessages((prev: any[]) => {
-            const next = prev.map((m: any) => {
-                if (m.id !== assistantMsgId) return m;
-                const nextMsg = { ...m, content, isLoading };
-                if (nextMsg.parts && nextMsg.parts[0]) {
-                    nextMsg.parts = [{ type: 'text', text: content }];
-                }
-                if (data) nextMsg.data = data;
-                return nextMsg;
-            });
-            return next as any;
-        });
-    }, [setMessages]);
-
-    const runDemoPlayback = useCallback(async (demoId: string) => {
-        const script = demoScripts[demoId];
-        if (!script) return;
-
-        const lang = resolveLang();
-        const token = ++demoRunTokenRef.current;
-
-        setIsDemoPlaying(true);
-        setMessages([] as any);
-        useUIStore.setState({ messages: [] as any });
-
-        const vars = {
-            time: script.mockContext?.time?.[lang] ?? '',
-            weather: script.mockContext?.weather?.[lang] ?? ''
-        };
-
-        const rounds = Array.isArray((script as any).rounds) ? (script as any).rounds : [];
-
-        for (const round of rounds) {
-            if (demoRunTokenRef.current !== token) return;
-
-            const userText = round.userMessage?.[lang] ?? '';
-            const userMsg = {
-                id: `demo-${demoId}-r${round.roundNumber}-user-${Date.now()}`,
-                role: 'user',
-                content: userText,
-                parts: [{ type: 'text', text: userText }]
-            };
-
-            setMessages((prev: any[]) => [...prev, userMsg] as any);
-            await sleep(450);
-            if (demoRunTokenRef.current !== token) return;
-
-            const assistantMsgId = `demo-${demoId}-r${round.roundNumber}-assistant-${Date.now()}`;
-            const assistantMsg = {
-                id: assistantMsgId,
-                role: 'assistant',
-                content: '',
-                parts: [{ type: 'text', text: '' }],
-                isLoading: true
-            };
-            setMessages((prev: any[]) => [...prev, assistantMsg] as any);
-
-            const responseTemplate = round.assistantResponse?.[lang] ?? '';
-            const responseText = renderDemoTemplate(responseTemplate, vars);
-            let displayedText = '';
-            const chunkSize = 2;
-
-            for (let i = 0; i < responseText.length; i += chunkSize) {
-                if (demoRunTokenRef.current !== token) return;
-                await sleep(30);
-                displayedText += responseText.slice(i, i + chunkSize);
-                updateAssistantMessage(assistantMsgId, displayedText, true);
-            }
-
-            const roundActions = Array.isArray(round.actions) ? round.actions : [];
-            const localizedRoundActions = roundActions.map((a: any) => ({
-                ...a,
-                label: a.label?.[lang] ?? a.label
-            }));
-
-            const isLastRound = round.roundNumber === 3;
-            const endActions = isLastRound ? [
-                {
-                    type: 'discovery',
-                    label: lang === 'ja'
-                        ? 'この条件で旅を始める'
-                        : lang === 'en'
-                            ? 'Start planning with LUTAGU'
-                            : lang === 'zh-TW'
-                                ? '用這個情境開始規劃'
-                                : '用这个情境开始规划',
-                    target: 'internal:end-demo',
-                    metadata: { category: 'cta' }
-                },
-                {
-                    type: 'discovery',
-                    label: lang === 'ja'
-                        ? 'デモをもう一度見る'
-                        : lang === 'en'
-                            ? 'Replay demo'
-                            : lang === 'zh-TW'
-                                ? '重新播放示範'
-                                : '重新播放示范',
-                    target: 'internal:restart-demo',
-                    metadata: { category: 'cta' }
-                }
-            ] : [];
-
-            updateAssistantMessage(
-                assistantMsgId,
-                displayedText,
-                false,
-                (localizedRoundActions.length > 0 || endActions.length > 0)
-                    ? { actions: [...localizedRoundActions, ...endActions] }
-                    : undefined
-            );
-
-            await sleep(typeof round.pauseAfterMs === 'number' ? round.pauseAfterMs : 650);
+    const { startPlayback, stopPlayback, isDemoPlaying } = useDemoPlayback({
+        setMessages,
+        onPlaybackComplete: () => {
+            // Optional callback
         }
+    });
 
-        if (demoRunTokenRef.current === token) {
-            setIsDemoPlaying(false);
-        }
-    }, [renderDemoTemplate, resolveLang, setMessages, sleep, updateAssistantMessage]);
+    const runDemoPlayback = startPlayback;
 
     // Auto-scroll
     useEffect(() => {
@@ -293,13 +167,12 @@ export function ChatPanel() {
 
     // Handlers
     const handleRestart = useCallback(() => {
-        demoRunTokenRef.current++;
-        setIsDemoPlaying(false);
+        stopPlayback();
         clearMessages();
         clearStoreMessages();
         setDemoMode(false);
         hasBootstrappedRef.current = false;
-    }, [clearMessages, clearStoreMessages, setDemoMode]);
+    }, [clearMessages, clearStoreMessages, setDemoMode, stopPlayback]);
 
     const handleAction = useCallback((action: ChatAction) => {
         if (action.type === 'navigate') {
@@ -315,14 +188,13 @@ export function ChatPanel() {
         } else if (action.target === 'internal:restart') {
             handleRestart();
         } else if (action.target === 'internal:end-demo') {
-            demoRunTokenRef.current++;
-            setIsDemoPlaying(false);
+            stopPlayback();
             clearMessages();
             clearStoreMessages();
             setDemoMode(false);
             hasBootstrappedRef.current = false;
         } else if (action.target === 'internal:restart-demo') {
-            demoRunTokenRef.current++;
+            stopPlayback();
             hasBootstrappedRef.current = true;
             if (activeDemoId) runDemoPlayback(activeDemoId);
         } else if (action.target?.startsWith('chat:')) {
