@@ -233,7 +233,12 @@ export function useAgentChat(options: UseAgentChatOptions) {
         if (!isOffline) return;
         setAiMessages(prev => {
             const last = prev[prev.length - 1] as any;
+            // Skip adding generic message if last message already contains backend debug info
             if (last?.role === 'assistant' && last?.content === offlineMessage) return prev;
+            if (last?.role === 'assistant' && (last?.content?.includes('[SYSTEM_') || last?.content?.includes('[THINKING]'))) {
+                // Backend already sent debug info, preserve it
+                return prev;
+            }
             return [...prev, {
                 id: `error-${Date.now()}`,
                 role: 'assistant',

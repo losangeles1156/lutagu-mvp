@@ -71,17 +71,23 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
         baseUrl = API_PUBLIC;
         token = TOKENS.PUBLIC;
     } else if (operator.includes('JR-East') || operator.includes('Keio') || operator.includes('Keikyu') ||
-               operator.includes('Keisei') || operator.includes('Odakyu') || operator.includes('Seibu') ||
-               operator.includes('Tobu') || operator.includes('Tokyu') || operator.includes('Yurikamome')) {
+        operator.includes('Keisei') || operator.includes('Odakyu') || operator.includes('Seibu') ||
+        operator.includes('Tobu') || operator.includes('Tokyu') || operator.includes('Yurikamome')) {
         // Strategy B: JR East & Private Railways -> Challenge API, JR East/Challenge Token
         baseUrl = API_CHALLENGE;
         token = TOKENS.JR_EAST;
-        if (!token) throw new Error(`ODPT_API_KEY_JR_EAST missing for ${operator} (Challenge API)`);
+        if (!token) {
+            console.warn(`[ODPT Client] ODPT_API_KEY_JR_EAST missing for ${operator}. Graceful skip.`);
+            return [] as any;
+        }
     } else {
         // Strategy C: Metro, MIR -> Developer API, Metro Token
         baseUrl = API_DEV;
         token = TOKENS.METRO;
-        if (!token) throw new Error('ODPT_API_KEY_METRO missing for Metro/MIR (Developer API)');
+        if (!token) {
+            console.warn('[ODPT Client] ODPT_API_KEY_METRO missing. Graceful skip.');
+            return [] as any;
+        }
     }
 
     const searchParams = new URLSearchParams(params);

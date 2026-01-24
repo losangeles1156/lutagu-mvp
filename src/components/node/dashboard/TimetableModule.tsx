@@ -136,65 +136,44 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
         return (
             <div className="flex flex-col items-center justify-center p-8 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/60 text-center">
                 <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center text-3xl shadow-sm mb-4">
-                    {isJR ? '🚃' : '🕰️'}
+                    🕰️
                 </div>
 
-                {isJR ? (
-                    <>
-                        <p className="text-sm font-black text-slate-600">
-                            {locale.startsWith('ja')
-                                ? 'JR線の時刻表はODPT APIでは提供されていません'
-                                : locale.startsWith('en')
-                                    ? 'JR timetables are not available via ODPT API'
-                                    : 'JR線時刻表不在 ODPT API 提供範圍內'}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-2 max-w-[220px] leading-relaxed">
-                            {locale.startsWith('ja')
-                                ? 'JR東日本の公式サイトで時刻表をご確認ください。'
-                                : locale.startsWith('en')
-                                    ? 'Please check the official JR East website for timetables.'
-                                    : '請前往 JR 東日本官方網站查看時刻表。'}
-                        </p>
-                        {jrUrl && (
-                            <a
-                                href={jrUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-500 text-white text-sm font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-                            >
-                                <span>🔗</span>
-                                <span>
-                                    {locale.startsWith('ja')
-                                        ? `${stationName}駅 公式時刻表`
-                                        : locale.startsWith('en')
-                                            ? `${stationName} Station Timetable`
-                                            : `${stationName}站 官方時刻表`}
-                                </span>
-                            </a>
-                        )}
-                    </>
-                ) : (
-                    <>
-                        <p className="text-sm font-black text-slate-600">
-                            {t('timetable.noData', { defaultValue: '時刻表が見つかりません' })}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-2 max-w-[200px] leading-relaxed">
-                            {t('timetable.checkStation', { defaultValue: '駅の掲示板または公式アプリをご確認ください。' })}
-                        </p>
-                        {/* Fallback for Metro/Private - Generic Search Link */}
+                <p className="text-sm font-black text-slate-600">
+                    {t('timetable.noData', { defaultValue: '時刻表が見つかりません' })}
+                </p>
+                <p className="text-xs text-slate-400 mt-2 max-w-[220px] leading-relaxed">
+                    {locale.startsWith('ja')
+                        ? '駅の掲示板または公式サイトをご確認ください。'
+                        : locale.startsWith('en')
+                            ? 'Please check the station display or official website.'
+                            : '請確認車站告示牌或官方網站。'}
+                </p>
+
+                <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                    {/* If JR station, show direct JR link */}
+                    {jrUrl && (
                         <a
-                            href={`https://www.google.com/search?q=${stationName}+station+timetable`}
+                            href={jrUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-600 text-sm font-bold rounded-full hover:bg-slate-200 transition-all duration-200"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white text-xs font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
                         >
-                            <span>🔍</span>
-                            <span>
-                                {locale.startsWith('ja') ? 'Webで検索' : 'Search Web'}
-                            </span>
+                            <span>🚃</span>
+                            <span>JR {stationName}</span>
                         </a>
-                    </>
-                )}
+                    )}
+                    {/* Generic search link */}
+                    <a
+                        href={`https://www.google.com/search?q=${stationName}+station+timetable+東京`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-slate-200 transition-all duration-200"
+                    >
+                        <span>🔍</span>
+                        <span>{locale.startsWith('ja') ? 'Webで検索' : locale.startsWith('en') ? 'Search Web' : '網路搜尋'}</span>
+                    </a>
+                </div>
             </div>
         );
     }
