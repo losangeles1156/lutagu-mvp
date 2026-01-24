@@ -144,9 +144,12 @@ export async function POST(req: NextRequest) {
                     // enqueueText('\n\n' + getFallbackMessage(locale)); // Disable fallback to see error
                 }
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error('[PhasedAPI] Stream error:', error);
-                enqueueText('\n\n' + getFallbackMessage(locale));
+                // EXPOSE GLOBAL ERROR TO UI (Critical for Pre-check failures)
+                const errorDetails = error?.message || JSON.stringify(error);
+                enqueueText(`\n\n[SYSTEM_CRITICAL] Pre-computation Failed. Details: ${errorDetails}`);
+                // enqueueText('\n\n' + getFallbackMessage(locale));
             } finally {
                 controller.close();
             }
