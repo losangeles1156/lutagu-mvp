@@ -181,6 +181,18 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
                         <p className="text-xs text-slate-400 mt-2 max-w-[200px] leading-relaxed">
                             {t('timetable.checkStation', { defaultValue: '駅の掲示板または公式アプリをご確認ください。' })}
                         </p>
+                        {/* Fallback for Metro/Private - Generic Search Link */}
+                        <a
+                            href={`https://www.google.com/search?q=${stationName}+station+timetable`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-600 text-sm font-bold rounded-full hover:bg-slate-200 transition-all duration-200"
+                        >
+                            <span>🔍</span>
+                            <span>
+                                {locale.startsWith('ja') ? 'Webで検索' : 'Search Web'}
+                            </span>
+                        </a>
                     </>
                 )}
             </div>

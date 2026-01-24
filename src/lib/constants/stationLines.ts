@@ -54,6 +54,12 @@ export const LINES = {
     // Keikyu
     KeikyuMain: { name: { ja: '京急本線', en: 'Keikyu Main Line', zh: '京急本線' }, operator: 'Private', color: '#00C3E3' } as StationLineDef, // Cyan/Blue
     KeikyuAirport: { name: { ja: '京急空港線', en: 'Keikyu Airport Line', zh: '京急機場線' }, operator: 'Private', color: '#00C3E3' } as StationLineDef,
+
+    // Aliases for ODPT API Variations (Normalized keys)
+    ChuoSobuLocal: { name: { ja: '中央・総武線(各停)', en: 'Chuo-Sobu Line (Local)', zh: '中央・總武線(各停)' }, operator: 'JR', color: '#FFD700' } as StationLineDef,
+    KeihinTohokuNegishi: { name: { ja: '京浜東北・根岸線', en: 'Keihin-Tohoku-Negishi Line', zh: '京濱東北・根岸線' }, operator: 'JR', color: '#00BFFF' } as StationLineDef,
+    JobanRapid: { name: { ja: '常磐線(快速)', en: 'Joban Line (Rapid)', zh: '常磐線(快速)' }, operator: 'JR', color: '#00B261' } as StationLineDef,
+    JobanLocal: { name: { ja: '常磐線(各停)', en: 'Joban Line (Local)', zh: '常磐線(各停)' }, operator: 'Metro', color: '#00B261' } as StationLineDef, // Usually thru-service
 };
 
 // Operator Colors for Map Icons (Official Brand Colors)
