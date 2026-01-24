@@ -115,10 +115,10 @@ export async function POST(req: NextRequest) {
                 const userPrompt = buildUserPrompt(text, nodeId, strategyContext);
 
                 try {
-                    // Upgrade to Gemini 3 Flash Preview (Gemini 2.0) via Zeabur
-                    // matching the system's "High Logic" capability
+                    // Switched to stable Gemini 1.5 Flash to ensure availability
+                    // 'gemini-3-flash-preview' was causing connection errors
                     const result = streamText({
-                        model: zeabur('gemini-3-flash-preview'),
+                        model: zeabur('gemini-1.5-flash'),
                         messages: [
                             { role: 'system', content: systemPrompt },
                             { role: 'user', content: userPrompt }
