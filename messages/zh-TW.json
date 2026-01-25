@@ -275,7 +275,11 @@
         "vacanSub": "探索周邊空位",
         "noLiveData": "暫無即時運行數據",
         "noLiveDataTitle": "全線正常運行",
-        "noLiveDataDesc": "目前無延誤或異常通報。"
+        "noLiveDataDesc": "目前無延誤或異常通報。",
+        "issuesCount": "{count} 項異常",
+        "allGood": "運行良好",
+        "sourceOdpt": "來源：ODPT",
+        "liveCrowd": "即時人潮"
     },
     "l3": {
         "servicesTitle": "服務設施",
@@ -495,7 +499,29 @@
                 "to": "往 ",
                 "weekday": "平日 Weekday",
                 "weekend": "週末/假日 Weekend"
-            }
+            },
+            "synthesis": "AI 合成",
+            "routeFound": "找到路線",
+            "optionLabel": "方案",
+            "optionsLabel": "方案",
+            "aiReasoning": "AI 決策依據",
+            "expertInsights": "專家洞察",
+            "recommendations": "推薦建議",
+            "action": "行動",
+            "bestRecommended": "最佳方案 Recommended",
+            "alternative": "替代路線 Alternative",
+            "time": "時間 Time",
+            "fare": "費用 Fare",
+            "transfer": "轉乘 Transfer",
+            "tpiLabel": "轉乘辛苦度 TPI",
+            "cdrLabel": "延誤連鎖風險 CDR",
+            "departure": "次發 Departure",
+            "nextDeparture": "下一班 Next Departure",
+            "arriving": "即將 Arriving",
+            "routeDetails": "路徑詳情 Route Details",
+            "applyToMap": "套用到地圖",
+            "bambiStrategy": "BAMBI 策略",
+            "bambiLabel": "BAMBI"
         }
     },
     "weather": {

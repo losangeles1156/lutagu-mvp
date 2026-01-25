@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { EnrichedRouteOption } from '@/lib/l4/assistantEngine';
 import type { SupportedLocale, RouteStep } from '@/lib/l4/types/RoutingTypes';
 import { ChevronDown, ChevronUp, Clock, CreditCard, Repeat, Navigation2, Sparkles, Zap, ShieldCheck, AlertTriangle } from 'lucide-react';
@@ -118,6 +119,7 @@ function computeCountdownMinutes(hhmm?: string) {
 }
 
 export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) {
+    const tL4 = useTranslations('l4.dashboard');
     const [expanded, setExpanded] = useState(rank === 0);
     const [tick, setTick] = useState(0);
 
@@ -132,14 +134,14 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
         return computeCountdownMinutes(option.nextDeparture);
     }, [option.nextDeparture, tick]);
 
-    const transferLabel = useMemo(() => {
+    const transferLabelValue = useMemo(() => {
         const n = Number(option.transfers || 0);
         if (locale === 'ja') return `${n} 回`;
         if (locale === 'en') return `${n}`;
         return `${n} 次`;
     }, [locale, option.transfers]);
 
-    const durationLabel = useMemo(() => {
+    const durationLabelValue = useMemo(() => {
         if (!Number.isFinite(option.duration)) return null;
         const n = Math.max(0, Math.round(Number(option.duration)));
         if (locale === 'ja') return `${n} 分`;
@@ -147,13 +149,11 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
         return `${n} 分`;
     }, [locale, option.duration]);
 
-    const fareLabel = useMemo(() => {
+    const fareValue = useMemo(() => {
         const fare = option.fare;
         if (!fare || !Number.isFinite(fare.ic) || !Number.isFinite(fare.ticket)) return null;
-        if (locale === 'ja') return `¥${fare.ic}`;
-        if (locale === 'en') return `¥${fare.ic}`;
         return `¥${fare.ic}`;
-    }, [locale, option.fare]);
+    }, [option.fare]);
 
     const railways = (option.railways || []).filter(Boolean);
 
@@ -170,12 +170,12 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                             {rank === 0 ? (
                                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
                                     <Sparkles size={12} className="animate-pulse" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">最佳方案 Recommended</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{tL4('bestRecommended')}</span>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 text-slate-500 border border-slate-200/50">
                                     <Navigation2 size={12} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">替代路線 Alternative</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{tL4('alternative')}</span>
                                 </div>
                             )}
 
@@ -214,20 +214,35 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                 <div className="mt-6 grid grid-cols-3 gap-3">
                     <div className="p-3.5 rounded-2xl bg-white/50 border border-white/60 shadow-sm flex flex-col items-center justify-center text-center group/stat hover:bg-white transition-all hover:shadow-md">
                         <Clock size={16} className="text-slate-400 mb-1 group-hover/stat:text-indigo-500 transition-colors" />
-                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">時間 Time</div>
-                        <div className="text-sm font-black text-slate-900">{durationLabel || '—'}</div>
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{tL4('timeLabel')}</div>
+                        <div className="text-sm font-black text-slate-900">{durationLabelValue || '—'}</div>
                     </div>
                     <div className="p-3.5 rounded-2xl bg-white/50 border border-white/60 shadow-sm flex flex-col items-center justify-center text-center group/stat hover:bg-white transition-all hover:shadow-md">
                         <CreditCard size={16} className="text-slate-400 mb-1 group-hover/stat:text-emerald-500 transition-colors" />
-                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">費用 Fare</div>
-                        <div className="text-sm font-black text-slate-900">{fareLabel || '—'}</div>
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{tL4('fareLabel')}</div>
+                        <div className="text-sm font-black text-slate-900">{fareValue || '—'}</div>
                     </div>
                     <div className="p-3.5 rounded-2xl bg-white/50 border border-white/60 shadow-sm flex flex-col items-center justify-center text-center group/stat hover:bg-white transition-all hover:shadow-md">
                         <Repeat size={16} className="text-slate-400 mb-1 group-hover/stat:text-amber-500 transition-colors" />
-                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">轉乘 Transfer</div>
-                        <div className="text-sm font-black text-slate-900">{transferLabel}</div>
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{tL4('transferLabel')}</div>
+                        <div className="text-sm font-black text-slate-900">{transferLabelValue}</div>
                     </div>
                 </div>
+
+                {/* L4 Insights - Smart Badges */}
+                {option.insights && option.insights.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {option.insights.map((insight, idx) => (
+                            <div key={idx} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wide ${insight.type === 'pro'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                : 'bg-amber-50 text-amber-700 border-amber-100'
+                                }`}>
+                                {insight.type === 'pro' ? '✅' : '⚠️'}
+                                <span>{insight.text}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* L4 Intelligence Metrics */}
                 {(option.tpi || option.cdr) && (
@@ -240,7 +255,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                     <Zap size={14} />
                                 </div>
                                 <div className="min-w-0">
-                                    <div className="text-[8px] font-black text-indigo-400 uppercase tracking-tighter">轉乘辛苦度 TPI</div>
+                                    <div className="text-[8px] font-black text-indigo-400 uppercase tracking-tighter">{tL4('tpiLabel')}</div>
                                     <div className="text-xs font-black text-slate-700 truncate">
                                         {option.tpi.score} - {
                                             locale === 'ja' ? (option.tpi.level === 'easy' ? '快適' : option.tpi.level === 'normal' ? '普通' : '大変') :
@@ -259,7 +274,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                     {option.cdr.riskLevel === 'low' ? <ShieldCheck size={14} /> : <AlertTriangle size={14} />}
                                 </div>
                                 <div className="min-w-0">
-                                    <div className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">延誤連鎖風險 CDR</div>
+                                    <div className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">{tL4('cdrLabel')}</div>
                                     <div className="text-xs font-black text-slate-700 truncate">
                                         {Math.round(option.cdr.overallSuccessRate * 100)}% {
                                             locale === 'ja' ? (option.cdr.riskLevel === 'low' ? '低リスク' : 'リスクあり') :
@@ -284,7 +299,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                 </div>
                                 <div>
                                     <div className="text-[10px] font-black text-indigo-100/60 uppercase tracking-widest leading-none mb-1.5">
-                                        {locale === 'ja' ? '次発 Departure' : '下一班 Next Departure'}
+                                        {tL4('nextDeparture')}
                                     </div>
                                     <div className="text-lg font-black text-white leading-none tracking-tight">
                                         {option.nextDeparture}
@@ -296,7 +311,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                     {countdownMin === null
                                         ? '—'
                                         : countdownMin === 0
-                                            ? (locale === 'ja' ? '即時' : '即將 Arriving')
+                                            ? tL4('arriving')
                                             : (locale === 'ja' ? `${countdownMin} 分` : `${countdownMin} min`)}
                                 </div>
                             </div>
@@ -328,7 +343,7 @@ export function RouteResultCard({ option, rank, locale }: RouteResultCardProps) 
                                 <div className="flex items-center gap-2 mb-6 px-1">
                                     <div className="w-1 h-4 bg-indigo-500 rounded-full" />
                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                        {locale === 'ja' ? 'ルート詳細 Route Details' : '路線詳情 Route Details'}
+                                        {tL4('routeDetails')}
                                     </span>
                                 </div>
                                 <div className="space-y-6">

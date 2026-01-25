@@ -6,6 +6,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { KnowledgeGapManager } from './KnowledgeGapManager';
 
 let supabaseInstance: SupabaseClient | null = null;
 
@@ -117,56 +118,26 @@ export class FeedbackLooper {
     }
 
     /**
-     * Trigger knowledge enrichment for a specific station/topic.
-     * This is a placeholder that logs the enrichment request.
-     * In production, this could:
-     * - Create a GitHub Issue
-     * - Trigger a web crawler
-     * - Call LLM to generate knowledge
-     */
-    async triggerKnowledgeEnrichment(stationId: string, intentTarget: string): Promise<void> {
-        console.log(`[FeedbackLooper] 🔔 Enrichment triggered for station=${stationId}, topic=${intentTarget}`);
-
-        // TODO: Implement actual enrichment logic
-        // Options:
-        // 1. GitHub Issue creation via GitHub API
-        // 2. LLM-based knowledge generation
-        // 3. Web crawling and extraction
-
-        // For now, log to a dedicated table for tracking
-        const supabase = getSupabase();
-        if (!supabase) return;
-
-        try {
-            await supabase
-                .from('enrichment_requests')
-                .insert({
-                    station_id: stationId,
-                    intent_target: intentTarget,
-                    status: 'pending',
-                    created_at: new Date().toISOString()
-                });
-        } catch (e) {
-            // Table might not exist, that's OK
-            console.warn('[FeedbackLooper] Could not log enrichment request:', e);
-        }
-    }
-
-    /**
-     * Main loop: Analyze signals and trigger enrichment for high-priority needs.
+     * Main loop: Analyze signals and interact with KnowledgeGapManager for deep analysis.
      */
     async runAnalysisAndEnrich(): Promise<{ analyzed: number; enriched: number }> {
         const unmetNeeds = await this.analyzeDemandSignals();
 
-        let enrichedCount = 0;
-        for (const need of unmetNeeds) {
-            await this.triggerKnowledgeEnrichment(need.station_id, need.intent_target);
-            enrichedCount++;
+        if (unmetNeeds.length === 0) {
+            return { analyzed: 0, enriched: 0 };
         }
+
+        const supabase = getSupabase();
+        if (!supabase) return { analyzed: unmetNeeds.length, enriched: 0 };
+
+        const gapManager = new KnowledgeGapManager(supabase);
+
+        // Deep Analysis: Cluster and Prioritize
+        const tasks = await gapManager.processUnmetNeeds(unmetNeeds);
 
         return {
             analyzed: unmetNeeds.length,
-            enriched: enrichedCount
+            enriched: tasks.length
         };
     }
 }

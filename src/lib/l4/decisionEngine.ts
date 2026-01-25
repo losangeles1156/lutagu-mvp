@@ -18,6 +18,16 @@ export class L4DecisionEngine {
      */
     public evaluate(context: EvaluationContext): MatchedStrategyCard[] {
         const { stationId, lineIds = [], userPreferences, currentDate = getJSTTime().date, locale } = context;
+
+        // [Phase 3] Temporal Intelligence injection
+        if (context.isHoliday === undefined) {
+            const timeInfo = getJSTTime();
+            context.isHoliday = timeInfo.isHoliday;
+            // Determine dayType
+            const day = timeInfo.date.getDay();
+            const isWeekend = day === 0 || day === 6;
+            context.dayType = timeInfo.isHoliday ? 'holiday' : (isWeekend ? 'weekend' : 'weekday');
+        }
         const matches: MatchedStrategyCard[] = [];
 
         // Helper to get active user state keys
@@ -27,7 +37,7 @@ export class L4DecisionEngine {
             // Skip if rule is marked to be excluded from cards (Chat only)
             if (rule.excludeFromCards) continue;
 
-            if (this.checkTrigger(rule.trigger, stationId, lineIds, activeUserStates, currentDate)) {
+            if (this.checkTrigger(rule.trigger, stationId, lineIds, activeUserStates, currentDate, context.dayType)) {
 
                 // Calculate Relevance Score
                 let score = rule.priority;
@@ -135,7 +145,8 @@ export class L4DecisionEngine {
         stationId: string,
         lineIds: string[],
         activeUserStates: Set<UserStateKey>,
-        currentDate: Date
+        currentDate: Date,
+        dayType?: 'weekday' | 'weekend' | 'holiday'
     ): boolean {
 
         // 1. Station Match (If defined, MUST match)
@@ -171,6 +182,13 @@ export class L4DecisionEngine {
         if (trigger.time_patterns && trigger.time_patterns.length > 0) {
             const timeMatch = trigger.time_patterns.some(pattern => this.matchesTimePattern(pattern, currentDate));
             if (!timeMatch) {
+                return false;
+            }
+        }
+
+        // 5. Day Type Match (If defined, current dayType must match)
+        if (trigger.allowed_days && trigger.allowed_days.length > 0) {
+            if (!dayType || !trigger.allowed_days.includes(dayType)) {
                 return false;
             }
         }

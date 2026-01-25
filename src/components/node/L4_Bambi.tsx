@@ -308,7 +308,7 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
                                 }}
                                 className="px-4 py-3 rounded-2xl bg-white/10 border border-white/15 text-white font-black text-xs tracking-widest hover:bg-white/15 transition-colors active:scale-[0.99]"
                             >
-                                {locale.startsWith('ja') ? '地図に反映' : locale.startsWith('en') ? 'Apply to Map' : '套用到地圖'}
+                                {tL4('applyToMap')}
                             </button>
 
                             {otherCards.length > 0 && (

@@ -201,7 +201,7 @@ export function ChatPanel() {
             const q = decodeURIComponent(action.target.slice('chat:'.length));
             append({ role: 'user', content: q });
         }
-    }, [transitionTo, clearMessages, clearStoreMessages, setDemoMode, activeDemoId, runDemoPlayback, append, handleRestart]);
+    }, [transitionTo, clearMessages, clearStoreMessages, setDemoMode, activeDemoId, runDemoPlayback, append, handleRestart, stopPlayback]);
 
     const handleFeedback = useCallback(async (index: number, score: number) => {
         const msg = displayMessages[index];

@@ -4,26 +4,32 @@ import type { NodeDatum } from '@/lib/api/nodes';
 
 export function useVisibleMarkers(
     nodes: NodeDatum[],
-    mapBounds: LatLngBounds | null
+    mapState: { bounds: LatLngBounds | null; zoom: number }
 ) {
+    const { bounds: mapBounds, zoom } = mapState;
+
     return useMemo(() => {
         if (!mapBounds) return nodes;
-
-        // Perform simple bounding box check
-        // LatLngBounds.contains works with {lat, lon} or [lat, lon] usually
-        // Leaflet bounds usually have methods.
-
-        // Optimizing: Create local variables for bounds to avoid method calls in loop if needed,
-        // but Leaflet's contains is reasonably fast.
 
         return nodes.filter(node => {
             if (!node.location?.coordinates) return false;
 
-            // GeoJSON is [lon, lat]
-            const [lon, lat] = node.location.coordinates;
+            // 1. Tier-based Visibility Check (The 5-Tier Rule)
+            // If min_zoom_level is explicit, use it. Otherwise derive from display_tier.
+            const minZoom = node.min_zoom_level || (
+                node.display_tier === 1 ? 0 :
+                    node.display_tier === 2 ? 12 :
+                        node.display_tier === 3 ? 14 :
+                            node.display_tier === 4 ? 15 : 16
+            );
 
-            // mapBounds.contains expects LatLng or [lat, lon]
+            if (zoom < minZoom) return false;
+
+            // 2. Viewport Bounding Box Check
+            // GeoJSON coordinates are [lon, lat]
+            const [lon, lat] = node.location.coordinates;
+            // Leaflet mapBounds.contains expects [lat, lon]
             return mapBounds.contains([lat, lon]);
         });
-    }, [nodes, mapBounds]);
+    }, [nodes, mapBounds, zoom]);
 }

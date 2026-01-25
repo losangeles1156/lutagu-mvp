@@ -8,8 +8,22 @@ import { filterRoutesByL2Status } from '../utils/routeFiltering';
 import { DataNormalizer } from '../utils/Normalization';
 import { getCache, LAYER_CACHE_CONFIG } from '../../cache/cacheService';
 import { supabaseAdmin } from '@/lib/supabase';
+import { RouteSynthesizer } from '../RouteSynthesizer';
+import { L1NodeProfile } from '../types/L1Profile';
 
 import { fetchL4Routes, RustRoute } from '@/lib/api/rustServices';
+
+export interface FindRoutesParams {
+    originName?: string;
+    destinationName?: string;
+    originId?: string;
+    destinationId?: string;
+    locale: SupportedLocale;
+    l2Status?: any;
+    filterSuspended?: boolean;
+    userProfile?: L1NodeProfile; // [Phase 4] for Route Synthesis
+    isHoliday?: boolean; // [Phase 3] Temporal Intelligence
+}
 
 export class AlgorithmProvider {
     private routeCache = getCache<RouteOption[]>('route_cache', {
@@ -89,15 +103,7 @@ export class AlgorithmProvider {
         }
     }
 
-    public async findRoutes(params: {
-        originName?: string;
-        destinationName?: string;
-        originId?: string;
-        destinationId?: string;
-        locale: SupportedLocale;
-        l2Status?: any;
-        filterSuspended?: boolean;
-    }): Promise<RouteOption[] | null> {
+    public async findRoutes(params: FindRoutesParams): Promise<RouteOption[] | null> {
         const originId = params.originId || (params.originName ? DataNormalizer.lookupStationId(params.originName) : null);
         const destId = params.destinationId || (params.destinationName ? DataNormalizer.lookupStationId(params.destinationName) : null);
 
@@ -130,6 +136,13 @@ export class AlgorithmProvider {
         if (!l2) return baseRoutes;
 
         const filtered = filterRoutesByL2Status({ routes: baseRoutes, l2Status: l2 }).routes;
+
+        // [Phase 4] Route Synthesis (The Experience Layer)
+        if (params.userProfile) {
+            const synthesized = await RouteSynthesizer.synthesize(filtered, params.userProfile, params.isHoliday);
+            return synthesized;
+        }
+
         return filtered;
     }
 

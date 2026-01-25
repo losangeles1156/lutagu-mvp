@@ -281,7 +281,11 @@
             "full": "満員"
         },
         "emergencyAlert": "緊急警報",
-        "viewJmaDetails": "気象庁の詳細を見る"
+        "viewJmaDetails": "気象庁の詳細を見る",
+        "issuesCount": "{count} 件の異常",
+        "allGood": "平常通り",
+        "sourceOdpt": "出典：ODPT",
+        "liveCrowd": "混雑状況"
     },
     "l3": {
         "servicesTitle": "サービス施設",
@@ -489,9 +493,31 @@
                 "noData": "時刻表データがありません",
                 "noDataSub": "この方向の運行情報はありません",
                 "to": "方面 ",
-                "weekday": "平日 Weekday",
+                "weekday": "平日",
                 "weekend": "土休日 Weekend"
-            }
+            },
+            "synthesis": "AI 合成",
+            "routeFound": "ルート確定",
+            "optionLabel": "方案",
+            "optionsLabel": "方案",
+            "aiReasoning": "AI 意思決定根拠",
+            "expertInsights": "専門家の洞察",
+            "recommendations": "おすすめの提案",
+            "action": "アクション",
+            "bestRecommended": "おすすめ Recommended",
+            "alternative": "その他の選択肢 Alternative",
+            "timeLabel": "時間 Time",
+            "fareLabel": "運賃 Fare",
+            "transferLabel": "乗換 Transfer",
+            "tpiLabel": "乗換苦労度 TPI",
+            "cdrLabel": "遅延連鎖リスク CDR",
+            "departure": "次発 Departure",
+            "nextDeparture": "次発 Next Departure",
+            "arriving": "まもなく Arriving",
+            "routeDetails": "ルート詳細 Route Details",
+            "applyToMap": "地図に反映",
+            "bambiStrategy": "BAMBI 戦略",
+            "bambiLabel": "BAMBI"
         }
     },
     "weather": {

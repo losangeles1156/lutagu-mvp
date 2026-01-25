@@ -840,6 +840,12 @@ export type EnrichedRouteOption = RouteOption & {
     nextDeparture?: string;
     tpi?: TPIResult;
     cdr?: CDRResult;
+    // [Phase 8.2] Semantic Reasoning Insights
+    insights?: Array<{
+        type: 'pro' | 'con' | 'warning';
+        text: string;
+        icon?: string;
+    }>;
 };
 
 function normalizeOdptRailwayId(input: string): string {

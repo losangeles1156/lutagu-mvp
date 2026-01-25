@@ -6,6 +6,7 @@ export function useViewportBounds() {
     // This hook must be used inside a child of <MapContainer>
     const map = useMap();
     const [bounds, setBounds] = useState<LatLngBounds | null>(null);
+    const [zoom, setZoom] = useState<number>(15);
 
     useEffect(() => {
         if (!map) return;
@@ -13,6 +14,7 @@ export function useViewportBounds() {
         const updateBounds = () => {
             // Add padding to fetch slightly more than visible
             setBounds(map.getBounds().pad(0.2));
+            setZoom(map.getZoom());
         };
 
         map.on('moveend', updateBounds);
@@ -27,5 +29,5 @@ export function useViewportBounds() {
         };
     }, [map]);
 
-    return bounds;
+    return { bounds, zoom };
 }

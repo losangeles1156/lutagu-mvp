@@ -275,7 +275,11 @@
             "full": "Full"
         },
         "emergencyAlert": "Emergency Alert",
-        "viewJmaDetails": "View JMA Details"
+        "viewJmaDetails": "View JMA Details",
+        "issuesCount": "{count} Issues",
+        "allGood": "All Good",
+        "sourceOdpt": "Source: ODPT",
+        "liveCrowd": "LIVE CROWD"
     },
     "l3": {
         "servicesTitle": "Station Services",
@@ -485,7 +489,29 @@
                 "to": "To ",
                 "weekday": "Weekday",
                 "weekend": "Weekend"
-            }
+            },
+            "synthesis": "AI SYNTHESIS",
+            "routeFound": "ROUTE FOUND",
+            "optionLabel": "Option",
+            "optionsLabel": "Options",
+            "aiReasoning": "AI Reasoning",
+            "expertInsights": "EXPERT INSIGHTS",
+            "recommendations": "RECOMMENDATIONS",
+            "action": "Action",
+            "bestRecommended": "Recommended",
+            "alternative": "Alternative",
+            "timeLabel": "Time",
+            "fareLabel": "Fare",
+            "transferLabel": "Transfer",
+            "tpiLabel": "TPI",
+            "cdrLabel": "CDR",
+            "departure": "Departure",
+            "nextDeparture": "Next Departure",
+            "arriving": "Arriving",
+            "routeDetails": "Route Details",
+            "applyToMap": "Apply to Map",
+            "bambiStrategy": "BAMBI Strategy",
+            "bambiLabel": "BAMBI"
         }
     },
     "weather": {

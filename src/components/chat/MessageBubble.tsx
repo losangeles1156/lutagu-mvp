@@ -5,6 +5,7 @@ import { Bot, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ParsedMessageContent } from './ParsedMessageContent';
 import { ActionCard, Action as ChatAction } from './ActionCard';
+import { AgenticResponseCard } from './AgenticResponseCard';
 
 interface MessageBubbleProps {
     msg: any;
@@ -51,6 +52,16 @@ export const MessageBubble = memo(({
 
                 {/* Message Content with Markdown and Thinking Process */}
                 <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
+
+                {/* Phase 5: Agentic UI - Render Structured Response */}
+                {(msg.type || msg.data) && msg.role === 'assistant' && (
+                    <AgenticResponseCard
+                        type={msg.type || (msg.data?.type)}
+                        data={msg.data}
+                        source={msg.source}
+                        onAction={handleAction}
+                    />
+                )}
 
                 {/* Render Legacy Actions (Grouped) */}
                 {legacyActions && legacyActions.length > 0 && (
@@ -141,9 +152,8 @@ export const MessageBubble = memo(({
                                 }
                             }}
                             disabled={feedbackGiven !== null}
-                            className={`p-1.5 hover:bg-slate-100 rounded-full transition-colors ${
-                                feedbackGiven === 1 ? 'text-emerald-500 bg-emerald-50' : 'text-slate-300 hover:text-emerald-500'
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            className={`p-1.5 hover:bg-slate-100 rounded-full transition-colors ${feedbackGiven === 1 ? 'text-emerald-500 bg-emerald-50' : 'text-slate-300 hover:text-emerald-500'
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             <ThumbsUp size={14} />
                         </button>
@@ -155,9 +165,8 @@ export const MessageBubble = memo(({
                                 }
                             }}
                             disabled={feedbackGiven !== null}
-                            className={`p-1.5 hover:bg-slate-100 rounded-full transition-colors ${
-                                feedbackGiven === -1 ? 'text-rose-500 bg-rose-50' : 'text-slate-300 hover:text-rose-500'
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            className={`p-1.5 hover:bg-slate-100 rounded-full transition-colors ${feedbackGiven === -1 ? 'text-rose-500 bg-rose-50' : 'text-slate-300 hover:text-rose-500'
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             <ThumbsDown size={14} />
                         </button>

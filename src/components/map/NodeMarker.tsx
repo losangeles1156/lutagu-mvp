@@ -49,6 +49,10 @@ interface NodeMarkerProps {
     isSelected?: boolean;
     showLabelOverride?: boolean;
     onClick?: (node: any) => void;
+
+    // [Phase 8] Visual Intelligence Lite Props
+    crowdLevel?: number;        // 0.0 to 1.0
+    disruptionStatus?: 'normal' | 'delay' | 'suspended';
 }
 
 // [PERF] LRU icon cache to avoid recreating identical icons
@@ -72,7 +76,7 @@ const AIRPORT_TERMINAL_IDS = [
     'odpt.Station:Keisei.NaritaSkyAccess.NaritaAirportTerminal2and3'
 ];
 
-function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSelected = false, showLabelOverride, onClick }: NodeMarkerProps) {
+function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSelected = false, showLabelOverride, onClick, crowdLevel = 0, disruptionStatus = 'normal' }: NodeMarkerProps) {
     const setCurrentNode = useNodeStore(s => s.setCurrentNode);
     const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
 
@@ -187,8 +191,8 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     // [PERF] Generate cache key for icon (MUST be before early return)
     // CRITICAL: Must include zoom in cache key since icon size and label visibility depend on zoom
     const iconCacheKey = useMemo(() => {
-        return `${node.id}:${isSelected}:${isMajor}:${hasMembers}:${memberCount}:${baseColor}:${showLabel}:${label}:${zoom}`;
-    }, [node.id, isSelected, isMajor, hasMembers, memberCount, baseColor, showLabel, label, zoom]);
+        return `${node.id}:${isSelected}:${isMajor}:${hasMembers}:${memberCount}:${baseColor}:${showLabel}:${label}:${zoom}:${crowdLevel}:${disruptionStatus}`;
+    }, [node.id, isSelected, isMajor, hasMembers, memberCount, baseColor, showLabel, label, zoom, crowdLevel, disruptionStatus]);
 
     // [PERF] Memoize entire icon creation with caching (MUST be before early return)
     const leafletIcon = useMemo(() => {
@@ -234,6 +238,14 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
                     {/* [PERF] Simplified shadow layers - reduced from 2 to 1 */}
                     {hasMembers && (
                         <div className={`absolute inset-0 translate-x-[3px] translate-y-[3px] ${shapeClass} bg-slate-900/10`} />
+                    )}
+
+                    {/* [Phase 8] Warning / Pulse Ring */}
+                    {(crowdLevel > 0.8 || disruptionStatus !== 'normal') && (
+                        <div className={`absolute inset-[-8px] ${ringRadiusClass} animate-ping bg-red-500/70 z-0`} />
+                    )}
+                    {(crowdLevel > 0.6) && (
+                        <div className={`absolute inset-[-4px] ${ringRadiusClass} border-2 border-red-500/50 z-0`} />
                     )}
 
                     <div
@@ -327,7 +339,7 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         iconCache.set(iconCacheKey, icon);
 
         return icon;
-    }, [iconCacheKey, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge, isAirport, isPrivate, operatorAbbr, primaryLineColor, zoom]);
+    }, [iconCacheKey, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge, isAirport, isPrivate, operatorAbbr, primaryLineColor, zoom, crowdLevel, disruptionStatus]);
 
     // NOW we can do early return - after all hooks
     if (!coords.lat || !coords.lon) return null;
@@ -353,6 +365,8 @@ export const NodeMarker = memo(NodeMarkerInner, (prevProps, nextProps) => {
         prevProps.hubDetails?.member_count === nextProps.hubDetails?.member_count &&
         prevProps.locale === nextProps.locale &&
         prevProps.zoom === nextProps.zoom &&
-        prevProps.isSelected === nextProps.isSelected
+        prevProps.isSelected === nextProps.isSelected &&
+        prevProps.crowdLevel === nextProps.crowdLevel &&
+        prevProps.disruptionStatus === nextProps.disruptionStatus
     );
 });

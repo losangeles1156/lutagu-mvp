@@ -27,6 +27,7 @@ export function LoginPanel() {
   const setAgentConversationId = useUIStore(s => s.setAgentConversationId);
   const setBottomSheetOpen = useUIStore(s => s.setBottomSheetOpen);
   const setNodeActiveTab = useUIStore(s => s.setNodeActiveTab);
+  const setDemoMode = useUIStore(s => s.setDemoMode);
 
   const setMapCenter = useMapStore(s => s.setMapCenter);
   const setCurrentNode = useNodeStore(s => s.setCurrentNode);
@@ -127,12 +128,13 @@ export function LoginPanel() {
   }, [transitionTo, setMapCenter, setAgentConversationId, clearMessages, setPendingInput, isMobile]);
 
   // 3. 演示範例點擊
-  const handleDemoClick = useCallback((node: string, text: string) => {
+  const handleDemoClick = useCallback((node: string, demoId: string) => {
     // 進入 AI 對話演示模式 (fullscreen)
-    setPendingInput(text);
+    setPendingInput('');
+    setDemoMode(true, demoId);
     transitionTo('fullscreen');
-    router.push(`/${locale}/?node=${node}&sheet=1&tab=lutagu&q=${encodeURIComponent(text)}`);
-  }, [transitionTo, setPendingInput, router, locale]);
+    router.push(`/${locale}/?node=${node}&sheet=1&tab=lutagu&demo=${encodeURIComponent(demoId)}`);
+  }, [transitionTo, setPendingInput, setDemoMode, router, locale]);
 
   return (
     <motion.div
@@ -178,7 +180,7 @@ export function LoginPanel() {
           ].map((tip) => (
             <button
               key={tip.id}
-              onClick={() => handleDemoClick(tip.node, tip.text)}
+              onClick={() => handleDemoClick(tip.node, tip.id)}
               className="w-full text-left p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all group active:scale-[0.98]"
             >
               <div className="flex items-center gap-2 mb-1">

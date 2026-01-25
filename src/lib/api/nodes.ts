@@ -35,6 +35,10 @@ export interface NodeDatum {
     version?: number;     // Incremental version number
     data_hash?: string;   // SHA-256 hash of node data for change detection
     ward_id?: string | null;     // Ward/行政區 ID for ward-based node grouping
+
+    // [Phase 8] Visual Intelligence Lite
+    crowd_level?: number;        // 0.0 to 1.0
+    disruption_status?: 'normal' | 'delay' | 'suspended';
 }
 
 /**
@@ -106,7 +110,11 @@ function normalizeNodeRow(n: any) {
         version: typeof n?.version === 'number' ? n.version : (n?.version ?? undefined),
         updated_at: updatedAt,
         data_hash: typeof n?.data_hash === 'string' ? n.data_hash : (n?.data_hash ?? undefined),
-        ward_id: typeof n?.ward_id === 'string' ? n.ward_id : (n?.ward_id ?? undefined)
+        ward_id: typeof n?.ward_id === 'string' ? n.ward_id : (n?.ward_id ?? undefined),
+
+        // [Phase 8]
+        crowd_level: typeof n?.crowd_level === 'number' ? n.crowd_level : 0,
+        disruption_status: typeof n?.disruption_status === 'string' ? n.disruption_status : 'normal'
     };
 }
 
@@ -223,28 +231,61 @@ function getFallbackNearbyNodes(lat: number, lon: number) {
     });
 }
 
-function enrichNodeData(n: any) {
+export function enrichNodeData(n: any) {
     const seed = SEED_NODES.find(s => s.id === n.id);
     const name = n.name || (seed ? seed.name : 'Station');
 
     // V3.0 Logic: ID parent_hub_id is null, it is a Hub.
     const isHub = !n.parent_hub_id;
 
-    // Custom Map Design Overrides
+    // Custom Map Design Overrides & Tier Assignment (MVP Hardcoded Phase)
     let mapDesign = undefined;
-    let tier = undefined;
+    let tier: 'major' | 'minor' | undefined = undefined;
+    let display_tier = n.display_tier || 5; // Default Tier 5
 
+    // Tier 1: Super Hubs (Always Visible)
+    // Precise ID Matching to avoid "TokyoMetro" false positives
+    // Checks for ".Name" or ":Name" or just starts with specific logic if needed
+    const checkId = (str: string) => n.id.includes(`.${str}`) || n.id.endsWith(`:${str}`);
+
+    if (
+        checkId('Ueno') ||
+        checkId('Tokyo') ||
+        checkId('Ikebukuro') ||
+        checkId('Shinjuku') ||
+        checkId('Shibuya') ||
+        checkId('Shinagawa') ||
+        checkId('Akihabara') ||
+        n.id.includes('NaritaAirport') ||
+        n.id.includes('HanedaAirport')
+    ) {
+        tier = 'major';
+        display_tier = 1;
+    }
+
+    // Tier 2: Major Hubs (Zoom >= 12)
+    if (
+        n.id.includes('Ginza') ||
+        n.id.includes('Asakusa') ||
+        n.id.includes('Otemachi') ||
+        n.id.includes('Oshiage') ||
+        n.id.includes('Shimbashi') ||
+        n.id.includes('Nihombashi')
+    ) {
+        if (display_tier > 2) display_tier = 2; // Only promote if not already T1
+        tier = 'major';
+    }
+
+    // Design Overrides
     if (n.id.includes('Ueno')) {
-        tier = 'major';
         mapDesign = { icon: 'park', color: '#F39700' };
+        // [VERIFICATION] Mock High Crowd for Phase 8.1 visual test
+        if (!n.crowd_level) n.crowd_level = 0.9;
     } else if (n.id.includes('Tokyo')) {
-        tier = 'major';
         mapDesign = { icon: 'red_brick', color: '#E25822' };
     } else if (n.id.includes('Akihabara')) {
-        tier = 'major';
         mapDesign = { icon: 'electric', color: '#FFE600' };
     } else if (n.id.includes('Asakusa') && !n.id.includes('bashi')) {
-        tier = 'major';
         mapDesign = { icon: 'lantern', color: '#D32F2F' };
     }
 
@@ -253,6 +294,8 @@ function enrichNodeData(n: any) {
         name,
         is_hub: isHub,
         tier,
+        display_tier, // Explicitly return the calculated tier
+        min_zoom_level: display_tier === 1 ? 0 : display_tier === 2 ? 12 : display_tier === 3 ? 14 : display_tier === 4 ? 15 : 16,
         mapDesign
     };
 }

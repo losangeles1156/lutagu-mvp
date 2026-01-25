@@ -1,58 +1,58 @@
-# 2026 MaaS 1.0 落差補齊開發任務
+# 2026 Q1 Development Plan: Deep Research & Intelligence
 
-> **目標**: 解決 GAP_ANALYSIS_2026.md 中識別的核心技術落差
-> **優先級排序**: 基礎架構啟用 → 閉環學習 → L3 數據補完 → 路由個人化
-
----
-
-## Phase 1: 向量數據庫啟用 (Vector DB Activation) ✅ 完成
+## Phase 1: 向量數據庫啟用 (Vector DB Activation) [優先]
 
 ### [x] 1.1 修復 vector-search-rs 持久化問題
-- 移除 `main.rs` 中的 `delete_collection` 啟動清除邏輯
-- 改為條件式初始化：僅在 collection 不存在時創建
-- **驗證**: 通過
+- [x] 移除 `main.rs` 中的 `delete_collection` 啟動清除邏輯
+- [x] 改為條件式初始化：僅在 collection 不存在時創建
+- **驗證**: 重啟服務後確認數據仍存在
 
 ### [x] 1.2 連接主應用與向量服務
-- 新增 `src/lib/api/vectorService.ts`
-- 實作 `searchVectorDB(query: string)` 函數
-- 在 `HybridEngine.ts` 中整合調用
+- [x] 在 `src/lib/api/` 新增 `vectorService.ts`
+- [x] 實作 `searchVectorDB(query: string)` 函數
+- [x] 在 `HybridEngine.ts` 中整合調用
 
-### [x] 1.3 知識庫遷移至向量庫
-- HybridEngine 已整合向量檢索至 RAG 流程
-- **待辦**: 實際數據上傳至 Qdrant (需啟動服務)
+### [ ] 1.3 知識庫遷移至向量庫
+- [ ] 將 `expertKnowledgeBase.ts` 的靜態規則轉為 Embedding
+- [ ] 將 `tokyo_transit_knowledge_base.md` 切片並上傳 Qdrant
+- **驗證**: `FareRulesSkill` 可通過向量檢索回答
 
 ---
 
-## Phase 2: 閉環學習機制 (Feedback Loop) ⏳ 進行中
+## Phase 2: 閉環學習機制 (Feedback Loop) [優先]
 
 ### [x] 2.1 建立 FeedbackLooper 服務
-- 新增 `src/lib/analytics/FeedbackLooper.ts`
-- 定時分析 `demand_signals` 表
-- 識別高頻未滿足需求 (Unmet Needs)
+- [x] 新增 `src/lib/analytics/FeedbackLooper.ts`
+- [x] 定時分析 `demand_signals` 表
+- [x] 識別高頻未滿足需求 (Unmet Needs)
 
-### [ ] 2.2 自動知識補充觸發
-- 當某站點 Unmet Need 超過閾值時，生成開發工單
-- 或觸發爬蟲/LLM 自動補充知識
-
-### [ ] 2.3 權重調整機制
-- 實作 `WeightAdjuster`
-- 將調整後的權重回寫至用戶 Profile
+### 2.2 知識補充工作流
+- [ ] 對於高頻缺失問題，自動生成 `CandidateKnowledge` (Draft)
+- [ ] 通知管理員（或 User）審閱新知識
 
 ---
 
-## Phase 3: L3 數據補完 (L3 Topology) ⏸️ 待執行
+## Phase 3: 時間與情境智能 (Temporal Intelligence)
 
-### [ ] 3.1 合成拓撲數據計畫
-### [ ] 3.2 垂直移動阻力標註
+### 3.1 注入假日邏輯
+- [ ] 修改 `L4DecisionEngine.evaluate(context)`
+  - [ ] 增加 `dayType: 'weekday' | 'weekend' | 'holiday'` 欄位
+  - [ ] 讀取 `timeUtils.ts` 的 `isHoliday`
+- [ ] 更新 `KnowledgeTrigger` 介面，支援 `allowed_days: ['weekday']` 等設定
+
+### 3.2 優化 L2 演算法上下文
+- [ ] 修改 `findRoutes`，傳入 `isHoliday`
+- [ ] 若後端支援，將此參數傳遞給 Rust Routing Engine
 
 ---
 
-## Phase 4: 路由個人化 (Personalized Routing) ⏸️ 待執行
+## Phase 4: UI 整合 (AI Insights)
 
-### [ ] 4.1 重構 Rust Routing API
-### [ ] 4.2 動態權重計算
+### 4.1 新增 AI Insight 元件
+- [ ] `src/components/chat/AmenityCard.tsx` (擴充顯示 Semantic Search 結果)
+- [ ] 增加 "引用來源" (Citation) 樣式
 
----
-
-## 參考文件
-- [GAP_ANALYSIS_2026.md](./GAP_ANALYSIS_2026.md)
+### 4.2 驗證測試
+- [ ] 編寫 `chat_flow.spec.ts` 測試案例：
+  - [ ] "Where is strict/quiet?" -> 觸發 Vector Search
+  - [ ] "Is it crowded today?" -> 觸發 Temporal Logic (Holiday check)

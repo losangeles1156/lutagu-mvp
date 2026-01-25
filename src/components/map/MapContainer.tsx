@@ -33,12 +33,11 @@ function VirtualizedNodeLayer({ zone, locale }: { zone: 'core' | 'buffer' | 'out
     const error = useNodeError();
     const currentNodeId = useNodeStore(s => s.currentNodeId);
 
-    // [OPTIMIZATION] 1. Track Map Bounds decoupled from render loop
-    const mapBounds = useViewportBounds();
+    // [OPTIMIZATION] 1. Track Map Bounds & Zoom
+    const { bounds: mapBounds, zoom } = useViewportBounds();
 
-    // [OPTIMIZATION] 2. Filter nodes to only those visible in viewport
-    // This dramatically reduces the number of DOM elements for Leaflet to manage
-    const visibleNodes = useVisibleMarkers(allNodes, mapBounds);
+    // [OPTIMIZATION] 2. Filter nodes to only those visible in viewport AND allowed by Zoom Tier
+    const visibleNodes = useVisibleMarkers(allNodes, { bounds: mapBounds, zoom });
 
     // Logs for verification
     useEffect(() => {
@@ -112,6 +111,7 @@ function VirtualizedNodeLayer({ zone, locale }: { zone: 'core' | 'buffer' | 'out
             expandedHubId={expandedHubId}
             expandedNodeIds={expandedNodeIds}
             enableClustering={true}
+            zoom={zoom}
         />
     );
 }

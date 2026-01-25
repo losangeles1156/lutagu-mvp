@@ -182,7 +182,7 @@ export function ChatOverlay() {
         } else {
             setMessages([welcomeMessage]);
         }
-    }, [isChatOpen, storeMessages, messages, locale, addStoreMessage, clearStoreMessages, isDemoMode, activeDemoId, pendingChatInput, setMessages, tChat]);
+    }, [isChatOpen, storeMessages, messages, locale, addStoreMessage, clearStoreMessages, isDemoMode, activeDemoId, pendingChatInput, setMessages, tChat, startPlayback, stopPlayback]);
 
     useEffect(() => {
         if (!isChatOpen) return;

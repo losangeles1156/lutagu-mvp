@@ -42,6 +42,7 @@ interface HubNodeLayerProps {
     expandedHubId?: string | null;
     expandedNodeIds?: string[] | null;
     enableClustering?: boolean;
+    zoom: number; // [NEW] Accept zoom from parent
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -86,26 +87,28 @@ export function HubNodeLayer({
     currentNodeId = null,
     expandedHubId = null,
     expandedNodeIds = null,
-    enableClustering = false
+    enableClustering = false,
+    zoom
 }: HubNodeLayerProps) {
+
     const map = useMap();
-    const [zoom, setZoom] = useState(map.getZoom());
     // [PERF] Track viewport bounds for culling
     const [boundsVersion, setBoundsVersion] = useState(0);
 
     // [PERF] Update bounds version on map movement to trigger re-filtering
+    // Zoom tracking removed (handled by parent)
     useMapEvents({
-        zoomend: () => {
-            setZoom(map.getZoom());
-            setBoundsVersion(v => v + 1);
-        },
         moveend: () => {
             setBoundsVersion(v => v + 1);
         }
     });
 
     const clampedZoom = clamp(zoom, 1, 22);
-    const maxNodes = getMaxNodesForZoom(clampedZoom);
+    // [PERF] Quantize zoom to integer to reduce re-renders of NodeMarkers
+    // NodeMarker only cares about integer thresholds (12, 14, 15, etc)
+    const quantizedZoom = Math.floor(clampedZoom);
+
+    const maxNodes = getMaxNodesForZoom(quantizedZoom);
 
     // [PERF] Get current viewport bounds for culling
     const viewportBounds = useMemo(() => {
@@ -182,7 +185,7 @@ export function HubNodeLayer({
 
         // Sorting: Prioritize Tier 1 > Tier 2 > Others
         // And always keep selected on top.
-    }, [nodes, showAllNodes, viewportBounds, clampedZoom, expandedHubId, expandedNodeIds, currentNodeId]);
+    }, [nodes, showAllNodes, viewportBounds, expandedHubId, expandedNodeIds, currentNodeId, clampedZoom]);
 
     // Sort logic removed from here as filter handles visibility directly. 
     // Marker render order can be handled by Z-index if needed.
@@ -303,7 +306,7 @@ export function HubNodeLayer({
         }
 
         return labelIds;
-    }, [visibleNodes, hubDetails, clampedZoom, currentNodeId, expandedHubId, expandedNodeIds]);
+    }, [visibleNodes, hubDetails, currentNodeId, expandedHubId, expandedNodeIds, clampedZoom]);
 
     // [FIX] Separate Tier 1-2 nodes so they are never clustered
     const tier1And2Markers = sortedVisibleNodes
@@ -317,9 +320,11 @@ export function HubNodeLayer({
                     hubDetails={details}
                     zone={zone}
                     locale={locale}
-                    zoom={clampedZoom}
+                    zoom={quantizedZoom}
                     isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
                     showLabelOverride={labelSet.has(node.id)}
+                    crowdLevel={node.crowd_level}
+                    disruptionStatus={node.disruption_status}
                 />
             );
         });
@@ -335,9 +340,11 @@ export function HubNodeLayer({
                     hubDetails={details}
                     zone={zone}
                     locale={locale}
-                    zoom={clampedZoom}
+                    zoom={quantizedZoom}
                     isSelected={node.id === currentNodeId || (expandedHubId !== null && node.id === expandedHubId)}
                     showLabelOverride={labelSet.has(node.id)}
+                    crowdLevel={node.crowd_level}
+                    disruptionStatus={node.disruption_status}
                 />
             );
         });

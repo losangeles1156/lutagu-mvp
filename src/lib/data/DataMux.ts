@@ -61,7 +61,10 @@ export class DataMux {
 
         // 1. Parallel Fetch of Raw Data
         // We skip the heavy "Brain" LLM synthesis in favor of speed (Optimistic UI)
-        const [l2Data, l3Data, l4Knowledge] = await Promise.all([
+        // 1. Parallel Fetch of Raw Data (Resilient)
+        // We use allSettled to ensure that if L3/L4 caches fail (Redis/API down), 
+        // L2 (Weather/Crowd) or basic partial data is still returned.
+        const results = await Promise.allSettled([
             fetchL2Status(stationId),
             fetchL3Facilities(stationId),
             getCached(
@@ -74,6 +77,15 @@ export class DataMux {
                 1800 // 30 min TTL
             )
         ]);
+
+        const l2Data = results[0].status === 'fulfilled' ? results[0].value : {};
+        if (results[0].status === 'rejected') console.warn('[DataMux] L2 Fetch Failed', results[0].reason);
+
+        const l3Data = results[1].status === 'fulfilled' ? results[1].value : {};
+        if (results[1].status === 'rejected') console.warn('[DataMux] L3 Fetch Failed', results[1].reason);
+
+        const l4Knowledge = results[2].status === 'fulfilled' ? results[2].value : [];
+        if (results[2].status === 'rejected') console.warn('[DataMux] L4 Fetch Failed', results[2].reason);
 
         // 2. Direct Aggregation (No LLM Latency)
         // We construct the UI Profile directly from raw signals.
@@ -250,82 +262,89 @@ export class DataMux {
     static async searchExpertRules(query: string): Promise<any[]> {
         console.log(`[DataMux] Searching Expert Rules for: "${query}"`);
 
-        // 1. Try Vector Search first
-        try {
-            const { EmbeddingService } = await import('@/lib/ai/embeddingService');
-            const embedding = await EmbeddingService.generateEmbedding(query);
-            // Check if it's a real embedding (not zero vector mock)
-            const isRealEmbedding = embedding.some(v => v !== 0);
+        // Cache Key: normalize query to lowercase and trim
+        return getCached(
+            `expert_rules:${query.trim().toLowerCase()}`,
+            async () => {
+                // 1. Try Vector Search first
+                try {
+                    const { EmbeddingService } = await import('@/lib/ai/embeddingService');
+                    const embedding = await EmbeddingService.generateEmbedding(query);
+                    // Check if it's a real embedding (not zero vector mock)
+                    const isRealEmbedding = embedding.some(v => v !== 0);
 
-            if (isRealEmbedding) {
-                // Use a local createClient or import shared one if possible, but SignalCollector has logic.
-                // For now, instantiate client directly for read-only RPC.
-                const { createClient } = await import('@supabase/supabase-js');
-                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-                const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+                    if (isRealEmbedding) {
+                        // Use a local createClient or import shared one if possible, but SignalCollector has logic.
+                        // For now, instantiate client directly for read-only RPC.
+                        const { createClient } = await import('@supabase/supabase-js');
+                        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+                        const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-                if (supabaseUrl && supabaseKey) {
-                    const supabase = createClient(supabaseUrl, supabaseKey);
-                    const { data: vectorResults, error } = await supabase.rpc('match_expert_knowledge', {
-                        query_embedding: embedding,
-                        match_threshold: 0.7,
-                        match_count: 3
-                    });
+                        if (supabaseUrl && supabaseKey) {
+                            const supabase = createClient(supabaseUrl, supabaseKey);
+                            const { data: vectorResults, error } = await supabase.rpc('match_expert_knowledge', {
+                                query_embedding: embedding,
+                                match_threshold: 0.7,
+                                match_count: 3
+                            });
 
-                    if (!error && vectorResults && vectorResults.length > 0) {
-                        console.log(`[DataMux] Vector Search found ${vectorResults.length} hits.`);
-                        return vectorResults.map((r: any) => ({
-                            id: r.id,
-                            content: r.content,
-                            tags: ['vector-match'],
-                            similarity: r.similarity
-                        }));
+                            if (!error && vectorResults && vectorResults.length > 0) {
+                                console.log(`[DataMux] Vector Search found ${vectorResults.length} hits.`);
+                                return vectorResults.map((r: any) => ({
+                                    id: r.id,
+                                    content: r.content,
+                                    tags: ['vector-match'],
+                                    similarity: r.similarity
+                                }));
+                            }
+                        }
+                    } else {
+                        console.log('[DataMux] Using Mock Search (No Logic/API Key for Embeddings)');
                     }
+                } catch (e) {
+                    console.warn('[DataMux] Vector Search failed, falling back to Mock:', e);
                 }
-            } else {
-                console.log('[DataMux] Using Mock Search (No Logic/API Key for Embeddings)');
-            }
-        } catch (e) {
-            console.warn('[DataMux] Vector Search failed, falling back to Mock:', e);
-        }
 
-        // 2. Fallback: Mock Knowledge Base (Unstructured Text)
-        const ruleBase = [
-            {
-                id: 'rule-child-fare',
-                content: 'Child Fare (6-11 yo) is 50% of Adult Fare. Toddlers (1-5 yo) are FREE (up to 2 per adult). Infants (<1 yo) are always FREE.',
-                tags: ['fare', 'child', 'toddler', 'baby', 'price']
-            },
-            {
-                id: 'rule-jr-pass-subway',
-                content: 'The Japan Rail Pass (JR Pass) is VALID on JR Lines (Yamanote, Chuo, etc.) and Tokyo Monorail. It is NOT valid on Tokyo Metro or Toei Subway lines.',
-                tags: ['jr pass', 'subway', 'metro', 'ticket', 'validity']
-            },
-            {
-                id: 'rule-transfer-discount',
-                content: 'Transferring between Tokyo Metro and Toei Subway within 60 minutes grants a 70 JPY discount on the total fare (Adult).',
-                tags: ['transfer', 'discount', 'metro', 'toei', 'price']
-            },
-            {
-                id: 'rule-suica-pasmo',
-                content: 'Suica and Pasmo are fully interchangeable. You can use either card on almost all trains, subways, and buses in Tokyo.',
-                tags: ['ic card', 'suica', 'pasmo', 'compatibility']
-            }
-        ];
+                // 2. Fallback: Mock Knowledge Base (Unstructured Text)
+                const ruleBase = [
+                    {
+                        id: 'rule-child-fare',
+                        content: 'Child Fare (6-11 yo) is 50% of Adult Fare. Toddlers (1-5 yo) are FREE (up to 2 per adult). Infants (<1 yo) are always FREE.',
+                        tags: ['fare', 'child', 'toddler', 'baby', 'price']
+                    },
+                    {
+                        id: 'rule-jr-pass-subway',
+                        content: 'The Japan Rail Pass (JR Pass) is VALID on JR Lines (Yamanote, Chuo, etc.) and Tokyo Monorail. It is NOT valid on Tokyo Metro or Toei Subway lines.',
+                        tags: ['jr pass', 'subway', 'metro', 'ticket', 'validity']
+                    },
+                    {
+                        id: 'rule-transfer-discount',
+                        content: 'Transferring between Tokyo Metro and Toei Subway within 60 minutes grants a 70 JPY discount on the total fare (Adult).',
+                        tags: ['transfer', 'discount', 'metro', 'toei', 'price']
+                    },
+                    {
+                        id: 'rule-suica-pasmo',
+                        content: 'Suica and Pasmo are fully interchangeable. You can use either card on almost all trains, subways, and buses in Tokyo.',
+                        tags: ['ic card', 'suica', 'pasmo', 'compatibility']
+                    }
+                ];
 
-        // Simple Keyword Matching Simulation (Vector Search Proxy)
-        const lowerQuery = query.toLowerCase();
-        const results = ruleBase.filter(rule =>
-            rule.tags.some(tag => lowerQuery.includes(tag)) ||
-            rule.content.toLowerCase().includes(lowerQuery)
+                // Simple Keyword Matching Simulation (Vector Search Proxy)
+                const lowerQuery = query.toLowerCase();
+                const results = ruleBase.filter(rule =>
+                    rule.tags.some(tag => lowerQuery.includes(tag)) ||
+                    rule.content.toLowerCase().includes(lowerQuery)
+                );
+
+                // If no match, return generic fare rule as fallback
+                if (results.length === 0) {
+                    return [ruleBase[0]];
+                }
+
+                return results;
+            },
+            3600 // 1 hour TTL
         );
-
-        // If no match, return generic fare rule as fallback
-        if (results.length === 0) {
-            return [ruleBase[0]];
-        }
-
-        return results;
 
     }
 }

@@ -364,18 +364,18 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                         {lines.length > 0 && (
                             delayedLines.length > 0 ? (
                                 <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-[9px] font-bold rounded-full flex items-center gap-1">
-                                    <AlertTriangle size={10} /> {delayedLines.length} Issues
+                                    <AlertTriangle size={10} /> {tL2('issuesCount', { count: delayedLines.length })}
                                 </span>
                             ) : (
                                 <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-bold rounded-full flex items-center gap-1">
-                                    <Zap size={10} /> All Good
+                                    <Zap size={10} /> {tL2('allGood')}
                                 </span>
                             )
                         )}
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <span className="text-[8px] font-bold text-gray-300 uppercase tracking-tight">Source: ODPT</span>
+                        <span className="text-[8px] font-bold text-gray-300 uppercase tracking-tight">{tL2('sourceOdpt')}</span>
                         <span className="text-[10px] font-medium text-gray-400">
                             {updatedAt && <span className="ml-1 text-xs font-mono text-indigo-400">
                                 {new Date(updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Tokyo' })}
@@ -519,7 +519,7 @@ const CrowdFeedbackCard = memo(({ stationId, initialCrowd, tL2 }: { stationId: s
                 <Users size={14} className="text-gray-400" />
                 <span className="text-[10px] font-black text-gray-400 uppercase">{tL2('crowdReport')}</span>
                 <span className="text-[8px] text-indigo-400 bg-indigo-50 px-1 py-0.5 rounded ml-auto">
-                    LIVE CROWD
+                    {tL2('liveCrowd')}
                 </span>
             </div>
             <p className="text-[8px] text-gray-400 mb-2 leading-tight">

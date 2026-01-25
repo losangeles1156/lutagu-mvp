@@ -18,7 +18,7 @@ import { useNodeDisplay } from '@/providers/NodeDisplayProvider';
  */
 export function ViewportNodeLoader_Optimized() {
     const map = useMap(); // Get map context
-    const bounds = useViewportBounds();
+    const { bounds } = useViewportBounds();
     const zoom = map.getZoom();
 
     // 1. Fetch data based on bounds/zoom
