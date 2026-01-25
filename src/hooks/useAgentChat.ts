@@ -173,6 +173,21 @@ export function useAgentChat(options: UseAgentChatOptions) {
             // Extract and remove suggested questions markers
             content = content.replace(/\[SUGGESTED_QUESTIONS\]([\s\S]*?)(?:\[\/SUGGESTED_QUESTIONS\]|$)/g, '').trim();
 
+            // Phase 5: Parse HYBRID_DATA (Agentic UI)
+            // Format: [HYBRID_DATA]{"type":"...", "data":...}[/HYBRID_DATA]
+            const hybridDataMatch = content.match(/\[HYBRID_DATA\]([\s\S]*?)\[\/HYBRID_DATA\]/);
+            let hybridData: any = null;
+
+            if (hybridDataMatch) {
+                try {
+                    hybridData = JSON.parse(hybridDataMatch[1]);
+                    // Remove form content
+                    content = content.replace(hybridDataMatch[0], '').trim();
+                } catch (e) {
+                    console.error('Failed to parse Hybrid Data:', e);
+                }
+            }
+
             // Final safety filter for [THINKING] tags that might remain (e.g. nested or malformed)
             content = content.replace(/\[\/?THINKING\]/gi, '').trim();
 
@@ -180,8 +195,9 @@ export function useAgentChat(options: UseAgentChatOptions) {
                 id: m.id,
                 role: m.role as 'user' | 'assistant',
                 content,
-                data: m.data,
-                thought, // This prop now drives the ThinkingBubble UI
+                data: hybridData?.data || m.data || hybridData, // Merge hybridData into data
+                type: hybridData?.type, // Lift type to top level if available
+                thought,
                 rawContent: rawContent
             };
         });

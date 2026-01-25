@@ -106,3 +106,12 @@ export const LOCAL_GUIDE_SKILL = {
 > Provides personalized recommendations using DeepSeek V3 (Creative).
 `
 };
+
+export const STANDARD_ROUTING_SKILL = {
+    name: 'standard-routing',
+    keywords: ['route', 'go to', 'directions', 'transfer', 'way to', 'how to get', 'train to', '去', '到', '怎麼去', '路線', '轉乘', '前往', '交通', '乘換'],
+    content: `
+# Standard Routing Skill
+> Standard navigation engine.
+`
+};

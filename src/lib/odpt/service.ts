@@ -348,3 +348,54 @@ export async function getTrainStatus(operator?: string) {
 
     return [...enhancedResults, ...injectedFromYahoo];
 }
+
+export async function getTrains(operator?: string) {
+    if (!TOKEN_STANDARD && !TOKEN_CHALLENGE) {
+        return [];
+    }
+
+    const type = 'odpt:Train';
+    // Similar logic to fetchForOperator but for 'odpt:Train'
+    // We can reuse the internal logic if we refactor, but for now let's duplicate the relevant parts for safety
+    // or better yet, make a generic fetcher.
+    // However, since we can't easily change the private 'fetchForOperator' signature without affecting existing code flow broadly...
+    // Let's implement a specific fetcher for trains.
+
+    // We need to fetch from the correct base URL based on operator
+    const targetOperators = operator ? [operator] : Object.keys(OPERATOR_MAP);
+
+    const promises = targetOperators.map(async (opKey) => {
+        const ids = OPERATOR_MAP[opKey];
+        if (!ids) return [];
+
+        // Challenge API operators check
+        const challengeOperators = ['JR-East', 'Keikyu', 'Seibu', 'Tobu', 'Tokyu'];
+        const baseUrl = challengeOperators.includes(opKey) ? BASE_URL_CHALLENGE : BASE_URL_STANDARD;
+        const token = challengeOperators.includes(opKey) ? TOKEN_CHALLENGE : TOKEN_STANDARD;
+        if (!token) return [];
+
+        // Parallel fetch for each operator ID
+        // Note: odpt:Train API supports filtering by odpt:operator
+        const opPromises = ids.map(async (id) => {
+            const params = new URLSearchParams({
+                'odpt:operator': id,
+                'acl:consumerKey': token
+            });
+            const url = `${baseUrl}/${type}?${params.toString()}`;
+            try {
+                const res = await fetch(url, { next: { revalidate: 30 } }); // Short cache for live trains
+                if (!res.ok) return [];
+                return await res.json();
+            } catch (e) {
+                console.error(`Failed to fetch trains for ${id}`, e);
+                return [];
+            }
+        });
+
+        const results = await Promise.all(opPromises);
+        return results.flat();
+    });
+
+    const results = await Promise.all(promises);
+    return results.flat();
+}

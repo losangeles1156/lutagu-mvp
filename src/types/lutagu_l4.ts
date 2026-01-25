@@ -76,6 +76,7 @@ export interface KnowledgeTrigger {
 
     // Temporal Triggers
     time_patterns?: string[];  // ISO Date Range '2025-12-31/2026-01-01' OR Time '08:00-09:00'
+    allowed_days?: ('weekday' | 'weekend' | 'holiday')[]; // [Phase 3] Day Type Filter
 
     keywords?: string[]; // New: Match against user query text
 
@@ -122,6 +123,10 @@ export interface EvaluationContext {
     // Optional WVC Factors
     waitMinutes?: number;
     destinationValue?: number; // 1-10 (1=casual, 10=critical meeting)
+
+    // [Phase 3] Temporal Intelligence
+    isHoliday?: boolean;
+    dayType?: 'weekday' | 'weekend' | 'holiday';
 }
 
 export interface RecommendRequest {

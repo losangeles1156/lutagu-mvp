@@ -12,7 +12,8 @@ import {
     SPATIAL_REASONER_SKILL,
     EXIT_STRATEGIST_SKILL,
     LOCAL_GUIDE_SKILL,
-    MEDICAL_SKILL
+    MEDICAL_SKILL,
+    STANDARD_ROUTING_SKILL
 } from './provisional';
 import {
     ToolDefinition,
@@ -23,8 +24,10 @@ import {
     CROWD_DISPATCHER_SCHEMA,
     EXIT_STRATEGIST_SCHEMA,
     LOCAL_GUIDE_SCHEMA,
-    MEDICAL_SCHEMA
+    MEDICAL_SCHEMA,
+    ROUTING_SCHEMA
 } from './schemas';
+import { algorithmProvider } from '../algorithms/AlgorithmProvider';
 
 // ... (BaseSkill)
 
@@ -47,8 +50,14 @@ abstract class BaseSkill implements DeepResearchSkill {
     }
 
     canHandle(input: string, _context: RequestContext): boolean {
-        // Simple keyword match (can be overridden)
+        // Simple keyword match (Legacy fallback)
         return this.keywords.some(k => input.includes(k));
+    }
+
+    calculateRelevance(input: string, context: RequestContext): number {
+        // Default implementation: 0.3 if keyword matches, else 0
+        // Subclasses should override this for Tag-Driven logic
+        return this.canHandle(input, context) ? 0.3 : 0.0;
     }
 
     abstract execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null>;
@@ -62,13 +71,53 @@ export class ExitStrategistSkill extends BaseSkill {
         super(EXIT_STRATEGIST_SKILL.name, 95, EXIT_STRATEGIST_SKILL.keywords, EXIT_STRATEGIST_SCHEMA); // High Priority
     }
 
+    calculateRelevance(input: string, context: RequestContext): number {
+        let score = 0.0;
+
+        // GEM Logic: Attention Fusion
+        const isShortQuery = input.length <= 5;
+
+        // 1. Keyword Check (Base)
+        if (this.keywords.some(k => input.includes(k))) score += 0.3;
+
+        // 2. Tag-Driven Boost (GEM Schema)
+        if (context.nodeContext?.l1Profile) {
+
+            // Core Layer (Tri-gram Sweet Spot)
+            // "Exit" knowledge is bound to complex stations (HUBs)
+            if (context.nodeContext.l1Profile.core.identity.includes('HUB')) {
+                // If short query ("Exit?"), Core match is enough.
+                score += isShortQuery ? 0.4 : 0.2;
+            }
+
+            // Intent Layer (Semantic Interaction)
+            // "TRANSFER" capability implies complex exits
+            if (context.nodeContext.l1Profile.intent.capabilities.includes('TRANSFER')) score += 0.2;
+        }
+
+        // 3. Intent Check (Phase 1.1 artifact)
+        if (context.nodeContext?.intent === 'navigation') {
+            score += 0.2;
+        }
+
+        return Math.min(score, 1.0);
+    }
+
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
         console.log(`[Deep Research] Triggering Exit Strategist... Params:`, params);
         const destination = params?.destination || input;
-        const station = params?.station_id || context.currentStation || 'Current Station';
 
-        // 1. Fetch Exit Rules (Accessibility & Strategy)
-        const rules = await DataMux.searchExpertRules("exit selection accessibility traps");
+        // Context-Pruned: Use resolved Primary Node
+        const station = context.nodeContext?.primaryNodeId || params?.station_id || context.currentStation || 'Current Station';
+        const isContextual = !!context.nodeContext?.primaryNodeId;
+
+        console.log(`[ExitStrategist] Target Station: ${station} (Contextual: ${isContextual})`);
+
+        // 1. Fetch Exit Rules (Context-Pruned)
+        // Instead of global search, we should ideally fetch rules TAGGED with this station.
+        // For MVP, we prepend the station name to the query to narrow down vector search.
+        const query = isContextual ? `${station} exit accessibility` : "exit selection accessibility traps";
+        const rules = await DataMux.searchExpertRules(query);
         const ruleContext = rules.map(r => `- ${r.content}`).join('\n');
 
         // Real implementation would query mapped Exit DB. For now, use Gemini 3's reasoning.
@@ -463,6 +512,68 @@ If WVC < 1, strongly recommend detour.`,
                 reasoning: 'Executed Spatial Reasoner Skill'
             };
         }
+        return null;
+    }
+}
+
+export class StandardRoutingSkill extends BaseSkill {
+    constructor() {
+        super(STANDARD_ROUTING_SKILL.name, 92, STANDARD_ROUTING_SKILL.keywords, ROUTING_SCHEMA); // High priority but below Emergency
+    }
+
+    calculateRelevance(input: string, context: RequestContext): number {
+        // High relevance if explicit routing intent
+        if ((context.nodeContext?.intent as string) === 'route') return 0.9;
+
+        // Also good if keywords match
+        if (this.keywords.some(k => input.includes(k))) return 0.8;
+
+        return 0.1;
+    }
+
+    async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
+        console.log(`[Deep Research] Triggering Standard Routing... Params:`, params);
+
+        const origin = params?.origin || context.nodeContext?.primaryNodeId; // Primary often maps to "From" or "To" depending on parser
+        const destination = params?.destination || context.nodeContext?.secondaryNodeId;
+
+        // If context has dedicated method for IDs, use those
+        const originId = context.nodeContext?.primaryNodeId;
+        const destId = context.nodeContext?.secondaryNodeId;
+
+        if (!destId) {
+            return {
+                source: 'template',
+                type: 'text',
+                content: "請問您想去哪裡？(目的地未指定)",
+                confidence: 1.0,
+                reasoning: "Missing destination"
+            };
+        }
+
+        // Call Phase 4 Algorithm Provider (Integrates RouteSynthesizer)
+        const routes = await algorithmProvider.findRoutes({
+            originId: originId || 'odpt.Station:JR-East.Yamanote.Tokyo', // Fallback or Error
+            destinationId: destId,
+            locale: 'zh-TW', // Should fetch from params
+            userProfile: context.nodeContext?.l1Profile || undefined
+        });
+
+        if (routes && routes.length > 0) {
+            const summary = context.nodeContext?.l1Profile
+                ? `為您找到 ${routes.length} 條前往 ${context.nodeContext.secondaryNodeId?.split(':').pop()} 的路線 (已根據 ${context.nodeContext.l1Profile} 優化)`
+                : `為您找到 ${routes.length} 條路線。`;
+
+            return {
+                source: 'algorithm',
+                type: 'options',
+                content: summary,
+                confidence: 0.95,
+                data: { strategy: 'route_synthesizer', routes },
+                reasoning: 'Executed Standard Routing with Synthesis'
+            };
+        }
+
         return null;
     }
 }

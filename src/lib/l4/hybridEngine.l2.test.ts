@@ -324,6 +324,7 @@ test('Skill execution validates params, enforces timeout, and caches results', a
             maxStringParamChars: 10
         },
         canHandle: () => true,
+        calculateRelevance: () => 0.3,
         execute: async (_input, _context, params) => {
             calls++;
             return {

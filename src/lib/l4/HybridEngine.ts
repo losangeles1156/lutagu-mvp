@@ -10,7 +10,10 @@
 
 import { templateEngine } from './intent/TemplateEngine';
 import { algorithmProvider } from './algorithms/AlgorithmProvider';
-import { extractRouteEndpointsFromText, buildLastTrainSuggestion, type SupportedLocale } from './assistantEngine';
+import { extractRouteEndpointsFromText, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion } from './assistantEngine';
+import { NodeContext, NodeScope } from './types/NodeContext';
+import { TagLoader } from './TagLoader';
+import { DynamicContextService } from './DynamicContextService';
 import { metricsCollector } from './monitoring/MetricsCollector';
 import { DataNormalizer } from './utils/Normalization';
 import { feedbackStore } from './monitoring/FeedbackStore';
@@ -24,6 +27,7 @@ import { DataMux } from '@/lib/data/DataMux';
 import { StrategyContext } from '@/lib/ai/strategyEngine';
 import { AgentRouter } from '@/lib/ai/AgentRouter';
 import { executeSkill, skillRegistry } from './skills/SkillRegistry';
+import { TagDrivenDispatcher } from './skills/TagDrivenDispatcher';
 import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
 import { getPartnerUrl } from '@/config/partners';
 import { STATION_MAP } from '@/lib/api/nodes';
@@ -36,10 +40,11 @@ import {
     CrowdDispatcherSkill,
     SpatialReasonerSkill
 } from './skills/implementations';
+import { L1NodeProfile } from './types/L1Profile';
 
 export interface HybridResponse {
     source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge' | 'l2_disruption';
-    type: 'text' | 'card' | 'route' | 'fare' | 'action' | 'recommendation' | 'expert_tip';
+    type: 'text' | 'card' | 'route' | 'fare' | 'action' | 'recommendation' | 'expert_tip' | 'options';
     content: string;
     data?: any;
     confidence: number;
@@ -56,12 +61,16 @@ export interface RequestContext {
     };
     currentStation?: string;
     strategyContext?: StrategyContext | null;
+    nodeContext?: NodeContext; // New field for Phase 1.3
 }
 
 export class HybridEngine {
     private poiTaggedEngine: POITaggedDecisionEngine | null = null;
+    private skillDispatcher: TagDrivenDispatcher;
 
     constructor() {
+        this.skillDispatcher = new TagDrivenDispatcher(skillRegistry);
+
         // Register Deep Research Skills
         skillRegistry.register(new FareRulesSkill());
         skillRegistry.register(new AccessibilitySkill());
@@ -98,6 +107,80 @@ export class HybridEngine {
             }
         );
         return this.poiTaggedEngine;
+    }
+
+    /**
+     * Context-Pruned RAG: Node Resolution
+     * Determines the Primary Node (e.g. Station) and Scope to restrict the search space.
+     * Also loads L1 3-5-8 Profile into the context.
+     */
+    private async resolveNodeContext(text: string, locale: SupportedLocale, context?: RequestContext): Promise<NodeContext> {
+        // 1. Use existing classifier for intent and simple destination
+        const classification = classifyQuestion(text, locale);
+
+        // 2. Use endpoint extractor for more complex origin/destination
+        const endpoints = extractRouteEndpointsFromText(text);
+
+        let primaryNodeId: string | null = null;
+        let secondaryNodeId: string | null = null;
+        let scope: NodeScope = 'global';
+
+        // Logic: Origin takes precedence as Primary Node (where the user is/acting from)
+        if (endpoints && endpoints.originIds.length > 0) {
+            primaryNodeId = endpoints.originIds[0];
+            secondaryNodeId = endpoints.destinationIds?.[0] || classification.toStationId || null;
+            scope = 'station';
+        } else if (context?.currentStation) {
+            // Implicit context
+            primaryNodeId = context.currentStation;
+            secondaryNodeId = classification.toStationId || endpoints?.destinationIds?.[0] || null;
+            scope = 'station';
+        } else if (classification.toStationId) {
+            // Only destination mentioned? 
+            // If query is "About Ueno Station", Ueno is primary.
+            // If query is "Go to Ueno", User location is primary (if known), else Global.
+            if (classification.kind === 'amenity' || classification.kind === 'status') {
+                primaryNodeId = classification.toStationId;
+                scope = 'station';
+            } else {
+                // Route query without origin -> Global or infer from GPS (future)
+                secondaryNodeId = classification.toStationId;
+                scope = 'route';
+            }
+        }
+
+        // Adjust scope based on intent
+        if (classification.kind === 'route' || classification.kind === 'fare') {
+            scope = 'route';
+        } else if (classification.kind === 'amenity' || classification.kind === 'status') {
+            scope = 'station';
+        }
+
+        // Fallback scope for unknown intent but valid node
+        if (primaryNodeId && scope === 'global') {
+            scope = 'station';
+        }
+
+        // [Phase 1.4] Load 3-5-8 Profile
+        let l1Profile = null;
+        if (primaryNodeId) {
+            l1Profile = await TagLoader.loadProfile(primaryNodeId);
+
+            // [Phase 2.2] Dynamic L2 Intent Injection
+            if (l1Profile) {
+                l1Profile = await DynamicContextService.enrichProfile(l1Profile);
+            }
+        }
+
+        return {
+            primaryNodeId,
+            secondaryNodeId,
+            scope,
+            intent: classification.kind as any,
+            // [GEM Update] Flatten capabilities for backward compatibility / vector search if needed
+            loadedTags: l1Profile ? [...l1Profile.core.identity, ...l1Profile.intent.capabilities] : [],
+            l1Profile
+        };
     }
 
     public async processRequest(params: {
@@ -149,6 +232,47 @@ export class HybridEngine {
                 };
             }
 
+            // 1. Node Resolution (Context-Pruned RAG Step 1)
+            // Identify the "Center of the World" for this query.
+            const nodeContext = await this.resolveNodeContext(text, locale, context);
+            logs.push(`[NodeResolver] Primary: ${nodeContext.primaryNodeId || 'Global'}, Scope: ${nodeContext.scope}, Intent: ${nodeContext.intent}`);
+
+            // Inject NodeContext into RequestContext for Skills
+            if (context) {
+                context.nodeContext = nodeContext;
+            } else {
+                // If context was undefined, we can't easily assign, but params.context is generic
+                // We should ensure context exists or is created.
+                // However, params.context is optional. We might need to mutate a local copy.
+            }
+            // Actually, we can just ensure nodeContext is present.
+            if (context && !context.nodeContext) {
+                context.nodeContext = nodeContext;
+            }
+            const dispatchContext = context || { nodeContext };
+
+
+            // 2. Skill Dispatch (Phase 1.5 - Tag Driven)
+            const dispatchResult = await this.skillDispatcher.dispatch(text, dispatchContext);
+
+            if (dispatchResult) {
+                logs.push(`[SkillDispatch] ${dispatchResult.skill.name} triggered (Score: ${dispatchResult.score.toFixed(2)})`);
+                try {
+                    const skillRes = await executeSkill(dispatchResult.skill, text, dispatchContext);
+                    if (skillRes.result) {
+                        return finalize(skillRes.result);
+                    }
+                } catch (e) {
+                    logs.push(`[SkillDispatch] Execution failed: ${e}`);
+                }
+            } else {
+                logs.push(`[SkillDispatch] No skill reached relevance threshold.`);
+            }
+
+            // 3. Fallback to L2 or LLM
+            // ... (Existing Logic)
+
+
             // Proactive L2 Warning: If critical, force L2 advice even if not explicitly asked
             const l2Status = (context?.strategyContext as any)?.l2Status;
             const isSevere = this.isSevereDisruption(l2Status);
@@ -193,14 +317,21 @@ export class HybridEngine {
                         logs.push(`[Deep Research] Agent Decision: ${agentDecision.toolName} (Reason: ${agentDecision.reasoning})`);
                         const skill = skillRegistry.findByToolName(agentDecision.toolName);
                         if (skill) {
-                            const { result: skillResult, meta } = await executeSkill(skill, text, context || {}, agentDecision.parameters);
-                            logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
-                            if (skillResult) {
-                                const withAgentLogic = {
-                                    ...skillResult,
-                                    reasoningLog: [`Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
-                                };
-                                return finalize(withAgentLogic);
+                            const skillContext = context || {};
+                            const relevance = skill.calculateRelevance ? skill.calculateRelevance(text, skillContext as any) : 0;
+                            const keywordMatch = skill.canHandle(text.toLowerCase(), skillContext as any);
+                            if (!keywordMatch && relevance < 0.45) {
+                                logs.push(`[Deep Research] Agent Decision ignored (relevance=${relevance.toFixed(2)})`);
+                            } else {
+                                const { result: skillResult, meta } = await executeSkill(skill, text, skillContext, agentDecision.parameters);
+                                logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
+                                if (skillResult) {
+                                    const withAgentLogic = {
+                                        ...skillResult,
+                                        reasoningLog: [`Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
+                                    };
+                                    return finalize(withAgentLogic);
+                                }
                             }
                         }
                     }
@@ -283,16 +414,26 @@ export class HybridEngine {
                 activeKnowledgeSnippet = `Station Knowledge:\n${t}\n${h}`;
             }
 
-            // Vector DB RAG: Search for relevant expert knowledge
+            // Vector DB RAG: Search for relevant expert knowledge with Context Pruning
             let vectorKnowledge = '';
             try {
-                const vectorResults = await searchVectorDB(text, 3);
+                // Step 2: Load Tags (Simplified for MVP, can be expanded to fetch from DB)
+                const currentTags = nodeContext.loadedTags;
+
+                // Step 3: Context-Pruned Vector Search
+                const vectorResults = await searchVectorDB(text, 3, {
+                    node_id: nodeContext.primaryNodeId || undefined,
+                    tags: currentTags.length > 0 ? currentTags : undefined
+                });
+
                 if (vectorResults.length > 0) {
-                    logs.push(`[VectorService] Found ${vectorResults.length} relevant knowledge chunks`);
+                    logs.push(`[VectorService] Found ${vectorResults.length} relevant knowledge chunks for ${nodeContext.primaryNodeId || 'Global'}`);
                     vectorKnowledge = vectorResults
                         .map((r: VectorSearchResult) => `[RAG] ${r.payload.content}`)
                         .join('\n');
                     activeKnowledgeSnippet = vectorKnowledge + (activeKnowledgeSnippet ? '\n\n' + activeKnowledgeSnippet : '');
+                } else {
+                    logs.push(`[VectorService] No relevant knowledge found in context.`);
                 }
             } catch (e) {
                 logs.push(`[VectorService] Search failed: ${e}`);
@@ -304,33 +445,43 @@ export class HybridEngine {
             let llmResponse: string | null = null;
             const hasL2Issues = this.hasL2Issues(l2Status);
             if (params.onToken && !hasL2Issues) {
-                const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
-                const result: any = streamWithFallback({
-                    model,
-                    system: systemPrompt,
-                    messages: [{ role: 'user', content: userPrompt }]
-                });
+                try {
+                    const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
+                    const result: any = streamWithFallback({
+                        model,
+                        system: systemPrompt,
+                        messages: [{ role: 'user', content: userPrompt }]
+                    });
 
-                let acc = '';
-                const textStream: any = result?.textStream;
-                if (textStream && typeof textStream[Symbol.asyncIterator] === 'function') {
-                    for await (const delta of textStream as AsyncIterable<string>) {
-                        acc += delta;
-                        params.onToken(delta);
+                    let acc = '';
+                    const textStream: any = result?.textStream;
+                    if (textStream && typeof textStream[Symbol.asyncIterator] === 'function') {
+                        for await (const delta of textStream as AsyncIterable<string>) {
+                            acc += delta;
+                            params.onToken(delta);
+                        }
+                        llmResponse = acc;
+                    } else {
+                        llmResponse = (await result.text) || null;
+                        if (llmResponse) params.onToken(llmResponse);
                     }
-                    llmResponse = acc;
-                } else {
-                    llmResponse = (await result.text) || null;
-                    if (llmResponse) params.onToken(llmResponse);
+                } catch (streamError) {
+                    logs.push(`[LLM Stream] ${streamError}`);
                 }
-            } else {
-                llmResponse = await generateLLMResponse({
-                    systemPrompt,
-                    userPrompt,
-                    taskType: 'chat',
-                    temperature: 0.7,
-                    model: 'gemini-3-flash-preview'
-                });
+            }
+
+            if (!llmResponse) {
+                try {
+                    llmResponse = await generateLLMResponse({
+                        systemPrompt,
+                        userPrompt,
+                        taskType: 'chat',
+                        temperature: 0.7,
+                        model: 'gemini-3-flash-preview'
+                    });
+                } catch (fallbackError) {
+                    logs.push(`[LLM Fallback] ${fallbackError}`);
+                }
             }
 
             if (llmResponse) {
@@ -450,7 +601,27 @@ export class HybridEngine {
                 for (const originId of endpoints.originIds) {
                     for (const destinationId of endpoints.destinationIds) {
                         try {
-                            const routes = await algorithmProvider.findRoutes({ originId, destinationId, locale, l2Status });
+                            // [Phase 3/4] Context Construction for Route Synthesis
+                            const isHoliday = getJSTTime().isHoliday;
+
+                            // Simple Intent Extraction from Text (similar to tryBuildL2DisruptionResponse)
+                            const wantsLuggage = /行李|大行李|luggage|suitcase|荷物|スーツケース/i.test(text);
+                            const wantsStroller = /嬰兒車|baby stroller|stroller|ベビーカー/i.test(text);
+
+                            const userProfile: L1NodeProfile = {
+                                nodeId: 'user-request-context',
+                                core: { identity: [] },
+                                intent: {
+                                    capabilities: [
+                                        ...(wantsLuggage ? ['LUGGAGE'] : []),
+                                        ...(wantsStroller ? ['STROLLER'] : [])
+                                    ]
+                                },
+                                vibe: { visuals: [] },
+                                weights: { transfer_ease: 1.0, tourism_value: 0.5, crowd_level: 1.0 }
+                            };
+
+                            const routes = await algorithmProvider.findRoutes({ originId, destinationId, locale, l2Status, isHoliday, userProfile });
                             if (routes && routes.length > 0) {
                                 let content = locale.startsWith('zh') ? `為您找到從 ${originLabel} 到 ${destLabel} 的路線建議。` : `Found routes from ${originLabel} to ${destLabel}.`;
 
@@ -464,6 +635,7 @@ export class HybridEngine {
                                             : `⚠️ 目前有運行異常（${summary}）。已為您規劃避開受影響路段的替代方案。\n\n`;
                                     content = warning + content;
                                 }
+
 
                                 // WVT: Check if late night and add末班車 suggestion
                                 const lastTrainSuggestion = buildLastTrainSuggestion({

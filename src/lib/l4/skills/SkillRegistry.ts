@@ -19,7 +19,8 @@ export interface DeepResearchSkill {
     priority: number;
     definition: ToolDefinition; // Agentic Schema
     policy?: SkillPolicy;
-    canHandle(input: string, context: RequestContext): boolean; // Keeping for hybrid fallback
+    canHandle(input: string, context: RequestContext): boolean; // Legacy: Keyword match
+    calculateRelevance(input: string, context: RequestContext): number; // Tag-Based Score (0.0 - 1.0)
     execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null>;
 }
 
@@ -39,6 +40,15 @@ function clampString(value: string, maxChars: number): string {
     if (!value) return '';
     if (value.length <= maxChars) return value;
     return value.slice(0, maxChars);
+}
+
+function hashString(value: string): string {
+    let hash = 2166136261;
+    for (let i = 0; i < value.length; i += 1) {
+        hash ^= value.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(16);
 }
 
 function cleanInput(input: string, maxChars: number): string {
@@ -89,7 +99,9 @@ function buildSkillCacheKey(skill: DeepResearchSkill, input: string, context: Re
     const station = context.currentStation || '';
     const base = {
         skill: skill.definition?.name || skill.name,
-        input: clampString(input, 200),
+        input: clampString(input, 240),
+        inputHash: hashString(input),
+        inputLength: input.length,
         station,
         params
     };

@@ -164,3 +164,22 @@ export const MEDICAL_SCHEMA: ToolDefinition = {
         required: ["symptom"]
     }
 };
+
+export const ROUTING_SCHEMA: ToolDefinition = {
+    name: "find_route",
+    description: "Calculate the best route between two stations, considering user preferences and real-time conditions.",
+    parameters: {
+        type: "object",
+        properties: {
+            origin: {
+                type: "string",
+                description: "Starting point (station name or ID)."
+            },
+            destination: {
+                type: "string",
+                description: "End point (station name or ID)."
+            }
+        },
+        required: ["destination"]
+    }
+};
