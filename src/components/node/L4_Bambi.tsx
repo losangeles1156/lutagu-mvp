@@ -45,10 +45,13 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     const chatDisplayMode = useUIStore(s => s.chatDisplayMode);
     const setChatDisplayMode = useUIStore(s => s.setChatDisplayMode);
 
-    // Robust Name Resolution
-    const displayName = (name?.zh && name?.zh !== tL4('station') && name?.zh !== 'Station')
-        ? name.zh
-        : (name?.en || name?.ja || (stationId?.split(':').pop()?.split('.').pop()) || tCommon('station'));
+    // Robust Name Resolution (Locale-aware)
+    const displayName = useMemo(() => {
+        const primary = getLocaleString(name, locale);
+        if (primary && primary !== tL4('station') && primary !== 'Station') return primary;
+        // Fallback to ID-based name if all else fails
+        return (stationId?.split(':').pop()?.split('.').pop()) || tCommon('station');
+    }, [name, locale, stationId, tL4, tCommon]);
 
     // Chat Hook
     const {

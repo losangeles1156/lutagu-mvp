@@ -66,10 +66,17 @@ export function toLocaleString(value: any): LocaleString {
     if (!value) return { ja: '', en: '', zh: '' };
     if (typeof value === 'string') return { ja: value, en: value, zh: value };
     if (typeof value === 'object') {
+        // If it's already a LocaleString (has ja, en, or zh), return it but fill missing keys
         const ja = value.ja ?? value['ja-JP'] ?? value.jp ?? value.japanese ?? '';
         const en = value.en ?? value.english ?? '';
         const zh = value.zh ?? value['zh-TW'] ?? value['zh-Hant'] ?? value['zh_TW'] ?? value.chinese ?? '';
-        const anyText = ja || en || zh;
+
+        // If it was already a valid LocaleString, just ensure it has all keys
+        if (value.ja !== undefined || value.en !== undefined || value.zh !== undefined) {
+            return { ja: ja || '', en: en || '', zh: zh || '' };
+        }
+
+        const anyText = ja || en || zh || '';
         return {
             ja: ja || anyText,
             en: en || anyText,

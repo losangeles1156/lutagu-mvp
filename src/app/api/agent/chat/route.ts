@@ -113,6 +113,8 @@ export async function POST(req: NextRequest) {
                 const rawNodeId = body.nodeId || body.current_station || body.currentStation || body.stationId;
                 const userId = body.userId || `anon-${randomUUID()}`;
 
+                console.log(`[Chat API] Query: "${query}", Node: ${rawNodeId}, Locale: ${locale}`);
+
                 const recentMessages = Array.isArray(body.messages)
                     ? body.messages
                         .map((m: any) => {
@@ -172,12 +174,12 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (result) {
+                    console.log(`[Chat API] Processing success: ${result.source}`);
                     if (!streamedAnyToken && result.content) {
                         sendUpdate(result.content);
                     }
 
                     // Phase 5: Agentic Data Tunneling
-                    // Inject structured data for Frontend UI components (e.g. RouteResultCard, ActionCard)
                     if (result.data || result.type !== 'text') {
                         const payload = {
                             type: result.type,
@@ -187,13 +189,15 @@ export async function POST(req: NextRequest) {
                         sendUpdate(`\n[HYBRID_DATA]${JSON.stringify(payload)}[/HYBRID_DATA]`);
                     }
                 } else {
+                    console.warn(`[Chat API] Processing returned null for query: "${trimmedQuery}"`);
                     const msg = locale === 'en' ? "I'm not sure, could you clarify?" : '抱歉，我不太理解您的意思。';
                     sendUpdate(msg);
                 }
             } catch (error) {
-                console.error('[Chat Local] Exception:', error);
+                console.error('[Chat API] Critical Exception:', error);
                 sendUpdate(fallbackMessage);
             } finally {
+                console.log('[Chat API] Connection closing');
                 controller.close();
             }
         }

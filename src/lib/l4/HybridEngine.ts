@@ -310,10 +310,10 @@ export class HybridEngine {
             // 3. Agentic Skill Router (Complex Queries Only)
             if (decision.level === DecisionLevel.LEVEL_3_COMPLEX) {
                 try {
-                    if (params.onProgress) params.onProgress(locale === 'en' ? "Analyzing intent..." : "正在分析意圖...");
+                    if (params.onProgress) params.onProgress(locale === 'ja' ? "意図を分析中..." : (locale === 'en' ? "Analyzing intent..." : "正在分析意圖..."));
                     const agentDecision = await AgentRouter.selectTool(text, skillRegistry.getSkills());
                     if (agentDecision) {
-                        if (params.onProgress) params.onProgress(locale === 'en' ? `Using tool: ${agentDecision.toolName}` : `正在調用工具：${agentDecision.toolName}`);
+                        if (params.onProgress) params.onProgress(locale === 'ja' ? `ツール実行中：${agentDecision.toolName}` : (locale === 'en' ? `Using tool: ${agentDecision.toolName}` : `正在調用工具：${agentDecision.toolName}`));
                         logs.push(`[Deep Research] Agent Decision: ${agentDecision.toolName} (Reason: ${agentDecision.reasoning})`);
                         const skill = skillRegistry.findByToolName(agentDecision.toolName);
                         if (skill) {
@@ -345,14 +345,14 @@ export class HybridEngine {
 
             // 4. Level 1: Template Engine
             if (decision.level === DecisionLevel.LEVEL_1_SIMPLE) {
-                if (params.onProgress) params.onProgress(locale === 'en' ? "Checking templates..." : "正在比對範本...");
+                if (params.onProgress) params.onProgress(locale === 'ja' ? "テンプレートを確認中..." : (locale === 'en' ? "Checking templates..." : "正在比對範本..."));
                 logs.push(`[L1] Checking Templates...`);
                 bestMatch = await this.checkTemplates(text, locale);
             }
 
             // 5. Level 2: Algorithm Provider + POI Search
             if (!bestMatch && (decision.level === DecisionLevel.LEVEL_2_MEDIUM || decision.level === DecisionLevel.LEVEL_1_SIMPLE)) {
-                if (params.onProgress) params.onProgress(locale === 'en' ? "Searching algorithms & POI..." : "正在搜尋大數據與地點資訊...");
+                if (params.onProgress) params.onProgress(locale === 'ja' ? "アルゴリズムとスポット情報を検索中..." : (locale === 'en' ? "Searching algorithms & POI..." : "正在搜尋大數據與地點資訊..."));
                 logs.push(`[L2] Checking Algorithms & POI Tags...`);
                 const [poiMatch, algorithmMatch] = await Promise.all([
                     this.checkPOITags(text, locale, context),
@@ -402,7 +402,7 @@ export class HybridEngine {
             }
 
             // 8. Fallback (LLM Orchestrator)
-            if (params.onProgress) params.onProgress(locale === 'en' ? "Synthesizing expert advice..." : "正在彙整專家建議...");
+            if (params.onProgress) params.onProgress(locale === 'ja' ? "エキスパートのアドバイスを収集中..." : (locale === 'en' ? "Synthesizing expert advice..." : "正在彙整專家建議..."));
             logs.push(`[Fallback] Delegating to LLM Service with Context...`);
 
             // Use existing enriched data if available for enriched prompt

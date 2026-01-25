@@ -40,15 +40,10 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             return;
         }
 
-        // Update zustand store immediately for in-place UI updates
-        setLocale(newLocale as 'zh-TW' | 'ja' | 'en');
-
         // Build new search params, updating any locale-prefixed paths in 'next' parameter
         const newParams = new URLSearchParams(searchParams.toString());
         const nextParam = newParams.get('next');
         if (nextParam) {
-            // Update locale prefix in the 'next' path if it exists
-            // Matches paths like /zh/..., /en/..., /ja/..., /zh-TW/...
             const updatedNext = nextParam.replace(
                 /^\/(?:zh-TW|zh|en|ja|ar)(\/|$)/,
                 `/${newLocale}$1`
@@ -59,9 +54,12 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
         const queryString = newParams.toString();
         const url = queryString ? `${pathname}?${queryString}` : pathname;
 
-        // "replace" to switch language in-place (no history push usually preferred for lang switch, or push is fine)
-        // router.replace takes the PATH (without locale) and adds the new locale prefix automatically
+        // Perform navigation first
         router.replace(url, { locale: newLocale as any, scroll: false });
+
+        // Sync zustand store after navigation trigger
+        setLocale(newLocale as 'zh-TW' | 'ja' | 'en');
+
         setIsOpen(false);
     };
 
@@ -71,6 +69,8 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
         'en': 'English',
         'ja': '日本語'
     };
+
+    const availableLocales = ['zh-TW', 'en', 'ja'];
 
     return (
         <div className="relative" ref={containerRef}>
@@ -91,7 +91,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                     style={{ top: containerRef.current ? containerRef.current.getBoundingClientRect().bottom + 8 : 80, right: containerRef.current ? window.innerWidth - containerRef.current.getBoundingClientRect().right : 16 }}
                 >
                     <div className="p-1">
-                        {['zh', 'en', 'ja'].map((l) => (
+                        {availableLocales.map((l) => (
                             <button
                                 key={l}
                                 onClick={() => handleChange(l)}
@@ -100,7 +100,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                                     : 'text-gray-500 hover:bg-black/[0.03] hover:text-gray-900'
                                     }`}
                             >
-                                <span>{labels[l]}</span>
+                                <span>{labels[l] || l}</span>
                                 {locale === l && <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.4)]" />}
                             </button>
                         ))}

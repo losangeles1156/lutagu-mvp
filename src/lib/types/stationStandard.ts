@@ -99,9 +99,9 @@ export interface ActionCard {
 
 export interface L4Item {
     icon: string;
-    title: string;
-    description: string;
-    advice?: string;
+    title: LocaleString | string;
+    description: LocaleString | string;
+    advice?: LocaleString | string;
 }
 
 export interface L4FacilityHighlight {

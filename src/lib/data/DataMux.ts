@@ -109,8 +109,8 @@ export class DataMux {
             // We return raw cards so frontend can render them immediately
             l4_cards: l4Knowledge.slice(0, 3).map(k => ({
                 id: k.id,
-                title: 'Travel Tip', // Generic title, or extract from content
-                content: k.content,
+                title: { ja: 'トラベルチップ', en: 'Travel Tip', zh: '旅遊攻略' },
+                description: typeof k.content === 'object' ? k.content : { ja: k.content, en: k.content, zh: k.content },
                 type: k.knowledge_type,
                 tags: k.tags
             })),
