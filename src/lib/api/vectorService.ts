@@ -25,13 +25,19 @@ export interface VectorUpsertPayload {
     payload: Record<string, any>;
 }
 
+export interface VectorSearchFilter {
+    node_id?: string;
+    tags?: string[];
+}
+
 /**
  * Search the vector database for semantically similar content.
  * Uses the vector-search-rs HTTP API.
  */
 export async function searchVectorDB(
     query: string,
-    topK: number = 5
+    topK: number = 5,
+    filter?: VectorSearchFilter
 ): Promise<VectorSearchResult[]> {
     try {
         const url = `${VECTOR_API_URL}/search`;
@@ -39,7 +45,7 @@ export async function searchVectorDB(
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, top_k: topK }),
+            body: JSON.stringify({ query, top_k: topK, filter }),
             // Short cache for real-time relevance
             next: { revalidate: 30 }
         });
