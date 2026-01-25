@@ -641,15 +641,18 @@
         "quickQuestions": {
             "status": {
                 "text": "Is the Ginza Line delayed right now?",
-                "label": "Service Status"
+                "label": "Service Status",
+                "prompt": "Task: Check Service Status\nTarget: Real-time status of Ginza Line.\nRequirements:\n1. Check for delays or suspensions.\n2. If delayed, provide specific duration and cause.\n3. If severely delayed, suggest an alternative route.\nSource: Use L2 Live Data."
             },
             "accessibility": {
                 "text": "Do Ueno Station exits have elevators?",
-                "label": "Accessibility"
+                "label": "Accessibility",
+                "prompt": "Task: Accessible Route Query\nLocation: Ueno Station\nNeed: Use elevator or escalator.\nRequirements:\n1. List main exits with elevators.\n2. Recommend best exit for Ueno Park.\n3. Note if there is a wheelchair-friendly path."
             },
             "route": {
                 "text": "Fastest way from Asakusa to Tokyo Station?",
-                "label": "Route Planning"
+                "label": "Route Planning",
+                "prompt": "Task: Best Route Planning\nOrigin: Asakusa\nDestination: Tokyo Station\nPreference: Fastest arrival\nRequirements:\n1. Provide the shortest duration route.\n2. Explain transfer points and estimated fare.\n3. Check for any current service disruptions on this route."
             }
         },
         "intent": {

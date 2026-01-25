@@ -468,6 +468,7 @@ export function useAgentChat(options: UseAgentChatOptions) {
                     body: {
                         userId: userIdRef.current,
                         user_profile: userProfile,
+                        locale: locale // Explicitly pass current locale to override any stale transport default
                     }
                 }
             );

@@ -40,24 +40,12 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             return;
         }
 
-        // Build new search params, updating any locale-prefixed paths in 'next' parameter
-        const newParams = new URLSearchParams(searchParams.toString());
-        const nextParam = newParams.get('next');
-        if (nextParam) {
-            const updatedNext = nextParam.replace(
-                /^\/(?:zh-TW|zh|en|ja|ar)(\/|$)/,
-                `/${newLocale}$1`
-            );
-            newParams.set('next', updatedNext);
-        }
+        // Just use router.replace with the new locale option.
+        // next-intl's navigation wrapper handles the prefix logic automatically.
+        // We preserve the current search params.
+        router.replace(`${pathname}?${searchParams.toString()}`, { locale: newLocale as any, scroll: false });
 
-        const queryString = newParams.toString();
-        const url = queryString ? `${pathname}?${queryString}` : pathname;
-
-        // Perform navigation first
-        router.replace(url, { locale: newLocale as any, scroll: false });
-
-        // Sync zustand store after navigation trigger
+        // Sync zustand store
         setLocale(newLocale as 'zh-TW' | 'ja' | 'en');
 
         setIsOpen(false);
