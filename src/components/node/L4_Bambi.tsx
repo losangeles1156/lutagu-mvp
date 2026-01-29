@@ -63,7 +63,6 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
         messagesEndRef
     } = useAgentChat({
         stationId: stationId,
-        stationName: displayName,
         userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
         onComplete: () => { }
     });
@@ -96,13 +95,13 @@ export function L4_Bambi({ data, seedQuestion, seedUserProfile, onSeedConsumed }
     }, [displayName, tL4, setMessages, messages.length]);
 
     // Send Logic
-    const handleSend = useCallback(async (textOverride?: string, profileOverride?: string) => {
+    const handleSend = useCallback(async (textOverride?: string, _profileOverride?: string) => {
         const text = textOverride || input.trim();
         if (!text || isLoading) return;
 
         if (!textOverride) setInput('');
-        await sendMessage(text, profileOverride || seedUserProfile || 'general');
-    }, [input, isLoading, sendMessage, seedUserProfile]);
+        await sendMessage(text);
+    }, [input, isLoading, sendMessage]);
 
     // Seed Question Handling
     const lastSeedQuestionRef = useRef<string>('');

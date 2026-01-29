@@ -56,7 +56,6 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
         messagesEndRef
     } = useAgentChat({
         stationId: stationId,
-        stationName: displayName,
         onComplete: () => { }
     });
 
@@ -93,13 +92,13 @@ export function L4_Strategy({ data, seedQuestion, seedUserProfile, onSeedConsume
 
 
     // Send Logic
-    const handleSend = useCallback(async (textOverride?: string, profileOverride?: string) => {
+    const handleSend = useCallback(async (textOverride?: string, _profileOverride?: string) => {
         const text = textOverride || input.trim();
         if (!text || isLoading) return;
 
         if (!textOverride) setInput('');
-        await sendMessage(text, profileOverride || seedUserProfile || 'general');
-    }, [input, isLoading, sendMessage, seedUserProfile]);
+        await sendMessage(text);
+    }, [input, isLoading, sendMessage]);
 
 
     // Seed Question Handling

@@ -230,7 +230,7 @@ export async function POST(req: NextRequest) {
             tools,
             maxSteps: MAX_STEPS as number, // Enable multi-step tool calling loop
             toolChoice: 'auto', // Let model decide when to use tools
-            onFinish: ({ text, toolCalls, steps }) => {
+            onFinish: ({ text, toolCalls, steps }: { text: string; toolCalls?: Array<{ toolName: string }>; steps?: unknown[] }) => {
                 const stepCount = steps?.length || 0;
                 const toolNames = toolCalls?.map(tc => tc.toolName) || [];
 

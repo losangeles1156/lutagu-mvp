@@ -47,13 +47,11 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         isLoading,
         thinkingStep,
         suggestedQuestions,
-        quickButtons,
         sendMessage,
         clearMessages,
         messagesEndRef
     } = useAgentChat({
         stationId: data.id,
-        stationName: displayName,
         userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
         onComplete: () => {
             // Optional callback
@@ -79,8 +77,8 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
         if (!text || isLoading) return;
 
         if (!textOverride) setInput('');
-        await sendMessage(text, seedUserProfile || 'general'); // Assuming userProfileStr was meant to be seedUserProfile or a default
-    }, [input, isLoading, sendMessage, seedUserProfile]);
+        await sendMessage(text);
+    }, [input, isLoading, sendMessage]);
 
     const handleAction = useCallback((action: ChatAction) => {
         const target = String(action?.target || '');
@@ -199,19 +197,18 @@ export function L4_Chat({ data, variant = 'strategy', seedQuestion, seedUserProf
                 )}
 
                 {/* Suggested Questions & Quick Actions */}
-                {!thinkingStep && (suggestedQuestions.length > 0 || quickButtons.length > 0) && (
+                {!thinkingStep && suggestedQuestions.length > 0 && (
                     <div className="flex flex-col gap-2 mt-2 px-1">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">{tL4('suggestedQuestions')}</p>
                         <div className="flex flex-wrap gap-2">
-                            {/* Priority: Suggested (Contextual) > Quick (Default) */}
-                            {(suggestedQuestions.length > 0 ? suggestedQuestions.map(q => ({ label: q, prompt: q })) : quickButtons).map((btn, i) => (
+                            {suggestedQuestions.map((q, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => handleSend(btn.prompt || btn.label)}
+                                    onClick={() => handleSend(q)}
                                     disabled={isLoading}
                                     className="text-left bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-colors shadow-sm disabled:opacity-50"
                                 >
-                                    {btn.label}
+                                    {q}
                                 </button>
                             ))}
                         </div>

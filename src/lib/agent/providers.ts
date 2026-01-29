@@ -3,7 +3,7 @@
  * 定義主要與備援模型實例，並提供 Fallback 機制
  */
 
-import { google } from '@ai-sdk/google';
+// import { google } from '@ai-sdk/google'; // Removed as it's not used and module is missing
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText, LanguageModel, ModelMessage, ToolSet } from 'ai';
 

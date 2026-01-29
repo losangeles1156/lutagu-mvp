@@ -72,8 +72,8 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     if (!input.trim() || isLoading) return;
     const text = input;
     setInput('');
-    await sendMessage(text, userProfile || 'general');
-  }, [input, isLoading, sendMessage, userProfile]);
+    await sendMessage(text);
+  }, [input, isLoading, sendMessage]);
 
   const handleRestart = useCallback(() => {
     backupMessages();

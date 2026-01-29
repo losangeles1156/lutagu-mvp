@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 // Simple Supabase client for this endpoint to avoid middleware overhead if possible,
 // or use the standard project client.
 // Using standard process.env vars.
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 export async function POST(req: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     try {
         const body = await req.json();
         const { step_name, step_number, visitor_id, session_id, path, metadata, timestamp } = body;
