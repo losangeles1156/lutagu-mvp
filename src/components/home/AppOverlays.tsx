@@ -14,6 +14,7 @@ import { getLocaleString } from '@/lib/utils/localeUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { NodeSkeleton } from '@/components/node/NodeSkeleton';
+import { ONBOARDING_VERSION } from '@/constants/onboarding';
 
 const NodeTabs = dynamic(
     () => import('@/components/node/NodeTabs').then(m => ({ default: m.NodeTabs })),
@@ -42,11 +43,13 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
     const setDemoMode = useUIStore(s => s.setDemoMode);
 
     const setOnboardingSeenVersion = useUserStore(s => s.setOnboardingSeenVersion);
+    const onboardingSeenVersion = useUserStore(s => s.onboardingSeenVersion);
     const setMapCenter = useMapStore(s => s.setMapCenter);
+
+    console.log(`[AppOverlays] Render: isOpen=${isOnboardingOpen}, seenVersion=${onboardingSeenVersion}`);
 
     const { transitionTo } = useUIStateMachine();
     const [showSkipConfirm, setShowSkipConfirm] = useState(false);
-    const ONBOARDING_VERSION = 1;
 
     return (
         <>
@@ -104,7 +107,10 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
                             <div className="flex items-center gap-2">
                                 <LanguageSwitcher className="p-2 shadow-none glass-effect-none bg-transparent hover:bg-slate-50 rounded-full" />
                                 <button
-                                    onClick={() => setShowSkipConfirm(true)}
+                                    onClick={() => {
+                                        console.log('[Onboarding] X clicked, showing confirm');
+                                        setShowSkipConfirm(true);
+                                    }}
                                     className="min-w-[44px] min-h-[44px] p-2.5 hover:bg-slate-50 rounded-full transition-colors text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                     aria-label={tOnboarding('skip')}
                                 >
@@ -121,14 +127,16 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
                                 </h3>
                                 <div className="grid grid-cols-1 gap-3">
                                     {[
-                                        { id: 'overtourism', text: tOnboarding('tips.overtourism') },
-                                        { id: 'disruption', text: tOnboarding('tips.disruption') },
-                                        { id: 'handsfree', text: tOnboarding('tips.handsfree') },
-                                        { id: 'accessibility', text: tOnboarding('tips.accessibility') }
+                                        { id: 'overtourism' },
+                                        { id: 'disruption' },
+                                        { id: 'handsfree' },
+                                        { id: 'accessibility' }
                                     ].map((tip) => (
                                         <button
-                                            key={tip.id}
+                                            key={`onboarding-tip-${tip.id}`}
+                                            data-testid={`onboarding-tip-${tip.id}`}
                                             onClick={() => {
+                                                console.log(`[Onboarding] Triggering demo: ${tip.id}`);
                                                 setOnboardingSeenVersion(ONBOARDING_VERSION);
                                                 setIsOnboardingOpen(false);
                                                 setDemoMode(true, tip.id);
@@ -141,7 +149,7 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
                                                     {tOnboarding(`issues.${tip.id}`)}
                                                 </span>
                                             </div>
-                                            <div className="text-xs font-bold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors">{tip.text}</div>
+                                            <div className="text-xs font-bold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors">{tOnboarding(`tips.${tip.id}`)}</div>
                                             <div className="mt-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">{tOnboarding('askSubtitle')}</div>
                                         </button>
                                     ))}
@@ -152,21 +160,23 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
                                 <h3 id="onboarding-hubs-title" className="text-[11px] font-black text-slate-400 mb-3 uppercase tracking-wider">{tOnboarding('hubTitle')}</h3>
                                 <div className="grid grid-cols-4 gap-2">
                                     {[
-                                        { label: tOnboarding('hubs.ueno'), center: { lat: 35.7141, lon: 139.7774 }, node: 'odpt.Station:TokyoMetro.Ginza.Ueno' },
-                                        { label: tOnboarding('hubs.asakusa'), center: { lat: 35.7119, lon: 139.7976 }, node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
-                                        { label: tOnboarding('hubs.akihabara'), center: { lat: 35.6984, lon: 139.7753 }, node: 'odpt.Station:TokyoMetro.Hibiya.Akihabara' },
-                                        { label: tOnboarding('hubs.tokyo'), center: { lat: 35.6812, lon: 139.7671 }, node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo' }
+                                        { id: 'ueno', label: tOnboarding('hubs.ueno'), center: { lat: 35.7141, lon: 139.7774 }, node: 'odpt.Station:TokyoMetro.Ginza.Ueno' },
+                                        { id: 'asakusa', label: tOnboarding('hubs.asakusa'), center: { lat: 35.7119, lon: 139.7976 }, node: 'odpt.Station:TokyoMetro.Ginza.Asakusa' },
+                                        { id: 'akihabara', label: tOnboarding('hubs.akihabara'), center: { lat: 35.6984, lon: 139.7753 }, node: 'odpt.Station:TokyoMetro.Hibiya.Akihabara' },
+                                        { id: 'tokyo', label: tOnboarding('hubs.tokyo'), center: { lat: 35.6812, lon: 139.7671 }, node: 'odpt.Station:TokyoMetro.Marunouchi.Tokyo' }
                                     ].map((hub) => (
                                         <button
-                                            key={hub.label}
+                                            key={`onboarding-hub-${hub.id}`}
+                                            data-testid={`onboarding-hub-${hub.id}`}
                                             onClick={() => {
+                                                console.log(`[Onboarding] Hub clicked: ${hub.id}`);
                                                 setMapCenter(hub.center);
                                                 setCurrentNode(hub.node);
                                                 setBottomSheetOpen(true);
                                                 setOnboardingSeenVersion(ONBOARDING_VERSION);
                                                 setIsOnboardingOpen(false);
                                             }}
-                                            className="py-2.5 bg-slate-50 rounded-xl text-[11px] font-black text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            className="px-4 py-3 bg-white border border-slate-100/50 rounded-2xl text-[13px] font-black text-slate-600 hover:border-indigo-100 hover:bg-indigo-50/30 hover:text-indigo-600 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
                                         >
                                             {hub.label}
                                         </button>
@@ -237,20 +247,25 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
                             </button>
                             <button
                                 onClick={() => {
+                                    console.log('[Onboarding] Browse First clicked');
                                     const ueno = { lat: 35.7141, lon: 139.7774 };
                                     if (!navigator.geolocation) {
+                                        console.log('[Onboarding] No geolocation support, skipping');
                                         setMapCenter(ueno);
                                         setOnboardingSeenVersion(ONBOARDING_VERSION);
                                         setIsOnboardingOpen(false);
                                         return;
                                     }
+                                    console.log('[Onboarding] Requesting geolocation...');
                                     navigator.geolocation.getCurrentPosition(
                                         (pos) => {
+                                            console.log('[Onboarding] Geolocation success');
                                             setMapCenter({ lat: pos.coords.latitude, lon: pos.coords.longitude });
                                             setOnboardingSeenVersion(ONBOARDING_VERSION);
                                             setIsOnboardingOpen(false);
                                         },
-                                        () => {
+                                        (err) => {
+                                            console.log('[Onboarding] Geolocation error:', err.message);
                                             setMapCenter(ueno);
                                             setOnboardingSeenVersion(ONBOARDING_VERSION);
                                             setIsOnboardingOpen(false);

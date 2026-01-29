@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ONBOARDING_VERSION } from '@/constants/onboarding';
 
 import { useNodeStore } from '@/stores/nodeStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useUserStore } from '@/stores/userStore';
+import { useUserStore, useUserStoreHydrated } from '@/stores/userStore';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { fetchNodeConfig, findFallbackNodeForId } from '@/lib/api/nodes';
 import type { NodeProfile } from '@/lib/api/nodes';
@@ -22,9 +23,15 @@ export function HomeLogic({
     const router = useRouter();
     const searchParams = useSearchParams();
     const nodeRequestSeqRef = useRef(0);
-    const ONBOARDING_VERSION = 1;
+    const onboardingHandledRef = useRef(false);
     const [didHandleParams, setDidHandleParams] = useState(false);
     const [hadDeepLink, setHadDeepLink] = useState(false);
+    const instanceId = useMemo(() => Math.random().toString(36).substr(2, 5), []);
+
+    useEffect(() => {
+        console.log(`[HomeLogic] Instance MOUNT: ${instanceId}`);
+        return () => console.log(`[HomeLogic] Instance UNMOUNT: ${instanceId}`);
+    }, [instanceId]);
 
     // Migrated Store Hooks
     const currentNodeId = useNodeStore(s => s.currentNodeId);
@@ -90,14 +97,31 @@ export function HomeLogic({
         }
     }, [router, searchParams.toString(), setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
 
+    const isUserStoreHydrated = useUserStoreHydrated();
+
     // 2. Onboarding check
     useEffect(() => {
-        if (!didHandleParams) return;
-        if (hadDeepLink) return;
-        if (isBottomSheetOpen) return;
-        if (onboardingSeenVersion >= ONBOARDING_VERSION) return;
-        setIsOnboardingOpen(true);
-    }, [didHandleParams, hadDeepLink, isBottomSheetOpen, onboardingSeenVersion, setIsOnboardingOpen, ONBOARDING_VERSION]);
+        // 僅在初始化完成且非深層連結、非 BottomSheet 開啟時檢測一次
+        if (!didHandleParams || !isUserStoreHydrated || hadDeepLink || isBottomSheetOpen) return;
+
+        // 使用 window 全域變數作為最終保護層，應對 Playwright 環境下可能的重載
+        if (typeof window !== 'undefined' && (window as any)._LUTAGU_ONBOARDING_HANDLED) return;
+
+        // 直接從 Store 獲取最新狀態
+        const seenVersion = useUserStore.getState().onboardingSeenVersion;
+        console.log(`[HomeLogic] Checking onboarding (atomic): hydrated=${isUserStoreHydrated}, seenVersion=${seenVersion}, targetVersion=${ONBOARDING_VERSION}`);
+
+        if (seenVersion < ONBOARDING_VERSION) {
+            console.log('[HomeLogic] Opening onboarding');
+            setIsOnboardingOpen(true);
+        } else {
+            console.log('[HomeLogic] Onboarding already seen');
+        }
+
+        if (typeof window !== 'undefined') {
+            (window as any)._LUTAGU_ONBOARDING_HANDLED = true;
+        }
+    }, [didHandleParams, isUserStoreHydrated, hadDeepLink, isBottomSheetOpen, setIsOnboardingOpen]);
 
     // 3. Session handling
     useEffect(() => {

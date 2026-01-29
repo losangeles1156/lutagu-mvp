@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useEffect, useState } from 'react';
 
 interface UserState {
     // Identity
@@ -73,6 +74,18 @@ export const useUserStore = create<UserState>()(
         }
     )
 );
+
+// 導出一個方便檢查水合狀態的 hook
+export const useUserStoreHydrated = () => {
+    const [hydrated, setHydrated] = useState(false);
+    useEffect(() => {
+        const unsub = useUserStore.persist.onFinishHydration(() => setHydrated(true));
+        // Check if already hydrated
+        if (useUserStore.persist.hasHydrated()) setHydrated(true);
+        return () => unsub();
+    }, []);
+    return hydrated;
+};
 
 if (typeof window !== 'undefined') {
     (window as any).__LUTAGU_USER_STORE__ = useUserStore;

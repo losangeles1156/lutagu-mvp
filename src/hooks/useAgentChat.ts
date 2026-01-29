@@ -41,7 +41,11 @@ export const useAgentChat = (options: {
 
     // Local state for thinking process visibility
     const [thinkingStep, setThinkingStep] = useState<string | null>(null);
-    const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+    const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>(() => {
+        if (locale === 'zh-TW') return ['新宿車站有寄物櫃嗎？', '最新的運行狀態？', '附近的推薦景點？'];
+        if (locale === 'ja') return ['新宿駅にコインロッカーはありますか？', '最新の運行状況は？', '周辺のおすすめスポットは？'];
+        return ['Are there lockers in Shinjuku?', 'Current status?', 'Recommended spots nearby?'];
+    });
     const [isOffline, setIsOffline] = useState(false);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -54,8 +58,10 @@ export const useAgentChat = (options: {
         api: agentEndpoint,
         body: {
             locale,
+            nodeId: stationId,
+            userLocation,
         }
-    }), [locale]);
+    }), [locale, stationId, userLocation]);
 
     const {
         messages: aiMessages,
@@ -190,6 +196,8 @@ export const useAgentChat = (options: {
             }, {
                 body: {
                     locale,
+                    nodeId: stationId,
+                    userLocation,
                 }
             });
         } catch (error) {

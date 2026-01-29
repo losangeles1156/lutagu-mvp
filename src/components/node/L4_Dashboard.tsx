@@ -125,17 +125,24 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
     const requestSeqRef = useRef(0);
 
     // Build profile data for L4_Chat - use 'any' to bypass strict type checking for this integration
-    const stationProfile = useMemo(() => ({
-        id: stationId,
-        tier: 'minor' as const,
-        name: { ja: '', en: '', zh: '' },
-        description: { ja: '', en: '', zh: '' },
-        l1_dna: { categories: {}, vibe_tags: [], last_updated: new Date().toISOString() },
-        l2: { lines: [], weather: { temp: 0, condition: 'Clear', windSpeed: 0 }, crowd: { level: 2, trend: 'stable' as const, userVotes: { total: 0, distribution: [0, 0, 0, 0, 0] } } },
-        l3_facilities: [],
-        l4_cards: [],
-        l4_knowledge: l4Knowledge
-    }) as any, [stationId, l4Knowledge]);
+    const stationProfile = useMemo(() => {
+        const s = selectedOrigin as any;
+        return {
+            id: stationId,
+            tier: s?.tier || 'minor',
+            name: {
+                ja: s?.name?.ja || '',
+                en: s?.name?.en || '',
+                zh: s?.name?.['zh-TW'] || s?.name?.zh || ''
+            },
+            description: s?.description || { ja: '', en: '', zh: '' },
+            l1_dna: s?.l1_dna || { categories: {}, vibe_tags: [], last_updated: new Date().toISOString() },
+            l2: s?.l2 || { lines: [], weather: { temp: 0, condition: 'Clear', windSpeed: 0 }, crowd: { level: 2, trend: 'stable' as const, userVotes: { total: 0, distribution: [0, 0, 0, 0, 0] } } },
+            l3_facilities: s?.l3_facilities || [],
+            l4_cards: s?.l4_cards || [],
+            l4_knowledge: l4Knowledge
+        };
+    }, [stationId, l4Knowledge, selectedOrigin]);
 
     useEffect(() => {
         const fetchRecommendations = async () => {
