@@ -8,9 +8,13 @@ test.describe('Main Chat Panel Core Verification', () => {
         await page.context().setGeolocation({ latitude: 35.6812, longitude: 139.7671 });
 
         await page.goto('/zh-TW');
-        await page.waitForLoadState('domcontentloaded');
 
-        // 繞過登入與導覽
+        // 1. 等待 React Hydration 與 Store 初始化 (關鍵修復)
+        await page.waitForFunction(() => {
+            return (window as any).__LUTAGU_USER_STORE__ && (window as any).__LUTAGU_UI_STORE__;
+        }, { timeout: 30000 });
+
+        // 2. 繞過登入與導覽 (現在可以安全操作 Store)
         await page.evaluate(() => {
             const uiState = (window as any).__LUTAGU_UI_STATE__;
             const uiStore = (window as any).__LUTAGU_UI_STORE__;
@@ -21,15 +25,21 @@ test.describe('Main Chat Panel Core Verification', () => {
             if (uiState) uiState.getState().transitionTo('collapsed_desktop');
         });
 
-        await page.waitForTimeout(1000);
+        // 3. 等待 UI 反映狀態變更，不再使用固定 timeout
+        await page.waitForSelector('button[data-testid="open-ai-chat"]', { state: 'visible', timeout: 10000 });
     });
 
     async function openChat(page: Page) {
         const aiBtn = page.locator('button[data-testid="open-ai-chat"]').first();
         await aiBtn.waitFor({ state: 'visible' });
-        await aiBtn.click({ force: true });
 
-        // 等待進入全螢幕狀態
+        // 使用 JavaScript 直接點擊以確保不被攔截
+        await page.evaluate(() => {
+            const btn = document.querySelector('button[data-testid="open-ai-chat"]') as HTMLButtonElement;
+            if (btn) btn.click();
+        });
+
+        // 4. 等待進入全螢幕狀態且輸入框可見
         await page.waitForFunction(() => {
             return (window as any).__LUTAGU_UI_STATE__?.getState()?.uiState === 'fullscreen';
         }, { timeout: 10000 });

@@ -34,6 +34,11 @@ test.describe('Phase 1: Base Access & Onboarding Verification', () => {
         });
 
         await page.goto('/zh-TW');
+
+        // 4. 等待 Hydration (確保測試穩定性)
+        await page.waitForFunction(() => {
+            return (window as any).__LUTAGU_USER_STORE__ && (window as any).__LUTAGU_UI_STORE__;
+        }, { timeout: 30000 });
     });
 
     test('Scenario 1: Initial Page Load and Onboarding Opening', async ({ page }) => {
@@ -54,17 +59,14 @@ test.describe('Phase 1: Base Access & Onboarding Verification', () => {
             if (btn) btn.click();
         });
 
-        // 3. 等待狀態更新
-        await page.waitForTimeout(1500);
-
-        // 4. 驗證 Onboarding 關閉
+        // 3. 驗證 Onboarding 關閉 (取代 waitForTimeout)
         await expect(onboardingModal).toBeHidden({ timeout: 15000 });
 
-        // 5. 驗證進入全螢幕模式
+        // 4. 驗證進入全螢幕模式
         const chatPanel = page.locator('div.fixed.inset-0.z-\\[9998\\]');
         await expect(chatPanel).toBeVisible({ timeout: 10000 });
 
-        // 6. 驗證演示訊息包含特定主題
+        // 5. 驗證演示訊息包含特定主題
         const firstMessage = page.locator('[data-testid="chat-message-text"]').first();
         await expect(firstMessage).toBeVisible({ timeout: 15000 });
         await expect(firstMessage).toContainText(/江戶風情/);
@@ -81,15 +83,12 @@ test.describe('Phase 1: Base Access & Onboarding Verification', () => {
             if (btn) btn.click();
         });
 
-        // 3. 等待狀態更新與動畫完成
-        await page.waitForTimeout(1500);
-
-        // 4. 驗證 Onboarding 關閉
+        // 3. 驗證 Onboarding 關閉 (取代 waitForTimeout)
         await expect(onboardingModal).toBeHidden({ timeout: 15000 });
 
-        // 5. 檢查地圖上的 AI 助手按鈕是否存在
+        // 4. 檢查地圖上的 AI 助手按鈕是否存在
         const aiBtn = page.locator('button[data-testid="open-ai-chat"]').first();
-        await expect(aiBtn).toBeVisible();
+        await expect(aiBtn).toBeVisible({ timeout: 10000 });
     });
 
     test('Scenario 4: Hub Station Selection', async ({ page }) => {
@@ -103,13 +102,10 @@ test.describe('Phase 1: Base Access & Onboarding Verification', () => {
             if (btn) btn.click();
         });
 
-        // 3. 等待狀態更新
-        await page.waitForTimeout(1500);
-
-        // 4. 驗證 Onboarding 關閉
+        // 3. 驗證 Onboarding 關閉 (取代 waitForTimeout)
         await expect(onboardingModal).toBeHidden({ timeout: 15000 });
 
-        // 5. 驗證車站詳情面板 (BottomSheet) 開啟
+        // 4. 驗證車站詳情面板 (BottomSheet) 開啟
         const bottomSheetHeader = page.locator('header h2');
         await expect(bottomSheetHeader).toBeVisible({ timeout: 10000 });
         await expect(bottomSheetHeader).toContainText(/東京/);

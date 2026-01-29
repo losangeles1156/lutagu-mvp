@@ -491,16 +491,53 @@ export async function GET(request: Request) {
         }).filter(Boolean);
 
         // Mix DB disruptions with Live API disruptions
-        // CRITICAL FIX: Filter out DB disruptions that mention "Normal" or "平常"
-        const filteredDbDisruptions = (baseData as any).disruption_data?.disruptions?.filter((d: any) => {
-            const msg = d.message?.ja || d.status_label?.ja || '';
-            return !msg.includes('平常') && !msg.includes('通常') && !msg.includes('ダイヤ乱れは解消');
-        }).map((d: any) => ({
-            ...d,
-            source: d.source || 'snapshot'
-        })) || [];
+        // CRITICAL FIX: Filter out DB disruptions and prioritize Live API data
+        // We use a Map to ensure each railway ID only appears once, with Live API taking precedence.
+        const disruptionMap = new Map<string, any>();
 
-        const combinedDisruptions = [...filteredDbDisruptions, ...liveTrainInfo];
+        // 1. First, process DB disruptions (Snapshot)
+        const dbDisruptions = (baseData as any).disruption_data?.disruptions || [];
+        dbDisruptions.forEach((d: any) => {
+            const railwayId = normalizeRailwayId(d?.railway_id || d?.['odpt:railway'] || '');
+            const msg = d.message?.ja || d.status_label?.ja || '';
+
+            // Skip clearly resolved ones
+            const isResolved = msg.includes('平常') || msg.includes('通常') || msg.includes('ダイヤ乱れは解消');
+            if (!isResolved && railwayId) {
+                disruptionMap.set(railwayId, {
+                    ...d,
+                    source: d.source || 'snapshot'
+                });
+            }
+        });
+
+        // 2. Then, process Live API disruptions (ODPT/Yahoo)
+        // Live data ALWAYS overwrites Snapshot data for the same railway ID
+        liveTrainInfo.forEach((d: any) => {
+            const railwayId = normalizeRailwayId(d?.railway_id || d?.['odpt:railway'] || '');
+            if (railwayId) {
+                // If it's in the live list, it's either a new disruption or still valid.
+                // If the live status says "normal" elsewhere, we'd handle it, 
+                // but liveTrainInfo already filtered for disruptions.
+                disruptionMap.set(railwayId, d);
+            }
+        });
+
+        // 3. Special Case: If a railway was in DB but NOT in Live API, it MIGHT be resolved.
+        // However, ODPT only returns ACTIVE disruptions. If a line is missing from liveTrainInfo,
+        // IT IS LIKELY NORMAL.
+        // To be safe, we cross-check with ALL railways in the live API feed (even normal ones)
+        const allLiveRailways = new Set(trainStatus.map((item: any) => normalizeRailwayId(item['odpt:railway'] || '')));
+
+        disruptionMap.forEach((d, railwayId) => {
+            // If the railway is present in the latest ODPT feed but NOT in liveTrainInfo (which filters for trouble),
+            // then it MUST be normal now. Remove from map.
+            if (allLiveRailways.has(railwayId) && !liveTrainInfo.some((ld: any) => ld && normalizeRailwayId(ld.railway_id || '') === railwayId)) {
+                disruptionMap.delete(railwayId);
+            }
+        });
+
+        const combinedDisruptions = Array.from(disruptionMap.values());
 
         const lineStatusArray = lines.map(lineDef => {
             const expectedRailwayId = getExpectedRailwayIds(lineDef)[0];

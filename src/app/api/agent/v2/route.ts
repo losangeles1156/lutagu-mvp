@@ -254,8 +254,9 @@ export async function POST(req: NextRequest) {
             },
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('[Agent 2.0] Error:', error);
+        logDebug(`!!! CRITICAL ERROR !!!: ${error.message}\nStack: ${error.stack}`);
 
         const errorMessage = locale === 'en'
             ? 'Sorry, an error occurred. Please try again.'

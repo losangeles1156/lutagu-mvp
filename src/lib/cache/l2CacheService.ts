@@ -17,7 +17,7 @@ export async function getL2StatusCached(nodeId: string): Promise<any | null> {
     return getCached(
         cacheKey,
         () => fetchL2StatusFresh(nodeId),
-        60 // 60 seconds TTL
+        30 // 30 seconds TTL (reduced from 60s for Phase 1 fix)
     );
 }
 
