@@ -1,516 +1,234 @@
 'use client';
 
+import { PlanParser } from '@/lib/agent/planParser';
+import { AgentPlan } from '@/lib/agent/types';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { logger } from '@/lib/utils/logger';
 import { useChat } from '@ai-sdk/react';
-import { TextStreamChatTransport } from 'ai';
-import { useTranslations, useLocale } from 'next-intl';
-import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
-import { getSessionId } from '@/lib/tracking';
+import { useAppStore } from '@/stores/appStore';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTranslations } from 'next-intl';
+import { TextStreamChatTransport } from 'ai';
 
 export interface AgentMessage {
-    id?: string;
-    role: 'user' | 'assistant';
-    content: string;
-    isStrategy?: boolean;
-    source?: 'template' | 'algorithm' | 'llm';
-    data?: any;
-    thought?: string | null; // Added thought property
-    rawContent?: string;
-}
-
-export interface UseAgentChatOptions {
-    stationId?: string;
-    stationName?: string;
-    userLocation?: { lat: number; lng: number };
-    onMessage?: (message: AgentMessage) => void;
-    onComplete?: () => void;
-    onError?: (error: Error) => void;
-    syncToUIStateMachine?: boolean;
-}
-
-export interface UseAgentChatReturn {
-    messages: AgentMessage[];
-    setMessages: React.Dispatch<React.SetStateAction<AgentMessage[]>>;
-    isLoading: boolean;
-    isOffline: boolean;
-    thinkingStep: string;
-    sendMessage: (text: string, userProfile?: string) => Promise<void>;
-    clearMessages: () => void;
-    quickButtons: QuickButton[];
-    suggestedQuestions: string[];
-    messagesEndRef: React.RefObject<HTMLDivElement>;
-    userId: string;
-    sessionId: string;
-}
-
-// Quick button configuration type
-export interface QuickButton {
     id: string;
-    label: string;
-    demands: string[];
-    profile: string;
-    prompt: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    thought?: string | null;
+    rawContent?: string;
+    type?: string;
+    data?: any;
+    agentPlan?: AgentPlan | null;
 }
 
-// removed hybridEngine import to avoid server-side code in client bundle
-
-import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
-
-export function useAgentChat(options: UseAgentChatOptions) {
-    const { stationId, stationName, onMessage, onComplete, onError, syncToUIStateMachine = false } = options;
-
+export const useAgentChat = (options: {
+    stationId?: string;
+    userLocation?: { lat: number; lng: number };
+    initialMessages?: AgentMessage[];
+    onComplete?: (message: string) => void;
+    syncToUIStateMachine?: boolean;
+} = {}) => {
+    const {
+        stationId = '',
+        userLocation,
+        initialMessages = [],
+        onComplete,
+        syncToUIStateMachine = true
+    } = options;
+    const { locale } = useAppStore();
     const tL4 = useTranslations('l4');
-    const locale = useLocale();
-    const { zone } = useZoneAwareness();
+    const { user } = useAuth();
 
-    const [isOffline, setIsOffline] = useState(false);
-    const [thinkingStep, setThinkingStep] = useState<string>('');
+    // Local state for thinking process visibility
+    const [thinkingStep, setThinkingStep] = useState<string | null>(null);
     const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
-
+    const [isOffline, setIsOffline] = useState(false);
+    const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const userIdRef = useRef<string>(
-        globalThis.crypto?.randomUUID?.() ||
-        `lutagu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
-    );
-    const sessionIdRef = useRef<string>(
-        (typeof window !== 'undefined' ? getSessionId() : null) ||
-        `session-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
-    );
+    const sessionId = useMemo(() => `session-${Date.now()}`, []);
 
-    const hasHydratedFromStoreRef = useRef(false);
-    const lastStoreSyncSignatureRef = useRef<string>('');
+    const agentEndpoint = '/api/agent/v2';
 
-    const offlineMessage = useMemo(() => {
-        if (locale.startsWith('ja')) return 'すみません、現在AIサービスに接続できません。少し後で再試行してください。';
-        if (locale.startsWith('en')) return 'Sorry, the AI service is temporarily unavailable. Please try again shortly.';
-        return '抱歉，目前無法連接 AI 服務，請稍後再試。';
-    }, [locale]);
-
-    // AI SDK v6 transport-based architecture
+    // AI SDK implementation matching project's transport-based architecture
     const transport = useMemo(() => new TextStreamChatTransport({
-        api: '/api/agent/chat',
+        api: agentEndpoint,
         body: {
-            nodeId: stationId || '',
-            stationName: stationName || '',
             locale,
-            user_profile: 'general', // This will be overridden by sendMessage if userProfile is passed
-            zone: zone || 'core',
-            userLocation: options.userLocation, // Added from options
-            sessionId: sessionIdRef.current
         }
-    }), [stationId, stationName, locale, zone, options.userLocation]);
+    }), [locale]);
 
     const {
         messages: aiMessages,
         sendMessage: sendAiMessage,
-        status: chatStatus,
+        status,
         setMessages: setAiMessages,
     } = useChat({
         transport,
-        onError: (error: Error) => {
-            logger.error('Chat Error:', error);
+        onError: (error) => {
+            console.error('[Agent 2.0] Chat Error:', error);
             setIsOffline(true);
-            setThinkingStep('');
-            onError?.(error);
-        }
+        },
     });
 
-    const isLoading = chatStatus === 'submitted' || chatStatus === 'streaming';
-
-    const [status, setStatus] = useState<'ready' | 'streaming' | 'error'>('ready');
-
+    // Handle initial messages if provided
     useEffect(() => {
-        if (isLoading) setStatus('streaming');
-        else if (isOffline) setStatus('error');
-        else setStatus('ready');
-    }, [isLoading, isOffline]);
-
-    // Clear thinking step when streaming completes
-    useEffect(() => {
-        if (status === 'ready' || status === 'error') {
-            setThinkingStep('');
-            // Clear suggested questions only on error, otherwise keep them until next message sent
-            if (status === 'error') {
-                setSuggestedQuestions([]);
-            }
+        if (initialMessages.length > 0 && aiMessages.length === 0) {
+            setAiMessages((initialMessages as any[]).map(m => ({
+                id: m.id,
+                role: m.role,
+                content: m.content || '',
+                parts: m.parts || [{ type: 'text', text: m.content || '' }]
+            })));
         }
-    }, [status]);
+    }, [initialMessages, setAiMessages, aiMessages.length]);
 
-    // Map aiMessages to AgentMessage format for backward compatibility
-    // Also extract [THINKING] markers for thinking indicator
+    const isLoading = status === 'streaming' || status === 'submitted';
+
+    // Map aiMessages to AgentMessage format
     const messages: AgentMessage[] = useMemo(() => {
         return aiMessages.map((m: any) => {
             let content = m.content || (m.parts?.find((p: any) => p.type === 'text')?.text) || '';
             const rawContent = content;
 
-            // Filter out ** symbols (Markdown bold) as per Dify prompt requirements (Frontend cleanup)
+            // Filter out ** symbols
             content = content.replace(/\*\*/g, '');
 
-            // Extract thinking markers from content
+            // 1. Extract Thinking
             let thought: string | null = null;
-
-            // Robust parsing for streaming thinking blocks
-            // 1. Check for closed block [THINKING]...[/THINKING]
             const closedThinkingMatch = content.match(/\[THINKING\]\s*([\s\S]*?)\s*\[\/THINKING\]/);
-
-            // 2. Check for open block at the end (streaming in progress)
             const openThinkingMatch = content.match(/\[THINKING\]([\s\S]*)$/);
 
             if (closedThinkingMatch) {
-                // Found a completed thought
                 thought = closedThinkingMatch[1].trim();
-                // Remove the thought block from displayed content
                 content = content.replace(closedThinkingMatch[0], '').trim();
             } else if (openThinkingMatch) {
-                // Found an ongoing thought (streaming)
                 thought = openThinkingMatch[1].trim();
-                // Remove the open thought block from displayed content
                 content = content.replace(openThinkingMatch[0], '').trim();
             }
 
-            // Extract and remove suggested questions markers
-            content = content.replace(/\[SUGGESTED_QUESTIONS\]([\s\S]*?)(?:\[\/SUGGESTED_QUESTIONS\]|$)/g, '').trim();
+            // 2. Extract Plan (Agent 2.0)
+            const plans = PlanParser.parseComplete(content);
+            const latestPlan = plans.length > 0 ? plans[plans.length - 1] : null;
+            content = PlanParser.stripTags(content);
 
-            // Phase 5: Parse HYBRID_DATA (Agentic UI)
-            // Format: [HYBRID_DATA]{"type":"...", "data":...}[/HYBRID_DATA]
+            // 3. Extract Hybrid Data
             const hybridDataMatch = content.match(/\[HYBRID_DATA\]([\s\S]*?)\[\/HYBRID_DATA\]/);
             let hybridData: any = null;
-
             if (hybridDataMatch) {
                 try {
                     hybridData = JSON.parse(hybridDataMatch[1]);
-                    // Remove form content
                     content = content.replace(hybridDataMatch[0], '').trim();
                 } catch (e) {
                     console.error('Failed to parse Hybrid Data:', e);
                 }
             }
 
-            // Final safety filter for [THINKING] tags that might remain (e.g. nested or malformed)
+            // 5. Final fallback cleanup
             content = content.replace(/\[\/?THINKING\]/gi, '').trim();
 
             return {
                 id: m.id,
                 role: m.role as 'user' | 'assistant',
                 content,
-                data: hybridData?.data || m.data || hybridData, // Merge hybridData into data
-                type: hybridData?.type, // Lift type to top level if available
                 thought,
-                rawContent: rawContent
+                rawContent,
+                type: hybridData?.type,
+                data: hybridData ? (hybridData.data || hybridData) : (m.data || null),
+                agentPlan: latestPlan,
             };
         });
     }, [aiMessages]);
 
+    // Side effects for thinkingStep
     useEffect(() => {
-        if (!syncToUIStateMachine) return;
-        if (hasHydratedFromStoreRef.current) return;
-        if (aiMessages.length > 0) {
-            hasHydratedFromStoreRef.current = true;
-            return;
+        const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
+        if (lastAssistantMessage?.thought) {
+            setThinkingStep(lastAssistantMessage.thought);
+        } else if (!isLoading) {
+            setThinkingStep(null);
         }
 
+        // Handle onComplete
+        if (!isLoading && messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
+            onComplete?.(messages[messages.length - 1].content);
+        }
+    }, [messages, isLoading, onComplete]);
+
+    // Persist to UI State Machine (Legacy Sync Logic)
+    const hasHydratedRef = useRef(false);
+    useEffect(() => {
+        if (!syncToUIStateMachine || hasHydratedRef.current) return;
         const storeMessages = useUIStateMachine.getState().messages;
-        if (storeMessages.length === 0) {
-            hasHydratedFromStoreRef.current = true;
-            return;
-        }
-
-        setAiMessages(
-            storeMessages.map((m) => ({
+        if (storeMessages.length > 0) {
+            setAiMessages((storeMessages as any[]).map(m => ({
                 id: m.id,
-                role: m.role,
-                content: m.content,
-                parts: [{ type: 'text', text: m.content }]
-            })) as any
-        );
-        hasHydratedFromStoreRef.current = true;
-    }, [syncToUIStateMachine, aiMessages.length, setAiMessages]);
+                role: m.role as any,
+                content: m.content || '',
+                parts: [{ type: 'text', text: m.content || '' }]
+            })));
+        }
+        hasHydratedRef.current = true;
+    }, [syncToUIStateMachine, setAiMessages]);
 
     useEffect(() => {
         if (!syncToUIStateMachine) return;
-
-        const nextStoreMessages = messages.map((m, idx) => {
-            const fallbackId = (aiMessages[idx] as any)?.id || `msg-${idx}`;
-            const previous = useUIStateMachine.getState().messages[idx];
-
-            return {
-                id: m.id || fallbackId,
-                role: m.role,
-                content: m.content,
-                timestamp: previous?.timestamp || Date.now(),
-            };
-        });
-
-        const signature = nextStoreMessages.map((m) => `${m.role}:${m.content}`).join('|');
-        if (signature === lastStoreSyncSignatureRef.current) return;
-        lastStoreSyncSignatureRef.current = signature;
-
+        const nextStoreMessages = messages.map((m, idx) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            timestamp: (useUIStateMachine.getState().messages[idx] as any)?.timestamp || Date.now()
+        }));
         useUIStateMachine.getState().setMessages(nextStoreMessages as any);
-    }, [syncToUIStateMachine, messages, aiMessages]);
+    }, [messages, syncToUIStateMachine]);
 
-    useEffect(() => {
-        if (!isOffline) return;
-        setAiMessages(prev => {
-            const last = prev[prev.length - 1] as any;
-            // Skip adding generic message if last message already contains backend debug info
-            if (last?.role === 'assistant' && last?.content === offlineMessage) return prev;
-            if (last?.role === 'assistant' && (last?.content?.includes('[SYSTEM_') || last?.content?.includes('[THINKING]'))) {
-                // Backend already sent debug info, preserve it
-                return prev;
-            }
-            return [...prev, {
-                id: `error-${Date.now()}`,
-                role: 'assistant',
-                content: offlineMessage,
-                parts: [{ type: 'text', text: offlineMessage }]
-            } as any];
-        });
-    }, [isOffline, offlineMessage, setAiMessages]);
-
-    // Effect to extract side-channel data (Thinking, Suggested Questions) from raw messages
-    useEffect(() => {
-        if (!aiMessages.length) return;
-
-        const lastMsg = aiMessages[aiMessages.length - 1] as any;
-        if (lastMsg.role !== 'assistant') return;
-
-        const content = lastMsg.content || (lastMsg.parts?.find((p: any) => p.type === 'text')?.text) || '';
-
-        // Thinking - Search for the current thinking step (capture ALL thinking blocks)
-        const thinkingRegex = /\[THINKING\]\s*([\s\S]*?)\s*(?:\[\/THINKING\]|$)/gi;
-        let lastMatch;
-        let foundThinking = '';
-
-        while ((lastMatch = thinkingRegex.exec(content)) !== null) {
-            foundThinking = lastMatch[1].trim();
-        }
-
-        if (foundThinking) {
-            setThinkingStep(foundThinking);
-        }
-
-        // Suggested Questions
-        const suggestedMatch = content.match(/\[SUGGESTED_QUESTIONS\]([\s\S]*?)\[\/SUGGESTED_QUESTIONS\]/);
-        if (suggestedMatch) {
-            try {
-                const jsonStr = suggestedMatch[1];
-                const questions = JSON.parse(jsonStr);
-                if (Array.isArray(questions)) {
-                    setSuggestedQuestions(prev => {
-                        if (JSON.stringify(prev) !== JSON.stringify(questions)) return questions;
-                        return prev;
-                    });
-                }
-            } catch (e) {
-                // ignore
-            }
-        }
-    }, [aiMessages]);
-
-    // Generate quick buttons based on locale
-    const quickButtons = useMemo((): QuickButton[] => {
-        const displayName = stationName || '車站';
-        const id = stationId || '';
-
-        if (locale === 'ja') {
-            return [
-                {
-                    id: 'route',
-                    label: '最短ルート',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `タスク：ルート案内\n出発：${displayName}（${id}）\n目的地：先に「どこへ行きたいか（駅名/観光地）」を聞いてください\n要望：最速/乗換少なめ（どちらか）\n出力：2案、各案にルート・所要時間・乗換のコツを含める`
-                },
-                {
-                    id: 'access',
-                    label: 'バリアフリー',
-                    demands: ['accessibility'],
-                    profile: 'wheelchair',
-                    prompt: `タスク：バリアフリー案内\n現在地：${displayName}（${id}）\n要望：エレベーターで移動できる出口/動線を優先\n不足情報：必要なら「どの出口/どの路線/どの方向か」を先に質問\n出力：結論→確認質問（必要時）の順で短く`
-                },
-                {
-                    id: 'status',
-                    label: '遅延・代替',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `タスク：運行状況\n影響駅：${displayName}（${id}）\nやること：この駅に影響する遅延/運休があるか確認し、あるなら代替案を1つ\n出力：要点だけ（1-2行）`
-                }
-            ];
-        }
-
-        if (locale === 'en') {
-            return [
-                {
-                    id: 'route',
-                    label: 'Fastest Route',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `Task: Route planning\nFrom: ${displayName} (${id})\nTo: Ask me where I want to go first (station/POI)\nPreference: fastest vs fewer transfers (pick one)\nOutput: 2 options, each with route, ETA, and key transfer tips`
-                },
-                {
-                    id: 'access',
-                    label: 'Accessibility',
-                    demands: ['accessibility'],
-                    profile: 'wheelchair',
-                    prompt: `Task: Accessibility guidance\nLocation: ${displayName} (${id})\nPriority: elevator-only path and accessible exits\nIf missing info: ask which exit/line/direction\nOutput: direct recommendation first, then questions if needed`
-                },
-                {
-                    id: 'status',
-                    label: 'Delays & Backup',
-                    demands: ['speed'],
-                    profile: 'general',
-                    prompt: `Task: Live disruptions\nAffected station: ${displayName} (${id})\nDo: check any delays/disruptions impacting this station and give 1 backup suggestion\nOutput: concise bullets`
-                }
-            ];
-        }
-
-        return [
-            {
-                id: 'route',
-                label: '最快路線',
-                demands: ['speed'],
-                profile: 'general',
-                prompt: `任務：路線規劃\n出發：${displayName}（${id}）\n目的地：請先問我想去哪一站/景點\n需求：最快 / 少轉乘（二選一）\n輸出：給 2 個選項，各含：路線、預估時間、轉乘關鍵點`
-            },
-            {
-                id: 'access',
-                label: '無障礙動線',
-                demands: ['accessibility'],
-                profile: 'wheelchair',
-                prompt: `任務：無障礙動線\n目前：${displayName}（${id}）\n需求：優先電梯可達的出口/動線\n不足資訊：需要時先問我「哪個出口 / 哪條線 / 方向」\n輸出：先給結論，再補必要追問`
-            },
-            {
-                id: 'status',
-                label: '延誤/替代',
-                demands: ['speed'],
-                profile: 'general',
-                prompt: `任務：即時運行狀態\n影響車站：${displayName}（${id}）\n要做：確認是否有延誤/停駛，若有給 1 個替代建議\n輸出：重點 1-2 行`
-            }
-        ];
-    }, [locale, stationId, stationName]);
-
-    // Scroll to bottom when messages change
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, thinkingStep]);
-
-    // Send message to our API
-    const sendMessage = useCallback(async (text: string, userProfile: string = 'general') => {
-        if (!text.trim() || isLoading) return;
-
+    const sendMessage = useCallback(async (text: string) => {
+        if (!text.trim()) return;
         setIsOffline(false);
-        setThinkingStep(tL4('thinking.initializing'));
-
-        // --- Hybrid Engine Interception (DISABLED for Phase 9 Unified Streaming) ---
-        // try {
-        //     const hybridApiRes = await fetch('/api/agent/hybrid', {
-        //         method: 'POST',
-        //         headers: { 'Content-Type': 'application/json' },
-        //         body: JSON.stringify({
-        //             text,
-        //             locale,
-        //             context: {
-        //                 current_station: stationId,
-        //                 user_profile: userProfile,
-        //                 zone
-        //             }
-        //         })
-        //     });
-        //
-        //     if (hybridApiRes.ok) {
-        //         const hybridRes = await hybridApiRes.json();
-        //
-        //         // The API returns { success: true, result: { content, source, ... } }
-        //         const result = hybridRes.result;
-        //
-        //         if (hybridRes.success && result && !result.passToLLM) {
-        //             const hybridMsg: any = {
-        //                 id: `hybrid-${Date.now()}`,
-        //                 role: 'assistant',
-        //                 content: result.content || '',
-        //                 parts: [{ type: 'text', text: result.content || '' }],
-        //                 data: result.data,
-        //                 source: result.source
-        //             };
-        //
-        //             // Add user message manually to aiMessages then assistant message
-        //             setAiMessages(prev => [
-        //                 ...prev,
-        //                 { id: `user-${Date.now()}`, role: 'user', content: text, parts: [{ type: 'text', text }] } as any,
-        //                 hybridMsg
-        //             ]);
-        //
-        //             setThinkingStep('');
-        //             onMessage?.({
-        //                 role: 'assistant',
-        //                 content: result.content || '',
-        //                 data: result.data,
-        //                 source: result.source
-        //             });
-        //             onComplete?.();
-        //             return;
-        //         }
-        //     }
-        // } catch (err) {
-        //     logger.error('[HybridEngine] API Error:', err);
-        // }
-
-        // Visualizing steps
-        setThinkingStep(tL4('thinking.l2'));
-        const startTime = Date.now();
-
         try {
-            await sendAiMessage(
-                { text },
-                {
-                    body: {
-                        userId: userIdRef.current,
-                        user_profile: userProfile,
-                        locale: locale // Explicitly pass current locale to override any stale transport default
-                    }
+            await sendAiMessage({
+                text
+            }, {
+                body: {
+                    locale,
                 }
-            );
-            setThinkingStep('');
-            onComplete?.();
-            metricsCollector.recordRequest('llm', Date.now() - startTime);
+            });
         } catch (error) {
-            logger.error('Chat Error:', error);
+            console.error('Failed to send message:', error);
             setIsOffline(true);
-            setThinkingStep('');
         }
-    }, [isLoading, tL4, sendAiMessage, onComplete]);
+    }, [sendAiMessage, locale]);
 
-    const clearMessagesHandler = useCallback(() => {
-        setAiMessages([]);
-        if (syncToUIStateMachine) {
-            useUIStateMachine.getState().clearMessages();
-        }
-    }, [setAiMessages, syncToUIStateMachine]);
-
-    return useMemo(() => ({
+    const hookReturn = {
         messages,
+        input,
+        handleInputChange: (e: any) => setInput(e.target.value),
+        handleSubmit: (e: any) => {
+            e?.preventDefault();
+            sendMessage(input);
+            setInput('');
+        },
+        sendMessage,
         setMessages: setAiMessages,
         isLoading,
-        isOffline,
         thinkingStep,
         suggestedQuestions,
-        sendMessage,
-        clearMessages: clearMessagesHandler,
-        quickButtons,
+        isOffline,
+        clearMessages: () => {
+            setAiMessages([]);
+            useUIStateMachine.getState().setMessages([]);
+        },
+        clearHistory: () => {
+            setAiMessages([]);
+            useUIStateMachine.getState().setMessages([]);
+        },
         messagesEndRef,
-        userId: userIdRef.current,
-        sessionId: sessionIdRef.current
-    }), [
-        messages,
-        setAiMessages,
-        isLoading,
-        isOffline,
-        thinkingStep,
-        suggestedQuestions,
-        sendMessage,
-        clearMessagesHandler,
-        quickButtons
-    ]);
-}
+        sessionId
+    };
+
+    // Log hook return to verify all properties are present for debugging
+    if (typeof window !== 'undefined') {
+        console.log('[useAgentChat] returning hook properties:', Object.keys(hookReturn));
+    }
+
+    return hookReturn;
+};

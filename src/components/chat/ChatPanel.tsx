@@ -82,6 +82,14 @@ export function ChatPanel() {
         stationId: currentNodeId || '',
         userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
     });
+    // Debug log to check hook properties
+    if (typeof window !== 'undefined') {
+        console.log('[ChatPanel] useAgentChat hook properties:', {
+            hasMessagesEndRef: !!messagesEndRef,
+            isAttached: !!messagesEndRef?.current,
+            isLoading
+        });
+    }
 
     useAiResponseTracking(messages, isLoading);
 
@@ -207,11 +215,16 @@ export function ChatPanel() {
         const msg = displayMessages[index];
 
         try {
-            const response = await fetch('/api/agent/feedback', {
+            const prevMsg = displayMessages[index - 1];
+            const requestText = (prevMsg && prevMsg.role === 'user') ? prevMsg.content : "";
+
+            const response = await fetch('/api/feedback', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     score,
+                    requestText, // Key for FeedbackStore lookup
+                    contextNodeId: msg.data?.contextNodeId, // Stateless ID
                     messageId: msg.id || `msg-${index}`,
                     sessionId: sessionId,
                 })

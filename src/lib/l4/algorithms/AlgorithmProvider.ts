@@ -41,6 +41,12 @@ export class AlgorithmProvider {
     private stationNameMap: Map<string, { en: string; ja: string; zh: string }> | null = null;
     private railwayNameMap: Map<string, { en: string; ja: string; zh: string }> | null = null;
 
+    // Dependency Injection for Testability
+    constructor(
+        private routeFetcher: (originId: string, destId: string) => Promise<any | null> = fetchL4Routes, // Use any or strict type if imported
+        private synthesizer: typeof RouteSynthesizer = RouteSynthesizer
+    ) { }
+
     private ensureNameMaps() {
         if (this.stationNameMap) return;
         this.stationNameMap = new Map();
@@ -66,6 +72,8 @@ export class AlgorithmProvider {
             });
         });
     }
+
+    // ...
 
     private getStationName(id: string, locale: SupportedLocale): string {
         this.ensureNameMaps();
@@ -115,7 +123,7 @@ export class AlgorithmProvider {
         // 1. Try Rust Service (L4 High Performance)
         let rustRoutes: RouteOption[] | null = null;
         try {
-            const rustResp = await fetchL4Routes(originId, destId);
+            const rustResp = await this.routeFetcher(originId, destId);
             if (rustResp && rustResp.routes && rustResp.routes.length > 0) {
                 rustRoutes = this.mapRustRoutesToOptions(rustResp.routes, params.locale);
             }
@@ -139,7 +147,7 @@ export class AlgorithmProvider {
 
         // [Phase 4] Route Synthesis (The Experience Layer)
         if (params.userProfile) {
-            const synthesized = await RouteSynthesizer.synthesize(filtered, params.userProfile, params.isHoliday);
+            const synthesized = await this.synthesizer.synthesize(filtered, params.userProfile, params.isHoliday, params.locale || 'en');
             return synthesized;
         }
 
@@ -154,6 +162,7 @@ export class AlgorithmProvider {
             steps.push({
                 kind: 'origin',
                 text: this.getStationName(r.path[0], locale),
+                stationId: r.path[0],
                 note: 'Start'
             });
 
@@ -178,6 +187,7 @@ export class AlgorithmProvider {
                         steps.push({
                             kind: 'walk',
                             text: locale === 'ja' ? `${toName}まで徒歩` : locale === 'en' ? `Walk to ${toName}` : `步行至 ${toName}`,
+                            stationId: toStation,
                             note: 'Walk'
                         });
                     } else {
@@ -185,6 +195,7 @@ export class AlgorithmProvider {
                             kind: 'train',
                             text: locale === 'ja' ? `${railwayName}で${toName}へ` : locale === 'en' ? `Take ${railwayName} to ${toName}` : `搭乘 ${railwayName} 前往 ${toName}`,
                             railwayId: currentRailway,
+                            stationId: toStation,
                             icon: 'train'
                         });
                     }
@@ -194,6 +205,7 @@ export class AlgorithmProvider {
                         steps.push({
                             kind: 'transfer',
                             text: locale === 'ja' ? '乗り換え' : locale === 'en' ? 'Transfer' : '換乘',
+                            stationId: toStation,
                             note: 'Change Lines'
                         });
                     }
@@ -207,6 +219,7 @@ export class AlgorithmProvider {
             steps.push({
                 kind: 'destination',
                 text: this.getStationName(r.path[r.path.length - 1], locale),
+                stationId: r.path[r.path.length - 1],
                 note: 'End'
             });
 

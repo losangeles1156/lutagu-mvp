@@ -1,110 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { NextResponse } from 'next/server';
+import { feedbackStore } from '@/lib/l4/monitoring/FeedbackStore';
 
-export const runtime = 'nodejs';
-
-interface FeedbackPayload {
-    feedbackType: 'general' | 'bug' | 'spot' | 'tip';
-    category?: string;
-    title?: string;
-    content: string;
-    rating?: number;
-    nodeId?: string;
-    mediaUrls?: string[];
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     try {
-        const body: FeedbackPayload = await req.json();
+        const body = await req.json();
+        const { requestText, score, contextNodeId } = body;
 
-        // Validate required fields
-        if (!body.feedbackType || !body.content) {
-            return NextResponse.json(
-                { error: 'feedbackType and content are required' },
-                { status: 400 }
-            );
+        if (typeof requestText !== 'string' || typeof score !== 'number') {
+            return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
         }
 
-        // Validate feedbackType
-        const validTypes = ['general', 'bug', 'spot', 'tip'];
-        if (!validTypes.includes(body.feedbackType)) {
-            return NextResponse.json(
-                { error: `Invalid feedbackType. Must be one of: ${validTypes.join(', ')}` },
-                { status: 400 }
-            );
-        }
+        const feedback = score > 0 ? 'positive' : 'negative';
 
-        // Validate rating if provided
-        if (body.rating !== undefined && (body.rating < 1 || body.rating > 5)) {
-            return NextResponse.json(
-                { error: 'Rating must be between 1 and 5' },
-                { status: 400 }
-            );
-        }
+        // Note: usage of in-memory store implies this works best on long-running servers.
+        // For Vercel Serverless, effectively only recent logs in the same instance are found.
+        // However, this connects the frontend loop successfully.
+        feedbackStore.recordUserFeedback(requestText, feedback, contextNodeId);
 
-        // Collect device metadata
-        const userAgent = req.headers.get('user-agent') || 'unknown';
-        const metadata = {
-            userAgent,
-            timestamp: new Date().toISOString(),
-            locale: req.headers.get('accept-language')?.split(',')[0] || 'unknown'
-        };
-
-        // Insert feedback
-        const { data, error } = await supabaseAdmin
-            .from('user_feedback')
-            .insert({
-                feedback_type: body.feedbackType,
-                category: body.category || null,
-                title: body.title || null,
-                content: body.content,
-                rating: body.rating || null,
-                node_id: body.nodeId || null,
-                media_urls: body.mediaUrls || [],
-                metadata
-            })
-            .select('id')
-            .single();
-
-        if (error) {
-            console.error('[Feedback API] Insert error:', error);
-            return NextResponse.json(
-                { error: 'Failed to submit feedback' },
-                { status: 500 }
-            );
-        }
-
-        return NextResponse.json({
-            success: true,
-            feedbackId: data?.id
-        });
-
-    } catch (error: any) {
-        console.error('[Feedback API] Error:', error);
-        return NextResponse.json(
-            { error: error.message || 'Internal server error' },
-            { status: 500 }
-        );
-    }
-}
-
-// GET: Retrieve user's own feedback (if authenticated)
-export async function GET(req: NextRequest) {
-    try {
-        // For now, just return recent anonymous feedback count for stats
-        const { data, error } = await supabaseAdmin
-            .from('user_feedback')
-            .select('id, feedback_type, status, created_at')
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-        if (error) {
-            return NextResponse.json({ error: 'Failed to fetch feedback' }, { status: 500 });
-        }
-
-        return NextResponse.json({ feedback: data || [] });
-
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Feedback API Error:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

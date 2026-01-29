@@ -84,8 +84,11 @@ export function HomeLogic({
         }
         setHadDeepLink(hasDeepLink);
         setDidHandleParams(true);
-        if (changed) router.replace(window.location.pathname);
-    }, [router, searchParams, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
+        if (changed) {
+            // Guard against repeated replaced if params haven't changed in a way that matters
+            router.replace(window.location.pathname);
+        }
+    }, [router, searchParams.toString(), setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
 
     // 2. Onboarding check
     useEffect(() => {

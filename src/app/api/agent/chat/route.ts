@@ -57,8 +57,9 @@ export async function POST(req: NextRequest) {
 
     const chatApiUrl = process.env.CHAT_API_URL;
     if (chatApiUrl) {
+        console.log(`[Chat Proxy] Routing to upstream: ${chatApiUrl}`);
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 9000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout for AI response
         try {
             const upstreamRes = await fetch(`${chatApiUrl}/agent/chat`, {
                 method: 'POST',
@@ -195,7 +196,9 @@ export async function POST(req: NextRequest) {
                 }
             } catch (error) {
                 console.error('[Chat API] Critical Exception:', error);
-                sendUpdate(fallbackMessage);
+                // DEBUG: Send actual error to client for diagnosis
+                const debugErrorMessage = `[CRITICAL ERROR] ${(error as any)?.message || String(error)}\n${(error as any)?.stack || ''}`;
+                sendUpdate(debugErrorMessage + '\n\n' + fallbackMessage);
             } finally {
                 console.log('[Chat API] Connection closing');
                 controller.close();

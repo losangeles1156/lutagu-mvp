@@ -257,6 +257,7 @@ export function AppOverlays({ nodeData, profile }: AppOverlaysProps) {
                                         }
                                     );
                                 }}
+                                data-testid="onboarding-browse-btn"
                                 className="py-4 bg-slate-50 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-100 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300"
                             >
                                 {tOnboarding('browseFirst')}

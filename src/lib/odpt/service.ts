@@ -10,6 +10,8 @@ const OPERATOR_MAP: Record<string, string[]> = {
     'Toei': ['odpt.Operator:Toei'],
     'JR-East': ['odpt.Operator:JR-East', 'odpt.Operator:jre-is'],
     'Keikyu': ['odpt.Operator:Keikyu'],
+    'Keisei': ['odpt.Operator:Keisei'],
+    'TokyoMonorail': ['odpt.Operator:TokyoMonorail'],
     'Seibu': ['odpt.Operator:Seibu'],
     'Tobu': ['odpt.Operator:Tobu'],
     'Tokyu': ['odpt.Operator:Tokyu'],
@@ -254,7 +256,6 @@ export async function getTrainStatus(operator?: string) {
     }
 
     const yahooPromise = fetchYahooStatus();
-
     const [odptResults, yahooResults] = await Promise.all([odptPromise, yahooPromise]);
 
     const yahooStatusMap = new Map<string, string>();
@@ -266,88 +267,107 @@ export async function getTrainStatus(operator?: string) {
         yahooNameByRailway.set(mappedId, y.name);
     }
 
-    const odptRailways = new Set<string>();
+    const odptRailwaysWithTrouble = new Set<string>();
     for (const item of odptResults) {
         const railwayId = item?.['odpt:railway'];
-        if (typeof railwayId === 'string' && railwayId) odptRailways.add(railwayId);
+        const textObj = item?.['odpt:trainInformationText'];
+        const text = (typeof textObj === 'object' && textObj) ? (textObj.ja || '') : String(textObj || '');
+        const derived = deriveOfficialStatusFromText(text);
+        if (derived.derived !== 'normal' && typeof railwayId === 'string') {
+            odptRailwaysWithTrouble.add(railwayId);
+        }
     }
 
-    const jrEastNeedsConfirm = Array.from(yahooStatusMap.keys()).some((rid) => rid.startsWith('odpt.Railway:JR-East.'));
-    const jrEastSnapshot = jrEastNeedsConfirm ? await fetchJrEastKantoSnapshotCached() : null;
+    const jrEastSnapshot = (operator === 'JR-East' || !operator) ? await fetchJrEastKantoSnapshotCached() : null;
 
-    const shouldInjectYahoo = (railwayId: string): { ok: boolean; official?: { derived: string; snippet?: string } } => {
-        if (!railwayId.startsWith('odpt.Railway:JR-East.')) return { ok: true };
-        const hintJa = JR_EAST_RAILWAY_HINT_JA[railwayId];
-        if (!hintJa) return { ok: true };
-        const snippet = jrEastSnapshot?.parsed?.lineStatusTextMapJa?.[hintJa];
-        const derived = deriveOfficialStatusFromText(snippet);
-        if (derived.derived === 'normal') return { ok: false, official: { derived: derived.derived, snippet } };
-        return { ok: true, official: { derived: derived.derived, snippet } };
-    };
+    const enhancedResults = odptResults.map(item => {
+        const railwayId = item['odpt:railway'];
+        const isYahooReporting = railwayId && yahooStatusMap.has(railwayId);
+
+        let trust_level: 'verified' | 'unverified' | 'discrepancy' = 'unverified';
+        let confidence = 0.7;
+
+        const textObj = item['odpt:trainInformationText'];
+        const jaText = (typeof textObj === 'object' && textObj) ? (textObj.ja || '') : String(textObj || '');
+        const derived = deriveOfficialStatusFromText(jaText).derived;
+
+        if (derived !== 'normal') {
+            if (isYahooReporting) {
+                trust_level = 'verified';
+                confidence = 1.0;
+            } else if (railwayId && railwayId.startsWith('odpt.Railway:JR-East.')) {
+                // Check JR-East snapshot
+                const hint = JR_EAST_RAILWAY_HINT_JA[railwayId];
+                const snippet = hint ? jrEastSnapshot?.parsed?.lineStatusTextMapJa?.[hint] : null;
+                const snapDerived = deriveOfficialStatusFromText(snippet || '').derived;
+                if (snapDerived !== 'normal' && snapDerived !== 'unknown') {
+                    trust_level = 'verified';
+                    confidence = 0.95;
+                }
+            }
+        }
+
+        const suffix = isYahooReporting ? ` [Yahoo: Verified]` : '';
+        const existingTextObj = (typeof textObj === 'object' && textObj !== null) ? textObj : {};
+
+        return {
+            ...item,
+            'odpt:trainInformationText': {
+                ...existingTextObj,
+                ja: jaText,
+                en: ((existingTextObj as any).en || 'Delay information') + suffix
+            },
+            trust_level,
+            confidence,
+            secondary_source: isYahooReporting ? 'Yahoo Transit' : undefined,
+            secondary_status: isYahooReporting ? yahooStatusMap.get(railwayId) : undefined
+        };
+    });
 
     const injectedFromYahoo: any[] = [];
     for (const [railwayId, yahooStatus] of yahooStatusMap.entries()) {
-        if (odptRailways.has(railwayId)) continue;
-        const check = shouldInjectYahoo(railwayId);
-        if (!check.ok) continue;
+        const hasOdptTrouble = odptRailwaysWithTrouble.has(railwayId);
+        if (hasOdptTrouble) continue;
+
+        // Check if ODPT has the railway at all (might be normal)
+        const odptItem = odptResults.find(r => r['odpt:railway'] === railwayId);
+        const odptText = odptItem?.['odpt:trainInformationText'];
+        const odptJa = (typeof odptText === 'object' && odptText) ? (odptText.ja || '') : String(odptText || '');
+        const odptDerived = deriveOfficialStatusFromText(odptJa).derived;
+
+        let trust_level: 'verified' | 'unverified' | 'discrepancy' = 'unverified';
+        let confidence = 0.5;
+
+        if (odptDerived === 'normal') {
+            trust_level = 'discrepancy';
+            confidence = 0.3;
+        }
 
         const operatorId = inferOdptOperatorFromRailwayId(railwayId);
         const yahooName = yahooNameByRailway.get(railwayId) || railwayId;
-        const officialTag = (() => {
-            const derived = check.official?.derived;
-            if (!derived || derived === 'unknown') return '';
-            return ` [JR-East: ${derived}]`;
-        })();
 
         injectedFromYahoo.push({
             '@id': `synthetic:yahoo:${railwayId}`,
             'owl:sameAs': `yahoo:${railwayId}`,
             'odpt:operator': operatorId,
             'odpt:railway': railwayId,
-            'odpt:trainInformationStatus': { ja: '運行情報', en: 'Service Update' },
+            'odpt:trainInformationStatus': { ja: '運行情報 (Yahoo)', en: 'Service Update (Yahoo)' },
             'odpt:trainInformationText': {
-                ja: `[Yahoo] ${yahooName}: ${yahooStatus}${officialTag}`,
-                en: `[Yahoo] ${yahooName}: ${yahooStatus}${officialTag}`,
-                'zh-TW': `[Yahoo] ${yahooName}: ${yahooStatus}${officialTag}`
+                ja: `[Yahoo] ${yahooName}: ${yahooStatus}`,
+                en: `[Yahoo] ${yahooName}: ${yahooStatus}`,
+                'zh-TW': `[Yahoo] ${yahooName}: ${yahooStatus}`
             },
             'dc:date': new Date().toISOString(),
+            trust_level,
+            confidence,
             secondary_source: 'Yahoo Transit',
             secondary_status: yahooStatus
         });
     }
 
-    const enhancedResults = odptResults.map(item => {
-        const railwayId = item['odpt:railway'];
-        if (railwayId && yahooStatusMap.has(railwayId)) {
-            const yahooStatus = yahooStatusMap.get(railwayId);
-            const yahooName = yahooNameByRailway.get(railwayId);
-            const suffix = yahooStatus ? ` [Yahoo: ${yahooStatus}${yahooName ? ` / ${yahooName}` : ''}]` : '';
-
-            const existingText = item['odpt:trainInformationText'];
-            const existingTextObj = (typeof existingText === 'object' && existingText !== null) ? existingText : {};
-            const baseEn = (typeof existingText === 'object' && existingText !== null && typeof existingText.en === 'string')
-                ? existingText.en
-                : (typeof existingText === 'string' ? existingText : 'Normal');
-            const baseJa = (typeof existingText === 'object' && existingText !== null && typeof existingText.ja === 'string')
-                ? existingText.ja
-                : (typeof existingText === 'string' ? existingText : '');
-
-            return {
-                ...item,
-                'odpt:trainInformationText': {
-                    ...existingTextObj,
-                    ja: (existingTextObj as any).ja ?? baseJa,
-                    en: baseEn + suffix
-                },
-                secondary_source: 'Yahoo Transit',
-                secondary_status: yahooStatus
-            };
-        }
-        return item;
-    });
-
     return [...enhancedResults, ...injectedFromYahoo];
 }
+
 
 export async function getTrains(operator?: string) {
     if (!TOKEN_STANDARD && !TOKEN_CHALLENGE) {

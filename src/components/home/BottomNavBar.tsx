@@ -40,9 +40,13 @@ export function BottomNavBar({ nodeData }: BottomNavBarProps) {
 
                 {/* Primary AI Chat Action */}
                 <button
-                    onClick={() => transitionTo('fullscreen')}
+                    onClick={() => {
+                        console.log('[BottomNavBar] AI button clicked, transitioning to fullscreen');
+                        transitionTo('fullscreen');
+                    }}
                     className="flex-1 h-[60px] rounded-[22px] bg-gradient-to-r from-indigo-600 to-indigo-800 text-white flex items-center justify-center gap-3 shadow-[0_8px_20px_rgba(79,70,229,0.3)] active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 hover:shadow-[0_12px_28px_rgba(79,70,229,0.4)]"
                     aria-label={tCommon('openChat')}
+                    data-testid="open-ai-chat"
                 >
                     <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
                         <MessageSquare size={18} className="text-white" aria-hidden="true" />

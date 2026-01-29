@@ -22,6 +22,9 @@ export interface DeepResearchSkill {
     canHandle(input: string, context: RequestContext): boolean; // Legacy: Keyword match
     calculateRelevance(input: string, context: RequestContext): number; // Tag-Based Score (0.0 - 1.0)
     execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null>;
+
+    // GEM-Logic: Dynamic Capability Definition
+    gemCapabilities?: string[];
 }
 
 export interface SkillExecutionMeta {
@@ -135,7 +138,7 @@ export async function executeSkill(skill: DeepResearchSkill, input: string, cont
         }
     }
 
-    const timeoutMs = skill.policy?.timeoutMs ?? 3500;
+    const timeoutMs = skill.policy?.timeoutMs ?? 8000;
     let timeoutHandle: any;
 
     try {

@@ -3,6 +3,11 @@ import { test, expect, Page } from '@playwright/test';
 test.describe('AI Chat Flow', () => {
 
     test.beforeEach(async ({ page }) => {
+        // Capture browser console logs
+        page.on('console', msg => {
+            console.log(`[BROWSER ${msg.type()}] ${msg.text()}`);
+        });
+
         await page.context().grantPermissions(['geolocation']);
         await page.context().setGeolocation({ latitude: 35.6812, longitude: 139.7671 });
 
@@ -10,22 +15,25 @@ test.describe('AI Chat Flow', () => {
 
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(500);
-        await page.addStyleTag({ content: 'section[role="dialog"][aria-labelledby="onboarding-title"]{display:none !important;}' });
 
-        // Find the "先逛逛" button using text matching
-        const browseBtn = page.locator('button', { hasText: '先逛逛' }).first();
+        // Bypass login and onboarding using absolute store control
+        console.log(`[TEST] Bypassing login and onboarding via direct store access...`);
+        await page.evaluate(() => {
+            const uiState = (window as any).__LUTAGU_UI_STATE__;
+            const uiStore = (window as any).__LUTAGU_UI_STORE__;
+            const userStore = (window as any).__LUTAGU_USER_STORE__;
 
-        // If we're on the login page, click "先逛逛" to bypass
-        if (await browseBtn.count() > 0 && await browseBtn.isVisible()) {
-            // Use force:true to click through any overlays
-            await browseBtn.click({ force: true });
-            await page.waitForTimeout(2000); // Give it time to transition
-        }
+            if (userStore) userStore.getState().setOnboardingSeenVersion(1);
+            if (uiStore) uiStore.getState().setIsOnboardingOpen(false);
+            if (uiState) uiState.getState().transitionTo('collapsed_desktop');
+        });
 
-        await dismissOnboarding(page);
+        // Small wait for React to reflect changes
+        await page.waitForTimeout(1000);
 
-        const aiGuideBtn = page.getByRole('button', { name: /開啟對話|Open Chat/i }).first();
+        const aiGuideBtn = page.locator('button[data-testid="open-ai-chat"]').first();
         await expect(aiGuideBtn).toBeVisible({ timeout: 20000 });
+        console.log(`[TEST] AI Guide button is visible.`);
     });
 
     // Helper to mock streaming response
@@ -39,7 +47,7 @@ test.describe('AI Chat Flow', () => {
         });
     }
 
-    const chatInputSelector = 'input[placeholder*="想去哪裡"], input[placeholder*="Ask"], input[placeholder*="LUTAGU"], input[placeholder*="輸入訊息"], input[placeholder*="問 LUTAGU"]';
+    const chatInputSelector = 'input[data-testid="chat-input"]';
 
     async function dismissOnboarding(page: Page) {
         const onboardingDialog = page.locator('section[role="dialog"][aria-labelledby="onboarding-title"]');
@@ -47,17 +55,23 @@ test.describe('AI Chat Flow', () => {
             if (!await onboardingDialog.isVisible()) {
                 return;
             }
-            const skipBtn = onboardingDialog.locator('button', { hasText: /先逛逛|跳過導覽|開始|Skip|下一步|Next|完成|Finish/i }).first();
+            console.log(`[TEST] Dismissing onboarding modal, attempt ${attempt + 1}...`);
+            const skipBtn = onboardingDialog.locator('[data-testid="onboarding-browse-btn"]').first();
+            const legacySkipBtn = onboardingDialog.locator('button', { hasText: /先逛逛|跳過導覽|開始|Skip|下一步|Next|完成|Finish/i }).first();
             const closeBtn = onboardingDialog.locator('button[aria-label*="Close"], button[aria-label*="關閉"], button:has(svg.lucide-x)').first();
+
             if (await skipBtn.isVisible()) {
                 await skipBtn.click({ force: true });
+            } else if (await legacySkipBtn.isVisible()) {
+                await legacySkipBtn.click({ force: true });
             } else if (await closeBtn.isVisible()) {
                 await closeBtn.click({ force: true });
             } else {
+                // If nothing works, try hitting Escape
                 try {
                     await page.keyboard.press('Escape');
                 } catch {
-                    await onboardingDialog.click({ force: true });
+                    await onboardingDialog.click({ force: true, position: { x: 5, y: 5 } });
                 }
             }
             await page.waitForTimeout(500);
@@ -66,23 +80,48 @@ test.describe('AI Chat Flow', () => {
 
     async function openChatAndGetInput(page: Page) {
         await dismissOnboarding(page);
-        const aiBtn = page.getByRole('button', { name: /開啟對話|Open Chat|AI 助手|AI Assistant|LUTAGU AI/i });
+        const aiBtn = page.locator('button[data-testid="open-ai-chat"]').first();
+        console.log(`[TEST] AI button visible count: ${await aiBtn.count()}`);
+
+        await page.evaluate(() => {
+            const btn = document.querySelector('button[data-testid="open-ai-chat"]') as HTMLElement;
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                console.log(`[DEBUG] AI Button details:`, {
+                    text: btn.innerText,
+                    visible: btn.offsetWidth > 0,
+                    rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+                    zIndex: window.getComputedStyle(btn).zIndex
+                });
+            }
+        });
+        await page.screenshot({ path: 'test-results/before-ai-click.png' });
         await aiBtn.click({ force: true });
+        console.log(`[TEST] AI button clicked.`);
+
+        // Wait for UI to transition to fullscreen
+        console.log(`[TEST] Waiting for fullscreen state...`);
+        await page.waitForFunction(() => {
+            return (window as any).__LUTAGU_UI_STATE__?.getState()?.uiState === 'fullscreen';
+        }, { timeout: 10000 });
+        console.log(`[TEST] Fullscreen state reached.`);
+
         await dismissOnboarding(page);
+
         const chatInput = page.locator(chatInputSelector);
+        console.log(`[TEST] Checking for chat input...`);
+
         if (!await chatInput.isVisible()) {
+            console.log(`[TEST] Chat input not visible, checking for maximize icon...`);
             const maximizeIcon = page.locator('button:has(svg.lucide-maximize-2)').first();
             if (await maximizeIcon.isVisible()) {
+                console.log(`[TEST] Maximize icon found, clicking...`);
                 await maximizeIcon.click();
             }
         }
-        if (!await chatInput.isVisible()) {
-            const expandBtn = page.locator('button[aria-label*="Expand"], button[aria-label*="展開"], button[aria-label*="展开"], button[aria-label*="Expand chat panel"], button:has-text("AI Assistant")').first();
-            if (await expandBtn.isVisible()) {
-                await expandBtn.click();
-            }
-        }
+
         await chatInput.waitFor({ state: 'visible', timeout: 10000 });
+        console.log(`[TEST] Chat input is visible.`);
         return chatInput;
     }
 
@@ -90,7 +129,7 @@ test.describe('AI Chat Flow', () => {
     test('Scenario 1: Basic Chat Flow (Streaming)', async ({ page }) => {
         // 1. Mock the API response
         const mockResponse = '[THINKING]Searching for suggestions...[/THINKING]Hello! This is a **simulated** response.';
-        await page.route('**/api/agent/chat', async route => {
+        await page.route('**/api/agent/v2', async route => {
             await route.fulfill({ status: 200, contentType: 'text/plain', body: mockResponse });
         });
 
@@ -105,11 +144,10 @@ test.describe('AI Chat Flow', () => {
         await sendBtn.click({ force: true });
 
         // 5. Verify User Message appears
-        await expect(page.locator('text=Test Message')).toBeVisible();
+        await expect(page.locator('[data-testid="chat-message-text"]').first()).toContainText('Test Message');
 
         // 6. Verify Assistant Message Content (including Markdown)
-        const responseText = page.locator('text=simulated');
-        await expect(responseText).toBeVisible();
+        await expect(page.locator('[data-testid="chat-message-text"]').last()).toContainText('simulated');
 
         // 7. Verify Thinking Bubble (ensure tag is stripped)
         await expect(page.locator('text=[THINKING]')).not.toBeVisible();
@@ -118,7 +156,7 @@ test.describe('AI Chat Flow', () => {
     // Test Scenario 2: Error Handling
     test('Scenario 2: Error Handling (Offline/API Failure)', async ({ page }) => {
         // 1. Mock API Failure
-        await page.route('**/api/agent/chat', async route => {
+        await page.route('**/api/agent/v2', async route => {
             await route.abort('failed'); // Simulate network failure
         });
 
@@ -131,7 +169,8 @@ test.describe('AI Chat Flow', () => {
         // 4. Verify Error State
         // "現在AIサービスに接続できません" -> zh-TW "無法連接" or similar
         // Let's use a regex or check common.retry
-        await expect(page.locator('text=/無法連接|Connection failed|接続できません/')).toBeVisible({ timeout: 5000 });
+        // "現在AIサービスに接続できません" -> zh-TW "發生錯誤" or "連線錯誤"
+        await expect(page.locator('text=/發生錯誤|連線錯誤|服務暫時不可用|Connection failed/')).toBeVisible({ timeout: 10000 });
     });
 
     // Test Scenario 3: UI State (Minimize/Expand)

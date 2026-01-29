@@ -102,6 +102,7 @@ export function LoginPanel() {
 
   // 2. 先逛逛邏輯
   const handleBrowse = useCallback(() => {
+    console.log('[LoginPanel] handleBrowse triggered');
     setAgentConversationId(null);
     clearMessages();
     setPendingInput('');
@@ -109,21 +110,26 @@ export function LoginPanel() {
     const targetState = isMobile ? 'collapsed_mobile' : 'collapsed_desktop';
 
     if (!navigator.geolocation) {
+      console.log('[LoginPanel] Geolocation not available, defaulting to Ueno');
       setMapCenter({ lat: 35.7141, lon: 139.7774 }); // 預設上野
       transitionTo(targetState);
       return;
     }
 
+    console.log('[LoginPanel] Requesting geolocation...');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        console.log('[LoginPanel] Geolocation success');
         const center = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         setMapCenter(center);
         transitionTo(targetState);
       },
       () => {
+        console.log('[LoginPanel] Geolocation failed/denied, defaulting to Ueno');
         setMapCenter({ lat: 35.7141, lon: 139.7774 }); // 失敗 -> 上野
         transitionTo(targetState);
-      }
+      },
+      { timeout: 3000 }
     );
   }, [transitionTo, setMapCenter, setAgentConversationId, clearMessages, setPendingInput, isMobile]);
 
@@ -251,6 +257,7 @@ export function LoginPanel() {
 
         <button
           onClick={handleBrowse}
+          data-testid="browse-first-btn"
           className="flex flex-col items-center justify-center gap-2 py-6 bg-white text-slate-600 rounded-[32px] border border-slate-200 shadow-sm hover:bg-slate-50 transition-all active:scale-95"
         >
           <Compass size={24} className="text-slate-400" />

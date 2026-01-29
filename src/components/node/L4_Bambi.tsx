@@ -12,8 +12,6 @@ import { useUserStore } from '@/stores/userStore';
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useAgentChat } from '@/hooks/useAgentChat';
 
-import { hybridEngine } from '@/lib/l4/HybridEngine';
-
 import { ParsedMessageContent } from '../chat/ParsedMessageContent';
 import { metricsCollector } from '@/lib/l4/monitoring/MetricsCollector';
 import { trackFunnelEvent } from '@/lib/tracking';

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { SEED_NODES } from '@/lib/nodes/seedNodes';
 import { getRedisCache, initRedisCacheFromEnv } from '@/lib/cache/redisCacheService';
 import { generateRequestId, getElapsedMs, logPerformanceMetric } from '@/lib/monitoring/performanceLogger';
+import { getNodeDisplayTier, MapDisplayTier, getNameOnly } from '@/lib/constants/MapDisplayPolicy';
 
 
 export const dynamic = 'force-dynamic';
@@ -326,340 +327,370 @@ export async function GET(req: Request) {
     try {
         const url = new URL(req.url);
 
-    const swLat = toNumber(url.searchParams.get('swLat'));
-    const swLon = toNumber(url.searchParams.get('swLon'));
-    const neLat = toNumber(url.searchParams.get('neLat'));
-    const neLon = toNumber(url.searchParams.get('neLon'));
-    const zoomRaw = toNumber(url.searchParams.get('zoom'));
+        const swLat = toNumber(url.searchParams.get('swLat'));
+        const swLon = toNumber(url.searchParams.get('swLon'));
+        const neLat = toNumber(url.searchParams.get('neLat'));
+        const neLon = toNumber(url.searchParams.get('neLon'));
+        const zoomRaw = toNumber(url.searchParams.get('zoom'));
 
-    if (swLat === null || swLon === null || neLat === null || neLon === null || zoomRaw === null) {
-        statusCode = 400;
-        return NextResponse.json({ error: 'Missing or invalid viewport parameters' }, { status: 400 });
-    }
-
-    const zoom = clamp(Math.round(zoomRaw), 1, 22);
-    const page = clamp(Math.floor(toNumber(url.searchParams.get('page')) ?? 0), 0, 1000);
-
-    const maxDataSizeKb = clamp(Math.floor(toNumber(url.searchParams.get('max_kb')) ?? 250), 50, 1000);
-
-    const defaultPageSize = zoom < 11 ? 200 : zoom < 14 ? 350 : 500;
-    const requestedPageSize = Math.floor(toNumber(url.searchParams.get('page_size')) ?? defaultPageSize);
-    const pageSize = clamp(requestedPageSize, 50, 500);
-
-    // [RESTORED] hubsOnly filter: show only hubs at low zoom for performance and visual clarity
-    // This ensures same-operator stations are grouped as single nodes
-    const hubsOnlyParam = url.searchParams.get('hubs_only') ?? url.searchParams.get('hubsOnly');
-    const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
-
-    // [DISABLED] Ward-based filtering relaxed per user request
-    const wardId = url.searchParams.get('ward_id');
-    const coreOnly = false; // Disabled: url.searchParams.get('coreOnly') === 'true' || url.searchParams.get('core_only') === 'true';
-    const showStationsOnly = url.searchParams.get('stations_only') === '1';
-
-    const minLat = Math.min(swLat, neLat);
-    const maxLat = Math.max(swLat, neLat);
-    const minLon = Math.min(swLon, neLon);
-    const maxLon = Math.max(swLon, neLon);
-
-    // [CACHE] Check for existing data
-    const cacheKey = getCacheKey({ swLat, swLon, neLat, neLon, zoomRaw });
-    const cached = cache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-        cacheLayer = 'memory';
-        console.log('[api/nodes/viewport] Cache Hit:', cacheKey.substring(0, 50) + '...');
-        return NextResponse.json(cached.data);
-    }
-
-    await Promise.race([
-        ensureRedis(),
-        new Promise<void>(resolve => setTimeout(resolve, 800))
-    ]);
-    const sharedKey = `viewport:${cacheKey}`;
-    const sharedCached = await redisCache.get(sharedKey);
-    if (sharedCached) {
-        cacheLayer = 'redis';
-        cache.set(cacheKey, { data: sharedCached, timestamp: Date.now() });
-        return NextResponse.json(sharedCached);
-    }
-
-    const center = { lat: (minLat + maxLat) / 2, lon: (minLon + maxLon) / 2 };
-    const corner = { lat: maxLat, lon: maxLon };
-
-    const radiusMetersRaw = haversineMeters(center, corner) * 1.12;
-    const maxRadius = zoom < 11 ? 80000 : zoom < 14 ? 50000 : 25000;
-    const radiusMeters = clamp(radiusMetersRaw, 800, maxRadius);
-
-    const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const envKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    const supabaseUrl = envUrl || '';
-    const supabaseKey = envKey || '';
-
-    // Check if we should use fallback due to missing config (only if both Env and Fallback are missing, effectively never now)
-    // But we might want 'fallback' manual override
-    const useFallback = url.searchParams.get('fallback') === '1';
-
-    let candidates: any[] = [];
-    let degraded = false;
-    let source: 'supabase' | 'fallback' = 'supabase';
-    let supabaseClient: any = null;
-
-    if (useFallback) {
-        degraded = true;
-        source = 'fallback';
-        candidates = getFallbackNodes();
-        if (!supabaseUrl || !supabaseKey) {
-            // Log only once or in development
+        if (swLat === null || swLon === null || neLat === null || neLon === null || zoomRaw === null) {
+            statusCode = 400;
+            return NextResponse.json({ error: 'Missing or invalid viewport parameters' }, { status: 400 });
         }
-    } else {
-        try {
-            if (!supabaseUrl || !supabaseKey) {
-                degraded = true;
-                source = 'fallback';
-                candidates = getFallbackNodes();
-                console.warn('[api/nodes/viewport] Supabase not configured, using fallback');
-            } else {
-                supabaseClient = createClient(supabaseUrl, supabaseKey, {
-                    global: {
-                        fetch: createTimeoutFetch(6000),
-                    },
-                });
-            }
-            let data: any = null;
-            let error: any = null;
 
-            if (!degraded) {
-                ({ data, error } = await supabaseClient.rpc('nearby_nodes_v2', {
-                    center_lat: center.lat,
-                    center_lon: center.lon,
-                    radius_meters: Math.round(radiusMeters),
-                    max_results: 700
-                }));
+        const zoom = clamp(Math.round(zoomRaw), 1, 22);
+        const page = clamp(Math.floor(toNumber(url.searchParams.get('page')) ?? 0), 0, 1000);
 
-                if (error) {
-                    ({ data, error } = await supabaseClient.rpc('nearby_nodes', {
-                        center_lat: center.lat,
-                        center_lon: center.lon,
-                        radius_meters: Math.round(radiusMeters)
-                    }));
-                }
+        const maxDataSizeKb = clamp(Math.floor(toNumber(url.searchParams.get('max_kb')) ?? 250), 50, 1000);
 
-                if (error) {
-                    degraded = true;
-                    source = 'fallback';
-                    candidates = getFallbackNodes();
+        const defaultPageSize = zoom < 11 ? 200 : zoom < 14 ? 350 : 500;
+        const requestedPageSize = Math.floor(toNumber(url.searchParams.get('page_size')) ?? defaultPageSize);
+        const pageSize = clamp(requestedPageSize, 50, 500);
 
-                    console.warn('[api/nodes/viewport] Supabase RPC failed, using fallback', {
-                        code: (error as any).code,
-                        message: (error as any).message
-                    });
-                } else {
-                    candidates = ((data as any[] | null | undefined) || []).filter(
-                        (n: any) => (n as any).is_active !== false
-                    );
-                }
-            }
-        } catch (err: any) {
+        // [RESTORED] hubsOnly filter: show only hubs at low zoom for performance and visual clarity
+        // This ensures same-operator stations are grouped as single nodes
+        const hubsOnlyParam = url.searchParams.get('hubs_only') ?? url.searchParams.get('hubsOnly');
+        const hubsOnly = hubsOnlyParam === '1' || hubsOnlyParam === 'true' || zoom < 14;
+
+        // [DISABLED] Ward-based filtering relaxed per user request
+        const wardId = url.searchParams.get('ward_id');
+        const coreOnly = false; // Disabled: url.searchParams.get('coreOnly') === 'true' || url.searchParams.get('core_only') === 'true';
+        const showStationsOnly = url.searchParams.get('stations_only') === '1';
+
+        const minLat = Math.min(swLat, neLat);
+        const maxLat = Math.max(swLat, neLat);
+        const minLon = Math.min(swLon, neLon);
+        const maxLon = Math.max(swLon, neLon);
+
+        // [CACHE] Check for existing data
+        const cacheKey = getCacheKey({ swLat, swLon, neLat, neLon, zoomRaw });
+        const cached = cache.get(cacheKey);
+        if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+            cacheLayer = 'memory';
+            console.log('[api/nodes/viewport] Cache Hit:', cacheKey.substring(0, 50) + '...');
+            return NextResponse.json(cached.data);
+        }
+
+        await Promise.race([
+            ensureRedis(),
+            new Promise<void>(resolve => setTimeout(resolve, 800))
+        ]);
+        const sharedKey = `viewport:${cacheKey}`;
+        const sharedCached = await redisCache.get(sharedKey);
+        if (sharedCached) {
+            cacheLayer = 'redis';
+            cache.set(cacheKey, { data: sharedCached, timestamp: Date.now() });
+            return NextResponse.json(sharedCached);
+        }
+
+        const center = { lat: (minLat + maxLat) / 2, lon: (minLon + maxLon) / 2 };
+        const corner = { lat: maxLat, lon: maxLon };
+
+        const radiusMetersRaw = haversineMeters(center, corner) * 1.12;
+        const maxRadius = zoom < 11 ? 80000 : zoom < 14 ? 50000 : 25000;
+        const radiusMeters = clamp(radiusMetersRaw, 800, maxRadius);
+
+        const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const envKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        const supabaseUrl = envUrl || '';
+        const supabaseKey = envKey || '';
+
+        // Check if we should use fallback due to missing config (only if both Env and Fallback are missing, effectively never now)
+        // But we might want 'fallback' manual override
+        const useFallback = url.searchParams.get('fallback') === '1';
+
+        let candidates: any[] = [];
+        let degraded = false;
+        let source: 'supabase' | 'fallback' = 'supabase';
+        let supabaseClient: any = null;
+
+        if (useFallback) {
             degraded = true;
             source = 'fallback';
             candidates = getFallbackNodes();
-            console.error('[api/nodes/viewport] Unexpected error fetching from Supabase:', err.message);
+            if (!supabaseUrl || !supabaseKey) {
+                // Log only once or in development
+            }
+        } else {
+            try {
+                if (!supabaseUrl || !supabaseKey) {
+                    degraded = true;
+                    source = 'fallback';
+                    candidates = getFallbackNodes();
+                    console.warn('[api/nodes/viewport] Supabase not configured, using fallback');
+                } else {
+                    supabaseClient = createClient(supabaseUrl, supabaseKey, {
+                        global: {
+                            fetch: createTimeoutFetch(6000),
+                        },
+                    });
+                }
+                let data: any = null;
+                let error: any = null;
+
+                if (!degraded) {
+                    ({ data, error } = await supabaseClient.rpc('nearby_nodes_v2', {
+                        center_lat: center.lat,
+                        center_lon: center.lon,
+                        radius_meters: Math.round(radiusMeters),
+                        max_results: 700
+                    }));
+
+                    if (error) {
+                        ({ data, error } = await supabaseClient.rpc('nearby_nodes', {
+                            center_lat: center.lat,
+                            center_lon: center.lon,
+                            radius_meters: Math.round(radiusMeters)
+                        }));
+                    }
+
+                    if (error) {
+                        degraded = true;
+                        source = 'fallback';
+                        candidates = getFallbackNodes();
+
+                        console.warn('[api/nodes/viewport] Supabase RPC failed, using fallback', {
+                            code: (error as any).code,
+                            message: (error as any).message
+                        });
+                    } else {
+                        candidates = ((data as any[] | null | undefined) || []).filter(
+                            (n: any) => (n as any).is_active !== false
+                        );
+                    }
+                }
+            } catch (err: any) {
+                degraded = true;
+                source = 'fallback';
+                candidates = getFallbackNodes();
+                console.error('[api/nodes/viewport] Unexpected error fetching from Supabase:', err.message);
+            }
         }
-    }
 
-    // Filter to show only hub nodes and standalone stations (hide child nodes)
-    const filteredBase = candidates
-        .map(n => {
-            const location = parseLocation((n as any).location ?? (n as any).coordinates);
-            const parentHubId = (n as any).parent_hub_id;
-            const hasParentHub = parentHubId !== null && parentHubId !== undefined;
-            let isHub = !hasParentHub;
+        // Filter to show only hub nodes and standalone stations (hide child nodes)
+        const filteredBase = candidates
+            .map(n => {
+                const location = parseLocation((n as any).location ?? (n as any).coordinates);
+                const parentHubId = (n as any).parent_hub_id;
+                const hasParentHub = parentHubId !== null && parentHubId !== undefined;
+                const displayTier = getNodeDisplayTier(String((n as any).id ?? ''));
 
-            // [DISABLED] Removed HOTFIX that was hiding major Yamanote stations
-            // Now showing all nodes without filtering
+                // [Phase 13.5] Auto-Hub Logic
+                let isHub = !hasParentHub; // Default
 
-            return {
-                id: String((n as any).id ?? ''),
-                city_id: String((n as any).city_id ?? ''),
-                name: (n as any).name ?? { 'zh-TW': '車站', ja: '駅', en: 'Station' },
-                type: String((n as any).type ?? (n as any).node_type ?? 'station'),
-                location,
-                geohash: String((n as any).geohash ?? ''),
-                vibe: (n as any).vibe ?? null,
-                is_hub: isHub,
-                parent_hub_id: parentHubId ?? null,
-                zone: String((n as any).zone ?? 'core'),
-                ward_id: (n as any).ward_id ?? null
-            };
-        })
-        .filter((n) => {
-            const [lon, lat] = n.location.coordinates;
-            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
-            if (lat === 0 && lon === 0) return false;
-            if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
+                // Tier 1 & 2 are ALWAYS hubs, overriding the DB is_hub flag or parent relationships
+                if (displayTier <= 2) {
+                    isHub = true;
+                }
 
-            // [FIX] Ward/Core filtering disabled by user request to ensure node visibility.
-            // We rely on the viewport bounds and pageSize limit for performance.
-            /*
-            if (wardId) {
-                if (n.ward_id === 'ward:airport') {
-                    // Always show airports
-                } else if (n.ward_id !== wardId) {
+                return {
+                    id: String((n as any).id ?? ''),
+                    city_id: String((n as any).city_id ?? ''),
+                    name: (n as any).name ?? { 'zh-TW': '車站', ja: '駅', en: 'Station' },
+                    type: String((n as any).type ?? (n as any).node_type ?? 'station'),
+                    location,
+                    geohash: String((n as any).geohash ?? ''),
+                    vibe: (n as any).vibe ?? null,
+                    is_hub: isHub,
+                    parent_hub_id: parentHubId ?? null,
+                    zone: String((n as any).zone ?? 'core'),
+                    ward_id: (n as any).ward_id ?? null,
+                    display_tier: displayTier
+                };
+            })
+            .map(n => {
+                // [NEW] Geography-Only Naming for Hubs (Tier 1 & 2)
+                if (n.display_tier <= 2) {
+                    const geoName = getNameOnly(n.name, 'zh-TW'); // Standardize on zh-TW for now or keep structure
+                    const localeName: any = { ...n.name };
+                    ['zh-TW', 'ja', 'en'].forEach(loc => {
+                        localeName[loc] = getNameOnly(n.name, loc);
+                    });
+                    return { ...n, name: localeName };
+                }
+                return n;
+            })
+            .filter((n) => {
+                const [lon, lat] = n.location.coordinates;
+                if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+                if (lat === 0 && lon === 0) return false;
+                if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) return false;
+
+                // [NEW] Parent Hub Priority Logic (Explicit Rule 2)
+                // If it's a child station and zoom < 16, HIDE IT. Only show the parent.
+                if (n.parent_hub_id && zoom < 16) {
                     return false;
                 }
-            }
 
-            if (coreOnly) {
-                const isAirport = n.ward_id === 'ward:airport';
-                const isCoreWard = n.ward_id && [
-                    'ward:chiyoda', 'ward:chuo', 'ward:minato', 'ward:shinjuku', 'ward:bunkyo',
-                    'ward:taito', 'ward:sumida', 'ward:koto', 'ward:shinagawa', 'ward:meguro', 'ward:shibuya'
-                ].includes(n.ward_id);
+                // [FIX] Ward/Core filtering disabled by user request to ensure node visibility.
+                // We rely on the viewport bounds and pageSize limit for performance.
+                /*
+                if (wardId) {
+                    if (n.ward_id === 'ward:airport') {
+                        // Always show airports
+                    } else if (n.ward_id !== wardId) {
+                        return false;
+                    }
+                }
+    
+                if (coreOnly) {
+                    const isAirport = n.ward_id === 'ward:airport';
+                    const isCoreWard = n.ward_id && [
+                        'ward:chiyoda', 'ward:chuo', 'ward:minato', 'ward:shinjuku', 'ward:bunkyo',
+                        'ward:taito', 'ward:sumida', 'ward:koto', 'ward:shinagawa', 'ward:meguro', 'ward:shibuya'
+                    ].includes(n.ward_id);
+    
+                    // Keep if Airport, Core Ward, or Unknown (FAIL OPEN)
+                    if (!isAirport && !isCoreWard && n.ward_id) {
+                        return false;
+                    }
+                }
+                */
 
-                // Keep if Airport, Core Ward, or Unknown (FAIL OPEN)
-                if (!isAirport && !isCoreWard && n.ward_id) {
+                // [NEW] Filter out non-station nodes (bus stops, POIs, etc.)
+                const nodeType = n.type;
+                const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
+                if (excludedTypes.includes(nodeType)) {
                     return false;
                 }
+
+                // [FIX] When hubsOnly is true, only show actual station hubs (not standalone non-hubs)
+                if (hubsOnly && !n.is_hub) return false;
+
+                return true;
+            })
+
+        // [FIX] Do NOT merge fallback nodes if we successfully fetched from Supabase
+        // Only use fallback nodes if we are in degraded mode or strictly using fallback source
+        // The previous logic for supplementalSeed was causing zombie nodes and is removed.
+        const supplementalSeed: any[] = [];
+
+        // If source is supabase, filteredBase contains our DB nodes.
+        // If source is fallback, filteredBase contains fallback nodes (assigned to candidates earlier).
+        // The previous logic was double-dipping or force-injecting seeds.
+        // However, checking the logic above:
+        // If useFallback is true -> candidates = getFallbackNodes()
+        // If supabase fails -> candidates = getFallbackNodes()
+        // If supabase succeeds -> candidates = data from DB
+
+        // So 'filteredBase' ALREADY contains the correct set of nodes based on the source.
+        // We should NOT add getFallbackNodes() again unless we specifically want to supplement DB data with local data (which causes the zombie node issue).
+        // So we can simply remove the supplementalSeed merging or make it empty.
+
+        const filtered = dedupeById([...filteredBase])
+            .sort((a, b) => {
+                // Priority 1: Display Tier (Lower number = Higher importance)
+                if (a.display_tier !== b.display_tier) {
+                    return a.display_tier - b.display_tier;
+                }
+
+                // Priority 2: Distance from center
+                const da = (a.location.coordinates[1] - center.lat) ** 2 + (a.location.coordinates[0] - center.lon) ** 2;
+                const db = (b.location.coordinates[1] - center.lat) ** 2 + (b.location.coordinates[0] - center.lon) ** 2;
+                return da - db;
+            });
+
+        function dedupeById<T extends { id: string }>(arr: T[]): T[] {
+            const seen = new Set<string>();
+            const out: T[] = [];
+            for (const item of arr) {
+                if (!item?.id) continue;
+                if (seen.has(item.id)) continue;
+                seen.add(item.id);
+                out.push(item);
             }
-            */
+            return out;
+        }
 
-            // [NEW] Filter out non-station nodes (bus stops, POIs, etc.)
-            const nodeType = n.type;
-            const excludedTypes = ['bus_stop', 'poi', 'place', 'facility', 'entrance', 'exit', 'shopping', 'restaurant'];
-            if (excludedTypes.includes(nodeType)) {
-                return false;
+        // [NEW] Apply operator+station deduplication to reduce same-operator different-line duplicates
+        const deduplicatedByOperator = deduplicateByOperatorStation(filtered);
+        const deduplicated = deduplicatedByOperator;
+
+        // Implement truncation to respect maxDataSizeKb
+        // A rough estimation: each node is about 0.4KB to 0.6KB in JSON
+        const estimatedNodeSizeKb = 0.5;
+        const maxNodesAllowed = Math.floor(maxDataSizeKb / estimatedNodeSizeKb);
+
+        const start = page * pageSize;
+        const end = start + pageSize;
+        const limitedNodes = deduplicated.slice(start, Math.min(deduplicated.length, end, start + maxNodesAllowed));
+        const hasMore = deduplicated.length > end;
+
+        // Fetch hub metadata and members for the returned nodes
+        const hubDetails: Record<string, HubDetails> = {};
+
+        if (supabaseClient && limitedNodes.length > 0) {
+            const hubIds = limitedNodes.filter(n => n.is_hub || n.parent_hub_id === null).map(n => n.id);
+
+            if (hubIds.length > 0) {
+                const [metadataMap, membersMap] = await Promise.all([
+                    fetchHubMetadata(supabaseClient, hubIds),
+                    fetchHubMembers(supabaseClient, hubIds)
+                ]);
+
+                for (const hubId of hubIds) {
+                    const metadata = metadataMap.get(hubId);
+                    const members = membersMap.get(hubId) || [];
+                    const memberCount = members.length;
+
+                    hubDetails[hubId] = {
+                        member_count: memberCount,
+                        transfer_type: metadata?.transfer_type || 'indoor',
+                        transfer_complexity: metadata?.transfer_complexity || 'simple',
+                        walking_distance_meters: metadata?.walking_distance_meters || null,
+                        indoor_connection_notes: metadata?.indoor_connection_notes || null,
+                        members: members
+                    };
+                }
             }
+        }
 
-            // [FIX] When hubsOnly is true, only show actual station hubs (not standalone non-hubs)
-            if (hubsOnly && !n.is_hub) return false;
+        // Post-process to remove spatial overlaps and ensure data integrity
+        const uniqueNodes = [];
+        const seenCoords = new Set<string>();
 
-            return true;
-        })
-
-    // [FIX] Do NOT merge fallback nodes if we successfully fetched from Supabase
-    // Only use fallback nodes if we are in degraded mode or strictly using fallback source
-    // The previous logic for supplementalSeed was causing zombie nodes and is removed.
-    const supplementalSeed: any[] = [];
-
-    // If source is supabase, filteredBase contains our DB nodes.
-    // If source is fallback, filteredBase contains fallback nodes (assigned to candidates earlier).
-    // The previous logic was double-dipping or force-injecting seeds.
-    // However, checking the logic above:
-    // If useFallback is true -> candidates = getFallbackNodes()
-    // If supabase fails -> candidates = getFallbackNodes()
-    // If supabase succeeds -> candidates = data from DB
-
-    // So 'filteredBase' ALREADY contains the correct set of nodes based on the source.
-    // We should NOT add getFallbackNodes() again unless we specifically want to supplement DB data with local data (which causes the zombie node issue).
-    // So we can simply remove the supplementalSeed merging or make it empty.
-
-    const filtered = dedupeById([...filteredBase])
-        .sort((a, b) => {
-            const da = (a.location.coordinates[1] - center.lat) ** 2 + (a.location.coordinates[0] - center.lon) ** 2;
-            const db = (b.location.coordinates[1] - center.lat) ** 2 + (b.location.coordinates[0] - center.lon) ** 2;
-            return da - db;
+        // Priority sorting:
+        // 1. Hubs always win over non-hubs
+        // 2. Nodes with more complete metadata win (using ID length as proxy)
+        const sortedNodes = [...limitedNodes].sort((a: any, b: any) => {
+            if (a.is_hub !== b.is_hub) return a.is_hub ? -1 : 1;
+            return (b.id?.length ?? 0) - (a.id?.length ?? 0);
         });
 
-    function dedupeById<T extends { id: string }>(arr: T[]): T[] {
-        const seen = new Set<string>();
-        const out: T[] = [];
-        for (const item of arr) {
-            if (!item?.id) continue;
-            if (seen.has(item.id)) continue;
-            seen.add(item.id);
-            out.push(item);
-        }
-        return out;
-    }
+        for (const node of sortedNodes) {
+            const coordKey = `${node.location.coordinates[0].toFixed(5)},${node.location.coordinates[1].toFixed(5)}`;
 
-    // [NEW] Apply operator+station deduplication to reduce same-operator different-line duplicates
-    const deduplicatedByOperator = deduplicateByOperatorStation(filtered);
-    const deduplicated = deduplicatedByOperator;
-
-    // Implement truncation to respect maxDataSizeKb
-    // A rough estimation: each node is about 0.4KB to 0.6KB in JSON
-    const estimatedNodeSizeKb = 0.5;
-    const maxNodesAllowed = Math.floor(maxDataSizeKb / estimatedNodeSizeKb);
-
-    const start = page * pageSize;
-    const end = start + pageSize;
-    const limitedNodes = deduplicated.slice(start, Math.min(deduplicated.length, end, start + maxNodesAllowed));
-    const hasMore = deduplicated.length > end;
-
-    // Fetch hub metadata and members for the returned nodes
-    const hubDetails: Record<string, HubDetails> = {};
-
-    if (supabaseClient && limitedNodes.length > 0) {
-        const hubIds = limitedNodes.filter(n => n.is_hub || n.parent_hub_id === null).map(n => n.id);
-
-        if (hubIds.length > 0) {
-            const [metadataMap, membersMap] = await Promise.all([
-                fetchHubMetadata(supabaseClient, hubIds),
-                fetchHubMembers(supabaseClient, hubIds)
-            ]);
-
-            for (const hubId of hubIds) {
-                const metadata = metadataMap.get(hubId);
-                const members = membersMap.get(hubId) || [];
-                const memberCount = members.length;
-
-                hubDetails[hubId] = {
-                    member_count: memberCount,
-                    transfer_type: metadata?.transfer_type || 'indoor',
-                    transfer_complexity: metadata?.transfer_complexity || 'simple',
-                    walking_distance_meters: metadata?.walking_distance_meters || null,
-                    indoor_connection_notes: metadata?.indoor_connection_notes || null,
-                    members: members
-                };
+            // If we've seen this coordinate and the current node is not a hub, skip it
+            if (seenCoords.has(coordKey) && !node.is_hub) {
+                continue;
             }
-        }
-    }
 
-    // Post-process to remove spatial overlaps and ensure data integrity
-    const uniqueNodes = [];
-    const seenCoords = new Set<string>();
-
-    // Priority sorting:
-    // 1. Hubs always win over non-hubs
-    // 2. Nodes with more complete metadata win (using ID length as proxy)
-    const sortedNodes = [...limitedNodes].sort((a: any, b: any) => {
-        if (a.is_hub !== b.is_hub) return a.is_hub ? -1 : 1;
-        return (b.id?.length ?? 0) - (a.id?.length ?? 0);
-    });
-
-    for (const node of sortedNodes) {
-        const coordKey = `${node.location.coordinates[0].toFixed(5)},${node.location.coordinates[1].toFixed(5)}`;
-
-        // If we've seen this coordinate and the current node is not a hub, skip it
-        if (seenCoords.has(coordKey) && !node.is_hub) {
-            continue;
+            uniqueNodes.push(node);
+            seenCoords.add(coordKey);
         }
 
-        uniqueNodes.push(node);
-        seenCoords.add(coordKey);
-    }
+        const responseData = {
+            nodes: uniqueNodes,
+            page,
+            next_page: hasMore ? page + 1 : null,
+            page_size: pageSize,
+            total_in_viewport: deduplicated.length,
+            has_more: hasMore,
+            degraded,
+            source,
+            hub_details: hubDetails
+        };
 
-    const responseData = {
-        nodes: uniqueNodes,
-        page,
-        next_page: hasMore ? page + 1 : null,
-        page_size: pageSize,
-        total_in_viewport: deduplicated.length,
-        has_more: hasMore,
-        degraded,
-        source,
-        hub_details: hubDetails
-    };
+        // [CACHE] Store for future requests
+        cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+        await redisCache.set(sharedKey, responseData, CACHE_TTL);
 
-    // [CACHE] Store for future requests
-    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
-    await redisCache.set(sharedKey, responseData, CACHE_TTL);
-
-    // Prevent cache from growing too large
-    if (cache.size > 100) {
-        const oldestKey = cache.keys().next().value;
-        if (oldestKey) cache.delete(oldestKey);
-    }
+        // Prevent cache from growing too large
+        if (cache.size > 100) {
+            const oldestKey = cache.keys().next().value;
+            if (oldestKey) cache.delete(oldestKey);
+        }
 
         return NextResponse.json(responseData);
     } catch (error: any) {

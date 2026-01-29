@@ -42,6 +42,9 @@ export async function searchVectorDB(
     try {
         const url = `${VECTOR_API_URL}/search`;
 
+        console.log(`[VectorTelemetry] Search Query: "${query.substring(0, 50)}..."`);
+        console.log(`[VectorTelemetry] Filter: ${JSON.stringify(filter || {})}`);
+
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -56,7 +59,17 @@ export async function searchVectorDB(
         }
 
         const data = await res.json();
-        return data.results || [];
+        const results = data.results || [];
+
+        // Mock Pruning Ratio Calculation (Real logic would require Total Count from DB)
+        // For now, we log that filtering was applied.
+        if (filter?.node_id || filter?.tags) {
+            console.log(`[VectorTelemetry] Context Pruning Active. Returned ${results.length} relevant docs.`);
+        } else {
+            console.warn(`[VectorTelemetry] ⚠️ Naked Search (No Context Pruning)`);
+        }
+
+        return results;
     } catch (e) {
         console.error('[VectorService] Search error:', e);
         return [];

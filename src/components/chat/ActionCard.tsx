@@ -1,5 +1,5 @@
 import { MapPin, Info, CalendarPlus, Train, Car, Bike, Navigation, Zap, Banknote } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { TrapCard } from './TrapCard';
 import { HackCard } from './HackCard';
 
@@ -7,15 +7,25 @@ export type ActionType = 'navigate' | 'details' | 'trip' | 'transit' | 'taxi' | 
 
 export interface Action {
     type: ActionType;
-    label: string;
+    label: string | Record<string, string>;
     target: string;
-    description?: string;
-    price?: string;
-    timeSaved?: string;
-    metadata?: any;
+    description?: string | Record<string, string>;
+    price?: string | Record<string, string>;
+    timeSaved?: string | Record<string, string>;
+    metadata?: {
+        eta_min?: number;
+        eta_max?: number;
+        price_approx?: number;
+        currency?: string;
+        partner_id?: string;
+        nudge_log_id?: string;
+        score?: number;
+        tags?: string[];
+        [key: string]: any;
+    };
     // New fields for Wisdom Cards
-    title?: string;
-    content?: string;
+    title?: string | Record<string, string>;
+    content?: string | Record<string, string>;
     severity?: 'medium' | 'high' | 'critical';
 }
 
@@ -78,8 +88,18 @@ const CONFIG: Record<string, any> = {
 
 import { trackPartnerClick } from '@/lib/analytics/partner';
 
+import { resolveText as resolveTextUtil } from '@/lib/i18n/utils';
+
 export function ActionCard({ action, onClick }: ActionCardProps) {
     const t = useTranslations('chat');
+    // Safe access to locale should be handled by provider, but hook must be top level
+    const currentLocale = useLocale();
+
+    // Helper to resolve localized string or object
+    const resolveText = (text: string | Record<string, string> | undefined): string => {
+        return resolveTextUtil(text, currentLocale);
+    };
+
 
     const handleCardClick = () => {
         // Partner Tracking
@@ -92,6 +112,28 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
         }
         onClick(action);
     };
+
+    // Smart Fallbacks from Metadata (HybridEngine Compatibility)
+    const effectivePrice = action.price
+        ? resolveText(action.price)
+        : (action.metadata?.price_approx ? `~${action.metadata.price_approx} ${action.metadata.currency || 'JPY'}` : '');
+
+    // Logic: If explicit timeSaved label exists, use it. 
+    // Else if eta_min/max exists, format it.
+    let effectiveTimeSaved = action.timeSaved ? resolveText(action.timeSaved) : '';
+    if (!effectiveTimeSaved && (action.metadata?.eta_min || action.metadata?.eta_max)) {
+        const min = action.metadata.eta_min || 0;
+        const max = action.metadata.eta_max || min;
+        if (max > 0) {
+            effectiveTimeSaved = min === max ? `${min} min` : `${min}-${max} min`;
+        }
+    }
+
+    const effectiveTitle = resolveText(action.title);
+    const effectiveLabel = resolveText(action.label);
+    const effectiveDescription = resolveText(action.description);
+    const effectiveContent = resolveText(action.content);
+
 
     // 1. Specialized Cards
     if (action.type === 'trap') {
@@ -129,11 +171,11 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                         </div>
 
                         <h3 className="text-base font-black text-slate-800 leading-tight mb-1 truncate">
-                            {action.label}
+                            {effectiveLabel}
                         </h3>
 
                         <p className="text-xs text-slate-500 font-medium mb-3 line-clamp-1">
-                            {action.description}
+                            {effectiveDescription}
                         </p>
 
                         {/* Tags */}
@@ -162,21 +204,13 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
         );
     }
 
-    // Helper to resolve localized string or object
-    const resolveText = (text: string | Record<string, string> | undefined): string => {
-        if (!text) return '';
-        if (typeof text === 'string') return text;
-        // @ts-ignore
-        return text[t('locale') || 'zh-TW'] || text['en'] || text['zh-TW'] || Object.values(text)[0] || '';
-    };
-
     // 2. Standard Cards (Legacy Logic)
     const config = CONFIG[action.type] || CONFIG.details;
     const Icon = config.icon;
 
     // Prompt 3: L4 Experience Advice Card
     // If it has a title/content structure (from new AI response), use the new layout
-    if (action.title && action.content) {
+    if (effectiveTitle && effectiveContent) {
         return (
             <button
                 onClick={handleCardClick}
@@ -192,15 +226,15 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                             <span className={`text-[10px] font-black uppercase tracking-widest ${config.textColor} opacity-80`}>
                                 {t('decision')}
                             </span>
-                            {action.timeSaved && (
+                            {effectiveTimeSaved && (
                                 <span className="flex items-center gap-1 text-[10px] font-black bg-white/60 px-2 py-0.5 rounded-full text-green-700 uppercase tracking-tighter shadow-sm">
                                     <Zap size={10} fill="currentColor" />
-                                    {t('saveTime', { time: resolveText(action.timeSaved) })}
+                                    {t('saveTime', { time: effectiveTimeSaved })}
                                 </span>
                             )}
                         </div>
                         <h3 className="text-lg font-black text-gray-900 leading-tight">
-                            {resolveText(action.title)}
+                            {effectiveTitle}
                         </h3>
                     </div>
                 </div>
@@ -208,7 +242,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                 {/* (B) Traffic Knowledge Tips (Expert Advice) */}
                 <div className="p-5 pt-4">
                     <p className="text-sm font-bold text-gray-600 leading-relaxed mb-3">
-                        {resolveText(action.content)}
+                        {effectiveContent}
                     </p>
 
                     {/* Visual Separator */}
@@ -216,9 +250,9 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            {action.price ? (
+                            {effectivePrice ? (
                                 <span className="text-xs font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded-lg">
-                                    {resolveText(action.price)}
+                                    {effectivePrice}
                                 </span>
                             ) : (
                                 <span className="text-xs font-bold text-gray-400">
@@ -227,7 +261,7 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                             )}
                         </div>
                         <div className={`text-sm font-black ${config.textColor} flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity`}>
-                            {resolveText(action.label)} <span className="text-lg">→</span>
+                            {effectiveLabel} <span className="text-lg">→</span>
                         </div>
                     </div>
                 </div>
@@ -249,30 +283,28 @@ export function ActionCard({ action, onClick }: ActionCardProps) {
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                         <div className={`font-bold text-base ${config.textColor} truncate`}>
-                            {resolveText(action.label)}
+                            {effectiveLabel}
                         </div>
-                        {action.timeSaved && (
+                        {effectiveTimeSaved && (
                             <span className="flex items-center gap-1 text-[10px] font-black bg-white/80 px-2 py-0.5 rounded-full text-green-600 uppercase tracking-tighter shadow-sm whitespace-nowrap">
                                 <Zap size={10} fill="currentColor" />
-                                {resolveText(action.timeSaved)}
+                                {effectiveTimeSaved}
                             </span>
                         )}
                     </div>
 
-                    {action.description && (
+                    {effectiveDescription && (
                         <div className="text-xs text-black/50 mt-0.5 leading-relaxed font-medium">
-                            {resolveText(action.description)}
+                            {effectiveDescription}
                         </div>
                     )}
 
-                    {(action.price) && (
+                    {(effectivePrice) && (
                         <div className="flex items-center gap-1.5 mt-2">
-                            {action.price && (
-                                <div className="flex items-center gap-1 text-[11px] font-bold text-black/60 bg-white/40 px-2.5 py-1 rounded-lg border border-white/50">
-                                    <Banknote size={12} className="opacity-50" />
-                                    {resolveText(action.price)}
-                                </div>
-                            )}
+                            <div className="flex items-center gap-1 text-[11px] font-bold text-black/60 bg-white/40 px-2.5 py-1 rounded-lg border border-white/50">
+                                <Banknote size={12} className="opacity-50" />
+                                {effectivePrice}
+                            </div>
                         </div>
                     )}
                 </div>

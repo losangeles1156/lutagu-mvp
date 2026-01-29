@@ -25,6 +25,7 @@ async function fetchL2Status(stationId: string): Promise<any> {
     return data || {};
 }
 
+
 // L3 Facility Fetcher (Cached 1h)
 async function fetchL3Facilities(stationId: string): Promise<any> {
     return getCached(
@@ -41,6 +42,22 @@ async function fetchL3Facilities(stationId: string): Promise<any> {
     );
 }
 
+// Coordinates Fetcher (Nodes Table)
+async function fetchCoordinates(stationId: string): Promise<{ lat: number, lng: number } | null> {
+    // Try generic ID or normalized ID
+    const { data } = await supabaseAdmin
+        .from('nodes')
+        .select('lat, lng')
+        .eq('id', stationId)
+        .maybeSingle();
+
+    if (data) return data;
+
+    // Try normalized lookup if mismatch (e.g. "Tokyo" vs "odpt.Station:...")
+    // In a real system, we might need a name lookup table.
+    return null;
+}
+
 interface DataMuxContext {
     userId: string;
     locale: string;
@@ -48,7 +65,15 @@ interface DataMuxContext {
     time?: Date;
 }
 
+
 export class DataMux {
+    /**
+     * Get Station Coordinates (for L2 Fallback)
+     */
+    static async getCoordinates(stationId: string): Promise<{ lat: number, lng: number } | null> {
+        return fetchCoordinates(stationId);
+    }
+
     /**
      * Enriches raw station data with Context-Aware Intelligence (MiniMax)
      */

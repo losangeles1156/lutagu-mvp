@@ -20,6 +20,7 @@ export interface RouteStep {
     text: string;
     icon?: string;
     railwayId?: string;
+    stationId?: string; // Persistent ID for robust matching (e.g. odpt.Station:...)
     duration?: number;
     distance?: number;
 }

@@ -4,8 +4,10 @@ import { memo, useState } from 'react';
 import { Bot, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ParsedMessageContent } from './ParsedMessageContent';
+import { CommerceCard } from './cards/CommerceCard';
 import { ActionCard, Action as ChatAction } from './ActionCard';
 import { AgenticResponseCard } from './AgenticResponseCard';
+import { ThinkingPlanCard } from './ThinkingPlanCard';
 
 interface MessageBubbleProps {
     msg: any;
@@ -33,6 +35,20 @@ export const MessageBubble = memo(({
 
     const isL4 = variant === 'l4';
 
+    // DEBUG: Logs
+    if (msg.role === 'assistant' && (msg.content || '').includes('HYBRID_DATA')) {
+        console.log('[DEBUG MessageBubble] Raw content contains HYBRID_DATA tag!', msg.id);
+    }
+    if (msg.role === 'assistant') {
+        console.log(`[DEBUG MessageBubble] Render msg[${idx}]:`, {
+            id: msg.id,
+            hasType: !!msg.type,
+            type: msg.type,
+            hasData: !!msg.data,
+            dataKeys: Object.keys(msg.data || {}),
+        });
+    }
+
     return (
         <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`
@@ -53,8 +69,13 @@ export const MessageBubble = memo(({
                 {/* Message Content with Markdown and Thinking Process */}
                 <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
 
+                {/* AI Agent 2.0 - Thinking Plan Card */}
+                {msg.agentPlan && (
+                    <ThinkingPlanCard plan={msg.agentPlan} />
+                )}
+
                 {/* Phase 5: Agentic UI - Render Structured Response */}
-                {(msg.type || msg.data) && msg.role === 'assistant' && (
+                {(msg.type || (msg.data && Object.keys(msg.data).length > 0)) && (
                     <AgenticResponseCard
                         type={msg.type || (msg.data?.type)}
                         data={msg.data}
@@ -67,43 +88,74 @@ export const MessageBubble = memo(({
                 {legacyActions && legacyActions.length > 0 && (
                     <div className="mt-4 flex flex-col gap-2">
                         {(() => {
-                            // Group actions by category
-                            const groups = legacyActions.reduce((acc: any, action: any) => {
-                                const category = action.metadata?.category || 'other';
-                                if (!acc[category]) acc[category] = [];
-                                acc[category].push(action);
-                                return acc;
-                            }, {});
+                            // [PRO MAX] Separate Commercial Actions
+                            const commercialActions = legacyActions.filter((a: any) =>
+                                a.metadata?.category === 'commercial' || a.type === 'commercial' || a.metadata?.vendor
+                            );
+                            const otherActions = legacyActions.filter((a: any) =>
+                                !(a.metadata?.category === 'commercial' || a.type === 'commercial' || a.metadata?.vendor)
+                            );
 
-                            const categories = Object.keys(groups);
+                            return (
+                                <>
+                                    {/* Render Commercial Cards (Radical Design) */}
+                                    {commercialActions.map((action: any, i: number) => (
+                                        <CommerceCard
+                                            key={`comm-${i}`}
+                                            type={action.metadata?.vendor || 'generic'}
+                                            title={typeof action.label === 'string' ? action.label : (action.label as any)['zh-TW'] || action.label['en']}
+                                            description={action.metadata?.description || 'Exclusive offer for you.'}
+                                            actionLabel="查看詳情"
+                                            url={action.target}
+                                            imageUrl={action.metadata?.image}
+                                            price={action.metadata?.price}
+                                            onClick={() => handleAction(action)}
+                                        />
+                                    ))}
 
-                            if (categories.length === 1 || legacyActions.length <= 3) {
-                                return (
-                                    <div className="flex flex-wrap gap-2">
-                                        {legacyActions.map((action: any, i: number) => (
-                                            <ActionCard key={i} action={action} onClick={handleAction} />
-                                        ))}
-                                    </div>
-                                );
-                            }
+                                    {/* Standard Actions Grouping */}
+                                    {(() => {
+                                        if (otherActions.length === 0) return null;
 
-                            return categories.map((cat) => (
-                                <details key={cat} className="group/accordion bg-slate-50 rounded-xl border border-slate-100 open:bg-white transition-colors" open={cat === 'recommendation' || cat === 'navigation'}>
-                                    <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none select-none">
-                                        <span className="text-xs font-black uppercase tracking-widest text-slate-500 group-open/accordion:text-indigo-600">
-                                            {cat.replace(/_/g, ' ')} ({groups[cat].length})
-                                        </span>
-                                        <div className="text-slate-400 group-open/accordion:rotate-180 transition-transform">
-                                            ▼
-                                        </div>
-                                    </summary>
-                                    <div className="px-3 pb-3 pt-0 flex flex-col gap-2">
-                                        {groups[cat].map((action: any, i: number) => (
-                                            <ActionCard key={i} action={action} onClick={handleAction} />
-                                        ))}
-                                    </div>
-                                </details>
-                            ));
+                                        const groups = otherActions.reduce((acc: any, action: any) => {
+                                            const category = action.metadata?.category || 'other';
+                                            if (!acc[category]) acc[category] = [];
+                                            acc[category].push(action);
+                                            return acc;
+                                        }, {});
+
+                                        const categories = Object.keys(groups);
+
+                                        if (categories.length === 1 || otherActions.length <= 3) {
+                                            return (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {otherActions.map((action: any, i: number) => (
+                                                        <ActionCard key={i} action={action} onClick={handleAction} />
+                                                    ))}
+                                                </div>
+                                            );
+                                        }
+
+                                        return categories.map((cat) => (
+                                            <details key={cat} className="group/accordion bg-slate-50 rounded-xl border border-slate-100 open:bg-white transition-colors" open={cat === 'recommendation' || cat === 'navigation'}>
+                                                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none select-none">
+                                                    <span className="text-xs font-black uppercase tracking-widest text-slate-500 group-open/accordion:text-indigo-600">
+                                                        {cat.replace(/_/g, ' ')} ({groups[cat].length})
+                                                    </span>
+                                                    <div className="text-slate-400 group-open/accordion:rotate-180 transition-transform">
+                                                        ▼
+                                                    </div>
+                                                </summary>
+                                                <div className="px-3 pb-3 pt-0 flex flex-col gap-2">
+                                                    {groups[cat].map((action: any, i: number) => (
+                                                        <ActionCard key={i} action={action} onClick={handleAction} />
+                                                    ))}
+                                                </div>
+                                            </details>
+                                        ));
+                                    })()}
+                                </>
+                            );
                         })()}
                     </div>
                 )}

@@ -19,6 +19,15 @@ export function AgenticResponseCard({ type, data, source, onAction }: AgenticRes
     const locale = useLocale();
     const tL4 = useTranslations('l4.dashboard');
 
+    // DEBUG: Log props to understand why cards aren't rendering
+    console.log('[DEBUG AgenticResponseCard] Props:', {
+        type,
+        source,
+        hasRoutes: !!data?.routes,
+        routesLength: data?.routes?.length,
+        dataKeys: Object.keys(data || {})
+    });
+
     // Strategy: Route Synthesizer (List of Routes) or Algorithm Route
     // Support both 'options' (Synthesizer) and 'route' (Algorithm) types
     if ((type === 'options' || type === 'route') && (data?.routes || data?.option)) {

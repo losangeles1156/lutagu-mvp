@@ -93,24 +93,24 @@ export interface OdptTrainInformation {
     "dc:date"?: string;
     "owl:sameAs"?: string;
     "odpt:trainInformationText":
-        | string
-        | {
-              en?: string;
-              ja?: string;
-              zh?: string;
-              'zh-TW'?: string;
-          };
+    | string
+    | {
+        en?: string;
+        ja?: string;
+        zh?: string;
+        'zh-TW'?: string;
+    };
     "odpt:railway": string;
     "odpt:operator": string;
     "odpt:timeOfOrigin"?: string;
     "odpt:trainInformationStatus"?:
-        | string
-        | {
-              en?: string;
-              ja?: string;
-              zh?: string;
-              'zh-TW'?: string;
-          };
+    | string
+    | {
+        en?: string;
+        ja?: string;
+        zh?: string;
+        'zh-TW'?: string;
+    };
     secondary_source?: string;
     secondary_status?: string;
 }
@@ -147,6 +147,8 @@ export type TransitIncident = {
     occurred_at?: string | null;
     observed_at: string;
     evidence?: TransitIncidentEvidence[];
+    trust_level?: 'verified' | 'unverified' | 'discrepancy';
+    confidence?: number; // 0.0 to 1.0
 };
 
 export interface OdptBus {

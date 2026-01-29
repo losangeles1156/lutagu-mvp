@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
 import { HomeLogic } from './HomeLogic';
 import { BottomNavBar } from './BottomNavBar';
 import { NodeProfile } from '@/lib/api/nodes';
 import { NodeDisplayProvider } from '@/providers/NodeDisplayProvider';
+import { GlobalAlertList } from '@/components/common/GlobalAlertList';
 
 // Lazy load heavy overlay components to reduce TBT
 const AppOverlays = dynamic(
@@ -25,12 +25,10 @@ export function HomeClient({ header, mapPanel, chatPanel }: HomeClientProps) {
     const [nodeData, setNodeData] = useState<any>(null);
     const [profile, setProfile] = useState<NodeProfile | null>(null);
 
-    // Quick hydration fix removed to allow SSR content (Header) to show immediately
-
     return (
         <div className="relative min-h-screen bg-white">
-            <OfflineIndicator />
             <HomeLogic setNodeData={setNodeData} setProfile={setProfile} />
+            <GlobalAlertList />
 
             <NodeDisplayProvider>
                 <MainLayout

@@ -1,5 +1,8 @@
 import { AlertTriangle, XOctagon } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Action } from './ActionCard';
+
+import { resolveText } from '@/lib/i18n/utils';
 
 interface TrapCardProps {
     action: Action;
@@ -36,6 +39,14 @@ export function TrapCard({ action, onClick }: TrapCardProps) {
     const config = styles[severity] || styles.medium;
     const Icon = config.icon;
 
+    // TODO: Move to shared hook (DRY) -> DONE
+    const t = useTranslations('chat');
+    const currentLocale = useLocale();
+
+    const effectiveTitle = resolveText(action.title, currentLocale) || resolveText(action.label, currentLocale);
+    const effectiveContent = resolveText(action.content, currentLocale) || resolveText(action.description, currentLocale);
+    const effectiveAdvice = resolveText(action.metadata?.advice, currentLocale);
+
     return (
         <button
             onClick={() => onClick(action)}
@@ -48,19 +59,19 @@ export function TrapCard({ action, onClick }: TrapCardProps) {
 
                 <div className="flex-1">
                     <h3 className={`font-bold text-base ${config.text} flex items-center gap-2`}>
-                        {action.title || action.label}
+                        {effectiveTitle}
                         <span className="text-[10px] uppercase border px-1.5 py-0.5 rounded-full font-black opacity-70 border-current">
-                            {severity} Trap
+                            {severity} {t('trapLabel')}
                         </span>
                     </h3>
 
                     <p className={`text-sm mt-1 opacity-90 font-medium ${config.text}`}>
-                        {action.content || action.description}
+                        {effectiveContent}
                     </p>
 
                     {action.metadata?.advice && (
                         <div className="mt-3 text-xs bg-white/60 p-2 rounded-lg font-mono leading-relaxed">
-                            💡 建議：{action.metadata.advice}
+                            💡 {t('advice')}: {effectiveAdvice}
                         </div>
                     )}
                 </div>

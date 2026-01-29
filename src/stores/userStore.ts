@@ -73,3 +73,7 @@ export const useUserStore = create<UserState>()(
         }
     )
 );
+
+if (typeof window !== 'undefined') {
+    (window as any).__LUTAGU_USER_STORE__ = useUserStore;
+}

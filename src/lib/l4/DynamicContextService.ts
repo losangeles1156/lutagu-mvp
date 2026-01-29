@@ -15,23 +15,13 @@ import { TrainLocator } from '../services/TrainLocator';
 
 export class DynamicContextService {
 
-    // Map Node (Station Name) to Line ID for MVP
-    // In production, this relations is in the DB (stations_static table)
-    private static readonly STATION_LINE_MAP: Record<string, string> = {
-        'Ueno': 'odpt.Railway:JR-East.Yamanote',
-        'Shinjuku': 'odpt.Railway:JR-East.Yamanote',
-        'Tokyo': 'odpt.Railway:JR-East.Yamanote',
-        'Shibuya': 'odpt.Railway:JR-East.Yamanote',
-        'Ikebukuro': 'odpt.Railway:JR-East.Yamanote'
-    };
-
     /**
      * Enrich the static profile with real-time L2 tags.
      */
     static async enrichProfile(profile: L1NodeProfile): Promise<L1NodeProfile> {
         const enriched = JSON.parse(JSON.stringify(profile)) as L1NodeProfile;
 
-        // resolve Line ID from Node Name
+        // resolve Line ID from Node Name using Generic Parser
         const lineId = this.detectLineId(profile.nodeId);
 
         if (lineId) {
@@ -49,11 +39,9 @@ export class DynamicContextService {
                 enriched.weights.crowd_level = Math.min(enriched.weights.crowd_level * 1.2, 1.0);
             }
 
-            // Logic: Crowd based on train density (mock heuristic)
-            // If more than 15 trains active on line, it's peak.
+            // Logic: Crowd based on train density
             if (stats.trainCount > 15) {
                 enriched.intent.capabilities.push("CROWD_HI");
-                // Crowd penalty
                 enriched.weights.crowd_level = Math.min(enriched.weights.crowd_level * 1.3, 1.0);
             }
         }
@@ -61,9 +49,33 @@ export class DynamicContextService {
         return enriched;
     }
 
+    /**
+     * Parse Line ID from ODPT Station ID.
+     * Standard Format: odpt.Station:Operator.Line.StationName
+     * @param nodeId e.g. "odpt.Station:JR-East.Yamanote.Tokyo"
+     * @returns "odpt.Railway:JR-East.Yamanote"
+     */
     private static detectLineId(nodeId: string): string | undefined {
-        // Simple fuzzy match for MVP
-        const key = Object.keys(this.STATION_LINE_MAP).find(k => nodeId.includes(k));
-        return key ? this.STATION_LINE_MAP[key] : undefined;
+        // 1. Check strict prefix
+        const prefix = 'odpt.Station:';
+        if (!nodeId.startsWith(prefix)) return undefined;
+
+        // 2. Extract Operator.Line.StationName
+        // e.g. "JR-East.Yamanote.Tokyo"
+        const suffix = nodeId.substring(prefix.length);
+        const parts = suffix.split('.');
+
+        if (parts.length >= 2) {
+            // Operator = parts[0] (e.g. JR-East)
+            // Line = parts[1] (e.g. Yamanote)
+            // Railway ID usually follows odpt.Railway:Operator.Line
+            const operator = parts[0];
+            const line = parts[1];
+
+            // Construct Railway ID generically
+            return `odpt.Railway:${operator}.${line}`;
+        }
+
+        return undefined;
     }
 }

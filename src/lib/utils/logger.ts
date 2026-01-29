@@ -1,17 +1,4 @@
-/**
- * Logger Utility
- *
- * Provides environment-aware logging to prevent console pollution in production.
- *
- * Usage:
- * ```typescript
- * import { logger } from '@/lib/utils/logger';
- *
- * logger.log('Debug info');
- * logger.error('Error occurred', error);
- * logger.warn('Warning message');
- * ```
- */
+import * as Sentry from "@sentry/nextjs";
 
 type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug';
 
@@ -23,63 +10,88 @@ class Logger {
   }
 
   /**
-   * Log debug information (development only)
+   * PII Scrubber: Mask sensitive patterns in logs
    */
+  private scrub(args: any[]): any[] {
+    const PII_PATTERNS = [
+      { name: 'UUID', re: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, mask: '[MASKED-UUID]' },
+      { name: 'EMAIL', re: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, mask: '[MASKED-EMAIL]' },
+      { name: 'COORD', re: /([-+]?\d{1,2}\.\d+, ?[-+]?\d{1,3}\.\d+)/g, mask: '[MASKED-COORD]' },
+      { name: 'TOKEN', re: /(bearer\s+[a-zA-Z0-9\-._~+/]+=*|token[:=]\s*[a-zA-Z0-9\-._~+/]+=*)/gi, mask: '[MASKED-TOKEN]' }
+    ];
+
+    return args.map(arg => {
+      if (typeof arg === 'string') {
+        let scrubbed = arg;
+        for (const p of PII_PATTERNS) {
+          scrubbed = scrubbed.replace(p.re, p.mask);
+        }
+        return scrubbed;
+      }
+      if (arg && typeof arg === 'object') {
+        try {
+          const str = JSON.stringify(arg);
+          let scrubbedStr = str;
+          for (const p of PII_PATTERNS) {
+            scrubbedStr = scrubbedStr.replace(p.re, p.mask);
+          }
+          return JSON.parse(scrubbedStr);
+        } catch {
+          return arg; // Fallback if not stringifiable
+        }
+      }
+      return arg;
+    });
+  }
+
   log(...args: any[]): void {
     if (this.isDev) {
-      console.log(...args);
+      console.log(...this.scrub(args));
     }
   }
 
-  /**
-   * Log informational messages (development only)
-   */
   info(...args: any[]): void {
     if (this.isDev) {
-      console.info(...args);
+      console.info(...this.scrub(args));
     }
   }
 
-  /**
-   * Log warnings (always shown)
-   */
   warn(...args: any[]): void {
-    console.warn(...args);
+    console.warn(...this.scrub(args));
   }
 
-  /**
-   * Log errors (always shown)
-   * TODO: Integrate with error tracking service (e.g., Sentry)
-   */
   error(...args: any[]): void {
-    console.error(...args);
-    // Future: Send to error tracking service
-    // if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
-    //   Sentry.captureException(args[0]);
-    // }
+    const scrubbed = this.scrub(args);
+    console.error(...scrubbed);
+
+    // Send to Sentry if in production or configured
+    if (!this.isDev || process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      const errorObj = args.find(a => a instanceof Error);
+      if (errorObj) {
+        Sentry.captureException(errorObj, {
+          extra: { logArgs: scrubbed }
+        });
+      } else {
+        Sentry.captureMessage(String(scrubbed[0]), {
+          level: 'error',
+          extra: { logArgs: scrubbed }
+        });
+      }
+    }
   }
 
-  /**
-   * Log debug information (development only)
-   */
   debug(...args: any[]): void {
     if (this.isDev) {
-      console.debug(...args);
+      console.debug(...this.scrub(args));
     }
   }
 
-  /**
-   * Conditional logging based on condition
-   */
   logIf(condition: boolean, ...args: any[]): void {
     if (condition && this.isDev) {
-      console.log(...args);
+      console.log(...this.scrub(args));
     }
   }
 
-  /**
-   * Group logs together (development only)
-   */
   group(label: string, callback: () => void): void {
     if (this.isDev) {
       console.group(label);
@@ -88,9 +100,6 @@ class Logger {
     }
   }
 
-  /**
-   * Performance timing
-   */
   time(label: string): void {
     if (this.isDev) {
       console.time(label);
@@ -105,3 +114,4 @@ class Logger {
 }
 
 export const logger = new Logger();
+

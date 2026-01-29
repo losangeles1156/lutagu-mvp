@@ -8,6 +8,7 @@ import { useUIStateMachine, initializeUIState, isCollapsedState, canEnterExplore
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useUIStore } from '@/stores/uiStore';
 import { Sparkles, Map as MapIcon, MessageSquare } from 'lucide-react';
+import { ResizableLayout } from '@/components/layout/v2/ResizableLayout';
 
 // Lazy load heavy UI state components to reduce TBT
 const LoginPanel = dynamic(
@@ -111,6 +112,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
 
   // 渲染全螢幕對話
   if (uiState === 'fullscreen') {
+    if (typeof window !== 'undefined') console.log('[MainLayout] Rendering fullscreen chatPanel');
     return (
       <div className="fixed inset-0 z-[9998] bg-white isolate pointer-events-auto">
         {chatPanel}
@@ -167,46 +169,37 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
           </div>
         )}
 
-        {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden relative">
-          {/* Map Panel (Left) */}
-          <div className="h-full overflow-hidden transition-all duration-300 ease-out flex-1">
-            {mapPanel}
-
-            {/* Floating Chat Button */}
-            {!isCollapsedState(uiState) && (
-              <button
-                onClick={handleChatClose}
-                className="absolute bottom-6 right-6 z-10 px-6 py-4
-                  bg-indigo-600 text-white rounded-2xl shadow-2xl
-                  flex items-center gap-2 font-bold text-sm
-                  active:scale-95 transition-all min-h-[56px]"
-              >
-                <Sparkles size={20} />
-                <span>{tChat('aiName')}</span>
-              </button>
-            )}
-          </div>
-
-          {/* Chat Collapsed Panel (Right) */}
-          <AnimatePresence>
-            {isCollapsedState(uiState) && (
-              <motion.div
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: 20, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="h-full border-l border-slate-200 shadow-lg"
-                style={{ width: DESKTOP_COLLAPSED_WIDTH, minWidth: '280px', maxWidth: '400px' }}
-              >
-                <ChatCollapsedPanel
-                  onExpand={handleChatExpand}
-                  onClose={handleChatClose}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* [RWD] Resizable Layout Engine */}
+        <ResizableLayout
+          isMobile={false}
+          rightPanelVisible={isCollapsedState(uiState)}
+          leftPanel={
+            <div className="h-full w-full relative">
+              {mapPanel}
+              {/* Floating Chat Button (Only when chat is closed) */}
+              {!isCollapsedState(uiState) && (
+                <button
+                  onClick={handleChatClose}
+                  className="absolute bottom-6 right-6 z-10 px-6 py-4
+                    bg-indigo-600 text-white rounded-2xl shadow-2xl
+                    flex items-center gap-2 font-bold text-sm
+                    active:scale-95 transition-all min-h-[56px]"
+                >
+                  <Sparkles size={20} />
+                  <span>{tChat('aiName')}</span>
+                </button>
+              )}
+            </div>
+          }
+          rightPanel={
+            <div className="h-full w-full">
+              <ChatCollapsedPanel
+                onExpand={handleChatExpand}
+                onClose={handleChatClose}
+              />
+            </div>
+          }
+        />
 
         {/* Bottom Bar */}
         {bottomBar && (

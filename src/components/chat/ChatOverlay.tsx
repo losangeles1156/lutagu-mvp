@@ -275,7 +275,8 @@ export function ChatOverlay() {
                 setChatOpen(false);
             }
         } else if (action.type === 'trip') {
-            const content = `✅ ${tChat('tripAdded', { label: action.label })}`;
+            const labelStr = typeof action.label === 'string' ? action.label : (action.label as any)[locale] || action.label['en'] || 'Trip';
+            const content = `✅ ${tChat('tripAdded', { label: labelStr })}`;
             if (isDemoMode) {
                 addStoreMessage({ role: 'assistant', content });
             } else {
@@ -354,7 +355,8 @@ export function ChatOverlay() {
                 });
                 window.open(safeUrl, '_blank', 'noopener,noreferrer');
             } else {
-                const content = tChat('openingTimetable', { label: action.label });
+                const labelStr = typeof action.label === 'string' ? action.label : (action.label as any)[locale] || action.label['en'] || 'Transit';
+                const content = tChat('openingTimetable', { label: labelStr });
                 if (isDemoMode) {
                     addStoreMessage({ role: 'assistant', content });
                 } else {
@@ -508,15 +510,18 @@ export function ChatOverlay() {
                             {/* Action Cards / Suggestions */}
                             {msg.actions && msg.actions.length > 0 && (
                                 <div className="mt-4 flex flex-wrap gap-2">
-                                    {msg.actions.map((action: ChatAction, i: number) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => handleAction(action)}
-                                            className="px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-full text-xs font-bold hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm"
-                                        >
-                                            {action.label}
-                                        </button>
-                                    ))}
+                                    {msg.actions.map((action: ChatAction, i: number) => {
+                                        const labelStr = typeof action.label === 'string' ? action.label : (action.label as any)[locale] || action.label['en'] || 'Action';
+                                        return (
+                                            <button
+                                                key={i}
+                                                onClick={() => handleAction(action)}
+                                                className="px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-full text-xs font-bold hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm"
+                                            >
+                                                {labelStr}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
 

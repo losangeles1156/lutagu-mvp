@@ -4,6 +4,7 @@ import { STATION_LINES, getStationIdVariants, guessPhysicalOdptStationIds, resol
 import { L1_DNA_Data, L3Facility, StationUIProfile, LocaleString, ActionCard } from '@/lib/types/stationStandard';
 import { getAllIdVariants, extractStationNameSlug } from '@/lib/nodes/nodeIdNormalizer';
 import { ExpertKnowledge } from '../../types/lutagu_l4';
+import { getNodeDisplayTier, MapDisplayTier, ZOOM_THRESHOLD } from '../constants/MapDisplayPolicy';
 
 // Helper to extract locale string
 function getLoc(obj: any) {
@@ -240,41 +241,17 @@ export function enrichNodeData(n: any) {
 
     // Custom Map Design Overrides & Tier Assignment (MVP Hardcoded Phase)
     let mapDesign = undefined;
+    // Unified Tier Assignment: Prioritize DB value, fallback to MapDisplayPolicy
+    // Only use policy if DB value is missing or default (5) AND node is important
+    let display_tier = n.display_tier;
+    if (!display_tier || display_tier === 5) {
+        const policyTier = getNodeDisplayTier(n.id);
+        if (policyTier < 5) display_tier = policyTier;
+    }
+
     let tier: 'major' | 'minor' | undefined = undefined;
-    let display_tier = n.display_tier || 5; // Default Tier 5
-
-    // Tier 1: Super Hubs (Always Visible)
-    // Precise ID Matching to avoid "TokyoMetro" false positives
-    // Checks for ".Name" or ":Name" or just starts with specific logic if needed
-    const checkId = (str: string) => n.id.includes(`.${str}`) || n.id.endsWith(`:${str}`);
-
-    if (
-        checkId('Ueno') ||
-        checkId('Tokyo') ||
-        checkId('Ikebukuro') ||
-        checkId('Shinjuku') ||
-        checkId('Shibuya') ||
-        checkId('Shinagawa') ||
-        checkId('Akihabara') ||
-        n.id.includes('NaritaAirport') ||
-        n.id.includes('HanedaAirport')
-    ) {
-        tier = 'major';
-        display_tier = 1;
-    }
-
-    // Tier 2: Major Hubs (Zoom >= 12)
-    if (
-        n.id.includes('Ginza') ||
-        n.id.includes('Asakusa') ||
-        n.id.includes('Otemachi') ||
-        n.id.includes('Oshiage') ||
-        n.id.includes('Shimbashi') ||
-        n.id.includes('Nihombashi')
-    ) {
-        if (display_tier > 2) display_tier = 2; // Only promote if not already T1
-        tier = 'major';
-    }
+    if (display_tier <= 2) tier = 'major';
+    else if (display_tier === 3) tier = 'minor';
 
     // Design Overrides
     if (n.id.includes('Ueno')) {
@@ -294,8 +271,8 @@ export function enrichNodeData(n: any) {
         name,
         is_hub: isHub,
         tier,
-        display_tier, // Explicitly return the calculated tier
-        min_zoom_level: display_tier === 1 ? 0 : display_tier === 2 ? 12 : display_tier === 3 ? 14 : display_tier === 4 ? 15 : 16,
+        display_tier,
+        min_zoom_level: ZOOM_THRESHOLD[display_tier as keyof typeof ZOOM_THRESHOLD] || 15,
         mapDesign
     };
 }

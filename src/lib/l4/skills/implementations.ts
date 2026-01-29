@@ -61,6 +61,14 @@ abstract class BaseSkill implements DeepResearchSkill {
     }
 
     abstract execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null>;
+
+    // GEM-Logic
+    gemCapabilities: string[] = [];
+
+    setGemCapabilities(caps: string[]) {
+        this.gemCapabilities = caps;
+        return this; // fluent
+    }
 }
 
 // ------------------------------------------------------------------
@@ -69,6 +77,7 @@ abstract class BaseSkill implements DeepResearchSkill {
 export class ExitStrategistSkill extends BaseSkill {
     constructor() {
         super(EXIT_STRATEGIST_SKILL.name, 95, EXIT_STRATEGIST_SKILL.keywords, EXIT_STRATEGIST_SCHEMA); // High Priority
+        this.setGemCapabilities(['TRANSFER', 'EXIT', 'HUB']);
     }
 
     calculateRelevance(input: string, context: RequestContext): number {
@@ -197,6 +206,7 @@ Output in Traditional Chinese (Taiwan).`,
 export class MedicalSkill extends BaseSkill {
     constructor() {
         super(MEDICAL_SKILL.name, 110, MEDICAL_SKILL.keywords, MEDICAL_SCHEMA); // Highest Priority (Emergency)
+        this.setGemCapabilities(['EMERGENCY', 'HOSPITAL']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
@@ -241,9 +251,9 @@ Output in Traditional Chinese.`,
 export class FareRulesSkill extends BaseSkill {
     constructor() {
         super(FARE_RULES_SKILL.name, 100, FARE_RULES_SKILL.keywords, FARE_RULES_SCHEMA, {
-            timeoutMs: 12000,
             cacheTtlMs: 5 * 60 * 1000
         });
+        this.setGemCapabilities(['FARE', 'TICKET', 'COMMUTE']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
@@ -288,6 +298,7 @@ export class AccessibilitySkill extends BaseSkill {
             timeoutMs: 6000,
             cacheTtlMs: 3 * 60 * 1000
         });
+        this.setGemCapabilities(['STROLLER', 'WHEELCHAIR', 'ACCESSIBILITY']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
@@ -331,6 +342,7 @@ export class LuggageSkill extends BaseSkill {
             timeoutMs: 6000,
             cacheTtlMs: 60 * 1000
         });
+        this.setGemCapabilities(['LUGGAGE', 'LOCKER']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {

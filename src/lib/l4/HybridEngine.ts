@@ -10,7 +10,7 @@
 
 import { templateEngine } from './intent/TemplateEngine';
 import { algorithmProvider } from './algorithms/AlgorithmProvider';
-import { extractRouteEndpointsFromText, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion } from './assistantEngine';
+import { extractRouteEndpointsFromText, extractDestinationOnlyIntent, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion } from './assistantEngine';
 import { NodeContext, NodeScope } from './types/NodeContext';
 import { TagLoader } from './TagLoader';
 import { DynamicContextService } from './DynamicContextService';
@@ -41,6 +41,8 @@ import {
     SpatialReasonerSkill
 } from './skills/implementations';
 import { L1NodeProfile } from './types/L1Profile';
+import { AffiliateContextManager } from '@/lib/commerce/AffiliateContextManager';
+import { SignalCollector } from '@/lib/analytics/SignalCollector';
 
 export interface HybridResponse {
     source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge' | 'l2_disruption';
@@ -50,6 +52,7 @@ export interface HybridResponse {
     confidence: number;
     reasoning?: string;
     reasoningLog?: string[];
+    commercialActions?: any[]; // [Phase 14] Affiliate Links
 }
 
 export interface RequestContext {
@@ -190,6 +193,70 @@ export class HybridEngine {
         onProgress?: (step: string) => void;
         onToken?: (delta: string) => void;
     }): Promise<HybridResponse | null> {
+        const timeoutMs = 25000;
+        const timeoutPromise = new Promise<null>((_, reject) =>
+            setTimeout(() => reject(new Error('AI_TIMEOUT')), timeoutMs)
+        );
+
+        try {
+            return await Promise.race([
+                this.executeProcessRequest(params),
+                timeoutPromise
+            ]);
+        } catch (error: any) {
+            console.error('[HybridEngine] Request failed or timed out:', error);
+
+            // LOGGING: Write critical error to file for diagnosis
+            try {
+                const fs = require('fs');
+                const os = require('os');
+                const path = require('path');
+                const logPath = path.join(os.tmpdir(), 'api_crash.log');
+                const logMsg = `\n[${new Date().toISOString()}] HybridEngine Exception:\n${error.message}\n${error.stack}\n-------------------\n`;
+                fs.appendFileSync(logPath, logMsg);
+                console.log(`[HybridEngine] Log written to ${logPath}`);
+            } catch (fsError) {
+                console.error('Failed to write info to api_crash.log', fsError);
+            }
+
+            // Fallback: Return L1 Summary if possible
+            const locale = (params.locale || 'zh-TW') as SupportedLocale;
+            const nodeContext = await this.resolveNodeContext(params.text, locale, params.context);
+
+            if (nodeContext.primaryNodeId) {
+                const summary = await this.getL1Summary(nodeContext.primaryNodeId, locale);
+                return {
+                    source: 'template',
+                    type: 'text',
+                    content: summary,
+                    confidence: 0.5,
+                    reasoning: error.message === 'AI_TIMEOUT' ? 'Timeout fallback' : 'Error fallback'
+                };
+            }
+
+            const fallbackMessages: Record<string, string> = {
+                'zh-TW': '系統暫時忙碌中，請稍後再試。',
+                'ja': '現在システムが混み合っております。お時間を置いて再度お試しください。',
+                'en': 'System is busy, please try again later.'
+            };
+
+            return {
+                source: 'template',
+                type: 'text',
+                content: (fallbackMessages[locale] || fallbackMessages['zh-TW']) + `\n\n[DEBUG] Error: ${error.message}`,
+                confidence: 0.1,
+                reasoning: `Safe fallback: ${error.message}`
+            };
+        }
+    }
+
+    private async executeProcessRequest(params: {
+        text: string;
+        locale: string;
+        context?: RequestContext;
+        onProgress?: (step: string) => void;
+        onToken?: (delta: string) => void;
+    }): Promise<HybridResponse | null> {
         const startTime = Date.now();
         const { text, locale: inputLocale, context } = params;
         const locale = (inputLocale || 'zh-TW') as SupportedLocale;
@@ -198,20 +265,58 @@ export class HybridEngine {
         const safeText = typeof text === 'string' && text.length > 500 ? `${text.slice(0, 500)}…` : text;
         logs.push(`[Input] Text: "${safeText}", Locale: ${locale}`);
 
-        const finalize = (res: HybridResponse): HybridResponse => {
-            const mergedLogs = [...logs, ...((res.reasoningLog || []).filter(Boolean))];
-            const fused = this.applyResponseFuse({
+        const finalize = async (res: HybridResponse): Promise<HybridResponse> => {
+            // [Phase 14] Commercial Decorator Pattern
+            // Analyze context and user intent to inject High-Value Affiliate Links
+            // Kotozna Style: "Recommend, don't execute"
+            // This is done BEFORE fusing logs so it's included in client response
+            const commercialActions = AffiliateContextManager.matchContext(context || {}, text);
+            if (commercialActions.length > 0) {
+                logs.push(`[Commerce] Injected ${commercialActions.length} affiliate cards (Intent: ${text.slice(0, 20)}...)`);
+                // Log Impression
+                SignalCollector.collectCommerceSignal({
+                    type: 'IMPRESSION',
+                    actions: commercialActions.map(a => a.id),
+                    stationId: context?.currentStation
+                });
+            }
+
+            // Inject commercialActions into res if not present
+            const resWithCommerce = {
+                ...res,
+                commercialActions: res.commercialActions || commercialActions
+            };
+
+            const mergedLogs = [...logs, ...((resWithCommerce.reasoningLog || []).filter(Boolean))];
+            const fused = await this.applyResponseFuse({
                 text,
                 locale,
                 context,
-                response: { ...res, reasoningLog: undefined },
+                response: { ...resWithCommerce, reasoningLog: undefined },
                 logs: mergedLogs
             });
             metricsCollector.recordRequest(fused.source, Date.now() - startTime);
-            feedbackStore.logRequest({ text, source: fused.source, timestamp: startTime });
+            feedbackStore.logRequest({
+                text,
+                source: fused.source,
+                timestamp: startTime,
+                contextNodeId: context?.currentStation
+            });
             if (params.onToken) params.onToken(fused.content);
-            return { ...fused, reasoningLog: mergedLogs };
+
+            // Inject contextNodeId into client response for stateless feedback loop
+            const clientResponse: HybridResponse = {
+                ...fused,
+                data: {
+                    ...(fused.data || {}),
+                    contextNodeId: context?.currentStation
+                },
+                reasoningLog: mergedLogs,
+                commercialActions: resWithCommerce.commercialActions // Ensure it passes through Fuse
+            };
+            return clientResponse;
         };
+
 
         try {
             // 0. Anomaly Detection
@@ -260,7 +365,7 @@ export class HybridEngine {
                 try {
                     const skillRes = await executeSkill(dispatchResult.skill, text, dispatchContext);
                     if (skillRes.result) {
-                        return finalize(skillRes.result);
+                        return await finalize(skillRes.result);
                     }
                 } catch (e) {
                     logs.push(`[SkillDispatch] Execution failed: ${e}`);
@@ -277,10 +382,10 @@ export class HybridEngine {
             const l2Status = (context?.strategyContext as any)?.l2Status;
             const isSevere = this.isSevereDisruption(l2Status);
 
-            const l2DisruptionEarly = this.tryBuildL2DisruptionResponse(text, locale, context, isSevere);
+            const l2DisruptionEarly = await this.tryBuildL2DisruptionResponse(text, locale, context, isSevere);
             if (l2DisruptionEarly) {
                 logs.push(`[L2] Live disruption detected (Severe=${isSevere}), returning disruption-first guidance`);
-                return finalize(l2DisruptionEarly);
+                return await finalize(l2DisruptionEarly);
             }
 
             const routeEndpoints = extractRouteEndpointsFromText(text);
@@ -288,8 +393,29 @@ export class HybridEngine {
                 logs.push('[L2] Route endpoints detected, prefer algorithm routes');
                 const routeMatch = await this.checkAlgorithms(text, locale, context);
                 if (routeMatch && (routeMatch.type === 'route' || routeMatch.type === 'action')) {
-                    return finalize(routeMatch);
+                    return await finalize(routeMatch);
                 }
+            }
+
+            // Handle "destination-only" requests (e.g., "我要去成田機場" without origin)
+            const destOnlyIntent = extractDestinationOnlyIntent(text);
+            if (destOnlyIntent && !routeEndpoints) {
+                logs.push('[Route] Destination-only intent detected, prompting for origin');
+                const destName = destOnlyIntent.destinationText || destOnlyIntent.destinationIds[0]?.split('.').pop() || '目的地';
+
+                const promptMessages: Record<string, string> = {
+                    'zh-TW': `想去 ${destName}！請告訴我您目前在哪一站，或在地圖上選擇出發站，我就能為您規劃最佳路線。\n\n💡 提示：您也可以開啟定位，讓我自動偵測最近的車站。`,
+                    'ja': `${destName}へ行きたいですね！現在地を教えていただくか、地図で出発駅を選択してください。最適なルートをご案内します。\n\n💡 ヒント：位置情報をオンにすると、最寄り駅を自動検出できます。`,
+                    'en': `Want to go to ${destName}! Please tell me your current station, or select a departure station on the map, and I'll plan the best route for you.\n\n💡 Tip: You can also enable location services to auto-detect the nearest station.`
+                };
+
+                return await finalize({
+                    source: 'template',
+                    type: 'text',
+                    content: promptMessages[locale] || promptMessages['zh-TW'],
+                    confidence: 0.9,
+                    reasoning: 'Destination-only request - prompting for origin'
+                });
             }
 
             // 1. Legacy Regex Skill (Fast Path)
@@ -299,7 +425,7 @@ export class HybridEngine {
                 const { result: skillResult, meta } = await executeSkill(matchedSkill, text, context || {});
                 logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
                 if (skillResult) {
-                    return finalize(skillResult);
+                    return await finalize(skillResult);
                 }
             }
 
@@ -330,7 +456,7 @@ export class HybridEngine {
                                         ...skillResult,
                                         reasoningLog: [`Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
                                     };
-                                    return finalize(withAgentLogic);
+                                    return await finalize(withAgentLogic);
                                 }
                             }
                         }
@@ -398,7 +524,7 @@ export class HybridEngine {
 
             // 7. Post-processing and Metrics
             if (bestMatch) {
-                return finalize(bestMatch);
+                return await finalize(bestMatch);
             }
 
             // 8. Fallback (LLM Orchestrator)
@@ -441,9 +567,9 @@ export class HybridEngine {
 
             const systemPrompt = this.buildSystemPrompt(locale);
             const userPrompt = this.buildUserPrompt(text, { ...context, wisdomSummary: activeKnowledgeSnippet } as any);
+            const hasL2Issues = this.hasL2Issues(l2Status);
 
             let llmResponse: string | null = null;
-            const hasL2Issues = this.hasL2Issues(l2Status);
             if (params.onToken && !hasL2Issues) {
                 try {
                     const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
@@ -485,7 +611,7 @@ export class HybridEngine {
             }
 
             if (llmResponse) {
-                return finalize({
+                return await finalize({
                     source: 'llm',
                     type: 'text',
                     content: llmResponse,
@@ -495,25 +621,31 @@ export class HybridEngine {
             }
 
         } catch (error) {
-            console.error('[HybridEngine] Process Request failed:', error);
-            logs.push(`[Error] ${error}`);
+            throw error;
         }
-
-        // Final safe fallback
-        const fallbackMessages: Record<string, string> = {
-            'zh-TW': '系統暫時忙碌中，請稍後再試。',
-            'ja': '現在システムが混み合っております。お時間を置いて再度お試しください。',
-            'en': 'System is busy, please try again later.'
-        };
-
-        return {
-            source: 'template',
-            type: 'text',
-            content: fallbackMessages[locale] || fallbackMessages['zh-TW'],
-            confidence: 0.1,
-            reasoningLog: logs
-        };
+        return null;
     }
+
+
+    private async getL1Summary(nodeId: string, locale: string): Promise<string> {
+        try {
+            const profile = await TagLoader.loadProfile(nodeId);
+            if (!profile) return 'AI 服務暫時繁忙';
+
+            const identity = (profile.core.identity || []).join('、');
+            const capabilities = (profile.intent.capabilities || []).join('、');
+
+            if (locale.startsWith('ja')) {
+                return `【基本情報】${identity}。利用可能な設備：${capabilities}。現在AIサービスが混み合っているため、基本情報のみ表示しています。`;
+            } else if (locale.startsWith('en')) {
+                return `[Basic Info] ${identity}. Available facilities: ${capabilities}. AI service is currently busy, showing basic info only.`;
+            }
+            return `【基本資訊】${identity}。提供設施：${capabilities}。目前 AI 服務繁忙，僅顯示基本站點資訊。`;
+        } catch (e) {
+            return 'AI 服務暫時繁忙';
+        }
+    }
+
 
     private async checkPOITags(text: string, locale: SupportedLocale, context?: RequestContext): Promise<HybridResponse | null> {
         const poiKeywords = ['吃', '餐廳', '食物', '飯', '午餐', '晚餐', '日本料理', '拉麵', '壽司', '咖哩', 'cafe', '咖啡', '咖啡廳', '下午茶', '買', '購物', '商店', '商場', '藥妝', '電器', '玩', '景點', '公園', '博物館', '推薦', '好店', '好玩', '推薦我'];
@@ -661,70 +793,12 @@ export class HybridEngine {
                             }
 
                             if (l2Status && this.hasL2Issues(l2Status)) {
-                                // Fallback coordinates for major hubs
-                                const FALLBACK_COORDS: Record<string, { lat: number, lon: number }> = {
-                                    'Tokyo': { lat: 35.6812, lon: 139.7671 }, '東京': { lat: 35.6812, lon: 139.7671 },
-                                    'Ueno': { lat: 35.7141, lon: 139.7774 }, '上野': { lat: 35.7141, lon: 139.7774 },
-                                    'Shinjuku': { lat: 35.6896, lon: 139.7006 }, '新宿': { lat: 35.6896, lon: 139.7006 },
-                                    'Shibuya': { lat: 35.6580, lon: 139.7016 }, '渋谷': { lat: 35.6580, lon: 139.7016 },
-                                    'Ikebukuro': { lat: 35.7295, lon: 139.7109 }, '池袋': { lat: 35.7295, lon: 139.7109 },
-                                    'Shinagawa': { lat: 35.6284, lon: 139.7387 }, '品川': { lat: 35.6284, lon: 139.7387 },
-                                    'Maihama': { lat: 35.6366, lon: 139.8831 }, '舞浜': { lat: 35.6366, lon: 139.8831 }
-                                };
-
-                                let originCoord = this.getStationCoord(originId);
-                                if (!originCoord && FALLBACK_COORDS[originLabel]) originCoord = FALLBACK_COORDS[originLabel];
-
-                                let destCoord = this.getStationCoord(destinationId);
-                                if (!destCoord && FALLBACK_COORDS[destLabel]) destCoord = FALLBACK_COORDS[destLabel];
-
-                                const originParam = originCoord ? `${originCoord.lat},${originCoord.lon}` : originLabel;
-                                const destParam = destCoord ? `${destCoord.lat},${destCoord.lon}` : destLabel;
-
-                                const gmapsTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=transit`;
-                                const gmapsDrivingUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=driving`;
-                                const gmapsBikeUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=bicycling`;
-
-                                const distanceKm = originCoord && destCoord
-                                    ? this.getDistanceFromLatLonInKm(originCoord.lat, originCoord.lon, destCoord.lat, destCoord.lon)
-                                    : 5.0; // Default 5km to ensure ETA generation
-
-                                const taxiEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'taxi') : null;
-                                const bikeEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'bike') : null;
-                                const etaSuffixTaxi = taxiEta ? this.formatEtaLabel(taxiEta.min, taxiEta.max, locale) : '';
-                                const etaSuffixBike = bikeEta ? this.formatEtaLabel(bikeEta.min, bikeEta.max, locale) : '';
-
-                                const busPrompt = locale.startsWith('ja')
-                                    ? `都営バスで ${originLabel} → ${destLabel} の行き方を教えて（最短・迷いにくい）`
-                                    : locale.startsWith('en')
-                                        ? `Find a Toei bus option from ${originLabel} to ${destLabel} (simple + reliable)`
-                                        : `幫我找都營公車：${originLabel} → ${destLabel}（最簡單、最不容易迷路）`;
-                                const preferBusOverBike = typeof distanceKm === 'number' ? distanceKm >= 1.5 : false;
-
-                                const content = locale.startsWith('ja')
-                                    ? `いま運行が乱れているため、この区間の「乗れる経路」だけに絞るとルートが見つかりませんでした。\n\n**おすすめの行動**：**Google Maps（公共交通）** で地下鉄／バスの迂回を確認してください。`
-                                    : locale.startsWith('en')
-                                        ? `Live disruption is affecting service, so I couldn't find a usable route for this segment right now.\n\n**Recommendation**: Open **Google Maps (Transit)** to follow a subway/bus detour.`
-                                        : `因為目前有即時運行異常，我把「不能搭乘的路線」排除後，這段暫時找不到可用路線。\n\n**唯一建議**：先開 **Google Maps（大眾運輸）** 看地鐵／公車的繞行最穩。`;
-
-                                return {
-                                    source: 'algorithm',
-                                    type: 'action',
-                                    content,
-                                    data: {
-                                        l2_summary: this.summarizeL2Status(l2Status),
-                                        l2_status: l2Status,
-                                        actions: [
-                                            { type: 'discovery', label: locale.startsWith('ja') ? 'A→B 迂回（Google Maps）' : locale.startsWith('en') ? 'A→B detour (Google Maps)' : 'A→B 迂回（Google Maps）', target: gmapsTransitUrl, metadata: { category: 'navigation', origin: originLabel, destination: destLabel, distance_km: distanceKm ?? undefined } },
-                                            { type: 'taxi', label: locale.startsWith('ja') ? `タクシー（急ぐ場合）${etaSuffixTaxi}` : locale.startsWith('en') ? `Taxi (if urgent)${etaSuffixTaxi}` : `計程車（趕時間）${etaSuffixTaxi}`, target: getPartnerUrl('go_taxi') || gmapsDrivingUrl, metadata: { category: 'mobility', partner_id: 'go_taxi', eta_min: taxiEta?.min, eta_max: taxiEta?.max, route_url: gmapsDrivingUrl } },
-                                            preferBusOverBike
-                                                ? { type: 'transit', label: locale.startsWith('ja') ? '都営バス案内（アプリ内）' : locale.startsWith('en') ? 'Toei bus option (in-app)' : '都營公車方案（App 內）', target: `chat:${busPrompt}`, metadata: { category: 'transit', partner_id: 'toei_bus', origin: originLabel, destination: destLabel, distance_km: distanceKm ?? undefined } }
-                                                : { type: 'bike', label: locale.startsWith('ja') ? `シェアサイクル（LUUP）${etaSuffixBike}` : locale.startsWith('en') ? `Shared bike (LUUP)${etaSuffixBike}` : `共享單車（LUUP）${etaSuffixBike}`, target: getPartnerUrl('luup') || gmapsBikeUrl, metadata: { category: 'mobility', partner_id: 'luup', eta_min: bikeEta?.min, eta_max: bikeEta?.max, route_url: gmapsBikeUrl } }
-                                        ]
-                                    },
-                                    confidence: 0.88,
-                                    reasoning: 'No usable route after filtering suspended lines.'
-                                };
+                                // Fallback: Use centralized L2 Disruption Builder
+                                const fallbackResponse = await this.tryBuildL2DisruptionResponse(text, locale, context, true);
+                                if (fallbackResponse) {
+                                    // Override type to action to ensure it renders correctly
+                                    return { ...fallbackResponse, source: 'algorithm', type: 'action' };
+                                }
                             }
                         } catch (e) { }
                     }
@@ -895,13 +969,13 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
         }
     }
 
-    private applyResponseFuse(params: {
+    private async applyResponseFuse(params: {
         text: string;
         locale: SupportedLocale;
         context?: RequestContext;
         response: HybridResponse;
         logs: string[];
-    }): HybridResponse {
+    }): Promise<HybridResponse> {
         const { text, locale, context, response, logs } = params;
         const l2 = (context?.strategyContext as any)?.l2Status;
         if (!this.hasL2Issues(l2)) return response;
@@ -912,7 +986,7 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
         const mentionsDisruption = this.textMentionsDisruption(content);
 
         if (looksTruncated || !mentionsDisruption) {
-            const l2Fallback = this.tryBuildL2DisruptionResponse(text, locale, context, true);
+            const l2Fallback = await this.tryBuildL2DisruptionResponse(text, locale, context, true);
             if (l2Fallback) {
                 logs.push(`[Fuse] disruption_fallback: truncated=${looksTruncated} mentions_disruption=${mentionsDisruption}`);
                 return l2Fallback;
@@ -1049,7 +1123,7 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
         return null;
     }
 
-    private tryBuildL2DisruptionResponse(text: string, locale: SupportedLocale, context?: RequestContext, forceTrigger: boolean = false): HybridResponse | null {
+    private async tryBuildL2DisruptionResponse(text: string, locale: SupportedLocale, context?: RequestContext, forceTrigger: boolean = false): Promise<HybridResponse | null> {
         if (!forceTrigger && !this.isStatusQuery(text)) return null;
         const strategy = (context?.strategyContext as any) || null;
         const l2 = strategy?.l2Status;
@@ -1111,11 +1185,21 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
             };
         }
 
+        const trustLevel = (l2 as any).trust_level;
+        const confidence = Number((l2 as any).confidence || 0);
+        let trustBadge = '';
+        if (trustLevel === 'verified' && confidence >= 0.9) {
+            trustBadge = locale.startsWith('ja') ? '【✅公式確認済】' : locale.startsWith('en') ? '[✅Verified] ' : '【✅公式已確認】';
+        } else if (trustLevel === 'discrepancy') {
+            trustBadge = locale.startsWith('ja') ? '【⚠️情報不一致・駅で確認推奨】' : locale.startsWith('en') ? '[⚠️Discrepancy] ' : '【⚠️資訊不一致・建議確認站內告示】';
+        }
+
         const base = locale.startsWith('ja')
-            ? `${nodeName ? `${nodeName}周辺で` : ''}現在、運行に乱れがあります。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`
+            ? `${trustBadge}${nodeName ? `${nodeName}周辺で` : ''}現在、運行に乱れがあります。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`
             : locale.startsWith('en')
-                ? `${nodeName ? `Around ${nodeName}, ` : ''}there is a live service disruption. ${causeText ? `Cause: ${causeText}. ` : ''}${affected ? `Affected: ${affected}. ` : ''}`
-                : `${nodeName ? `${nodeName}附近` : ''}目前出現即時運行異常。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`;
+                ? `${trustBadge}${nodeName ? `Around ${nodeName}, ` : ''}there is a live service disruption. ${causeText ? `Cause: ${causeText}. ` : ''}${affected ? `Affected: ${affected}. ` : ''}`
+                : `${trustBadge}${nodeName ? `${nodeName}附近` : ''}目前出現即時運行異常。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`;
+
 
         const delayLine = delay > 0
             ? (locale.startsWith('ja')
@@ -1205,24 +1289,19 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
         const originIdForCoord = endpoints?.originIds?.[0] || context?.currentStation || '';
         const destIdForCoord = endpoints?.destinationIds?.[0] || '';
 
-        // Fallback coordinates for major hubs to ensure ETA calculation in critical scenarios
-        const FALLBACK_COORDS: Record<string, { lat: number, lon: number }> = {
-            'Tokyo': { lat: 35.6812, lon: 139.7671 }, '東京': { lat: 35.6812, lon: 139.7671 },
-            'Ueno': { lat: 35.7141, lon: 139.7774 }, '上野': { lat: 35.7141, lon: 139.7774 },
-            'Shinjuku': { lat: 35.6896, lon: 139.7006 }, '新宿': { lat: 35.6896, lon: 139.7006 },
-            'Shibuya': { lat: 35.6580, lon: 139.7016 }, '渋谷': { lat: 35.6580, lon: 139.7016 },
-            'Ikebukuro': { lat: 35.7295, lon: 139.7109 }, '池袋': { lat: 35.7295, lon: 139.7109 },
-            'Shinagawa': { lat: 35.6284, lon: 139.7387 }, '品川': { lat: 35.6284, lon: 139.7387 },
-            'Maihama': { lat: 35.6366, lon: 139.8831 }, '舞浜': { lat: 35.6366, lon: 139.8831 } // Disney
-        };
+        const hasRoutePair = Boolean(destLabel);
 
+        // Helper to normalize DataMux (lng) to Internal (lon)
+        const normalizeCoord = (c: { lat: number, lng: number } | null) => c ? { lat: c.lat, lon: c.lng } : null;
+
+        // Use DataMux to fetch coordinates robustly (Database -> Cache -> Fallback)
         let originCoord = this.getStationCoord(originIdForCoord);
-        if (!originCoord && FALLBACK_COORDS[originLabel]) originCoord = FALLBACK_COORDS[originLabel];
+        if (!originCoord) originCoord = normalizeCoord(await DataMux.getCoordinates(originIdForCoord));
+        if (!originCoord && !hasRoutePair) originCoord = normalizeCoord(await DataMux.getCoordinates('odpt.Station:JR-East.Yamanote.Tokyo'));
 
         let destCoord = this.getStationCoord(destIdForCoord);
-        if (!destCoord && FALLBACK_COORDS[destLabel]) destCoord = FALLBACK_COORDS[destLabel];
-
-        const hasRoutePair = Boolean(destLabel);
+        if (!destCoord) destCoord = normalizeCoord(await DataMux.getCoordinates(destIdForCoord));
+        if (!destCoord && !hasRoutePair) destCoord = normalizeCoord(await DataMux.getCoordinates('odpt.Station:JR-East.Yamanote.Tokyo'));
 
         const originParam = originCoord ? `${originCoord.lat},${originCoord.lon}` : originLabel;
         const destParam = destCoord ? `${destCoord.lat},${destCoord.lon}` : destLabel;

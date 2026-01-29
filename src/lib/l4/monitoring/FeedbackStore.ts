@@ -1,10 +1,13 @@
 
+import { weightAdjuster } from './WeightAdjuster';
+
 export interface FeedbackItem {
     text: string;
     source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge' | 'l2_disruption';
     timestamp: number;
     userFeedback?: 'positive' | 'negative';
     missedIntent?: string;
+    contextNodeId?: string; // e.g. "odpt:Station:..."
 }
 
 class FeedbackStore {
@@ -27,11 +30,23 @@ class FeedbackStore {
         return this.logs;
     }
 
-    public recordUserFeedback(text: string, feedback: 'positive' | 'negative') {
+    public recordUserFeedback(text: string, feedback: 'positive' | 'negative', explicitContextId?: string) {
         const item = this.logs.findLast(l => l.text === text);
+
+        // Log Update (Stateful logic - might be skipped in serverless)
         if (item) {
             item.userFeedback = feedback;
             console.log(`[FeedbackStore] User feedback for "${text}": ${feedback}`);
+        }
+
+        // Logic Loop (Stateless)
+        const targetNode = explicitContextId || item?.contextNodeId;
+        if (targetNode) {
+            if (feedback === 'positive') {
+                weightAdjuster.processSignal(targetNode, 'stay');
+            } else {
+                weightAdjuster.processSignal(targetNode, 'bounce');
+            }
         }
     }
 }

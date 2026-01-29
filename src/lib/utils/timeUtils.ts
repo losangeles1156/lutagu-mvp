@@ -40,11 +40,17 @@ export function getJSTTime() {
     const holidayName = JAPAN_HOLIDAYS_2026[dateKey];
     const isHoliday = !!holidayName || (jstDate.getDay() === 0 || jstDate.getDay() === 6);
 
+    // ODPT Calendar mapping logic (Centralized)
+    const calendarSelector = isHoliday
+        ? ['SaturdayHoliday', 'Holiday', 'Saturday']
+        : ['Weekday'];
+
     return {
         date: jstDate,
         dateKey,
         holidayName,
         isHoliday,
+        calendarSelector,
         hour: jstDate.getHours(),
         minute: jstDate.getMinutes(),
         second: jstDate.getSeconds()

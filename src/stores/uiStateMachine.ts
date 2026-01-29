@@ -108,6 +108,9 @@ export const useUIStateMachine = create<UIStateMachineState>()(
       // 狀態轉換 (帶動畫標記)
       transitionTo: (state: UIStateType) => {
         const currentState = get().uiState;
+        if (typeof window !== 'undefined') {
+          console.log(`[uiStateMachine] transition: ${currentState} -> ${state}`);
+        }
         const direction = getStatePriority(state) > getStatePriority(currentState)
           ? 'forward'
           : 'backward';
@@ -223,6 +226,9 @@ export const useUIStateMachine = create<UIStateMachineState>()(
     }
   )
 );
+if (typeof window !== 'undefined') {
+  (window as any).__LUTAGU_UI_STATE__ = useUIStateMachine;
+}
 
 // Helper function to check if in collapsed mode
 export function isCollapsedState(state: UIStateType): boolean {

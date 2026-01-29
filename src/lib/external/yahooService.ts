@@ -102,7 +102,11 @@ export const YAHOO_TO_ODPT_MAP: Record<string, string> = {
     '都営新宿線': 'odpt.Railway:Toei.Shinjuku',
     '都営大江戸線': 'odpt.Railway:Toei.Oedo',
 
-    // Others
+    // Airport Lines & Others
+    '京急線': 'odpt.Railway:Keikyu.Main',
+    '京成線': 'odpt.Railway:Keisei.Main',
+    '東京モノレール': 'odpt.Railway:TokyoMonorail.Haneda',
     'ゆりかもめ': 'odpt.Railway:Yurikamome.Yurikamome',
     'りんかい線': 'odpt.Railway:TWR.Rinkai'
+
 };

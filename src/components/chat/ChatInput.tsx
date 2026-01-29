@@ -49,6 +49,7 @@ export const ChatInput = memo(({
                     placeholder={placeholder || tChat('placeholder')}
                     maxLength={maxLength}
                     disabled={isDemoPlaying}
+                    data-testid="chat-input"
                     className="flex-1 px-4 py-3 bg-slate-50 border-0 rounded-xl focus:ring-2 focus:ring-indigo-500 font-bold"
                 />
                 <button

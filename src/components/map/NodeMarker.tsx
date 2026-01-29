@@ -9,6 +9,7 @@ import { Crown, MapPin, Train, Link2, Plane } from 'lucide-react';
 import { OPERATOR_COLORS, getPrimaryOperator, getOperatorAbbreviation, STATION_LINES } from '@/lib/constants/stationLines';
 import { getLocaleString } from '@/lib/utils/localeUtils';
 import { memo, useMemo, useCallback } from 'react';
+import { ZOOM_THRESHOLD, getNameOnly, getNodeDisplayManifest } from '@/lib/constants/MapDisplayPolicy';
 
 interface HubMemberInfo {
     member_id: string;
@@ -84,13 +85,10 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     const isExplicitHub = node.is_hub === true || node.parent_hub_id === null;
     const hasMembers = hubDetails && hubDetails.member_count > 0;
     const memberCount = hubDetails?.member_count || 0;
-    // const isMajor = node.tier === 'major' || isExplicitHub || hasMembers; // Deprecated logic?
-    // Use display_tier for importance if available
     const displayTier = node.display_tier || 5;
     const isMajor = displayTier <= 2; // Tier 1 & 2 act as "Major" visually
 
     // Coordinate Parsing - memoized (MUST be before early return)
-    // ... (coords logic unchanged) ...
     const coords = useMemo(() => {
         let lon = 0, lat = 0;
         if (Array.isArray((node as any).coordinates?.coordinates)) {
@@ -104,14 +102,11 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         return { lat, lon };
     }, [node]);
 
-
     // [UPDATED] Flexible airport detection for consolidated nodes
     const isAirport = useMemo(() => {
         return node.type === 'airport' ||
             node.id.includes('Airport') ||
-            // Fallback: Check if name includes airport keywords
             (node.name && (JSON.stringify(node.name).includes('Airport') || JSON.stringify(node.name).includes('空港')));
-        // AIRPORT_TERMINAL_IDS removed for brevity as logic simplified
     }, [node.id, node.type, node.name]);
 
     // [PERF] Memoize operator color lookup (MUST be before early return)
@@ -123,49 +118,19 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
     const primaryLineColor = useMemo(() => lines.length > 0 ? lines[0].color : null, [lines]);
 
     const baseColor = useMemo(() => {
-        // Priority 1: Selected
         if (isSelected) return '#111827';
-
-        // Priority 2: Node Brand Color (DB Driven)
         if (node.brand_color) return node.brand_color;
-
-        // Priority 3: Airport
-        if (isAirport) return '#3B82F6'; // Blue fallback if no brand_color
-
-        // Priority 4: Operator Color Fallback
+        if (isAirport) return '#3B82F6';
         const operatorColor = OPERATOR_COLORS[primaryOperator] || OPERATOR_COLORS['Metro'];
         return operatorColor;
     }, [isSelected, node.brand_color, isAirport, primaryOperator]);
 
-    const label = useMemo(() => getLocaleString(node.name, locale) || node.id, [node.name, node.id, locale]);
-
-    // [LOD] Progressive Label Disclosure - 漸進式標籤顯示策略
-    // New Logic based on SKILL.md Display Tiers
-    const showLabel = useMemo(() => {
-        if (showLabelOverride !== undefined) {
-            return isSelected || showLabelOverride || hasMembers || isExplicitHub; // Override always wins if set?
-            // Wait, logic says 'showLabelOverride' is from clusters?
-            // If clustered, maybe we force show label? Or force HIDE?
-            // Usually overrides are for forcing show.
-            return showLabelOverride;
+    const label = useMemo(() => {
+        if (displayTier <= 2 || isExplicitHub) {
+            return getNameOnly(node.name, locale);
         }
-
-        // Always show selected
-        if (isSelected) return true;
-
-        // Tier 1: Always Show
-        if (displayTier === 1) return true;
-
-        // Tier 2: Zoom 12+
-        if (displayTier === 2) return zoom >= 12;
-
-        // Tier 3: Zoom 14+
-        if (displayTier === 3) return zoom >= 14;
-
-        // Tier 4-5: Zoom 15+
-        return zoom >= 15;
-
-    }, [showLabelOverride, isSelected, displayTier, zoom, hasMembers, isExplicitHub]);
+        return getLocaleString(node.name, locale) || node.id;
+    }, [node.name, node.id, locale, displayTier, isExplicitHub]);
 
     // Transfer type badge styling (MUST be before early return)
     const transferBadge = useMemo(() => {
@@ -188,11 +153,17 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         }
     }, [onClick, node, setCurrentNode, setBottomSheetOpen]);
 
+    const manifest = useMemo(() => getNodeDisplayManifest(displayTier, zoom, isSelected), [displayTier, zoom, isSelected]);
+    const markerSize = manifest.size;
+    const iconSize = markerSize * 0.45;
+    const showLabel = manifest.showLabel;
+    const shapeClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[18px]' : (manifest.shape === 'squircle' ? 'rounded-[16px]' : 'rounded-full')));
+    const ringRadiusClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[22px]' : (manifest.shape === 'squircle' ? 'rounded-[20px]' : 'rounded-full')));
+
     // [PERF] Generate cache key for icon (MUST be before early return)
-    // CRITICAL: Must include zoom in cache key since icon size and label visibility depend on zoom
     const iconCacheKey = useMemo(() => {
-        return `${node.id}:${isSelected}:${isMajor}:${hasMembers}:${memberCount}:${baseColor}:${showLabel}:${label}:${zoom}:${crowdLevel}:${disruptionStatus}`;
-    }, [node.id, isSelected, isMajor, hasMembers, memberCount, baseColor, showLabel, label, zoom, crowdLevel, disruptionStatus]);
+        return `${node.id}:${displayTier}:${primaryOperator}:${isSelected}:${hasMembers}:${memberCount}:${baseColor}:${showLabel}:${label}:${zoom}:${crowdLevel}:${disruptionStatus}:${manifest.size}:${manifest.shape}`;
+    }, [node.id, displayTier, primaryOperator, isSelected, hasMembers, memberCount, baseColor, showLabel, label, zoom, crowdLevel, disruptionStatus, manifest]);
 
     // [PERF] Memoize entire icon creation with caching (MUST be before early return)
     const leafletIcon = useMemo(() => {
@@ -203,31 +174,11 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         // Use Plane icon for airports, Train for major hubs/train stations, MapPin for others
         const DisplayIcon = isAirport ? Plane : (isMajor ? Train : MapPin);
 
-        // Custom styling for Private Railways: use rounded-xl (square-ish) instead of rounded-full
-        const shapeClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[18px]' : 'rounded-full'));
-        const ringRadiusClass = isAirport ? 'rounded-full' : (isPrivate ? 'rounded-xl' : (hasMembers ? 'rounded-[22px]' : 'rounded-full'));
-
-        // [LOD OPTIMIZATION] Dynamic sizing based on zoom
-        const isZoomedOut = zoom < 14;
-
-        // Enhanced Visual Hierarchy: Hubs become LARGER at low zoom to stand out
-        // Minor nodes shrink significantly to reduce clutter
-        const baseSize = isAirport || isMajor || hasMembers ? 56 : 48;
-        const markerSize = (isAirport || isMajor || hasMembers)
-            ? (isZoomedOut ? 64 : 56)          // Hubs ENLARGED at low zoom for prominence
-            : (isZoomedOut ? 28 : 48);         // Non-hubs shrink MORE at low zoom
-
-        // Icon sizes scale with marker size for consistency
-        const baseIconSize = isAirport ? 26 : (isMajor ? 24 : 22);
-        const iconSize = (isAirport || isMajor || hasMembers)
-            ? (isZoomedOut ? 28 : baseIconSize)  // Larger icon for hubs at low zoom
-            : (isZoomedOut ? 14 : baseIconSize); // Smaller icon for minor nodes at low zoom
-
-        // [PERF] Simplified markup for mobile - removed heavy animations
         const iconMarkup = renderToStaticMarkup(
             <div
                 title={label}
-                className={`relative flex items-center justify-center select-none ${isSelected ? 'z-50' : 'z-10'}`}
+                className="relative flex items-center justify-center select-none"
+                style={{ zIndex: manifest.zIndex }}
             >
                 {/* [PERF] Removed animate-ping for mobile performance */}
                 {hasMembers && (
@@ -261,8 +212,14 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
                         )}
 
                         {!isAirport && (
-                            <span className="text-xl font-black leading-none tracking-tighter z-10">
-                                {operatorAbbr || 'S'}
+                            <span className="text-xl font-black leading-none tracking-tighter z-10 flex items-center justify-center h-full w-full">
+                                {(() => {
+                                    // [Phase 13.5] Custom Operator Symbols
+                                    if (primaryOperator === 'Metro') return <span className="text-[90%] -translate-y-[1px]">Ⓜ️</span>; // Simplified M
+                                    if (primaryOperator === 'Toei') return <span className="text-[90%] font-serif">T</span>;
+                                    if (primaryOperator === 'JR') return <span className="text-[70%] tracking-tighter scale-x-75">JR</span>;
+                                    return <span className="text-[80%]">{operatorAbbr || 'S'}</span>;
+                                })()}
                             </span>
                         )}
                         {/* Only show icon if Airport */}
@@ -319,19 +276,23 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
             </div>
         );
 
+        // Anchor calculation: 
+        // 1. divIcon total size is [size*2, size*2], so geometric center is [size, size]
+        // 2. Inner marker div is [size, size], centered at [size, size]
+        // 3. Pointer tip is at bottom center of marker div + pointer offset
+        // Pointer is 16x16 square rotated 45deg, so tip is size/2 + diag/2 - offset
+        const pointerTipOffset = (manifest.size / 2) + 11.3 - 2;
         const icon = L.divIcon({
             html: iconMarkup,
             className: 'custom-node-icon',
-            iconSize: [72, 72],
-            iconAnchor: [36, 72],
+            iconSize: [manifest.size * 2, manifest.size * 2],
+            iconAnchor: [manifest.size, manifest.size + pointerTipOffset],
         });
 
         // [PERF] LRU cache: delete & re-insert to move to end (most recent)
-        // If key exists, remove it first to update its position
         if (iconCache.has(iconCacheKey)) {
             iconCache.delete(iconCacheKey);
         }
-        // Evict oldest (first) entry if at capacity
         if (iconCache.size >= ICON_CACHE_MAX_SIZE) {
             const oldestKey = iconCache.keys().next().value;
             if (oldestKey) iconCache.delete(oldestKey);
@@ -339,7 +300,7 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         iconCache.set(iconCacheKey, icon);
 
         return icon;
-    }, [iconCacheKey, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge, isAirport, isPrivate, operatorAbbr, primaryLineColor, zoom, crowdLevel, disruptionStatus]);
+    }, [iconCacheKey, displayTier, primaryOperator, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge, isAirport, isPrivate, operatorAbbr, primaryLineColor, zoom, crowdLevel, disruptionStatus, manifest, iconSize, markerSize, ringRadiusClass, shapeClass]);
 
     // NOW we can do early return - after all hooks
     if (!coords.lat || !coords.lon) return null;

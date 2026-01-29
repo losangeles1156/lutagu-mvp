@@ -22,6 +22,7 @@ import { TrainLayer } from './TrainLayer';
 import { PedestrianLayer } from './PedestrianLayer';
 import { RouteLayer } from './RouteLayer';
 import { JapanTimeClock } from '@/components/ui/JapanTimeClock';
+import { ProMaxNodeLayer } from './v2/ProMaxNodeLayer';
 
 // -----------------------------------------------------------------------------
 // [OPTIMIZED] Virtualized Node Layer
@@ -194,14 +195,16 @@ export function MapContainer() {
                                 is_hub: false,
                                 geohash: '',
                                 parent_hub_id: null,
-                                zone: 'user'
                             } as any}
                             zone="core"
                             locale={locale}
                         />
                     )}
 
-                    {/* [OPTIMIZATION] The New Layer */}
+                    {/* [PRO MAX] Logic Isolation: New Radical Map Layer - DISABLED for classic Hub Logic */}
+                    {/* <ProMaxNodeLayer /> */}
+
+                    {/* [RESTORED] Virtualized Layer with Hub Aggregation Logic */}
                     <VirtualizedNodeLayer zone={zone} locale={locale} />
 
                     <TrainLayer />

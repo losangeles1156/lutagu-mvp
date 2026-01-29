@@ -1,0 +1,59 @@
+{
+  "odpt.Station:JR-East.ChuoSobuLocal.Chiba": {
+    "id": "odpt.Station:JR-East.ChuoSobuLocal.Chiba",
+    "text": "千葉駅是一個節奏明快的立體都市樞紐。車站大樓巍峨矗立，繁忙人流在層層連接的通道與月台間穿梭流動，節奏緊湊地銜接著JR各路線與其他交通網絡。這不僅是轉乘的中繼點，更與周邊商業設施緊密融合，形成一座全天候運轉的複合型車站。人們的身影在這裡交錯、匯聚，旋即又分散至各自的旅途，構成了城市脈動的鮮明縮影。",
+    "generatedAt": 1769406373834,
+    "tagsSnapshot": [
+      "BUSY",
+      "RUSH",
+      "MULTI_LEVEL",
+      "TRANSIT",
+      "TRANSFER",
+      "SHOPPING"
+    ]
+  },
+  "odpt.Station:JR-East.ChuoSobuLocal.NishiChiba": {
+    "id": "odpt.Station:JR-East.ChuoSobuLocal.NishiChiba",
+    "text": "西千葉站，一個尋常的都會節點，摒棄了浮誇與喧囂。它以四條平凡的路軌，穩穩接住了來自市川與千葉市交界地帶安分的生活節奏。這裡很少出現遊客匆忙的身影，更多的是通勤者沉默的慣性與學生們熟悉的路徑。車站大堂簡樸而寧靜，彷彿是城市背景中一抹令人安心的留白，見證著無數人早晨出發與黃昏歸返的低語。它不追逐光影，只負責將人們安穩地送至下一個日常。",
+    "generatedAt": 1769406386015,
+    "tagsSnapshot": [
+      "LOCAL",
+      "QUIET",
+      "TRANSIT",
+      "COMMUTE"
+    ]
+  },
+  "odpt.Station:JR-East.ChuoSobuLocal.Inage": {
+    "id": "odpt.Station:JR-East.ChuoSobuLocal.Inage",
+    "text": "稲毛 (Inage) 是一處典型的「LOCAL QUIET」車站。\n這裡沒有喧囂的商業廣告牌，也沒有龐雜的人潮。月台舊而靜，主要吞吐著早晨通勤上學的學生與傍晚歸來的上班族。\n\n它如同一個精準的社區機能開關，每日定時開啟與關閉，是千葉縣住宅區與新宿等大站之間的**寧靜**中繼點。\n\n大部分旅客僅是**通勤轉乘**，不會為此停留，令車站本身顯得格外低調、生活化而**不起眼**。",
+    "generatedAt": 1769406396515,
+    "tagsSnapshot": [
+      "LOCAL",
+      "QUIET",
+      "TRANSIT",
+      "COMMUTE"
+    ]
+  },
+  "odpt.Station:JR-East.ChuoSobuLocal.ShinKemigawa": {
+    "id": "odpt.Station:JR-East.ChuoSobuLocal.ShinKemigawa",
+    "text": "新検見川（Shin-Kemigawa），一座靜默低語的車站。它不屬於喧囂的觀光路線，而是深深嵌入了市郊的日常肌理之中。清晨與黃昏，通勤的學生與上班族勾勒出它主要的脈動，隨後便歸於住宅區特有的寧靜。月台上沒有匆忙的轉乘人潮，只有列車規律地進出，將人們送往都心或帶回社區。這裡是JR東日本網絡中一個不起眼的節點，不張揚，卻忠實地支撐著周邊生活的平靜節奏。",
+    "generatedAt": 1769406406772,
+    "tagsSnapshot": [
+      "LOCAL",
+      "QUIET",
+      "TRANSIT",
+      "COMMUTE"
+    ]
+  },
+  "odpt.Station:JR-East.ChuoSobuLocal.Makuhari": {
+    "id": "odpt.Station:JR-East.ChuoSobuLocal.Makuhari",
+    "text": "幕張 駅是東京灣岸一座沉默而務實的車站。沒有華麗的商業喧囂，它主要承載著居住於此的上班族晨昏往復的通勤節奏。月台上的人流帶著明確的目的性，多是為了轉乘前往海濱幕張的辦公區或幕張展覽館。空氣中流動的不是觀光客的興奮，而是對列車時刻的精準期待。這裡的「靜」並非無人，而是一種高效率的、近乎隱形的日常運轉，是都會擴張邊緣一個功能明確的交通節點。",
+    "generatedAt": 1769406417973,
+    "tagsSnapshot": [
+      "LOCAL",
+      "QUIET",
+      "TRANSIT",
+      "COMMUTE"
+    ]
+  }
+}

@@ -10,19 +10,9 @@ function getEnvConfig() {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    // Choose the best available key for general purpose
-    // Choose the best available key for general purpose
-    const supabaseKey = supabaseServiceKey || supabaseAnonKey;
-    const finalUrl = supabaseUrl;
-
-    console.log('[SupabaseConfig] Loading Env:', {
-        hasUrl: !!supabaseUrl,
-        hasKey: !!supabaseKey,
-        usingFallback: !supabaseUrl,
-        nodeEnv: process.env.NODE_ENV
-    });
-
-    return { supabaseUrl: finalUrl, supabaseKey, supabaseServiceKey };
+    // Standard client MUST use Anon Key for RAG/Static data access and standard auth
+    const supabaseKey = supabaseAnonKey;
+    return { supabaseUrl, supabaseKey, supabaseServiceKey };
 }
 
 // Lazy Getter for Default Client

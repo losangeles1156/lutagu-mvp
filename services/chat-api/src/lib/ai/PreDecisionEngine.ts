@@ -54,7 +54,6 @@ const LEVEL_1_KEYWORDS: Record<string, string[]> = {
     // 問候語
     greeting: [
         '你好', 'hello', 'hi', '嗨', '安安', '哈囉', '哈喽',
-        'こんにちは', 'こんばんは', 'おはよう', 'おはようございます', 'はじめまして', 'よろしく', 'よろしくお願いします', 'もしもし',
         '早安', '午安', '晚安', '好', 'good morning', 'good afternoon',
         '晚上好', '初次見面', '請多指教', 'yahoo', 'yo'
     ],
@@ -65,11 +64,10 @@ const LEVEL_1_KEYWORDS: Record<string, string[]> = {
         '感恩啦', '感激不盡'
     ],
     // 基本資訊查詢 (包含時間查詢)
-    // NOTE: 避免使用「現在」單獨作為關鍵詞，因為會與路線查詢中的「我現在想去」衝突
     basic_info: [
         '天氣', 'weather', '現在幾點', '現在時間', '現在日期',
         '匯率', 'rate', '日期', 'today', '今天日期',
-        '今日', '星期幾', '禮拜幾'
+        '現在', '今日', '星期幾', '禮拜幾'
     ],
     // 簡單 FAQ - 日本交通票券
     simple_faq: [
@@ -149,9 +147,6 @@ const LEVEL_2_KEYWORDS: Record<string, string[]> = {
     operation_status: [
         '營運', '運行', '行駛', '停駛', '停開',
         '延誤', 'delay', '誤點', '晚點',
-        '遅延', '遅れ', '運行状況', '運行狀況', '運転状況',
-        '平常運転', '平時運行',
-        '運転見合わせ', '見合わせ', '運休', 'ダイヤ', '運転間隔',
         '正常', 'status', '狀態',
         '停運', '停行', '不通', '不通區間'
     ]
@@ -205,7 +200,7 @@ export class PreDecisionEngine {
             return { ...cached, _fromCache: true };
         }
 
-        // 2. Level 2 快速匹配 (0-1ms) - 優先於 Level 1，確保具體意圖（如「去羽田」）不被問候語覆蓋
+        // 2. Level 2 快速匹配 (0-1ms) - 優先檢查具體意圖
         const level2Match = this.matchLevel2Keywords(normalizedText);
         if (level2Match.matched) {
             const result: PreDecisionResult = {
@@ -220,7 +215,7 @@ export class PreDecisionEngine {
             return result;
         }
 
-        // 3. Level 1 快速匹配 (0-1ms) - Level 2 未匹配時才檢查
+        // 3. Level 1 快速匹配 (0-1ms)
         const level1Match = this.matchLevel1Keywords(normalizedText);
         if (level1Match.matched) {
             const result: PreDecisionResult = {
@@ -309,18 +304,11 @@ reason 必須在 10 個中文字以內，格式：
 
             const parsed = this.parseClassificationResult(result);
 
-            // 根據分類結果設定建議模型 (Trinity Architecture Strategy)
             let suggestedModel = 'none';
             if (parsed.level === DecisionLevel.LEVEL_3_COMPLEX) {
-                // 複雜推理預設使用 Gemini 3 Flash Preview
                 suggestedModel = 'gemini-3-flash-preview';
             } else if (parsed.level === DecisionLevel.LEVEL_2_MEDIUM) {
                 suggestedModel = 'algorithm';
-            }
-
-            // 若為長文/閒聊 (可在 parsed.reason 中偵測關鍵字擴充邏輯)
-            if (parsed.reason.includes('閒聊') || parsed.reason.includes('創作')) {
-                suggestedModel = 'deepseek-v3';
             }
 
             return {
@@ -332,21 +320,16 @@ reason 必須在 10 個中文字以內，格式：
             };
         } catch (error) {
             console.error('[PreDecisionEngine] ML 分類失敗:', error);
-
-            // ML 分類失敗時，保守估計為 Level 3
             return {
                 level: DecisionLevel.LEVEL_3_COMPLEX,
                 confidence: 0.5,
-                suggestedModel: process.env.AI_SLM_MODEL || 'mistral-small-latest',
+                suggestedModel: 'mistral-small-latest',
                 reason: 'ML分類失敗，保守估計',
                 estimatedLatency: 100
             };
         }
     }
 
-    /**
-     * 建立分類提示
-     */
     private buildClassificationPrompt(text: string): string {
         return `分析以下使用者輸入的複雜度等級：
 
@@ -360,121 +343,55 @@ reason 必須在 10 個中文字以內，格式：
 只回覆 JSON。`;
     }
 
-    /**
-     * 解析分類結果
-     */
     private parseClassificationResult(result: string | null): {
         level: DecisionLevel;
         confidence: number;
         reason: string;
     } {
-        if (!result) {
-            return {
-                level: DecisionLevel.LEVEL_3_COMPLEX,
-                confidence: 0.5,
-                reason: '解析失敗'
-            };
-        }
+        if (!result) return { level: DecisionLevel.LEVEL_3_COMPLEX, confidence: 0.5, reason: '解析失敗' };
 
         try {
-            // 清理可能的 markdown 格式
-            const cleanResult = result
-                .replace(/```json/g, '')
-                .replace(/```/g, '')
-                .trim();
-
+            const cleanResult = result.replace(/```json/g, '').replace(/```/g, '').trim();
             const parsed = JSON.parse(cleanResult);
-
             return {
                 level: this.parseLevel(parsed.level),
                 confidence: Math.max(0, Math.min(1, parsed.confidence || 0.7)),
                 reason: parsed.reason || 'ML分類結果'
             };
         } catch (error) {
-            // 嘗試簡單解析
-            const lowerResult = result.toLowerCase();
-            if (lowerResult.includes('simple')) {
-                return {
-                    level: DecisionLevel.LEVEL_1_SIMPLE,
-                    confidence: 0.7,
-                    reason: '關鍵詞匹配'
-                };
-            } else if (lowerResult.includes('medium')) {
-                return {
-                    level: DecisionLevel.LEVEL_2_MEDIUM,
-                    confidence: 0.7,
-                    reason: '關鍵詞匹配'
-                };
-            }
-
-            return {
-                level: DecisionLevel.LEVEL_3_COMPLEX,
-                confidence: 0.6,
-                reason: '解析結果'
-            };
+            return { level: DecisionLevel.LEVEL_3_COMPLEX, confidence: 0.6, reason: '解析結果' };
         }
     }
 
-    /**
-     * 解析等級字串
-     */
     private parseLevel(levelStr: string): DecisionLevel {
         switch (levelStr?.toLowerCase()) {
-            case 'simple':
-                return DecisionLevel.LEVEL_1_SIMPLE;
-            case 'medium':
-                return DecisionLevel.LEVEL_2_MEDIUM;
-            case 'complex':
-                return DecisionLevel.LEVEL_3_COMPLEX;
-            default:
-                return DecisionLevel.LEVEL_3_COMPLEX;
+            case 'simple': return DecisionLevel.LEVEL_1_SIMPLE;
+            case 'medium': return DecisionLevel.LEVEL_2_MEDIUM;
+            case 'complex': return DecisionLevel.LEVEL_3_COMPLEX;
+            default: return DecisionLevel.LEVEL_3_COMPLEX;
         }
     }
 
-    // =========================================================================
-    // 快取管理
-    // =========================================================================
-
-    /**
-     * 從快取取得結果
-     */
     private getFromCache(key: string): PreDecisionResult | null {
         const entry = this.cache.get(key);
         if (!entry) return null;
-
-        // 檢查 TTL
         if (Date.now() - entry.timestamp > DECISION_CACHE_TTL_MS) {
             this.cache.delete(key);
             this.cacheOrder = this.cacheOrder.filter(k => k !== key);
             return null;
         }
-
         return entry.result;
     }
 
-    /**
-     * 設定快取
-     */
     private setCache(key: string, result: PreDecisionResult): void {
-        // 檢查快取大小限制
         if (this.cache.size >= DECISION_CACHE_MAX_SIZE) {
-            // 移除最舊的項目
             const oldestKey = this.cacheOrder.shift();
-            if (oldestKey) {
-                this.cache.delete(oldestKey);
-            }
+            if (oldestKey) this.cache.delete(oldestKey);
         }
-
-        this.cache.set(key, {
-            result,
-            timestamp: Date.now()
-        });
+        this.cache.set(key, { result, timestamp: Date.now() });
         this.cacheOrder.push(key);
     }
 
-    /**
-     * 啟動週期性清理任務
-     */
     private startCleanupTask(): void {
         const timer = setInterval(() => {
             const now = Date.now();
@@ -484,57 +401,17 @@ reason 必須在 10 個中文字以內，格式：
                     this.cacheOrder = this.cacheOrder.filter(k => k !== key);
                 }
             }
-        }, 60 * 1000); // 每分鐘清理一次
+        }, 60 * 1000);
         timer.unref?.();
     }
 
-    /**
-     * 清除快取
-     */
-    public clearCache(): void {
-        this.cache.clear();
-        this.cacheOrder = [];
-    }
-
-    /**
-     * 取得快取統計
-     */
+    public clearCache(): void { this.cache.clear(); this.cacheOrder = []; }
     public getCacheStats(): { size: number; maxSize: number; ttlMs: number } {
-        return {
-            size: this.cache.size,
-            maxSize: DECISION_CACHE_MAX_SIZE,
-            ttlMs: DECISION_CACHE_TTL_MS
-        };
+        return { size: this.cache.size, maxSize: DECISION_CACHE_MAX_SIZE, ttlMs: DECISION_CACHE_TTL_MS };
     }
 }
-
-// ============================================================================
-// 單例匯出
-// ============================================================================
 
 export const preDecisionEngine = new PreDecisionEngine();
-
-// ============================================================================
-// 便捷函數
-// ============================================================================
-
-/**
- * 快速分類使用者意圖
- */
-export async function classifyIntent(text: string): Promise<PreDecisionResult> {
-    return preDecisionEngine.classifyIntent(text);
-}
-
-/**
- * 清除預決策快取
- */
-export function clearPreDecisionCache(): void {
-    preDecisionEngine.clearCache();
-}
-
-/**
- * 取得快取統計
- */
-export function getPreDecisionCacheStats(): { size: number; maxSize: number; ttlMs: number } {
-    return preDecisionEngine.getCacheStats();
-}
+export async function classifyIntent(text: string): Promise<PreDecisionResult> { return preDecisionEngine.classifyIntent(text); }
+export function clearPreDecisionCache(): void { preDecisionEngine.clearCache(); }
+export function getPreDecisionCacheStats(): { size: number; maxSize: number; ttlMs: number } { return preDecisionEngine.getCacheStats(); }

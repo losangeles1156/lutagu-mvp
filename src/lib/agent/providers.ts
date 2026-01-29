@@ -7,6 +7,13 @@ import { google } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText, LanguageModel, ModelMessage, ToolSet } from 'ai';
 
+import { useModelHealthStore } from '../monitoring/ModelHealthStore';
+
+function isDeepSeekModel(model: LanguageModel): boolean {
+    const m = model as any;
+    return m.modelId === 'deepseek-v3' || (typeof m.modelId === 'string' && m.modelId.includes('deepseek'));
+}
+
 // =============================================================================
 // Provider Instances
 // =============================================================================
@@ -42,7 +49,7 @@ export const geminiBrain = zeabur('gemini-1.5-flash');
 export const minimaxBrain = minimax('MiniMax-M2.1');
 
 // 3. Synthesizer / Chat: DeepSeek V3
-export const deepseekChat = deepseek('deepseek-v3');
+export const deepseekChat = deepseek('deepseek-v3.2');
 export const geminiFlashFull = zeabur('gemini-2.5-flash'); // Fallback
 
 // =============================================================================
@@ -113,10 +120,21 @@ export function streamWithFallback<TOOLS extends ToolSet>(
         console.warn('[Providers] Primary model failed, attempting fallback:', error.message);
 
         // Notify caller about fallback
-        onFallback?.(error, 'mistral-large-2411');
+        onFallback?.(error, 'gemini-2.5-flash');
 
         // Reset step count for fallback
         stepCount = 0;
+
+        // If primary was DeepSeek, report it to admin/monitor
+        if (model && isDeepSeekModel(model)) {
+            console.error('[CRITICAL] DeepSeek V3 Failure Detected. Reporting to Admin...');
+            useModelHealthStore.getState().reportFailure({
+                modelName: 'DeepSeek-V3',
+                timestamp: Date.now(),
+                error: error.message,
+                task: 'Batch/Literary Generation'
+            });
+        }
 
         try {
             // Fallback to backup model

@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { usePathname, useRouter } from '@/navigation';
+import { usePathname, useRouter, Link } from '@/navigation';
 import { useSearchParams } from 'next/navigation'; // Keep this for query params
 import { Globe } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -34,23 +34,6 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleChange = (newLocale: string) => {
-        if (newLocale === locale) {
-            setIsOpen(false);
-            return;
-        }
-
-        // Just use router.replace with the new locale option.
-        // next-intl's navigation wrapper handles the prefix logic automatically.
-        // We preserve the current search params.
-        router.replace(`${pathname}?${searchParams.toString()}`, { locale: newLocale as any, scroll: false });
-
-        // Sync zustand store
-        setLocale(newLocale as 'zh-TW' | 'ja' | 'en');
-
-        setIsOpen(false);
-    };
-
     const labels: Record<string, string> = {
         'zh': '繁體中文',
         'zh-TW': '繁體中文',
@@ -79,19 +62,30 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                     style={{ top: containerRef.current ? containerRef.current.getBoundingClientRect().bottom + 8 : 80, right: containerRef.current ? window.innerWidth - containerRef.current.getBoundingClientRect().right : 16 }}
                 >
                     <div className="p-1">
-                        {availableLocales.map((l) => (
-                            <button
-                                key={l}
-                                onClick={() => handleChange(l)}
-                                className={`w-full px-4 py-3 text-xs font-black text-left rounded-xl transition-all duration-300 flex items-center justify-between ${locale === l
-                                    ? 'text-indigo-600 bg-indigo-50 shadow-inner'
-                                    : 'text-gray-500 hover:bg-black/[0.03] hover:text-gray-900'
-                                    }`}
-                            >
-                                <span>{labels[l] || l}</span>
-                                {locale === l && <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.4)]" />}
-                            </button>
-                        ))}
+                        {availableLocales.map((l) => {
+                            // Construct href with search params
+                            const query = searchParams.toString();
+                            const href = query ? `${pathname}?${query}` : pathname;
+
+                            return (
+                                <Link
+                                    key={l}
+                                    href={href}
+                                    locale={l as any}
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        setLocale(l as any);
+                                    }}
+                                    className={`w-full px-4 py-3 text-xs font-black text-left rounded-xl transition-all duration-300 flex items-center justify-between ${locale === l
+                                        ? 'text-indigo-600 bg-indigo-50 shadow-inner'
+                                        : 'text-gray-500 hover:bg-black/[0.03] hover:text-gray-900'
+                                        }`}
+                                >
+                                    <span>{labels[l] || l}</span>
+                                    {locale === l && <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.4)]" />}
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>,
                 document.body

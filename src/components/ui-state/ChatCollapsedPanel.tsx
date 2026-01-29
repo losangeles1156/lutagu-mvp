@@ -93,16 +93,12 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
     }
   }, [transitionTo]);
 
-  // 桌面版收合面板
+  // 桌面版收合面板 (內容)
   if (isDesktopCollapsed) {
     return (
-      <motion.div
-        initial={{ x: 20, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: 20, opacity: 0 }}
+      <div
         onClick={handlePanelClick}
-        className="h-full flex flex-col bg-white border-l border-slate-200 shadow-lg cursor-pointer"
-        style={{ width: '25%', minWidth: '280px', maxWidth: '400px' }}
+        className="h-full w-full flex flex-col bg-white overflow-hidden"
       >
         {/* Header */}
         <div className="panel-header shrink-0 px-4 py-3 border-b border-slate-100 flex items-center justify-between">
@@ -198,25 +194,20 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
             </button>
           </div>
         </form>
-      </motion.div>
+      </div>
     );
   }
 
-  // 手機版收合面板 (底部彈出)
+  // 手機版收合面板 (內容)
   if (isMobileCollapsed) {
     return (
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      <div
         onClick={handlePanelClick}
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-[24px] overflow-hidden cursor-pointer"
-        style={{ height: '30%', maxHeight: '300px' }}
+        className="h-full w-full flex flex-col bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-[24px] overflow-hidden"
       >
         {/* Drag Handle */}
         <div
-          className="w-full h-8 flex items-center justify-center cursor-pointer"
+          className="w-full h-8 flex items-center justify-center cursor-pointer shrink-0"
           onClick={onExpand}
         >
           <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
@@ -302,7 +293,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
             </button>
           </div>
         </form>
-      </motion.div>
+      </div>
     );
   }
 

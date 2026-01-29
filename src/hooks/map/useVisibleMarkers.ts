@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { LatLngBounds } from 'leaflet';
 import type { NodeDatum } from '@/lib/api/nodes';
+import { ZOOM_THRESHOLD } from '@/lib/constants/MapDisplayPolicy';
 
 export function useVisibleMarkers(
     nodes: NodeDatum[],
@@ -11,25 +12,29 @@ export function useVisibleMarkers(
     return useMemo(() => {
         if (!mapBounds) return nodes;
 
-        return nodes.filter(node => {
+        const filteredNodes = nodes.filter(node => {
             if (!node.location?.coordinates) return false;
 
             // 1. Tier-based Visibility Check (The 5-Tier Rule)
-            // If min_zoom_level is explicit, use it. Otherwise derive from display_tier.
-            const minZoom = node.min_zoom_level || (
-                node.display_tier === 1 ? 0 :
-                    node.display_tier === 2 ? 12 :
-                        node.display_tier === 3 ? 14 :
-                            node.display_tier === 4 ? 15 : 16
-            );
+            // Use explicit display_tier or default to 5 (Local)
+            const tier = node.display_tier || 5;
+            const minZoom = node.min_zoom_level ?? (ZOOM_THRESHOLD[tier as keyof typeof ZOOM_THRESHOLD] || 16);
 
             if (zoom < minZoom) return false;
 
             // 2. Viewport Bounding Box Check
-            // GeoJSON coordinates are [lon, lat]
             const [lon, lat] = node.location.coordinates;
-            // Leaflet mapBounds.contains expects [lat, lon]
             return mapBounds.contains([lat, lon]);
+        });
+
+        // 3. Hub Aggregation Rule: Hide members if their parent_hub is present.
+        // This ensures T1/T2 Hubs only show a single marker.
+        const hubIds = new Set(filteredNodes.filter(n => n.is_hub).map(n => n.id));
+        return filteredNodes.filter(node => {
+            if (node.parent_hub_id && hubIds.has(node.parent_hub_id)) {
+                return false;
+            }
+            return true;
         });
     }, [nodes, mapBounds, zoom]);
 }

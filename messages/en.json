@@ -606,6 +606,8 @@
     },
     "chat": {
         "aiName": "LUTAGU AI",
+        "trapLabel": "Trap",
+        "advice": "Advice",
         "decision": "LUTAGU DECISION",
         "saveTime": "Save {time}",
         "viewDetails": "Tap to view details",

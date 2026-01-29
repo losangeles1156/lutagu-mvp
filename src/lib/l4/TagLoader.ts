@@ -1,3 +1,4 @@
+import { StationProfileGenerator } from './data/StationProfileGenerator';
 /**
  * TagLoader - L1 Profile Provider (GEM Optimized)
  * 
@@ -17,54 +18,8 @@ export class TagLoader {
      * Implements Hub-Spoke inheritance logic (simplified).
      */
     static async loadProfile(nodeId: string): Promise<L1NodeProfile | null> {
-        // Normalize
-        const id = nodeId.replace('odpt:Station:', 'odpt.Station:');
-
-        // MVP: Mock Ueno Hub Persona
-        if (id.includes('Ueno')) {
-            return {
-                nodeId: id,
-                core: {
-                    // Tri-gram Sweet Spot (3-4 chars)
-                    identity: ["HUB", "JR", "GINZ", "PARK"]
-                },
-                intent: {
-                    // Semantic Interaction (5-8 chars)
-                    capabilities: ["LUGGAGE", "TOURISM", "EXPRESS", "MUSEUM"]
-                },
-                vibe: {
-                    // Visual Alignment
-                    visuals: ["WIDE_CONCOURSE", "HIGH_CEILING", "CROWDED_GATES", "PARK_EXIT_GREEN"]
-                },
-                weights: {
-                    transfer_ease: 0.9,
-                    tourism_value: 0.95,
-                    crowd_level: 0.85
-                }
-            };
-        }
-
-        // MVP: Mock Shinjuku Hub Persona
-        if (id.includes('Shinjuku')) {
-            return {
-                nodeId: id,
-                core: {
-                    identity: ["HUB", "JR", "BUSY", "MAZE"]
-                },
-                intent: {
-                    capabilities: ["COMMUTE", "SHOPPING", "NIGHT", "DINING"]
-                },
-                vibe: {
-                    visuals: ["NEON_LIGHTS", "SKYSCRAPER", "UNDERGROUND_MAZE"]
-                },
-                weights: {
-                    transfer_ease: 0.7,
-                    tourism_value: 0.7,
-                    crowd_level: 1.0
-                }
-            };
-        }
-
-        return null; // Remote/Unknown node
+        // Use deterministic generator for ALL stations
+        // This ensures every valid topology node has a 3-5-8 profile
+        return StationProfileGenerator.generate(nodeId);
     }
 }

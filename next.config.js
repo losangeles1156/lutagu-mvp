@@ -6,7 +6,10 @@ const isProd = process.env.NODE_ENV === 'production';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // 🚀 Performance: Enable tree-shaking for Lucide icons
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+  // 🚀 Performance: Enable tree-shaking for Lucide icons (Modularize as fallback)
   modularizeImports: {
     'lucide-react': {
       transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
@@ -57,15 +60,53 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const { withSentryConfig } = require("@sentry/nextjs");
+
+let finalConfig;
 if (isProd) {
   const withPWA = require('next-pwa')({
     dest: 'public',
-    register: true,
+    register: false,
     skipWaiting: true,
     disable: process.env.NODE_ENV === 'development',
     buildExcludes: [/middleware-manifest\.json$/],
+    runtimeCaching: [
+      {
+        urlPattern: /\/data\/routing_graph\.json$/,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'lutagu-graph-cache',
+          expiration: { maxEntries: 4, maxAgeSeconds: 7 * 24 * 60 * 60 }
+        }
+      },
+      {
+        urlPattern: /\/api\/nodes\/.+/,
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'lutagu-node-cache',
+          expiration: { maxEntries: 100, maxAgeSeconds: 24 * 60 * 60 }
+        }
+      }
+    ]
   });
-  module.exports = withBundleAnalyzer(withPWA(withNextIntl(nextConfig)));
+  finalConfig = withBundleAnalyzer(withPWA(withNextIntl(nextConfig)));
 } else {
-  module.exports = withBundleAnalyzer(withNextIntl(nextConfig));
+  finalConfig = withBundleAnalyzer(withNextIntl(nextConfig));
 }
+
+module.exports = withSentryConfig(
+  finalConfig,
+  {
+    silent: true,
+    org: "lutagu",
+    project: "lutagu-pwa",
+  },
+  {
+    widenClientFileUpload: true,
+    transpileClientSDK: true,
+    tunnelRoute: "/monitoring",
+    hideSourceMaps: true,
+    disableLogger: true,
+  }
+);
+

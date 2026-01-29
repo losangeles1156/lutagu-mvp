@@ -10,24 +10,28 @@
 
 import { templateEngine } from './intent/TemplateEngine';
 import { algorithmProvider } from './algorithms/AlgorithmProvider';
-import { type SupportedLocale } from './assistantEngine';
+import { extractRouteEndpointsFromText, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion } from './assistantEngine';
+import { NodeContext, NodeScope } from './types/NodeContext';
+import { TagLoader } from './TagLoader';
+import { DynamicContextService } from './DynamicContextService';
 import { metricsCollector } from './monitoring/MetricsCollector';
 import { DataNormalizer } from './utils/Normalization';
 import { feedbackStore } from './monitoring/FeedbackStore';
 import { AnomalyDetector } from './utils/AnomalyDetector';
 import { getJSTTime } from '@/lib/utils/timeUtils';
-import { CircuitBreaker } from '@/lib/utils/retry';
 import { POITaggedDecisionEngine } from '@/lib/ai/poi-tagged-decision-engine';
+import { translateDisruption } from '@/lib/odpt/odptDisruptionTranslations';
 import { preDecisionEngine, DecisionLevel } from '@/lib/ai/PreDecisionEngine';
 import { generateLLMResponse } from '@/lib/ai/llmService';
 import { DataMux } from '@/lib/data/DataMux';
 import { StrategyContext } from '@/lib/ai/strategyEngine';
 import { AgentRouter } from '@/lib/ai/AgentRouter';
 import { executeSkill, skillRegistry } from './skills/SkillRegistry';
+import { TagDrivenDispatcher } from './skills/TagDrivenDispatcher';
 import { AGENT_ROLES, streamWithFallback } from '@/lib/agent/providers';
-import { getTrainStatus } from '@/lib/odpt/service';
-import { getActiveAlerts } from '@/lib/weather/alertService';
-import { checkForHallucinations } from '@/lib/validation/FactChecker';
+import { getPartnerUrl } from '@/config/partners';
+import { STATION_MAP } from '@/lib/api/nodes';
+import { searchVectorDB, VectorSearchResult } from '@/lib/api/vectorService';
 import {
     FareRulesSkill,
     AccessibilitySkill,
@@ -36,15 +40,19 @@ import {
     CrowdDispatcherSkill,
     SpatialReasonerSkill
 } from './skills/implementations';
+import { L1NodeProfile } from './types/L1Profile';
+import { AffiliateContextManager } from '@/lib/commerce/AffiliateContextManager';
+import { SignalCollector } from '@/lib/analytics/SignalCollector';
 
 export interface HybridResponse {
-    source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge';
-    type: 'text' | 'card' | 'route' | 'fare' | 'action' | 'recommendation' | 'expert_tip';
+    source: 'template' | 'algorithm' | 'llm' | 'poi_tagged' | 'knowledge' | 'l2_disruption';
+    type: 'text' | 'card' | 'route' | 'fare' | 'action' | 'recommendation' | 'expert_tip' | 'options';
     content: string;
     data?: any;
     confidence: number;
     reasoning?: string;
     reasoningLog?: string[];
+    commercialActions?: any[]; // [Phase 14] Affiliate Links
 }
 
 export interface RequestContext {
@@ -56,13 +64,16 @@ export interface RequestContext {
     };
     currentStation?: string;
     strategyContext?: StrategyContext | null;
-    recentMessages?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    nodeContext?: NodeContext; // New field for Phase 1.3
 }
 
 export class HybridEngine {
     private poiTaggedEngine: POITaggedDecisionEngine | null = null;
+    private skillDispatcher: TagDrivenDispatcher;
 
     constructor() {
+        this.skillDispatcher = new TagDrivenDispatcher(skillRegistry);
+
         // Register Deep Research Skills
         skillRegistry.register(new FareRulesSkill());
         skillRegistry.register(new AccessibilitySkill());
@@ -101,7 +112,136 @@ export class HybridEngine {
         return this.poiTaggedEngine;
     }
 
+    /**
+     * Context-Pruned RAG: Node Resolution
+     * Determines the Primary Node (e.g. Station) and Scope to restrict the search space.
+     * Also loads L1 3-5-8 Profile into the context.
+     */
+    private async resolveNodeContext(text: string, locale: SupportedLocale, context?: RequestContext): Promise<NodeContext> {
+        // 1. Use existing classifier for intent and simple destination
+        const classification = classifyQuestion(text, locale);
+
+        // 2. Use endpoint extractor for more complex origin/destination
+        const endpoints = extractRouteEndpointsFromText(text);
+
+        let primaryNodeId: string | null = null;
+        let secondaryNodeId: string | null = null;
+        let scope: NodeScope = 'global';
+
+        // Logic: Origin takes precedence as Primary Node (where the user is/acting from)
+        if (endpoints && endpoints.originIds.length > 0) {
+            primaryNodeId = endpoints.originIds[0];
+            secondaryNodeId = endpoints.destinationIds?.[0] || classification.toStationId || null;
+            scope = 'station';
+        } else if (context?.currentStation) {
+            // Implicit context
+            primaryNodeId = context.currentStation;
+            secondaryNodeId = classification.toStationId || endpoints?.destinationIds?.[0] || null;
+            scope = 'station';
+        } else if (classification.toStationId) {
+            // Only destination mentioned? 
+            // If query is "About Ueno Station", Ueno is primary.
+            // If query is "Go to Ueno", User location is primary (if known), else Global.
+            if (classification.kind === 'amenity' || classification.kind === 'status') {
+                primaryNodeId = classification.toStationId;
+                scope = 'station';
+            } else {
+                // Route query without origin -> Global or infer from GPS (future)
+                secondaryNodeId = classification.toStationId;
+                scope = 'route';
+            }
+        }
+
+        // Adjust scope based on intent
+        if (classification.kind === 'route' || classification.kind === 'fare') {
+            scope = 'route';
+        } else if (classification.kind === 'amenity' || classification.kind === 'status') {
+            scope = 'station';
+        }
+
+        // Fallback scope for unknown intent but valid node
+        if (primaryNodeId && scope === 'global') {
+            scope = 'station';
+        }
+
+        // [Phase 1.4] Load 3-5-8 Profile
+        let l1Profile = null;
+        if (primaryNodeId) {
+            l1Profile = await TagLoader.loadProfile(primaryNodeId);
+
+            // [Phase 2.2] Dynamic L2 Intent Injection
+            if (l1Profile) {
+                l1Profile = await DynamicContextService.enrichProfile(l1Profile);
+            }
+        }
+
+        return {
+            primaryNodeId,
+            secondaryNodeId,
+            scope,
+            intent: classification.kind as any,
+            // [GEM Update] Flatten capabilities for backward compatibility / vector search if needed
+            loadedTags: l1Profile ? [...l1Profile.core.identity, ...l1Profile.intent.capabilities] : [],
+            l1Profile
+        };
+    }
+
     public async processRequest(params: {
+        text: string;
+        locale: string;
+        context?: RequestContext;
+        onProgress?: (step: string) => void;
+        onToken?: (delta: string) => void;
+    }): Promise<HybridResponse | null> {
+        const timeoutMs = 25000;
+        const timeoutPromise = new Promise<null>((_, reject) =>
+            setTimeout(() => reject(new Error('AI_TIMEOUT')), timeoutMs)
+        );
+
+        try {
+            return await Promise.race([
+                this.executeProcessRequest(params),
+                timeoutPromise
+            ]);
+        } catch (error: any) {
+            console.error('[HybridEngine] Request failed or timed out:', error);
+
+            // Fallback: Return L1 Summary if possible
+            const locale = (params.locale || 'zh-TW') as SupportedLocale;
+            const nodeContext = await this.resolveNodeContext(params.text, locale, params.context);
+
+            if (nodeContext.primaryNodeId) {
+                const summary = await this.getL1Summary(nodeContext.primaryNodeId, locale);
+                return {
+                    source: 'template',
+                    type: 'text',
+                    content: summary,
+                    confidence: 0.5,
+                    reasoning: error.message === 'AI_TIMEOUT' ? 'Timeout fallback' : 'Error fallback'
+                };
+            }
+
+            const fallbackMessages: Record<string, string> = {
+                'zh-TW': '系統暫時忙碌中，請稍後再試。',
+                'ja': '現在システムが混み合っております。お時間を置いて再度お試しください。',
+                'en': 'System is busy, please try again later.'
+            };
+
+            const lastLog = logs.length > 0 ? logs[logs.length - 1] : '';
+            const thinkingBlock = lastLog ? `[THINKING] ${lastLog} [/THINKING]\n` : '';
+
+            return {
+                source: 'template',
+                type: 'text',
+                content: thinkingBlock + (fallbackMessages[locale] || fallbackMessages['zh-TW']),
+                confidence: 0.1,
+                reasoning: `Safe fallback: ${error.message}`,
+                reasoningLog: logs
+            };
+        }
+    }
+
+    private async executeProcessRequest(params: {
         text: string;
         locale: string;
         context?: RequestContext;
@@ -115,6 +255,59 @@ export class HybridEngine {
 
         const safeText = typeof text === 'string' && text.length > 500 ? `${text.slice(0, 500)}…` : text;
         logs.push(`[Input] Text: "${safeText}", Locale: ${locale}`);
+
+        const finalize = async (res: HybridResponse): Promise<HybridResponse> => {
+            // [Phase 14] Commercial Decorator Pattern
+            // Analyze context and user intent to inject High-Value Affiliate Links
+            // Kotozna Style: "Recommend, don't execute"
+            // This is done BEFORE fusing logs so it's included in client response
+            const commercialActions = AffiliateContextManager.matchContext(context || {}, text);
+            if (commercialActions.length > 0) {
+                logs.push(`[Commerce] Injected ${commercialActions.length} affiliate cards (Intent: ${text.slice(0, 20)}...)`);
+                // Log Impression
+                SignalCollector.collectCommerceSignal({
+                    type: 'IMPRESSION',
+                    actions: commercialActions.map(a => a.id),
+                    stationId: context?.currentStation
+                });
+            }
+
+            // Inject commercialActions into res if not present
+            const resWithCommerce = {
+                ...res,
+                commercialActions: res.commercialActions || commercialActions
+            };
+
+            const mergedLogs = [...logs, ...((resWithCommerce.reasoningLog || []).filter(Boolean))];
+            const fused = await this.applyResponseFuse({
+                text,
+                locale,
+                context,
+                response: { ...resWithCommerce, reasoningLog: undefined },
+                logs: mergedLogs
+            });
+            metricsCollector.recordRequest(fused.source, Date.now() - startTime);
+            feedbackStore.logRequest({
+                text,
+                source: fused.source,
+                timestamp: startTime,
+                contextNodeId: context?.currentStation
+            });
+            if (params.onToken) params.onToken(fused.content);
+
+            // Inject contextNodeId into client response for stateless feedback loop
+            const clientResponse: HybridResponse = {
+                ...fused,
+                data: {
+                    ...(fused.data || {}),
+                    contextNodeId: context?.currentStation
+                },
+                reasoningLog: mergedLogs,
+                commercialActions: resWithCommerce.commercialActions // Ensure it passes through Fuse
+            };
+            return clientResponse;
+        };
+
 
         try {
             // 0. Anomaly Detection
@@ -135,6 +328,66 @@ export class HybridEngine {
                 };
             }
 
+            // 1. Node Resolution (Context-Pruned RAG Step 1)
+            // Identify the "Center of the World" for this query.
+            const nodeContext = await this.resolveNodeContext(text, locale, context);
+            logs.push(`[NodeResolver] Primary: ${nodeContext.primaryNodeId || 'Global'}, Scope: ${nodeContext.scope}, Intent: ${nodeContext.intent}`);
+
+            // Inject NodeContext into RequestContext for Skills
+            if (context) {
+                context.nodeContext = nodeContext;
+            } else {
+                // If context was undefined, we can't easily assign, but params.context is generic
+                // We should ensure context exists or is created.
+                // However, params.context is optional. We might need to mutate a local copy.
+            }
+            // Actually, we can just ensure nodeContext is present.
+            if (context && !context.nodeContext) {
+                context.nodeContext = nodeContext;
+            }
+            const dispatchContext = context || { nodeContext };
+
+
+            // 2. Skill Dispatch (Phase 1.5 - Tag Driven)
+            const dispatchResult = await this.skillDispatcher.dispatch(text, dispatchContext);
+
+            if (dispatchResult) {
+                logs.push(`[SkillDispatch] ${dispatchResult.skill.name} triggered (Score: ${dispatchResult.score.toFixed(2)})`);
+                try {
+                    const skillRes = await executeSkill(dispatchResult.skill, text, dispatchContext);
+                    if (skillRes.result) {
+                        return await finalize(skillRes.result);
+                    }
+                } catch (e) {
+                    logs.push(`[SkillDispatch] Execution failed: ${e}`);
+                }
+            } else {
+                logs.push(`[SkillDispatch] No skill reached relevance threshold.`);
+            }
+
+            // 3. Fallback to L2 or LLM
+            // ... (Existing Logic)
+
+
+            // Proactive L2 Warning: If critical, force L2 advice even if not explicitly asked
+            const l2Status = (context?.strategyContext as any)?.l2Status;
+            const isSevere = this.isSevereDisruption(l2Status);
+
+            const l2DisruptionEarly = await this.tryBuildL2DisruptionResponse(text, locale, context, isSevere);
+            if (l2DisruptionEarly) {
+                logs.push(`[L2] Live disruption detected (Severe=${isSevere}), returning disruption-first guidance`);
+                return await finalize(l2DisruptionEarly);
+            }
+
+            const routeEndpoints = extractRouteEndpointsFromText(text);
+            if (routeEndpoints) {
+                logs.push('[L2] Route endpoints detected, prefer algorithm routes');
+                const routeMatch = await this.checkAlgorithms(text, locale, context);
+                if (routeMatch && (routeMatch.type === 'route' || routeMatch.type === 'action')) {
+                    return await finalize(routeMatch);
+                }
+            }
+
             // 1. Legacy Regex Skill (Fast Path)
             const matchedSkill = skillRegistry.findMatchingSkill(text, context || {});
             if (matchedSkill) {
@@ -142,20 +395,7 @@ export class HybridEngine {
                 const { result: skillResult, meta } = await executeSkill(matchedSkill, text, context || {});
                 logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
                 if (skillResult) {
-                    // Apply FactChecker to Skill responses
-                    const factCheckResult = checkForHallucinations(skillResult.content, text);
-                    if (factCheckResult.hasHallucination) {
-                        console.warn('[HybridEngine] Hallucination detected in Legacy Skill:', factCheckResult.issues);
-                        logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
-                        if (factCheckResult.correctedResponse) {
-                            skillResult.content = factCheckResult.correctedResponse;
-                            logs.push('[FactCheck] Response corrected with ground truth');
-                        }
-                    }
-
-                    const finalResult = { ...skillResult, reasoningLog: [...logs, ...(skillResult.reasoningLog || [])] };
-                    metricsCollector.recordRequest(finalResult.source, Date.now() - startTime);
-                    return finalResult;
+                    return await finalize(skillResult);
                 }
             }
 
@@ -166,46 +406,34 @@ export class HybridEngine {
             // 3. Agentic Skill Router (Complex Queries Only)
             if (decision.level === DecisionLevel.LEVEL_3_COMPLEX) {
                 try {
-                    if (params.onProgress) params.onProgress(locale === 'en' ? "Analyzing intent..." : "正在分析意圖...");
-                    const agentDecision = await agentRouterBreaker.execute(() =>
-                        AgentRouter.selectTool(text, skillRegistry.getSkills())
-                    );
+                    if (params.onProgress) params.onProgress(locale === 'ja' ? "意図を分析中..." : (locale === 'en' ? "Analyzing intent..." : "正在分析意圖..."));
+                    const agentDecision = await AgentRouter.selectTool(text, skillRegistry.getSkills());
                     if (agentDecision) {
-                        if (params.onProgress) params.onProgress(locale === 'en' ? `Using tool: ${agentDecision.toolName}` : `正在調用工具：${agentDecision.toolName}`);
+                        if (params.onProgress) params.onProgress(locale === 'ja' ? `ツール実行中：${agentDecision.toolName}` : (locale === 'en' ? `Using tool: ${agentDecision.toolName}` : `正在調用工具：${agentDecision.toolName}`));
                         logs.push(`[Deep Research] Agent Decision: ${agentDecision.toolName} (Reason: ${agentDecision.reasoning})`);
                         const skill = skillRegistry.findByToolName(agentDecision.toolName);
                         if (skill) {
-                            const { result: skillResult, meta } = await executeSkill(skill, text, context || {}, agentDecision.parameters);
-                            logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
-                            if (skillResult) {
-                                // Apply FactChecker to Agent Skill responses
-                                const factCheckResult = checkForHallucinations(skillResult.content, text);
-                                if (factCheckResult.hasHallucination) {
-                                    console.warn('[HybridEngine] Hallucination detected in Agent Skill:', factCheckResult.issues);
-                                    logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
-                                    if (factCheckResult.correctedResponse) {
-                                        skillResult.content = factCheckResult.correctedResponse;
-                                        logs.push('[FactCheck] Response corrected with ground truth');
-                                    }
+                            const skillContext = context || {};
+                            const relevance = skill.calculateRelevance ? skill.calculateRelevance(text, skillContext as any) : 0;
+                            const keywordMatch = skill.canHandle(text.toLowerCase(), skillContext as any);
+                            if (!keywordMatch && relevance < 0.45) {
+                                logs.push(`[Deep Research] Agent Decision ignored (relevance=${relevance.toFixed(2)})`);
+                            } else {
+                                const { result: skillResult, meta } = await executeSkill(skill, text, skillContext, agentDecision.parameters);
+                                logs.push(`[Deep Research] Skill Exec: cache=${meta.fromCache}, dur=${meta.durationMs}ms${meta.errorCode ? `, code=${meta.errorCode}` : ''}`);
+                                if (skillResult) {
+                                    const withAgentLogic = {
+                                        ...skillResult,
+                                        reasoningLog: [`Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
+                                    };
+                                    return await finalize(withAgentLogic);
                                 }
-
-                                const finalResult = {
-                                    ...skillResult,
-                                    reasoningLog: [...logs, `Agent Logic: ${agentDecision.reasoning}`, ...(skillResult.reasoningLog || [])]
-                                };
-                                metricsCollector.recordRequest(finalResult.source, Date.now() - startTime);
-                                return finalResult;
                             }
                         }
                     }
-                } catch (agentError: any) {
-                    const isCircuitOpen = agentError?.code === 'CIRCUIT_OPEN' || String(agentError).includes('circuit_open');
-                    if (isCircuitOpen) {
-                        logs.push('[CircuitBreaker] agent_router_open');
-                    } else {
-                        console.error('[HybridEngine] Agent Router Failed:', agentError);
-                        logs.push(`[Error] Agent Router: ${agentError}`);
-                    }
+                } catch (agentError) {
+                    console.error('[HybridEngine] Agent Router Failed:', agentError);
+                    logs.push(`[Error] Agent Router: ${agentError}`);
                 }
             }
 
@@ -213,14 +441,14 @@ export class HybridEngine {
 
             // 4. Level 1: Template Engine
             if (decision.level === DecisionLevel.LEVEL_1_SIMPLE) {
-                if (params.onProgress) params.onProgress(locale === 'en' ? "Checking templates..." : "正在比對範本...");
+                if (params.onProgress) params.onProgress(locale === 'ja' ? "テンプレートを確認中..." : (locale === 'en' ? "Checking templates..." : "正在比對範本..."));
                 logs.push(`[L1] Checking Templates...`);
                 bestMatch = await this.checkTemplates(text, locale);
             }
 
             // 5. Level 2: Algorithm Provider + POI Search
             if (!bestMatch && (decision.level === DecisionLevel.LEVEL_2_MEDIUM || decision.level === DecisionLevel.LEVEL_1_SIMPLE)) {
-                if (params.onProgress) params.onProgress(locale === 'en' ? "Searching algorithms & POI..." : "正在搜尋大數據與地點資訊...");
+                if (params.onProgress) params.onProgress(locale === 'ja' ? "アルゴリズムとスポット情報を検索中..." : (locale === 'en' ? "Searching algorithms & POI..." : "正在搜尋大數據與地點資訊..."));
                 logs.push(`[L2] Checking Algorithms & POI Tags...`);
                 const [poiMatch, algorithmMatch] = await Promise.all([
                     this.checkPOITags(text, locale, context),
@@ -229,8 +457,7 @@ export class HybridEngine {
 
                 if (poiMatch && poiMatch.confidence >= 0.6) {
                     bestMatch = poiMatch;
-                } else if (algorithmMatch && algorithmMatch.confidence >= 0.65) {
-                    // Lowered from 0.8 to 0.65 to accept more valid algorithm results (Fixed: Issue #AI-CHAT-002)
+                } else if (algorithmMatch && algorithmMatch.confidence >= 0.8) {
                     bestMatch = algorithmMatch;
                 }
             }
@@ -240,17 +467,12 @@ export class HybridEngine {
             if (!bestMatch && context?.currentStation) {
                 logs.push(`[L3/L4] Checking DataMux Enrichment...`);
                 try {
-                    enrichedData = await dataMuxBreaker.execute(() =>
-                        DataMux.enrichStationData(context.currentStation as string, {
-                            userId: context.userId || 'anon',
-                            locale: locale,
-                            userProfile: 'general'
-                        })
-                    );
+                    enrichedData = await DataMux.enrichStationData(context.currentStation, {
+                        userId: context.userId || 'anon',
+                        locale: locale,
+                        userProfile: 'general'
+                    });
 
-                    // FIX: Don't set bestMatch here. Just let enrichedData flow to LLM Fallback.
-                    // This allows generic queries like "Time" or "Weather" to be answered by LLM with context.
-                    /*
                     if (enrichedData?.l4_cards && enrichedData.l4_cards.length > 0) {
                         bestMatch = {
                             source: 'knowledge',
@@ -265,41 +487,18 @@ export class HybridEngine {
                             reasoningLog: logs
                         };
                     }
-                    */
-                } catch (e: any) {
-                    const isCircuitOpen = e?.code === 'CIRCUIT_OPEN' || String(e).includes('circuit_open');
-                    if (isCircuitOpen) {
-                        logs.push('[CircuitBreaker] data_mux_open');
-                    } else {
-                        console.error('[HybridEngine] DataMux Enrichment failed:', e);
-                    }
+                } catch (e) {
+                    console.error('[HybridEngine] DataMux Enrichment failed:', e);
                 }
             }
 
             // 7. Post-processing and Metrics
             if (bestMatch) {
-                // Apply FactChecker to LLM and knowledge-based responses (Skills are checked separately)
-                if (bestMatch.source === 'llm' || bestMatch.source === 'knowledge') {
-                    const factCheckResult = checkForHallucinations(bestMatch.content, text);
-                    if (factCheckResult.hasHallucination) {
-                        console.warn('[HybridEngine] Hallucination detected in bestMatch:', factCheckResult.issues);
-                        logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
-                        if (factCheckResult.correctedResponse) {
-                            bestMatch.content = factCheckResult.correctedResponse;
-                            bestMatch.confidence = Math.min(bestMatch.confidence || 0.6, 0.5);
-                            logs.push('[FactCheck] Response corrected with ground truth');
-                        }
-                    }
-                }
-
-                metricsCollector.recordRequest(bestMatch.source, Date.now() - startTime);
-                feedbackStore.logRequest({ text, source: bestMatch.source, timestamp: startTime });
-                if (params.onToken) params.onToken(bestMatch.content);
-                return { ...bestMatch, reasoningLog: logs };
+                return await finalize(bestMatch);
             }
 
             // 8. Fallback (LLM Orchestrator)
-            if (params.onProgress) params.onProgress(locale === 'en' ? "Synthesizing expert advice..." : "正在彙整專家建議...");
+            if (params.onProgress) params.onProgress(locale === 'ja' ? "エキスパートのアドバイスを収集中..." : (locale === 'en' ? "Synthesizing expert advice..." : "正在彙整專家建議..."));
             logs.push(`[Fallback] Delegating to LLM Service with Context...`);
 
             // Use existing enriched data if available for enriched prompt
@@ -310,145 +509,118 @@ export class HybridEngine {
                 const h = k.hacks?.slice(0, 3).map((it: any) => `[Hack] ${it.title}: ${it.desc}`).join('\n') || '';
                 activeKnowledgeSnippet = `Station Knowledge:\n${t}\n${h}`;
             }
-            if (enrichedData?.weather) {
-                const w = enrichedData.weather;
-                activeKnowledgeSnippet += `\nStation Weather: ${w.condition}, Temp: ${w.temp}°C, Wind: ${w.wind}m/s`;
-            } else if (enrichedData?.weather_condition) {
-                activeKnowledgeSnippet += `\nStation Weather: ${enrichedData.weather_condition}`;
-            }
 
-            // Extreme Weather Knowledge Injection
-            const isExtremeWeatherQuery = /(?:大雪|積雪|雪害|暴風雪|寒流|降雪|停駛|停運|運休|見合わせ|運転見合わせ|道路管制|封路|高速公路封閉|颱風|台風|暴風|地震|揺れ|snow|typhoon|earthquake)/i.test(text);
-            if (isExtremeWeatherQuery) {
-                logs.push('[Knowledge] Extreme Weather Query Detected - Injecting Expert Knowledge');
+            // Vector DB RAG: Search for relevant expert knowledge with Context Pruning
+            let vectorKnowledge = '';
+            try {
+                // Step 2: Load Tags (Simplified for MVP, can be expanded to fetch from DB)
+                const currentTags = nodeContext.loadedTags;
 
-                // Inject active alerts from database (if any)
-                try {
-                    const activeAlerts = await getActiveAlerts('tokyo');
-                    if (activeAlerts.length > 0) {
-                        const alertSummary = activeAlerts.slice(0, 3).map(a =>
-                            `[${a.severity?.toUpperCase() || 'ALERT'}] ${a.title || a.alert_type}: ${typeof a.content === 'object' ? a.content.ja : a.content}`
-                        ).join('\n');
-                        activeKnowledgeSnippet += `\n[Active Weather Alerts]\n${alertSummary}\n`;
-                        logs.push(`[Alerts] Injected ${activeAlerts.length} active alerts`);
-                    }
-                } catch (alertErr) {
-                    console.error('[HybridEngine] Alert fetch failed:', alertErr);
+                // Step 3: Context-Pruned Vector Search
+                const vectorResults = await searchVectorDB(text, 3, {
+                    node_id: nodeContext.primaryNodeId || undefined,
+                    tags: currentTags.length > 0 ? currentTags : undefined
+                });
+
+                if (vectorResults.length > 0) {
+                    logs.push(`[VectorService] Found ${vectorResults.length} relevant knowledge chunks for ${nodeContext.primaryNodeId || 'Global'}`);
+                    vectorKnowledge = vectorResults
+                        .map((r: VectorSearchResult) => `[RAG] ${r.payload.content}`)
+                        .join('\n');
+                    activeKnowledgeSnippet = vectorKnowledge + (activeKnowledgeSnippet ? '\n\n' + activeKnowledgeSnippet : '');
+                } else {
+                    logs.push(`[VectorService] No relevant knowledge found in context.`);
                 }
-
-                const extremeWeatherKnowledge = `
-[Extreme Weather Guide]
-- JR 在來線：積雪 20cm 以上可能減班，30cm 以上可能停駛。
-- 東京Metro / 都營地鐵：全線地下化，通常不受積雪影響（地面段除外）。
-- 新幹線：東海道新幹線（關原區間）較易受影響，北陸・上越有除雪設備。
-- 大雪時建議：優先使用地下鐵，避免山手線外側 JR 線。
-- 查詢道路狀況：日本道路交通情報センター (jartic.or.jp)。
-- 攜帶物品：防滑鞋、備用乾襪、行動電源、現金。
-`;
-                activeKnowledgeSnippet += extremeWeatherKnowledge;
+            } catch (e) {
+                logs.push(`[VectorService] Search failed: ${e}`);
             }
 
             const systemPrompt = this.buildSystemPrompt(locale);
             const userPrompt = this.buildUserPrompt(text, { ...context, wisdomSummary: activeKnowledgeSnippet } as any);
+            const hasL2Issues = this.hasL2Issues(l2Status);
 
             let llmResponse: string | null = null;
-            try {
-                // TEMPORARY FIX: Disable streaming path to avoid legacy breaker and model issues
-                if (false && params.onToken) {
+            if (params.onToken && !hasL2Issues) {
+                try {
                     const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
-                    llmResponse = await llmBreaker.execute(async () => {
-                        const result: any = streamWithFallback({
-                            model,
-                            system: systemPrompt,
-                            messages: [{ role: 'user', content: userPrompt }]
-                        });
-
-                        let acc = '';
-                        const textStream: any = result?.textStream;
-                        if (textStream && typeof textStream[Symbol.asyncIterator] === 'function') {
-                            for await (const delta of textStream as AsyncIterable<string>) {
-                                acc += delta;
-                                params.onToken(delta);
-                            }
-                            return acc;
-                        }
-                        const finalText = (await result.text) || null;
-                        if (finalText) params.onToken(finalText);
-                        return finalText;
+                    const result: any = streamWithFallback({
+                        model,
+                        system: systemPrompt,
+                        messages: [{ role: 'user', content: userPrompt }]
                     });
-                } else {
-                    console.log('[HybridEngine] Calling LLM directly (Bypassing Breaker)...');
+
+                    let acc = '';
+                    const textStream: any = result?.textStream;
+                    if (textStream && typeof textStream[Symbol.asyncIterator] === 'function') {
+                        for await (const delta of textStream as AsyncIterable<string>) {
+                            acc += delta;
+                            params.onToken(delta);
+                        }
+                        llmResponse = acc;
+                    } else {
+                        llmResponse = (await result.text) || null;
+                        if (llmResponse) params.onToken(llmResponse);
+                    }
+                } catch (streamError) {
+                    logs.push(`[LLM Stream] ${streamError}`);
+                }
+            }
+
+            if (!llmResponse) {
+                try {
                     llmResponse = await generateLLMResponse({
                         systemPrompt,
                         userPrompt,
                         taskType: 'chat',
-                        temperature: 0.7
+                        temperature: 0.7,
+                        model: 'gemini-3-flash-preview'
                     });
-                }
-            } catch (e: any) {
-                const isCircuitOpen = e?.code === 'CIRCUIT_OPEN' || String(e).includes('circuit_open');
-                if (isCircuitOpen) {
-                    logs.push('[CircuitBreaker] llm_fallback_open');
-                } else {
-                    console.error('[HybridEngine] LLM fallback failed:', e);
-                    logs.push(`[Error] LLM fallback: ${e}`);
+                } catch (fallbackError) {
+                    logs.push(`[LLM Fallback] ${fallbackError}`);
                 }
             }
 
             if (llmResponse) {
-                // Fact-check the LLM response for hallucinations
-                const factCheckResult = checkForHallucinations(llmResponse, text);
-                if (factCheckResult.hasHallucination) {
-                    console.warn('[HybridEngine] Hallucination detected:', factCheckResult.issues);
-                    logs.push(`[FactCheck] Hallucination detected: ${factCheckResult.issues.map(i => i.claim).join(', ')}`);
-                    // Use corrected response if available
-                    if (factCheckResult.correctedResponse) {
-                        llmResponse = factCheckResult.correctedResponse;
-                        logs.push('[FactCheck] Response corrected with ground truth');
-                    }
-                }
-
-                metricsCollector.recordRequest('llm', Date.now() - startTime);
-                return {
+                return await finalize({
                     source: 'llm',
                     type: 'text',
                     content: llmResponse,
-                    confidence: factCheckResult.hasHallucination ? 0.5 : 0.6,
-                    reasoning: factCheckResult.hasHallucination ? 'LLM Response (Corrected by FactChecker)' : 'Fallback to General LLM with Context',
-                    reasoningLog: logs
-                };
+                    confidence: 0.6,
+                    reasoning: 'Fallback to General LLM with Context',
+                });
             }
 
         } catch (error) {
-            console.error('[HybridEngine] Process Request failed:', error);
-            logs.push(`[Error] ${error}`);
+            throw error;
         }
-
-        // Final safe fallback
-        const fallbackMessages: Record<string, string> = {
-            'zh-TW': '系統暫時忙碌中，請稍後再試。',
-            'ja': '現在システムが混み合っております。お時間を置いて再度お試しください。',
-            'en': 'System is busy, please try again later.'
-        };
-
-        return {
-            source: 'template',
-            type: 'text',
-            content: fallbackMessages[locale] || fallbackMessages['zh-TW'],
-            confidence: 0.1,
-            reasoningLog: logs
-        };
+        return null;
     }
+
+
+    private async getL1Summary(nodeId: string, locale: string): Promise<string> {
+        try {
+            const profile = await TagLoader.loadProfile(nodeId);
+            if (!profile) return 'AI 服務暫時繁忙';
+
+            const identity = (profile.core.identity || []).join('、');
+            const capabilities = (profile.intent.capabilities || []).join('、');
+
+            if (locale.startsWith('ja')) {
+                return `【基本情報】${identity}。利用可能な設備：${capabilities}。現在AIサービスが混み合っているため、基本情報のみ表示しています。`;
+            } else if (locale.startsWith('en')) {
+                return `[Basic Info] ${identity}. Available facilities: ${capabilities}. AI service is currently busy, showing basic info only.`;
+            }
+            return `【基本資訊】${identity}。提供設施：${capabilities}。目前 AI 服務繁忙，僅顯示基本站點資訊。`;
+        } catch (e) {
+            return 'AI 服務暫時繁忙';
+        }
+    }
+
 
     private async checkPOITags(text: string, locale: SupportedLocale, context?: RequestContext): Promise<HybridResponse | null> {
         const poiKeywords = ['吃', '餐廳', '食物', '飯', '午餐', '晚餐', '日本料理', '拉麵', '壽司', '咖哩', 'cafe', '咖啡', '咖啡廳', '下午茶', '買', '購物', '商店', '商場', '藥妝', '電器', '玩', '景點', '公園', '博物館', '推薦', '好店', '好玩', '推薦我'];
         const lowerText = text.toLowerCase();
         if (!poiKeywords.some(kw => text.includes(kw) || lowerText.includes(kw.toLowerCase()))) return null;
-
-        // Exclude ticket/pass purchase queries from generic POI search to let LLM explain
-        if (/(?:suica|pasmo|ic card|ic卡|西瓜卡|pass|周遊券|一日券|ticket|JR Pass|兌換)/i.test(text)) {
-            return null;
-        }
 
         try {
             const results = await this.getPoiEngine().decide({
@@ -495,183 +667,12 @@ export class HybridEngine {
 
     private async checkAlgorithms(text: string, locale: SupportedLocale, context?: RequestContext): Promise<HybridResponse | null> {
         const lowerText = text.toLowerCase();
+        const l2Status = (context?.strategyContext as any)?.l2Status;
 
-        // Exclude general weather knowledge queries from L2 status check
-        const isExtremeWeatherContext = /(?:大雪|積雪|雪害|暴風雪|寒流|颱風|台風|地震|天氣|気象)/i.test(text);
-
-        const isOperationStatusQuery = /(?:遅延|遅れ|delay|延誤|誤點|晚點|運行状況|運行狀況|運転状況|status|平常運転|運転見合わせ|見合わせ|運休|停運|停駛)/i.test(text);
-        if (isOperationStatusQuery && !isExtremeWeatherContext) {
-            const lineHints: Array<{
-                railwayId: string;
-                operatorKey: string;
-                match: RegExp;
-                names: { 'zh-TW': string; ja: string; en: string };
-            }> = [
-                    {
-                        railwayId: 'odpt.Railway:TokyoMetro.Ginza',
-                        operatorKey: 'TokyoMetro',
-                        match: /(?:銀座線|ginza\s*line)/i,
-                        names: { 'zh-TW': '銀座線', ja: '銀座線', en: 'Ginza Line' }
-                    },
-                    {
-                        railwayId: 'odpt.Railway:TokyoMetro.Marunouchi',
-                        operatorKey: 'TokyoMetro',
-                        match: /(?:丸ノ内線|丸之內線|marunouchi\s*line)/i,
-                        names: { 'zh-TW': '丸之內線', ja: '丸ノ内線', en: 'Marunouchi Line' }
-                    },
-                    {
-                        railwayId: 'odpt.Railway:TokyoMetro.Hibiya',
-                        operatorKey: 'TokyoMetro',
-                        match: /(?:日比谷線|hibiya\s*line)/i,
-                        names: { 'zh-TW': '日比谷線', ja: '日比谷線', en: 'Hibiya Line' }
-                    },
-                    {
-                        railwayId: 'odpt.Railway:JR-East.Yamanote',
-                        operatorKey: 'JR-East',
-                        match: /(?:山手線|yamanote\s*line)/i,
-                        names: { 'zh-TW': '山手線', ja: '山手線', en: 'Yamanote Line' }
-                    }
-                ];
-
-            const hint = lineHints.find(h => h.match.test(text)) || null;
-            try {
-                const list = await getTrainStatus(hint?.operatorKey);
-                const filtered = hint ? list.filter((it: any) => it?.['odpt:railway'] === hint.railwayId) : list;
-                const top = filtered[0];
-
-                const pickLocaleKey = ((): 'ja' | 'en' | 'zh-TW' => {
-                    if (locale.startsWith('ja')) return 'ja';
-                    if (locale.startsWith('en')) return 'en';
-                    return 'zh-TW';
-                })();
-
-                const infoTextObj = top?.['odpt:trainInformationText'];
-                const pickLocalizedText = (value: any): string => {
-                    if (!value) return '';
-                    if (typeof value === 'string') {
-                        if (locale.startsWith('zh') && /[\u3040-\u30ff]/.test(value)) return '';
-                        return value;
-                    }
-                    if (typeof value !== 'object') return '';
-                    if (locale.startsWith('ja')) return (value as any).ja || '';
-                    if (locale.startsWith('en')) return (value as any).en || '';
-                    return (value as any)['zh-TW'] || (value as any)['zh-Hant'] || (value as any).zh || '';
-                };
-                const infoText = pickLocalizedText(infoTextObj);
-                const infoTextForDetection = ((): string => {
-                    if (typeof infoTextObj === 'string') return infoTextObj;
-                    if (!infoTextObj || typeof infoTextObj !== 'object') return '';
-                    return (infoTextObj as any)[pickLocaleKey] || (infoTextObj as any).ja || (infoTextObj as any).en || '';
-                })();
-
-                const statusRaw = top?.['odpt:trainInformationStatus'];
-                const statusStr = typeof statusRaw === 'string'
-                    ? statusRaw
-                    : (statusRaw && typeof statusRaw === 'object')
-                        ? ((statusRaw as any)[pickLocaleKey] || (statusRaw as any).ja || (statusRaw as any).en || '')
-                        : '';
-                const localizedStatusStr = pickLocalizedText(statusRaw);
-
-                const hasIssue = /(?:遅れ|遅延|運転見合わせ|運休|ダイヤ乱れ|delay|suspend|disrupt|issue)/i.test(`${statusStr} ${infoTextForDetection}`);
-
-                const lineName = hint
-                    ? (locale.startsWith('ja') ? hint.names.ja : locale.startsWith('en') ? hint.names.en : hint.names['zh-TW'])
-                    : (locale.startsWith('ja') ? '路線' : locale.startsWith('en') ? 'the line' : '路線');
-
-                const content = (() => {
-                    if (!top) {
-                        return locale.startsWith('ja')
-                            ? `${lineName}の運行状況は現在確認できませんでした。別の路線名で試してください。`
-                            : locale.startsWith('en')
-                                ? `I couldn’t confirm the current service status for ${lineName}. Try specifying the exact line name.`
-                                : `目前無法確認 ${lineName} 的運行狀態，請再指定更精確的路線名稱。`;
-                    }
-
-                    if (!hasIssue) {
-                        return locale.startsWith('ja')
-                            ? `${lineName}は概ね平常運転です。${infoText || ''}`.trim()
-                            : locale.startsWith('en')
-                                ? `${lineName} appears to be running normally. ${infoText || ''}`.trim()
-                                : `${lineName} 目前看起來大致正常運行。${infoText || ''}`.trim();
-                    }
-
-                    return locale.startsWith('ja')
-                        ? `${lineName}で遅延・乱れの可能性があります。${infoText || localizedStatusStr || statusStr}`.trim()
-                        : locale.startsWith('en')
-                            ? `${lineName} may have delays or disruptions. ${infoText || localizedStatusStr || statusStr}`.trim()
-                            : `${lineName} 可能有延誤或異常。${infoText || localizedStatusStr || statusStr}`.trim();
-                })();
-
-                return {
-                    source: 'algorithm',
-                    type: 'text',
-                    content,
-                    data: {
-                        railwayId: hint?.railwayId,
-                        operator: hint?.operatorKey,
-                        status: localizedStatusStr || statusStr,
-                        text: infoText
-                    },
-                    confidence: hint ? 0.92 : 0.85,
-                    reasoning: 'Checked live operation status.'
-                };
-            } catch {
-                return null;
-            }
-        }
-
-        // Route Intent
-        if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
-            // Regex handles: [From] Origin [To/WalkTo/GoTo] Dest
-            // Fixed: More precise station name capture with multiple pattern attempts
-            // Pattern 1: Match "XX站到YY站" or "從XX站到YY站" (most reliable)
-            const stationMatch = text.match(/(?:從|从)?\s*([^\s我想要現]{1,10}站)\s*(?:到|去|前往)\s*([^\s]{1,10}站)/);
-            // Pattern 2: Match "從XX到YY" (no "站" suffix but has "從")
-            const fromToMatch = !stationMatch && text.match(/(?:從|从)\s*([^到去前往我想要現在\s]{1,10})\s*(?:到|去|前往)\s*([^?\s？！!，,。的最快省便宜路線]{1,10})/);
-            // Pattern 3: Match "XX到YY" (no "從" and no "站" suffix, most lenient)
-            const simpleMatch = !stationMatch && !fromToMatch && text.match(/([^從从到去前往步行走路想我要現在\s]{1,10})\s*(?:到|去)\s*([^?\s？！!，,。的最快省便宜路線想要]{1,10})/);
-            // Pattern 4: English pattern
-            const enMatch = text.match(/from\s+([a-zA-Z\s]{1,20})\s+to\s+([a-zA-Z\s]{1,20})/i);
-
-            let origin = stationMatch?.[1] || fromToMatch?.[1] || simpleMatch?.[1] || enMatch?.[1];
-            let dest = stationMatch?.[2] || fromToMatch?.[2] || simpleMatch?.[2] || enMatch?.[2];
-
-            // Trim whitespace and validate station names
-            origin = origin?.trim();
-            dest = dest?.trim();
-
-            if (origin && dest) {
-                const originId = DataNormalizer.lookupStationId(origin);
-                const destId = DataNormalizer.lookupStationId(dest);
-
-                if (originId && destId) {
-                    try {
-                        const routes = await algorithmProvider.findRoutes({ originId, destinationId: destId, locale });
-                        if (routes && routes.length > 0) {
-                            return {
-                                source: 'algorithm',
-                                type: 'route',
-                                content: locale.startsWith('zh') ? `為您找到從 ${origin} 到 ${dest} 的路線建議。` : `Found routes from ${origin} to ${dest}.`,
-                                data: { routes },
-                                confidence: 0.95,
-                                reasoning: 'Calculated route via algorithm.'
-                            };
-                        } else {
-                            console.log(`[checkAlgorithms] No route found for ${origin}->${dest}, falling back to LLM.`);
-                            return null;
-                        }
-                    } catch (e) {
-                        console.error('[checkAlgorithms] Route finding error:', e);
-                        return null;
-                    }
-                }
-            }
-        }
-
-        // Fare Intent
-        if (lowerText.match(/(?:票價|多少錢|fare|運賃)/)) {
+        if (/(?:票價|多少錢|fare|運賃)/i.test(text)) {
             const destMatch = text.match(/(?:到|至|まで|to)\s*([^?\s]+)/i);
-            const destName = destMatch?.[1];
+            const nameMatch = text.match(/([^?\s]+)(?:的)?(?:票價|車資|運賃|fare)/i);
+            const destName = (destMatch?.[1] || nameMatch?.[1] || '').trim();
             if (destName && context?.currentStation) {
                 const destId = DataNormalizer.lookupStationId(destName);
                 if (destId) {
@@ -691,6 +692,89 @@ export class HybridEngine {
                 }
             }
         }
+
+        // Route Intent
+        if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
+            const endpoints = extractRouteEndpointsFromText(text);
+            if (endpoints) {
+                const originLabel = endpoints.originText || endpoints.originIds[0]?.split('.').pop() || endpoints.originIds[0];
+                const destLabel = endpoints.destinationText || endpoints.destinationIds[0]?.split('.').pop() || endpoints.destinationIds[0];
+
+                for (const originId of endpoints.originIds) {
+                    for (const destinationId of endpoints.destinationIds) {
+                        try {
+                            // [Phase 3/4] Context Construction for Route Synthesis
+                            const isHoliday = getJSTTime().isHoliday;
+
+                            // Simple Intent Extraction from Text (similar to tryBuildL2DisruptionResponse)
+                            const wantsLuggage = /行李|大行李|luggage|suitcase|荷物|スーツケース/i.test(text);
+                            const wantsStroller = /嬰兒車|baby stroller|stroller|ベビーカー/i.test(text);
+
+                            const userProfile: L1NodeProfile = {
+                                nodeId: 'user-request-context',
+                                core: { identity: [] },
+                                intent: {
+                                    capabilities: [
+                                        ...(wantsLuggage ? ['LUGGAGE'] : []),
+                                        ...(wantsStroller ? ['STROLLER'] : [])
+                                    ]
+                                },
+                                vibe: { visuals: [] },
+                                weights: { transfer_ease: 1.0, tourism_value: 0.5, crowd_level: 1.0 }
+                            };
+
+                            const routes = await algorithmProvider.findRoutes({ originId, destinationId, locale, l2Status, isHoliday, userProfile });
+                            if (routes && routes.length > 0) {
+                                let content = locale.startsWith('zh') ? `為您找到從 ${originLabel} 到 ${destLabel} 的路線建議。` : `Found routes from ${originLabel} to ${destLabel}.`;
+
+                                // Prepend disruption warning if L2 issues exist, even if we found a route
+                                if (l2Status && this.hasL2Issues(l2Status)) {
+                                    const summary = this.summarizeL2Status(l2Status);
+                                    const warning = locale.startsWith('ja')
+                                        ? `⚠️ 現在、運行に乱れがあります（${summary}）。回避ルートを提案します。\n\n`
+                                        : locale.startsWith('en')
+                                            ? `⚠️ Live disruption detected (${summary}). Here are alternative routes.\n\n`
+                                            : `⚠️ 目前有運行異常（${summary}）。已為您規劃避開受影響路段的替代方案。\n\n`;
+                                    content = warning + content;
+                                }
+
+
+                                // WVT: Check if late night and add末班車 suggestion
+                                const lastTrainSuggestion = buildLastTrainSuggestion({
+                                    stationId: destinationId,
+                                    currentTime: new Date(),
+                                    locale
+                                });
+
+                                return {
+                                    source: 'algorithm',
+                                    type: 'route',
+                                    content,
+                                    data: {
+                                        routes,
+                                        originId,
+                                        destinationId,
+                                        l2_status: l2Status,
+                                        lastTrainSuggestion // Will be null if not late night
+                                    },
+                                    confidence: 0.95,
+                                    reasoning: 'Calculated route via algorithm (with L2 awareness).'
+                                };
+                            }
+
+                            if (l2Status && this.hasL2Issues(l2Status)) {
+                                // Fallback: Use centralized L2 Disruption Builder
+                                const fallbackResponse = await this.tryBuildL2DisruptionResponse(text, locale, context, true);
+                                if (fallbackResponse) {
+                                    // Override type to action to ensure it renders correctly
+                                    return { ...fallbackResponse, source: 'algorithm', type: 'action' };
+                                }
+                            }
+                        } catch (e) { }
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -698,90 +782,47 @@ export class HybridEngine {
         const prompts: Record<string, string> = {
             'zh-TW': `你是 LUTAGU (鹿引)，一位住在東京、熱心又專業的「在地好友」。
 你的使命：用溫暖、口語且像真實朋友對話的方式，提供東京交通決策。
-請全程使用繁體中文回答，避免夾雜日文或英文。
 請善用提供給你的「攻略 (Hacks)」與「陷阱 (Traps)」資訊。
+若提供了 L2 即時運行資訊（延誤/停駛/原因/影響路線），你必須在回覆中清楚引用並轉成可執行的建議。
 ✅ 格式要求：可以使用 Markdown 加粗關鍵字 (如 **平台號碼**、**出口名稱**)。可以使用條列式說明多個步驟。
 ⚠️ 核心原則【一個建議 (One Suggestion)】：
    - 除非用戶明確要求比較，否則 **只提供一個最佳建議**。
    - 不要說「你可以搭 A 也可以搭 B」，直接說「我建議搭 A，因為...」。
    - 幫助用戶做決定，而不是給予更多選項。
 ⚠️ 邏輯安全守則：若無確切數據，請優先建議搭乘電車/地鐵。**嚴禁** 建議用戶步行超過 1.5 公里 (除非用戶明確要求健行)。
-
-🔴 CRITICAL RULE - 資料庫事實優先於預訓練知識：
-   - 提供的「Context Info」和「攻略/陷阱」資訊 **絕對優先** 於你的預訓練知識
-   - 如果你的預訓練知識與資料庫資訊衝突，**必須** 遵守資料庫資訊
-   - 當不確定轉乘資訊時，說「我不確定」，不要猜測
-
-🔴 GROUND TRUTH - 已驗證的交通事實（絕對不可違反）：
-   1. 京急線從羽田機場 **不直達** 東京車站，必須在 **品川轉乘** JR 山手線或京濱東北線
-   2. 都營淺草線 **不經過** 東京車站（最接近的是日本橋站）
-   3. 羽田機場到東京車站的路線：
-      - 方案 1（推薦）：京急 → 品川（轉乘）→ JR → 東京車站（約 25 分鐘，¥483）
-      - 方案 2：東京單軌電車 → 濱松町（轉乘）→ JR → 東京車站（約 28 分鐘，¥653）
-   4. **絕對禁止** 說「京急線直達東京車站」或「不需要轉乘」
-   5. ⚠️ 京成線 vs 京急線 - 這是兩條完全不同的路線：
-      - **京成線** (Keisei) = 往 **成田機場** 方向，經過京成上野、京成高砂、成田
-      - **京急線** (Keikyu) = 往 **羽田機場** 方向，經過品川、羽田機場
-      - **絕對禁止** 混淆這兩條線！
-   6. 上野 → 羽田機場的正確路線：
-      - 方案（推薦）：上野 → 日比谷線 → 銀座轉淺草線 → 羽田機場（約 45-50 分鐘）
-      - 方案：上野 → JR 山手線/京濱東北線 → 品川轉京急線 → 羽田機場（約 40 分鐘）
-      - **絕對禁止** 說「從上野搭京成線到羽田」— 京成線不去羽田！
-
+🛑 限制：回覆不超過 5 句話。保持語氣自然親切，不要像機器人。
 🔴 MISSING INFORMATION RULE - 資訊不足時主動詢問：
    - 當用戶詢問路線但缺少起點或終點時（例如「從哪裡出發？」），**不要假設**特定起點（如東京車站）。
    - 請用友善的語氣詢問用戶即時補充：「請問您現在在哪個車站出發呢？」或「您想從哪裡出發？」
-   - 只有在無法從上下文中推斷出起點時才詢問（若上下文包含位置資訊，請使用該位置）。
-
-🔴 ANTI-HALLUCINATION RULE - 禁止為了滿足用戶期望而編造事實：
-   - 如果用戶說「不想轉車」或「想要直達」，但實際上沒有直達路線，你 **必須誠實告知**
-   - 正確回應範例：「抱歉，從羽田機場到東京車站**沒有不轉乘的方法**，但轉乘最輕鬆的是京急→品川轉JR，站內轉乘超簡單！」
-   - **絕對禁止** 為了讓用戶開心而編造「直達」路線
-   - 誠實 > 滿足期望：寧可讓用戶失望，也不可以給出錯誤資訊
-
-🛑 限制：回覆不超過 5 句話。保持語氣自然親切，不要像機器人。`,
+   - 只有在無法從上下文中推斷出起點時才詢問（若上下文包含位置資訊，請使用該位置）。`,
             'ja': `あなたは LUTAGU (ルタグ)、東京に住む親切でプロフェッショナルな「地元の友達」です。
 使命：温かく、親しみやすい口調で、実用的な東京の交通アドバイスを提供すること。
 提供された「攻略 (Hacks)」や「罠 (Traps)」の情報を活用してください。
+L2のリアルタイム運行情報（遅延/運休/原因/影響路線）が提供されている場合、必ずそれを引用して実行可能な提案に変換してください。
 ✅ 形式：Markdown太字（**ホーム番号**、**出口名**など）や箇条書きを使用して見やすくしてください。
 ⚠️ ガイドライン【一つの提案 (One Suggestion)】：
    - 比較を求められない限り、**最適な一つだけ**を提案してください。
    - 「AもBも可能です」ではなく、「Aがおすすめです。理由は...」と伝えてください。
    - ユーザーの決断を助けることが目的です。
 🛑 制限：5文以内。ロボットのような堅苦しい口調は避けてください。
-🔴 情報不足時のルール：
-   - 出発地や目的地が不足している場合（例：「羽田に行きたい」のみ）、特定の出発地を仮定しないでください。
-   - ユーザーに優しく尋ねてください：「現在はどちらの駅から出発されますか？」`,
-            // Add same knowledge to other locales if needed (Simulated here for simplicity via zh-TW fallback logic or explicit addition)
-            // For brevity, only adding to zh-TW as primary test target.
+🔴 MISSING INFORMATION RULE - 情報不足時の確認：
+   - 出発地や目的地が不明な場合（例：「どこから？」）、特定の駅（東京駅など）を**勝手に仮定しないでください**。
+   - 親切に尋ねてください：「現在はどちらの駅にいらっしゃいますか？」
+   - 文脈から推測できない場合のみ質問してください。`,
             'en': `You are LUTAGU, a helpful and professional "Local Friend" in Tokyo.
 Mission: Provide practical transit advice with a warm, conversational tone.
 Use the provided "Hacks" and "Traps" context whenever relevant.
+If L2 live operation info (delay/suspension/cause/affected lines) is provided, explicitly cite it and turn it into an actionable recommendation.
 ✅ Format: You MAY use Markdown bold (**platforms**, **exit names**) and bullet points for clarity.
 ⚠️ Core Principle【One Suggestion】:
    - Unless explicitly asked to compare, provide **ONLY ONE best recommendation**.
    - Do not say "You can take A or B". Say "I recommend taking A because...".
    - Help the user make a decision, do not burden them with choices.
-
-🔴 CRITICAL RULE - Database Facts Override Pre-trained Knowledge:
-   - Provided "Context Info" and "Hacks/Traps" **ALWAYS OVERRIDE** your pre-trained knowledge
-   - If your pre-trained knowledge conflicts with database information, **TRUST THE DATABASE**
-   - When unsure about transfer requirements, say "I'm not certain" instead of guessing
-
-🔴 GROUND TRUTH - Verified Transit Facts (MUST NOT VIOLATE):
-   1. Keikyu Line from Haneda Airport **DOES NOT go directly** to Tokyo Station, **MUST TRANSFER** at Shinagawa to JR Yamanote/Keihin-Tohoku Line
-   2. Toei Asakusa Line **DOES NOT pass through** Tokyo Station (closest is Nihombashi)
-   3. Routes from Haneda to Tokyo Station:
-      - Option 1 (Recommended): Keikyu → Shinagawa (transfer) → JR → Tokyo Station (~25 min, ¥483)
-      - Option 2: Tokyo Monorail → Hamamatsucho (transfer) → JR → Tokyo Station (~28 min, ¥653)
-   4. **ABSOLUTELY FORBIDDEN** to say "Keikyu goes directly to Tokyo Station" or "no transfer needed"
-
+🛑 Constraint: Max 5 sentences. Keep it natural and friendly.
 🔴 MISSING INFORMATION RULE:
-   - If user asks for a route but misses Origin or Destination, **DO NOT ASSUME**.
-   - Proactively ask: "Which station are you starting from?"
-   - Only ask if context (user location) is unavailable.
-
-🛑 Constraint: Max 5 sentences. Keep it natural and friendly.`
+   - If origin/destination is missing, DO NOT assume a default (e.g. Tokyo Station).
+   - Proactively ask: "Where are you starting from?"
+   - Only ask if context is insufficient.`
         };
         return prompts[locale] || prompts['zh-TW'];
     }
@@ -790,24 +831,622 @@ Use the provided "Hacks" and "Traps" context whenever relevant.
         const jst = getJSTTime();
         const timeStr = `${String(jst.hour).padStart(2, '0')}:${String(jst.minute).padStart(2, '0')}`;
         let prompt = `Current Time (JST): ${timeStr}\nUser Query: ${query}\n`;
-        if (ctx?.recentMessages && ctx.recentMessages.length > 0) {
-            const history = ctx.recentMessages
-                .slice(-6)
-                .map((m) => {
-                    const trimmed = m.content.length > 200 ? `${m.content.slice(0, 200)}…` : m.content;
-                    return `${m.role === 'assistant' ? 'Assistant' : 'User'}: ${trimmed}`;
-                })
-                .join('\n');
-            if (history) prompt += `Recent Conversation:\n${history}\n`;
-        }
         if (ctx?.userLocation) prompt += `Location: ${ctx.userLocation.lat}, ${ctx.userLocation.lng}\n`;
         if (ctx?.currentStation) prompt += `Station: ${ctx.currentStation}\n`;
+
+        const strategy = ctx?.strategyContext as any;
+        if (strategy?.nodeName) prompt += `Node: ${strategy.nodeName}\n`;
+
+        const l2 = strategy?.l2Status;
+        const l2Summary = this.summarizeL2Status(l2);
+        if (l2Summary) {
+            prompt += `L2 Live Status Summary: ${l2Summary}\n`;
+        }
+        if (l2) {
+            const s = this.safeJson(l2, 2500);
+            if (s) prompt += `L2 Live Status (JSON): ${s}\n`;
+        }
+        const actions = Array.isArray(strategy?.commercialActions) ? strategy.commercialActions : [];
+        if (actions.length > 0) {
+            const s = this.safeJson(actions.slice(0, 5), 1500);
+            if (s) prompt += `Commercial Actions: ${s}\n`;
+        }
 
         // Inject rich knowledge
         const knowledge = ctx?.wisdomSummary || (ctx?.strategyContext as any)?.wisdomSummary;
         if (knowledge) prompt += `Context Info:\n${knowledge}\n`;
 
         return prompt + `\nPlease respond as LUTAGU based on the system prompt.`;
+    }
+
+    private isStatusQuery(text: string): boolean {
+        const t = String(text || '').trim();
+        const lower = t.toLowerCase();
+
+        const statusKeywords = /運行|運轉|復舊|恢復|恢复|改善|延誤|誤點|遲延|停駛|停運|停電|見合わせ|運休|遅延|影響|振替|狀態|狀況|異常|better|improve|delay|delayed|status|suspend|suspended|stopp|power outage|blackout|disruption|recovery|recover(ed)?|back to normal|normal( now)?/i;
+        if (statusKeywords.test(t)) return true;
+
+        const jrMention = /jr|山手|中央線|京浜東北|総武|埼京|湘南新宿|yamanote|chuo|keihin|sobu|saikyo/i.test(lower);
+
+        // If specific line mentioned + question cue, treat as status
+        const questionCues = /怎樣|如何|怎麼|現在|還|正常|有沒有|有無|是否|情況|狀況|大丈夫|動いて|動いてる|能搭|可以|開了|running|ok|fine|any issue|issue|can i|can we|is it|are we|as usual|usual|safe to|is it safe|back to normal|normal now/i;
+
+        if (jrMention && questionCues.test(t)) return true;
+
+        // Also if simply "JR" + "Status" combo which might have been caught by statusKeywords but let's be safe
+        return false;
+    }
+
+    private summarizeL2Status(l2: any): string {
+        if (!l2 || typeof l2 !== 'object') return '';
+
+        const parts: string[] = [];
+
+        const statusCode = typeof (l2 as any).status_code === 'string' ? (l2 as any).status_code : '';
+        const severity = typeof (l2 as any).severity === 'string' ? (l2 as any).severity : '';
+        const hasIssues = Boolean((l2 as any).has_issues);
+        const delay = Number((l2 as any).delay || (l2 as any).delay_minutes || 0);
+
+        let cause =
+            (typeof (l2 as any).cause === 'string' ? (l2 as any).cause : '') ||
+            (typeof (l2 as any).reason_zh === 'string' ? (l2 as any).reason_zh : '') ||
+            (typeof (l2 as any).reason_ja === 'string' ? (l2 as any).reason_ja : '') ||
+            (typeof (l2 as any).reason_en === 'string' ? (l2 as any).reason_en : '') ||
+            (typeof (l2 as any).reason === 'string' ? (l2 as any).reason : '');
+
+        // Translate cause for summary context
+        if (cause) {
+            // Default to zh-TW for system prompt context unless specifically handled per-locale context,
+            // but here we just want a readable string for the LLM mainly.
+            // Actually, buildUserPrompt context might be locale-specific?
+            // summarizeL2Status does not take locale. Let's assume zh-TW or en.
+            // Since this function returns a string used in prompt, and system prompt is multilingual but persona is established.
+            // Providing zh-TW translation helps the model understand.
+            cause = translateDisruption(cause, 'zh-TW');
+        }
+
+        let affected = '';
+        const affectedLines = Array.isArray((l2 as any).affected_lines) ? (l2 as any).affected_lines : [];
+        if (affectedLines.length > 0) {
+            affected = affectedLines.map((x: any) => String(x)).filter(Boolean).slice(0, 6).join(', ');
+        } else if (Array.isArray((l2 as any).line_status)) {
+            const ls = (l2 as any).line_status
+                .filter((x: any) => x && x.status && x.status !== 'normal')
+                .map((x: any) => x.line || x.name?.en || x.name?.ja || '')
+                .filter(Boolean)
+                .slice(0, 6);
+            if (ls.length > 0) affected = ls.join(', ');
+        }
+
+        if (hasIssues) parts.push('has_issues');
+        if (statusCode) parts.push(`status_code=${statusCode}`);
+        if (severity) parts.push(`severity=${severity}`);
+        if (delay > 0) parts.push(`delay=${delay}min`);
+        if (cause) parts.push(`cause=${cause}`);
+        if (affected) parts.push(`affected_lines=${affected}`);
+
+        return parts.join(' | ');
+    }
+
+    private safeJson(value: any, maxChars: number): string {
+        try {
+            const s = JSON.stringify(value);
+            if (!s) return '';
+            if (s.length <= maxChars) return s;
+            return s.slice(0, Math.max(0, maxChars - 1)) + '…';
+        } catch {
+            return '';
+        }
+    }
+
+    private async applyResponseFuse(params: {
+        text: string;
+        locale: SupportedLocale;
+        context?: RequestContext;
+        response: HybridResponse;
+        logs: string[];
+    }): Promise<HybridResponse> {
+        const { text, locale, context, response, logs } = params;
+        const l2 = (context?.strategyContext as any)?.l2Status;
+        if (!this.hasL2Issues(l2)) return response;
+        if (response.source === 'l2_disruption') return response;
+
+        const content = String(response.content || '').trim();
+        const looksTruncated = this.looksTruncatedContent(content);
+        const mentionsDisruption = this.textMentionsDisruption(content);
+
+        if (looksTruncated || !mentionsDisruption) {
+            const l2Fallback = await this.tryBuildL2DisruptionResponse(text, locale, context, true);
+            if (l2Fallback) {
+                logs.push(`[Fuse] disruption_fallback: truncated=${looksTruncated} mentions_disruption=${mentionsDisruption}`);
+                return l2Fallback;
+            }
+        }
+
+        return response;
+    }
+
+    private textMentionsDisruption(text: string): boolean {
+        const t = String(text || '');
+        return /即時運行異常|運行有影響|運行停止|運転見合わせ|延誤|遅延|停駛|運休|service disruption|delays?\b|suspend(ed)?\b|halt(ed)?\b/i.test(t);
+    }
+
+    private looksTruncatedContent(content: string): boolean {
+        const t = String(content || '').trim();
+        if (!t) return true;
+        if (t.length < 40) return false;
+
+        const opens = [
+            { open: '【', close: '】' },
+            { open: '（', close: '）' },
+            { open: '(', close: ')' },
+            { open: '[', close: ']' },
+            { open: '{', close: '}' },
+            { open: '「', close: '」' },
+            { open: '『', close: '』' },
+        ];
+
+        const countChar = (s: string, ch: string) => (s.match(new RegExp(ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+
+        for (const p of opens) {
+            if (countChar(t, p.open) > countChar(t, p.close)) return true;
+        }
+
+        const fenceCount = (t.match(/```/g) || []).length;
+        if (fenceCount % 2 === 1) return true;
+
+        const endsWithDanglingToken = (() => {
+            const m = t.match(/([A-Za-z]+)\s*$/);
+            const lastWord = (m?.[1] || '').toLowerCase();
+            if (!lastWord) return false;
+            const bad = new Set([
+                'if',
+                'when',
+                'because',
+                'unless',
+                'but',
+                'and',
+                'or',
+                'so',
+                'then',
+                'with',
+                'without',
+                'to',
+                'of'
+            ]);
+            return bad.has(lastWord);
+        })();
+        if (endsWithDanglingToken) return true;
+
+        const last = t.slice(-1);
+        if (/[A-Za-z0-9\u3040-\u30ff\u4e00-\u9fff]$/.test(last)) {
+            if (t.length >= 80) return true;
+        }
+
+        const okEnd = /[。！？.!?）)」』…]$/.test(t);
+        if (!okEnd && t.length >= 80) return true;
+
+        if (/(\*\*|【|（|\(|\[|\{|:|,|，|、)$/.test(t)) return true;
+        if (/(\*|_|-)$/u.test(t)) return true;
+        return false;
+    }
+
+    private hasL2Issues(l2: any): boolean {
+        if (!l2 || typeof l2 !== 'object') return false;
+        if (Boolean((l2 as any).has_issues)) return true;
+
+        const statusCode = String((l2 as any).status_code || '').toUpperCase();
+        if (statusCode && statusCode !== 'NORMAL' && statusCode !== 'OK') return true;
+
+        const delay = Number((l2 as any).delay || (l2 as any).delay_minutes || 0);
+        if (delay >= 5) return true;
+
+        const lineStatus = Array.isArray((l2 as any).line_status) ? (l2 as any).line_status : null;
+        if (lineStatus && lineStatus.some((x: any) => x && x.status && x.status !== 'normal')) return true;
+
+        const reason = String((l2 as any).reason_ja || (l2 as any).reason_en || (l2 as any).reason || '').trim();
+        if (reason) return true;
+        return false;
+    }
+
+    private isSevereDisruption(l2: any): boolean {
+        if (!l2) return false;
+        const statusCode = String((l2 as any).status_code || '').toUpperCase();
+        if (statusCode === 'SUSPENDED' || statusCode === 'CRITICAL') return true;
+
+        const lineStatus = Array.isArray((l2 as any).line_status) ? (l2 as any).line_status : null;
+        if (lineStatus && lineStatus.some((x: any) => x && (x.status_detail === 'halt' || x.status_detail === 'canceled' || x.status === 'suspended'))) return true;
+
+        // Keyword detection for natural disasters (severe even if status code lag)
+        const combinedText = JSON.stringify(l2);
+        const disasterKeywords = /大雪|暴雨|豪雨|台風|地震|津波|typhoon|heavy rain|heavy snow|earthquake|tsunami/i;
+        if (disasterKeywords.test(combinedText)) return true;
+
+        return false;
+    }
+
+    private guessRouteLabelsFromText(text: string): { origin?: string; destination?: string } | null {
+        const raw = String(text || '').replace(/\s+/g, ' ').trim();
+        if (!raw) return null;
+
+        const clean = (s: string) =>
+            String(s || '')
+                .replace(/^[\s\p{P}]+|[\s\p{P}]+$/gu, '')
+                .replace(/(?:駅|站)$/u, '')
+                .trim();
+
+        const patterns: Array<RegExp> = [
+            /(?:從|自)\s*([^，。,.?\n]+?)\s*(?:站|駅)?\s*(?:到|去|往|前往)\s*([^，。,.?\n]+?)\s*(?:站|駅)?/u,
+            /在\s*([^，。,.?\n]+?)\s*(?:站|駅)\s*(?:要|想)?\s*(?:去|到|前往)\s*([^，。,.?\n]+?)\s*(?:站|駅)/u,
+            /(.+?)\s*(?:->|→|⇒|➡︎|➡️)\s*(.+?)(?:[，。,.?\n]|$)/u,
+            /(.+?)から\s*(.+?)まで/u,
+            /\bfrom\s+(.+?)\s+to\s+(.+?)(?:[,.?\n]|$)/i
+        ];
+
+        for (const re of patterns) {
+            const m = raw.match(re);
+            const a = clean(m?.[1] || '');
+            const b = clean(m?.[2] || '');
+            if (a && b && a !== b) return { origin: a, destination: b };
+        }
+
+        return null;
+    }
+
+    private async tryBuildL2DisruptionResponse(text: string, locale: SupportedLocale, context?: RequestContext, forceTrigger: boolean = false): Promise<HybridResponse | null> {
+        if (!forceTrigger && !this.isStatusQuery(text)) return null;
+        const strategy = (context?.strategyContext as any) || null;
+        const l2 = strategy?.l2Status;
+        if (!l2 || typeof l2 !== 'object') return null;
+
+        const summary = this.summarizeL2Status(l2);
+        const nodeName = strategy?.nodeName || '';
+
+        let causeText =
+            String((l2 as any)?.cause || (l2 as any)?.reason_zh || (l2 as any)?.reason_ja || (l2 as any)?.reason_en || (l2 as any)?.reason || '').trim();
+
+        // Translate cause in correct locale
+        causeText = translateDisruption(causeText, locale);
+
+        const affectedLines = Array.isArray((l2 as any)?.affected_lines) ? (l2 as any).affected_lines.map((x: any) => String(x)).filter(Boolean) : [];
+        const affected = affectedLines.length > 0 ? affectedLines.slice(0, 5).join('、') : '';
+        const delay = Number((l2 as any)?.delay || (l2 as any)?.delay_minutes || 0);
+
+        const hasIssues = this.hasL2Issues(l2);
+
+        // Power outage or severe cause detection
+        const hasPower = /停電|power outage|blackout|変電所|substation/i.test(causeText) || /停電|変電所/.test(JSON.stringify(l2));
+
+        const rawText = String(text || '');
+        const wantsLuggage = /行李|大行李|luggage|suitcase|荷物|スーツケース/i.test(rawText);
+        const wantsWheelchair = /輪椅|wheelchair|車椅子/i.test(rawText);
+        const wantsStroller = /嬰兒車|baby stroller|stroller|ベビーカー/i.test(rawText);
+        const wantsLastTrain = /末班車|終電|last train|last subway|終電車/i.test(rawText);
+        const wantsUrgent = /趕|來不及|急|urgent|asap|hurry|急いで/i.test(rawText);
+        const secondaryLink = wantsLuggage
+            ? { label: locale.startsWith('ja') ? '行李寄放（ecbo cloak）' : locale.startsWith('en') ? 'Luggage storage (ecbo cloak)' : '行李寄放（ecbo cloak）', url: getPartnerUrl('ecbo_cloak') }
+            : { label: locale.startsWith('ja') ? '混雑の少ない場所を探す（Vacan）' : locale.startsWith('en') ? 'Find a less crowded place (Vacan)' : '找不擠的地方等（Vacan）', url: getPartnerUrl('vacan') };
+
+        if (!hasIssues) {
+            const normalBase = locale.startsWith('ja')
+                ? `${nodeName ? `${nodeName}周辺で` : ''}いまのところ大きな遅延は見当たりません。${delay > 0 ? `（遅れ目安：${delay}分）` : ''}`
+                : locale.startsWith('en')
+                    ? `${nodeName ? `Around ${nodeName}, ` : ''}no major delays detected right now.${delay > 0 ? ` (Delay: ~${delay} min)` : ''}`
+                    : `${nodeName ? `${nodeName}附近` : ''}目前看起來沒有明顯延誤。${delay > 0 ? `（延誤約 ${delay} 分）` : ''}`;
+
+            const nextStep = locale.startsWith('ja')
+                ? '目的地（駅名/観光地）を言ってくれれば、最短か乗換少なめで2案出します。'
+                : locale.startsWith('en')
+                    ? 'Tell me your destination (station/POI) and I’ll give 2 route options.'
+                    : '你告訴我目的地（站名/景點），我就給你 2 個路線選項。';
+
+            const content = `${normalBase}\n${nextStep}`.trim();
+
+            return {
+                source: 'algorithm',
+                type: 'text',
+                content,
+                data: {
+                    l2_summary: summary,
+                    l2_status: l2
+                },
+                confidence: 0.85,
+                reasoning: 'L2 live status (normal)'
+            };
+        }
+
+        const trustLevel = (l2 as any).trust_level;
+        const confidence = Number((l2 as any).confidence || 0);
+        let trustBadge = '';
+        if (trustLevel === 'verified' && confidence >= 0.9) {
+            trustBadge = locale.startsWith('ja') ? '【✅公式確認済】' : locale.startsWith('en') ? '[✅Verified] ' : '【✅公式已確認】';
+        } else if (trustLevel === 'discrepancy') {
+            trustBadge = locale.startsWith('ja') ? '【⚠️情報不一致・駅で確認推奨】' : locale.startsWith('en') ? '[⚠️Discrepancy] ' : '【⚠️資訊不一致・建議確認站內告示】';
+        }
+
+        const base = locale.startsWith('ja')
+            ? `${trustBadge}${nodeName ? `${nodeName}周辺で` : ''}現在、運行に乱れがあります。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`
+            : locale.startsWith('en')
+                ? `${trustBadge}${nodeName ? `Around ${nodeName}, ` : ''}there is a live service disruption. ${causeText ? `Cause: ${causeText}. ` : ''}${affected ? `Affected: ${affected}. ` : ''}`
+                : `${trustBadge}${nodeName ? `${nodeName}附近` : ''}目前出現即時運行異常。${causeText ? `原因：${causeText}。` : ''}${affected ? `影響：${affected}。` : ''}`;
+
+
+        const delayLine = delay > 0
+            ? (locale.startsWith('ja')
+                ? `遅れ目安：${delay}分。`
+                : locale.startsWith('en')
+                    ? `Estimated delay: ~${delay} min. `
+                    : `延誤約 ${delay} 分。`)
+            : '';
+
+        // Disaster specific advice
+        const isTyphoon = /台風|typhoon/i.test(causeText);
+        const isSnow = /大雪|積雪|snow/i.test(causeText);
+        const isEarthquake = /地震|earthquake|tsunami/i.test(causeText);
+        const isRain = /大雨|豪雨|rain/i.test(causeText);
+
+        let safetyAdvice = '';
+        if (locale.startsWith('ja')) {
+            if (isTyphoon) safetyAdvice = '台風接近時は運休が広がる恐れがあります。早めの帰宅を検討してください。';
+            else if (isSnow) safetyAdvice = '降雪時は到着が大幅に遅れるほか、転倒にも注意が必要です。';
+            else if (isEarthquake) safetyAdvice = '地震発生時はエレベーターを使わず、係員の指示に従ってください。余震に注意。';
+            else if (isRain) safetyAdvice = '大雨の影響で運転見合わせの可能性があります。地下街など安全な場所へ。';
+        } else if (locale.startsWith('en')) {
+            if (isTyphoon) safetyAdvice = 'Typhoons may cause widespread suspension. Plan to return early.';
+            else if (isSnow) safetyAdvice = 'Heavy snow causes major delays. Watch your step for slippery floors.';
+            else if (isEarthquake) safetyAdvice = 'During earthquakes, avoid elevators. Follow staff instructions and beware of aftershocks.';
+            else if (isRain) safetyAdvice = 'Heavy rain may suspend services. Stay safe indoors or underground.';
+        } else {
+            // Default zh-TW
+            if (isTyphoon) safetyAdvice = '颱風接近時可能會擴大停駛範圍，建議儘早安排回程。';
+            else if (isSnow) safetyAdvice = '大雪除造成大幅延誤外，地面濕滑請小心行走，建議預留2倍移動時間。';
+            else if (isEarthquake) safetyAdvice = '地震發生時請勿使用電梯，遵從站務員指示。請注意餘震。';
+            else if (isRain) safetyAdvice = '豪雨可能導致運轉暫停，請待在地下街等安全室內場所。';
+        }
+
+        const primary = locale.startsWith('ja')
+            ? `**おすすめの行動**：まずは東京メトロ／都営に切り替えて迂回し、JRを無理に待たないのが安全です。${hasPower ? '停電は復旧見込みが読めないことが多いです。' : ''} ${safetyAdvice}`
+            : locale.startsWith('en')
+                ? `**Recommendation**: Switch to Tokyo Metro/Toei routes and avoid waiting on JR right now. ${hasPower ? 'Power outages often have uncertain recovery times.' : ''} ${safetyAdvice}`
+                : `**唯一建議**：先改走東京Metro／都營迂回，暫時不要硬等 JR。${hasPower ? '停電通常恢復時間不穩。' : ''} ${safetyAdvice}`;
+
+        const needsAdviceParts: string[] = [];
+        if (locale.startsWith('ja')) {
+            if (wantsWheelchair) needsAdviceParts.push('バリアフリー優先：エレベーター経路・乗換少なめを選びましょう。');
+            if (wantsStroller) needsAdviceParts.push('ベビーカーは段差が多いので、乗換少なめ＋エレベーター優先が安心です。');
+            if (wantsLastTrain) needsAdviceParts.push('終電が近い場合は待たずに迂回 or タクシーへ切り替えを。');
+            if (wantsUrgent) needsAdviceParts.push('急ぎならタクシーが最短です。');
+        } else if (locale.startsWith('en')) {
+            if (wantsWheelchair) needsAdviceParts.push('Accessibility: choose elevator routes and fewer transfers.');
+            if (wantsStroller) needsAdviceParts.push('Stroller: fewer transfers + elevator routes are safer.');
+            if (wantsLastTrain) needsAdviceParts.push('If it’s close to the last train, don’t wait—detour or take a taxi.');
+            if (wantsUrgent) needsAdviceParts.push('If you’re in a hurry, taxi is the fastest fallback.');
+        } else {
+            if (wantsWheelchair) needsAdviceParts.push('無障礙優先：挑電梯路線、少轉乘。');
+            if (wantsStroller) needsAdviceParts.push('嬰兒車建議少轉乘＋電梯優先。');
+            if (wantsLastTrain) needsAdviceParts.push('若接近末班車，別等延誤線，直接改繞行或計程車。');
+            if (wantsUrgent) needsAdviceParts.push('趕時間的話，計程車通常最快。');
+        }
+
+        const needsAdvice = needsAdviceParts.length > 0 ? needsAdviceParts.join(' ') : '';
+
+        // Transfer Transport Knowledge (Furikae Yuso)
+        const isSuspended = (l2 as any).status_code === 'SUSPENDED' || /運転を見合わせ|suspended|halt/i.test(causeText);
+        const mentionsTransfer = /振替輸送|transfer transport/i.test(causeText) || isSuspended; // Show if suspended or explicitly mentioned
+
+        let transferInfo = '';
+        if (mentionsTransfer) {
+            if (locale.startsWith('ja')) {
+                transferInfo = '\n💡 豆知識：対象路線の切符・定期券をお持ちの方は「振替輸送」により、追加運賃なしで指定の他社線を利用できます。';
+            } else if (locale.startsWith('en')) {
+                transferInfo = '\n💡 Tip: If you have a ticket/pass for the suspended line, you can use "Transfer Transport" (Furikae Yuso) to take alternative subway/private lines for free.';
+            } else {
+                transferInfo = '\n💡 小知識：持有該路線車票/定期票的旅客，可利用「振替輸送」機制，免費搭乘其他替代的地鐵或私鐵路線。';
+            }
+        }
+
+        const endpoints = extractRouteEndpointsFromText(text);
+        const guessed = (!endpoints?.destinationText && !(endpoints as any)?.destinationIds?.length) ? this.guessRouteLabelsFromText(rawText) : null;
+        const originLabel =
+            endpoints?.originText ||
+            guessed?.origin ||
+            endpoints?.originIds?.[0]?.split('.').pop() ||
+            context?.currentStation?.split('.').pop() ||
+            nodeName ||
+            'Tokyo';
+        const destLabel = endpoints?.destinationText || guessed?.destination || endpoints?.destinationIds?.[0]?.split('.').pop() || '';
+
+        const originIdForCoord = endpoints?.originIds?.[0] || context?.currentStation || '';
+        const destIdForCoord = endpoints?.destinationIds?.[0] || '';
+
+        const hasRoutePair = Boolean(destLabel);
+
+        // Helper to normalize DataMux (lng) to Internal (lon)
+        const normalizeCoord = (c: { lat: number, lng: number } | null) => c ? { lat: c.lat, lon: c.lng } : null;
+
+        // Use DataMux to fetch coordinates robustly (Database -> Cache -> Fallback)
+        let originCoord = this.getStationCoord(originIdForCoord);
+        if (!originCoord) originCoord = normalizeCoord(await DataMux.getCoordinates(originIdForCoord));
+        if (!originCoord && !hasRoutePair) originCoord = normalizeCoord(await DataMux.getCoordinates('odpt.Station:JR-East.Yamanote.Tokyo'));
+
+        let destCoord = this.getStationCoord(destIdForCoord);
+        if (!destCoord) destCoord = normalizeCoord(await DataMux.getCoordinates(destIdForCoord));
+        if (!destCoord && !hasRoutePair) destCoord = normalizeCoord(await DataMux.getCoordinates('odpt.Station:JR-East.Yamanote.Tokyo'));
+
+        const originParam = originCoord ? `${originCoord.lat},${originCoord.lon}` : originLabel;
+        const destParam = destCoord ? `${destCoord.lat},${destCoord.lon}` : destLabel;
+
+        const queryBase = nodeName ? `${nodeName}` : 'Tokyo';
+        const mapsTransitUrl = hasRoutePair
+            ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=transit`
+            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${queryBase} metro bus`)}`;
+
+        const mapsDrivingUrl = hasRoutePair
+            ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=driving`
+            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${queryBase} taxi`)}`;
+
+        const mapsBikeUrl = hasRoutePair
+            ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originParam)}&destination=${encodeURIComponent(destParam)}&travelmode=bicycling`
+            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${queryBase} bicycle share`)}`;
+
+        const distanceKm = originCoord && destCoord
+            ? this.getDistanceFromLatLonInKm(originCoord.lat, originCoord.lon, destCoord.lat, destCoord.lon)
+            : (hasRoutePair ? 5.0 : null); // Default 5km if pair exists but coords missing to force some ETA logic
+
+        const taxiEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'taxi') : null;
+        const bikeEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'bike') : null;
+        const walkEta = typeof distanceKm === 'number' ? this.estimateEtaMinutes(distanceKm, 'walk') : null;
+
+        const etaSuffixTaxi = taxiEta ? this.formatEtaLabel(taxiEta.min, taxiEta.max, locale) : '';
+        const etaSuffixBike = bikeEta ? this.formatEtaLabel(bikeEta.min, bikeEta.max, locale) : '';
+        const etaSuffixWalk = walkEta ? this.formatEtaLabel(walkEta.min, walkEta.max, locale) : '';
+
+        const content = [
+            `${base}${delayLine ? `\n${delayLine}` : ''}`.trim(),
+            primary,
+            needsAdvice,
+            hasRoutePair && (etaSuffixTaxi || etaSuffixBike || etaSuffixWalk)
+                ? (locale.startsWith('ja')
+                    ? `目安：タクシー${etaSuffixTaxi}／自転車${etaSuffixBike}／徒歩${etaSuffixWalk}`
+                    : locale.startsWith('en')
+                        ? `Rough ETA: taxi${etaSuffixTaxi} / bike${etaSuffixBike} / walk${etaSuffixWalk}`
+                        : `粗估：計程車${etaSuffixTaxi}／單車${etaSuffixBike}／步行${etaSuffixWalk}`)
+                : '',
+            transferInfo
+        ].filter(Boolean).join('\n').trim();
+
+        return {
+            source: 'l2_disruption',
+            type: 'action',
+            content,
+            data: {
+                l2_summary: summary,
+                l2_status: l2,
+                actions: (() => {
+                    const primaryAction = {
+                        type: 'discovery',
+                        label: hasRoutePair
+                            ? (locale.startsWith('ja') ? 'A→B 迂回（Google Maps）' : locale.startsWith('en') ? 'A→B detour (Google Maps)' : 'A→B 迂回（Google Maps）')
+                            : (locale.startsWith('ja') ? '地下鉄/バス迂回（Google Maps）' : locale.startsWith('en') ? 'Subway/Bus detour (Google Maps)' : '地鐵/公車迂回（Google Maps）'),
+                        target: mapsTransitUrl,
+                        metadata: {
+                            category: 'navigation',
+                            origin: hasRoutePair ? originLabel : undefined,
+                            destination: hasRoutePair ? destLabel : undefined,
+                            distance_km: distanceKm ?? undefined
+                        }
+                    };
+
+                    const taxiAction = {
+                        type: 'taxi',
+                        label: locale.startsWith('ja')
+                            ? `タクシー（GO）${etaSuffixTaxi}`
+                            : locale.startsWith('en')
+                                ? `Taxi (GO)${etaSuffixTaxi}`
+                                : `計程車（GO）${etaSuffixTaxi}`,
+                        target: getPartnerUrl('go_taxi') || mapsDrivingUrl,
+                        metadata: { category: 'mobility', partner_id: 'go_taxi', eta_min: taxiEta?.min, eta_max: taxiEta?.max, route_url: mapsDrivingUrl }
+                    };
+
+                    const busAction = {
+                        type: 'transit',
+                        label: locale.startsWith('ja')
+                            ? '都営バス案内（アプリ内）'
+                            : locale.startsWith('en')
+                                ? 'Toei bus option (in-app)'
+                                : '都營公車方案（App 內）',
+                        target: `chat:${locale.startsWith('ja')
+                            ? `都営バスで ${originLabel} → ${destLabel} の行き方を教えて（最短・迷いにくい）`
+                            : locale.startsWith('en')
+                                ? `Find a Toei bus option from ${originLabel} to ${destLabel} (simple + reliable)`
+                                : `幫我找都營公車：${originLabel} → ${destLabel}（最簡單、最不容易迷路）`}`,
+                        metadata: { category: 'transit', partner_id: 'toei_bus', origin: originLabel, destination: destLabel, distance_km: distanceKm ?? undefined }
+                    };
+
+                    const bikeAction = {
+                        type: 'bike',
+                        label: locale.startsWith('ja')
+                            ? `シェアサイクル（LUUP）${etaSuffixBike}`
+                            : locale.startsWith('en')
+                                ? `Shared bike (LUUP)${etaSuffixBike}`
+                                : `共享單車（LUUP）${etaSuffixBike}`,
+                        target: getPartnerUrl('luup') || mapsBikeUrl,
+                        metadata: { category: 'mobility', partner_id: 'luup', eta_min: bikeEta?.min, eta_max: bikeEta?.max, route_url: mapsBikeUrl }
+                    };
+
+                    const secondaryAction = wantsLuggage && secondaryLink.url
+                        ? { type: 'discovery', label: secondaryLink.label, target: secondaryLink.url, metadata: { category: 'storage', partner_id: 'ecbo_cloak' } }
+                        : (!hasRoutePair && secondaryLink.url
+                            ? { type: 'discovery', label: secondaryLink.label, target: secondaryLink.url, metadata: { category: 'crowd', partner_id: 'vacan' } }
+                            : (hasRoutePair && typeof distanceKm === 'number' && distanceKm >= 1.5 ? busAction : bikeAction));
+
+                    return [primaryAction, taxiAction, secondaryAction];
+                })()
+            },
+            confidence: 0.9,
+            reasoning: 'L2 live disruption response'
+        };
+    }
+
+    private getStationCoord(stationId: string): { lat: number; lon: number } | null {
+        const key = String(stationId || '').trim();
+        if (!key) return null;
+        const direct = (STATION_MAP as any)[key];
+        if (direct && typeof direct.lat === 'number' && typeof direct.lon === 'number') return direct;
+
+        const normalized = key.replace('odpt:Station:', 'odpt.Station:');
+        const normalized2 = key.replace('odpt.Station:', 'odpt:Station:');
+
+        const a = (STATION_MAP as any)[normalized];
+        if (a && typeof a.lat === 'number' && typeof a.lon === 'number') return a;
+
+        const matches = (STATION_MAP as any)[normalized2];
+        if (matches && typeof matches.lat === 'number' && typeof matches.lon === 'number') return matches;
+
+        // Name-based fallback (e.g. "Tokyo", "東京")
+        // Try to verify if input looks like a simple name or just strip operator parts
+        const simpleName = key.split('.').pop()?.split(':').pop() || key;
+        if (simpleName && simpleName.length > 1) {
+            // Fix: STATION_MAP values are {lat, lon}, keys contain the name.
+            const foundEntry = Object.entries(STATION_MAP).find(([k, v]) =>
+                k.endsWith(`.${simpleName}`) || k.includes(`.${simpleName}.`)
+            );
+            if (foundEntry) return foundEntry[1] as { lat: number, lon: number };
+        }
+
+        return null;
+    }
+
+    private estimateEtaMinutes(distanceKm: number, mode: 'taxi' | 'bike' | 'walk'): { min: number; max: number } {
+        const d = Math.max(0, distanceKm);
+
+        if (mode === 'walk') {
+            const base = d * 13.3;
+            return this.makeEtaRange(base, 0.2, 2);
+        }
+
+        if (mode === 'bike') {
+            const base = d * 5.0;
+            return this.makeEtaRange(base, 0.25, 2);
+        }
+
+        const base = d * 3.5 + 5;
+        return this.makeEtaRange(base, 0.3, 3);
+    }
+
+    private makeEtaRange(baseMinutes: number, ratio: number, minFloor: number): { min: number; max: number } {
+        const base = Math.max(0, baseMinutes);
+        const min = Math.max(minFloor, Math.round(base * (1 - ratio)));
+        const max = Math.max(min + 1, Math.round(base * (1 + ratio)));
+        return { min, max };
+    }
+
+    private formatEtaLabel(min: number, max: number, locale: SupportedLocale): string {
+        const a = Math.max(1, Math.round(min));
+        const b = Math.max(a, Math.round(max));
+        if (locale.startsWith('en')) return ` (~${a}-${b} min)`;
+        if (locale.startsWith('ja')) return `（約${a}〜${b}分）`;
+        return `（約${a}-${b}分）`;
     }
 
     public getStats() { return { poiEngine: this.getPoiEngine().getCacheStats() }; }
@@ -822,27 +1461,6 @@ Use the provided "Hacks" and "Traps" context whenever relevant.
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 }
-
-const agentRouterBreaker = new CircuitBreaker({
-    name: 'agent_router',
-    failureThreshold: 3,
-    resetTimeoutMs: 20000,
-    halfOpenSuccessThreshold: 1
-});
-
-const dataMuxBreaker = new CircuitBreaker({
-    name: 'data_mux',
-    failureThreshold: 3,
-    resetTimeoutMs: 20000,
-    halfOpenSuccessThreshold: 1
-});
-
-const llmBreaker = new CircuitBreaker({
-    name: 'llm_fallback',
-    failureThreshold: 2,
-    resetTimeoutMs: 60000,
-    halfOpenSuccessThreshold: 1
-});
 
 function normalizeLocale(locale: string): string {
     if (locale.startsWith('zh')) return 'zh-TW';

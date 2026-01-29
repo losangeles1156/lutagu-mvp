@@ -93,6 +93,8 @@ function normalizeToIncident(item: any): TransitIncident {
         occurred_at: null,
         observed_at: observedAt,
         evidence: evidence.length > 0 ? evidence : undefined,
+        trust_level: item.trust_level,
+        confidence: item.confidence,
     };
 }
 
@@ -125,10 +127,14 @@ export async function GET(req: NextRequest) {
                             text_en: i.message?.en || '',
                             occurred_at: i.occurred_at || null,
                             updated_at: i.observed_at,
+                            trust_level: i.trust_level || 'unverified',
+                            confidence: i.confidence || 0.5,
+                            metadata: { evidence: i.evidence }
                         })),
                         { onConflict: 'id' }
                     );
             }
+
 
             return NextResponse.json(
                 {
@@ -200,9 +206,13 @@ export async function POST(req: NextRequest) {
                     text_en: i.message?.en || '',
                     occurred_at: i.occurred_at || null,
                     updated_at: i.observed_at,
+                    trust_level: i.trust_level || 'unverified',
+                    confidence: i.confidence || 0.5,
+                    metadata: { evidence: i.evidence }
                 })),
                 { onConflict: 'id' }
             );
+
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });

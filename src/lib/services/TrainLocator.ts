@@ -43,12 +43,10 @@ export class TrainLocator {
             // If railwayId is provided, try to extract operator
             let operator: string | undefined = undefined;
             if (railwayId) {
-                if (railwayId.includes('JR-East')) operator = 'Toei'; // Wait, JR-East is JR-East.
-                // Correction:
                 if (railwayId.includes('JR-East')) operator = 'JR-East';
                 else if (railwayId.includes('TokyoMetro')) operator = 'TokyoMetro';
                 else if (railwayId.includes('Toei')) operator = 'Toei';
-                // ... others
+                // Add more mappings as needed
             }
 
             const rawTrains = (await getTrains(operator)) as OdptTrain[];

@@ -51,7 +51,18 @@ const loadWasm = async () => {
         if (!wasmMatcher) {
             // @ts-ignore
             const wasm = await import('@/lib/wasm/l1-template-rs/l1_template_rs.js');
-            await wasm.default(); // Initialize Wasm
+
+            // Fix: Load Wasm file using fs to avoid 'fetch failed' in Node environment
+            if (typeof window === 'undefined') {
+                const fs = require('fs');
+                const path = require('path');
+                const wasmPath = path.join(process.cwd(), 'src/lib/wasm/l1-template-rs/l1_template_rs_bg.wasm');
+                const buffer = fs.readFileSync(wasmPath);
+                await wasm.default(buffer);
+            } else {
+                await wasm.default(); // Browser environment fallback
+            }
+
             wasmMatcher = new wasm.L1Matcher();
             console.log('[TemplateEngine] Rust Wasm Matcher Loaded 🚀');
         }

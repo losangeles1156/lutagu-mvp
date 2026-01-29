@@ -109,13 +109,14 @@ Priority logic: High count = High priority. Safety/Accessibility issues = Max pr
         const { error } = await this.supabase
             .from('enrichment_requests')
             .insert({
-                station_id: task.topic.split(' - ')[0], // Weak parsing, but sufficient for MVP
+                station_id: task.topic.split(' - ')[0],
                 intent_target: task.topic,
                 status: 'pending',
                 priority: task.priority_score,
                 metadata: {
                     queries: task.query_cluster,
-                    source: 'KnowledgeGapManager'
+                    source: 'KnowledgeGapManager',
+                    vector: task.semantic_vector // Future proofing
                 }
             });
 

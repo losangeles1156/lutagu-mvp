@@ -492,8 +492,23 @@ export function extractRouteEndpointsFromText(text: string): RouteEndpointExtrac
         originMention = pickBetween(fromIdx + 1, toIdx) || pickFirstAfter(fromIdx + 1);
         destMention = pickFirstAfter(toIdx + 1) || mentions[mentions.length - 1];
     } else if (toIdx >= 0) {
-        originMention = mentions[0];
-        destMention = pickFirstAfter(toIdx + 1) || mentions[mentions.length - 1];
+        // "去成田機場" pattern - only destination, no origin
+        // If there's only one mention, it should be the DESTINATION, not both
+        const afterDest = pickFirstAfter(toIdx + 1);
+        if (afterDest) {
+            destMention = afterDest;
+            // Try to use the first mention as origin if it's different from dest
+            if (mentions[0] && mentions[0].index < toIdx) {
+                originMention = mentions[0];
+            }
+        } else if (mentions.length === 1) {
+            // Only one mention after "去" -> it's the destination, no origin
+            // Return null to let upper layers handle missing origin
+            return null;
+        } else if (mentions.length >= 2) {
+            originMention = mentions[0];
+            destMention = mentions[mentions.length - 1];
+        }
     } else if (mentions.length >= 2) {
         originMention = mentions[0];
         destMention = mentions[mentions.length - 1];
@@ -512,6 +527,34 @@ export function extractRouteEndpointsFromText(text: string): RouteEndpointExtrac
         destinationIds,
         originText: originMention.term,
         destinationText: destMention.term,
+    };
+}
+
+/**
+ * Detect "destination-only" route intent (e.g., "我要去成田機場")
+ * where user wants directions but hasn't specified their origin.
+ * Returns the destination IDs if detected, null otherwise.
+ */
+export function extractDestinationOnlyIntent(text: string): { destinationIds: string[]; destinationText: string } | null {
+    const raw = String(text || '');
+    const cleaned = stripDateTimeNoise(raw);
+
+    // Check for route intent keywords
+    const toIdx = findFirstIndex(cleaned, ['前往', '到', '去', 'to', 'まで'], 0);
+    if (toIdx < 0) return null;
+
+    const mentions = [...resolveAirportAliases(cleaned), ...resolveHanedaAirportAliases(cleaned), ...findStationMentions(cleaned)];
+    mentions.sort((a, b) => a.index - b.index);
+
+    if (mentions.length !== 1) return null; // Either no mentions or multiple (handled by extractRouteEndpointsFromText)
+
+    const mention = mentions[0];
+    // The single mention should be AFTER the "to" keyword
+    if (mention.index < toIdx) return null;
+
+    return {
+        destinationIds: mention.ids.map(normalizeOdptStationId),
+        destinationText: mention.term
     };
 }
 

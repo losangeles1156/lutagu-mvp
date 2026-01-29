@@ -66,7 +66,7 @@ export const LINES = {
 export const OPERATOR_COLORS: Record<string, string> = {
     'JR': '#00AC4E',           // JR East - Official Green
     'Metro': '#149BDF',        // Tokyo Metro - Heart Blue 官方企業色
-    'Toei': '#008E48',         // Toei - Leaf Green 銀杏葉綠 (官方色)
+    'Toei': '#70BE1B',         // Toei - Light Green (User Preference)
     'Keikyu': '#8B0000',       // Keikyu - Dark Red (深紅色)
     'Tokyu': '#EE0000',        // Tokyu - Red
     'Odakyu': '#0060B2',       // Odakyu - Blue
@@ -118,7 +118,7 @@ export function getPrimaryOperator(nodeId: string): string {
     if (nodeId.includes('Yurikamome')) return 'Yurikamome';
     if (nodeId.includes('TokyoMonorail')) return 'Monorail';
 
-    return 'Metro'; // Default fallback
+    return 'Private'; // Default fallback
 }
 
 // Get Short Abbreviation for Operator (English letters only)

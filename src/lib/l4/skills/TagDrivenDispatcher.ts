@@ -65,20 +65,18 @@ export class TagDrivenDispatcher {
                 }
 
                 // Intent Layer Modulation (Capability Match)
-                // If a skill maps to a capability that is present in the Profile, boost it.
-                // e.g. LuggageSkill maps to 'LUGGAGE'
-                const skillCapabilityMap: Record<string, string> = {
-                    'LuggageLogistics': 'LUGGAGE',
-                    'AccessibilityMaster': 'STROLLER', // Or WHEELCHAIR
-                    'ExitStrategist': 'TRANSFER',
-                    'MedicalSkill': 'EMERGENCY'
-                };
+                // DYNAMIC: Read capability directly from skill definition
+                if (skill.gemCapabilities && skill.gemCapabilities.length > 0) {
+                    const skillCaps = skill.gemCapabilities;
+                    const nodeCaps = profile.intent.capabilities;
 
-                const mappedCap = skillCapabilityMap[skill.name];
-                if (mappedCap && profile.intent.capabilities.includes(mappedCap)) {
-                    // If the Node HAS this capability (e.g. Ueno has Lockers), 
-                    // AND we are in "Intent Mode" (Long query), we boost.
-                    score *= attentionWeights.intent;
+                    // Intersection: Does Node enable this skill?
+                    // e.g. Node has 'LUGGAGE' -> Boost LuggageSkill
+                    const hasMatch = skillCaps.some(cap => nodeCaps.includes(cap));
+
+                    if (hasMatch) {
+                        score *= attentionWeights.intent;
+                    }
                 }
             }
 

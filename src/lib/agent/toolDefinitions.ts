@@ -673,9 +673,11 @@ export const TOOL_HANDLERS = {
 
                 const jst = getJSTTime();
                 const nowMin = jst.hour * 60 + jst.minute;
-                const wantCalendarKey = jst.isHoliday ? 'SaturdayHoliday' : 'Weekday';
                 const chosen =
-                    timetables.find((t: any) => String(t['odpt:calendar'] || '').includes(wantCalendarKey)) ||
+                    timetables.find((t: any) => {
+                        const cal = String(t['odpt:calendar'] || '');
+                        return jst.calendarSelector.some(c => cal.includes(c));
+                    }) ||
                     timetables[0];
 
                 const trips = Array.isArray(chosen?.['odpt:stationTimetableObject']) ? chosen['odpt:stationTimetableObject'] : [];

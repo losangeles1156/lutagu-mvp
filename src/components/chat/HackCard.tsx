@@ -1,5 +1,8 @@
 import { Lightbulb, Sparkles } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Action } from './ActionCard';
+
+import { resolveText } from '@/lib/i18n/utils';
 
 interface HackCardProps {
     action: Action;
@@ -7,6 +10,13 @@ interface HackCardProps {
 }
 
 export function HackCard({ action, onClick }: HackCardProps) {
+    // TODO: Move to shared hook (DRY) -> DONE
+    const t = useTranslations('chat');
+    const currentLocale = useLocale();
+
+    const effectiveTitle = resolveText(action.title, currentLocale) || resolveText(action.label, currentLocale);
+    const effectiveContent = resolveText(action.content, currentLocale) || resolveText(action.description, currentLocale);
+
     return (
         <button
             onClick={() => onClick(action)}
@@ -19,11 +29,11 @@ export function HackCard({ action, onClick }: HackCardProps) {
 
                 <div className="flex-1">
                     <h3 className="font-bold text-base text-teal-900 flex items-center gap-2">
-                        {action.title || action.label}
+                        {effectiveTitle}
                     </h3>
 
                     <p className="text-sm mt-1 text-teal-800/80 leading-relaxed">
-                        {action.content || action.description}
+                        {effectiveContent}
                     </p>
                 </div>
 

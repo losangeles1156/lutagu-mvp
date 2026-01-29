@@ -6,13 +6,9 @@ export const runtime = 'nodejs';
 
 // Helper: Get JST Time and Day
 function getJSTContext() {
-    const { hour, minute, isHoliday } = getJSTTime();
-    const currentMinutes = hour * 60 + minute;
-
-    // ODPT Calendar mapping logic
-    const calendarSelector = isHoliday ? ['SaturdayHoliday', 'Holiday', 'Saturday'] : ['Weekday'];
-
-    return { currentMinutes, calendarSelector };
+    const jst = getJSTTime();
+    const currentMinutes = jst.hour * 60 + jst.minute;
+    return { currentMinutes, calendarSelector: jst.calendarSelector };
 }
 
 export async function GET(req: NextRequest) {

@@ -122,3 +122,7 @@ export const useUIStore = create<UIState>((set) => ({
     setDemoMode: (isDemo, demoId) => set({ isDemoMode: isDemo, activeDemoId: demoId || null }),
     setSelectedNeed: (need) => set({ selectedNeed: need }),
 }));
+
+if (typeof window !== 'undefined') {
+    (window as any).__LUTAGU_UI_STORE__ = useUIStore;
+}

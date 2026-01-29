@@ -12,9 +12,33 @@ import Script from 'next/script';
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
-    title: 'LUTAGU',
-    description: 'City Emotional Navigation',
+    title: {
+        default: 'LUTAGU - City Emotional Navigation',
+        template: '%s | LUTAGU'
+    },
+    description: 'Real-time Tokyo transit guide with AI precision. Verified disruption alerts, airport navigation, and expert local knowledge.',
     manifest: '/manifest.json',
+    openGraph: {
+        title: 'LUTAGU - Tokyo Smart Transit & Knowledge',
+        description: 'Verified transit alerts and expert local insights for Tokyo travelers.',
+        url: 'https://lutagu.com',
+        siteName: 'LUTAGU',
+        images: [
+            {
+                url: '/images/og-image.jpg',
+                width: 1200,
+                height: 630,
+            },
+        ],
+        locale: 'en_US',
+        type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'LUTAGU - Tokyo Smart Transit',
+        description: 'Real-time verified transit alerts and expert knowledge for Tokyo.',
+        images: ['/images/og-image.jpg'],
+    },
     alternates: {
         canonical: './',
         languages: {
@@ -22,10 +46,14 @@ export const metadata: Metadata = {
             'zh': '/zh',
             'zh-TW': '/zh-TW',
             'ja': '/ja',
-            'ar': '/ar',
         },
     },
 };
+
+
+import { OfflineDataManager } from '@/lib/offline/OfflineDataManager';
+import { ResilienceManager } from '@/components/offline/ResilienceManager';
+import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 
 export default async function RootLayout({
     children,
@@ -58,6 +86,8 @@ export default async function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="LUTAGU" />
                 <meta name="format-detection" content="telephone=no" />
                 <meta name="mobile-web-app-capable" content="yes" />
+                <meta name="theme-color" content="#4f46e5" />
+                <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
                 <link rel="apple-touch-icon" href="/icons/icon-192.png" />
             </head>
             <body className={inter.className}>
@@ -84,6 +114,8 @@ export default async function RootLayout({
                     </>
                 )}
                 <NextIntlClientProvider messages={messages}>
+                    <ResilienceManager />
+                    <OfflineIndicator />
                     <ErrorBoundary>
                         <AuthProvider>
                             <NodeDisplayProvider>
