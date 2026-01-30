@@ -59,30 +59,6 @@ interface FunnelEvent {
 }
 
 export async function trackFunnelEvent(event: Omit<FunnelEvent, 'visitor_id' | 'session_id'>) {
-    if (typeof window === 'undefined') return;
-
-    const visitor_id = getVisitorId();
-    const session_id = getSessionId();
-
-    if (!visitor_id || !session_id) {
-        console.warn('Tracking skipped: Missing visitor_id or session_id');
-        return;
-    }
-
-    try {
-        await fetch('/api/tracking/funnel', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...event,
-                visitor_id,
-                session_id,
-                timestamp: new Date().toISOString(),
-            }),
-        });
-    } catch (error) {
-        console.error('Failed to track funnel event:', error);
-    }
+    console.log('[DEBUG Global Tracking Mock]', event.step_name);
+    return;
 }

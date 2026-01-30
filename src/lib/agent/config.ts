@@ -13,6 +13,7 @@ export const AGENT_CONFIG = {
     endpoints: {
         v1: '/api/agent/chat',
         v2: '/api/agent/v2',
+        adk: '/api/agent/adk',
     },
 
     // Get the current endpoint based on feature flag

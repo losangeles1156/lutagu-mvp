@@ -6,7 +6,7 @@ import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { useUIStore } from '@/stores/uiStore';
 import { useNodeStore } from '@/stores/nodeStore';
 import { useUserStore } from '@/stores/userStore';
-import { useAgentChat } from '@/hooks/useAgentChat';
+import { useAgentChatContext } from '@/providers/AgentChatProvider';
 import { useTranslations } from 'next-intl';
 import {
   MessageSquare,
@@ -40,11 +40,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
   const currentNodeId = useNodeStore(s => s.currentNodeId);
   const userProfile = useUserStore(s => s.userProfile);
 
-  const { sendMessage, isLoading, clearMessages: clearAgentMessages } = useAgentChat({
-    stationId: currentNodeId || '',
-    userLocation: undefined,
-    syncToUIStateMachine: true,
-  });
+  const { sendMessage, isLoading, clearMessages: clearAgentMessages } = useAgentChatContext();
 
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);

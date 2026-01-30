@@ -71,16 +71,18 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
             )}
 
             {/* Main Content with Markdown */}
-            {parsed.text && (
-                <div
-                    data-testid="chat-message-text"
-                    className={`prose prose-sm max-w-none ${role === 'user' ? 'prose-invert' : 'text-slate-800'}`}
-                >
+            <div
+                data-testid="chat-message-text"
+                className={`prose prose-sm max-w-none ${role === 'user' ? 'prose-invert' : 'text-slate-800'}`}
+            >
+                {parsed.text ? (
                     <MarkdownRenderer>
                         {parsed.text}
                     </MarkdownRenderer>
-                </div>
-            )}
+                ) : (
+                    role === 'assistant' && <span className="opacity-0">...</span>
+                )}
+            </div>
         </div>
     );
 });

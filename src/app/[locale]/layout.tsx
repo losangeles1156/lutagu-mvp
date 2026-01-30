@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { ToastProvider } from '@/components/ui/Toast';
 import { NodeDisplayProvider } from '@/providers/NodeDisplayProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { AgentChatProvider } from '@/providers/AgentChatProvider';
 import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
@@ -113,14 +114,16 @@ export default async function RootLayout({
                         />
                     </>
                 )}
-                <NextIntlClientProvider messages={messages}>
+                <NextIntlClientProvider locale={locale} messages={messages}>
                     <ResilienceManager />
                     <OfflineIndicator />
                     <ErrorBoundary>
                         <AuthProvider>
                             <NodeDisplayProvider>
                                 <ToastProvider>
-                                    {children}
+                                    <AgentChatProvider>
+                                        {children}
+                                    </AgentChatProvider>
                                 </ToastProvider>
                             </NodeDisplayProvider>
                         </AuthProvider>

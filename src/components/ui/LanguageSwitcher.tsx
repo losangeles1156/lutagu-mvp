@@ -23,6 +23,11 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const setLocale = useUserStore(s => s.setLocale);
 
+    // Sync store locale when system locale changes
+    useEffect(() => {
+        setLocale(locale as any);
+    }, [locale, setLocale]);
+
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -63,18 +68,17 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                 >
                     <div className="p-1">
                         {availableLocales.map((l) => {
-                            // Construct href with search params
                             const query = searchParams.toString();
                             const href = query ? `${pathname}?${query}` : pathname;
 
                             return (
-                                <Link
+                                <button
                                     key={l}
-                                    href={href}
-                                    locale={l as any}
                                     onClick={() => {
                                         setIsOpen(false);
-                                        setLocale(l as any);
+                                        // Use router.replace to change locale with prefix
+                                        router.replace(href, { locale: l as any });
+                                        // Persistence happens via useEffect above
                                     }}
                                     className={`w-full px-4 py-3 text-xs font-black text-left rounded-xl transition-all duration-300 flex items-center justify-between ${locale === l
                                         ? 'text-indigo-600 bg-indigo-50 shadow-inner'
@@ -83,7 +87,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                                 >
                                     <span>{labels[l] || l}</span>
                                     {locale === l && <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.4)]" />}
-                                </Link>
+                                </button>
                             );
                         })}
                     </div>

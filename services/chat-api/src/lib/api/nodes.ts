@@ -437,12 +437,16 @@ export async function fetchNodeConfig(nodeId: string) {
             .from('nodes')
             .select('*')
             .eq('id', nodeId)
-            .single();
+            .maybeSingle();
 
-        if (nodeError) throw nodeError;
-        finalNode = node;
+        if (node) {
+            finalNode = node;
+        } else {
+            // Node not found in DB is expected for some L3/generated IDs, trigger fallback silently
+        }
     } catch (err) {
-        console.warn(`[fetchNodeConfig] Node fetch failed for ${nodeId}, using fallback:`, err);
+        // Only warn for actual errors, not for not found if handled by fallback
+        console.debug(`[fetchNodeConfig] Node DB fetch failed for ${nodeId}, attempting fallback`);
         const fallbackNode = findFallbackNodeForId(nodeId);
         if (fallbackNode) {
             finalNode = {

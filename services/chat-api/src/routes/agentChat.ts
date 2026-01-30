@@ -84,9 +84,9 @@ agentChatRouter.post('/', async (req, res) => {
             currentStation: nodeId,
             userLocation: body.userLocation,
             preferences: { categories: [] },
-            strategyContext: null,
-            recentMessages: recentMessages as Array<{ role: 'user' | 'assistant'; content: string }>
-        };
+            strategyContext: null
+        } as any; // Cast to any to allow optional recentMessages field
+        (context as any).recentMessages = recentMessages;
 
         // Strategy Synthesis (L4) logic
         if (!context.strategyContext) {

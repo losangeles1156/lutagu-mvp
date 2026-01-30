@@ -138,7 +138,7 @@ function sha256Hex(input: string): string {
     }
 }
 
-function deriveOfficialStatusFromText(statusTextJa?: string): {
+export function deriveOfficialStatusFromText(statusTextJa?: string): {
     derived: 'normal' | 'delay' | 'suspended' | 'unknown';
     evidence: string[];
 } {
@@ -154,12 +154,12 @@ function deriveOfficialStatusFromText(statusTextJa?: string): {
         add('運転見合わせ/運休');
         return { derived: 'suspended', evidence };
     }
-    if (/(遅れ|遅延|ダイヤ乱れ|運転間隔が乱れ|一部運休|列車に遅れ|運転本数が少なく)/.test(t)) {
-        add('遅れ/遅延');
+    if (/(遅れ|遅延|ダイヤ乱れ|運転間隔が乱れ|一部運休|列車に遅れ|運転本数が少なく|運行状況|お知らせがあります)/.test(t)) {
+        add('遅れ/遲延/運行狀況');
         return { derived: 'delay', evidence };
     }
-    if (/(平常運転|通常運転|ほぼ平常どおり|おおむね平常)/.test(t)) {
-        add('平常運転');
+    if (/(平常運転|通常運転|ほぼ平常どおり|おおむね平常|見合わせていましたが|再開しました)/.test(t)) {
+        add('平常運転/恢復');
         return { derived: 'normal', evidence };
     }
 
@@ -178,12 +178,31 @@ const JR_EAST_RAILWAY_HINT_JA: Record<string, string> = {
     'odpt.Railway:JR-East.KeihinTohoku': '京浜東北線',
     'odpt.Railway:JR-East.ChuoKaisoku': '中央線快速',
     'odpt.Railway:JR-East.ChuoSobu': '中央・総武各駅停車',
-    'odpt.Railway:JR-East.SobuKaisoku': '総武快速線',
+    'odpt.Railway:JR-East.SobuKaisoku': '總武快速線',
     'odpt.Railway:JR-East.Saikyo': '埼京線',
     'odpt.Railway:JR-East.ShonanShinjuku': '湘南新宿ライン',
     'odpt.Railway:JR-East.Tokaido': '東海道線',
     'odpt.Railway:JR-East.Keiyo': '京葉線',
-    'odpt.Railway:JR-East.Joban': '常磐線'
+    'odpt.Railway:JR-East.Joban': '常磐線',
+    'odpt.Railway:JR-East.Utsunomiya': '宇都宮線',
+    'odpt.Railway:JR-East.Takasaki': '高崎線',
+    'odpt.Railway:JR-East.Narita': '成田線',
+    'odpt.Railway:JR-East.UenoTokyo': '上野東京ライン',
+    'odpt.Railway:JR-East.Musashino': '武蔵野線',
+    'odpt.Railway:JR-East.Hachiko': '八高線',
+    'odpt.Railway:JR-East.Negishi': '根岸線',
+    'odpt.Railway:JR-East.Nambu': '南武線',
+    'odpt.Railway:JR-East.Yokohama': '横浜線',
+    'odpt.Railway:JR-East.Itsukaichi': '五日市線',
+    'odpt.Railway:JR-East.Ome': '青梅線'
+};
+
+const RELATED_LINES: Record<string, string[]> = {
+    'odpt.Railway:JR-East.ChuoKaisoku': ['odpt.Railway:JR-East.ChuoSobu', 'odpt.Railway:JR-East.Ome'],
+    'odpt.Railway:JR-East.ChuoSobu': ['odpt.Railway:JR-East.ChuoKaisoku', 'odpt.Railway:JR-East.SobuKaisoku'],
+    'odpt.Railway:JR-East.Yamanote': ['odpt.Railway:JR-East.Saikyo', 'odpt.Railway:JR-East.ShonanShinjuku', 'odpt.Railway:JR-East.KeihinTohoku'],
+    'odpt.Railway:JR-East.KeihinTohoku': ['odpt.Railway:JR-East.Yamanote', 'odpt.Railway:JR-East.Negishi'],
+    'odpt.Railway:JR-East.SobuKaisoku': ['odpt.Railway:JR-East.Yokosuka', 'odpt.Railway:JR-East.Narita'],
 };
 
 async function fetchJrEastKantoSnapshotCached(): Promise<JrEastKantoSnapshot | null> {
@@ -365,7 +384,32 @@ export async function getTrainStatus(operator?: string) {
         });
     }
 
-    return [...enhancedResults, ...injectedFromYahoo];
+    const finalResults = [...enhancedResults, ...injectedFromYahoo];
+
+    // Basic Cascade Propagation: Mark related lines as "risk"
+    const troubledLines = new Set(finalResults
+        .filter(r => deriveOfficialStatusFromText(r['odpt:trainInformationText']?.ja).derived !== 'normal')
+        .map(r => r['odpt:railway']));
+
+    return finalResults.map(r => {
+        const railwayId = r['odpt:railway'];
+        const relatedToTrouble = Object.entries(RELATED_LINES).some(([main, subs]) =>
+            troubledLines.has(main) && subs.includes(railwayId)
+        );
+
+        if (relatedToTrouble && deriveOfficialStatusFromText(r['odpt:trainInformationText']?.ja).derived === 'normal') {
+            return {
+                ...r,
+                cascade_risk: true,
+                'odpt:trainInformationStatus': {
+                    ja: '関連路線の遅延',
+                    en: 'Related Line Delay Risk',
+                    'zh-TW': '關聯路線延誤風險'
+                }
+            };
+        }
+        return r;
+    });
 }
 
 

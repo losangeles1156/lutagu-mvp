@@ -11,6 +11,9 @@ export interface RouteOption {
     nextDeparture?: string;
     railways?: string[]; // Added to pass to AssistantEngine
     sources: Array<{ type: string; verified: boolean }>;
+    // Debug properties for testing and synthesis analysis
+    _debug_pain?: number;
+    insights?: Array<{ type: 'pro' | 'con' | 'warning'; text: string; icon?: string }>;
 }
 
 export type RouteStepKind = 'origin' | 'destination' | 'train' | 'transfer' | 'walk' | 'wait' | 'info';
@@ -23,6 +26,7 @@ export interface RouteStep {
     stationId?: string; // Persistent ID for robust matching (e.g. odpt.Station:...)
     duration?: number;
     distance?: number;
+    note?: string; // Optional note for additional step information
 }
 
 export interface RailwayTopology {

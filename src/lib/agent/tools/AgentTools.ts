@@ -13,6 +13,8 @@ import { SubagentType } from '../types';
 import { SupportedLocale } from '@/lib/l4/assistantEngine';
 import fs from 'fs';
 import path from 'path';
+import { getTrainStatus } from '@/lib/odpt/service';
+import { deriveOfficialStatusFromText } from '@/lib/odpt/service';
 
 // =============================================================================
 // Type Definitions
@@ -365,17 +367,63 @@ export const createGetTransitStatusTool = (ctx: ToolContext) => tool({
         lineOrStation: z.string().describe('Line name or station to check'),
     }),
     execute: async ({ lineOrStation }: { lineOrStation: string }) => {
-        console.log(`[Tool:getTransitStatus] Checking: ${lineOrStation}`);
+        const logMsg = `[Tool:getTransitStatus] Checking: ${lineOrStation}`;
+        console.log(logMsg);
+        fs.appendFileSync(path.join(process.cwd(), 'AGENT_DEBUG.log'), `[${new Date().toISOString()}] ${logMsg}\n`);
 
-        // This would connect to ODPT or city-specific transit API
-        return {
-            success: true,
-            status: 'normal',
-            message: ctx.locale === 'en'
-                ? `${lineOrStation} is currently operating normally.`
-                : `${lineOrStation} 目前正常運行中。`,
-            note: 'Real-time status requires city-specific API integration.',
-        };
+        try {
+            // Fetch real-time status from ODPT service
+            // Note: getTrainStatus returns all current disruptions
+            const allStatus = await getTrainStatus();
+
+            // Search for matches in line names or IDs
+            const matches = allStatus.filter(s => {
+                const lineNameJa = s['odpt:railway']?.split('.').pop() || '';
+                const text = String(s['odpt:trainInformationText']?.ja || '').toLowerCase();
+                const query = lineOrStation.toLowerCase();
+
+                return lineOrStation.includes(lineNameJa) ||
+                    lineNameJa.includes(lineOrStation) ||
+                    text.includes(query);
+            });
+
+            if (matches.length === 0) {
+                return {
+                    success: true,
+                    status: 'normal',
+                    summary: ctx.locale === 'en'
+                        ? `${lineOrStation} is currently operating normally.`
+                        : `${lineOrStation} 目前正常運行中。`,
+                };
+            }
+
+            // Synthesize findings
+            const findings = matches.map(m => {
+                const text = m['odpt:trainInformationText']?.ja || '';
+                return {
+                    line: m['odpt:railway'],
+                    status: deriveOfficialStatusFromText(text).derived,
+                    rawText: text
+                };
+            });
+
+            const worstStatus = findings.some(f => f.status === 'suspended') ? 'suspended' : 'delay';
+
+            return {
+                success: true,
+                status: worstStatus,
+                findings,
+                summary: ctx.locale === 'en'
+                    ? `Found ${matches.length} issue(s) affecting ${lineOrStation}. Status: ${worstStatus}.`
+                    : `在 ${lineOrStation} 發現 ${matches.length} 則運行情報。狀態：${worstStatus === 'suspended' ? '中止' : '延誤'}。`,
+            };
+        } catch (error: any) {
+            console.error('[Tool:getTransitStatus] Error:', error);
+            return {
+                success: false,
+                message: 'Failed to retrieve real-time transit status.',
+            };
+        }
     },
 } as any);
 

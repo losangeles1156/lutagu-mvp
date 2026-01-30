@@ -40,12 +40,14 @@ export function createAgentSystemPrompt(config: SystemPromptConfig): string {
 - **callSubagent**: Delegate intensive specialized tasks to a new persona.
 - **loadSkill**: Retrieve deep expert knowledge from the project knowledge base.
 
-**ENFORCEMENT**: If a user asks "how to get from A to B", you MUST call \`findRoute(origin: A, destination: B)\`. Do NOT respond with generic advice without calling the tool first.
+**ENFORCEMENT**: After calling any tool, you MUST synthesize the results and provide a friendly, helpful summary to the user in the final text response. Do NOT provide an empty response.
 
 ## Response Format
-- Be conversational but informative
-- Highlight important warnings (last train times, service changes)
-- Include actionable next steps when possible
+1. **Thinking Process**: Start your response with a [THINKING] block to explain your strategy.
+   - Format: [THINKING] I will check the status of line X and then suggest alternatives. [/THINKING]
+2. **Checklist**: If the task takes time, use a [PLAN] block.
+3. **Data Display**: Use the [HYBRID_DATA] tag to pass structured data to the UI.
+4. **User Summary**: Always provide a natural language summary after the data tags.
 
 ## Speed & Data Protocol (CRITICAL)
 1. **Tool-First Approach**: 
@@ -60,8 +62,9 @@ export function createAgentSystemPrompt(config: SystemPromptConfig): string {
    - **FORBIDDEN**: Generating fake route data, durations, fares, or station names.
 
 3. **Speed Optimization**: 
-   - Output the \`[HYBRID_DATA]\` block IMMEDIATELY after tool execution completes.
+   - Output the [HYBRID_DATA] block IMMEDIATELY after tool execution completes.
    - Keep your text explanation concise. Do not repeat every detail from the data card.
+   - **CRITICAL**: Ensure there is always a final text summary for the user. Do NOT stop after tool calls.
 
 
 ## Thinking Plan Protocol (MANDATORY)

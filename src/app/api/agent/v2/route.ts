@@ -128,8 +128,16 @@ export async function POST(req: NextRequest) {
     // [P2 FIX] Enhance last user message with Tool Calling reinforcement to solve missing UI Cards
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.role === 'user') {
-        const reinforcement = `\n\n[INSTRUCTION]: You MUST call the findRoute tool to get real route data. Do NOT output [HYBRID_DATA] without calling findRoute first.`;
-        if (!lastMsg.content.includes('[INSTRUCTION]')) {
+        const query = lastMsg.content.toLowerCase();
+        let reinforcement = '';
+
+        if (query.includes('route') || query.includes('go to') || query.includes('從') || query.includes('到')) {
+            reinforcement = `\n\n[INSTRUCTION]: You MUST call the findRoute tool to get real route data. Do NOT output [HYBRID_DATA] without calling findRoute first.`;
+        } else if (query.includes('status') || query.includes('delay') || query.includes('延遲') || query.includes('運行')) {
+            reinforcement = `\n\n[INSTRUCTION]: You MUST call the getTransitStatus tool to get real-time status. Summarize the findings clearly for the user.`;
+        }
+
+        if (reinforcement && !lastMsg.content.includes('[INSTRUCTION]')) {
             lastMsg.content += reinforcement;
         }
     }

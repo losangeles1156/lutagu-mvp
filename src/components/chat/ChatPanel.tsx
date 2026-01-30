@@ -13,7 +13,7 @@ import { useUserStore } from '@/stores/userStore';
 
 import { useZoneAwareness } from '@/hooks/useZoneAwareness';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
-import { useAgentChat } from '@/hooks/useAgentChat';
+import { useAgentChatContext } from '@/providers/AgentChatProvider';
 import { useLocale, useTranslations } from 'next-intl';
 import { Action as ChatAction } from './ActionCard';
 import { EmptyState } from './EmptyState';
@@ -68,7 +68,6 @@ export function ChatPanel() {
     const showToast = useToast();
 
 
-    // Agent Chat Hook Integration
     const {
         messages,
         setMessages,
@@ -78,17 +77,11 @@ export function ChatPanel() {
         clearMessages,
         messagesEndRef,
         sessionId
-    } = useAgentChat({
-        stationId: currentNodeId || '',
-        userLocation: userLocation ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
-    });
-    // Debug log to check hook properties
+    } = useAgentChatContext();
+
+    // Debug message log
     if (typeof window !== 'undefined') {
-        console.log('[ChatPanel] useAgentChat hook properties:', {
-            hasMessagesEndRef: !!messagesEndRef,
-            isAttached: !!messagesEndRef?.current,
-            isLoading
-        });
+        console.log(`[DEBUG ChatPanel] messages count: ${messages?.length || 0}`);
     }
 
     useAiResponseTracking(messages, isLoading);
@@ -97,8 +90,6 @@ export function ChatPanel() {
     const append = useCallback(async (msg: { role: string; content: string }) => {
         await sendMessage(msg.content);
     }, [sendMessage]);
-
-    const displayMessages = messages;
 
     // Panel UI State
     const [isMinimized, setIsMinimized] = useState(false);
@@ -122,7 +113,7 @@ export function ChatPanel() {
     // Auto-scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [displayMessages, isLoading, messagesEndRef]);
+    }, [messages, isLoading, messagesEndRef]);
 
     // Initialize (Welcome Message or Pending Chat or Demo Script)
     useEffect(() => {
@@ -212,10 +203,10 @@ export function ChatPanel() {
     }, [transitionTo, clearMessages, clearStoreMessages, setDemoMode, activeDemoId, runDemoPlayback, append, handleRestart, stopPlayback]);
 
     const handleFeedback = useCallback(async (index: number, score: number) => {
-        const msg = displayMessages[index];
+        const msg = messages[index];
 
         try {
-            const prevMsg = displayMessages[index - 1];
+            const prevMsg = messages[index - 1];
             const requestText = (prevMsg && prevMsg.role === 'user') ? prevMsg.content : "";
 
             const response = await fetch('/api/feedback', {
@@ -239,7 +230,7 @@ export function ChatPanel() {
             logger.error('Feedback submission failed:', error);
             showToast?.(tChat('feedbackError', { defaultValue: 'Failed to send feedback' }), 'error');
         }
-    }, [displayMessages, sessionId, showToast, tChat]);
+    }, [messages, sessionId, showToast, tChat]);
 
     const handleSend = useCallback((text: string) => {
         if (text.trim()) {
@@ -274,11 +265,11 @@ export function ChatPanel() {
                 <>
                     {/* Messages Area */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-                        {displayMessages.length === 0 && !isLoading && !isDemoMode && (
+                        {messages.length === 0 && !isLoading && !isDemoMode && (
                             <EmptyState onSend={(text) => append({ role: 'user', content: text })} />
                         )}
 
-                        {displayMessages.map((msg: any, idx: number) => (
+                        {messages.map((msg: any, idx: number) => (
                             <MessageBubble
                                 key={msg.id || idx}
                                 msg={msg}
@@ -290,9 +281,9 @@ export function ChatPanel() {
 
                         {/* Optimistic UI: Show skeleton immediately when loading, before content arrives */}
                         {isLoading && (
-                            displayMessages.length === 0 ||
-                            displayMessages[displayMessages.length - 1]?.role !== 'assistant' ||
-                            !displayMessages[displayMessages.length - 1]?.content
+                            messages.length === 0 ||
+                            messages[messages.length - 1]?.role !== 'assistant' ||
+                            !messages[messages.length - 1]?.content
                         ) && (
                                 <SkeletonMessageBubble />
                             )}

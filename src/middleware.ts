@@ -129,7 +129,8 @@ export default async function middleware(req: NextRequest) {
         const isExemptedChatEndpoint = pathname.startsWith('/api/agent/chat') ||
             pathname.startsWith('/api/agent/v2') ||
             pathname.startsWith('/api/chat') ||
-            pathname.startsWith('/api/agent/hybrid');
+            pathname.startsWith('/api/agent/hybrid') ||
+            pathname.startsWith('/api/agent/adk');
 
         if (!isExemptedChatEndpoint) {
             const sameOrigin = enforceSameOriginApi(req);
