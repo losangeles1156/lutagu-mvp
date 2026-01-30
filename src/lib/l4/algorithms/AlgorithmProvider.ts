@@ -230,20 +230,50 @@ export class AlgorithmProvider {
                 railways: Array.from(new Set(r.edge_railways)),
                 duration: Math.ceil(r.costs.time),
                 transfers: r.costs.transfers,
-                // Fare not available in Rust yet
-                fare: { ic: 0, ticket: 0 }
+                fare: this.estimateFare(r)
             };
         });
     }
 
     public async calculateFare(originId: string, destId: string): Promise<{ ic: number; ticket: number } | null> {
-        // ... (rest of method unchanged, but we can't easily see it here)
-        // Re-implementing simplified since we are replacing the block
-        const routes = await this.findRoutes({ originId, destinationId: destId, locale: 'zh-TW', filterSuspended: false });
+        // Fallback: Estimate based on route characteristics since L4 doesn't return fare yet
+        const routes = await this.findRoutes({ originId, destinationId: destId, locale: 'en', filterSuspended: false });
         if (routes && routes.length > 0) {
             return routes[0].fare || null;
         }
         return null;
+    }
+
+    private estimateFare(r: RustRoute): { ic: number; ticket: number } {
+        // Heuristic Fare Estimation
+        // 1. Base Fare: ~150-180 JPY
+        // 2. Distance Factor: Time * X
+        // 3. Transfer Penalty: Transfers * Y (assuming transfers usually mean new operator base fare)
+
+        const baseFare = 178; // IC Card base
+        const timeFactor = 10; // Approx 10 Yen per minute of travel (very rough)
+        const transferPenalty = 150; // New ticket usually required
+
+        // Logic:
+        // Fare ~= Base + (Duration * TimeFactor) + (Transfers * TransferPenalty)
+        // But capped reasonably.
+
+        let estimatedIC = baseFare + (r.costs.time * 5); // 5 yen per minute
+
+        if (r.costs.transfers > 0) {
+            estimatedIC += (r.costs.transfers * transferPenalty);
+        }
+
+        // Round to nearest 10
+        estimatedIC = Math.ceil(estimatedIC / 10) * 10;
+
+        // Ticket is usually slightly higher/rounded
+        const estimatedTicket = Math.ceil(estimatedIC / 10) * 10;
+
+        return {
+            ic: estimatedIC,
+            ticket: estimatedTicket
+        };
     }
 }
 

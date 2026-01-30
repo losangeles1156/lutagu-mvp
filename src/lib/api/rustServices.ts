@@ -1,7 +1,11 @@
 import { normalizeOdptStationId } from '@/lib/l4/assistantEngine';
 
-const L4_API_URL = process.env.L4_ROUTING_API_URL || 'https://l4-routing-rs-147810667713.asia-northeast1.run.app';
-const L2_API_URL = process.env.L2_STATUS_API_URL || 'https://l2-status-rs-147810667713.asia-northeast1.run.app';
+const L4_API_URL = process.env.L4_ROUTING_API_URL || 'http://localhost:8082'; // Default to local
+const L2_API_URL = process.env.L2_STATUS_API_URL || 'http://localhost:8083';
+
+if (process.env.NODE_ENV === 'production' && (!process.env.L4_ROUTING_API_URL || !process.env.L2_STATUS_API_URL)) {
+    console.warn('[RustServices] Warning: Missing Rust Service URLs in Production. Falling back to localhost which may fail.');
+}
 
 export interface RustRouteResponse {
     routes: RustRoute[];

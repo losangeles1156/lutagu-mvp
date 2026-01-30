@@ -38,6 +38,22 @@ module.exports = {
                 // L4 service needs to find routing_graph.json relative to its CWD
                 // or via absolute path. By setting CWD above, relative path works.
             }
+        },
+        {
+            name: "adk-agent",
+            cwd: "./services/adk-agent",
+            script: "/Users/zhuangzixian/Documents/LUTAGU_MVP/.bin/go/bin/go",
+            args: "run cmd/server/main.go",
+            interpreter: "none",
+            instances: 1,
+            autorestart: true,
+            watch: ["./internal", "./cmd", "./pkg"],
+            ignore_watch: ["./tmp", "./bin"],
+            env: {
+                ...envConfig,
+                PORT: 8080,
+                REDIS_URL: envConfig.REDIS_URL || "redis://localhost:6379/0"
+            }
         }
     ]
 };

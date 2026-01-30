@@ -51,7 +51,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // Start HTTP Server (Cloud Run compatible)
-    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string()).parse::<u16>().unwrap_or(8080);
+    let port = env::var("PORT").unwrap_or_else(|_| "8082".to_string()).parse::<u16>().unwrap_or(8082);
     let addr = format!("0.0.0.0:{}", port);
     
     info!("🚀 Vector Search Service (HTTP) running on {}", addr);

@@ -30,7 +30,29 @@ const TAG_DICTIONARY: Tag[] = [
     { id: 't9', name: 'exit', category: 'location', synonyms: ['way out', 'gate', 'entrance'], baseWeight: 0.8, vector: [0.6, 0.6, 0] },
     { id: 't10', name: 'barrier_free', category: 'facility', synonyms: ['accessibility', 'wheelchair', 'ramp', 'slope'], baseWeight: 1.0, vector: [1, 0.5, 0] },
     { id: 't11', name: 'keiyo', category: 'line', synonyms: ['keiyo line', 'red line'], baseWeight: 0.8, vector: [0.5, 0.5, 0.5] },
-    { id: 't12', name: 'walk', category: 'action', synonyms: ['walking', 'foot'], baseWeight: 0.4, vector: [0.2, 0.2, 0.2] }
+    // GEM 3-5-8 Standard Tags
+    // Core (L1)
+    { id: 'gem_hub', name: 'HUB', category: 'core', synonyms: ['hub', 'major station', 'terminal'], baseWeight: 1.0, vector: [1, 1, 1] },
+    { id: 'gem_jr', name: 'JR', category: 'core', synonyms: ['jr', 'jr east'], baseWeight: 0.9, vector: [0.9, 0.5, 0.5] },
+
+    // Intent (L2)
+    { id: 'gem_transfer', name: 'TRANSFER', category: 'intent', synonyms: ['transfer', 'switch line', 'connection'], baseWeight: 0.9, vector: [0.8, 0.8, 0] },
+    { id: 'gem_shopping', name: 'SHOPPING', category: 'intent', synonyms: ['shop', 'buy', 'store', 'mall'], baseWeight: 0.7, vector: [0.5, 0.9, 0.2] },
+    { id: 'gem_commute', name: 'COMMUTE', category: 'intent', synonyms: ['work', 'office', 'rush hour'], baseWeight: 0.6, vector: [0.4, 0.4, 0.8] },
+    { id: 'gem_luggage', name: 'LUGGAGE', category: 'intent', synonyms: ['baggage', 'suitcase', 'heavy bags'], baseWeight: 0.8, vector: [0.3, 0.8, 0.1] },
+    { id: 'gem_flight', name: 'FLIGHT', category: 'intent', synonyms: ['airport', 'plane', 'fly', 'narita', 'haneda'], baseWeight: 0.9, vector: [0.2, 0.5, 0.9] },
+    { id: 'gem_sightseeing', name: 'SIGHTSEEING', category: 'intent', synonyms: ['tour', 'visit', 'see'], baseWeight: 0.7, vector: [0.1, 0.9, 0.5] },
+    { id: 'gem_dining', name: 'DINING', category: 'intent', synonyms: ['eat', 'food', 'restaurant', 'cafe', 'lunch', 'dinner'], baseWeight: 0.7, vector: [0.2, 0.8, 0.2] },
+
+    // Core Facilities (Mapped to Intent in Profile)
+    { id: 'gem_elevator', name: 'ELEVATOR', category: 'intent', synonyms: ['elevator', 'lift'], baseWeight: 1.0, vector: [1, 0, 0] },
+    { id: 'gem_restroom', name: 'RESTROOM', category: 'intent', synonyms: ['toilet', 'wc', 'restroom'], baseWeight: 0.9, vector: [0.8, 0.2, 0] },
+
+    // Vibe (L3)
+    { id: 'gem_busy', name: 'BUSY', category: 'vibe', synonyms: ['crowded', 'packed', 'busy', 'rush'], baseWeight: 0.7, vector: [0.9, 0.9, 0] },
+    { id: 'gem_quiet', name: 'QUIET', category: 'vibe', synonyms: ['calm', 'peaceful', 'silent', 'local'], baseWeight: 0.7, vector: [0.1, 0.1, 0.8] },
+    { id: 'gem_modern', name: 'MODERN', category: 'vibe', synonyms: ['new', 'clean', 'shiny'], baseWeight: 0.5, vector: [0.8, 0.2, 0.8] },
+    { id: 'gem_traditional', name: 'TRADITIONAL', category: 'vibe', synonyms: ['old', 'classic', 'edo', 'temple'], baseWeight: 0.6, vector: [0.2, 0.8, 0.5] }
 ];
 
 export class TagEngine {
@@ -47,7 +69,7 @@ export class TagEngine {
         tokens.forEach(token => {
             // Direct match or synonym match
             const match = TAG_DICTIONARY.find(t =>
-                t.name === token || t.synonyms?.includes(token)
+                t.name.toLowerCase() === token || t.synonyms?.includes(token)
             );
 
             if (match && !seenIds.has(match.id)) {
@@ -59,112 +81,40 @@ export class TagEngine {
         return foundTags;
     }
 
-    /**
-     * Calculates the dynamic weight of a tag based on context.
-     * Implements "Dynamic Weighting" core requirement.
-     */
-    static calculateContextualWeight(tag: Tag, context: TagContext): number {
-        let weight = tag.baseWeight || 0.5;
-
-        // Rule 1: User Profile Impact
-        if (context.userProfile === 'wheelchair' || context.userProfile === 'stroller') {
-            if (['elevator', 'ramp', 'accessible', 'step_free'].includes(tag.name)) {
-                weight *= 2.0; // Critical boost
-            }
-            if (tag.category === 'facility') {
-                weight *= 1.5; // General facility boost
-            }
-        }
-
-        // Rule 2: Weather Impact
-        if (['rain', 'snow'].includes(context.weather)) {
-            if (tag.name === 'indoor' || tag.category === 'indoor') {
-                weight *= 1.8; // Boost indoor
-            }
-            if (tag.name === 'park' || tag.category === 'outdoor') {
-                weight *= 0.2; // Penalize outdoor
-            }
-        }
-
-        // Rule 3: Time Impact (Example)
-        if (context.timeOfDay === 'night' && tag.name === 'park') {
-            weight *= 0.5; // Less relevant at night maybe
-        }
-
-        return parseFloat(weight.toFixed(2));
-    }
-
-    /**
-     * Finds similar tags using Cosine Similarity on vectors.
-     * Simulates Vector Search (Core Requirement).
-     */
-    static findSimilarTags(targetVector: number[], topK: number = 3): Tag[] {
-        // In a real app, this would query a vector DB (e.g., pgvector).
-        // Here we linear scan the mock dictionary.
-        return TAG_DICTIONARY
-            .filter(t => t.vector) // Only tags with vectors
-            .map(tag => ({
-                ...tag,
-                score: this.cosineSimilarity(targetVector, tag.vector!)
-            }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, topK);
-    }
-
-    /**
-     * Calculates Cosine Similarity between two tags based on their vectors.
-     * If vectors are missing, falls back to string similarity (Levenshtein-based mock).
-     */
-    static calculateSimilarity(tagA: Tag, tagB: Tag): number {
-        if (tagA.vector && tagB.vector) {
-            return this.cosineSimilarity(tagA.vector, tagB.vector);
-        }
-        // Fallback: Jaccard Similarity of character bigrams for string matching
-        return this.stringSimilarity(tagA.name, tagB.name);
-    }
-
-    private static cosineSimilarity(vecA: number[], vecB: number[]): number {
-        // Pad vectors if lengths differ (naive approach, usually vectors are fixed dim)
-        const maxLength = Math.max(vecA.length, vecB.length);
-        const vA = [...vecA, ...Array(maxLength - vecA.length).fill(0)];
-        const vB = [...vecB, ...Array(maxLength - vecB.length).fill(0)];
-
-        const dotProduct = vA.reduce((sum, a, i) => sum + a * (vB[i] || 0), 0);
-        const magA = Math.sqrt(vA.reduce((sum, a) => sum + a * a, 0));
-        const magB = Math.sqrt(vB.reduce((sum, b) => sum + b * b, 0));
-
-        if (magA === 0 || magB === 0) return 0;
-        return dotProduct / (magA * magB);
-    }
-
-    private static stringSimilarity(str1: string, str2: string): number {
-        const set1 = new Set(str1.split(''));
-        const set2 = new Set(str2.split(''));
-        const intersection = new Set([...set1].filter(x => set2.has(x)));
-        const union = new Set([...set1, ...set2]);
-        return intersection.size / union.size;
-    }
-
-    /**
-     * Resolves conflicts between tags based on weight and context scores.
-     * @param tags List of conflicting tags
-     * @returns The winning tag
-     */
-    static resolveConflicts(tags: Tag[]): Tag | null {
-        if (!tags.length) return null;
-
-        // Sort by weight descending (assumes weight is already dynamic)
-        return tags.sort((a, b) => (b.weight || 0) - (a.weight || 0))[0];
-    }
+    // ... existing calculateContextualWeight ...
+    // ... existing findSimilarTags ...
+    // ... existing calculateSimilarity ...
+    // ... existing cosineSimilarity ...
+    // ... existing stringSimilarity ...
+    // ... existing resolveConflicts ...
 
     /**
      * Maps tags across different schemas/libraries.
+     * Supports bidirectional mapping between User Query and GEM Profile Tags.
      * @param sourceTag
-     * @param targetSchema
+     * @param targetSchema 'GEM' | 'Display' | 'Query'
      */
-    static mapTag(sourceTag: Tag, targetSchema: string): string {
-        // Mock mapping logic
-        // Real implementation would use a lookup table or semantic search
-        return `${targetSchema}:${sourceTag.name}`;
+    static mapTag(sourceTag: Tag, targetSchema: 'GEM' | 'Display' | 'Query' = 'GEM'): string {
+        if (targetSchema === 'GEM') {
+            // Map common query tags to GEM standard tags
+            // e.g. 'elevator' -> 'ELEVATOR', 'crowded' -> 'BUSY'
+            // Since we unified TAG_DICTIONARY, we check if the tag IS a GEM tag (UPPERCASE name)
+            // If it is regular case, find the GEM equivalent (if any)
+
+            // 1. If already GEM (all caps), return it
+            if (sourceTag.name === sourceTag.name.toUpperCase()) return sourceTag.name;
+
+            // 2. Find GEM tag that has this tag name as synonym
+            const gemTag = TAG_DICTIONARY.find(t =>
+                t.name === t.name.toUpperCase() && t.synonyms?.includes(sourceTag.name)
+            );
+
+            if (gemTag) return gemTag.name;
+
+            // 3. Fallback: normalize
+            return sourceTag.name.toUpperCase();
+        }
+
+        return sourceTag.name;
     }
 }

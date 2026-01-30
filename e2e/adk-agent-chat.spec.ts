@@ -43,7 +43,7 @@ test.describe('ADK Agent Chat Flow', () => {
         await page.waitForTimeout(1000);
 
         // Verify AI Chat button is visible
-        const aiGuideBtn = page.locator('button[data-testid="open-ai-chat"]').first();
+        const aiGuideBtn = page.locator('button[data-testid="open-ai-chat"]:visible').first();
         await expect(aiGuideBtn).toBeVisible({ timeout: 20000 });
     });
 
@@ -51,7 +51,7 @@ test.describe('ADK Agent Chat Flow', () => {
      * Helper: Opens the chat panel and returns the input element
      */
     async function openChatAndGetInput(page: Page) {
-        const aiBtn = page.locator('button[data-testid="open-ai-chat"]').first();
+        const aiBtn = page.locator('button[data-testid="open-ai-chat"]:visible').first();
         await aiBtn.click({ force: true });
 
         // Wait for fullscreen UI state

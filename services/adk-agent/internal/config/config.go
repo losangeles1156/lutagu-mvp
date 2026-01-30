@@ -19,6 +19,10 @@ type Config struct {
         FacilityAgent string
         GeneralAgent  string
     }
+    Redis struct {
+        URL string
+    }
+    RoutingServiceURL string
     Port string
 }
 
@@ -31,6 +35,9 @@ func Load() *Config {
     cfg.ODPT.APIKey = os.Getenv("ODPT_API_KEY")
     cfg.ODPT.APIUrl = getEnv("ODPT_API_URL", "https://api.odpt.org/api/v4/odpt:TrainInformation")
     
+    // Internal Services
+    cfg.RoutingServiceURL = getEnv("ROUTING_SERVICE_URL", "http://localhost:8787/l4/route")
+
     // Model Definitions
     cfg.Models.RootAgent = getEnv("MODEL_ROOT_AGENT", "google/gemini-3-flash-preview")
     cfg.Models.RouteAgent = getEnv("MODEL_ROUTE_AGENT", "deepseek/deepseek-chat-v3-0324")
@@ -38,6 +45,9 @@ func Load() *Config {
     cfg.Models.FacilityAgent = getEnv("MODEL_FACILITY_AGENT", "google/gemini-2.5-flash-lite-preview-06-17")
     cfg.Models.GeneralAgent = getEnv("MODEL_GENERAL_AGENT", "deepseek/deepseek-chat-v3-0324")
     
+    // Redis
+    cfg.Redis.URL = getEnv("REDIS_URL", "redis://localhost:6379/0")
+
     // Server Port
     cfg.Port = getEnv("PORT", "8080")
     

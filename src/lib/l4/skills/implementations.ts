@@ -166,6 +166,7 @@ Format:
 export class LocalGuideSkill extends BaseSkill {
     constructor() {
         super(LOCAL_GUIDE_SKILL.name, 85, LOCAL_GUIDE_SKILL.keywords, LOCAL_GUIDE_SCHEMA);
+        this.setGemCapabilities(['FOOD', 'SHOPPING', 'SIGHTSEEING']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
@@ -386,6 +387,7 @@ export class LastMileSkill extends BaseSkill {
             timeoutMs: 6000,
             cacheTtlMs: 60 * 1000
         });
+        this.setGemCapabilities(['LASTMILE', 'BUS', 'WALK']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
@@ -427,6 +429,7 @@ export class CrowdDispatcherSkill extends BaseSkill {
             timeoutMs: 8000,
             cacheTtlMs: 5 * 60 * 1000
         });
+        this.setGemCapabilities(['CROWD', 'QUIET', 'ALTERNATIVE']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
@@ -478,6 +481,7 @@ export class SpatialReasonerSkill extends BaseSkill {
                 cacheTtlMs: 15 * 1000
             }
         );
+        this.setGemCapabilities(['ROUTE', 'DETOUR', 'SPATIAL']);
     }
 
     async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
@@ -531,6 +535,7 @@ If WVC < 1, strongly recommend detour.`,
 export class StandardRoutingSkill extends BaseSkill {
     constructor() {
         super(STANDARD_ROUTING_SKILL.name, 92, STANDARD_ROUTING_SKILL.keywords, ROUTING_SCHEMA); // High priority but below Emergency
+        this.setGemCapabilities(['ROUTE', 'TRANSFER', 'COMMUTE']);
     }
 
     calculateRelevance(input: string, context: RequestContext): number {

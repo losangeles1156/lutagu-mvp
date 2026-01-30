@@ -1,0 +1,97 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/**'
+      - '.github/workflows/deploy.yml'
+
+env:
+  PROJECT_ID: lutagu-mvp # Replace with verified Project ID
+  REGION: asia-northeast1
+  GAR_REPO: lutagu-repo
+
+jobs:
+  deploy-adk:
+    name: Deploy ADK Agent
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write' # Required for Workload Identity Federation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Auth Check (Actual setup requires Workload Identity Provider)
+      # Skipping real auth for MVP plan, generating template.
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}' # Fallback to key json for now
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Login to GAR
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and Push (ADK Agent)
+        uses: docker/build-push-action@v5
+        with:
+          context: services/adk-agent
+          push: true
+          tags: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/adk-agent:latest
+
+      - name: Deploy to Cloud Run (ADK)
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: adk-agent
+          region: ${{ env.REGION }}
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/adk-agent:latest
+          env_vars: |
+            EXT_URL=https://adk-agent-xyz.run.app
+            L4_ROUTING_SERVICE_URL=https://l4-routing-rs-xyz.run.app
+
+  deploy-l4:
+    name: Deploy L4 Routing
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Login to GAR
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      
+      # For L4, we need routing_graph.json
+      # In real CD, fetch from GCS bucket:
+      # run: gcloud storage cp gs://lutagu-assets/routing_graph.json ./routing_graph.json
+      - name: Prepare Graph (Mock for Template)
+        run: touch routing_graph.json # Placeholder
+
+      - name: Build and Push (L4 Routing)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/l4-routing-rs/Dockerfile
+          push: true
+          tags: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/l4-routing-rs:latest
+
+      - name: Deploy to Cloud Run (L4)
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: l4-routing-rs
+          region: ${{ env.REGION }}
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/l4-routing-rs:latest

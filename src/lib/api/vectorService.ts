@@ -5,7 +5,7 @@
  * for semantic knowledge retrieval (RAG).
  */
 
-const VECTOR_API_URL = process.env.VECTOR_SEARCH_API_URL || 'http://localhost:8080';
+const VECTOR_API_URL = process.env.VECTOR_SEARCH_API_URL || 'http://localhost:8082';
 
 export interface VectorSearchResult {
     id: string;
@@ -48,7 +48,7 @@ export async function searchVectorDB(
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, top_k: topK, filter }),
+            body: JSON.stringify({ query, limit: topK, filter }),
             // Short cache for real-time relevance
             next: { revalidate: 30 }
         });

@@ -83,23 +83,40 @@ export const useAgentChat = (options: {
     });
 
     // Destructure specifically what we know exists or provide defaults
-    const aiMessages = useMemo(() => chatHelpers.messages || [], [chatHelpers.messages]);
+    const aiMessages = chatHelpers.messages || [];
     const setMessages = chatHelpers.setMessages;
     const status = chatHelpers.status;
-    const appendFn = (chatHelpers as any).append || (chatHelpers as any).sendMessage;
+    const appendMessage = (chatHelpers as any).append as ((message: { role: string; content: string }, options?: any) => Promise<void>) | undefined;
+    const sendText = (chatHelpers as any).sendMessage as ((payload: { text: string }, options?: any) => Promise<void>) | undefined;
 
     // Derived loading state
     const aiLoading = status === 'streaming' || status === 'submitted';
     const isLoading = aiLoading;
 
     // Direct mapping to preserve reactivity
-    const messages: AgentMessage[] = useMemo(() => {
-        return aiMessages.map((m: any) => ({
+    const extractText = (value: unknown): string => {
+        if (typeof value === 'string') return value;
+        if (!Array.isArray(value)) return '';
+        return value.map((part) => {
+            if (typeof part === 'string') return part;
+            if (typeof part?.text === 'string') return part.text;
+            if (typeof part?.content === 'string') return part.content;
+            return '';
+        }).join('');
+    };
+
+    const messages: AgentMessage[] = aiMessages.map((m: any) => {
+        const contentText = typeof m?.content === 'string' ? m.content : '';
+        const contentFromContentParts = extractText(m?.content);
+        const contentFromParts = extractText(m?.parts);
+        const resolvedContent = contentText || contentFromContentParts || contentFromParts || '';
+
+        return {
             ...m,
-            content: m.content || '',
-            rawContent: m.content || ''
-        }));
-    }, [aiMessages]);
+            content: resolvedContent,
+            rawContent: resolvedContent
+        };
+    });
 
     useEffect(() => {
         const lastMsg = messages[messages.length - 1];
@@ -131,22 +148,24 @@ export const useAgentChat = (options: {
         try {
             console.log('[useAgentChat] Calling append/sendMessage...');
 
-            if (!appendFn) {
-                throw new Error('No append function found in useChat return values');
+            if (appendMessage) {
+                await appendMessage({
+                    role: 'user',
+                    content: text
+                }, {
+                    body: { ...bodyRef.current }
+                });
+            } else if (sendText) {
+                await sendText({ text });
+            } else {
+                throw new Error('No append or sendMessage function found in useChat return values');
             }
-
-            await appendFn({
-                role: 'user',
-                content: text
-            }, {
-                body: { ...bodyRef.current }
-            });
             console.log('[useAgentChat] append completed');
         } catch (error) {
             console.error('[useAgentChat] Send error:', error);
             setIsOffline(true);
         }
-    }, [appendFn, isLoading]);
+    }, [appendMessage, sendText, isLoading]);
 
     return {
         messages,

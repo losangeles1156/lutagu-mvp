@@ -2,6 +2,7 @@ package agent
 
 import (
     "context"
+    "encoding/json"
     "fmt"
 
     "github.com/lutagu/adk-agent/internal/infrastructure/odpt"
@@ -28,82 +29,68 @@ func (a *StatusAgent) Name() string {
     return "status_agent"
 }
 
-func (a *StatusAgent) Process(ctx context.Context, messages []Message, reqCtx RequestContext) (<-chan string, error) {
-    ch := make(chan string)
+// Tools returns the available tools for this agent
+func (a *StatusAgent) Tools() []openai.Tool {
+    return []openai.Tool{
+        {
+            Type: openai.ToolTypeFunction,
+            Function: &openai.FunctionDefinition{
+                Name:        "get_train_status",
+                Description: "Get real-time operation status of Tokyo train lines.",
+                Parameters: json.RawMessage(`{
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }`),
+            },
+        },
+    }
+}
 
-    go func() {
-        defer close(ch)
-
-        // 1. Fetch Real-Time Data (RAG)
-        dataContext := ""
+// ExecuteTool performs the logic for a tool call
+func (a *StatusAgent) ExecuteTool(ctx context.Context, toolCall openai.ToolCall, reqCtx RequestContext) (string, error) {
+    if toolCall.Function.Name == "get_train_status" {
         if a.OdptClient == nil {
-            dataContext = "ODPT data unavailable (client not configured)."
-        } else {
-            statusList, err := a.OdptClient.FetchTrainStatus()
-            if err != nil {
-                dataContext = fmt.Sprintf("Error fetching data: %v", err)
-            } else {
-                // Filter only delays
-                count := 0
-                for _, s := range statusList {
-                    if s.Status != "normal" {
-                        dataContext += fmt.Sprintf("- %s: %s (Status: %s)\n", s.Railway, s.Text, s.Status)
-                        count++
-                    }
-                }
-                if count == 0 {
-                    dataContext = "All lines are operating normally."
-                }
-            }
+            return "ODPT client not configured.", nil
         }
 
-        sysPrompt := fmt.Sprintf(`
-You are the Status Agent for LUTAGU.
-Your role is to explain train operation status, delays, and disruptions in Tokyo BASED ON THE REAL-TIME DATA BELOW.
+        statusList, err := a.OdptClient.FetchTrainStatus()
+        if err != nil {
+            return fmt.Sprintf("Error fetching data: %v", err), nil
+        }
 
---- REAL TIME DATA ---
-%s
-----------------------
+        // Filter for delays/issues to save tokens
+        var result string
+        count := 0
+        for _, s := range statusList {
+            if s.Status != "normal" {
+                result += fmt.Sprintf("- %s: %s (Status: %s)\n", s.Railway, s.Text, s.Status)
+                count++
+            }
+        }
+        if count == 0 {
+            return "All lines are operating normally.", nil
+        }
+        return result, nil
+    }
+    return "", fmt.Errorf("unknown tool: %s", toolCall.Function.Name)
+}
+
+func (a *StatusAgent) Process(ctx context.Context, messages []Message, reqCtx RequestContext) (<-chan string, error) {
+    sysPrompt := `
+You are the Status Agent for LUTAGU.
+Your role is to explain train operation status, delays, and disruptions in Tokyo.
+USE THE "get_train_status" TOOL to check for delays.
 
 Structure your response:
-1.  **Current Status**: Highlight any DELAY or SUSPENDED lines found in the data. If none, say all normal.
-2.  **Details**: Explain the cause if provided in the text.
+1.  **Current Status**: Highlight any DELAY or SUSPENDED lines found.
+2.  **Details**: Explain the cause.
 3.  **Advice**: Suggest alternatives if suspended.
 
-User Locale: %s
-`, dataContext, reqCtx.Locale)
+User Locale: ` + reqCtx.Locale + `
+`
+    msgsWithSys := append([]Message{{Role: "system", Content: sysPrompt}}, messages...)
 
-        openAIMessages := toOpenAIMessages(messages)
-        req := openai.ChatCompletionRequest{
-            Model: a.Model,
-            Messages: append([]openai.ChatCompletionMessage{
-                {Role: "system", Content: sysPrompt},
-            }, openAIMessages...),
-            Stream: true,
-        }
-
-        stream, err := a.Client.StreamChatCompletion(ctx, req)
-        if err != nil {
-            ch <- fmt.Sprintf("Error: %v", err)
-            return
-        }
-        defer stream.Close()
-
-        for {
-            response, err := stream.Recv()
-            if err != nil {
-                return
-            }
-            // Defensive check for empty Choices
-            if len(response.Choices) == 0 {
-                continue
-            }
-            content := response.Choices[0].Delta.Content
-            if content != "" {
-                ch <- content
-            }
-        }
-    }()
-
-    return ch, nil
+    orchestrator := NewOrchestrator(a)
+    return orchestrator.Run(ctx, msgsWithSys, reqCtx)
 }

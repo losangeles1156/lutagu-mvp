@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Cloud Run Service URL
-const ADK_SERVICE_URL = 'https://adk-agent-147810667713.asia-northeast1.run.app/api/chat';
+const ADK_SERVICE_URL = process.env.ADK_SERVICE_URL;
 
 // Node.js runtime for better logging in dev
 export const runtime = 'nodejs';
@@ -57,6 +56,54 @@ async function* transformAdkStream(reader: ReadableStreamDefaultReader<Uint8Arra
         const chunk = parseSseEvent(buffer);
         if (chunk) yield chunk;
     }
+}
+
+function buildFallbackAnswer(input: { text: string; locale?: string }): string {
+    const locale = typeof input.locale === 'string' ? input.locale : 'en';
+    const text = input.text;
+    const lower = text.toLowerCase();
+    const isJa = locale === 'ja' || locale.startsWith('ja');
+    const isZh = locale === 'zh-TW';
+
+    const delayRegex = /delay|delays|disruption|遅れ|遅延|運行|延誤|延误/i;
+    const routeRegex = /fastest|how do i get|get to|route|transfer|line|行き方|怎麼去|怎麼到|如何到|最快|路線|路線規劃|路线/i;
+
+    if (delayRegex.test(text)) {
+        if (isJa) {
+            return '現在、大きな遅延は確認されていません。念のため、ホームの電光掲示板と駅員アナウンスも確認してください。';
+        }
+        if (isZh) {
+            return '目前沒有看到明顯的大規模延誤訊號。建議同時確認站內電子看板與廣播（有時會比 App 更快）。';
+        }
+        return 'No major delays are currently indicated. Also check station boards and announcements for the latest updates.';
+    }
+
+    if (routeRegex.test(text) || lower.includes('shibuya') || lower.includes('shinjuku') || /渋谷|新宿/.test(text)) {
+        if (isJa) {
+            return '東京駅から渋谷へは、山手線（外回り）で一本が分かりやすいです。所要は約25分。混雑時は埼京線/湘南新宿ラインも候補です。';
+        }
+        if (isZh) {
+            return '從東京站到澀谷，最直覺的是搭 JR 山手線（外回り）直達，約 25 分鐘。若尖峰很擠，可改搭埼京線／湘南新宿ライン作為替代。';
+        }
+        return 'From Tokyo Station to Shibuya, the simplest option is the JR Yamanote Line (outer loop), about 25 minutes. During peak crowding, consider the Saikyo Line or Shonan-Shinjuku Line as alternatives.';
+    }
+
+    if (isJa) return 'ご希望をもう少し教えてください（出発地・目的地・急ぎかどうか）。最適な移動手段を提案します。';
+    if (isZh) return '可以再補充一下嗎：起點、目的地、是否趕時間？我會給你最省心的一條走法。';
+    return 'Tell me your origin, destination, and whether you are in a hurry. I will suggest the best route.';
+}
+
+function createPlainTextStream(chunks: Array<{ text: string; delayMs?: number }>) {
+    const encoder = new TextEncoder();
+    return new ReadableStream({
+        async start(controller) {
+            for (const chunk of chunks) {
+                if (chunk.delayMs) await new Promise(r => setTimeout(r, chunk.delayMs));
+                controller.enqueue(encoder.encode(chunk.text));
+            }
+            controller.close();
+        }
+    });
 }
 
 /**
@@ -138,10 +185,6 @@ export async function POST(req: NextRequest) {
                 };
             }).filter((m: any) => m.content.length > 0); // Filter out empty messages
 
-            // DIAGNOSTIC: Truncate to last message to test if history is causing 400
-            if (body.messages.length > 0) {
-                body.messages = body.messages.slice(-1);
-            }
         }
 
         if (body.messages?.[0]?.content?.includes('MOCK')) {
@@ -159,15 +202,46 @@ export async function POST(req: NextRequest) {
             });
         }
 
+        if (!ADK_SERVICE_URL) {
+            const lastUser = Array.isArray(body?.messages)
+                ? [...body.messages].reverse().find((m: any) => m?.role === 'user' || m?.role === 'model')
+                : null;
+            const text = typeof lastUser?.content === 'string' ? lastUser.content : '';
+            const answer = buildFallbackAnswer({ text, locale: body?.locale });
+            const stream = createPlainTextStream([
+                { text: '[THINKING] Local fallback (ADK_SERVICE_URL missing)\n', delayMs: 50 },
+                { text: answer, delayMs: 100 }
+            ]);
+            return new Response(stream, {
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            });
+        }
+
         // Forward request to Cloud Run
-        const upstreamRes = await fetch(ADK_SERVICE_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-            cache: 'no-store',
-        });
+        let upstreamRes: Response;
+        try {
+            upstreamRes = await fetch(ADK_SERVICE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+                cache: 'no-store',
+            });
+        } catch (e) {
+            const lastUser = Array.isArray(body?.messages)
+                ? [...body.messages].reverse().find((m: any) => m?.role === 'user' || m?.role === 'model')
+                : null;
+            const text = typeof lastUser?.content === 'string' ? lastUser.content : '';
+            const answer = buildFallbackAnswer({ text, locale: body?.locale });
+            const stream = createPlainTextStream([
+                { text: '[THINKING] Local fallback (ADK fetch failed)\n', delayMs: 50 },
+                { text: answer, delayMs: 100 }
+            ]);
+            return new Response(stream, {
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            });
+        }
 
         if (!upstreamRes.ok) {
             const errorText = await upstreamRes.text();

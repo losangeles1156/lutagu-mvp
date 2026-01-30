@@ -1,0 +1,62 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/**'
+      - '.github/workflows/backend-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/**'
+
+jobs:
+  test-go:
+    name: Test Go (adk-agent)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+      - name: Test
+        working-directory: services/adk-agent
+        run: go test -v ./...
+
+  test-rust:
+    name: Test Rust Services
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+            toolchain: stable
+      
+      - name: Test L4 Routing
+        working-directory: services/l4-routing-rs
+        # Mock graph file for tests if needed, or rely on test-specific data
+        run: cargo test --verbose
+
+      - name: Test Vector Search
+        working-directory: services/vector-search-rs
+        run: cargo test --verbose
+
+  build-check:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    needs: [test-go, test-rust]
+    steps:
+      - uses: actions/checkout@v4
+      
+      # We need a dummy routing_graph.json to satisfy the COPY instruction in l4-routing-rs
+      - name: Create Dummy Graph
+        run: echo "{}" > routing_graph.json
+
+      - name: Build adk-agent
+        run: docker build -t adk-agent-check services/adk-agent
+
+      - name: Build l4-routing-rs
+        run: docker build -t l4-routing-check -f services/l4-routing-rs/Dockerfile .

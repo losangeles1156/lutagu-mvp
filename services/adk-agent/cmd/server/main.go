@@ -4,13 +4,15 @@ import (
     "context"
     "encoding/json"
     "fmt"
-    "log"
+    "log/slog"
     "net/http"
+    "os"
     "strings"
     "time"
 
     "github.com/lutagu/adk-agent/internal/agent"
     "github.com/lutagu/adk-agent/internal/config"
+    "github.com/lutagu/adk-agent/internal/infrastructure/cache"
     "github.com/lutagu/adk-agent/internal/infrastructure/odpt"
     "github.com/lutagu/adk-agent/pkg/openrouter"
 )
@@ -23,30 +25,47 @@ var (
 )
 
 func main() {
-    log.SetFlags(log.LstdFlags | log.Lshortfile)
+    // 1. Setup Structured Logging (Cloud Logging compatible)
+    logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+    slog.SetDefault(logger)
+
     cfg = config.Load()
 
     // Initialize Clients
     orClient, err := openrouter.NewClient(openrouter.Config{APIKey: cfg.OpenRouter.APIKey})
     if err != nil {
-        log.Fatalf("Failed to create OpenRouter client: %v", err)
+        slog.Error("Failed to create OpenRouter client", "error", err)
+        os.Exit(1)
     }
     odptClient := odpt.NewClient(cfg.ODPT.APIKey, cfg.ODPT.APIUrl)
 
+    // Initialize Redis
+    redisStore, err := cache.NewRedisStore(cfg.Redis.URL)
+    if err != nil {
+        slog.Warn("Failed to connect to Redis. Proceeding without cache.", "error", err)
+    } else {
+        slog.Info("Connected to Redis", "url", cfg.Redis.URL)
+        defer redisStore.Close()
+    }
+
     // Initialize Agents with configured models
     rootAgent = agent.NewRootAgent(orClient, cfg.Models.RootAgent)
-    routeAgent = agent.NewRouteAgent(orClient, cfg.Models.RouteAgent)
+    routeAgent = agent.NewRouteAgent(orClient, cfg.Models.RouteAgent, cfg.RoutingServiceURL)
     statusAgent = agent.NewStatusAgent(orClient, cfg.Models.StatusAgent, odptClient)
     
-    log.Printf("Agents initialized: Root=%s, Route=%s, Status=%s", 
-        cfg.Models.RootAgent, cfg.Models.RouteAgent, cfg.Models.StatusAgent)
+    slog.Info("Agents initialized", 
+        "root", cfg.Models.RootAgent, 
+        "route", cfg.Models.RouteAgent, 
+        "status", cfg.Models.StatusAgent,
+    )
 
     http.HandleFunc("/api/chat", handleChat)
     http.HandleFunc("/health", handleHealth)
 
-    log.Printf("Server listening on port %s", cfg.Port)
+    slog.Info("Server listening", "port", cfg.Port)
     if err := http.ListenAndServe(":"+cfg.Port, nil); err != nil {
-        log.Fatalf("Server failed: %v", err)
+        slog.Error("Server failed", "error", err)
+        os.Exit(1)
     }
 }
 
@@ -100,7 +119,7 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
     
     intentChan, err := rootAgent.Process(ctx, req.Messages, reqCtx)
     if err != nil {
-        log.Printf("Root agent failed: %v", err)
+        slog.Error("Root agent failed", "error", err)
         sendEvent("error", err.Error())
         return
     }
@@ -108,7 +127,7 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
     // Read intent
     intentMsg := <-intentChan
     intent := strings.TrimPrefix(intentMsg, "INTENT_DETECTED:")
-    log.Printf("Intent detected: %s", intent)
+    slog.Info("Intent detected", "intent", intent)
     
     sendEvent("meta", fmt.Sprintf(`{"status":"routing", "intent":"%s"}`, intent))
 
@@ -127,7 +146,7 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
     // 6. Execute Sub-Agent & Stream
     respChan, err := subAgent.Process(ctx, req.Messages, reqCtx)
     if err != nil {
-        log.Printf("Sub-agent failed: %v", err)
+        slog.Error("Sub-agent failed", "error", err)
         sendEvent("error", err.Error())
         return
     }

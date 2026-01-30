@@ -145,4 +145,18 @@ impl OdptClient {
         }
         self.fetch("odpt:TrainInformation", &params).await
     }
+
+    pub async fn get_station_timetables(&self, operator: Option<&str>, railway: Option<&str>, station: Option<&str>) -> Result<Vec<OdptStationTimetable>> {
+        let mut params = Vec::new();
+        if let Some(op) = operator {
+            params.push(("odpt:operator", op));
+        }
+        if let Some(rw) = railway {
+            params.push(("odpt:railway", rw));
+        }
+        if let Some(st) = station {
+            params.push(("odpt:station", st));
+        }
+        self.fetch("odpt:StationTimetable", &params).await
+    }
 }

@@ -83,8 +83,9 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
 
   // 處理進入探索模式
   const handlePanelClick = useCallback((e: MouseEvent) => {
-    // 只有在點擊面板背景或標題時才觸發，避免影響輸入框和按鈕
-    if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.panel-header')) {
+    const target = e.target as HTMLElement;
+    if (target.closest('button, input, textarea, select, a, [role="button"]')) return;
+    if (e.target === e.currentTarget || target.closest('.panel-header')) {
       transitionTo('explore');
     }
   }, [transitionTo]);
@@ -116,6 +117,7 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
               onClick={onExpand}
               className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
               title={tChat('maximize')}
+              data-testid="open-ai-chat"
             >
               <Maximize2 size={16} />
             </button>
@@ -202,12 +204,14 @@ export function ChatCollapsedPanel({ onExpand, onClose }: ChatCollapsedPanelProp
         className="h-full w-full flex flex-col bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-[24px] overflow-hidden"
       >
         {/* Drag Handle */}
-        <div
+        <button
+          type="button"
           className="w-full h-8 flex items-center justify-center cursor-pointer shrink-0"
           onClick={onExpand}
+          data-testid="open-ai-chat"
         >
           <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
-        </div>
+        </button>
 
         {/* Header */}
         <div className="panel-header shrink-0 px-4 py-2 flex items-center justify-between">

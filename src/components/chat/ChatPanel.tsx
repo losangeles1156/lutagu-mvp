@@ -76,7 +76,8 @@ export function ChatPanel() {
         sendMessage,
         clearMessages,
         messagesEndRef,
-        sessionId
+        sessionId,
+        isOffline
     } = useAgentChatContext();
 
     // Debug message log
@@ -253,6 +254,12 @@ export function ChatPanel() {
                 onMinimize={() => setIsMinimized(!isMinimized)}
                 onClose={() => transitionTo('collapsed_desktop')}
             />
+
+            {isOffline && (
+                <div className="px-4 py-2 text-xs font-bold text-amber-700 bg-amber-50 border-b border-amber-200">
+                    {tChat('connectionError')}
+                </div>
+            )}
 
             {/* Content */}
             {isMinimized ? (

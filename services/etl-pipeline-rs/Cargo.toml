@@ -25,7 +25,7 @@ urlencoding = "2.1"
 regex = "1.10"
 home = "=0.5.9"
 base64ct = "=1.6.0"
-odpt-client = { path = "../shared/odpt-client-rs" }
+odpt-client = { path = "../shared/odpt-client-rs", features = ["redis-cache"] }
 
 [dev-dependencies]
 tokio-test = "0.4"

@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Go
+services/adk-agent/vendor/
+**/*_test.go
+
+# Rust
+target/
+**/*.rs.bk
+
+# Node
+node_modules/
+.next/
+dist/
+coverage/
+
+# OS
+.DS_Store
+
+# Secrets
+.env
+.env.local
+.env.*

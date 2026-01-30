@@ -294,65 +294,78 @@ export const createGetWeatherTool = (ctx: ToolContext) => tool({
 // POI Search Tool (City-Agnostic)
 // =============================================================================
 
-// Mock POI data for common Tokyo queries
-const MOCK_POI_RESULTS: Record<string, Array<{ name: string; nameJa: string; category: string; rating: number }>> = {
-    ramen: [
-        { name: 'Ichiran Ramen Tokyo Station', nameJa: '一蘭拉麵 東京站店', category: 'food', rating: 4.5 },
-        { name: 'Rokurinsha Tokyo Ramen Street', nameJa: '六厘舍 東京站一番街', category: 'food', rating: 4.7 },
-        { name: 'AFURI Yuzu Shio Ramen', nameJa: 'AFURI 阿夫利柚子鹽拉麵', category: 'food', rating: 4.4 },
-    ],
-    food: [
-        { name: 'Tsukiji Market Sushi', nameJa: '築地壽司店', category: 'food', rating: 4.6 },
-        { name: 'Tempura Kondo', nameJa: '天婦羅近藤', category: 'food', rating: 4.8 },
-        { name: 'Tonkatsu Maisen', nameJa: '豬排舞泉', category: 'food', rating: 4.5 },
-    ],
-    default: [
-        { name: 'Tokyo Skytree', nameJa: '東京晴空塔', category: 'attraction', rating: 4.6 },
-        { name: 'Senso-ji Temple', nameJa: '淺草寺', category: 'attraction', rating: 4.7 },
-    ],
-};
+// =============================================================================
+// POI Search Tool (Real Vector Search)
+// =============================================================================
+
+import { searchVectorDB } from '@/lib/api/vectorService';
 
 export const createSearchPOITool = (ctx: ToolContext) => tool({
-    description: `Search for points of interest near a location.
+    description: `Search for points of interest near a location using semantic search.
     Includes restaurants, attractions, shops, etc.
-    Use this when user asks for recommendations or nearby places.`,
+    Use this for recommendations ("Where is good ramen?") or finding specific places.`,
     inputSchema: z.object({
         query: z.string().describe('Search query (e.g., "ramen", "temple", "shopping")'),
-        nearStation: z.string().optional().describe('Station name to search near'),
+        nearStation: z.string().optional().describe('Station name to filter by (optional)'),
         category: z.enum(['food', 'attraction', 'shopping', 'service', 'all']).optional(),
     }),
     execute: async ({ query, nearStation, category = 'all' }: { query: string; nearStation?: string; category?: 'food' | 'attraction' | 'shopping' | 'service' | 'all' }) => {
-        console.log(`[Tool:searchPOI] Query: ${query}, Near: ${nearStation}, Category: ${category}`);
+        const logMsg = `[Tool:searchPOI] Query: "${query}", Near: "${nearStation || 'Any'}", Category: ${category}`;
+        console.log(logMsg);
 
-        // Determine which mock results to return
-        const queryLower = query.toLowerCase();
-        let results = MOCK_POI_RESULTS.default;
-        if (queryLower.includes('ramen') || queryLower.includes('拉麵') || queryLower.includes('ラーメン')) {
-            results = MOCK_POI_RESULTS.ramen;
-        } else if (queryLower.includes('food') || queryLower.includes('好吃') || queryLower.includes('餐廳') || queryLower.includes('吃')) {
-            results = MOCK_POI_RESULTS.food;
+        try {
+            // Construct semantic query with location context
+            const semanticQuery = nearStation
+                ? `${query} near ${nearStation}`
+                : query;
+
+            // Perform Vector Search
+            // We search for more results to allow for post-filtering if needed
+            const vectorResults = await searchVectorDB(semanticQuery, 5);
+
+            if (vectorResults.length === 0) {
+                return {
+                    success: false,
+                    message: ctx.locale === 'en'
+                        ? `No results found for "${query}".`
+                        : `找不到關於「${query}」的地點。`,
+                };
+            }
+
+            // Map vector results to consistent POI format
+            const results = vectorResults.map(r => ({
+                name: r.payload.name || r.payload.content?.substring(0, 30) || 'Unknown Place',
+                // If payload has specific language fields, use them based on locale
+                nameLocal: ctx.locale === 'ja' ? r.payload.name_ja : (ctx.locale === 'zh' ? r.payload.name_zh : r.payload.name_en),
+                category: r.payload.category || 'general',
+                rating: r.payload.rating || 0,
+                description: r.payload.content,
+                score: r.score
+            }));
+
+            const locationText = nearStation || (ctx.locale === 'en' ? 'Tokyo' : '東京');
+            const isChinese = ctx.locale === 'zh' || ctx.locale === 'zh-TW';
+
+            return {
+                success: true,
+                message: isChinese
+                    ? `已為您找到相關地點：`
+                    : ctx.locale === 'ja'
+                        ? `おすすめの場所が見つかりました：`
+                        : `Found the following places:`,
+                results: results,
+                summary: isChinese
+                    ? `已找到 ${results.length} 個相關地點`
+                    : `Found ${results.length} relevant places`,
+            };
+
+        } catch (error: any) {
+            console.error('[Tool:searchPOI] Error:', error);
+            return {
+                success: false,
+                message: 'POI search failed. Please try again.',
+            };
         }
-
-        const locationText = nearStation || 'Tokyo';
-        const isJapanese = ctx.locale === 'ja';
-        const isChinese = ctx.locale === 'zh' || ctx.locale === 'zh-TW';
-
-        return {
-            success: true,
-            message: isChinese
-                ? `已找到 ${locationText} 附近的餐廳推薦：`
-                : isJapanese
-                    ? `${locationText}付近のおすすめレストラン：`
-                    : `Found restaurant recommendations near ${locationText}:`,
-            results: results.map(r => ({
-                name: isChinese || isJapanese ? r.nameJa : r.name,
-                category: r.category,
-                rating: r.rating,
-            })),
-            summary: isChinese
-                ? `為您推薦 ${results.length} 間 ${locationText} 附近的好吃餐廳`
-                : `Found ${results.length} great food spots near ${locationText}`,
-        };
     },
 } as any);
 

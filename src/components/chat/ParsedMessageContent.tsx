@@ -2,15 +2,9 @@
 
 import { useMemo, memo } from 'react';
 import { useTranslations } from 'next-intl';
-// ReactMarkdown and remarkGfm replaced by dynamic import wrapper
-import dynamic from 'next/dynamic';
 import { Brain } from 'lucide-react';
 import { ThinkingBubble } from './ThinkingBubble';
-
-const MarkdownRenderer = dynamic(() => import('./MarkdownRenderer'), {
-    loading: () => <span className="animate-pulse">...</span>,
-    ssr: false // Client-side only optimization
-});
+import MarkdownRenderer from './MarkdownRenderer';
 
 // Component to parse Agent markers and render Markdown
 export const ParsedMessageContent = memo(({ content, role, thought }: { content: string; role: string; thought?: string | null }) => {

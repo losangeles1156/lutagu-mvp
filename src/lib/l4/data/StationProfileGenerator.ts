@@ -82,6 +82,10 @@ export class StationProfileGenerator {
         if (isHub) {
             intentTags.push("TRANSFER");
             intentTags.push("SHOPPING"); // Assumption for hubs
+            // Core Facilities for Hubs
+            intentTags.push("ELEVATOR");
+            intentTags.push("RESTROOM");
+            intentTags.push("ATM");
         } else {
             intentTags.push("COMMUTE");
         }
@@ -103,6 +107,16 @@ export class StationProfileGenerator {
             vibeTags.push("QUIET");
         }
 
+        // 4. Station Heuristics (Area Character)
+        const heuristic = this.getHeuristics(nameKey);
+        if (heuristic) {
+            if (heuristic.intent) intentTags.push(...heuristic.intent);
+            if (heuristic.vibe) vibeTags.push(...heuristic.vibe);
+        }
+
+        // 5. Integrate Station DNA
+        const dna = this.getStationDNA(nodeId);
+
         return {
             nodeId: id,
             core: { identity: Array.from(new Set(coreTags)) },
@@ -112,8 +126,32 @@ export class StationProfileGenerator {
                 transfer_ease: isHub ? 0.7 : 0.9, // Hubs are harder to transfer
                 tourism_value: isHub ? 0.8 : 0.3,
                 crowd_level: isHub ? 0.9 : 0.4
-            }
+            },
+            dna: dna || undefined
         };
+    }
+
+    private static getHeuristics(name: string): { intent?: string[], vibe?: string[] } | null {
+        // Simple manual mapping for Major Tourist Areas
+        // This simulates L2 Knowledge without DB lookup
+        const map: Record<string, { intent?: string[], vibe?: string[] }> = {
+            'Ginza': { intent: ['SHOPPING', 'DINING'], vibe: ['LUXURY', 'MODERN'] },
+            'Asakusa': { intent: ['SIGHTSEEING', 'CULTURE'], vibe: ['TRADITIONAL', 'TEMPLE'] },
+            'Akihabara': { intent: ['SHOPPING', 'GAME'], vibe: ['ANIME', 'ELECTRIC'] },
+            'Shinjuku': { intent: ['SHOPPING', 'DINING'], vibe: ['BUSY', 'NIGHT'] },
+            'Shibuya': { intent: ['SHOPPING', 'FASHION'], vibe: ['YOUTH', 'TRENDY'] },
+            'Harajuku': { intent: ['SHOPPING', 'FASHION'], vibe: ['CUTE', 'YOUTH'] },
+            'Ueno': { intent: ['SIGHTSEEING', 'CULTURE'], vibe: ['PARK', 'MUSEUM'] },
+            'Roppongi': { intent: ['DINING', 'ART'], vibe: ['MODERN', 'NIGHT'] },
+            'Maihama': { intent: ['THEMEPARK', 'FAMILY'], vibe: ['DREAM', 'HAPPY'] },
+            'Oshiage': { intent: ['SIGHTSEEING', 'SHOPPING'], vibe: ['SKYTREE', 'MODERN'] },
+            'Tsukiji': { intent: ['DINING', 'FOOD'], vibe: ['MARKET', 'BUSY'] }
+        };
+
+        // Fuzzy match or exact match on suffix
+        // e.g. "Ginza-Itchome" -> contains Ginza? maybe too risky.
+        // using exact suffix match from nameKey
+        return map[name] || null;
     }
 
     /**

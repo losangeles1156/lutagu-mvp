@@ -80,8 +80,8 @@ async fn main() -> anyhow::Result<()> {
         }
         Commands::FetchOdpt { operators, output } => {
             // Placeholder for future implementation
-             tracing::info!("Running FetchOdpt (Not implemented yet): {}, out={:?}", operators, output);
-            // modules::odpt_client::fetch_stations(&operators, output.as_deref()).await?;
+            tracing::info!("Running FetchOdpt: {}, out={:?}", operators, output);
+            modules::odpt_client::fetch_stations(&operators, output.as_deref()).await?;
         }
     }
 

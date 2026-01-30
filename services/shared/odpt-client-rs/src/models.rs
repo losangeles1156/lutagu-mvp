@@ -78,3 +78,33 @@ pub struct OdptTrainInformation {
     #[serde(rename = "odpt:timeOfOrigin")]
     pub time_of_origin: Option<String>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct OdptStationTimetable {
+    #[serde(rename = "@id")]
+    pub id: String,
+    #[serde(rename = "odpt:station")]
+    pub station: String,
+    #[serde(rename = "odpt:railway")]
+    pub railway: String,
+    #[serde(rename = "odpt:operator")]
+    pub operator: String,
+    #[serde(rename = "odpt:calendar")]
+    pub calendar: Option<String>,
+    #[serde(rename = "odpt:stationTimetableObject")]
+    pub timetable_objects: Vec<OdptStationTimetableObject>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct OdptStationTimetableObject {
+    #[serde(rename = "odpt:departureTime")]
+    pub departure_time: String,
+    #[serde(rename = "odpt:destinationStation")]
+    pub destination_station: Option<Vec<String>>,
+    #[serde(rename = "odpt:trainType")]
+    pub train_type: Option<String>,
+    #[serde(rename = "odpt:isLast")]
+    pub is_last: Option<bool>,
+}

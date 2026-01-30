@@ -5,11 +5,17 @@ import { OfflineDataManager } from '@/lib/offline/OfflineDataManager';
 
 export function ResilienceManager() {
     useEffect(() => {
-        // [Phase 13.4] Silent Prefetch for Web Resilience
-        // Wait for main thread to settle
-        requestIdleCallback(() => {
+        const runPrefetch = () => {
             OfflineDataManager.initSilentPrefetch();
-        });
+        };
+
+        if (typeof requestIdleCallback === 'function') {
+            requestIdleCallback(runPrefetch);
+            return;
+        }
+
+        const timeoutId = window.setTimeout(runPrefetch, 0);
+        return () => window.clearTimeout(timeoutId);
     }, []);
 
     return null; // Headless component

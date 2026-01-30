@@ -46,4 +46,7 @@ export interface L1NodeProfile {
 
     // Backward compatibility for raw display if needed
     rawTags?: string[];
+
+    // Station Personality (DNA) from L4 Expert Knowledge
+    dna?: string;
 }
