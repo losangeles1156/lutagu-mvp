@@ -9,7 +9,7 @@ on:
       - '.github/workflows/deploy.yml'
 
 env:
-  PROJECT_ID: lutagu-mvp # Replace with verified Project ID
+  PROJECT_ID: lutagu # Verified Project ID
   REGION: asia-northeast1
   GAR_REPO: lutagu-repo
 
