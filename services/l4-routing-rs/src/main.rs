@@ -17,6 +17,9 @@ use std::{
     sync::{Arc, OnceLock},
 };
 
+mod resolver;
+use resolver::{StationResolver, ResolvedStation};
+
 #[derive(Deserialize)]
 struct GraphData {
     adj: HashMap<String, HashMap<String, EdgeRaw>>,
@@ -44,6 +47,7 @@ struct Graph {
 #[derive(Clone)]
 struct AppState {
     graph: Arc<Graph>,
+    resolver: Arc<StationResolver>,
 }
 
 #[derive(Deserialize)]
@@ -53,6 +57,7 @@ struct RouteQuery {
     from_ids: Option<String>,
     to_ids: Option<String>,
     max_hops: Option<usize>,
+    locale: Option<String>,
 }
 
 #[derive(Serialize, Clone)]
@@ -74,13 +79,23 @@ struct PrevStep {
 struct RouteResult {
     key: String,
     path: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    path_localized: Option<Vec<String>>,
     edge_railways: Vec<String>,
     costs: RouteCosts,
 }
 
 #[derive(Serialize)]
+struct ResolvedInfo {
+    from: Option<ResolvedStation>,
+    to: Option<ResolvedStation>,
+}
+
+#[derive(Serialize)]
 struct RouteResponse {
     routes: Vec<RouteResult>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    resolved: Option<ResolvedInfo>,
     error: Option<String>,
 }
 
@@ -624,24 +639,20 @@ fn find_best_route(
 }
 
 async fn route_handler(State(state): State<AppState>, Query(query): Query<RouteQuery>) -> impl IntoResponse {
-    let mut origins = if query.from_ids.is_some() {
-        parse_ids(query.from_ids)
-    } else {
-        parse_ids(query.from)
-    };
-    let mut dests = if query.to_ids.is_some() {
-        parse_ids(query.to_ids)
-    } else {
-        parse_ids(query.to)
-    };
-
-    origins.retain(|s| !s.is_empty());
-    dests.retain(|s| !s.is_empty());
+    let locale = query.locale.as_deref().unwrap_or("ja");
+    
+    // Step 1: Resolve station names
+    let (origins, from_resolved) = resolve_station_query(&state.resolver, &query.from, &query.from_ids);
+    let (dests, to_resolved) = resolve_station_query(&state.resolver, &query.to, &query.to_ids);
 
     if origins.is_empty() || dests.is_empty() {
         let body = RouteResponse {
             routes: Vec::new(),
-            error: Some("missing from/to".to_string()),
+            resolved: Some(ResolvedInfo {
+                from: from_resolved,
+                to: to_resolved,
+            }),
+            error: Some("Could not resolve stations. Please provide valid station names or IDs.".to_string()),
         };
         return (StatusCode::BAD_REQUEST, Json(body));
     }
@@ -665,29 +676,116 @@ async fn route_handler(State(state): State<AppState>, Query(query): Query<RouteQ
                 continue;
             }
             result.key = key.to_string();
+            // Localize path names
+            result.path_localized = Some(state.resolver.localize_path(&result.path, locale));
             signature_set.insert(signature);
             routes.push(result);
         }
     }
 
-    (StatusCode::OK, Json(RouteResponse { routes, error: None }))
+    (StatusCode::OK, Json(RouteResponse { 
+        routes, 
+        resolved: Some(ResolvedInfo {
+            from: from_resolved,
+            to: to_resolved,
+        }),
+        error: None 
+    }))
+}
+
+/// Helper to resolve station names from query parameters
+fn resolve_station_query(
+    resolver: &StationResolver,
+    name_param: &Option<String>,
+    id_param: &Option<String>,
+) -> (Vec<String>, Option<ResolvedStation>) {
+    // If explicit IDs provided, use them directly
+    if let Some(ids) = id_param {
+        let parsed = parse_ids(Some(ids.clone()));
+        if !parsed.is_empty() {
+            return (parsed, None);
+        }
+    }
+    
+    // Otherwise, try to resolve from name
+    if let Some(name) = name_param {
+        let name_trimmed = name.trim();
+        if name_trimmed.is_empty() {
+            return (Vec::new(), None);
+        }
+        
+        // Check if this looks like an ODPT ID already
+        if name_trimmed.starts_with("odpt.Station:") {
+            return (vec![name_trimmed.to_string()], None);
+        }
+        
+        // Resolve using fuzzy matching
+        let resolved = resolver.resolve(name_trimmed, 3);
+        if !resolved.is_empty() {
+            let first = resolved[0].clone();
+            let ids: Vec<String> = resolved.iter().map(|r| r.matched_id.clone()).collect();
+            return (ids, Some(first));
+        }
+    }
+    
+    (Vec::new(), None)
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let graph_path = resolve_graph_path();
     let graph = load_graph(&graph_path)?;
+    
+    // Load station dictionary for fuzzy name resolution
+    let dict_path = resolve_dict_path();
+    let resolver = match StationResolver::from_file(std::path::Path::new(&dict_path)) {
+        Ok(r) => {
+            eprintln!("✅ Loaded station dictionary from: {}", dict_path);
+            r
+        }
+        Err(e) => {
+            eprintln!("⚠️ Failed to load station dictionary ({}): {}", dict_path, e);
+            eprintln!("   Fuzzy matching will be limited. Creating empty resolver.");
+            StationResolver::new(Vec::new())
+        }
+    };
+
     let state = AppState {
         graph: Arc::new(graph),
+        resolver: Arc::new(resolver),
     };
 
     let app = Router::new()
         .route("/l4/route", get(route_handler))
+        .route("/health", get(health_handler))
         .with_state(state);
 
     let port: u16 = env::var("PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(8787);
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    eprintln!("🚀 L4 Routing Service starting on {}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app).await?;
     Ok(())
+}
+
+fn resolve_dict_path() -> String {
+    if let Ok(path) = env::var("STATION_DICT_PATH") {
+        return path;
+    }
+
+    let base = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let candidate = base.join("../../public/data/station_dictionary.json");
+    if candidate.exists() {
+        candidate.to_string_lossy().to_string()
+    } else {
+        "public/data/station_dictionary.json".to_string()
+    }
+}
+
+async fn health_handler() -> impl IntoResponse {
+    Json(serde_json::json!({
+        "status": "ok",
+        "service": "l4-routing-rs",
+        "features": ["fuzzy_matching", "i18n"]
+    }))
 }

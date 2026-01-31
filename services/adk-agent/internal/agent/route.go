@@ -68,7 +68,7 @@ func (a *RouteAgent) ExecuteTool(ctx context.Context, toolCall openai.ToolCall, 
         // GET /l4/route?from={origin}&to={destination}&max_hops=5
         // Note: The service expects Station IDs or Names. It handles basic name resolution.
         
-        reqURL := fmt.Sprintf("%s?from=%s&to=%s&max_hops=5", a.RoutingURL, url.QueryEscape(args.Original), url.QueryEscape(args.Destination))
+        reqURL := fmt.Sprintf("%s?from=%s&to=%s&max_hops=5&locale=%s", a.RoutingURL, url.QueryEscape(args.Original), url.QueryEscape(args.Destination), reqCtx.Locale)
         resp, err := http.Get(reqURL)
         if err != nil {
             return fmt.Sprintf("Error calling routing service: %v. Please try again later.", err), nil

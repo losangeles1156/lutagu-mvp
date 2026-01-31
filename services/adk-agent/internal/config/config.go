@@ -64,7 +64,7 @@ func Load() *Config {
     cfg.Voyage.Model = getEnv("VOYAGE_MODEL", "voyage-4-lite")
     
     // Internal Services
-    cfg.RoutingServiceURL = getEnv("ROUTING_SERVICE_URL", "http://localhost:8787/l4/route")
+    cfg.RoutingServiceURL = getEnv("L4_ROUTING_SERVICE_URL", getEnv("ROUTING_SERVICE_URL", "http://localhost:8787/l4/route"))
     cfg.L2StatusServiceURL = getEnv("L2_STATUS_SERVICE_URL", "http://localhost:8083/api/status")
 
     // Model Definitions
