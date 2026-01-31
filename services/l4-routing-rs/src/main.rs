@@ -537,6 +537,7 @@ fn find_best_route(
             return Some(RouteResult {
                 key: String::new(),
                 path,
+                path_localized: None,
                 edge_railways,
                 costs,
             });
