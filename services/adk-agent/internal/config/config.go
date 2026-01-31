@@ -2,6 +2,8 @@ package config
 
 import (
     "os"
+    "strconv"
+    "time"
 )
 
 type Config struct {
@@ -11,6 +13,14 @@ type Config struct {
     ODPT struct {
         APIKey string
         APIUrl string
+    }
+    Supabase struct {
+        URL        string
+        ServiceKey string
+    }
+    Voyage struct {
+        APIKey string
+        Model  string
     }
     Models struct {
         RootAgent     string
@@ -22,7 +32,17 @@ type Config struct {
     Redis struct {
         URL string
     }
+    Layer struct {
+        TemplateCacheTTL time.Duration
+        RAGThreshold     float64
+        RAGTopK          int
+    }
+    Monitoring struct {
+        MetricsEnabled bool
+        TracingEnabled bool
+    }
     RoutingServiceURL string
+    L2StatusServiceURL string
     Port string
 }
 
@@ -35,8 +55,17 @@ func Load() *Config {
     cfg.ODPT.APIKey = os.Getenv("ODPT_API_KEY")
     cfg.ODPT.APIUrl = getEnv("ODPT_API_URL", "https://api.odpt.org/api/v4/odpt:TrainInformation")
     
+    // Supabase
+    cfg.Supabase.URL = os.Getenv("SUPABASE_URL")
+    cfg.Supabase.ServiceKey = os.Getenv("SUPABASE_SERVICE_KEY")
+    
+    // Voyage AI
+    cfg.Voyage.APIKey = os.Getenv("VOYAGE_API_KEY")
+    cfg.Voyage.Model = getEnv("VOYAGE_MODEL", "voyage-4-lite")
+    
     // Internal Services
     cfg.RoutingServiceURL = getEnv("ROUTING_SERVICE_URL", "http://localhost:8787/l4/route")
+    cfg.L2StatusServiceURL = getEnv("L2_STATUS_SERVICE_URL", "http://localhost:8083/api/status")
 
     // Model Definitions
     cfg.Models.RootAgent = getEnv("MODEL_ROOT_AGENT", "google/gemini-3-flash-preview")
@@ -47,6 +76,16 @@ func Load() *Config {
     
     // Redis
     cfg.Redis.URL = getEnv("REDIS_URL", "redis://localhost:6379/0")
+
+    // Layer Configuration
+    ttlMs, _ := strconv.Atoi(getEnv("TEMPLATE_CACHE_TTL_MS", "300000"))
+    cfg.Layer.TemplateCacheTTL = time.Duration(ttlMs) * time.Millisecond
+    cfg.Layer.RAGThreshold, _ = strconv.ParseFloat(getEnv("RAG_THRESHOLD", "0.5"), 64)
+    cfg.Layer.RAGTopK, _ = strconv.Atoi(getEnv("RAG_TOP_K", "5"))
+    
+    // Monitoring
+    cfg.Monitoring.MetricsEnabled = getEnv("METRICS_ENABLED", "true") == "true"
+    cfg.Monitoring.TracingEnabled = getEnv("TRACING_ENABLED", "true") == "true"
 
     // Server Port
     cfg.Port = getEnv("PORT", "8080")
@@ -60,3 +99,4 @@ func getEnv(key, fallback string) string {
     }
     return fallback
 }
+
