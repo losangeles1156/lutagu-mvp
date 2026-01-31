@@ -62,11 +62,19 @@ impl VectorSearchService {
                     })
                     .unwrap_or_default();
 
+                let node_id = point.payload.get("node_id")
+                    .and_then(|v| v.kind.as_ref())
+                    .and_then(|k| match k {
+                        Kind::StringValue(s) => Some(s.clone()),
+                        _ => None,
+                    });
+
                 crate::http::SearchResult {
                     id,
                     score: point.score,
                     content,
                     tags,
+                    node_id,
                 }
             })
             .collect();

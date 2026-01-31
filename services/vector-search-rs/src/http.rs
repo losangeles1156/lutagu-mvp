@@ -72,14 +72,14 @@ pub async fn search_handler(
     // Build Qdrant Filter
     let mut filter_conditions = vec![];
 
-    if let Some(f) = payload.filter {
+    if let Some(ref f) = payload.filter {
         // Filter by node_id
-        if let Some(node_id) = f.node_id {
+        if let Some(node_id) = &f.node_id {
              filter_conditions.push(Condition {
                 condition_one_of: Some(ConditionOneOf::Field(FieldCondition {
                     key: "node_id".to_string(),
-                    match_: Some(qdrant_client::qdrant::Match {
-                        match_value: Some(qdrant_client::qdrant::r#match::MatchValue::Keyword(node_id)),
+                    r#match: Some(qdrant_client::qdrant::Match {
+                        match_value: Some(qdrant_client::qdrant::r#match::MatchValue::Keyword(node_id.clone())),
                     }),
                     ..Default::default()
                 })),
@@ -87,7 +87,7 @@ pub async fn search_handler(
         }
 
         // Filter by tags (Any match)
-        if let Some(tags) = f.tags {
+        if let Some(tags) = &f.tags {
             if !tags.is_empty() {
                 // Should match ANY of the tags? Or ALL?
                 // Context Pruning usually means "Content MUST have at least one relevant tag"
@@ -101,8 +101,8 @@ pub async fn search_handler(
                      tag_conditions.push(Condition {
                         condition_one_of: Some(ConditionOneOf::Field(FieldCondition {
                             key: "tags".to_string(),
-                            match_: Some(qdrant_client::qdrant::Match {
-                                match_value: Some(qdrant_client::qdrant::r#match::MatchValue::Keyword(tag)),
+                            r#match: Some(qdrant_client::qdrant::Match {
+                                match_value: Some(qdrant_client::qdrant::r#match::MatchValue::Keyword(tag.clone())),
                             }),
                             ..Default::default()
                         })),
