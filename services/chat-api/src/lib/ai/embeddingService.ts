@@ -5,7 +5,7 @@ interface EmbeddingResponse {
 
 export class EmbeddingService {
     // Configuration
-    private static provider = process.env.EMBEDDING_PROVIDER || 'gemini'; // 'gemini' (default) | 'minimax' | 'openai' | 'mistral'
+    private static provider = process.env.EMBEDDING_PROVIDER || 'voyage'; // 'gemini' | 'minimax' | 'openai' | 'mistral' | 'voyage'
     private static apiUrl = process.env.EMBEDDING_API_URL || 'https://api.minimax.io/v1/embeddings';
 
     static async generateEmbedding(text: string, type: 'db' | 'query' = 'query'): Promise<number[]> {
@@ -24,6 +24,8 @@ export class EmbeddingService {
                 return await this.generateOpenAIEmbedding(text, apiKey);
             } else if (this.provider === 'mistral') {
                 return await this.generateMistralEmbedding(text, apiKey);
+            } else if (this.provider === 'voyage') {
+                return await this.generateVoyageEmbedding(text, apiKey);
             } else {
                 return await this.generateMiniMaxEmbedding(text, type, apiKey);
             }
@@ -52,6 +54,8 @@ export class EmbeddingService {
         if (this.provider === 'gemini') return this.getGeminiKey();
         if (this.provider === 'openai') return process.env.OPENAI_API_KEY;
         if (this.provider === 'mistral') return process.env.MISTRAL_API_KEY;
+        if (this.provider === 'mistral') return process.env.MISTRAL_API_KEY;
+        if (this.provider === 'voyage') return process.env.VOYAGE_API_KEY;
         return process.env.MINIMAX_API_KEY;
     }
 
@@ -136,5 +140,29 @@ export class EmbeddingService {
 
         console.error('[EmbeddingService] API Error:', JSON.stringify(data.base_resp || data, null, 2));
         throw new Error(`Embedding API Error: ${data.base_resp?.status_msg || 'Unknown Error'}`);
+    }
+    private static async generateVoyageEmbedding(text: string, apiKey: string): Promise<number[]> {
+        const model = process.env.VOYAGE_MODEL || 'voyage-4-lite'; // Updated to Voyage-4-lite
+        const response = await fetch('https://api.voyageai.com/v1/embeddings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                input: text,
+                model: model,
+                input_type: 'document'
+                // output_dimension: 1024 // Optional: explicit dimension if needed, default is often 1024 for lite
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`Voyage API Error: ${err}`);
+        }
+
+        const data = await response.json();
+        return data.data?.[0]?.embedding || [];
     }
 }
