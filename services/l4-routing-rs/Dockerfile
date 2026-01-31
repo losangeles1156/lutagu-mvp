@@ -1,6 +1,7 @@
 FROM rust:1-slim-bookworm as builder
 WORKDIR /app
 COPY . .
+WORKDIR /app/services/l4-routing-rs
 RUN cargo build --release
 
 # Run Stage
@@ -8,7 +9,7 @@ FROM gcr.io/distroless/cc-debian12
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/l4-routing-rs /app/l4-routing-rs
+COPY --from=builder /app/services/l4-routing-rs/target/release/l4-routing-rs /app/l4-routing-rs
 
 # Create directory for data (Distroless lacks mkdir, so we must rely on COPY creating dirs or mounting volumes)
 # However, for Distroless, we copy directly.
