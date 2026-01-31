@@ -28,12 +28,14 @@ pub struct StationNames {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[allow(dead_code)]
 struct StationDictionary {
     meta: DictionaryMeta,
     stations: Vec<StationEntry>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[allow(dead_code)]
 struct DictionaryMeta {
     count: usize,
     generated_at: String,
