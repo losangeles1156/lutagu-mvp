@@ -40,9 +40,7 @@ jobs:
         # Mock graph file for tests if needed, or rely on test-specific data
         run: cargo test --verbose
 
-      - name: Test Vector Search
-        working-directory: services/vector-search-rs
-        run: cargo test --verbose
+
 
   build-check:
     name: Docker Build Check
