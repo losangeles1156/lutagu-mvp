@@ -523,17 +523,21 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                 </div>
                             )}
 
+                            {/* Markdown-based Expert Knowledge (SSoT) */}
                             <L4KnowledgeSection
                                 knowledge={markdownKnowledge}
                                 isLoading={isKnowledgeLoading}
                             />
 
-                            <ExpertKnowledgeSection
-                                l4Knowledge={displayKnowledge}
-                                knowledgeFilter={knowledgeFilter}
-                                uiLocale={uiLocale}
-                                t={t}
-                            />
+                            {/* Legacy Props-based Expert Knowledge - Hide if Markdown (SSoT) has content */}
+                            {(!markdownKnowledge || markdownKnowledge.length === 0) && (
+                                <ExpertKnowledgeSection
+                                    l4Knowledge={displayKnowledge}
+                                    knowledgeFilter={knowledgeFilter}
+                                    uiLocale={uiLocale}
+                                    t={t}
+                                />
+                            )}
                         </motion.div>
                     ) : viewMode === 'chat' ? (
                         <motion.div

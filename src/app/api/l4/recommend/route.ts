@@ -4,6 +4,14 @@ import { MatchedStrategyCard, EvaluationContext } from '@/types/lutagu_l4';
 import { decisionEngine } from '@/lib/l4/decisionEngine';
 import { hardCalculationEngine } from '@/lib/l4/hardCalculationEngine';
 import { generateLLMResponse } from '@/lib/ai/llmClient';
+import { CacheService, getCache } from '@/lib/cache/cacheService';
+
+const rerankCache = getCache<MatchedStrategyCard[]>('l4_rerank', {
+    maxSize: 300,
+    ttlMs: 5 * 60 * 1000,
+    cleanupIntervalMs: 60 * 1000,
+    evictionRatio: 0.1
+});
 
 // Zod Schema for Request Validation (matches UserPreferences in lutagu_l4.ts)
 const UserPreferencesSchema = z.object({
@@ -137,10 +145,20 @@ export async function POST(req: NextRequest) {
         if (cards.length > 0 && userNeeds.length > 0) {
             console.log('[L4 API] Reranking cards for needs:', userNeeds);
             try {
-                // We use dynamic import or ensure clean import to avoid circular deps if any
-                // But imports are static here.
-                const { rerankL4Cards } = await import('@/lib/ai/llmService');
-                cards = await rerankL4Cards(cards, { stationId, userNeeds }, locale);
+                const cacheKey = CacheService.generateKey('l4_rerank', {
+                    stationId,
+                    locale,
+                    userNeeds: [...userNeeds].sort(),
+                    cardIds: cards.map(c => `${c.id}:${c.priority}`)
+                });
+                const cached = rerankCache.get(cacheKey);
+                if (cached) {
+                    cards = cached;
+                } else {
+                    const { rerankL4Cards } = await import('@/lib/ai/llmService');
+                    cards = await rerankL4Cards(cards, { stationId, userNeeds }, locale);
+                    rerankCache.set(cacheKey, cards, 5 * 60 * 1000);
+                }
             } catch (e) {
                 console.error('[L4 API] Rerank failed:', e);
             }

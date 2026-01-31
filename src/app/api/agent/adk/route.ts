@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ADK_SERVICE_URL = process.env.ADK_SERVICE_URL;
+// Support both ADK_SERVICE_URL and CHAT_API_URL for backward compatibility
+const ADK_SERVICE_URL = process.env.ADK_SERVICE_URL || process.env.CHAT_API_URL;
 
 // Node.js runtime for better logging in dev
 export const runtime = 'nodejs';
@@ -35,8 +36,8 @@ async function* transformAdkStream(reader: ReadableStreamDefaultReader<Uint8Arra
         // console.log(`[ADK Proxy] Received raw chunk: ${decoded.slice(0, 50)}${decoded.length > 50 ? '...' : ''}`);
 
         // Process complete SSE events
-        // Use a more robust split that handles \n\n, \r\n\r\n, etc.
-        const events = buffer.split(/\n\n+/);
+        // Handle various line ending formats: \n\n, \r\n\r\n, \r\r, mixed
+        const events = buffer.split(/(?:\r?\n){2,}|(?:\r){2,}/);
         buffer = events.pop() || '';
 
         for (const event of events) {
@@ -58,40 +59,19 @@ async function* transformAdkStream(reader: ReadableStreamDefaultReader<Uint8Arra
     }
 }
 
+// Fallback when ADK is not configured
 function buildFallbackAnswer(input: { text: string; locale?: string }): string {
     const locale = typeof input.locale === 'string' ? input.locale : 'en';
-    const text = input.text;
-    const lower = text.toLowerCase();
-    const isJa = locale === 'ja' || locale.startsWith('ja');
-    const isZh = locale === 'zh-TW';
-
-    const delayRegex = /delay|delays|disruption|遅れ|遅延|運行|延誤|延误/i;
-    const routeRegex = /fastest|how do i get|get to|route|transfer|line|行き方|怎麼去|怎麼到|如何到|最快|路線|路線規劃|路线/i;
-
-    if (delayRegex.test(text)) {
-        if (isJa) {
-            return '現在、大きな遅延は確認されていません。念のため、ホームの電光掲示板と駅員アナウンスも確認してください。';
-        }
-        if (isZh) {
-            return '目前沒有看到明顯的大規模延誤訊號。建議同時確認站內電子看板與廣播（有時會比 App 更快）。';
-        }
-        return 'No major delays are currently indicated. Also check station boards and announcements for the latest updates.';
-    }
-
-    if (routeRegex.test(text) || lower.includes('shibuya') || lower.includes('shinjuku') || /渋谷|新宿/.test(text)) {
-        if (isJa) {
-            return '東京駅から渋谷へは、山手線（外回り）で一本が分かりやすいです。所要は約25分。混雑時は埼京線/湘南新宿ラインも候補です。';
-        }
-        if (isZh) {
-            return '從東京站到澀谷，最直覺的是搭 JR 山手線（外回り）直達，約 25 分鐘。若尖峰很擠，可改搭埼京線／湘南新宿ライン作為替代。';
-        }
-        return 'From Tokyo Station to Shibuya, the simplest option is the JR Yamanote Line (outer loop), about 25 minutes. During peak crowding, consider the Saikyo Line or Shonan-Shinjuku Line as alternatives.';
-    }
-
-    if (isJa) return 'ご希望をもう少し教えてください（出発地・目的地・急ぎかどうか）。最適な移動手段を提案します。';
-    if (isZh) return '可以再補充一下嗎：起點、目的地、是否趕時間？我會給你最省心的一條走法。';
-    return 'Tell me your origin, destination, and whether you are in a hurry. I will suggest the best route.';
+    const errorMessages: Record<string, string> = {
+        'en': "⚠️ **System Notice**: The AI Service is currently not configured (ADK_SERVICE_URL missing). Please contact the administrator.",
+        'ja': "⚠️ **システム通知**: AIサービスが未設定です (ADK_SERVICE_URL missing)。管理者にご連絡ください。",
+        'zh-TW': "⚠️ **系統通知**: AI 服務尚未設定 (ADK_SERVICE_URL missing)。請聯繫管理員。",
+        'zh': "⚠️ **系统通知**: AI 服务尚未配置 (ADK_SERVICE_URL missing)。请联系管理员。",
+    };
+    return errorMessages[locale] || errorMessages['en'];
 }
+
+
 
 function createPlainTextStream(chunks: Array<{ text: string; delayMs?: number }>) {
     const encoder = new TextEncoder();
@@ -219,7 +199,12 @@ export async function POST(req: NextRequest) {
 
         // Forward request to Cloud Run
         let upstreamRes: Response;
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
         try {
+            const controller = new AbortController();
+            // Proxy timeout should be slightly longer than backend (30s > 25s)
+            // to allow receiving proper error messages from upstream
+            timeoutId = setTimeout(() => controller.abort(), 30000);
             upstreamRes = await fetch(ADK_SERVICE_URL, {
                 method: 'POST',
                 headers: {
@@ -227,8 +212,10 @@ export async function POST(req: NextRequest) {
                 },
                 body: JSON.stringify(body),
                 cache: 'no-store',
+                signal: controller.signal
             });
         } catch (e) {
+            if (timeoutId) clearTimeout(timeoutId);
             const lastUser = Array.isArray(body?.messages)
                 ? [...body.messages].reverse().find((m: any) => m?.role === 'user' || m?.role === 'model')
                 : null;
@@ -242,6 +229,7 @@ export async function POST(req: NextRequest) {
                 headers: { 'Content-Type': 'text/plain; charset=utf-8' }
             });
         }
+        if (timeoutId) clearTimeout(timeoutId);
 
         if (!upstreamRes.ok) {
             const errorText = await upstreamRes.text();

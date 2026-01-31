@@ -8,6 +8,7 @@ import { DefaultChatTransport, TextStreamChatTransport } from 'ai';
 import { useUIStateMachine } from '@/stores/uiStateMachine';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations, useLocale } from 'next-intl';
+import { AGENT_CONFIG } from '@/lib/agent/config';
 
 export interface AgentMessage {
     id: string;
@@ -20,7 +21,7 @@ export interface AgentMessage {
     agentPlan?: AgentPlan | null;
 }
 
-const agentEndpoint = '/api/agent/adk';
+const agentEndpoint = AGENT_CONFIG.useAgentV2 ? AGENT_CONFIG.endpoints.v2 : AGENT_CONFIG.endpoints.adk;
 
 export const useAgentChat = (options: {
     stationId?: string;
@@ -37,35 +38,36 @@ export const useAgentChat = (options: {
         syncToUIStateMachine = true
     } = options;
     const locale = useLocale();
+    const normalizedLocale = locale === 'zh' ? 'zh-TW' : locale;
     const { user } = useAuth();
 
     const [thinkingStep, setThinkingStep] = useState<string | null>(null);
     const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
 
     useEffect(() => {
-        if (locale === 'zh-TW') {
+        if (normalizedLocale === 'zh-TW' || normalizedLocale.startsWith('zh')) {
             setSuggestedQuestions(['新宿車站有寄物櫃嗎？', '最新的運行狀態？', '附近的推薦景點？']);
-        } else if (locale === 'ja' || locale.startsWith('ja')) {
+        } else if (normalizedLocale === 'ja' || normalizedLocale.startsWith('ja')) {
             setSuggestedQuestions(['新宿駅にコインロッカーはありますか？', '最新の運行状況は？', '周辺のおすすめスポットは？']);
         } else {
             setSuggestedQuestions(['Are there lockers in Shinjuku?', 'Current status?', 'Recommended spots nearby?']);
         }
-    }, [locale]);
+    }, [normalizedLocale]);
 
     const [isOffline, setIsOffline] = useState(false);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const sessionId = useMemo(() => `session-${Date.now()}`, []);
 
-    const bodyRef = useRef({ locale, nodeId: stationId, userLocation });
+    const bodyRef = useRef({ locale: normalizedLocale, nodeId: stationId, userLocation });
     useEffect(() => {
-        bodyRef.current = { locale, nodeId: stationId, userLocation };
-    }, [locale, stationId, userLocation]);
+        bodyRef.current = { locale: normalizedLocale, nodeId: stationId, userLocation };
+    }, [normalizedLocale, stationId, userLocation]);
 
     const transport = useMemo(() => new TextStreamChatTransport({
         api: agentEndpoint,
-        body: { locale, nodeId: stationId, userLocation }
-    }), [locale, stationId, userLocation]);
+        body: { locale: normalizedLocale, nodeId: stationId, userLocation }
+    }), [normalizedLocale, stationId, userLocation]);
 
     const chatHelpers = useChat({
         transport,

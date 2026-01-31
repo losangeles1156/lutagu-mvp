@@ -115,7 +115,7 @@ function ensureVisitorId(req: NextRequest, res: NextResponse) {
 
 const intlMiddleware = createMiddleware({
     locales: ['zh', 'en', 'ja', 'zh-TW', 'ar'],
-    defaultLocale: 'zh',
+    defaultLocale: 'zh-TW',
     localePrefix: 'as-needed'
 });
 
