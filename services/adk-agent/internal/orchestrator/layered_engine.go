@@ -312,7 +312,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		isFastPath := false
 
 		// Trigger SLM for high-confidence standard routing or status queries
-		if (nodeCtx.IsRouteQuery && nodeCtx.Confidence > 0.9) || isStatusQuery(lastMessage) {
+		if (nodeCtx.IsRouteQuery && nodeCtx.Confidence > 0.8) || isStatusQuery(lastMessage) {
 			if e.fastAgent != nil {
 				selectedAgent = e.fastAgent
 				systemPrompt = e.buildFastPrompt(req.Locale, l2Ctx, nodeCtx, weatherCtx)
