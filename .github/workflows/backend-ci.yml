@@ -15,6 +15,12 @@ jobs:
   test-go:
     name: Test Go (adk-agent)
     runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      ODPT_API_KEY: ${{ secrets.ODPT_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_KEY }}
+      LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go
