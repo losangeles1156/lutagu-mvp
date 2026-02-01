@@ -262,18 +262,13 @@ LUTAGU 不是被動的資料百科，而是**主動的在地嚮導 (Proactive Lo
 │                    AI 模型層（多通道）                         │
 │  ┌─────────────────────────────────────────────────────┐    │
 │  │ Zeabur AI Hub (hnd1.aihub.zeabur.ai) - 東京節點       │    │
-│  │  - Gemini 2.5 Flash Lite (分類/簡單)                  │    │
-│  │  - Gemini 3 Flash Preview (推理)                     │    │
-│  │  - Gemini 1.5 Flash (Agent Brain)                    │    │
-│  │  - DeepSeek V3.2 (對話/合成)                          │    │
+│  │  - Gemini 2.5 Flash Lite (Gatekeeper/分類)            │    │
+│  │  - DeepSeek V3.2 (Brain/推理 + Synthesizer/對話)      │    │
+│  │  - MiniMax M2.1 (備援)                                │    │
 │  └─────────────────────────────────────────────────────┘    │
-│  ┌──────────────────┐  ┌──────────────────┐                 │
-│  │ OpenRouter       │  │ MiniMax API      │                 │
-│  │ (Function Call)  │  │ (備援)           │                 │
-│  └──────────────────┘  └──────────────────┘                 │
-│  Embedding:                                                  │
-│  - Frontend: Mistral-embed (1024 dim)                       │
-│  - Backend: Voyage-4-lite (1024 dim)                        │
+│  Embedding (統一):                                           │
+│  - Voyage-4-lite (Query, 1024 dim)                          │
+│  - Voyage-4-large (Document, 1024 dim)                      │
 └─────────────────────────────────────────────────────────────┘
                               ↕
 ┌─────────────────────────────────────────────────────────────┐
@@ -323,23 +318,23 @@ AI SDK: Vercel AI SDK (ai@^6.0.57, @ai-sdk/openai)
 檔案儲存: Supabase Storage
 ```
 
-#### 後端技術 (Go - ADK Agent 微服務)
+#### 後端技術 (Go - Google ADK Agent 微服務)
 
 ```yaml
-語言: Go 1.21+
+語言: Go 1.23+
+框架: Google ADK-Agent (Agent Development Kit)
 位置: services/adk-agent/
 部署: 獨立部署 (:8080)
 功能:
   - LayeredEngine (L0-L5 決策流程)
   - ReAct Loop (最多 5 步迭代)
-  - Function Calling (OpenRouter)
+  - Function Calling (ADK Tools)
   - FactChecker (在地化事實驗證)
   - Skills Registry (7 個專業技能)
 基礎設施:
-  - OpenRouter Client (Function Calling)
-  - Zeabur Client (General Reasoning)
+  - Zeabur AI Hub Client (LLM Gateway)
+  - Voyage AI Client (Embedding)
   - ODPT Client (交通數據)
-  - Voyage Client (Embedding)
   - Supabase VectorStore (RAG)
   - Redis Cache (可選)
 HTTP 端點:
@@ -407,13 +402,15 @@ LUTAGU 採用**前後端分離的雙層 AI 架構**：
 │  - 主要用戶介面、快速回應                                      │
 │  - Vercel AI SDK (@ai-sdk/openai + ai)                      │
 │  - Direct Fetch (OpenAI-compatible REST)                    │
+│  - Voyage AI (統一向量嵌入)                                   │
 └─────────────────────────────────────────────────────────────┘
                               ↕ (可選代理)
 ┌─────────────────────────────────────────────────────────────┐
-│                   Go 後端微服務 (ADK Agent)                   │
+│              Go 後端微服務 (Google ADK Agent)                 │
 │  services/adk-agent/ (獨立部署)                              │
+│  - Google ADK-Agent Framework                               │
 │  - 深度推理、ReAct Loop、Function Calling                    │
-│  - OpenRouter + Zeabur AI Hub 雙通道                        │
+│  - Zeabur AI Hub (LLM Gateway)                              │
 │  - 分層決策引擎 (L0-L5)                                       │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -427,7 +424,7 @@ LUTAGU 採用**前後端分離的雙層 AI 架構**：
 | Task Type | 模型 | Timeout | Max Tokens |
 |-----------|------|---------|------------|
 | `classification`, `simple` | `gemini-2.5-flash-lite` | 20s | 200 |
-| `reasoning`, `context_heavy` | `gemini-3-flash-preview` | 45s | 600 |
+| `reasoning`, `context_heavy` | `deepseek-v3.2` | 45s | 600 |
 | `synthesis`, `chat` | `deepseek-v3.2` | 30s | 700 |
 | Default | `gemini-2.5-flash-lite` | 30s | 400 |
 
@@ -436,11 +433,13 @@ LUTAGU 採用**前後端分離的雙層 AI 架構**：
 | 角色 | 模型 ID | Provider | 用途 |
 |------|---------|----------|------|
 | **Gatekeeper** | `gemini-2.5-flash-lite` | Zeabur | 快速路由 |
-| **Brain** | `gemini-1.5-flash` | Zeabur | 推理邏輯 |
+| **Brain** | `deepseek-v3.2` | Zeabur | 推理邏輯 |
 | **Synthesizer** | `deepseek-v3.2` | Zeabur | 對話合成 |
 | **Fallback** | `MiniMax-M2.1` | MiniMax API | 備援 |
 
 #### 7.2.2 Go 後端模型配置
+
+**框架**: Google ADK-Agent (Agent Development Kit)
 
 **檔案**: `services/adk-agent/internal/config/config.go`
 
@@ -450,7 +449,7 @@ LUTAGU 採用**前後端分離的雙層 AI 架構**：
 | **RouteAgent** | `deepseek-v3.2` | 路線規劃 |
 | **StatusAgent** | `deepseek-v3.2` | 狀態查詢 |
 | **GeneralAgent** | `deepseek-v3.2` | 一般推理 |
-| **FastAgent** | `google/gemini-2.0-flash-001` | 快速回應 (SLM) |
+| **FastAgent** | `gemini-2.5-flash-lite` | 快速回應 (SLM) |
 
 ### 7.3 決策流程 (Layered Engine)
 
@@ -519,7 +518,7 @@ LUTAGU 採用**前後端分離的雙層 AI 架構**：
 | **SpatialReasonerSkill** | 空間推理 |
 | **InfoLinksSkill** | 資訊連結 |
 
-### 7.5 嵌入模型配置
+### 7.5 嵌入模型配置（統一使用 Voyage AI）
 
 #### TypeScript 前端
 
@@ -527,15 +526,20 @@ LUTAGU 採用**前後端分離的雙層 AI 架構**：
 
 ```yaml
 主要模型:
-  提供者: Mistral AI
-  模型: mistral-embed
+  提供者: Voyage AI
+  模型: voyage-4-lite
   維度: 1024
-  API: https://api.mistral.ai/v1/embeddings
+  API: https://api.voyageai.com/v1/embeddings
+  用途: Query embedding
+
+文件模型:
+  模型: voyage-4-large
+  用途: Document embedding
 
 備援:
   類型: 確定性雜湊 (Deterministic Hash)
   維度: 1024
-  觸發: MISTRAL_API_KEY 未設定時
+  觸發: VOYAGE_API_KEY 未設定時
 ```
 
 #### Go 後端
@@ -585,8 +589,10 @@ LUTAGU 採用**前後端分離的雙層 AI 架構**：
 |------|------|------|
 | **TypeScript Agent** | Vercel AI SDK (`ai@^6.0.57`, `@ai-sdk/openai`) | Agent 編排、串流回應 |
 | **TypeScript LLM** | Direct Fetch (OpenAI-compatible) | 底層 LLM 呼叫 |
-| **Go Agent** | Custom Orchestrator | ReAct Loop、Function Calling |
-| **Go LLM** | OpenRouter Client / Zeabur Client | LLM Gateway |
+| **TypeScript Embedding** | Voyage AI SDK | 向量嵌入 |
+| **Go Agent** | Google ADK-Agent (Agent Development Kit) | ReAct Loop、Function Calling |
+| **Go LLM** | Zeabur AI Hub Client | LLM Gateway |
+| **Go Embedding** | Voyage AI Client | 向量嵌入 |
 
 ---
 
@@ -791,22 +797,18 @@ DEEPSEEK_API_KEY=your_deepseek_api_key
 # MiniMax (備援)
 MINIMAX_API_KEY=your_minimax_api_key
 
-# Embedding (TypeScript 使用 Mistral)
-MISTRAL_API_KEY=your_mistral_api_key
-
 # =============================================
-# AI 模型 - Go 後端 (ADK Agent)
+# Embedding（統一使用 Voyage AI）
 # =============================================
-# OpenRouter (Function Calling 專用)
-OPENROUTER_API_KEY=your_openrouter_api_key
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-
-# Zeabur AI Hub (Go 後端)
-ZEABUR_BASE_URL=https://hnd1.aihub.zeabur.ai/v1
-
-# Voyage AI (Go 後端 Embedding)
 VOYAGE_API_KEY=your_voyage_api_key
 VOYAGE_MODEL=voyage-4-lite
+VOYAGE_MODEL_DOCUMENT=voyage-4-large
+
+# =============================================
+# AI 模型 - Go 後端 (Google ADK Agent)
+# =============================================
+# Zeabur AI Hub (Go 後端 LLM)
+ZEABUR_BASE_URL=https://hnd1.aihub.zeabur.ai/v1
 
 # 模型覆寫 (可選)
 MODEL_ROOT_AGENT=deepseek-v3.2
@@ -896,7 +898,8 @@ npm start
 
 **本次更新重點 (v3.1)**:
 - 詳細說明 TypeScript + Go 雙層 AI 架構
-- 更正 Embedding 模型配置 (TypeScript: Mistral / Go: Voyage)
-- 補充 Go ADK Agent 微服務架構
+- **統一 Embedding 模型**: 前後端皆使用 Voyage AI (voyage-4)
+- **統一 Brain 模型**: 使用 DeepSeek V3.2 取代舊版 Gemini
+- **Go 後端框架**: 採用 Google ADK-Agent (Agent Development Kit)
 - 更新環境變數配置（含 Go 後端參數）
 - 完整列出 10 個 Deep Research Skills 及其優先序
