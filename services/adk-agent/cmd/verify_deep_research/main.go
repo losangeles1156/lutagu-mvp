@@ -13,6 +13,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/layer"
 	"github.com/lutagu/adk-agent/internal/orchestrator"
 	"github.com/lutagu/adk-agent/pkg/openrouter"
+	"google.golang.org/adk/model"
 )
 
 func main() {
@@ -27,15 +28,18 @@ func main() {
 		log.Fatalf("❌ Failed to create OpenRouter client: %v\nCheck if OPENROUTER_API_KEY is set in .env", err)
 	}
 
+	// ADK Model Bridges
+	orModelBridge := &openrouter.ADKModelBridge{Client: orClient}
+	var reasoningBridge model.LLM = orModelBridge
+
 	// Zeabur Client (Primary)
-	var engineClient interface{} = orClient
 	if cfg.Zeabur.APIKey != "" {
 		zc, err := openrouter.NewZeaburClient(openrouter.ZeaburConfig{
 			APIKey:  cfg.Zeabur.APIKey,
 			BaseURL: cfg.Zeabur.BaseURL,
 		})
 		if err == nil {
-			engineClient = zc
+			reasoningBridge = &openrouter.ADKModelBridge{Client: zc}
 			fmt.Println("✅ Using Zeabur AI Hub for Reasoning")
 		}
 	}
@@ -45,32 +49,20 @@ func main() {
 	l2Injector := layer.NewL2Injector(odptClient)
 	nodeResolver := layer.NewNodeResolver()
 
-	// Minimal Engine Setup
+	// 1. Initialize General Agent (ADK version)
+	generalAgent, err := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent)
+	if err != nil {
+		log.Fatalf("❌ Failed to create GeneralAgent: %v", err)
+	}
+
+	// 2. Initialize Layered Engine
 	engine := orchestrator.NewLayeredEngine(orchestrator.LayeredEngineConfig{
 		Config:        cfg,
 		L2Injector:    l2Injector,
 		WeatherClient: weatherClient,
 		NodeResolver:  nodeResolver,
-		// Using Type Assertion wrapper for LLMClient if needed,
-		// but specifically we need GeneralAgent to trigger L5
-		GeneralAgent: nil, // Will init below
-	})
-
-	// Manually inject General Agent to avoid full main.go complexity
-	// We need to bypass the private fields if we use NewLayeredEngine,
-	// but we can just use the engine instance we created if we fully populated it.
-	// Actually, let's just populate the struct directly or use the constructor?
-	// The constructor uses the config struct.
-
-	// Re-do proper setup
-	generalAgent := agent.NewGeneralAgent(engineClient.(agent.LLMClient), cfg.Models.GeneralAgent)
-
-	engine = orchestrator.NewLayeredEngine(orchestrator.LayeredEngineConfig{
-		Config:        cfg,
-		L2Injector:    l2Injector,
-		WeatherClient: weatherClient,
-		NodeResolver:  nodeResolver,
 		GeneralAgent:  generalAgent,
+		Model:         cfg.Models.GeneralAgent,
 	})
 
 	// Test Cases

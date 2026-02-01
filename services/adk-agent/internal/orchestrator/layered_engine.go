@@ -32,7 +32,7 @@ type LayeredEngine struct {
 	statusAgent     *agent.StatusAgent
 	generalAgent    *agent.GeneralAgent
 	fastAgent       *agent.GeneralAgent // SLM for fast answers
-	llmClient       agent.LLMClient
+	rootAgent       *agent.RootAgent    // Intent Classification
 	model           string
 	metrics         *Metrics
 	factChecker     *validation.FactChecker
@@ -52,7 +52,7 @@ type LayeredEngineConfig struct {
 	StatusAgent     *agent.StatusAgent
 	GeneralAgent    *agent.GeneralAgent
 	FastAgent       *agent.GeneralAgent
-	LLMClient       agent.LLMClient
+	RootAgent       *agent.RootAgent
 	Model           string
 	FactChecker     *validation.FactChecker
 }
@@ -72,7 +72,7 @@ func NewLayeredEngine(engineCfg LayeredEngineConfig) *LayeredEngine {
 		statusAgent:     engineCfg.StatusAgent,
 		generalAgent:    engineCfg.GeneralAgent,
 		fastAgent:       engineCfg.FastAgent,
-		llmClient:       engineCfg.LLMClient,
+		rootAgent:       engineCfg.RootAgent,
 		model:           engineCfg.Model,
 		metrics:         NewMetrics(),
 		factChecker:     engineCfg.FactChecker,

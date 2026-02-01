@@ -1,39 +1,24 @@
 package agent
 
 import (
-    "context"
-    "fmt"
-    "strings"
+	"context"
+	"fmt"
+	"strings"
 
-    "github.com/lutagu/adk-agent/pkg/openrouter"
-    openai "github.com/sashabaranov/go-openai"
+	"google.golang.org/adk/agent"
+	"google.golang.org/adk/agent/llmagent"
+	"google.golang.org/adk/model"
 )
 
 type RootAgent struct {
-    BaseAgent
+	BaseAgent
+	agent.Agent
 }
 
-func NewRootAgent(client *openrouter.Client, model string) *RootAgent {
-    return &RootAgent{
-        BaseAgent: BaseAgent{
-            Client: client,
-            Model:  model,
-        },
-    }
-}
-
-func (a *RootAgent) Name() string {
-    return "root_agent"
-}
-
-func (a *RootAgent) Process(ctx context.Context, messages []Message, reqCtx RequestContext) (<-chan string, error) {
-    // 1. Convert messages to OpenAI format
-    openAIMessages := toOpenAIMessages(messages)
-
-    // 2. Add System Prompt for Intent Classification
-    systemPrompt := `
+func NewRootAgent(modelInstance model.LLM, modelID string) (*RootAgent, error) {
+	systemPrompt := `
 You are the Root Agent for the Tokyo Transit Assistant (LUTAGU).
-Your job is to specificly identifying the user's INTENT and routing it to the correct specialized agent.
+Your job is to specifically identifying the user's INTENT and routing it to the correct specialized agent.
 
 Authorized Intents:
 - ROUTE: User wants to go from A to B, or asks about path finding.
@@ -44,55 +29,45 @@ Authorized Intents:
 Output format: ONLY the Intent Name (ROUTE, STATUS, FACILITY, GENERAL).
 Do not explain your reasoning.
 `
-    // Prepend system prompt to the LAST message's context for better steering, 
-    // or just assume standard chat completion structure.
-    // For Root Agent, we just want a decision first.
-    // Actually, in ADK pattern, Root might orchestrate. 
-    // For this MVP, let's make Root return a specific "Routing Token" that the orchestrator understands,
-    // OR have Root actually generate the response if it's simple.
-    
-    // DECISION: For this phase, Root just acts as a Classifier.
-    // We will need an "Orchestrator" in main.go to use this output.
-    
-    // Let's create a specialized classification request
-    req := openai.ChatCompletionRequest{
-        Model: a.Model,
-        Messages: append([]openai.ChatCompletionMessage{
-            {Role: "system", Content: systemPrompt},
-        }, openAIMessages...),
-        MaxTokens: 10,
-    }
+	inner, err := llmagent.New(llmagent.Config{
+		Name:        "lutagu_root",
+		Model:       modelInstance,
+		Description: "Routes user queries to specialized agents",
+		Instruction: systemPrompt,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-    resp, err := a.Client.ChatCompletion(ctx, req)
-    if err != nil {
-        return nil, fmt.Errorf("root classification failed: %w", err)
-    }
-
-    // Defensive check for empty Choices (edge case: safety filter, rate limit)
-    if len(resp.Choices) == 0 {
-        return nil, fmt.Errorf("root classification returned empty choices")
-    }
-
-    intent := strings.TrimSpace(resp.Choices[0].Message.Content)
-    intent = strings.ToUpper(intent)
-
-    // Create a channel to stream the result (in this case just the intent for now)
-    // The main loop will switch based on this intent.
-    ch := make(chan string, 1)
-    ch <- fmt.Sprintf("INTENT_DETECTED:%s", intent)
-    close(ch)
-
-    return ch, nil
+	return &RootAgent{
+		BaseAgent: BaseAgent{
+			ModelInstance: modelInstance,
+			ModelID:       modelID,
+		},
+		Agent: inner,
+	}, nil
 }
 
-func toOpenAIMessages(msgs []Message) []openai.ChatCompletionMessage {
-    var res []openai.ChatCompletionMessage
-    for _, m := range msgs {
-        res = append(res, openai.ChatCompletionMessage{
-            Role:    m.Role,
-            Content: m.Content,
-            Name:    m.Name,
-        })
-    }
-    return res
+func (a *RootAgent) Process(ctx context.Context, messages []Message, reqCtx RequestContext) (<-chan string, error) {
+	ch := make(chan string, 1)
+
+	var lastContent string
+	if len(messages) > 0 {
+		lastContent = messages[len(messages)-1].Content
+	}
+
+	go func() {
+		defer close(ch)
+		respText, err := RunAgentSync(ctx, a.Agent, lastContent)
+		if err != nil {
+			ch <- fmt.Sprintf("Error: %v", err)
+			return
+		}
+
+		intent := strings.TrimSpace(respText)
+		intent = strings.ToUpper(intent)
+		ch <- fmt.Sprintf("INTENT_DETECTED:%s", intent)
+	}()
+
+	return ch, nil
 }

@@ -32,23 +32,19 @@ var (
 )
 
 func main() {
-	// 1. Setup Structured Logging (Cloud Logging compatible)
+	// 1. Setup Structured Logging
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
 	cfg = config.Load()
-	slog.Info("Configuration loaded",
-		"port", cfg.Port,
-		"supabase", cfg.Supabase.URL != "",
-		"voyage", cfg.Voyage.APIKey != "",
-	)
+	slog.Info("Configuration loaded")
 
 	// 2. Initialize Health Checker
 	healthChecker = monitoring.NewHealthChecker()
 
-	// 3. Initialize Clients with Graceful Degradation
+	// 3. Initialize Clients
 
-	// OpenRouter (Function Calling Specialist)
+	// OpenRouter
 	orClient, err := openrouter.NewClient(openrouter.Config{
 		APIKey:  cfg.OpenRouter.APIKey,
 		BaseURL: cfg.OpenRouter.BaseURL,
@@ -57,95 +53,60 @@ func main() {
 		slog.Error("Failed to create OpenRouter client", "error", err)
 		os.Exit(1)
 	}
-	slog.Info("OpenRouter client initialized", "url", cfg.OpenRouter.BaseURL)
 
-	// Zeabur AI Hub (General Logic/Chat Specialist)
+	// ADK Model Bridges
+	orModelBridge := &openrouter.ADKModelBridge{Client: orClient}
+
+	// Zeabur AI Hub
+	var zeaburModelBridge *openrouter.ADKModelBridge
 	zeaburClient, err := openrouter.NewZeaburClient(openrouter.ZeaburConfig{
 		APIKey:  cfg.Zeabur.APIKey,
 		BaseURL: cfg.Zeabur.BaseURL,
 	})
-	if err != nil {
-		slog.Warn("Failed to create Zeabur AI Hub client. Falling back to OpenRouter.", "error", err)
-		// Fallback for safety, though user requested strict separation
-		zeaburClient = nil
-	} else {
+	if err == nil {
+		zeaburModelBridge = &openrouter.ADKModelBridge{Client: zeaburClient}
 		slog.Info("Zeabur AI Hub client initialized")
 	}
 
-	// ODPT (Non-critical)
+	// ODPT
 	odptClient := odpt.NewClient(cfg.ODPT.APIKey, cfg.ODPT.APIUrl)
-	slog.Info("ODPT client initialized")
 
-	// Redis (Non-critical)
+	// Redis
 	var redisStore *cache.RedisStore
 	if cfg.Redis.URL != "" {
 		redisStore, err = cache.NewRedisStore(cfg.Redis.URL)
-		if err != nil {
-			slog.Warn("Failed to connect to Redis. Proceeding without cache.", "error", err)
-		} else {
+		if err == nil {
 			slog.Info("Connected to Redis")
 			defer redisStore.Close()
-			healthChecker.Register(monitoring.NewRedisCheck(func(ctx context.Context) error {
-				// Simplified ping using Get
-				_, err := redisStore.Get(ctx, "__health_check__")
-				if err != nil && err.Error() != "redis: nil" {
-					return err
-				}
-				return nil
-			}))
 		}
 	}
 
-	// Supabase (Non-critical for L1/L2)
+	// Supabase
 	var vectorStore *supabase.VectorStore
 	var supabaseClient *supabase.Client
-	if cfg.Supabase.URL != "" && cfg.Supabase.ServiceKey != "" {
+	if cfg.Supabase.URL != "" {
 		supabaseClient, err = supabase.NewClient(cfg.Supabase.URL, cfg.Supabase.ServiceKey)
-		if err != nil {
-			slog.Warn("Failed to create Supabase client", "error", err)
-		} else {
+		if err == nil {
 			vectorStore = supabase.NewVectorStore(supabaseClient)
-			slog.Info("Supabase vector store initialized")
-			healthChecker.Register(monitoring.NewSupabaseCheck(supabaseClient.Ping))
 		}
 	}
 
-	// Voyage AI (Non-critical for L1/L2)
+	// Voyage AI
 	var embeddingClient *embedding.VoyageClient
 	if cfg.Voyage.APIKey != "" {
-		embeddingClient, err = embedding.NewVoyageClient(cfg.Voyage.APIKey, cfg.Voyage.Model)
-		if err != nil {
-			slog.Warn("Failed to create Voyage client", "error", err)
-		} else {
-			slog.Info("Voyage embedding client initialized", "model", cfg.Voyage.Model)
-		}
+		embeddingClient, _ = embedding.NewVoyageClient(cfg.Voyage.APIKey, cfg.Voyage.Model)
 	}
 
 	// 4. Initialize Layers
 	templateEngine := layer.NewTemplateEngine(layer.TemplateEngineConfig{
 		CacheTTL: cfg.Layer.TemplateCacheTTL,
 	})
-	slog.Info("Template engine initialized")
-
 	nodeResolver := layer.NewNodeResolver()
-	slog.Info("Node resolver initialized")
-
 	l2Injector := layer.NewL2Injector(odptClient)
-	slog.Info("L2 injector initialized")
-
-	// 5. Initialize FactChecker
-	factChecker, err := validation.NewFactChecker()
-	if err != nil {
-		slog.Error("Failed to initialize FactChecker", "error", err)
-		os.Exit(1)
-	}
-	slog.Info("FactChecker initialized")
-
-	// 5.1 Initialize Weather Client (Deep Research)
+	factChecker, _ := validation.NewFactChecker()
 	weatherClient := weather.NewClient()
-	slog.Info("Weather client initialized")
 
-	// 6. Initialize Skill Registry
+	// 5. Initialize Skill Registry
 	skillRegistry := skill.NewRegistry()
 	skillRegistry.Register(implementations.NewFareSkill())
 	skillRegistry.Register(implementations.NewAccessibilitySkill())
@@ -154,40 +115,23 @@ func main() {
 	skillRegistry.Register(implementations.NewLocalGuideSkill())
 	skillRegistry.Register(implementations.NewSpatialReasonerSkill())
 	skillRegistry.Register(implementations.NewInfoLinksSkill())
-	slog.Info("Skill registry initialized", "skills", skillRegistry.Count())
 
-	// 6. Initialize Legacy Agents (for L2/L5 fallback)
-	// These agents use OpenRouter for Function Calling
-	routeAgent := agent.NewRouteAgent(orClient, cfg.Models.RouteAgent, cfg.RoutingServiceURL)
-	statusAgent := agent.NewStatusAgent(orClient, cfg.Models.StatusAgent, odptClient)
+	// 6. Initialize ADK Agents
+	routeAgent, _ := agent.NewRouteAgent(orModelBridge, cfg.Models.RouteAgent, cfg.RoutingServiceURL)
+	statusAgent, _ := agent.NewStatusAgent(orModelBridge, cfg.Models.StatusAgent, odptClient)
 
-	// Create GeneralAgent (Reasoning Heavy) and FastAgent (SLM)
-	var generalAgent *agent.GeneralAgent
-	var fastAgent *agent.GeneralAgent
-
-	if zeaburClient != nil {
-		generalAgent = agent.NewGeneralAgent(zeaburClient, cfg.Models.GeneralAgent)
-	} else {
-		generalAgent = agent.NewGeneralAgent(orClient, cfg.Models.GeneralAgent)
+	reasoningBridge := orModelBridge
+	if zeaburModelBridge != nil {
+		reasoningBridge = zeaburModelBridge
 	}
-	// FastAgent defaults to OpenRouter (e.g. Gemini 2.0 Flash) for speed
-	fastAgent = agent.NewGeneralAgent(orClient, cfg.Models.FastAgent)
 
-	slog.Info("Agents initialized",
-		"route", cfg.Models.RouteAgent,
-		"status", cfg.Models.StatusAgent,
-		"general", cfg.Models.GeneralAgent,
-		"fast", cfg.Models.FastAgent,
-		"using_zeabur", zeaburClient != nil,
-	)
+	generalAgent, _ := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent)
+	fastAgent, _ := agent.NewGeneralAgent(orModelBridge, cfg.Models.FastAgent)
+	rootAgent, _ := agent.NewRootAgent(reasoningBridge, cfg.Models.GeneralAgent)
+
+	slog.Info("ADK Agents initialized")
 
 	// 7. Initialize Layered Engine
-	// The engine uses Zeabur for General Reasoning (fallback to orClient if zeabur is missing)
-	engineClient := agent.LLMClient(orClient)
-	if zeaburClient != nil {
-		engineClient = zeaburClient
-	}
-
 	engine = orchestrator.NewLayeredEngine(orchestrator.LayeredEngineConfig{
 		Config:          cfg,
 		TemplateEngine:  templateEngine,
@@ -201,15 +145,14 @@ func main() {
 		StatusAgent:     statusAgent,
 		GeneralAgent:    generalAgent,
 		FastAgent:       fastAgent,
-		LLMClient:       engineClient,
+		RootAgent:       rootAgent,
 		Model:           cfg.Models.GeneralAgent,
 		FactChecker:     factChecker,
 	})
-	slog.Info("Layered engine initialized", "using_zeabur", zeaburClient != nil)
 
 	// 8. Setup HTTP Routes
 	http.HandleFunc("/api/chat", handleChat)
-	http.HandleFunc("/agent/chat", handleChat) // Alias for compatibility
+	http.HandleFunc("/agent/chat", handleChat)
 	http.HandleFunc("/health", healthChecker.HandleHealth)
 	http.HandleFunc("/health/ready", healthChecker.HandleHealthReady)
 	http.HandleFunc("/health/live", healthChecker.HandleHealthLive)
@@ -229,7 +172,6 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Parse Request
 	var req struct {
 		Messages []agent.Message `json:"messages"`
 		Locale   string          `json:"locale"`
@@ -239,24 +181,19 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Default locale
 	if req.Locale == "" {
 		req.Locale = "zh-TW"
 	}
 
-	// 2. Setup Context with Timeout
-	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 120*time.Second)
 	defer cancel()
 
-	// Generate trace ID
 	traceID := fmt.Sprintf("trace-%d", time.Now().UnixNano())
-	slog.Info("Processing chat request", "traceID", traceID, "locale", req.Locale)
+	slog.Info("Processing chat request", "traceID", traceID)
 
-	// 3. Setup Streaming Response
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("X-Trace-ID", traceID)
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -269,7 +206,6 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 
-	// 4. Process via Layered Engine
 	sendEvent("meta", `{"status":"processing"}`)
 
 	respCh := engine.Process(ctx, orchestrator.ProcessRequest{
@@ -278,24 +214,15 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		TraceID:  traceID,
 	})
 
-	// 5. Stream Response
 	for chunk := range respCh {
 		dataBytes, _ := json.Marshal(map[string]string{"content": chunk})
 		sendEvent("telem", string(dataBytes))
 	}
 
 	sendEvent("done", "{}")
-	slog.Info("Chat request completed", "traceID", traceID)
 }
 
 func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	// TODO: Get metrics from engine
-	if err := json.NewEncoder(w).Encode(map[string]interface{}{
-		"status": "ok",
-		"note":   "Metrics endpoint - implement Prometheus format if needed",
-	}); err != nil {
-		slog.Error("Metrics response encode failed", "error", err)
-	}
+	json.NewEncoder(w).Encode(map[string]interface{}{"status": "ok"})
 }

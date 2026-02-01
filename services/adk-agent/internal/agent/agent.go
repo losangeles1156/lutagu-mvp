@@ -2,12 +2,11 @@ package agent
 
 import (
 	"context"
-	"fmt"
 
-	openai "github.com/sashabaranov/go-openai"
+	"google.golang.org/adk/model"
 )
 
-// Message mimics the OpenAI chat message structure
+// Message mimics the OpenAI chat message structure (for compatibility)
 type Message struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -21,40 +20,18 @@ type RequestContext struct {
 	UserID    string
 }
 
-// LLMClient abstracts the underlying LLM provider
-type LLMClient interface {
-	ChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (openai.ChatCompletionResponse, error)
-	StreamChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (*openai.ChatCompletionStream, error)
-}
-
-// Agent defines the interface for all specialized agents
+// Agent wraps the ADK logic with LUTAGU specific methods for backward compatibility
 type Agent interface {
-	Name() string
-	Tools() []openai.Tool
-	ExecuteTool(ctx context.Context, toolCall openai.ToolCall, reqCtx RequestContext) (string, error)
 	Process(ctx context.Context, messages []Message, reqCtx RequestContext) (<-chan string, error)
-	GetClient() LLMClient
 	GetModel() string
 }
 
-// BaseAgent holds common dependencies
+// BaseAgent holds common dependencies using ADK types
 type BaseAgent struct {
-	Client LLMClient
-	Model  string
-}
-
-func (b *BaseAgent) GetClient() LLMClient {
-	return b.Client
+	ModelInstance model.LLM
+	ModelID       string
 }
 
 func (b *BaseAgent) GetModel() string {
-	return b.Model
-}
-
-func (b *BaseAgent) Tools() []openai.Tool {
-	return []openai.Tool{}
-}
-
-func (b *BaseAgent) ExecuteTool(ctx context.Context, toolCall openai.ToolCall, reqCtx RequestContext) (string, error) {
-	return "", fmt.Errorf("tool execution not implemented")
+	return b.ModelID
 }
