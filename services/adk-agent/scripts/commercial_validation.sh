@@ -70,7 +70,7 @@ TIME_END=$(date +%s%N)
 DURATION=$((($TIME_END - $TIME_START)/1000000))
 echo "⏱️  L1 Response Time: ${DURATION}ms"
 
-if [ $Duration -lt 1000 ]; then
+if [ $DURATION -lt 1000 ]; then
     echo "✅ Performance within commercial limits (<1000ms)"
 else
     echo "⚠️ Performance warning (>1000ms)"

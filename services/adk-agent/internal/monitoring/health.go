@@ -135,10 +135,12 @@ func (h *HealthChecker) getSystemInfo() SystemInfo {
 func (h *HealthChecker) HandleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"status": "ok",
 		"uptime": time.Since(h.startTime).Round(time.Second).String(),
-	})
+	}); err != nil {
+		slog.Error("Health response encode failed", "error", err)
+	}
 }
 
 // HandleHealthReady returns detailed readiness (dependencies check)
@@ -157,7 +159,9 @@ func (h *HealthChecker) HandleHealthReady(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
-	json.NewEncoder(w).Encode(status)
+	if err := json.NewEncoder(w).Encode(status); err != nil {
+		slog.Error("Health ready response encode failed", "error", err)
+	}
 }
 
 // HandleHealthLive returns liveness (goroutine health)
@@ -169,30 +173,36 @@ func (h *HealthChecker) HandleHealthLive(w http.ResponseWriter, r *http.Request)
 	// Check for goroutine leak (arbitrary threshold)
 	if info.Goroutines > 10000 {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":     "unhealthy",
 			"reason":     "goroutine leak detected",
 			"goroutines": info.Goroutines,
-		})
+		}); err != nil {
+			slog.Error("Health live response encode failed", "error", err)
+		}
 		return
 	}
 	
 	// Check for memory pressure (arbitrary threshold: 1GB)
 	if info.MemoryMB > 1024 {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":    "unhealthy",
 			"reason":    "memory pressure",
 			"memory_mb": info.MemoryMB,
-		})
+		}); err != nil {
+			slog.Error("Health live response encode failed", "error", err)
+		}
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "healthy",
 		"system": info,
-	})
+	}); err != nil {
+		slog.Error("Health live response encode failed", "error", err)
+	}
 }
 
 // ===== Common Health Checks =====

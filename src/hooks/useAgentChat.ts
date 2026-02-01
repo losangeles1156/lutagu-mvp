@@ -118,7 +118,7 @@ export const useAgentChat = (options: {
             content: resolvedContent,
             rawContent: resolvedContent
         };
-    });
+    }).filter((m: AgentMessage) => m.role !== 'system');
 
     useEffect(() => {
         const lastMsg = messages[messages.length - 1];

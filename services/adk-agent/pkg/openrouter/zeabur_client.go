@@ -12,7 +12,8 @@ const (
 )
 
 type ZeaburConfig struct {
-	APIKey string
+	APIKey  string
+	BaseURL string
 }
 
 type ZeaburClient struct {
@@ -25,7 +26,11 @@ func NewZeaburClient(cfg ZeaburConfig) (*ZeaburClient, error) {
 	}
 
 	config := openai.DefaultConfig(cfg.APIKey)
-	config.BaseURL = ZeaburBaseURL
+	if cfg.BaseURL != "" {
+		config.BaseURL = cfg.BaseURL
+	} else {
+		config.BaseURL = "https://hnd1.aihub.zeabur.ai/v1" // Update default to Tokyo
+	}
 
 	return &ZeaburClient{
 		client: openai.NewClientWithConfig(config),

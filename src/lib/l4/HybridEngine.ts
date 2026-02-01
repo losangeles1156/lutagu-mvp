@@ -10,7 +10,7 @@
 
 import { templateEngine } from './intent/TemplateEngine';
 import { algorithmProvider } from './algorithms/AlgorithmProvider';
-import { extractRouteEndpointsFromText, extractDestinationOnlyIntent, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion } from './assistantEngine';
+import { extractRouteEndpointsFromText, extractDestinationOnlyIntent, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion, findStationIdsByName, normalizeOdptStationId } from './assistantEngine';
 import { NodeContext, NodeScope } from './types/NodeContext';
 import { TagLoader } from './TagLoader';
 import { DynamicContextService } from './DynamicContextService';
@@ -381,14 +381,16 @@ export class HybridEngine {
             // Proactive L2 Warning: If critical, force L2 advice even if not explicitly asked
             const l2Status = (context?.strategyContext as any)?.l2Status;
             const isSevere = this.isSevereDisruption(l2Status);
+            const forceL2 = isSevere || this.hasL2Issues(l2Status);
 
-            const l2DisruptionEarly = await this.tryBuildL2DisruptionResponse(text, locale, context, isSevere);
+            const l2DisruptionEarly = await this.tryBuildL2DisruptionResponse(text, locale, context, forceL2);
             if (l2DisruptionEarly) {
                 logs.push(`[L2] Live disruption detected (Severe=${isSevere}), returning disruption-first guidance`);
                 return await finalize(l2DisruptionEarly);
             }
 
             const routeEndpoints = extractRouteEndpointsFromText(text);
+            const isFareQuery = /(?:票價|多少錢|fare|運賃)/i.test(text);
             if (routeEndpoints) {
                 logs.push('[L2] Route endpoints detected, prefer algorithm routes');
                 const routeMatch = await this.checkAlgorithms(text, locale, context);
@@ -399,7 +401,7 @@ export class HybridEngine {
 
             // Handle "destination-only" requests (e.g., "我要去成田機場" without origin)
             const destOnlyIntent = extractDestinationOnlyIntent(text);
-            if (destOnlyIntent && !routeEndpoints) {
+            if (destOnlyIntent && !routeEndpoints && !isFareQuery) {
                 logs.push('[Route] Destination-only intent detected, prompting for origin');
                 const destName = destOnlyIntent.destinationText || destOnlyIntent.destinationIds[0]?.split('.').pop() || '目的地';
 
@@ -416,6 +418,13 @@ export class HybridEngine {
                     confidence: 0.9,
                     reasoning: 'Destination-only request - prompting for origin'
                 });
+            }
+
+            if (isFareQuery) {
+                const fareMatch = await this.checkAlgorithms(text, locale, context);
+                if (fareMatch && fareMatch.type === 'fare') {
+                    return await finalize(fareMatch);
+                }
             }
 
             // 1. Legacy Regex Skill (Fast Path)
@@ -704,8 +713,17 @@ export class HybridEngine {
             const nameMatch = text.match(/([^?\s]+)(?:的)?(?:票價|車資|運賃|fare)/i);
             const destName = (destMatch?.[1] || nameMatch?.[1] || '').trim();
             if (destName && context?.currentStation) {
-                const destId = DataNormalizer.lookupStationId(destName);
-                if (destId) {
+                const endpointCandidates = extractRouteEndpointsFromText(text)?.destinationIds || [];
+                const directId = /odpt[.:]Station:/i.test(destName) ? normalizeOdptStationId(destName) : null;
+                const fromLookup = DataNormalizer.lookupStationId(destName);
+                const candidates = Array.from(new Set([
+                    ...(directId ? [directId] : []),
+                    ...findStationIdsByName(destName),
+                    ...endpointCandidates,
+                    ...(fromLookup ? [fromLookup] : [])
+                ].filter(Boolean)));
+
+                for (const destId of candidates) {
                     try {
                         const fare = await algorithmProvider.calculateFare(context.currentStation, destId);
                         if (fare) {
@@ -713,7 +731,7 @@ export class HybridEngine {
                                 source: 'algorithm',
                                 type: 'fare',
                                 content: locale.startsWith('zh') ? `前往 ${destName} 的票價約為 ${fare.ic} 日圓 (IC 卡)。` : `The fare to ${destName} is approximately ${fare.ic} JPY.`,
-                                data: { fare, destination: destName },
+                                data: { fare, destination: destName, destinationId: destId },
                                 confidence: 0.9,
                                 reasoning: 'Calculated fare via algorithm.'
                             };
@@ -1293,15 +1311,22 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
 
         // Helper to normalize DataMux (lng) to Internal (lon)
         const normalizeCoord = (c: { lat: number, lng: number } | null) => c ? { lat: c.lat, lon: c.lng } : null;
+        const safeGetCoordinates = async (stationId: string) => {
+            try {
+                return normalizeCoord(await DataMux.getCoordinates(stationId));
+            } catch {
+                return null;
+            }
+        };
 
         // Use DataMux to fetch coordinates robustly (Database -> Cache -> Fallback)
         let originCoord = this.getStationCoord(originIdForCoord);
-        if (!originCoord) originCoord = normalizeCoord(await DataMux.getCoordinates(originIdForCoord));
-        if (!originCoord && !hasRoutePair) originCoord = normalizeCoord(await DataMux.getCoordinates('odpt.Station:JR-East.Yamanote.Tokyo'));
+        if (!originCoord && originIdForCoord) originCoord = await safeGetCoordinates(originIdForCoord);
+        if (!originCoord && !hasRoutePair) originCoord = await safeGetCoordinates('odpt.Station:JR-East.Yamanote.Tokyo');
 
         let destCoord = this.getStationCoord(destIdForCoord);
-        if (!destCoord) destCoord = normalizeCoord(await DataMux.getCoordinates(destIdForCoord));
-        if (!destCoord && !hasRoutePair) destCoord = normalizeCoord(await DataMux.getCoordinates('odpt.Station:JR-East.Yamanote.Tokyo'));
+        if (!destCoord && destIdForCoord) destCoord = await safeGetCoordinates(destIdForCoord);
+        if (!destCoord && !hasRoutePair) destCoord = await safeGetCoordinates('odpt.Station:JR-East.Yamanote.Tokyo');
 
         const originParam = originCoord ? `${originCoord.lat},${originCoord.lon}` : originLabel;
         const destParam = destCoord ? `${destCoord.lat},${destCoord.lon}` : destLabel;

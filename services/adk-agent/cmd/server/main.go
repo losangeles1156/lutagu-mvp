@@ -15,6 +15,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/infrastructure/embedding"
 	"github.com/lutagu/adk-agent/internal/infrastructure/odpt"
 	"github.com/lutagu/adk-agent/internal/infrastructure/supabase"
+	"github.com/lutagu/adk-agent/internal/infrastructure/weather"
 	"github.com/lutagu/adk-agent/internal/layer"
 	"github.com/lutagu/adk-agent/internal/monitoring"
 	"github.com/lutagu/adk-agent/internal/orchestrator"
@@ -60,7 +61,8 @@ func main() {
 
 	// Zeabur AI Hub (General Logic/Chat Specialist)
 	zeaburClient, err := openrouter.NewZeaburClient(openrouter.ZeaburConfig{
-		APIKey: cfg.Zeabur.APIKey,
+		APIKey:  cfg.Zeabur.APIKey,
+		BaseURL: cfg.Zeabur.BaseURL,
 	})
 	if err != nil {
 		slog.Warn("Failed to create Zeabur AI Hub client. Falling back to OpenRouter.", "error", err)
@@ -139,6 +141,10 @@ func main() {
 	}
 	slog.Info("FactChecker initialized")
 
+	// 5.1 Initialize Weather Client (Deep Research)
+	weatherClient := weather.NewClient()
+	slog.Info("Weather client initialized")
+
 	// 6. Initialize Skill Registry
 	skillRegistry := skill.NewRegistry()
 	skillRegistry.Register(implementations.NewFareSkill())
@@ -155,18 +161,23 @@ func main() {
 	routeAgent := agent.NewRouteAgent(orClient, cfg.Models.RouteAgent, cfg.RoutingServiceURL)
 	statusAgent := agent.NewStatusAgent(orClient, cfg.Models.StatusAgent, odptClient)
 
-	// Create GeneralAgent (pinned to Zeabur)
+	// Create GeneralAgent (Reasoning Heavy) and FastAgent (SLM)
 	var generalAgent *agent.GeneralAgent
+	var fastAgent *agent.GeneralAgent
+
 	if zeaburClient != nil {
 		generalAgent = agent.NewGeneralAgent(zeaburClient, cfg.Models.GeneralAgent)
 	} else {
 		generalAgent = agent.NewGeneralAgent(orClient, cfg.Models.GeneralAgent)
 	}
+	// FastAgent defaults to OpenRouter (e.g. Gemini 2.0 Flash) for speed
+	fastAgent = agent.NewGeneralAgent(orClient, cfg.Models.FastAgent)
 
 	slog.Info("Agents initialized",
 		"route", cfg.Models.RouteAgent,
 		"status", cfg.Models.StatusAgent,
 		"general", cfg.Models.GeneralAgent,
+		"fast", cfg.Models.FastAgent,
 		"using_zeabur", zeaburClient != nil,
 	)
 
@@ -182,12 +193,14 @@ func main() {
 		TemplateEngine:  templateEngine,
 		NodeResolver:    nodeResolver,
 		L2Injector:      l2Injector,
+		WeatherClient:   weatherClient,
 		SkillRegistry:   skillRegistry,
 		VectorStore:     vectorStore,
 		EmbeddingClient: embeddingClient,
 		RouteAgent:      routeAgent,
 		StatusAgent:     statusAgent,
 		GeneralAgent:    generalAgent,
+		FastAgent:       fastAgent,
 		LLMClient:       engineClient,
 		Model:           cfg.Models.GeneralAgent,
 		FactChecker:     factChecker,
@@ -279,8 +292,10 @@ func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// TODO: Get metrics from engine
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "ok",
 		"note":   "Metrics endpoint - implement Prometheus format if needed",
-	})
+	}); err != nil {
+		slog.Error("Metrics response encode failed", "error", err)
+	}
 }

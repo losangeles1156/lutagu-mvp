@@ -2,7 +2,6 @@ package validation
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -19,21 +18,6 @@ type FactCheckIssue struct {
 	Claim      string
 	Correction string
 }
-
-var (
-	// Hallucination patterns (Ported from TS)
-	directToTokyoPatterns = []*regexp.Regexp{
-		regexp.MustCompile(`(?i)京急[線]?[^，。]*直達[^品川]*東京`),
-		regexp.MustCompile(`(?i)京急[線]?[^，。]*直接[^品川]*東京`),
-		regexp.MustCompile(`(?i)Keikyu[^,.\n]*direct[^Shinagawa]*Tokyo Station`),
-		regexp.MustCompile(`(?i)直達東京車站[^，。]*京急`),
-	}
-	noTransferPatterns = []*regexp.Regexp{
-		regexp.MustCompile(`(?i)羽田[^，。]*東京車站[^，。]*不[用需]?轉[乘車換]`),
-		regexp.MustCompile(`(?i)從羽田[^，。]*直達[^，。]*東京車站`),
-		regexp.MustCompile(`(?i)Haneda[^,.\n]*direct[^,.\n]*Tokyo Station`),
-	}
-)
 
 // FactChecker validates LLM responses against ground truth
 type FactChecker struct {
@@ -62,7 +46,7 @@ func (f *FactChecker) Check(query, response, locale string) FactCheckResult {
 	if isHanedaToTokyo {
 		// Detection keywords
 		hasKeikyu := strings.Contains(response, "京急") || strings.Contains(strings.ToLower(response), "keikyu")
-		hasTokyo := strings.Contains(response, "東京站") || strings.Contains(response, "東京駅") || strings.Contains(strings.ToLower(response), "tokyo station")
+		hasTokyo := strings.Contains(response, "東京站") || strings.Contains(response, "東京駅") || strings.Contains(response, "東京車站") || strings.Contains(response, "東京车站") || strings.Contains(strings.ToLower(response), "tokyo station")
 		hasDirect := strings.Contains(response, "直達") || strings.Contains(response, "直通") || strings.Contains(strings.ToLower(response), "direct")
 		hasNoTransfer := strings.Contains(response, "不需轉乘") || strings.Contains(response, "不需要轉乘") || strings.Contains(response, "不用轉乘") ||
 			strings.Contains(response, "乗り換えなし") || strings.Contains(strings.ToLower(response), "no transfer")

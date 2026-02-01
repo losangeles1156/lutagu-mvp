@@ -1,6 +1,7 @@
 
 import {
     getDefaultTopology,
+    findRankedRoutes,
     type SupportedLocale
 } from '../assistantEngine';
 import { RouteOption } from '@/lib/l4/types/RoutingTypes';
@@ -131,7 +132,19 @@ export class AlgorithmProvider {
             console.warn('[AlgorithmProvider] Rust route fetch failed:', e);
         }
 
-        const baseRoutes = cached || rustRoutes || [];
+        let baseRoutes = cached || rustRoutes || [];
+
+        if (!cached && baseRoutes.length === 0) {
+            const railways = getDefaultTopology();
+            const jsRoutes = findRankedRoutes({
+                originStationId: originId,
+                destinationStationId: destId,
+                maxHops: 35,
+                locale: params.locale,
+                railways
+            });
+            if (jsRoutes.length > 0) baseRoutes = jsRoutes;
+        }
 
         if (!cached && baseRoutes && baseRoutes.length > 0) {
             this.routeCache.set(cacheKey, baseRoutes);

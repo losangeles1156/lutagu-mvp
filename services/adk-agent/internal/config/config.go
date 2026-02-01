@@ -36,6 +36,7 @@ type Config struct {
 		RootAgent     string
 		FacilityAgent string
 		GeneralAgent  string
+		FastAgent     string
 	}
 	Redis struct {
 		URL string
@@ -63,7 +64,8 @@ func Load() *Config {
 
 	// Zeabur AI Hub (General Logic/Chat Specialist)
 	cfg.Zeabur.APIKey = os.Getenv("ZEABUR_API_KEY")
-	cfg.Zeabur.BaseURL = getEnv("ZEABUR_BASE_URL", "https://api.zeabur.com/ai/v1")
+	// Use regional endpoint (Tokyo) as default for better latency
+	cfg.Zeabur.BaseURL = getEnv("ZEABUR_BASE_URL", "https://hnd1.aihub.zeabur.ai/v1")
 
 	cfg.ODPT.APIKey = os.Getenv("ODPT_API_KEY")
 	cfg.ODPT.APIUrl = getEnv("ODPT_API_URL", "https://api.odpt.org/api/v4/odpt:TrainInformation")
@@ -80,12 +82,14 @@ func Load() *Config {
 	cfg.RoutingServiceURL = getEnv("L4_ROUTING_SERVICE_URL", getEnv("ROUTING_SERVICE_URL", "http://localhost:8787/l4/route"))
 	cfg.L2StatusServiceURL = getEnv("L2_STATUS_SERVICE_URL", "http://localhost:8083/api/status")
 
-	// Model Definitions (Explicitly Pinned)
-	cfg.Models.RootAgent = getEnv("MODEL_ROOT_AGENT", "google/gemini-2.0-flash-exp")         // Zeabur
-	cfg.Models.RouteAgent = getEnv("MODEL_ROUTE_AGENT", "google/gemini-2.0-flash-exp")       // OpenRouter
-	cfg.Models.StatusAgent = getEnv("MODEL_STATUS_AGENT", "google/gemini-2.0-flash-exp")     // OpenRouter
-	cfg.Models.FacilityAgent = getEnv("MODEL_FACILITY_AGENT", "google/gemini-2.0-flash-exp") // Zeabur
-	cfg.Models.GeneralAgent = getEnv("MODEL_GENERAL_AGENT", "google/gemini-2.0-flash-exp")   // Zeabur
+	// Model Definitions (Explicitly Pinned) - Updated to DeepSeek V3.2 as per user request
+	// Model Definitions (Explicitly Pinned) - Updated to DeepSeek V3.2
+	cfg.Models.RootAgent = getEnv("MODEL_ROOT_AGENT", "deepseek-v3.2")
+	cfg.Models.RouteAgent = getEnv("MODEL_ROUTE_AGENT", "deepseek-v3.2")
+	cfg.Models.StatusAgent = getEnv("MODEL_STATUS_AGENT", "deepseek-v3.2")
+	cfg.Models.FacilityAgent = getEnv("MODEL_FACILITY_AGENT", "deepseek-v3.2")
+	cfg.Models.GeneralAgent = getEnv("MODEL_GENERAL_AGENT", "deepseek-v3.2")
+	cfg.Models.FastAgent = getEnv("MODEL_FAST_AGENT", "google/gemini-2.0-flash-001") // Lightweight SLM for standard queries
 
 	// Redis
 	cfg.Redis.URL = getEnv("REDIS_URL", "redis://localhost:6379/0")

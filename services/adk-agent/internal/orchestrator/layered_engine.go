@@ -11,6 +11,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/config"
 	"github.com/lutagu/adk-agent/internal/infrastructure/embedding"
 	"github.com/lutagu/adk-agent/internal/infrastructure/supabase"
+	"github.com/lutagu/adk-agent/internal/infrastructure/weather"
 	"github.com/lutagu/adk-agent/internal/layer"
 	"github.com/lutagu/adk-agent/internal/skill"
 	"github.com/lutagu/adk-agent/internal/validation"
@@ -23,12 +24,14 @@ type LayeredEngine struct {
 	templateEngine  *layer.TemplateEngine
 	nodeResolver    *layer.NodeResolver
 	l2Injector      *layer.L2Injector
+	weatherClient   *weather.Client
 	skillRegistry   *skill.Registry
 	vectorStore     *supabase.VectorStore
 	embeddingClient *embedding.VoyageClient
 	routeAgent      *agent.RouteAgent
 	statusAgent     *agent.StatusAgent
 	generalAgent    *agent.GeneralAgent
+	fastAgent       *agent.GeneralAgent // SLM for fast answers
 	llmClient       agent.LLMClient
 	model           string
 	metrics         *Metrics
@@ -41,12 +44,14 @@ type LayeredEngineConfig struct {
 	TemplateEngine  *layer.TemplateEngine
 	NodeResolver    *layer.NodeResolver
 	L2Injector      *layer.L2Injector
+	WeatherClient   *weather.Client
 	SkillRegistry   *skill.Registry
 	VectorStore     *supabase.VectorStore
 	EmbeddingClient *embedding.VoyageClient
 	RouteAgent      *agent.RouteAgent
 	StatusAgent     *agent.StatusAgent
 	GeneralAgent    *agent.GeneralAgent
+	FastAgent       *agent.GeneralAgent
 	LLMClient       agent.LLMClient
 	Model           string
 	FactChecker     *validation.FactChecker
@@ -59,12 +64,14 @@ func NewLayeredEngine(engineCfg LayeredEngineConfig) *LayeredEngine {
 		templateEngine:  engineCfg.TemplateEngine,
 		nodeResolver:    engineCfg.NodeResolver,
 		l2Injector:      engineCfg.L2Injector,
+		weatherClient:   engineCfg.WeatherClient,
 		skillRegistry:   engineCfg.SkillRegistry,
 		vectorStore:     engineCfg.VectorStore,
 		embeddingClient: engineCfg.EmbeddingClient,
 		routeAgent:      engineCfg.RouteAgent,
 		statusAgent:     engineCfg.StatusAgent,
 		generalAgent:    engineCfg.GeneralAgent,
+		fastAgent:       engineCfg.FastAgent,
 		llmClient:       engineCfg.LLMClient,
 		model:           engineCfg.Model,
 		metrics:         NewMetrics(),
@@ -141,6 +148,18 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 			}
 		}
 
+		// Fetch Weather (Best Effort)
+		var weatherCtx *weather.CurrentWeather
+		if e.weatherClient != nil {
+			w, err := e.weatherClient.FetchTokyoWeather()
+			if err == nil {
+				weatherCtx = w
+				logs = append(logs, fmt.Sprintf("[L0] Weather: %s (%.1f°C)", w.Condition, w.Temperature))
+			} else {
+				logs = append(logs, fmt.Sprintf("[L0] Weather fetch failed: %v", err))
+			}
+		}
+
 		// ============================
 		// L1: Template Engine (Fast Path)
 		// ============================
@@ -148,9 +167,17 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		templateStart := time.Now()
 
 		if e.templateEngine != nil {
-			if match := e.templateEngine.Match(lastMessage, req.Locale); match != nil && match.Matched {
+			tmplCtx := layer.TemplateContext{
+				Query:      lastMessage,
+				Locale:     req.Locale,
+				NodeCtx:    nodeCtx,
+				WeatherCtx: weatherCtx,
+				L2Ctx:      l2Ctx,
+				Time:       time.Now(),
+			}
+
+			if match := e.templateEngine.Match(tmplCtx); match != nil && match.Matched {
 				e.metrics.RecordLayerSuccess("L1", time.Since(templateStart))
-				logs = append(logs, fmt.Sprintf("[L1] Template hit: %s (%.2f)", match.Category, match.Score))
 
 				outCh <- match.Content
 				logger.Info("Responded from L1 Template", "category", match.Category, "latency", time.Since(startTime))
@@ -274,27 +301,40 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 			}
 		}
 
-		// L5: LLM Fallback
+		// L5: LLM Fallback (Tiered Reasoning)
 		// ============================
 		e.metrics.RecordLayerAttempt("L5")
 		l5Start := time.Now()
-		logs = append(logs, "[L5] Falling back to LLM")
 
-		// Build enhanced system prompt with context
-		systemPrompt := e.buildSystemPrompt(req.Locale, ragContext, l2Ctx, nodeCtx)
+		// Decision Tier Selection: Use FastAgent (SLM) for standard tasks
+		selectedAgent := e.generalAgent
+		systemPrompt := e.buildSystemPrompt(req.Locale, ragContext, l2Ctx, nodeCtx, weatherCtx)
+		isFastPath := false
 
-		// L5: LLM Fallback (General Reasoning)
-		// Use dedicated GeneralAgent (pinned to Zeabur)
-		if e.generalAgent != nil {
+		// Trigger SLM for high-confidence standard routing or status queries
+		if (nodeCtx.IsRouteQuery && nodeCtx.Confidence > 0.9) || isStatusQuery(lastMessage) {
+			if e.fastAgent != nil {
+				selectedAgent = e.fastAgent
+				systemPrompt = e.buildFastPrompt(req.Locale, l2Ctx, nodeCtx, weatherCtx)
+				isFastPath = true
+				logs = append(logs, "[L5] Tier: SLM (FastPath)")
+			}
+		}
+
+		if !isFastPath {
+			logs = append(logs, "[L5] Tier: LLM (Deep Reasoning)")
+		}
+
+		if selectedAgent != nil {
 			reqCtx := agent.RequestContext{
 				Locale:    req.Locale,
 				SessionID: req.SessionID,
 			}
 
-			// Prepend enhanced system prompt to preserve RAG/Status context
+			// Prepend appropriate prompt
 			msgsWithSys := append([]agent.Message{{Role: "system", Content: systemPrompt}}, req.Messages...)
 
-			respCh, err := e.generalAgent.Process(ctx, msgsWithSys, reqCtx)
+			respCh, err := selectedAgent.Process(ctx, msgsWithSys, reqCtx)
 			if err == nil && respCh != nil {
 				e.metrics.RecordLayerSuccess("L5", time.Since(l5Start))
 
@@ -311,7 +351,6 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 						correction := strings.TrimPrefix(checkResult.CorrectedResponse, fullText.String())
 						if correction != "" {
 							outCh <- correction
-							logs = append(logs, "[L5] FactChecker: Hallucination detected and corrected")
 						}
 					}
 				}
@@ -329,24 +368,90 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 	return outCh
 }
 
-func (e *LayeredEngine) buildSystemPrompt(locale, ragContext string, l2Ctx *layer.L2Context, nodeCtx *layer.ResolvedContext) string {
-	prompt := fmt.Sprintf(`You are LUTAGU, a Tokyo transit assistant. Current locale: %s.
+func (e *LayeredEngine) buildSystemPrompt(locale, ragContext string, l2Ctx *layer.L2Context, nodeCtx *layer.ResolvedContext, weatherCtx *weather.CurrentWeather) string {
+	// Standardize on JST for all decision making
+	loc, _ := time.LoadLocation("Asia/Tokyo")
+	now := time.Now().In(loc)
+	timeStr := now.Format("2006-01-02 15:04 (Mon)")
 
-`, locale)
+	weatherStr := "Unknown (Assume clear)"
+	weatherAdvice := "" // Dynamic advice based on weather
+	if weatherCtx != nil {
+		weatherStr = fmt.Sprintf("%s, %.1f°C, Humidity: %d%%", weatherCtx.Condition, weatherCtx.Temperature, weatherCtx.Humidity)
+		if weatherCtx.IsRaining {
+			weatherAdvice = "\n- ☔ **RAIN ALERT**: It is currently raining. **Prioritize underground routes, indoor transfers, and covered walkways.** Suggest taxis for short distances."
+		} else if weatherCtx.Temperature > 30 {
+			weatherAdvice = "\n- ☀️ **HEAT ALERT**: High temperature detected. Suggest minimizing outdoor walking and staying hydrated."
+		}
+	}
+
+	prompt := fmt.Sprintf(`You are LUTAGU, an expert Tokyo Transportation Concierge.
+Current Time (JST): %s
+Current Weather: %s
+Current Locale: %s
+Model: Deep Reasoning Mode (Zeabur AI Hub / DeepSeek V3.2)
+
+## CORE DIRECTIVES:
+1. **Dynamic Context Awareness**: ALWAYS checks the current time, weather, and disruption status before answering.
+2. **Expert Routing**: When suggesting routes, consider transfers, congestion, weather impact, and "last mile" complexity.
+3. **Data-Driven**: Use the provided RAG knowledge (Knowledge Base), Real-time Status (L2), and Weather as your primary truth.
+4. **Expert Comparison**: Always compare **Speed** (Fastest) vs **Comfort** (Easiest) vs **Cost** (Cheapest). For example, Chuo Rapid is faster than Yamanote for cross-town trips.
+5. **Safety First**: If a line is suspended (⛔) or delayed (⚠️), proactively suggest alternatives.
+5. **Weather Adaptive**: %s
+
+`, timeStr, weatherStr, locale, weatherAdvice)
 
 	if l2Ctx != nil && l2Ctx.HasDisruption {
 		prompt += e.l2Injector.ForSystemPrompt(l2Ctx)
 	}
 
 	if nodeCtx != nil && nodeCtx.PrimaryNodeID != "" {
-		prompt += fmt.Sprintf("User context: Station=%s\n\n", nodeCtx.PrimaryNodeName)
+		prompt += fmt.Sprintf("## USER CONTEXT\nDetected Location/Station: %s\n\n", nodeCtx.PrimaryNodeName)
 	}
 
 	if ragContext != "" {
-		prompt += fmt.Sprintf("Relevant knowledge:\n%s\n\n", ragContext)
+		prompt += fmt.Sprintf("## EXPERT KNOWLEDGE BASE (RAG)\n%s\n\n", ragContext)
 	}
 
-	prompt += `Respond helpfully, concisely, and in the user's language.`
+	prompt += `## RESPONSE GUIDELINES:
+- **Think step-by-step**: Analyze Time -> Weather -> Status -> User Intent -> Solution.
+- **Show your work**: Briefly mention *why* you are suggesting something (e.g., "Since it's raining...", "Because the ginza line is delayed...").
+- Respond concisely but with the authority of a local expert.
+- Answer primarily in the user's language (%s).`
+
+	return fmt.Sprintf(prompt, locale)
+}
+
+func (e *LayeredEngine) buildFastPrompt(locale string, l2Ctx *layer.L2Context, nodeCtx *layer.ResolvedContext, weatherCtx *weather.CurrentWeather) string {
+	now := time.Now()
+	timeStr := now.Format("15:04 (Mon)")
+	weatherStr := "Unknown"
+	if weatherCtx != nil {
+		weatherStr = fmt.Sprintf("%s, %.1f°C", weatherCtx.Condition, weatherCtx.Temperature)
+	}
+
+	prompt := fmt.Sprintf(`You are LUTAGU (Fast Task Tier).
+[Context] Time: %s, Weather: %s.`, timeStr, weatherStr)
+
+	// Inject Node Context (Vector/Focus)
+	if nodeCtx != nil {
+		if nodeCtx.IsRouteQuery && nodeCtx.Origin != "" && nodeCtx.Destination != "" {
+			prompt += fmt.Sprintf("\n[Intent] Route: %s -> %s", nodeCtx.Origin, nodeCtx.Destination)
+		} else if nodeCtx.PrimaryNodeName != "" {
+			prompt += fmt.Sprintf("\n[Focus] Node: %s", nodeCtx.PrimaryNodeName)
+		}
+	}
+
+	prompt += fmt.Sprintf(`
+[Instructions]
+- Provide a concise, expert answer for the user's transit/status question.
+- Prioritize SPEED: If it's a route, give the fastest 1-2 options immediately.
+- If status data is present, mention it briefly.
+- Answer in %s.`, locale)
+
+	if l2Ctx != nil && l2Ctx.HasDisruption {
+		prompt += "\n[Status] " + e.l2Injector.ForSystemPrompt(l2Ctx)
+	}
 
 	return prompt
 }
@@ -357,16 +462,13 @@ func isStatusQuery(query string) bool {
 		"delay", "status", "suspended",
 		"誤點", "延誤", "停駛", "運行狀況",
 	}
+	lc := strings.ToLower(query)
 	for _, p := range statusPatterns {
-		if contains(query, p) {
+		if strings.Contains(lc, p) {
 			return true
 		}
 	}
 	return false
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && (s[:len(substr)] == substr || contains(s[1:], substr)))
 }
 
 func truncate(s string, maxLen int) string {

@@ -11,6 +11,14 @@ import { L3GraphBuilder } from './L3GraphBuilder';
  */
 export class RouteSynthesizer {
 
+    private static isUenoStep(step?: { stationId?: string; text?: string } | null): boolean {
+        if (!step) return false;
+        const stationId = String(step.stationId || '');
+        if (stationId.includes('Ueno')) return true;
+        const text = String(step.text || '');
+        return /Ueno|上野|上野駅/i.test(text);
+    }
+
     static async synthesize(routes: RouteOption[], profile: L1NodeProfile, isHoliday: boolean = false, locale: string = 'en'): Promise<RouteOption[]> {
         // console.log(`[RouteSynthesizer] Analyzing ${routes.length} routes. Holiday: ${isHoliday}, Intent: ${profile.intent.capabilities.join(', ')}`);
 
@@ -23,7 +31,9 @@ export class RouteSynthesizer {
                 const step = route.steps[i];
                 if (step.kind === 'transfer') {
                     const prevStep = route.steps[i - 1];
-                    if (prevStep && prevStep.kind === 'train' && prevStep.stationId?.includes('Ueno')) {
+                    const nextStep = route.steps[i + 1];
+                    const isUenoTransfer = this.isUenoStep(step) || this.isUenoStep(prevStep) || this.isUenoStep(nextStep);
+                    if (isUenoTransfer) {
                         stationsToLoad.add("odpt.Station:JR-East.Yamanote.Ueno");
                     }
                 }
@@ -52,8 +62,9 @@ export class RouteSynthesizer {
 
                     if (prevTrain?.kind === 'train' && nextTrain?.kind === 'train') {
                         const isUenoTransfer = (
-                            prevTrain.stationId?.includes('Ueno') ||
-                            nextTrain.stationId?.includes('Ueno')
+                            this.isUenoStep(step) ||
+                            this.isUenoStep(prevTrain) ||
+                            this.isUenoStep(nextTrain)
                         );
 
                         if (isUenoTransfer) {
@@ -130,6 +141,11 @@ export class RouteSynthesizer {
         const hasLuggage = profile.intent.capabilities.includes('LUGGAGE');
         const hasStroller = profile.intent.capabilities.includes('STROLLER');
 
+        if (isHoliday && (graph.stationId.includes("Ueno") || graph.stationId.includes("Tokyo"))) {
+            pain += 15;
+            reasons.push('Holiday Crowds (High)');
+        }
+
         graph.edges.forEach(edge => {
             // Logic restored
             if (edge.tags.includes('stairs')) {
@@ -140,6 +156,9 @@ export class RouteSynthesizer {
                 } else if (hasStroller) {
                     cost *= 5.0; // Blocker
                     reasons.push('Avoid Stairs (Stroller)');
+                }
+                if (hasLuggage || hasStroller) {
+                    pain += cost;
                 }
                 // No need to call `t` here as these are internal debug reasons effectively, 
                 // BUT insights (user facing) are generated in synthesize() based on Score/Profile.
@@ -152,11 +171,6 @@ export class RouteSynthesizer {
                 }
             }
 
-            // Holiday Crowd Penalty
-            if (isHoliday && (graph.stationId.includes("Ueno") || graph.stationId.includes("Tokyo"))) {
-                pain += 15;
-                reasons.push('Holiday Crowds (High)');
-            }
         });
 
         if (hasLuggage && reasons.length > 0) {
