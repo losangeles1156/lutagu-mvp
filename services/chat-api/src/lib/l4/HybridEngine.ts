@@ -197,6 +197,7 @@ export class HybridEngine {
         const timeoutPromise = new Promise<null>((_, reject) =>
             setTimeout(() => reject(new Error('AI_TIMEOUT')), timeoutMs)
         );
+        const logs: string[] = [];
 
         try {
             return await Promise.race([
@@ -330,6 +331,7 @@ export class HybridEngine {
 
             // 1. Node Resolution (Context-Pruned RAG Step 1)
             // Identify the "Center of the World" for this query.
+            if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "目的地を解析中..." : (locale.startsWith('en') ? "Resolving location..." : "解析站點資訊..."));
             const nodeContext = await this.resolveNodeContext(text, locale, context);
             logs.push(`[NodeResolver] Primary: ${nodeContext.primaryNodeId || 'Global'}, Scope: ${nodeContext.scope}, Intent: ${nodeContext.intent}`);
 
@@ -349,6 +351,7 @@ export class HybridEngine {
 
 
             // 2. Skill Dispatch (Phase 1.5 - Tag Driven)
+            if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "スキルをマッチング中..." : (locale.startsWith('en') ? "Matching skills..." : "匹配技能模組..."));
             const dispatchResult = await this.skillDispatcher.dispatch(text, dispatchContext);
 
             if (dispatchResult) {
@@ -466,6 +469,7 @@ export class HybridEngine {
             let enrichedData: any = null;
             if (!bestMatch && context?.currentStation) {
                 logs.push(`[L3/L4] Checking DataMux Enrichment...`);
+                if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "リアルタイムデータを取得中..." : (locale.startsWith('en') ? "Loading live data..." : "載入即時資訊..."));
                 try {
                     enrichedData = await DataMux.enrichStationData(context.currentStation, {
                         userId: context.userId || 'anon',
@@ -517,6 +521,7 @@ export class HybridEngine {
                 const currentTags = nodeContext.loadedTags;
 
                 // Step 3: Context-Pruned Vector Search
+                if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "専門知識を検索中..." : (locale.startsWith('en') ? "Searching expert knowledge..." : "搜尋專家知識庫..."));
                 const vectorResults = await searchVectorDB(text, 3, {
                     node_id: nodeContext.primaryNodeId || undefined,
                     tags: currentTags.length > 0 ? currentTags : undefined
@@ -541,6 +546,7 @@ export class HybridEngine {
 
             let llmResponse: string | null = null;
             if (params.onToken && !hasL2Issues) {
+                if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "回答を生成中..." : (locale.startsWith('en') ? "Generating response..." : "正在整理回覆..."));
                 try {
                     const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
                     const result: any = streamWithFallback({

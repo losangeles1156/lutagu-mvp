@@ -418,11 +418,14 @@
         "userLabel": "あなた",
         "lutaguLabel": "LUTAGU",
         "thinking": {
-            "initializing": "認知エンジンを起動中...",
-            "l2": "運行・天気を分析中...",
-            "l3": "施設とODPT時刻表を確認中...",
-            "kb": "知識ベース（Tips & Hacks）を参照中...",
-            "synthesizing": "ニーズに合わせて最適戦略を合成中..."
+            "initializing": "認識エンジンを起動中...",
+            "l2": "交通状況と天気を分析中...",
+            "l3": "施設と時刻表を検索中...",
+            "kb": "エキスパート知識を読み込み中...",
+            "synthesizing": "最適な戦略を生成中...",
+            "header_active": "LUTAGU 考え中",
+            "header_history": "思考プロセス",
+            "analyzing": "リクエストを分析中..."
         },
         "card": {
             "title": "最適戦略を合成しました",

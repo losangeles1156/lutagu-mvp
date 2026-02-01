@@ -412,11 +412,14 @@
         "userLabel": "You",
         "lutaguLabel": "LUTAGU",
         "thinking": {
-            "initializing": "Starting cognitive engine...",
-            "l2": "Analyzing live traffic & weather...",
-            "l3": "Checking facilities & ODPT schedules...",
-            "kb": "Reading expert knowledge base (Tips & Hacks)...",
-            "synthesizing": "Synthesizing the best strategy for your needs..."
+            "initializing": "Initializing cognitive engine...",
+            "l2": "Checking traffic and weather...",
+            "l3": "Querying facilities & timetables...",
+            "kb": "Reading expert knowledge base...",
+            "synthesizing": "Synthesizing best strategy...",
+            "header_active": "Lutagu is thinking",
+            "header_history": "Thought Process",
+            "analyzing": "Analyzing request..."
         },
         "card": {
             "title": "Best strategy synthesized",

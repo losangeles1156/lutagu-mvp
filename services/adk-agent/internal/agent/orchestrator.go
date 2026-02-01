@@ -9,13 +9,13 @@ import (
 
 // Orchestrator manages the ReAct loop for an Agent
 type Orchestrator struct {
-	Agent  Agent
+	Agent    Agent
 	MaxSteps int
 }
 
-func NewOrchestrator(agent Agent) *Orchestrator {
+func NewOrchestrator(a Agent) *Orchestrator {
 	return &Orchestrator{
-		Agent:    agent,
+		Agent:    a,
 		MaxSteps: 5,
 	}
 }
@@ -45,7 +45,7 @@ func (o *Orchestrator) Run(ctx context.Context, messages []Message, reqCtx Reque
 				Messages: currentMessages,
 				Tools:    tools,
 			}
-			
+
 			resp, err := client.ChatCompletion(ctx, req)
 			if err != nil {
 				outCh <- fmt.Sprintf("AI Error: %v", err)
@@ -58,7 +58,7 @@ func (o *Orchestrator) Run(ctx context.Context, messages []Message, reqCtx Reque
 			}
 
 			msg := resp.Choices[0].Message
-			
+
 			// 2. Check for Tool Calls
 			if len(msg.ToolCalls) > 0 {
 				// Append Assistant Message with Tool Calls
@@ -67,12 +67,12 @@ func (o *Orchestrator) Run(ctx context.Context, messages []Message, reqCtx Reque
 				// Execute Tools
 				for _, toolCall := range msg.ToolCalls {
 					outCh <- fmt.Sprintf("[Tool] Executing %s...", toolCall.Function.Name)
-					
+
 					result, err := o.Agent.ExecuteTool(ctx, toolCall, reqCtx)
 					if err != nil {
 						result = fmt.Sprintf("Error executing tool: %v", err)
 					}
-					
+
 					outCh <- fmt.Sprintf("[Tool] Result length: %d chars", len(result))
 
 					// Append Tool Message
@@ -85,13 +85,13 @@ func (o *Orchestrator) Run(ctx context.Context, messages []Message, reqCtx Reque
 				step++
 				continue // Loop back with new history
 			} else {
-				// No tool calls -> Model wants to speak. 
-				// The content is in msg.Content. 
-				// However, since we want to STREAM the final answer, we should probably 
+				// No tool calls -> Model wants to speak.
+				// The content is in msg.Content.
+				// However, since we want to STREAM the final answer, we should probably
 				// re-request as stream OR just yield this content if it's already full.
 				// For OpenRouter, "DeepSeek" might not stream well after tool calls in the same request?
 				// Actually, since we have the full content here, let's just stream it out.
-				
+
 				// Simulate stream
 				chunkSize := 10
 				runes := []rune(msg.Content)
@@ -112,7 +112,7 @@ func (o *Orchestrator) Run(ctx context.Context, messages []Message, reqCtx Reque
 			Model:    model,
 			Messages: currentMessages, // History with tool results
 			Stream:   true,
-			// No tools provided here to force text generation? 
+			// No tools provided here to force text generation?
 			// Or keep tools but since we are at max steps or no tools, it should just talk.
 			// Ideally remove tools if we want to force Final Answer.
 		}
@@ -142,9 +142,9 @@ func (o *Orchestrator) Run(ctx context.Context, messages []Message, reqCtx Reque
 }
 
 func formatAssistantMessage(msg openai.ChatCompletionMessage) openai.ChatCompletionMessage {
-    return openai.ChatCompletionMessage{
-        Role:      openai.ChatMessageRoleAssistant,
-        Content:   msg.Content,
-        ToolCalls: msg.ToolCalls,
-    }
+	return openai.ChatCompletionMessage{
+		Role:      openai.ChatMessageRoleAssistant,
+		Content:   msg.Content,
+		ToolCalls: msg.ToolCalls,
+	}
 }

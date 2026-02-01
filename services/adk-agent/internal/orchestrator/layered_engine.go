@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/lutagu/adk-agent/internal/agent"
@@ -12,7 +13,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/infrastructure/supabase"
 	"github.com/lutagu/adk-agent/internal/layer"
 	"github.com/lutagu/adk-agent/internal/skill"
-	"github.com/lutagu/adk-agent/pkg/openrouter"
+	"github.com/lutagu/adk-agent/internal/validation"
 )
 
 // LayeredEngine implements multi-layer decision flow
@@ -27,9 +28,11 @@ type LayeredEngine struct {
 	embeddingClient *embedding.VoyageClient
 	routeAgent      *agent.RouteAgent
 	statusAgent     *agent.StatusAgent
-	llmClient       *openrouter.Client
+	generalAgent    *agent.GeneralAgent
+	llmClient       agent.LLMClient
 	model           string
 	metrics         *Metrics
+	factChecker     *validation.FactChecker
 }
 
 // LayeredEngineConfig holds engine dependencies
@@ -43,8 +46,10 @@ type LayeredEngineConfig struct {
 	EmbeddingClient *embedding.VoyageClient
 	RouteAgent      *agent.RouteAgent
 	StatusAgent     *agent.StatusAgent
-	LLMClient       *openrouter.Client
+	GeneralAgent    *agent.GeneralAgent
+	LLMClient       agent.LLMClient
 	Model           string
+	FactChecker     *validation.FactChecker
 }
 
 // NewLayeredEngine creates a new multi-layer engine
@@ -59,17 +64,20 @@ func NewLayeredEngine(engineCfg LayeredEngineConfig) *LayeredEngine {
 		embeddingClient: engineCfg.EmbeddingClient,
 		routeAgent:      engineCfg.RouteAgent,
 		statusAgent:     engineCfg.StatusAgent,
+		generalAgent:    engineCfg.GeneralAgent,
 		llmClient:       engineCfg.LLMClient,
 		model:           engineCfg.Model,
 		metrics:         NewMetrics(),
+		factChecker:     engineCfg.FactChecker,
 	}
 }
 
 // ProcessRequest is the main entry point for the layered engine
 type ProcessRequest struct {
-	Messages []agent.Message
-	Locale   string
-	TraceID  string
+	Messages  []agent.Message
+	Locale    string
+	TraceID   string
+	SessionID string
 }
 
 // ProcessResponse contains the engine result
@@ -93,14 +101,14 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 
 		startTime := time.Now()
 		logs := []string{}
-		
+
 		traceID := req.TraceID
 		if traceID == "" {
 			traceID = fmt.Sprintf("trace-%d", time.Now().UnixNano())
 		}
-		
+
 		logger := slog.With("traceID", traceID)
-		
+
 		// Extract last user message
 		lastMessage := ""
 		for i := len(req.Messages) - 1; i >= 0; i-- {
@@ -109,12 +117,12 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				break
 			}
 		}
-		
+
 		if lastMessage == "" {
 			outCh <- "No message provided"
 			return
 		}
-		
+
 		logger.Info("Processing request", "query", truncate(lastMessage, 50), "locale", req.Locale)
 		logs = append(logs, fmt.Sprintf("[Start] Query: %s", truncate(lastMessage, 30)))
 
@@ -123,7 +131,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// ============================
 		nodeCtx := e.nodeResolver.Resolve(ctx, lastMessage)
 		logs = append(logs, fmt.Sprintf("[L0] NodeResolver: primary=%s, confidence=%.2f", nodeCtx.PrimaryNodeID, nodeCtx.Confidence))
-		
+
 		// Fetch L2 status (non-blocking with fallback)
 		var l2Ctx *layer.L2Context
 		if e.l2Injector != nil {
@@ -138,12 +146,12 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// ============================
 		e.metrics.RecordLayerAttempt("L1")
 		templateStart := time.Now()
-		
+
 		if e.templateEngine != nil {
 			if match := e.templateEngine.Match(lastMessage, req.Locale); match != nil && match.Matched {
 				e.metrics.RecordLayerSuccess("L1", time.Since(templateStart))
 				logs = append(logs, fmt.Sprintf("[L1] Template hit: %s (%.2f)", match.Category, match.Score))
-				
+
 				outCh <- match.Content
 				logger.Info("Responded from L1 Template", "category", match.Category, "latency", time.Since(startTime))
 				return
@@ -156,49 +164,49 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// ============================
 		e.metrics.RecordLayerAttempt("L2")
 		l2Start := time.Now()
-		
+
 		// Check if it's a route query
 		if nodeCtx.IsRouteQuery && e.routeAgent != nil {
 			logs = append(logs, fmt.Sprintf("[L2] Route query detected: %s → %s", nodeCtx.Origin, nodeCtx.Destination))
-			
+
 			// Inject L2 disruption context
 			routeReqCtx := agent.RequestContext{
 				Locale: req.Locale,
 			}
-			
+
 			routeCh, err := e.routeAgent.Process(ctx, req.Messages, routeReqCtx)
 			if err == nil && routeCh != nil {
 				e.metrics.RecordLayerSuccess("L2", time.Since(l2Start))
-				
+
 				for chunk := range routeCh {
 					outCh <- chunk
 				}
-				
+
 				// Append L2 warning if disruptions exist
 				if l2Ctx != nil && l2Ctx.HasDisruption {
 					outCh <- "\n\n" + l2Ctx.Summary
 				}
-				
+
 				logger.Info("Responded from L2 RouteAgent", "latency", time.Since(startTime))
 				return
 			} else if err != nil {
 				logs = append(logs, fmt.Sprintf("[L2] RouteAgent error: %v", err))
 			}
 		}
-		
+
 		// Check if it's a status query
 		if isStatusQuery(lastMessage) && e.statusAgent != nil {
 			logs = append(logs, "[L2] Status query detected")
-			
+
 			statusReqCtx := agent.RequestContext{Locale: req.Locale}
 			statusCh, err := e.statusAgent.Process(ctx, req.Messages, statusReqCtx)
 			if err == nil && statusCh != nil {
 				e.metrics.RecordLayerSuccess("L2", time.Since(l2Start))
-				
+
 				for chunk := range statusCh {
 					outCh <- chunk
 				}
-				
+
 				logger.Info("Responded from L2 StatusAgent", "latency", time.Since(startTime))
 				return
 			}
@@ -210,7 +218,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// ============================
 		e.metrics.RecordLayerAttempt("L3")
 		l3Start := time.Now()
-		
+
 		// Try skill matching
 		if e.skillRegistry != nil {
 			skillCtx := skill.SkillContext{
@@ -219,18 +227,18 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				Locale:      req.Locale,
 				L2Disrupted: l2Ctx != nil && l2Ctx.HasDisruption,
 			}
-			
+
 			skillRequest := skill.SkillRequest{
 				Query:   lastMessage,
 				Context: skillCtx,
 			}
-			
+
 			if result, err := e.skillRegistry.Execute(ctx, lastMessage, skillRequest); err == nil && result != nil {
 				e.metrics.RecordLayerSuccess("L3", time.Since(l3Start))
 				logs = append(logs, fmt.Sprintf("[L3] Skill executed: %s (%.2f)", result.Category, result.Confidence))
-				
+
 				outCh <- result.Content
-				
+
 				// If skill needs LLM refinement, continue to L5
 				if result.NeedsLLM {
 					logs = append(logs, "[L3] Skill requests LLM refinement")
@@ -241,7 +249,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				}
 			}
 		}
-		
+
 		// Try RAG search
 		e.metrics.RecordLayerAttempt("L4")
 		var ragContext string
@@ -253,12 +261,12 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 					Threshold: e.cfg.Layer.RAGThreshold,
 					NodeID:    nodeCtx.PrimaryNodeID,
 				}
-				
+
 				results, err := e.vectorStore.Search(ctx, queryEmbed, opts)
 				if err == nil && len(results) > 0 {
 					e.metrics.RecordLayerSuccess("L4", time.Since(l3Start))
 					logs = append(logs, fmt.Sprintf("[L4] RAG: found %d documents", len(results)))
-					
+
 					for _, r := range results {
 						ragContext += fmt.Sprintf("- %s (similarity: %.2f)\n", truncate(r.Content, 200), r.Similarity)
 					}
@@ -266,35 +274,53 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 			}
 		}
 
-		// ============================
 		// L5: LLM Fallback
 		// ============================
 		e.metrics.RecordLayerAttempt("L5")
 		l5Start := time.Now()
 		logs = append(logs, "[L5] Falling back to LLM")
-		
+
 		// Build enhanced system prompt with context
 		systemPrompt := e.buildSystemPrompt(req.Locale, ragContext, l2Ctx, nodeCtx)
-		
-		// Use the general agent or direct LLM call
-		llmMessages := append([]agent.Message{{Role: "system", Content: systemPrompt}}, req.Messages...)
-		
-		// For now, use route agent as fallback (it has general capability)
-		if e.routeAgent != nil {
-			reqCtx := agent.RequestContext{Locale: req.Locale}
-			respCh, err := e.routeAgent.Process(ctx, llmMessages, reqCtx)
+
+		// L5: LLM Fallback (General Reasoning)
+		// Use dedicated GeneralAgent (pinned to Zeabur)
+		if e.generalAgent != nil {
+			reqCtx := agent.RequestContext{
+				Locale:    req.Locale,
+				SessionID: req.SessionID,
+			}
+
+			// Prepend enhanced system prompt to preserve RAG/Status context
+			msgsWithSys := append([]agent.Message{{Role: "system", Content: systemPrompt}}, req.Messages...)
+
+			respCh, err := e.generalAgent.Process(ctx, msgsWithSys, reqCtx)
 			if err == nil && respCh != nil {
 				e.metrics.RecordLayerSuccess("L5", time.Since(l5Start))
-				
+
+				var fullText strings.Builder
 				for chunk := range respCh {
 					outCh <- chunk
+					fullText.WriteString(chunk)
 				}
-				
-				logger.Info("Responded from L5 LLM", "latency", time.Since(startTime))
+
+				// Post-processing: Fact Check (Localized)
+				if e.factChecker != nil {
+					checkResult := e.factChecker.Check(lastMessage, fullText.String(), req.Locale)
+					if checkResult.HasHallucination {
+						correction := strings.TrimPrefix(checkResult.CorrectedResponse, fullText.String())
+						if correction != "" {
+							outCh <- correction
+							logs = append(logs, "[L5] FactChecker: Hallucination detected and corrected")
+						}
+					}
+				}
+
+				logger.Info("Responded from L5 LLM (GeneralAgent)", "latency", time.Since(startTime))
 				return
 			}
 		}
-		
+
 		// Ultimate fallback
 		outCh <- "抱歉，我目前無法處理您的請求。請稍後再試。"
 		logger.Warn("All layers failed", "logs", logs)

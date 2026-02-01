@@ -42,12 +42,14 @@ const HALLUCINATION_PATTERNS = {
 // 用於檢測潛在幻覺的通用模式
 const GENERIC_DIRECT_PATTERNS = [
     /直達/,
-    /不需要轉乘/,
-    /不用轉車/,
-    /無需轉乘/,
+    /不需要轉[乘車換]/,
+    /不用轉[乘車換]/,
+    /無需轉[乘車換]/,
+    /不用[換轉]車/,
     /直接到達/,
     /一路直達/,
-    /直接抵達/
+    /直接抵達/,
+    /一車直達/
 ];
 
 /**
@@ -101,7 +103,7 @@ export function checkForHallucinations(
                 if (!/品川.*直達|直達.*品川|Shinagawa.*direct|direct.*Shinagawa/i.test(response)) {
                     issues.push({
                         type: 'direct_claim',
-                        severity: 'warning',
+                        severity: 'critical',
                         claim: response.match(pattern)?.[0] || '直達聲稱',
                         correction: '從羽田機場到東京車站沒有直達路線，必須轉乘',
                         context: response.substring(0, 100)

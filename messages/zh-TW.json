@@ -417,7 +417,10 @@
             "l2": "分析即時路況與天氣...",
             "l3": "查詢設施與 ODPT 時刻表...",
             "kb": "讀取專家知識庫（Tips & Hacks）...",
-            "synthesizing": "綜合需求，生成最佳策略..."
+            "synthesizing": "綜合需求，生成最佳策略...",
+            "header_active": "LUTAGU 思考中",
+            "header_history": "思考過程",
+            "analyzing": "正在分析需求..."
         },
         "card": {
             "title": "已合成最佳策略",

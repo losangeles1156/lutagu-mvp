@@ -20,6 +20,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/orchestrator"
 	"github.com/lutagu/adk-agent/internal/skill"
 	"github.com/lutagu/adk-agent/internal/skill/implementations"
+	"github.com/lutagu/adk-agent/internal/validation"
 	"github.com/lutagu/adk-agent/pkg/openrouter"
 )
 
@@ -35,7 +36,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	cfg = config.Load()
-	slog.Info("Configuration loaded", 
+	slog.Info("Configuration loaded",
 		"port", cfg.Port,
 		"supabase", cfg.Supabase.URL != "",
 		"voyage", cfg.Voyage.APIKey != "",
@@ -45,14 +46,29 @@ func main() {
 	healthChecker = monitoring.NewHealthChecker()
 
 	// 3. Initialize Clients with Graceful Degradation
-	
-	// OpenRouter (Critical)
-	orClient, err := openrouter.NewClient(openrouter.Config{APIKey: cfg.OpenRouter.APIKey})
+
+	// OpenRouter (Function Calling Specialist)
+	orClient, err := openrouter.NewClient(openrouter.Config{
+		APIKey:  cfg.OpenRouter.APIKey,
+		BaseURL: cfg.OpenRouter.BaseURL,
+	})
 	if err != nil {
 		slog.Error("Failed to create OpenRouter client", "error", err)
 		os.Exit(1)
 	}
-	slog.Info("OpenRouter client initialized")
+	slog.Info("OpenRouter client initialized", "url", cfg.OpenRouter.BaseURL)
+
+	// Zeabur AI Hub (General Logic/Chat Specialist)
+	zeaburClient, err := openrouter.NewZeaburClient(openrouter.ZeaburConfig{
+		APIKey: cfg.Zeabur.APIKey,
+	})
+	if err != nil {
+		slog.Warn("Failed to create Zeabur AI Hub client. Falling back to OpenRouter.", "error", err)
+		// Fallback for safety, though user requested strict separation
+		zeaburClient = nil
+	} else {
+		slog.Info("Zeabur AI Hub client initialized")
+	}
 
 	// ODPT (Non-critical)
 	odptClient := odpt.NewClient(cfg.ODPT.APIKey, cfg.ODPT.APIUrl)
@@ -115,21 +131,52 @@ func main() {
 	l2Injector := layer.NewL2Injector(odptClient)
 	slog.Info("L2 injector initialized")
 
-	// 5. Initialize Skill Registry
+	// 5. Initialize FactChecker
+	factChecker, err := validation.NewFactChecker()
+	if err != nil {
+		slog.Error("Failed to initialize FactChecker", "error", err)
+		os.Exit(1)
+	}
+	slog.Info("FactChecker initialized")
+
+	// 6. Initialize Skill Registry
 	skillRegistry := skill.NewRegistry()
 	skillRegistry.Register(implementations.NewFareSkill())
 	skillRegistry.Register(implementations.NewAccessibilitySkill())
+	skillRegistry.Register(implementations.NewMedicalSkill())
+	skillRegistry.Register(implementations.NewExitStrategistSkill())
+	skillRegistry.Register(implementations.NewLocalGuideSkill())
+	skillRegistry.Register(implementations.NewSpatialReasonerSkill())
+	skillRegistry.Register(implementations.NewInfoLinksSkill())
 	slog.Info("Skill registry initialized", "skills", skillRegistry.Count())
 
 	// 6. Initialize Legacy Agents (for L2/L5 fallback)
+	// These agents use OpenRouter for Function Calling
 	routeAgent := agent.NewRouteAgent(orClient, cfg.Models.RouteAgent, cfg.RoutingServiceURL)
 	statusAgent := agent.NewStatusAgent(orClient, cfg.Models.StatusAgent, odptClient)
+
+	// Create GeneralAgent (pinned to Zeabur)
+	var generalAgent *agent.GeneralAgent
+	if zeaburClient != nil {
+		generalAgent = agent.NewGeneralAgent(zeaburClient, cfg.Models.GeneralAgent)
+	} else {
+		generalAgent = agent.NewGeneralAgent(orClient, cfg.Models.GeneralAgent)
+	}
+
 	slog.Info("Agents initialized",
 		"route", cfg.Models.RouteAgent,
 		"status", cfg.Models.StatusAgent,
+		"general", cfg.Models.GeneralAgent,
+		"using_zeabur", zeaburClient != nil,
 	)
 
 	// 7. Initialize Layered Engine
+	// The engine uses Zeabur for General Reasoning (fallback to orClient if zeabur is missing)
+	engineClient := agent.LLMClient(orClient)
+	if zeaburClient != nil {
+		engineClient = zeaburClient
+	}
+
 	engine = orchestrator.NewLayeredEngine(orchestrator.LayeredEngineConfig{
 		Config:          cfg,
 		TemplateEngine:  templateEngine,
@@ -140,10 +187,12 @@ func main() {
 		EmbeddingClient: embeddingClient,
 		RouteAgent:      routeAgent,
 		StatusAgent:     statusAgent,
-		LLMClient:       orClient,
+		GeneralAgent:    generalAgent,
+		LLMClient:       engineClient,
 		Model:           cfg.Models.GeneralAgent,
+		FactChecker:     factChecker,
 	})
-	slog.Info("Layered engine initialized")
+	slog.Info("Layered engine initialized", "using_zeabur", zeaburClient != nil)
 
 	// 8. Setup HTTP Routes
 	http.HandleFunc("/api/chat", handleChat)
@@ -228,7 +277,7 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 
 func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	// TODO: Get metrics from engine
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "ok",
