@@ -51,19 +51,33 @@ Do not explain your reasoning.
 func (a *RootAgent) Process(ctx context.Context, messages []Message, reqCtx RequestContext) (<-chan string, error) {
 	ch := make(chan string, 1)
 
-	var lastContent string
-	if len(messages) > 0 {
-		lastContent = messages[len(messages)-1].Content
-	}
+	// Convert history for ADK
+	history := ToGenAIContent(messages)
 
 	go func() {
 		defer close(ch)
-		respText, err := RunAgentSync(ctx, a.Agent, lastContent)
+		// For RootAgent, we don't strictly need real-time streaming to the user since it's an internal classifier.
+		// However, using the streaming function unifies the architecture.
+		// We capture the output into a buffer to determine intent.
+
+		internalCh := make(chan string)
+		var fullResponse strings.Builder
+
+		go func() {
+			for chunk := range internalCh {
+				fullResponse.WriteString(chunk)
+			}
+		}()
+
+		respText, err := RunAgentStreaming(ctx, a.Agent, history, internalCh)
+		close(internalCh) // Close internal captured channel
+
 		if err != nil {
 			ch <- fmt.Sprintf("Error: %v", err)
 			return
 		}
 
+		// Use the returned full text from RunAgentStreaming as it's reliable
 		intent := strings.TrimSpace(respText)
 		intent = strings.ToUpper(intent)
 		ch <- fmt.Sprintf("INTENT_DETECTED:%s", intent)

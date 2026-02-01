@@ -51,21 +51,17 @@ Structure your response clearly:
 func (a *RouteAgent) Process(ctx context.Context, messages []Message, reqCtx RequestContext) (<-chan string, error) {
 	ch := make(chan string)
 
+	// Convert history for ADK
+	history := ToGenAIContent(messages)
+
 	go func() {
 		defer close(ch)
 
-		var lastContent string
-		if len(messages) > 0 {
-			lastContent = messages[len(messages)-1].Content
-		}
-
-		respText, err := RunAgentSync(ctx, a.Agent, lastContent)
+		_, err := RunAgentStreaming(ctx, a.Agent, history, ch)
 		if err != nil {
 			ch <- fmt.Sprintf("Error: %v", err)
 			return
 		}
-
-		ch <- respText
 	}()
 
 	return ch, nil
