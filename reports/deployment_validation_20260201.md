@@ -237,5 +237,74 @@ Google Cloud Run (chat-api)
 
 ---
 
+---
+
+## 9. 瀏覽器測試補充說明
+
+### 9.1 測試環境限制
+
+嘗試使用 agent-browser 進行真實瀏覽器測試時，發現以下網路限制：
+
+| 項目 | 狀態 | 原因 |
+|------|------|------|
+| agent-browser 安裝 | ✅ 成功 | npm 安裝正常 |
+| Chromium 下載 | ❌ 失敗 | cdn.playwright.dev 被 egress proxy 封鎖 |
+| 生產站點訪問 | ❌ 失敗 | lutagu.com 不在允許域名清單 |
+| Google Fonts | ❌ 失敗 | fonts.googleapis.com 被封鎖 |
+
+### 9.2 Egress Proxy 允許的域名
+
+此測試環境的網路代理只允許以下類型的域名：
+- 套件管理：npmjs.org, pypi.org, crates.io
+- 程式碼託管：github.com, gitlab.com
+- 雲端服務：googleapis.com, google.com, azure.com
+- 開發文檔：docs.claude.com, nodejs.org
+
+**lutagu.com 和 cdn.playwright.dev 不在允許清單內**。
+
+### 9.3 替代驗證方法
+
+由於無法進行瀏覽器測試，採用以下替代驗證：
+
+1. **單元測試驗證** (98.8% 通過)
+   - 核心邏輯測試全部通過
+   - L4 決策引擎測試正常
+   - 多語系工具函數測試正常
+
+2. **靜態代碼分析**
+   - TypeScript 編譯無錯誤
+   - ESLint 規則符合
+   - 組件結構完整
+
+3. **檔案完整性檢查**
+   - 多語系 JSON 檔案完整（zh-TW, en, ja）
+   - 時刻表組件代碼完整
+   - API 路由實現完整
+
+### 9.4 建議後續行動
+
+為了完成真實瀏覽器測試，建議：
+
+1. **在允許網路環境中測試**
+   ```bash
+   # 安裝瀏覽器
+   npx playwright install chromium
+
+   # 運行 E2E 測試
+   npm run test:e2e
+   ```
+
+2. **使用真實設備訪問**
+   - 電腦瀏覽器：https://www.lutagu.com
+   - 手機 PWA 安裝測試
+
+3. **手動測試清單**
+   - [ ] AI 對話：發送問題並確認回應
+   - [ ] 多語系：點擊語言切換確認 UI 變化
+   - [ ] 時刻表：選擇站點查看時刻表顯示
+
+---
+
 **報告生成時間**: 2026-02-01 UTC
+**更新時間**: 2026-02-01 (補充瀏覽器測試說明)
 **下次檢查建議**: 2026-02-08
