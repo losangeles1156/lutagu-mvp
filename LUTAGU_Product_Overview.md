@@ -1,8 +1,9 @@
 # LUTAGU 產品介紹說明書
 
-**版本**: v3.0
+**版本**: v3.1
 **日期**: 2026-02-01
 **文件類型**: 產品架構與功能說明
+**修訂說明**: 更新 AI 架構細節，反映實際程式碼實作
 
 ---
 
@@ -235,29 +236,44 @@ LUTAGU 不是被動的資料百科，而是**主動的在地嚮導 (Proactive Lo
 └─────────────────────────────────────────────────────────────┘
                               ↕
 ┌─────────────────────────────────────────────────────────────┐
-│                    API / 應用層（主服務）                      │
-│  Next.js Route Handlers (App Router)                         │
-│  - /api/agent/chat    : AI 對話主端點                         │
+│              TypeScript 應用層（Next.js 主服務）               │
+│  Route Handlers:                                             │
+│  - /api/agent/chat    : AI 對話（可代理至 Go 後端）            │
+│  - /api/agent/hybrid  : HybridEngine 直接執行                 │
 │  - /api/odpt/*        : 交通數據 API                          │
 │  - /api/l1-l4/*       : 數據層 API                           │
-│  - Rate Limit（Token Bucket）/ Auth（Supabase + LINE）       │
+│  AI Engine:                                                  │
+│  - HybridEngine (L1-L5 決策流程)                              │
+│  - Vercel AI SDK (ai@^6.0.57)                                │
+│  - Deep Research Skills (10 skills)                          │
+└─────────────────────────────────────────────────────────────┘
+                     ↕ (CHAT_API_URL 代理)
+┌─────────────────────────────────────────────────────────────┐
+│                Go 微服務層（ADK Agent）                        │
+│  services/adk-agent/ (獨立部署 :8080)                         │
+│  - LayeredEngine (L0-L5 決策)                                │
+│  - ReAct Loop (最多 5 步)                                    │
+│  - Function Calling (OpenRouter)                             │
+│  - FactChecker (後處理驗證)                                   │
+│  - Skills Registry (7 skills)                                │
 └─────────────────────────────────────────────────────────────┘
                               ↕
 ┌─────────────────────────────────────────────────────────────┐
-│                        AI 編排層                              │
-│  HybridEngine + PreDecisionEngine + Skills                   │
-│  - Template → Algorithm → LLM/Tools（依情境路由）             │
-│  - Deep Research Skills（票價、無障礙、行李、最後一哩路）       │
-│  - One Recommendation：主卡 1 + 次卡最多 2                    │
-└─────────────────────────────────────────────────────────────┘
-                              ↕
-┌─────────────────────────────────────────────────────────────┐
-│                    AI 模型層（Zeabur AI Hub）                  │
-│  - Gatekeeper : Gemini 2.5 Flash Lite（快速分類/路由）        │
-│  - Brain      : Gemini 3 Flash Preview（推理/策略）           │
-│  - Synthesizer: DeepSeek V3.2（長輸出/對話/整合）             │
-│  - Fallback   : MiniMax M2.1（備援）                         │
-│  Embedding: Voyage-4 (1024) / Gemini 004 (768→1024 padding) │
+│                    AI 模型層（多通道）                         │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ Zeabur AI Hub (hnd1.aihub.zeabur.ai) - 東京節點       │    │
+│  │  - Gemini 2.5 Flash Lite (分類/簡單)                  │    │
+│  │  - Gemini 3 Flash Preview (推理)                     │    │
+│  │  - Gemini 1.5 Flash (Agent Brain)                    │    │
+│  │  - DeepSeek V3.2 (對話/合成)                          │    │
+│  └─────────────────────────────────────────────────────┘    │
+│  ┌──────────────────┐  ┌──────────────────┐                 │
+│  │ OpenRouter       │  │ MiniMax API      │                 │
+│  │ (Function Call)  │  │ (備援)           │                 │
+│  └──────────────────┘  └──────────────────┘                 │
+│  Embedding:                                                  │
+│  - Frontend: Mistral-embed (1024 dim)                       │
+│  - Backend: Voyage-4-lite (1024 dim)                        │
 └─────────────────────────────────────────────────────────────┘
                               ↕
 ┌─────────────────────────────────────────────────────────────┐
@@ -266,6 +282,7 @@ LUTAGU 不是被動的資料百科，而是**主動的在地嚮導 (Proactive Lo
 │  - L1/L3: nodes / station_facilities / shared_mobility       │
 │  - L2: l2_cache / weather_cache（TTL 快取）                   │
 │  - L4: knowledge vectors（HNSW cosine index）                │
+│  快取: In-memory LRU → Redis/Upstash（可選）                  │
 └─────────────────────────────────────────────────────────────┘
                               ↕
 ┌─────────────────────────────────────────────────────────────┐
@@ -293,16 +310,45 @@ Markdown: react-markdown + remark-gfm
 PWA: next-pwa 5.6.0
 ```
 
-#### 後端技術
+#### 後端技術 (TypeScript - Next.js)
 
 ```yaml
 Runtime: Node.js 20+ (Next.js App Router)
 API Framework: Next.js Route Handlers
+AI SDK: Vercel AI SDK (ai@^6.0.57, @ai-sdk/openai)
 資料庫: Supabase (PostgreSQL 15 + PostGIS)
 向量索引: pgvector + HNSW (cosine similarity)
-快取: In-memory LRU → Upstash Redis（可選）
+快取: In-memory LRU (lru-cache@^11.2.4) → Upstash Redis（可選）
 認證: Supabase Auth + LINE Login（Trip Guard）
 檔案儲存: Supabase Storage
+```
+
+#### 後端技術 (Go - ADK Agent 微服務)
+
+```yaml
+語言: Go 1.21+
+位置: services/adk-agent/
+部署: 獨立部署 (:8080)
+功能:
+  - LayeredEngine (L0-L5 決策流程)
+  - ReAct Loop (最多 5 步迭代)
+  - Function Calling (OpenRouter)
+  - FactChecker (在地化事實驗證)
+  - Skills Registry (7 個專業技能)
+基礎設施:
+  - OpenRouter Client (Function Calling)
+  - Zeabur Client (General Reasoning)
+  - ODPT Client (交通數據)
+  - Voyage Client (Embedding)
+  - Supabase VectorStore (RAG)
+  - Redis Cache (可選)
+HTTP 端點:
+  - POST /api/chat       : 主對話端點
+  - POST /agent/chat     : 別名
+  - GET  /health         : 健康檢查
+  - GET  /health/ready   : Readiness Probe
+  - GET  /health/live    : Liveness Probe
+  - GET  /metrics        : 監控指標
 ```
 
 #### 開放數據整合
@@ -350,69 +396,197 @@ Embedding 快取:
 
 ## 7. AI 多模型編排系統
 
-### 7.1 Trip Trinity 架構
+### 7.1 雙層架構概覽
 
-LUTAGU 採用**專業分工的多模型系統**，而非單一 LLM：
+LUTAGU 採用**前後端分離的雙層 AI 架構**：
 
-| 角色 | 模型 | 用途 | 使用場景 |
-|------|------|------|---------|
-| **Gatekeeper** | Gemini 2.5 Flash Lite | 快速意圖分類與路由 | 解析查詢、判斷意圖類型 |
-| **Brain** | Gemini 3 Flash Preview | 深度推理與策略決策 | 複雜路線規劃、多約束優化 |
-| **Synthesizer** | DeepSeek V3.2 | 自然語言生成 | 用戶回應、Action Card 描述 |
-| **Fallback** | MiniMax M2.1 | 主模型失敗時備援 | 確保服務持續性 |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 TypeScript 前端 (Next.js)                    │
+│  src/lib/ai/ + src/lib/l4/HybridEngine.ts                   │
+│  - 主要用戶介面、快速回應                                      │
+│  - Vercel AI SDK (@ai-sdk/openai + ai)                      │
+│  - Direct Fetch (OpenAI-compatible REST)                    │
+└─────────────────────────────────────────────────────────────┘
+                              ↕ (可選代理)
+┌─────────────────────────────────────────────────────────────┐
+│                   Go 後端微服務 (ADK Agent)                   │
+│  services/adk-agent/ (獨立部署)                              │
+│  - 深度推理、ReAct Loop、Function Calling                    │
+│  - OpenRouter + Zeabur AI Hub 雙通道                        │
+│  - 分層決策引擎 (L0-L5)                                       │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### 7.2 模型選擇邏輯
+### 7.2 Trip Trinity 模型配置
+
+#### 7.2.1 TypeScript 前端模型配置
+
+**檔案**: `src/lib/ai/llmClient.ts`
+
+| Task Type | 模型 | Timeout | Max Tokens |
+|-----------|------|---------|------------|
+| `classification`, `simple` | `gemini-2.5-flash-lite` | 20s | 200 |
+| `reasoning`, `context_heavy` | `gemini-3-flash-preview` | 45s | 600 |
+| `synthesis`, `chat` | `deepseek-v3.2` | 30s | 700 |
+| Default | `gemini-2.5-flash-lite` | 30s | 400 |
+
+**檔案**: `src/lib/agent/providers.ts` (Vercel AI SDK)
+
+| 角色 | 模型 ID | Provider | 用途 |
+|------|---------|----------|------|
+| **Gatekeeper** | `gemini-2.5-flash-lite` | Zeabur | 快速路由 |
+| **Brain** | `gemini-1.5-flash` | Zeabur | 推理邏輯 |
+| **Synthesizer** | `deepseek-v3.2` | Zeabur | 對話合成 |
+| **Fallback** | `MiniMax-M2.1` | MiniMax API | 備援 |
+
+#### 7.2.2 Go 後端模型配置
+
+**檔案**: `services/adk-agent/internal/config/config.go`
+
+| Agent | 預設模型 | 用途 |
+|-------|---------|------|
+| **RootAgent** | `deepseek-v3.2` | 主代理 |
+| **RouteAgent** | `deepseek-v3.2` | 路線規劃 |
+| **StatusAgent** | `deepseek-v3.2` | 狀態查詢 |
+| **GeneralAgent** | `deepseek-v3.2` | 一般推理 |
+| **FastAgent** | `google/gemini-2.0-flash-001` | 快速回應 (SLM) |
+
+### 7.3 決策流程 (Layered Engine)
 
 ```
 用戶查詢
     │
     ▼
 ┌──────────────┐
-│  Gatekeeper  │ ← 意圖分類（<500ms）
-│  Flash Lite  │
+│ L0: Context  │ ← NodeResolver + L2 Injector + Weather
+│  Resolution  │
 └──────┬───────┘
        │
-       ├─→ route（路線）────────→ Algorithm Provider
-       ├─→ amenity（設施）──────→ L3 查詢 + Template
-       ├─→ status（狀態）───────→ L2 快取 + Template
-       └─→ guide（指南）────────→ Brain + Synthesizer
-                                      │
-                                      ▼
-                              ┌───────────────┐
-                              │ Deep Research │
-                              │    Skills     │
-                              └───────────────┘
+       ▼
+┌──────────────┐
+│ L1: Template │ ← 快速模式比對（高頻 FAQ）
+│    Engine    │   命中 → 直接回應
+└──────┬───────┘
+       │ Miss
+       ▼
+┌──────────────┐
+│ L2: Algorithm│ ← 路線/狀態查詢
+│   Provider   │   RouteAgent / StatusAgent
+└──────┬───────┘
+       │ Miss
+       ▼
+┌──────────────┐
+│ L3/L4: Skill │ ← Tag-Driven Dispatch
+│   + RAG      │   10 個 Deep Research Skills
+└──────┬───────┘
+       │ Miss
+       ▼
+┌──────────────┐
+│ L5: LLM      │ ← 分層推理 (SLM vs Full LLM)
+│   Fallback   │   + FactChecker 後處理
+└──────────────┘
 ```
 
-### 7.3 Deep Research Skills
+### 7.4 Deep Research Skills
 
-專為特定問題領域設計的技能模組：
+專為特定問題領域設計的技能模組（共 10 個）：
 
-| 技能 | 功能 | 觸發條件 |
-|------|------|---------|
-| **FareRulesSkill** | 票價計算、折扣查詢 | 票價相關關鍵字 |
-| **AccessibilitySkill** | 無障礙路線指引 | 輪椅、電梯關鍵字 |
-| **LuggageSkill** | 行李寄存建議 | 行李、置物櫃關鍵字 |
-| **LastMileSkill** | 最後一哩路連接 | 步行、接駁關鍵字 |
-| **CrowdDispatcherSkill** | 人潮迴避策略 | 擁擠、避開關鍵字 |
-| **SpatialReasonerSkill** | 空間推理與導航 | 出口、方向關鍵字 |
-| **ExitStrategistSkill** | 轉乘/出口優化 | 轉乘、出站關鍵字 |
+#### TypeScript Skills (`src/lib/l4/skills/`)
 
-### 7.4 嵌入模型配置
+| 技能 | 優先序 | 功能 | 使用模型 |
+|------|--------|------|---------|
+| **MedicalSkill** | 110 | 緊急醫療指引 | Gemini 3 (reasoning) |
+| **FareRulesSkill** | 100 | 票價計算、折扣 | Gemini 3 (reasoning) |
+| **ExitStrategistSkill** | 95 | 出口/轉乘優化 | Gemini 3 (reasoning) |
+| **StandardRoutingSkill** | 92 | 標準路線規劃 | Algorithm Provider |
+| **AccessibilitySkill** | 90 | 無障礙路線 | Gemini 2.5 Lite (classification) |
+| **LocalGuideSkill** | 85 | 在地推薦 | Gemini 3 (chat) |
+| **LuggageSkill** | 80 | 行李寄存 | Gemini 2.5 Lite |
+| **LastMileSkill** | 70 | 最後一哩路 | Gemini 2.5 Lite |
+| **CrowdDispatcherSkill** | 60 | 人潮迴避 | Gemini 3 (chat) |
+| **SpatialReasonerSkill** | 10 | 空間推理 (Fallback) | Gemini 3 (reasoning) |
+
+#### Go Skills (`services/adk-agent/internal/skill/`)
+
+| 技能 | 功能 |
+|------|------|
+| **FareSkill** | 票價查詢 |
+| **AccessibilitySkill** | 無障礙導引 |
+| **MedicalSkill** | 醫療緊急 |
+| **ExitStrategistSkill** | 出口策略 |
+| **LocalGuideSkill** | 在地推薦 |
+| **SpatialReasonerSkill** | 空間推理 |
+| **InfoLinksSkill** | 資訊連結 |
+
+### 7.5 嵌入模型配置
+
+#### TypeScript 前端
+
+**檔案**: `src/lib/ai/embedding.ts`
+
+```yaml
+主要模型:
+  提供者: Mistral AI
+  模型: mistral-embed
+  維度: 1024
+  API: https://api.mistral.ai/v1/embeddings
+
+備援:
+  類型: 確定性雜湊 (Deterministic Hash)
+  維度: 1024
+  觸發: MISTRAL_API_KEY 未設定時
+```
+
+#### Go 後端
+
+**檔案**: `services/adk-agent/internal/infrastructure/embedding/voyage.go`
 
 ```yaml
 主要模型:
   提供者: Voyage AI
-  模型: voyage-4
+  模型: voyage-4-lite (預設)
   維度: 1024
-  用途: Document (voyage-4-large) / Query (voyage-4-lite)
+  用途: Query embedding
 
-備援模型:
-  提供者: Google Gemini
-  模型: text-embedding-004
-  維度: 768 → zero-pad 至 1024
-  觸發: Voyage 速率限制時自動切換
+文件模型:
+  模型: voyage-4-large
+  用途: Document embedding
 ```
+
+### 7.6 API 端點與通信協議
+
+#### Zeabur AI Hub (主要)
+
+```yaml
+端點: https://hnd1.aihub.zeabur.ai/v1
+區域: 東京 (hnd1)
+協議: OpenAI-compatible REST API
+認證: Bearer Token (ZEABUR_API_KEY)
+```
+
+#### OpenRouter (Function Calling)
+
+```yaml
+端點: https://openrouter.ai/api/v1
+用途: Go 後端 Function Calling 專用
+```
+
+#### MiniMax (備援)
+
+```yaml
+端點: https://api.minimax.io/v1
+用途: 主模型失敗時的備援
+```
+
+### 7.7 SDK 與框架
+
+| 層級 | 框架 | 用途 |
+|------|------|------|
+| **TypeScript Agent** | Vercel AI SDK (`ai@^6.0.57`, `@ai-sdk/openai`) | Agent 編排、串流回應 |
+| **TypeScript LLM** | Direct Fetch (OpenAI-compatible) | 底層 LLM 呼叫 |
+| **Go Agent** | Custom Orchestrator | ReAct Loop、Function Calling |
+| **Go LLM** | OpenRouter Client / Zeabur Client | LLM Gateway |
 
 ---
 
@@ -587,33 +761,82 @@ PII 加密:
 ### 12.1 必要環境變數
 
 ```env
+# =============================================
 # ODPT API（公共交通開放數據）
+# =============================================
 ODPT_API_KEY_METRO=your_tokyo_metro_api_key
 ODPT_API_KEY_JR_EAST=your_jr_east_challenge_key
 ODPT_API_KEY_PUBLIC=optional_public_api_key
 
+# =============================================
 # Supabase
+# =============================================
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_KEY=your_service_key
 
-# AI 模型（Zeabur AI Hub）
+# =============================================
+# AI 模型 - TypeScript 前端
+# =============================================
+# Zeabur AI Hub (主要 - 東京節點)
 ZEABUR_API_KEY=your_zeabur_api_key
+
+# Gemini (備援 / 直連)
 GEMINI_API_KEY=your_gemini_api_key
 GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
 
-# Embedding 配置
-EMBEDDING_PROVIDER=voyage  # 'voyage' (default) | 'gemini'
+# DeepSeek (可選 - 若不使用 Zeabur 代理)
+DEEPSEEK_API_KEY=your_deepseek_api_key
 
-# AI 後端（可選代理）
+# MiniMax (備援)
+MINIMAX_API_KEY=your_minimax_api_key
+
+# Embedding (TypeScript 使用 Mistral)
+MISTRAL_API_KEY=your_mistral_api_key
+
+# =============================================
+# AI 模型 - Go 後端 (ADK Agent)
+# =============================================
+# OpenRouter (Function Calling 專用)
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+
+# Zeabur AI Hub (Go 後端)
+ZEABUR_BASE_URL=https://hnd1.aihub.zeabur.ai/v1
+
+# Voyage AI (Go 後端 Embedding)
+VOYAGE_API_KEY=your_voyage_api_key
+VOYAGE_MODEL=voyage-4-lite
+
+# 模型覆寫 (可選)
+MODEL_ROOT_AGENT=deepseek-v3.2
+MODEL_ROUTE_AGENT=deepseek-v3.2
+MODEL_STATUS_AGENT=deepseek-v3.2
+MODEL_GENERAL_AGENT=deepseek-v3.2
+MODEL_FAST_AGENT=google/gemini-2.0-flash-001
+
+# =============================================
+# 服務代理
+# =============================================
+# Go 後端代理 (設定後 /api/agent/chat 會轉發至此)
 CHAT_API_URL=http://localhost:8080/api
+ADK_SERVICE_URL=http://localhost:8080
+
+# n8n Webhook (可選)
 N8N_WEBHOOK_URL=https://n8n.zeabur.app/webhook/lutagu-chat
 
+# Redis (Go 後端快取)
+REDIS_URL=redis://localhost:6379/0
+
+# =============================================
 # LINE（Trip Guard 推播）
+# =============================================
 LINE_CHANNEL_ACCESS_TOKEN=your_line_token
 LINE_CHANNEL_SECRET=your_line_secret
 
+# =============================================
 # 安全性
+# =============================================
 PII_ENCRYPTION_KEY_BASE64=replace_with_32_byte_base64
 ACTIVITY_HASH_SALT=replace_with_random_secret
 RATE_LIMIT_ENABLED=true
@@ -669,4 +892,11 @@ npm start
 ---
 
 *本文件為 LUTAGU MVP 的完整產品說明書。*
-*最後更新：2026-02-01 | 版本：v3.0*
+*最後更新：2026-02-01 | 版本：v3.1*
+
+**本次更新重點 (v3.1)**:
+- 詳細說明 TypeScript + Go 雙層 AI 架構
+- 更正 Embedding 模型配置 (TypeScript: Mistral / Go: Voyage)
+- 補充 Go ADK Agent 微服務架構
+- 更新環境變數配置（含 Go 後端參數）
+- 完整列出 10 個 Deep Research Skills 及其優先序
