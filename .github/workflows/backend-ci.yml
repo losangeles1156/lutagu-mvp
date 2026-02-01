@@ -18,9 +18,10 @@ jobs:
     env:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       ODPT_API_KEY: ${{ secrets.ODPT_API_KEY }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_KEY }}
-      LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      LITELLM_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }} # Added for Voyage AI tests
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go

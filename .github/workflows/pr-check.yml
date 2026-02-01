@@ -21,9 +21,9 @@ jobs:
       pull-requests: read
 
     env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      LITELLM_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       ODPT_API_KEY_METRO: ${{ secrets.ODPT_API_KEY_METRO }}
 
     steps:
