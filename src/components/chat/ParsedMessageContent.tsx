@@ -22,10 +22,9 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
 
         // Extract [THINKING] marker if not already provided via prop
         if (!thinking) {
-            // Match ALL thinking blocks (global) to handle multiple or nested tags
-            // Also handle unclosed tags at the end
-            // Regex to find closed thinking blocks [THINKING]...[/THINKING] (Global, Case Insensitive, Multiline)
-            const closedRegex = /\[THINKING\]([\s\S]*?)\[\/THINKING\]/gi;
+            // Match ALL thinking blocks (global) - support various formats with flexible spacing
+            // Pattern handles: [THINKING], [ THINKING ], [THINKING ], etc.
+            const closedRegex = /\[\s*THINKING\s*\]([\s\S]*?)\[\s*\/\s*THINKING\s*\]/gi;
             const matches = Array.from(text.matchAll(closedRegex));
 
             if (matches.length > 0) {
@@ -35,21 +34,25 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
                 text = text.replace(closedRegex, '').trim();
             }
 
-            // Handle trailing open tag [THINKING]... (end of string)
-            const openMatch = text.match(/\[THINKING\]([\s\S]*)$/i);
+            // Handle trailing open tag [THINKING]... (end of string) - with flexible spacing
+            const openMatch = text.match(/\[\s*THINKING\s*\]([\s\S]*)$/i);
             if (openMatch) {
                 const openContent = openMatch[1].trim();
-                thinking = thinking ? `${thinking}\n---\n${openContent}` : openContent;
+                // Only add if content is meaningful and not another tag
+                if (openContent && !openContent.startsWith('[')) {
+                    thinking = thinking ? `${thinking}\n---\n${openContent}` : openContent;
+                }
                 text = text.replace(openMatch[0], '').trim();
             }
         } else {
             // If thinking is provided via prop, strictly strip all markers from text
-            text = text.replace(/\[THINKING\]\s*([\s\S]*?)\s*(?:\[\/THINKING\]|$)/g, '').trim();
+            text = text.replace(/\[\s*THINKING\s*\]\s*([\s\S]*?)\s*(?:\[\s*\/\s*THINKING\s*\]|$)/gi, '').trim();
         }
 
         // Final thorough safety cleanup: remove any remaining partial or malformed tags
-        text = text.replace(/\[\/?THINKING\]/gi, '');
-        text = text.replace(/\[\/?SUGGESTED_QUESTIONS\]/gi, '');
+        // More aggressive pattern to catch all variants with flexible spacing
+        text = text.replace(/\[\s*\/?\s*THINKING\s*\]/gi, '');
+        text = text.replace(/\[\s*\/?\s*SUGGESTED_QUESTIONS\s*\]/gi, '');
 
         // Double check for ** marks and strip them again (just in case they were nested or added later)
         text = text.replace(/\*\*/g, '').trim();
