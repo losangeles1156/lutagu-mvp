@@ -71,7 +71,7 @@ func Load() *Config {
 	cfg.ODPT.APIUrl = getEnv("ODPT_API_URL", "https://api.odpt.org/api/v4/odpt:TrainInformation")
 
 	// Supabase
-	cfg.Supabase.URL = os.Getenv("SUPABASE_URL")
+	cfg.Supabase.URL = getEnv("SUPABASE_URL", os.Getenv("NEXT_PUBLIC_SUPABASE_URL"))
 	cfg.Supabase.ServiceKey = os.Getenv("SUPABASE_SERVICE_KEY")
 
 	// Voyage AI

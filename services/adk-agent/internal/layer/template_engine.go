@@ -210,7 +210,7 @@ func (e *TemplateEngine) handleAirportTransfer(matches []string, ctx TemplateCon
 	// Dynamic Advice Header
 	advice := "🗼 **東京交通專家建議**\n"
 	if ctx.WeatherCtx != nil {
-		if ctx.WeatherCtx.IsRaining {
+		if ctx.WeatherCtx.IsRaining() {
 			advice += "☔ **目前正下雨**：優先推薦直達的新幹線或特急電車，避免在戶外轉乘計程車。\n"
 		} else {
 			advice += fmt.Sprintf("☀️ **今日天氣良好 (%.1f°C)**：所有交通工具運行正常。\n", ctx.WeatherCtx.Temperature)

@@ -28,7 +28,9 @@ export const ParsedMessageContent = memo(({ content, role, thought, isStreaming 
         // Extract [THINKING] marker if not already provided via prop
         if (!thinking) {
             // Match ALL thinking blocks (global) to handle multiple or nested tags
-            const closedRegex = /\[THINKING\]([\s\S]*?)\[\/THINKING\]/gi;
+            // [Fix] Robust Regex for <think>, [THINKING], [THINK] with flexible whitespace
+            // Supports: [THINKING], [THINK], <think>, <thinking>
+            const closedRegex = /(?:\[|<)THINK(?:ING)?(?:\]|>)([\s\S]*?)(?:\[\/|<\/)THINK(?:ING)?(?:\]|>)/gi;
             const matches = Array.from(text.matchAll(closedRegex));
 
             let thinkingBlocks: string[] = [];
@@ -40,7 +42,7 @@ export const ParsedMessageContent = memo(({ content, role, thought, isStreaming 
             }
 
             // Handle trailing open tag [THINKING]... (end of string)
-            const openMatch = text.match(/\[THINKING\]([\s\S]*)$/i);
+            const openMatch = text.match(/(?:\[|<)THINK(?:ING)?(?:\]|>)([\s\S]*)$/i);
             if (openMatch) {
                 const openContent = openMatch[1].trim();
                 thinkingBlocks.push(openContent);
@@ -81,11 +83,11 @@ export const ParsedMessageContent = memo(({ content, role, thought, isStreaming 
 
         } else {
             // If thinking is provided via prop (legacy/mock), strictly strip all markers from text
-            text = text.replace(/\[THINKING\]\s*([\s\S]*?)\s*(?:\[\/THINKING\]|$)/g, '').trim();
+            text = text.replace(/(?:\[|<)THINK(?:ING)?(?:\]|>)\s*([\s\S]*?)\s*(?:(?:\[\/|<\/)THINK(?:ING)?(?:\]|>)|$)/gi, '').trim();
         }
 
         // Final thorough safety cleanup: remove any remaining partial or malformed tags
-        text = text.replace(/\[\/?THINKING\]/gi, '');
+        text = text.replace(/(?:\[|\/?|<|\/?)THINK(?:ING)?(?:\]|\/?>)/gi, '');
         text = text.replace(/\[\/?SUGGESTED_QUESTIONS\]/gi, '');
 
         // Double check for ** marks and strip them again (just in case they were nested or added later)

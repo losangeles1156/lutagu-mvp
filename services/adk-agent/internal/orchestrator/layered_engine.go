@@ -9,6 +9,7 @@ import (
 
 	"github.com/lutagu/adk-agent/internal/agent"
 	"github.com/lutagu/adk-agent/internal/config"
+	"github.com/lutagu/adk-agent/internal/engine/router"
 	"github.com/lutagu/adk-agent/internal/infrastructure/embedding"
 	"github.com/lutagu/adk-agent/internal/infrastructure/supabase"
 	"github.com/lutagu/adk-agent/internal/infrastructure/weather"
@@ -36,6 +37,7 @@ type LayeredEngine struct {
 	model           string
 	metrics         *Metrics
 	factChecker     *validation.FactChecker
+	pathfinder      *router.Pathfinder
 }
 
 // LayeredEngineConfig holds engine dependencies
@@ -55,6 +57,7 @@ type LayeredEngineConfig struct {
 	RootAgent       *agent.RootAgent
 	Model           string
 	FactChecker     *validation.FactChecker
+	Pathfinder      *router.Pathfinder
 }
 
 // NewLayeredEngine creates a new multi-layer engine
@@ -76,6 +79,7 @@ func NewLayeredEngine(engineCfg LayeredEngineConfig) *LayeredEngine {
 		model:           engineCfg.Model,
 		metrics:         NewMetrics(),
 		factChecker:     engineCfg.FactChecker,
+		pathfinder:      engineCfg.Pathfinder,
 	}
 }
 
@@ -151,10 +155,10 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// Fetch Weather (Best Effort)
 		var weatherCtx *weather.CurrentWeather
 		if e.weatherClient != nil {
-			w, err := e.weatherClient.FetchTokyoWeather()
+			w, err := e.weatherClient.GetCurrentWeather(ctx)
 			if err == nil {
 				weatherCtx = w
-				logs = append(logs, fmt.Sprintf("[L0] Weather: %s (%.1f°C)", w.Condition, w.Temperature))
+				logs = append(logs, fmt.Sprintf("[L0] Weather: %s (%.1f°C)", w.GetConditionText(), w.Temperature))
 			} else {
 				logs = append(logs, fmt.Sprintf("[L0] Weather fetch failed: %v", err))
 			}
@@ -377,8 +381,9 @@ func (e *LayeredEngine) buildSystemPrompt(locale, ragContext string, l2Ctx *laye
 	weatherStr := "Unknown (Assume clear)"
 	weatherAdvice := "" // Dynamic advice based on weather
 	if weatherCtx != nil {
-		weatherStr = fmt.Sprintf("%s, %.1f°C, Humidity: %d%%", weatherCtx.Condition, weatherCtx.Temperature, weatherCtx.Humidity)
-		if weatherCtx.IsRaining {
+		cond := weatherCtx.GetConditionText()
+		weatherStr = fmt.Sprintf("%s, %.1f°C", cond, weatherCtx.Temperature)
+		if weatherCtx.IsRaining() {
 			weatherAdvice = "\n- ☔ **RAIN ALERT**: It is currently raining. **Prioritize underground routes, indoor transfers, and covered walkways.** Suggest taxis for short distances."
 		} else if weatherCtx.Temperature > 30 {
 			weatherAdvice = "\n- ☀️ **HEAT ALERT**: High temperature detected. Suggest minimizing outdoor walking and staying hydrated."
@@ -427,7 +432,7 @@ func (e *LayeredEngine) buildFastPrompt(locale string, l2Ctx *layer.L2Context, n
 	timeStr := now.Format("15:04 (Mon)")
 	weatherStr := "Unknown"
 	if weatherCtx != nil {
-		weatherStr = fmt.Sprintf("%s, %.1f°C", weatherCtx.Condition, weatherCtx.Temperature)
+		weatherStr = fmt.Sprintf("%s, %.1f°C", weatherCtx.GetConditionText(), weatherCtx.Temperature)
 	}
 
 	prompt := fmt.Sprintf(`You are LUTAGU (Fast Task Tier).

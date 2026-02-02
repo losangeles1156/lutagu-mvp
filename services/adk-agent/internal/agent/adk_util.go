@@ -26,6 +26,7 @@ func RunAgentStreaming(ctx context.Context, a agent.Agent, history []*genai.Cont
 	resp, err := svc.Create(ctx, &session.CreateRequest{
 		SessionID: sessionID,
 		UserID:    userID,
+		AppName:   "lutagu",
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create session: %w", err)

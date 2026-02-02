@@ -98,9 +98,14 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                 >
                     <div className="p-1">
                         {availableLocales.map((l) => (
-                            <button
+                            <Link
                                 key={l}
-                                onClick={() => handleLocaleChange(l)}
+                                href={{
+                                    pathname: pathname,
+                                    query: Object.fromEntries(searchParams.entries())
+                                }}
+                                locale={l}
+                                onClick={() => setIsOpen(false)}
                                 className={`w-full px-4 py-3 text-xs font-black text-left rounded-xl transition-all duration-300 flex items-center justify-between ${locale === l
                                     ? 'text-indigo-600 bg-indigo-50 shadow-inner'
                                     : 'text-gray-500 hover:bg-black/[0.03] hover:text-gray-900'
@@ -108,7 +113,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                             >
                                 <span>{labels[l] || l}</span>
                                 {locale === l && <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.4)]" />}
-                            </button>
+                            </Link>
                         ))}
                     </div>
                 </div>,

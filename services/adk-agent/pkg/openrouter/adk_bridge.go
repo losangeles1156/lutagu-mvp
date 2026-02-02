@@ -2,6 +2,7 @@ package openrouter
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"iter"
 
@@ -18,10 +19,14 @@ type OpenAICompatibleClient interface {
 
 // ADKModelBridge wraps an OpenAICompatibleClient to implement the ADK LLM interface
 type ADKModelBridge struct {
-	Client OpenAICompatibleClient
+	Client       OpenAICompatibleClient
+	DefaultModel string
 }
 
 func (m *ADKModelBridge) Name() string {
+	if m.DefaultModel != "" {
+		return m.DefaultModel
+	}
 	return "openrouter_bridge"
 }
 
@@ -32,25 +37,144 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 
 		// Map simple content to OpenAI messages
 		// This is a simplification; a robust bridge needs full multi-turn history mapping
-		for _, c := range req.Contents {
+		// Track pending tool calls to match responses
+		pendingCalls := make(map[string][]string)
+
+		for msgIdx, c := range req.Contents {
 			role := c.Role
-			if role == "model" {
+			switch role {
+			case "model":
 				role = "assistant"
+			case "function", "tool":
+				role = "tool"
 			}
+
+			// Handle multi-part content
 			var content string
-			if len(c.Parts) > 0 {
-				content = c.Parts[0].Text
+			var toolCalls []openai.ToolCall
+			var toolResponses []openai.ChatCompletionMessage
+
+			for partIdx, p := range c.Parts {
+				if p.Text != "" {
+					content += p.Text
+				}
+				if p.FunctionCall != nil {
+					// Generate deterministic ID
+					callID := fmt.Sprintf("call_%d_%d", msgIdx, partIdx)
+					pendingCalls[p.FunctionCall.Name] = append(pendingCalls[p.FunctionCall.Name], callID)
+
+					argsBytes, _ := json.Marshal(p.FunctionCall.Args)
+					toolCalls = append(toolCalls, openai.ToolCall{
+						Type: openai.ToolTypeFunction,
+						Function: openai.FunctionCall{
+							Name:      p.FunctionCall.Name,
+							Arguments: string(argsBytes),
+						},
+						ID: callID,
+					})
+				}
+				if p.FunctionResponse != nil {
+					// Find matching ID
+					var callID string
+					if ids, ok := pendingCalls[p.FunctionResponse.Name]; ok && len(ids) > 0 {
+						callID = ids[0]
+						pendingCalls[p.FunctionResponse.Name] = ids[1:]
+					} else {
+						// Fallback if history is incomplete or mismatched
+						callID = fmt.Sprintf("call_unknown_%s", p.FunctionResponse.Name)
+					}
+
+					respBytes, _ := json.Marshal(p.FunctionResponse.Response)
+					toolResponses = append(toolResponses, openai.ChatCompletionMessage{
+						Role:       "tool",
+						Content:    string(respBytes),
+						ToolCallID: callID,
+					})
+				}
 			}
-			messages = append(messages, openai.ChatCompletionMessage{
+
+			// If we have tool responses, they are separate messages in OpenAI
+			if len(toolResponses) > 0 {
+				messages = append(messages, toolResponses...)
+				continue
+			}
+
+			// Otherwise, standard message
+			// (Use "user" if original role was user/model/system)
+			// Note: If role was "tool" but treated as FunctionResponse loop above, we skip this
+			// But check if we have remaining content/toolcalls
+
+			// If role is tool/function but we handled it via toolResponses, we are done
+			if role == "tool" && len(toolResponses) > 0 {
+				continue
+			}
+			// What if role is "tool" but NO function response? (Shouldn't happen in valid ADK)
+
+			msg := openai.ChatCompletionMessage{
 				Role:    role,
 				Content: content,
-			})
+			}
+			if len(toolCalls) > 0 {
+				msg.ToolCalls = toolCalls
+			}
+			messages = append(messages, msg)
+		}
+
+		modelID := req.Model
+		if m.DefaultModel != "" {
+			modelID = m.DefaultModel
 		}
 
 		openAIReq := openai.ChatCompletionRequest{
-			Model:    req.Model,
+			Model:    modelID,
 			Messages: messages,
 			Stream:   stream,
+		}
+
+		fmt.Printf("DEBUG: GenContent Called. Model=%s, Tools=%d\n", modelID, len(req.Tools))
+		for i, t := range req.Tools {
+			fmt.Printf("DEBUG: Tool[%v] Type: %T\n", i, t)
+		}
+
+		// Map Tools
+		if len(req.Tools) > 0 {
+			var oTools []openai.Tool
+			for _, t := range req.Tools {
+				// Case 1: *genai.Tool (Standard ADK Tool)
+				if gt, ok := t.(*genai.Tool); ok {
+					for _, fd := range gt.FunctionDeclarations {
+						// fmt.Printf("DEBUG: Schema for %s: %+v\n", fd.Name, fd.Parameters)
+						oTools = append(oTools, openai.Tool{
+							Type: openai.ToolTypeFunction,
+							Function: &openai.FunctionDefinition{
+								Name:        fd.Name,
+								Description: fd.Description,
+								Parameters:  fd.Parameters,
+							},
+						})
+					}
+					continue
+				}
+
+				// Case 2: functiontool (ADK Wrapper)
+				// Uses Declaration() method to return *genai.FunctionDeclaration
+				if dt, ok := t.(interface {
+					Declaration() *genai.FunctionDeclaration
+				}); ok {
+					fd := dt.Declaration()
+					fmt.Printf("DEBUG: Schema for %s: %+v\n", fd.Name, fd.Parameters)
+					oTools = append(oTools, openai.Tool{
+						Type: openai.ToolTypeFunction,
+						Function: &openai.FunctionDefinition{
+							Name:        fd.Name,
+							Description: fd.Description,
+							Parameters:  fd.Parameters,
+						},
+					})
+					continue
+				}
+			}
+			openAIReq.Tools = oTools
 		}
 
 		if stream {
@@ -85,6 +209,10 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 							return
 						}
 					}
+					// Handle Tool Calls in Stream? ADK might expect them.
+					// Implementation of tool call streaming is complex.
+					// For now, let's assume text-only streaming response or basic tool call chunk handling.
+					// If resp.Choices[0].Delta.ToolCalls exists...
 				}
 			}
 		} else {
@@ -99,12 +227,34 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 				return
 			}
 
+			// Handle Tool Calls in Response
+			var parts []*genai.Part
+			if len(resp.Choices[0].Message.ToolCalls) > 0 {
+				for _, tc := range resp.Choices[0].Message.ToolCalls {
+					var args map[string]interface{}
+					fmt.Printf("DEBUG: Tool Arguments JSON: %s\n", tc.Function.Arguments)
+					if err := json.Unmarshal([]byte(tc.Function.Arguments), &args); err != nil {
+						// Fallback or log? For now empty map implies failure to parse
+						fmt.Printf("Error unmarshaling tool args: %v\n", err)
+						args = make(map[string]interface{})
+					}
+					parts = append(parts, &genai.Part{
+						FunctionCall: &genai.FunctionCall{
+							Name: tc.Function.Name,
+							Args: args,
+						},
+					})
+				}
+			} else {
+				parts = append(parts, &genai.Part{
+					Text: resp.Choices[0].Message.Content,
+				})
+			}
+
 			yield(&model.LLMResponse{
 				Content: &genai.Content{
-					Role: "assistant",
-					Parts: []*genai.Part{
-						{Text: resp.Choices[0].Message.Content},
-					},
+					Role:  "assistant",
+					Parts: parts,
 				},
 			}, nil)
 		}

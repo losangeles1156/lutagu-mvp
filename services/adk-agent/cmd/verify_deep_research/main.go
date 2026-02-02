@@ -4,19 +4,28 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/lutagu/adk-agent/internal/agent"
 	"github.com/lutagu/adk-agent/internal/config"
+	"github.com/lutagu/adk-agent/internal/engine/router"
 	"github.com/lutagu/adk-agent/internal/infrastructure/odpt"
+	"github.com/lutagu/adk-agent/internal/infrastructure/supabase"
 	"github.com/lutagu/adk-agent/internal/infrastructure/weather"
 	"github.com/lutagu/adk-agent/internal/layer"
 	"github.com/lutagu/adk-agent/internal/orchestrator"
 	"github.com/lutagu/adk-agent/pkg/openrouter"
 	"google.golang.org/adk/model"
+	"google.golang.org/adk/tool"
 )
 
 func main() {
+	os.Setenv("ADK_APP_NAME", "lutagu-verify") // Fix for session creation
+	if err := godotenv.Load("../../.env.local"); err != nil {
+		fmt.Println("Warning: Could not load .env.local")
+	}
 	cfg := config.Load()
 
 	// Initialize Clients
@@ -29,7 +38,10 @@ func main() {
 	}
 
 	// ADK Model Bridges
-	orModelBridge := &openrouter.ADKModelBridge{Client: orClient}
+	orModelBridge := &openrouter.ADKModelBridge{
+		Client:       orClient,
+		DefaultModel: cfg.Models.GeneralAgent,
+	}
 	var reasoningBridge model.LLM = orModelBridge
 
 	// Zeabur Client (Primary)
@@ -39,7 +51,10 @@ func main() {
 			BaseURL: cfg.Zeabur.BaseURL,
 		})
 		if err == nil {
-			reasoningBridge = &openrouter.ADKModelBridge{Client: zc}
+			reasoningBridge = &openrouter.ADKModelBridge{
+				Client:       zc,
+				DefaultModel: cfg.Models.GeneralAgent,
+			}
 			fmt.Println("✅ Using Zeabur AI Hub for Reasoning")
 		}
 	}
@@ -49,8 +64,28 @@ func main() {
 	l2Injector := layer.NewL2Injector(odptClient)
 	nodeResolver := layer.NewNodeResolver()
 
-	// 1. Initialize General Agent (ADK version)
-	generalAgent, err := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent)
+	// Initialize Supabase & Routing Engine (REAL DATA)
+	var tools []tool.Tool
+	if cfg.Supabase.URL != "" {
+		sClient, err := supabase.NewClient(cfg.Supabase.URL, cfg.Supabase.ServiceKey)
+		if err == nil {
+			fmt.Println("✅ Connected to Supabase (Real Deep Research Data)")
+			loader := router.NewLoader(sClient)
+			graph, err := loader.BuildGraph(context.Background())
+			if err == nil {
+				fmt.Printf("✅ Graph Built: %d nodes\n", len(graph.Nodes))
+				pathfinder := router.NewPathfinder(graph)
+				// Create the REAL tool
+				routeTool := agent.NewPlanRouteTool(pathfinder, weatherClient, graph)
+				tools = append(tools, routeTool)
+			} else {
+				fmt.Printf("❌ Graph Build Failed: %v\n", err)
+			}
+		}
+	}
+
+	// 1. Initialize General Agent (ADK version) with Tools
+	generalAgent, err := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent, tools)
 	if err != nil {
 		log.Fatalf("❌ Failed to create GeneralAgent: %v", err)
 	}

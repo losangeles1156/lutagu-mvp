@@ -281,7 +281,7 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
                                 const next = objs
                                     .filter(o => o.absMin >= normalizedCurrentMinutes)
                                     .sort((a, b) => a.absMin - b.absMin)
-                                    .slice(0, 8);
+                                    .slice(0, 10);
                                 const calendarId = String(table['odpt:calendar'] || '').split(':').pop() || '';
                                 const calendarLabel = calendarId.includes('Weekday') ? t('timetable.weekday') : t('timetable.weekend');
 

@@ -8,6 +8,9 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    outputFileTracingIncludes: {
+      '/api/odpt/timetable': ['./knowledge/**/*'],
+    },
   },
   // 🚀 Performance: Enable tree-shaking for Lucide icons (Modularize as fallback)
   modularizeImports: {

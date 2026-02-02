@@ -11,6 +11,7 @@ import (
 
 	"github.com/lutagu/adk-agent/internal/agent"
 	"github.com/lutagu/adk-agent/internal/config"
+	"github.com/lutagu/adk-agent/internal/engine/router"
 	"github.com/lutagu/adk-agent/internal/infrastructure/cache"
 	"github.com/lutagu/adk-agent/internal/infrastructure/embedding"
 	"github.com/lutagu/adk-agent/internal/infrastructure/odpt"
@@ -23,6 +24,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/skill/implementations"
 	"github.com/lutagu/adk-agent/internal/validation"
 	"github.com/lutagu/adk-agent/pkg/openrouter"
+	"google.golang.org/adk/tool"
 )
 
 var (
@@ -43,8 +45,6 @@ func main() {
 	healthChecker = monitoring.NewHealthChecker()
 
 	// 3. Initialize Clients
-
-	// OpenRouter
 	orClient, err := openrouter.NewClient(openrouter.Config{
 		APIKey:  cfg.OpenRouter.APIKey,
 		BaseURL: cfg.OpenRouter.BaseURL,
@@ -54,24 +54,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	// ADK Model Bridges
 	orModelBridge := &openrouter.ADKModelBridge{Client: orClient}
 
-	// Zeabur AI Hub
 	var zeaburModelBridge *openrouter.ADKModelBridge
 	zeaburClient, err := openrouter.NewZeaburClient(openrouter.ZeaburConfig{
 		APIKey:  cfg.Zeabur.APIKey,
 		BaseURL: cfg.Zeabur.BaseURL,
 	})
 	if err == nil {
-		zeaburModelBridge = &openrouter.ADKModelBridge{Client: zeaburClient}
+		zeaburModelBridge = &openrouter.ADKModelBridge{
+			Client:       zeaburClient,
+			DefaultModel: cfg.Models.GeneralAgent,
+		}
 		slog.Info("Zeabur AI Hub client initialized")
 	}
 
-	// ODPT
 	odptClient := odpt.NewClient(cfg.ODPT.APIKey, cfg.ODPT.APIUrl)
 
-	// Redis
 	var redisStore *cache.RedisStore
 	if cfg.Redis.URL != "" {
 		redisStore, err = cache.NewRedisStore(cfg.Redis.URL)
@@ -81,7 +80,6 @@ func main() {
 		}
 	}
 
-	// Supabase
 	var vectorStore *supabase.VectorStore
 	var supabaseClient *supabase.Client
 	if cfg.Supabase.URL != "" {
@@ -91,20 +89,20 @@ func main() {
 		}
 	}
 
-	// Voyage AI
 	var embeddingClient *embedding.VoyageClient
 	if cfg.Voyage.APIKey != "" {
 		embeddingClient, _ = embedding.NewVoyageClient(cfg.Voyage.APIKey, cfg.Voyage.Model)
 	}
 
-	// 4. Initialize Layers
+	weatherClient := weather.NewClient()
+
+	// 4. Initialize Core Layers
 	templateEngine := layer.NewTemplateEngine(layer.TemplateEngineConfig{
-		CacheTTL: cfg.Layer.TemplateCacheTTL,
+		CacheTTL: 5 * time.Minute,
 	})
 	nodeResolver := layer.NewNodeResolver()
 	l2Injector := layer.NewL2Injector(odptClient)
 	factChecker, _ := validation.NewFactChecker()
-	weatherClient := weather.NewClient()
 
 	// 5. Initialize Skill Registry
 	skillRegistry := skill.NewRegistry()
@@ -116,7 +114,22 @@ func main() {
 	skillRegistry.Register(implementations.NewSpatialReasonerSkill())
 	skillRegistry.Register(implementations.NewInfoLinksSkill())
 
-	// 6. Initialize ADK Agents
+	// 6. Initialize Routing Engine (Phase 3)
+	var pathfinder *router.Pathfinder
+	var graph *router.Graph
+	if supabaseClient != nil {
+		loader := router.NewLoader(supabaseClient)
+		g, err := loader.BuildGraph(context.Background())
+		if err == nil {
+			graph = g
+			pathfinder = router.NewPathfinder(graph)
+			slog.Info("Routing Engine (Graph) initialized")
+		} else {
+			slog.Warn("Routing Engine failed to initialize", "error", err)
+		}
+	}
+
+	// 7. Initialize ADK Agents
 	routeAgent, _ := agent.NewRouteAgent(orModelBridge, cfg.Models.RouteAgent, cfg.RoutingServiceURL)
 	statusAgent, _ := agent.NewStatusAgent(orModelBridge, cfg.Models.StatusAgent, odptClient)
 
@@ -125,13 +138,28 @@ func main() {
 		reasoningBridge = zeaburModelBridge
 	}
 
-	generalAgent, _ := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent)
-	fastAgent, _ := agent.NewGeneralAgent(orModelBridge, cfg.Models.FastAgent)
+	generalAgent, _ := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent, []tool.Tool{
+		&agent.SearchRouteTool{RoutingURL: cfg.RoutingServiceURL},
+		&agent.GetTrainStatusTool{FetchFunc: func() (string, error) {
+			statuses, err := odptClient.FetchTrainStatus()
+			if err != nil {
+				return "", err
+			}
+			bytes, err := json.Marshal(statuses)
+			if err != nil {
+				return "", err
+			}
+			return string(bytes), nil
+		}},
+		&agent.GetTimetableTool{Client: supabaseClient},
+		agent.NewPlanRouteTool(pathfinder, weatherClient, graph),
+	})
+	fastAgent, _ := agent.NewGeneralAgent(orModelBridge, cfg.Models.FastAgent, nil)
 	rootAgent, _ := agent.NewRootAgent(reasoningBridge, cfg.Models.GeneralAgent)
 
 	slog.Info("ADK Agents initialized")
 
-	// 7. Initialize Layered Engine
+	// 8. Initialize Layered Engine
 	engine = orchestrator.NewLayeredEngine(orchestrator.LayeredEngineConfig{
 		Config:          cfg,
 		TemplateEngine:  templateEngine,
@@ -148,9 +176,10 @@ func main() {
 		RootAgent:       rootAgent,
 		Model:           cfg.Models.GeneralAgent,
 		FactChecker:     factChecker,
+		Pathfinder:      pathfinder,
 	})
 
-	// 8. Setup HTTP Routes
+	// 9. Setup HTTP Routes
 	http.HandleFunc("/api/chat", handleChat)
 	http.HandleFunc("/agent/chat", handleChat)
 	http.HandleFunc("/health", healthChecker.HandleHealth)
@@ -158,7 +187,7 @@ func main() {
 	http.HandleFunc("/health/live", healthChecker.HandleHealthLive)
 	http.HandleFunc("/metrics", handleMetrics)
 
-	// 9. Start Server
+	// 10. Start Server
 	slog.Info("Server listening", "port", cfg.Port)
 	if err := http.ListenAndServe(":"+cfg.Port, nil); err != nil {
 		slog.Error("Server failed", "error", err)

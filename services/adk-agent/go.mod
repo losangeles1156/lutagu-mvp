@@ -3,6 +3,8 @@ module github.com/lutagu/adk-agent
 go 1.24.4
 
 require (
+	github.com/google/jsonschema-go v0.3.0
+	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/sashabaranov/go-openai v1.41.2
 	google.golang.org/adk v0.4.0
