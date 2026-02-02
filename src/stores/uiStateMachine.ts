@@ -261,14 +261,14 @@ export function initializeUIState(): void {
     // 這能防止多語系切換時（頁面重載）自動跳回登入頁
     return;
   } else {
-    // 檢查 URL，如果是在 /map 或其他內部路徑，不應重置為 login，而是進入預設收合狀態
-    if (typeof window !== 'undefined' && window.location.pathname.includes('/map')) {
+    const pathname = window.location.pathname;
+    const isLoginPath = pathname.includes('/login');
+    if (!isLoginPath) {
       const targetState = state.isMobile ? 'collapsed_mobile' : 'collapsed_desktop';
       useUIStateMachine.setState({ uiState: targetState });
       return;
     }
 
-    // 沒有對話且在登入頁，保持登入頁
     useUIStateMachine.setState({ uiState: 'login' });
   }
 }

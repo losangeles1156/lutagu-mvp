@@ -68,3 +68,22 @@ export type L4DemandState = {
     avoidCrowds: boolean;
     avoidRain: boolean;
 };
+
+export interface TPIResult {
+    score: number;
+    level: 'easy' | 'normal' | 'hard' | 'difficult' | 'extreme';
+    breakdown: { distance: number; vertical: number; complexity: number; crowd: number; userModifier: number };
+    recommendation: string;
+}
+
+export interface CDRResult {
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    maxDelayProb: number;
+    criticalPath: string[]; // IDs of risky lines
+    advice: string;
+}
+
+export interface EnrichedRouteOption extends RouteOption {
+    tpi: TPIResult;
+    cdr: CDRResult;
+}

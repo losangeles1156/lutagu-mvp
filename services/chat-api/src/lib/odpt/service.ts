@@ -358,3 +358,4 @@ export async function getTrainStatus(operator?: string) {
 
     return [...enhancedResults, ...injectedFromYahoo];
 }
+export const getTrains = getTrainStatus;

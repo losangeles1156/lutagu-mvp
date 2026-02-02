@@ -300,7 +300,7 @@ function NodeMarkerInner({ node, hubDetails, locale = 'zh-TW', zoom = 22, isSele
         iconCache.set(iconCacheKey, icon);
 
         return icon;
-    }, [iconCacheKey, displayTier, primaryOperator, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge, isAirport, isPrivate, operatorAbbr, primaryLineColor, zoom, crowdLevel, disruptionStatus, manifest, iconSize, markerSize, ringRadiusClass, shapeClass]);
+    }, [iconCacheKey, primaryOperator, isMajor, hasMembers, memberCount, baseColor, showLabel, label, isSelected, transferBadge, isAirport, operatorAbbr, primaryLineColor, crowdLevel, disruptionStatus, manifest, iconSize, markerSize, ringRadiusClass, shapeClass]);
 
     // NOW we can do early return - after all hooks
     if (!coords.lat || !coords.lon) return null;

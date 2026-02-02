@@ -235,16 +235,44 @@ export async function POST(req: NextRequest) {
             const errorText = await upstreamRes.text();
             console.error('[ADK Proxy] Upstream Error Status:', upstreamRes.status);
             console.error('[ADK Proxy] Upstream Error Body:', errorText);
-            return NextResponse.json({
-                error: `Upstream error: ${upstreamRes.status}`,
-                details: errorText,
-                debug_body: JSON.stringify(body).slice(0, 1000) // Echo partial body for debug
-            }, { status: upstreamRes.status });
+
+            const fallbackMessage = buildFallbackAnswer({ text: '', locale: body?.locale });
+            const errorStream = createPlainTextStream([
+                { text: `[THINKING] Upstream service error (${upstreamRes.status})\n`, delayMs: 50 },
+                { text: `⚠️ **Error**: ${errorText.slice(0, 100)}...\n\n`, delayMs: 50 },
+                { text: fallbackMessage, delayMs: 100 }
+            ]);
+
+            return new Response(errorStream, {
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            });
         }
 
         if (!upstreamRes.body) {
             console.error('[ADK Proxy] No response body from upstream');
             return NextResponse.json({ error: 'No response body' }, { status: 500 });
+        }
+
+        const upstreamContentType = upstreamRes.headers.get('Content-Type') || '';
+        if (!upstreamContentType.includes('text/event-stream')) {
+            if (upstreamContentType.includes('application/json')) {
+                const jsonText = await upstreamRes.text();
+                return new Response(jsonText, {
+                    headers: {
+                        'Content-Type': 'text/plain; charset=utf-8',
+                        'Cache-Control': 'no-cache',
+                        'Connection': 'keep-alive',
+                    },
+                });
+            }
+
+            return new Response(upstreamRes.body, {
+                headers: {
+                    'Content-Type': upstreamContentType || 'text/plain; charset=utf-8',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                },
+            });
         }
 
         // Transform ADK SSE to plain text stream for AI SDK

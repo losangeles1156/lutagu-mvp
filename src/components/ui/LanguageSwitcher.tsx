@@ -21,6 +21,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
     const searchParams = useSearchParams();
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const setLocale = useUserStore(s => s.setLocale);
 
     // Sync store locale when system locale changes
@@ -32,7 +33,11 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            const isOutsideContainer = containerRef.current && !containerRef.current.contains(target);
+            const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
+
+            if (isOutsideContainer && isOutsideDropdown) {
                 setIsOpen(false);
             }
         };
@@ -77,6 +82,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 
             {isOpen && typeof document !== 'undefined' && createPortal(
                 <div
+                    ref={dropdownRef}
                     className="fixed right-4 top-20 w-40 bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-2xl border border-black/[0.05] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[100000]"
                     style={{ top: containerRef.current ? containerRef.current.getBoundingClientRect().bottom + 8 : 80, right: containerRef.current ? window.innerWidth - containerRef.current.getBoundingClientRect().right : 16 }}
                 >

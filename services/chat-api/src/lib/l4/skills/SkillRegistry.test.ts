@@ -20,6 +20,7 @@ test('executeSkill returns invalid_input for empty input', async () => {
             parameters: { type: 'object', properties: {} }
         },
         canHandle: () => true,
+        calculateRelevance: async () => 0.5,
         execute: async () => ({ source: 'knowledge', type: 'text', content: 'ok', confidence: 1.0 })
     };
 
@@ -44,6 +45,7 @@ test('executeSkill returns invalid_params when required params missing', async (
             }
         },
         canHandle: () => true,
+        calculateRelevance: async () => 0.5,
         execute: async () => ({ source: 'knowledge', type: 'text', content: 'ok', confidence: 1.0 })
     };
 
@@ -66,6 +68,7 @@ test('executeSkill caches results when enabled', async () => {
             parameters: { type: 'object', properties: {} }
         },
         canHandle: () => true,
+        calculateRelevance: async () => 0.5,
         execute: async () => {
             calls += 1;
             const out: SkillResult = { source: 'knowledge', type: 'text', content: `ok-${calls}`, confidence: 1.0 };
@@ -99,6 +102,7 @@ test('executeSkill returns timeout when execution exceeds policy', async () => {
             parameters: { type: 'object', properties: {} }
         },
         canHandle: () => true,
+        calculateRelevance: async () => 0.5,
         execute: async () => {
             await sleep(30);
             return { source: 'knowledge', type: 'text', content: 'late', confidence: 1.0 };
@@ -117,6 +121,7 @@ test('SkillRegistry.findByToolName matches by definition.name', () => {
         priority: 1,
         definition: { name: 'tool_a', description: 'a', parameters: { type: 'object', properties: {} } },
         canHandle: () => false,
+        calculateRelevance: async () => 0,
         execute: async () => null
     };
     reg.register(s);

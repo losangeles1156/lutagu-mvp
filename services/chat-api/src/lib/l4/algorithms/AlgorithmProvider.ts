@@ -1,5 +1,7 @@
 
-import { RouteOption } from '../types/RoutingTypes';
+import { RouteOption, L4DemandState } from '../types/RoutingTypes';
+import { findRankedRoutes, findSimpleRoutes, EnrichedRouteOption } from '../assistantEngine';
+import { SupportedLocale } from '../assistantEngine';
 import { rustL4Client } from '../../services/RustL4Client';
 import { rustL2Client } from '../../services/RustL2Client';
 import { getDefaultTopology } from '../search/topologyLoader';
@@ -87,6 +89,27 @@ export class AlgorithmProvider {
         // Force L2-aware optimization
         const routes = await this.findRoutes({ originId, destinationId: destId, locale: 'zh-TW', filterSuspended: false });
         return routes.slice(0, 1);
+    }
+
+    async findRankedRoutes(params: {
+        originStationId: string | string[];
+        destinationStationId: string | string[];
+        railways: any[];
+        maxHops?: number;
+        locale?: SupportedLocale;
+        userDemand?: L4DemandState;
+    }): Promise<EnrichedRouteOption[]> {
+        return findRankedRoutes(params);
+    }
+
+    async findSimpleRoutes(params: {
+        originStationId: string | string[];
+        destinationStationId: string | string[];
+        railways: any[];
+        maxHops?: number;
+        locale?: SupportedLocale;
+    }): Promise<RouteOption[]> {
+        return findSimpleRoutes(params);
     }
 }
 

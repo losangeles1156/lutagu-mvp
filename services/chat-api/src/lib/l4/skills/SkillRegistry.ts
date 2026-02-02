@@ -20,7 +20,7 @@ export interface DeepResearchSkill {
     definition: ToolDefinition; // Agentic Schema
     policy?: SkillPolicy;
     canHandle(input: string, context: RequestContext): boolean; // Legacy: Keyword match
-    calculateRelevance(input: string, context: RequestContext): number; // Tag-Based Score (0.0 - 1.0)
+    calculateRelevance(input: string, context: RequestContext): Promise<number>; // Tag-Based Score (0.0 - 1.0)
     execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null>;
 
     // GEM-Logic: Dynamic Capability Definition

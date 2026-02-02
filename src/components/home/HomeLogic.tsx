@@ -27,6 +27,7 @@ export function HomeLogic({
     const [didHandleParams, setDidHandleParams] = useState(false);
     const [hadDeepLink, setHadDeepLink] = useState(false);
     const instanceId = useMemo(() => Math.random().toString(36).substr(2, 5), []);
+    const searchParamsString = useMemo(() => searchParams.toString(), [searchParams]);
 
     useEffect(() => {
         console.log(`[HomeLogic] Instance MOUNT: ${instanceId}`);
@@ -95,7 +96,7 @@ export function HomeLogic({
             // Guard against repeated replaced if params haven't changed in a way that matters
             router.replace(window.location.pathname);
         }
-    }, [router, searchParams.toString(), setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
+    }, [router, searchParams, searchParamsString, setActiveTab, setBottomSheetOpen, setCurrentNode, setChatOpen, setPendingChat, setNodeActiveTab, setDemoMode, transitionTo]);
 
     const isUserStoreHydrated = useUserStoreHydrated();
 

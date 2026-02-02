@@ -5,6 +5,7 @@ export interface FeedbackItem {
     timestamp: number;
     userFeedback?: 'positive' | 'negative';
     missedIntent?: string;
+    contextNodeId?: string;
 }
 
 class FeedbackStore {

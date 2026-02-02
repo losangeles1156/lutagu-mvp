@@ -403,7 +403,7 @@ export class HybridEngine {
             const destOnlyIntent = extractDestinationOnlyIntent(text);
             if (destOnlyIntent && !routeEndpoints && !isFareQuery) {
                 logs.push('[Route] Destination-only intent detected, prompting for origin');
-                const destName = destOnlyIntent.destinationText || destOnlyIntent.destinationIds[0]?.split('.').pop() || '目的地';
+                const destName = destOnlyIntent.destinationText || destOnlyIntent.destinationIds?.[0]?.split('.').pop() || '目的地';
 
                 const promptMessages: Record<string, string> = {
                     'zh-TW': `想去 ${destName}！請告訴我您目前在哪一站，或在地圖上選擇出發站，我就能為您規劃最佳路線。\n\n💡 提示：您也可以開啟定位，讓我自動偵測最近的車站。`,
@@ -745,8 +745,8 @@ export class HybridEngine {
         if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
             const endpoints = extractRouteEndpointsFromText(text);
             if (endpoints) {
-                const originLabel = endpoints.originText || endpoints.originIds[0]?.split('.').pop() || endpoints.originIds[0];
-                const destLabel = endpoints.destinationText || endpoints.destinationIds[0]?.split('.').pop() || endpoints.destinationIds[0];
+                const originLabel = endpoints.originText || endpoints.originIds?.[0]?.split('.').pop() || endpoints.originIds?.[0] || 'Origin';
+                const destLabel = endpoints.destinationText || endpoints.destinationIds?.[0]?.split('.').pop() || endpoints.destinationIds?.[0] || 'Destination';
 
                 for (const originId of endpoints.originIds) {
                     for (const destinationId of endpoints.destinationIds) {

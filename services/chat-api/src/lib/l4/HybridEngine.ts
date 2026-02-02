@@ -10,7 +10,7 @@
 
 import { templateEngine } from './intent/TemplateEngine';
 import { algorithmProvider } from './algorithms/AlgorithmProvider';
-import { extractRouteEndpointsFromText, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion } from './assistantEngine';
+import { extractRouteEndpointsFromText, buildLastTrainSuggestion, type SupportedLocale, classifyQuestion, getDefaultTopology } from './assistantEngine';
 import { NodeContext, NodeScope } from './types/NodeContext';
 import { TagLoader } from './TagLoader';
 import { DynamicContextService } from './DynamicContextService';
@@ -129,7 +129,7 @@ export class HybridEngine {
         let scope: NodeScope = 'global';
 
         // Logic: Origin takes precedence as Primary Node (where the user is/acting from)
-        if (endpoints && endpoints.originIds.length > 0) {
+        if (endpoints && endpoints.originIds && endpoints.originIds.length > 0) {
             primaryNodeId = endpoints.originIds[0];
             secondaryNodeId = endpoints.destinationIds?.[0] || classification.toStationId || null;
             scope = 'station';
@@ -266,10 +266,14 @@ export class HybridEngine {
             if (commercialActions.length > 0) {
                 logs.push(`[Commerce] Injected ${commercialActions.length} affiliate cards (Intent: ${text.slice(0, 20)}...)`);
                 // Log Impression
-                SignalCollector.collectCommerceSignal({
-                    type: 'IMPRESSION',
-                    actions: commercialActions.map(a => a.id),
-                    stationId: context?.currentStation
+                SignalCollector.collectSignal({
+                    stationId: context?.currentStation || '',
+                    policyCategory: 'commerce',
+                    unmetNeed: false,
+                    metadata: {
+                        type: 'IMPRESSION',
+                        actions: commercialActions.map(a => a.id)
+                    }
                 });
             }
 
@@ -287,10 +291,10 @@ export class HybridEngine {
                 response: { ...resWithCommerce, reasoningLog: undefined },
                 logs: mergedLogs
             });
-            metricsCollector.recordRequest(fused.source, Date.now() - startTime);
+            metricsCollector.recordRequest(fused.source as any, Date.now() - startTime);
             feedbackStore.logRequest({
                 text,
-                source: fused.source,
+                source: fused.source as any,
                 timestamp: startTime,
                 contextNodeId: context?.currentStation
             });
@@ -417,7 +421,7 @@ export class HybridEngine {
                         const skill = skillRegistry.findByToolName(agentDecision.toolName);
                         if (skill) {
                             const skillContext = context || {};
-                            const relevance = skill.calculateRelevance ? skill.calculateRelevance(text, skillContext as any) : 0;
+                            const relevance = skill.calculateRelevance ? await skill.calculateRelevance(text, skillContext as any) : 0;
                             const keywordMatch = skill.canHandle(text.toLowerCase(), skillContext as any);
                             if (!keywordMatch && relevance < 0.45) {
                                 logs.push(`[Deep Research] Agent Decision ignored (relevance=${relevance.toFixed(2)})`);
@@ -703,80 +707,95 @@ export class HybridEngine {
         if (lowerText.match(/(?:到|to|まで|route|怎么去|怎麼去|去|前往|步行|走路)/)) {
             const endpoints = extractRouteEndpointsFromText(text);
             if (endpoints) {
-                const originLabel = endpoints.originText || endpoints.originIds[0]?.split('.').pop() || endpoints.originIds[0];
-                const destLabel = endpoints.destinationText || endpoints.destinationIds[0]?.split('.').pop() || endpoints.destinationIds[0];
+                const originLabel = endpoints.originText || endpoints.originIds?.[0]?.split('.').pop() || endpoints.originIds?.[0] || 'Origin';
+                const destLabel = endpoints.destinationText || endpoints.destinationIds?.[0]?.split('.').pop() || endpoints.destinationIds?.[0] || 'Destination';
 
-                for (const originId of endpoints.originIds) {
-                    for (const destinationId of endpoints.destinationIds) {
-                        try {
-                            // [Phase 3/4] Context Construction for Route Synthesis
-                            const isHoliday = getJSTTime().isHoliday;
+                if (endpoints.originIds && endpoints.destinationIds) {
+                    for (const originId of endpoints.originIds) {
+                        for (const destinationId of endpoints.destinationIds) {
+                            try {
+                                // [Phase 3/4] Context Construction for Route Synthesis
+                                const isHoliday = getJSTTime().isHoliday;
 
-                            // Simple Intent Extraction from Text (similar to tryBuildL2DisruptionResponse)
-                            const wantsLuggage = /行李|大行李|luggage|suitcase|荷物|スーツケース/i.test(text);
-                            const wantsStroller = /嬰兒車|baby stroller|stroller|ベビーカー/i.test(text);
+                                // Simple Intent Extraction from Text (similar to tryBuildL2DisruptionResponse)
+                                const wantsLuggage = /行李|大行李|luggage|suitcase|荷物|スーツケース/i.test(text);
+                                const wantsStroller = /嬰兒車|baby stroller|stroller|ベビーカー/i.test(text);
 
-                            const userProfile: L1NodeProfile = {
-                                nodeId: 'user-request-context',
-                                core: { identity: [] },
-                                intent: {
-                                    capabilities: [
-                                        ...(wantsLuggage ? ['LUGGAGE'] : []),
-                                        ...(wantsStroller ? ['STROLLER'] : [])
-                                    ]
-                                },
-                                vibe: { visuals: [] },
-                                weights: { transfer_ease: 1.0, tourism_value: 0.5, crowd_level: 1.0 }
-                            };
-
-                            const routes = await algorithmProvider.findRoutes({ originId, destinationId, locale, l2Status, isHoliday, userProfile });
-                            if (routes && routes.length > 0) {
-                                let content = locale.startsWith('zh') ? `為您找到從 ${originLabel} 到 ${destLabel} 的路線建議。` : `Found routes from ${originLabel} to ${destLabel}.`;
-
-                                // Prepend disruption warning if L2 issues exist, even if we found a route
-                                if (l2Status && this.hasL2Issues(l2Status)) {
-                                    const summary = this.summarizeL2Status(l2Status);
-                                    const warning = locale.startsWith('ja')
-                                        ? `⚠️ 現在、運行に乱れがあります（${summary}）。回避ルートを提案します。\n\n`
-                                        : locale.startsWith('en')
-                                            ? `⚠️ Live disruption detected (${summary}). Here are alternative routes.\n\n`
-                                            : `⚠️ 目前有運行異常（${summary}）。已為您規劃避開受影響路段的替代方案。\n\n`;
-                                    content = warning + content;
-                                }
-
-
-                                // WVT: Check if late night and add末班車 suggestion
-                                const lastTrainSuggestion = buildLastTrainSuggestion({
-                                    stationId: destinationId,
-                                    currentTime: new Date(),
-                                    locale
-                                });
-
-                                return {
-                                    source: 'algorithm',
-                                    type: 'route',
-                                    content,
-                                    data: {
-                                        routes,
-                                        originId,
-                                        destinationId,
-                                        l2_status: l2Status,
-                                        lastTrainSuggestion // Will be null if not late night
+                                const userProfile: L1NodeProfile = {
+                                    nodeId: 'user-request-context',
+                                    core: { identity: [] },
+                                    intent: {
+                                        capabilities: [
+                                            ...(wantsLuggage ? ['LUGGAGE'] : []),
+                                            ...(wantsStroller ? ['STROLLER'] : [])
+                                        ]
                                     },
-                                    confidence: 0.95,
-                                    reasoning: 'Calculated route via algorithm (with L2 awareness).'
+                                    vibe: { visuals: [] },
+                                    weights: { transfer_ease: 1.0, tourism_value: 0.5, crowd_level: 1.0 }
                                 };
-                            }
 
-                            if (l2Status && this.hasL2Issues(l2Status)) {
-                                // Fallback: Use centralized L2 Disruption Builder
-                                const fallbackResponse = await this.tryBuildL2DisruptionResponse(text, locale, context, true);
-                                if (fallbackResponse) {
-                                    // Override type to action to ensure it renders correctly
-                                    return { ...fallbackResponse, source: 'algorithm', type: 'action' };
+                                const userDemand: any = {
+                                    largeLuggage: userProfile.intent?.capabilities?.includes('LUGGAGE'),
+                                    stroller: userProfile.intent?.capabilities?.includes('STROLLER'),
+                                    wheelchair: false, // Default or derived from context
+                                    senior: false
+                                };
+
+                                const routes = await algorithmProvider.findRankedRoutes({
+                                    originStationId: originId,
+                                    destinationStationId: destinationId,
+                                    railways: getDefaultTopology(),
+                                    locale: locale as any,
+                                    userDemand
+                                });
+                                if (routes && routes.length > 0) {
+                                    let content = locale.startsWith('zh') ? `為您找到從 ${originLabel} 到 ${destLabel} 的路線建議。` : `Found routes from ${originLabel} to ${destLabel}.`;
+
+                                    // Prepend disruption warning if L2 issues exist, even if we found a route
+                                    if (l2Status && this.hasL2Issues(l2Status)) {
+                                        const summary = this.summarizeL2Status(l2Status);
+                                        const warning = locale.startsWith('ja')
+                                            ? `⚠️ 現在、運行に乱れがあります（${summary}）。回避ルートを提案します。\n\n`
+                                            : locale.startsWith('en')
+                                                ? `⚠️ Live disruption detected (${summary}). Here are alternative routes.\n\n`
+                                                : `⚠️ 目前有運行異常（${summary}）。已為您規劃避開受影響路段的替代方案。\n\n`;
+                                        content = warning + content;
+                                    }
+
+
+                                    // WVT: Check if late night and add末班車 suggestion
+                                    const lastTrainSuggestion = buildLastTrainSuggestion({
+                                        stationId: destinationId,
+                                        currentTime: new Date(),
+                                        locale
+                                    });
+
+                                    return {
+                                        source: 'algorithm',
+                                        type: 'route',
+                                        content,
+                                        data: {
+                                            routes,
+                                            originId,
+                                            destinationId,
+                                            l2_status: l2Status,
+                                            lastTrainSuggestion // Will be null if not late night
+                                        },
+                                        confidence: 0.95,
+                                        reasoning: 'Calculated route via algorithm (with L2 awareness).'
+                                    };
                                 }
-                            }
-                        } catch (e) { }
+
+                                if (l2Status && this.hasL2Issues(l2Status)) {
+                                    // Fallback: Use centralized L2 Disruption Builder
+                                    const fallbackResponse = await this.tryBuildL2DisruptionResponse(text, locale, context, true);
+                                    if (fallbackResponse) {
+                                        // Override type to action to ensure it renders correctly
+                                        return { ...fallbackResponse, source: 'algorithm', type: 'action' };
+                                    }
+                                }
+                            } catch (e) { }
+                        }
                     }
                 }
             }
@@ -1267,8 +1286,8 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
 
         const hasRoutePair = Boolean(destLabel);
 
-        // Helper to normalize DataMux (lng) to Internal (lon)
-        const normalizeCoord = (c: { lat: number, lng: number } | null) => c ? { lat: c.lat, lon: c.lng } : null;
+        // Helper to normalize DataMux (lon) to Internal (lng)
+        const normalizeCoord = (c: { lat: number, lon: number } | null) => c ? { lat: c.lat, lon: c.lon } : null;
 
         // Use DataMux to fetch coordinates robustly (Database -> Cache -> Fallback)
         let originCoord = this.getStationCoord(originIdForCoord);

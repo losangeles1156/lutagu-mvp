@@ -53,6 +53,26 @@ abstract class BaseSkill implements DeepResearchSkill {
     }
 
     abstract execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null>;
+
+    async calculateRelevance(input: string, context: RequestContext): Promise<number> {
+        if (!input) return 0;
+
+        let score = 0;
+        const lowerInput = input.toLowerCase();
+
+        // 1. Keyword Match
+        for (const keyword of this.keywords) {
+            if (lowerInput.includes(keyword.toLowerCase())) {
+                score += 0.3;
+            }
+        }
+
+        // 2. Priority Boost
+        // Normalize priority (0-100) to a small boost (0-0.2)
+        score += (this.priority / 100) * 0.2;
+
+        return Math.min(score, 1.0);
+    }
 }
 
 // ------------------------------------------------------------------

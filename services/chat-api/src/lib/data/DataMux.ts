@@ -3,6 +3,7 @@ import { StationUIProfile, L4Knowledge } from '@/lib/types/stationStandard';
 import { generateLLMResponse } from '@/lib/ai/llmClient';
 import { searchL4Knowledge } from '@/lib/l4/searchService';
 import { supabaseAdmin } from '@/lib/supabase';
+import { STATION_MAP } from '@/lib/api/nodes';
 
 // L2 Status Fetcher (Reuse existing logic or call API)
 async function fetchL2Status(stationId: string): Promise<any> {
@@ -202,6 +203,14 @@ export class DataMux {
                 { name: 'Sagawa Hands-Free Center', location: 'South Exit via 2F', hours: '08:00-20:00', price: '800 JPY' }
             ]
         };
+    }
+
+    /**
+     * Helper: Get Coordinates for a station ID
+     */
+    static getCoordinates(stationId: string): { lat: number; lon: number } | null {
+        if (!stationId) return null;
+        return STATION_MAP[stationId] || null;
     }
 
     /**

@@ -21,7 +21,7 @@ export interface AgentMessage {
     agentPlan?: AgentPlan | null;
 }
 
-const agentEndpoint = AGENT_CONFIG.useAgentV2 ? AGENT_CONFIG.endpoints.v2 : AGENT_CONFIG.endpoints.adk;
+const agentEndpoint = AGENT_CONFIG.currentEndpoint;
 
 export const useAgentChat = (options: {
     stationId?: string;
@@ -85,7 +85,7 @@ export const useAgentChat = (options: {
     });
 
     // Destructure specifically what we know exists or provide defaults
-    const aiMessages = chatHelpers.messages || [];
+    const aiMessages = useMemo(() => chatHelpers.messages || [], [chatHelpers.messages]);
     const setMessages = chatHelpers.setMessages;
     const status = chatHelpers.status;
     const appendMessage = (chatHelpers as any).append as ((message: { role: string; content: string }, options?: any) => Promise<void>) | undefined;

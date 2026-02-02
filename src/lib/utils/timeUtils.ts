@@ -42,7 +42,7 @@ export function getJSTTime() {
 
     // ODPT Calendar mapping logic (Centralized)
     const calendarSelector = isHoliday
-        ? ['SaturdayHoliday', 'Holiday', 'Saturday']
+        ? ['SaturdayHoliday', 'Holiday', 'Sunday', 'Saturday']
         : ['Weekday'];
 
     return {

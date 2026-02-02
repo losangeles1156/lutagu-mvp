@@ -47,6 +47,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
   } = useUIStateMachine();
 
   const { setIsMobile } = useUIStore();
+  const isDemoMode = useUIStore(s => s.isDemoMode);
   const tCommon = useTranslations('common');
   const tChat = useTranslations('chat');
 
@@ -84,7 +85,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
   // 處理對話關閉
   const handleChatClose = useCallback(() => {
     // 如果是從全螢幕（演示模式）關閉，清除訊息與會話以進入「全新對話」狀態
-    if (uiState === 'fullscreen') {
+    if (uiState === 'fullscreen' && isDemoMode) {
       useUIStateMachine.setState({ messages: [] });
       useUIStore.getState().resetAgentConversation();
       useUIStore.setState({ messages: [] }); // Clear messages in uiStore too
@@ -92,7 +93,7 @@ export function MainLayout({ mapPanel, chatPanel, bottomBar, header }: MainLayou
       backupMessages();
     }
     transitionTo(isMobile ? 'collapsed_mobile' : 'collapsed_desktop');
-  }, [isMobile, transitionTo, backupMessages, uiState]);
+  }, [isMobile, transitionTo, backupMessages, uiState, isDemoMode]);
 
   // 處理探索模式
   const handleExploreMode = useCallback(() => {

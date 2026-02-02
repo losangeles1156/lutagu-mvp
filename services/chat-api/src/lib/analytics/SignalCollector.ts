@@ -25,7 +25,7 @@ function getSupabase(): SupabaseClient | null {
     }
 }
 
-export type PolicyCategory = 'traffic_vacuum' | 'overtourism' | 'hands_free' | 'barrier_free' | 'expert_rule';
+export type PolicyCategory = 'traffic_vacuum' | 'overtourism' | 'hands_free' | 'barrier_free' | 'expert_rule' | 'commerce';
 
 export interface DemandSignal {
     stationId: string;

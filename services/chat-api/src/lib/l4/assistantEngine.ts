@@ -1689,3 +1689,34 @@ export function buildRouteSuggestion(params: {
         })
     };
 }
+
+export function buildLastTrainSuggestion(params: { stationId: string; currentTime: Date; locale: string }): string {
+    return "注意終電時間 (Check Last Train)";
+}
+
+export function extractRouteEndpointsFromText(text: string): {
+    originText?: string;
+    destinationText?: string;
+    originIds?: string[];
+    destinationIds?: string[];
+} {
+    const fromMatch = text.match(/(?:from|從|から)\s*([^to到\s]+)/i);
+    const toMatch = text.match(/(?:to|到|へ|まで)\s*([^from從\s]+)/i);
+
+    const originText = fromMatch ? fromMatch[1] : undefined;
+    const destinationText = toMatch ? toMatch[1] : undefined;
+
+    const originIds = originText ? findStationIdsByName(originText) : undefined;
+    const destinationIds = destinationText ? findStationIdsByName(destinationText) : undefined;
+
+    return {
+        originText,
+        destinationText,
+        originIds: originIds && originIds.length > 0 ? originIds : undefined,
+        destinationIds: destinationIds && destinationIds.length > 0 ? destinationIds : undefined
+    };
+}
+
+export function getDefaultTopology(): RailwayTopology[] {
+    return CORE_TOPOLOGY as any[];
+}

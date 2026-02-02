@@ -44,8 +44,9 @@ const minimax = createOpenAI({
 export const geminiFlashLite = zeabur('gemini-2.5-flash-lite');
 export const mistralSmall = geminiFlashLite; // Legacy alias
 
-// 2. Brain / Logic: Gemini 1.5 Flash (Primary), MiniMax M2.1 (Backup)
-export const geminiBrain = zeabur('gemini-1.5-flash');
+// 2. Brain / Logic: DeepSeek V3.2 (Primary), MiniMax M2.1 (Backup)
+export const deepseekBrain = deepseek('deepseek-v3.2');
+export const geminiBrain = deepseekBrain; // Alias for compatibility during migration
 export const minimaxBrain = minimax('MiniMax-M2.1');
 
 // 3. Synthesizer / Chat: DeepSeek V3
@@ -57,16 +58,16 @@ export const geminiFlashFull = zeabur('gemini-2.5-flash'); // Fallback
 // =============================================================================
 export const AGENT_ROLES = {
     gatekeeper: geminiFlashLite,      // High Speed (Router)
-    brain: geminiBrain,               // High IQ (Logic)
+    brain: deepseekBrain,             // High IQ (Logic) - Switched to DeepSeek V3.2
     synthesizer: deepseekChat,        // Creative/Long Output (Chat)
     fallback: minimaxBrain            // Reliable Backup
 } as const;
 
 // Legacy export for backward compatibility
 export const AGENT_MODELS = {
-    primary: geminiBrain,
+    primary: deepseekBrain,
     backup: minimaxBrain,
-    reasoner: geminiBrain
+    reasoner: deepseekBrain
 } as const;
 
 // =============================================================================

@@ -48,7 +48,7 @@ export function useAlerts(favoriteNodeIds: string[]) {
         };
 
         fetchNodeMetadata();
-    }, [JSON.stringify(favoriteNodeIds)]);
+    }, [favoriteNodeIds]);
 
     // Derived unique railways to watch
     const targetRailways = useMemo(() => {
@@ -126,7 +126,7 @@ export function useAlerts(favoriteNodeIds: string[]) {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [JSON.stringify(targetRailways)]);
+    }, [targetRailways]);
 
     return { alerts, nodesMetadata, loading };
 }

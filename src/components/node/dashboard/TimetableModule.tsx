@@ -253,10 +253,14 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
                         </div>
                         <div className="p-5">
                             {tables.map(table => {
-                                const objs = (table['odpt:stationTimetableObject'] || []).map(o => ({
-                                    time: String(o['odpt:departureTime'] || ''),
-                                    dest: getLocalizedStationName(String(o['odpt:destinationStation'] || ''), locale)
-                                }));
+                                const objs = (table['odpt:stationTimetableObject'] || []).map(o => {
+                                    const destRaw = o['odpt:destinationStation'];
+                                    const destId = Array.isArray(destRaw) ? destRaw[0] : destRaw;
+                                    return {
+                                        time: String(o['odpt:departureTime'] || ''),
+                                        dest: getLocalizedStationName(String(destId || ''), locale)
+                                    };
+                                });
                                 const next = objs.filter(o => o.time >= nowHHMM).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 8);
                                 const calendarId = String(table['odpt:calendar'] || '').split(':').pop() || '';
                                 const calendarLabel = calendarId.includes('Weekday') ? t('timetable.weekday') : t('timetable.weekend');
