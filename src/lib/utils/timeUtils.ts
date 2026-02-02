@@ -41,8 +41,17 @@ export function getJSTTime() {
     const isHoliday = !!holidayName || (jstDate.getDay() === 0 || jstDate.getDay() === 6);
 
     // ODPT Calendar mapping logic (Centralized)
+    // Include all possible ODPT calendar variants for better matching
+    const dayOfWeek = jstDate.getDay();
+    const isSaturday = dayOfWeek === 6;
+    const isSunday = dayOfWeek === 0;
+
     const calendarSelector = isHoliday
-        ? ['SaturdayHoliday', 'Holiday', 'Saturday']
+        ? isSunday
+            ? ['SaturdayHoliday', 'Holiday', 'Sunday', 'Saturday'] // Sunday priority
+            : isSaturday
+                ? ['SaturdayHoliday', 'Holiday', 'Saturday', 'Sunday'] // Saturday priority
+                : ['Holiday', 'SaturdayHoliday', 'Saturday', 'Sunday'] // Public holiday
         : ['Weekday'];
 
     return {

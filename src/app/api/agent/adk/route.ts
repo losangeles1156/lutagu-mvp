@@ -235,16 +235,28 @@ export async function POST(req: NextRequest) {
             const errorText = await upstreamRes.text();
             console.error('[ADK Proxy] Upstream Error Status:', upstreamRes.status);
             console.error('[ADK Proxy] Upstream Error Body:', errorText);
-            return NextResponse.json({
-                error: `Upstream error: ${upstreamRes.status}`,
-                details: errorText,
-                debug_body: JSON.stringify(body).slice(0, 1000) // Echo partial body for debug
-            }, { status: upstreamRes.status });
+            // Return text stream format for AI SDK compatibility (not JSON)
+            const errorMessage = buildFallbackAnswer({ text: '', locale: body?.locale });
+            const errorStream = createPlainTextStream([
+                { text: `[THINKING] Upstream service error (${upstreamRes.status})\n`, delayMs: 50 },
+                { text: errorMessage, delayMs: 100 }
+            ]);
+            return new Response(errorStream, {
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            });
         }
 
         if (!upstreamRes.body) {
             console.error('[ADK Proxy] No response body from upstream');
-            return NextResponse.json({ error: 'No response body' }, { status: 500 });
+            // Return text stream format for AI SDK compatibility (not JSON)
+            const noBodyMessage = buildFallbackAnswer({ text: '', locale: body?.locale });
+            const noBodyStream = createPlainTextStream([
+                { text: '[THINKING] No response from service\n', delayMs: 50 },
+                { text: noBodyMessage, delayMs: 100 }
+            ]);
+            return new Response(noBodyStream, {
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            });
         }
 
         // Transform ADK SSE to plain text stream for AI SDK
@@ -297,6 +309,13 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error('[ADK Proxy] Error:', error);
-        return NextResponse.json({ error: 'Internal Proxy Error' }, { status: 500 });
+        // Return text stream format for AI SDK compatibility (not JSON)
+        const errorStream = createPlainTextStream([
+            { text: '[THINKING] Internal proxy error\n', delayMs: 50 },
+            { text: "⚠️ **System Notice**: An internal error occurred. Please try again.", delayMs: 100 }
+        ]);
+        return new Response(errorStream, {
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
     }
 }
