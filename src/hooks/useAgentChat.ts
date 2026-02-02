@@ -206,7 +206,7 @@ export const useAgentChat = (options: {
             console.error('[useAgentChat] Send error:', error);
             setIsOffline(true);
         }
-    }, [appendMessage, sendText, isLoading]);
+    }, [appendMessage, sendText, isLoading, normalizedLocale]);
 
     return {
         messages,

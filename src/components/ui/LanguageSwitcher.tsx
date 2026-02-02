@@ -104,7 +104,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                                     pathname: pathname,
                                     query: Object.fromEntries(searchParams.entries())
                                 }}
-                                locale={l}
+                                locale={l as "zh-TW" | "zh" | "en" | "ja"}
                                 onClick={() => setIsOpen(false)}
                                 className={`w-full px-4 py-3 text-xs font-black text-left rounded-xl transition-all duration-300 flex items-center justify-between ${locale === l
                                     ? 'text-indigo-600 bg-indigo-50 shadow-inner'
