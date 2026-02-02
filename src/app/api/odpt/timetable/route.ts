@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
 
     if (!station) return NextResponse.json({ error: 'Missing station ID' }, { status: 400 });
 
-    // Normalize station ID to use colon (standard for ODPT API params)
-    const apiStationId = station.replace(/^odpt[.:]Station:/, 'odpt:Station:');
+    // Normalize station ID to use dot format (standard for ODPT API queries)
+    const apiStationId = station.replace(/^odpt[.:]Station:/, 'odpt.Station:');
 
     const { currentMinutes, calendarSelector } = getJSTContext();
 

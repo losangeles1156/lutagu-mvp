@@ -120,14 +120,52 @@ export const useAgentChat = (options: {
         };
     }).filter((m: AgentMessage) => m.role !== 'system');
 
-    useEffect(() => {
+    const lastAssistantMessageStr = useMemo(() => {
         const lastMsg = messages[messages.length - 1];
-        if (lastMsg?.role === 'assistant') {
-            const match = lastMsg.content.match(/\[THINKING\]([\s\S]*?)(?:\[\/THINKING\]|$)/i);
-            if (match) setThinkingStep(match[1].trim());
-            else if (!isLoading) setThinkingStep(null);
+        if (lastMsg?.role === 'assistant') return lastMsg.content;
+        return null;
+    }, [messages]);
+
+    useEffect(() => {
+        if (!lastAssistantMessageStr) {
+            if (!isLoading) setThinkingStep(null);
+            return;
         }
-    }, [messages, isLoading]);
+
+        // Find ALL thinking blocks to get the latest one
+        // Use matchAll with global flag to capture all occurrences
+        const matches = Array.from(lastAssistantMessageStr.matchAll(/\[THINKING\]([\s\S]*?)(?:\[\/THINKING\]|$)/gi));
+
+        if (matches.length > 0) {
+            const lastMatch = matches[matches.length - 1];
+            const lastContent = lastMatch[1].trim();
+
+            // Check if this thinking block is effectively at the end of the message (ignoring whitespace)
+            const fullMatchString = lastMatch[0];
+            const matchIndex = lastMatch.index || 0;
+            const indexAfterMatch = matchIndex + fullMatchString.length;
+            const contentAfter = lastAssistantMessageStr.slice(indexAfterMatch).trim();
+
+            // If content follows, we are not "thinking" anymore (we are speaking)
+            if (!contentAfter) {
+                setThinkingStep(lastContent);
+            } else {
+                setThinkingStep(null);
+            }
+        } else if (!isLoading) {
+            setThinkingStep(null);
+        }
+    }, [lastAssistantMessageStr, isLoading]);
+
+    // Issue 4: Frontend Timeout Protection
+    useEffect(() => {
+        if (!isLoading) return;
+        const timeout = setTimeout(() => {
+            console.warn('[useAgentChat] Response timeout - clearing thinkingStep');
+            setThinkingStep(null);
+        }, 60000); // 60s timeout
+        return () => clearTimeout(timeout);
+    }, [isLoading]);
 
     // UI State Sync
     useEffect(() => {
@@ -147,6 +185,7 @@ export const useAgentChat = (options: {
             return;
         }
         setIsOffline(false);
+        setThinkingStep(normalizedLocale === 'en' ? 'Thinking...' : '思考中...');
         try {
             console.log('[useAgentChat] Calling append/sendMessage...');
 

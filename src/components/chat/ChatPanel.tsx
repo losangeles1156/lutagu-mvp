@@ -283,11 +283,12 @@ export function ChatPanel() {
                                 idx={idx}
                                 handleAction={handleAction}
                                 handleFeedback={handleFeedback}
+                                isStreaming={isLoading && idx === messages.length - 1 && msg.role === 'assistant'}
                             />
                         ))}
 
                         {/* Optimistic UI: Show skeleton immediately when loading, before content arrives */}
-                        {isLoading && (
+                        {isLoading && !thinkingStep && (
                             messages.length === 0 ||
                             messages[messages.length - 1]?.role !== 'assistant' ||
                             !messages[messages.length - 1]?.content
@@ -298,7 +299,7 @@ export function ChatPanel() {
                         {/* ThinkingBubble: Show thinking step if available */}
                         {thinkingStep && (
                             <div className="flex justify-start">
-                                <ThinkingBubble content={thinkingStep} isThinking={true} />
+                                <ThinkingBubble content={thinkingStep} isThinking={isLoading} />
                             </div>
                         )}
 

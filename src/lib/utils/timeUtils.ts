@@ -30,7 +30,14 @@ export const JAPAN_HOLIDAYS_2026: Record<string, string> = {
 
 export function getJSTTime() {
     const now = new Date();
-    const jstDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+    let jstDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+
+    // Service Day Logic: ROLL OVER AT 4 AM JST
+    // If it's 1 AM on Monday, we are still in Sunday's "Service Day"
+    const currentHour = jstDate.getHours();
+    if (currentHour < 4) {
+        jstDate.setDate(jstDate.getDate() - 1);
+    }
 
     const yyyy = jstDate.getFullYear();
     const mm = String(jstDate.getMonth() + 1).padStart(2, '0');
@@ -41,8 +48,9 @@ export function getJSTTime() {
     const isHoliday = !!holidayName || (jstDate.getDay() === 0 || jstDate.getDay() === 6);
 
     // ODPT Calendar mapping logic (Centralized)
+    // Supports: Saturday, Sunday, Holiday, and Special periods (Specific/NewYear/OBon)
     const calendarSelector = isHoliday
-        ? ['SaturdayHoliday', 'Holiday', 'Sunday', 'Saturday']
+        ? ['SaturdayHoliday', 'Holiday', 'Sunday', 'Saturday', 'Specific', 'NewYear', 'OBon']
         : ['Weekday'];
 
     return {

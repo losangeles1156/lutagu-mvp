@@ -102,29 +102,26 @@ async function fetchOdpt<T>(type: string, params: Record<string, string> = {}): 
     const strategyName = operator.includes('Toei') ? 'Public' : (operator.includes('JR') ? 'Challenge' : 'Dev');
     console.log(`[ODPT Client] Fetching (${strategyName}): ${type} for ${operator || 'Unknown'}`);
 
-    // Use retry-enabled fetch with caching via Next.js fetch
+    // Use retry-enabled fetch with caching via fetchWithRetry
     try {
-        const response = await fetch(url, {
-            next: { revalidate: 3600 }
-        });
+        const fetchOptions: any = { next: { revalidate: 3600 } };
 
-        if (response.status === 403) {
-            console.warn(`[ODPT Client] 403 Forbidden for ${operator} via ${strategyName}. Check API keys.`);
-            // Fallback for Strategy B (Challenge) -> Try Strategy A (Public) if applicable
-            if (strategyName === 'Challenge' && TOKENS.PUBLIC) {
-                const fallbackUrl = `${API_PUBLIC}/${type}?${searchParams.toString()}`;
-                console.log(`[ODPT Client] Attempting fallback to Public API for ${operator}...`);
-                const fallbackRes = await fetch(fallbackUrl, { next: { revalidate: 3600 } });
-                if (fallbackRes.ok) return await fallbackRes.json();
+        if (strategyName === 'Challenge' && TOKENS.PUBLIC) {
+            try {
+                return await fetchWithRetry<any>(url, fetchOptions, ODPT_RETRY_CONFIG);
+            } catch (err) {
+                console.warn(`[ODPT Client] Challenge API failed, trying Public fallback...`);
+                // Clear the challenge key and add the public key
+                const fallbackParams = new URLSearchParams(searchParams);
+                if (TOKENS.JR_EAST) fallbackParams.delete('acl:consumerKey');
+                if (TOKENS.PUBLIC) fallbackParams.set('acl:consumerKey', TOKENS.PUBLIC);
+
+                const fallbackUrl = `${API_PUBLIC}/${type}?${fallbackParams.toString()}`;
+                return await fetchWithRetry<any>(fallbackUrl, fetchOptions, ODPT_RETRY_CONFIG);
             }
-            return [] as any; // Graceful failure
         }
 
-        if (!response.ok) {
-            throw new Error(`ODPT API error: ${response.status} ${response.statusText}`);
-        }
-
-        return await response.json();
+        return await fetchWithRetry<any>(url, fetchOptions, ODPT_RETRY_CONFIG);
     } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
         console.error(`[ODPT Client] Failed: ${err.message}`);

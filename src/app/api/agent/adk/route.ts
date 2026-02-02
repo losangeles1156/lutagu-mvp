@@ -115,7 +115,7 @@ function parseSseEvent(event: string): string | null {
             const parsed = JSON.parse(eventData);
             if (parsed.status === 'thinking') {
                 const message = parsed.message || 'Processing...';
-                return `[THINKING] ${message}\n`;
+                return `[THINKING]${message}[/THINKING]\n`;
             } else if (parsed.status === 'routing') {
                 return null; // Skip routing events for now
             }
@@ -132,8 +132,9 @@ function parseSseEvent(event: string): string | null {
 }
 
 export async function POST(req: NextRequest) {
+    let rawBody = '';
     try {
-        const rawBody = await req.text();
+        rawBody = await req.text();
         console.log('[ADK Proxy] Raw request body:', rawBody);
 
         if (!rawBody) {
@@ -171,7 +172,7 @@ export async function POST(req: NextRequest) {
             const encoder = new TextEncoder();
             const mockStream = new ReadableStream({
                 async start(controller) {
-                    controller.enqueue(encoder.encode('[THINKING] Mock analysis...\n'));
+                    controller.enqueue(encoder.encode('[THINKING]Mock analysis...[/THINKING]\n'));
                     await new Promise(r => setTimeout(r, 1000));
                     controller.enqueue(encoder.encode('This is a mock response in Japanese: 渋谷への行き方は簡単です。'));
                     controller.close();
@@ -189,7 +190,7 @@ export async function POST(req: NextRequest) {
             const text = typeof lastUser?.content === 'string' ? lastUser.content : '';
             const answer = buildFallbackAnswer({ text, locale: body?.locale });
             const stream = createPlainTextStream([
-                { text: '[THINKING] Local fallback (ADK_SERVICE_URL missing)\n', delayMs: 50 },
+                { text: '[THINKING]Local fallback (ADK_SERVICE_URL missing)[/THINKING]\n', delayMs: 50 },
                 { text: answer, delayMs: 100 }
             ]);
             return new Response(stream, {
@@ -222,7 +223,7 @@ export async function POST(req: NextRequest) {
             const text = typeof lastUser?.content === 'string' ? lastUser.content : '';
             const answer = buildFallbackAnswer({ text, locale: body?.locale });
             const stream = createPlainTextStream([
-                { text: '[THINKING] Local fallback (ADK fetch failed)\n', delayMs: 50 },
+                { text: '[THINKING]Local fallback (ADK fetch failed)[/THINKING]\n', delayMs: 50 },
                 { text: answer, delayMs: 100 }
             ]);
             return new Response(stream, {
@@ -238,7 +239,7 @@ export async function POST(req: NextRequest) {
 
             const fallbackMessage = buildFallbackAnswer({ text: '', locale: body?.locale });
             const errorStream = createPlainTextStream([
-                { text: `[THINKING] Upstream service error (${upstreamRes.status})\n`, delayMs: 50 },
+                { text: `[THINKING]Upstream service error (${upstreamRes.status})[/THINKING]\n`, delayMs: 50 },
                 { text: `⚠️ **Error**: ${errorText.slice(0, 100)}...\n\n`, delayMs: 50 },
                 { text: fallbackMessage, delayMs: 100 }
             ]);
@@ -324,7 +325,33 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error) {
-        console.error('[ADK Proxy] Error:', error);
-        return NextResponse.json({ error: 'Internal Proxy Error' }, { status: 500 });
+        console.error('[ADK Proxy] Fatal Error:', error);
+
+        // Attempt to extract locale from rawBody if available, for localized error messages
+        let locale = 'en';
+        try {
+            if (rawBody) {
+                const parsedBody = JSON.parse(rawBody);
+                locale = parsedBody.locale || 'en';
+            }
+        } catch (e) {
+            // Ignore parse error, fallback to 'en'
+        }
+
+        const fallbackMessage = buildFallbackAnswer({ text: '', locale });
+        const errorStream = new ReadableStream({
+            async start(controller) {
+                const encoder = new TextEncoder();
+                const thinkingMsg = locale === 'zh-TW' || locale === 'zh' ? '系統錯誤' :
+                    locale === 'ja' ? 'システムエラー' : 'System Error';
+                controller.enqueue(encoder.encode(`[THINKING]${thinkingMsg}[/THINKING]\n`));
+                controller.enqueue(encoder.encode(fallbackMessage));
+                controller.close();
+            }
+        });
+
+        return new Response(errorStream, {
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
     }
 }

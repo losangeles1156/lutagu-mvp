@@ -7,7 +7,8 @@ import { ThinkingBubble } from './ThinkingBubble';
 import MarkdownRenderer from './MarkdownRenderer';
 
 // Component to parse Agent markers and render Markdown
-export const ParsedMessageContent = memo(({ content, role, thought }: { content: string; role: string; thought?: string | null }) => {
+// Component to parse Agent markers and render Markdown
+export const ParsedMessageContent = memo(({ content, role, thought, isStreaming }: { content: string; role: string; thought?: string | null; isStreaming?: boolean }) => {
     const tL4 = useTranslations('l4');
     const parsed = useMemo(() => {
         if (!content) return { text: '', thinking: thought || null };
@@ -20,17 +21,20 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
 
         let thinking: string | null = thought || null;
 
+        // Calculate active thinking content to potentially exclude
+        // We use similar logic to useAgentChat to identify if the last block is "active"
+        let activeThinkingContent: string | null = null;
+
         // Extract [THINKING] marker if not already provided via prop
         if (!thinking) {
             // Match ALL thinking blocks (global) to handle multiple or nested tags
-            // Also handle unclosed tags at the end
-            // Regex to find closed thinking blocks [THINKING]...[/THINKING] (Global, Case Insensitive, Multiline)
             const closedRegex = /\[THINKING\]([\s\S]*?)\[\/THINKING\]/gi;
             const matches = Array.from(text.matchAll(closedRegex));
 
+            let thinkingBlocks: string[] = [];
+
             if (matches.length > 0) {
-                // Combine all thinking content
-                thinking = matches.map(m => m[1].trim()).join('\n---\n');
+                thinkingBlocks = matches.map(m => m[1].trim());
                 // Remove all matched blocks from text
                 text = text.replace(closedRegex, '').trim();
             }
@@ -39,11 +43,44 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
             const openMatch = text.match(/\[THINKING\]([\s\S]*)$/i);
             if (openMatch) {
                 const openContent = openMatch[1].trim();
-                thinking = thinking ? `${thinking}\n---\n${openContent}` : openContent;
+                thinkingBlocks.push(openContent);
                 text = text.replace(openMatch[0], '').trim();
             }
+
+            // If streaming, check if we should hide the last block (because it's shown as active bubble)
+            if (isStreaming && thinkingBlocks.length > 0) {
+                // If the last block was open (openMatch), it's definitely active.
+                // If the last block was closed but we are streaming, AND there is no text content following it?
+                // Wait, we already stripped text. 
+                // We need to know if there was text *after* the last block in the original content?
+                // But we just modified `text`. 
+
+                // Simpler approach: If isStreaming, assume the last thinking block is the "active" one handled by ChatPanel
+                // IF the ChatPanel logic also picked it up.
+                // ChatPanel picks it up if it's at the end.
+                // Since we stripped them from `text`, if `text` is empty/short, then the thinking block was at the end?
+                // This acts as a heuristic.
+
+                // Ideally we keep it consistent: pop the last one.
+                // But if we have multiple history blocks? e.g. [T]1[/T] [T]2[/T].
+                // If streaming, 2 is active. 1 is history.
+                // So we render 1. Hide 2.
+
+                // If only 1 block: [T]1[/T]. Streaming. Active. Hide 1. Render nothing (text empty).
+                // User sees floating bubble "1". Correct.
+
+                const lastBlock = thinkingBlocks[thinkingBlocks.length - 1];
+                thinkingBlocks.pop();
+            }
+
+            if (thinkingBlocks.length > 0) {
+                thinking = thinkingBlocks.join('\n---\n');
+            } else {
+                thinking = null;
+            }
+
         } else {
-            // If thinking is provided via prop, strictly strip all markers from text
+            // If thinking is provided via prop (legacy/mock), strictly strip all markers from text
             text = text.replace(/\[THINKING\]\s*([\s\S]*?)\s*(?:\[\/THINKING\]|$)/g, '').trim();
         }
 
@@ -55,11 +92,11 @@ export const ParsedMessageContent = memo(({ content, role, thought }: { content:
         text = text.replace(/\*\*/g, '').trim();
 
         return { text, thinking };
-    }, [content, thought]);
+    }, [content, thought, isStreaming]);
 
     return (
         <div className="space-y-2">
-            {/* Thinking Indicator/Bubble */}
+            {/* Thinking Indicator/Bubble (History) */}
             {parsed.thinking && (
                 <ThinkingBubble content={parsed.thinking} />
             )}

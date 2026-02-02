@@ -30,6 +30,12 @@ function getLocalizedStationName(id: string, locale: string): string {
         'Shibuya': { 'zh': '澀谷', 'ja': '渋谷', 'en': 'Shibuya' },
         'Ginza': { 'zh': '銀座', 'ja': '銀座', 'en': 'Ginza' },
         'Ikebukuro': { 'zh': '池袋', 'ja': '池袋', 'en': 'Ikebukuro' },
+        'Shinagawa': { 'zh': '品川', 'ja': '品川', 'en': 'Shinagawa' },
+        'Hamamatsucho': { 'zh': '濱松町', 'ja': '浜松町', 'en': 'Hamamatsucho' },
+        'Shimbashi': { 'zh': '新橋', 'ja': '新橋', 'en': 'Shimbashi' },
+        'Otemachi': { 'zh': '大手町', 'ja': '大手町', 'en': 'Otemachi' },
+        'Kanda': { 'zh': '神田', 'ja': '神田', 'en': 'Kanda' },
+        'Roppongi': { 'zh': '六本木', 'ja': '六本木', 'en': 'Roppongi' },
     };
 
     const entry = stationMap[base];
@@ -134,7 +140,17 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
     const now = new Date();
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const jstNow = new Date(utc + (3600000 * 9));
-    const nowHHMM = `${String(jstNow.getHours()).padStart(2, '0')}:${String(jstNow.getMinutes()).padStart(2, '0')}`;
+
+    // Helper to handle 24h+ format (e.g. 25:10) for comparison
+    const toMinute = (timeStr: string) => {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    };
+
+    // Normalize current time: if 0-4 AM, treat as 24-28h for late night comparison
+    const currentHour = jstNow.getHours();
+    const normalizedCurrentMinutes = (currentHour < 4 ? currentHour + 24 : currentHour) * 60 + jstNow.getMinutes();
+
     const items = timetables || [];
 
     if (!items.length) {
@@ -258,10 +274,14 @@ export function TimetableModule({ timetables, stationId, locale, selectedDirecti
                                     const destId = Array.isArray(destRaw) ? destRaw[0] : destRaw;
                                     return {
                                         time: String(o['odpt:departureTime'] || ''),
-                                        dest: getLocalizedStationName(String(destId || ''), locale)
+                                        dest: getLocalizedStationName(String(destId || ''), locale),
+                                        absMin: toMinute(String(o['odpt:departureTime'] || '00:00'))
                                     };
                                 });
-                                const next = objs.filter(o => o.time >= nowHHMM).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 8);
+                                const next = objs
+                                    .filter(o => o.absMin >= normalizedCurrentMinutes)
+                                    .sort((a, b) => a.absMin - b.absMin)
+                                    .slice(0, 8);
                                 const calendarId = String(table['odpt:calendar'] || '').split(':').pop() || '';
                                 const calendarLabel = calendarId.includes('Weekday') ? t('timetable.weekday') : t('timetable.weekend');
 

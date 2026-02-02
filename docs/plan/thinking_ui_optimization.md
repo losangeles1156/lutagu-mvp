@@ -8,15 +8,18 @@ The "Thinking" UI exists in `ChatPanel.tsx` (`ThinkingBubble`) but is rarely tri
 - **Hook**: `useAgentChat.ts` handles the stream. It needs to parse special tokens or events to update `thinkingStep`.
 - **Backend**: `services/chat-api` needs to emit "thinking" status during long-running tool calls or reasoning.
 
-## Proposed Changes
+## Completed Changes
+### 1. Frontend Logic Fix (`useAgentChat.ts`)
+- [x] Fixed regex bug that only captured the *first* thinking block. Now captures the *last* block.
+- [x] Implemented logic to set `thinkingStep` strictly based on the *latest* thinking block status (Active if open/at end, Null if closed/followed by text).
 
-### 1. Frontend: `useAgentChat.ts` (Optimization)
-- Enhance `onFinish` or stream parser to detect `[THINKING]...[/THINKING]` blocks or custom headers.
-- If the backend uses Vercel AI SDK `StreamData`, ensure we listen for data events to set `thinkingStep`.
+### 2. UI De-duplication (`ParsedMessageContent.tsx`, `MessageBubble.tsx`, `ChatPanel.tsx`)
+- [x] Passed `isStreaming` prop down from `ChatPanel` to `ParsedMessageContent`.
+- [x] `ParsedMessageContent` now hides the *last* thinking block if `isStreaming` is true, allowing `ChatPanel`'s floating bubble to show it as "Active" without duplication.
+- [x] Maintained history: Once streaming stops, `ParsedMessageContent` shows all blocks as history, and floating bubble disappears.
 
-### 2. Backend: `services/chat-api`
-- In the LLM response loop, if a tool call takes time or if using a reasoning model, emit a "thinking" token/event immediately.
-- Ensure the stream starts *immediately* even if the full text isn't ready.
+### 3. Backend Verification
+- [x] Confirmed `agentChat.ts` and ADK proxy emit `[THINKING]` tags correctly.
 
 ## Verification Plan
 
@@ -27,5 +30,7 @@ The "Thinking" UI exists in `ChatPanel.tsx` (`ThinkingBubble`) but is rarely tri
     - Verify `ThinkingBubble` or "Thinking..." text appears during the delay.
 
 ### Manual Verification
-- Trigger a complex query ("Plan a route with weather check").
-- Observe if "Thinking..." bubble appears before the final answer.
+- [x] Trigger a complex query ("Plan a route with weather check").
+- [x] Observe if "Thinking..." bubble appears before the final answer.
+- [x] Confirmed functionality via `chat_verification_final` browser automation.
+

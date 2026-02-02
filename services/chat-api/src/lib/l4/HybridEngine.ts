@@ -372,6 +372,9 @@ export class HybridEngine {
                 logs.push(`[SkillDispatch] No skill reached relevance threshold.`);
             }
 
+            // 2.5. POI Search (L2)
+            if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "スポット情報を検索中..." : (locale.startsWith('en') ? "Searching POI..." : "正在搜尋地點資訊..."));
+
             // 3. Fallback to L2 or LLM
             // ... (Existing Logic)
 
@@ -443,6 +446,9 @@ export class HybridEngine {
                     logs.push(`[Error] Agent Router: ${agentError}`);
                 }
             }
+
+            // 3.5. Expert Knowledge RAG
+            if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "專門知識を検索中..." : (locale.startsWith('en') ? "Searching expert knowledge..." : "正在檢索專家知識庫..."));
 
             let bestMatch: HybridResponse | null = null;
 
@@ -550,7 +556,7 @@ export class HybridEngine {
 
             let llmResponse: string | null = null;
             if (params.onToken && !hasL2Issues) {
-                if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "回答を生成中..." : (locale.startsWith('en') ? "Generating response..." : "正在整理回覆..."));
+                if (params.onProgress) params.onProgress(locale.startsWith('ja') ? "回答を生成中..." : (locale.startsWith('en') ? "Generating response..." : "正在整理最合適的回覆..."));
                 try {
                     const model = process.env.DEEPSEEK_API_KEY ? AGENT_ROLES.synthesizer : AGENT_ROLES.brain;
                     const result: any = streamWithFallback({

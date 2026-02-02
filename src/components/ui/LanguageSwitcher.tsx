@@ -30,19 +30,29 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
         setLocale(normalizedLocale as 'zh-TW' | 'ja' | 'en');
     }, [locale, setLocale]);
 
-    // Close dropdown when clicking outside
+    // Close dropdown when clicking outside or pressing Escape
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
+            // Add explicit null check and defensive logic for ref access
             const isOutsideContainer = containerRef.current && !containerRef.current.contains(target);
-            const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
+            const isOutsideDropdown = !dropdownRef.current || !dropdownRef.current.contains(target);
 
             if (isOutsideContainer && isOutsideDropdown) {
                 setIsOpen(false);
             }
         };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setIsOpen(false);
+        };
+
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
     }, []);
 
     const labels: Record<string, string> = {

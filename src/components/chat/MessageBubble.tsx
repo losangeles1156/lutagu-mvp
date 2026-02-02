@@ -15,6 +15,7 @@ interface MessageBubbleProps {
     handleAction: (action: ChatAction) => void;
     handleFeedback?: (index: number, score: number) => void;
     variant?: 'default' | 'compact' | 'l4';
+    isStreaming?: boolean;
 }
 
 export const MessageBubble = memo(({
@@ -22,7 +23,8 @@ export const MessageBubble = memo(({
     idx,
     handleAction,
     handleFeedback,
-    variant = 'default'
+    variant = 'default',
+    isStreaming
 }: MessageBubbleProps) => {
     // Feedback state to prevent duplicate clicks
     const [feedbackGiven, setFeedbackGiven] = useState<number | null>(null);
@@ -46,6 +48,7 @@ export const MessageBubble = memo(({
             type: msg.type,
             hasData: !!msg.data,
             dataKeys: Object.keys(msg.data || {}),
+            isStreaming
         });
     }
 
@@ -70,7 +73,7 @@ export const MessageBubble = memo(({
                 )}
 
                 {/* Message Content with Markdown and Thinking Process */}
-                <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} />
+                <ParsedMessageContent content={msg.content} role={msg.role} thought={msg.thought} isStreaming={isStreaming} />
 
                 {/* AI Agent 2.0 - Thinking Plan Card */}
                 {msg.agentPlan && (
