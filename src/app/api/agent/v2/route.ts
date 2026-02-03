@@ -9,27 +9,39 @@ import { NextRequest } from 'next/server';
 import { streamText, generateText } from 'ai';
 import { createAgentTools, ToolContext } from '@/lib/agent/tools/AgentTools';
 import { createAgentSystemPrompt, TOKYO_SYSTEM_PROMPT_CONFIG } from '@/lib/agent/prompts/SystemPrompt';
-import { AGENT_TYPES, SubagentType } from '@/lib/agent/types';
+import { AGENT_TYPES } from '@/lib/agent/types';
 import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { logger } from '@/lib/utils/logger';
+import { recordAgentError, recordAgentFallback } from '@/lib/agent/healthState';
 
 export const runtime = 'nodejs';
 
-// Debug logging helper
+const IS_PROD = process.env.NODE_ENV === 'production';
+const DEBUG_LOG_FILE = path.join(process.cwd(), 'AGENT_DEBUG.log');
+
+// Debug logging helper (avoid file writes in production)
 function logDebug(message: string) {
     const timestamp = new Date().toISOString();
     const logLine = `[${timestamp}] ${message}\n`;
-    fs.appendFileSync(path.join(process.cwd(), 'AGENT_DEBUG.log'), logLine);
+    if (!IS_PROD) {
+        try {
+            fs.appendFileSync(DEBUG_LOG_FILE, logLine);
+        } catch (error) {
+            console.warn('[Agent 2.0] Debug log write failed:', error);
+        }
+    }
     console.log(`[Agent 2.0] ${message}`);
 }
 
 // Configuration
 const MAX_STEPS = 5; // Allow up to 5 rounds of tool calls
+const AI_TIMEOUT_MS = Number(process.env.AGENT_V2_TIMEOUT_MS || 25000);
+const FALLBACK_MODE = (process.env.AGENT_V2_FALLBACK || 'chat').toLowerCase();
 
 // Use OpenRouter with DeepSeek V3.2 as primary model
 import {
-    openrouter,
     zeabur,
     MODEL_CONFIG,
     ZEABUR_MODEL_CONFIG,
@@ -228,11 +240,29 @@ export async function POST(req: NextRequest) {
 
     const simulateFailure = req.headers.get('x-simulate-failure') === 'true';
 
+    const rawBodyForProxy = rawBodyForFallback(rawBody, body);
+
+    const missingKeys = getMissingKeys();
+    if (missingKeys.length > 0) {
+        const reason = `Missing AI keys: ${missingKeys.join(', ')}`;
+        logger.warn(`[Agent 2.0] ${reason}`);
+        recordAgentError(reason);
+        const fallback = await tryFallback({
+            mode: FALLBACK_MODE,
+            req,
+            rawBody: rawBodyForProxy,
+            reason,
+            locale
+        });
+        if (fallback) return fallback;
+        return errorResponse(locale, reason, 503);
+    }
+
     try {
         // Use streamWithFallback for automatic model failover
         logDebug(`Starting streamWithFallback with ${Object.keys(tools).length} tools, last msg: ${messages[messages.length - 1]?.content?.slice(0, 100)}`);
 
-        const result = await streamWithFallback({
+        const result = await withTimeout(streamWithFallback({
             system: systemPrompt,
             messages,
             tools,
@@ -251,7 +281,7 @@ export async function POST(req: NextRequest) {
                     logDebug(`WARNING: [HYBRID_DATA] output WITHOUT tool calls - this is hallucination!`);
                 }
             },
-        } as any, simulateFailure);
+        } as any, simulateFailure), AI_TIMEOUT_MS, 'Agent v2 timeout');
 
         // Return the stream directly
         return result.toTextStreamResponse({
@@ -259,20 +289,125 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'text/plain; charset=utf-8',
                 'Cache-Control': 'no-cache, no-transform',
                 'X-Accel-Buffering': 'no',
+                'X-Agent-Backend': 'v2'
             },
         });
 
     } catch (error: any) {
         console.error('[Agent 2.0] Error:', error);
-        logDebug(`!!! CRITICAL ERROR !!!: ${error.message}\nStack: ${error.stack}`);
+        logDebug(`!!! CRITICAL ERROR !!!: ${error?.message || String(error)}\nStack: ${error?.stack || ''}`);
+        logger.error('[Agent 2.0] Error', error);
+        recordAgentError(String(error?.message || error));
 
-        const errorMessage = locale === 'en'
-            ? 'Sorry, an error occurred. Please try again.'
-            : '抱歉，發生錯誤，請重試。';
-
-        return new Response(errorMessage, {
-            status: 500,
-            headers: { 'Content-Type': 'text/plain' },
+        const reason = error?.message || 'Agent v2 failure';
+        const fallback = await tryFallback({
+            mode: FALLBACK_MODE,
+            req,
+            rawBody: rawBodyForProxy,
+            reason,
+            locale
         });
+        if (fallback) return fallback;
+
+        return errorResponse(locale, reason, 500);
     }
 }
+
+function getMissingKeys(): string[] {
+    const missing: string[] = [];
+    if (!process.env.OPENROUTER_API_KEY) missing.push('OPENROUTER_API_KEY');
+    return missing;
+}
+
+function rawBodyForFallback(rawBody: string | undefined, body: Record<string, unknown>): string {
+    if (typeof rawBody === 'string' && rawBody.trim()) return rawBody;
+    try {
+        return JSON.stringify(body ?? {});
+    } catch {
+        return '{}';
+    }
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+    let timeoutId: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+            reject(new Error(label));
+        }, ms);
+    });
+    try {
+        return await Promise.race([promise, timeoutPromise]);
+    } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+    }
+}
+
+function errorResponse(locale: string, reason: string, status: number): Response {
+    const errorMessage = locale === 'en'
+        ? 'Sorry, an error occurred. Please try again.'
+        : '抱歉，發生錯誤，請重試。';
+    return new Response(`${errorMessage}\n${IS_PROD ? '' : `[DEBUG] ${reason}`}`.trim(), {
+        status,
+        headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-Agent-Backend': 'v2'
+        },
+    });
+}
+
+async function tryFallback(params: {
+    mode: string;
+    req: NextRequest;
+    rawBody: string;
+    reason: string;
+    locale: string;
+}): Promise<Response | null> {
+    const mode = params.mode;
+    if (mode === 'none') return null;
+
+    const path =
+        mode === 'chat' ? '/api/agent/chat' :
+            mode === 'adk' ? '/api/agent/adk' :
+                null;
+    if (!path) return null;
+
+    const origin = params.req.nextUrl.origin;
+    try {
+        recordAgentFallback(mode, params.reason);
+        const upstream = await fetch(`${origin}${path}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Agent-Fallback-From': 'v2'
+            },
+            body: params.rawBody
+        });
+
+        if (!upstream.body) {
+            logger.warn(`[Agent 2.0] Fallback ${mode} returned empty body`);
+            return null;
+        }
+
+        return new Response(upstream.body, {
+            status: upstream.status,
+            headers: {
+                'Content-Type': upstream.headers.get('Content-Type') || 'text/plain; charset=utf-8',
+                'Cache-Control': 'no-cache, no-transform',
+                'X-Accel-Buffering': 'no',
+                'X-Agent-Backend': `fallback-${mode}`
+            }
+        });
+    } catch (error) {
+        logger.error(`[Agent 2.0] Fallback ${mode} failed`, error);
+        recordAgentError(`fallback-${mode}-error`);
+        return null;
+    }
+}
+
+(POST as any).__private__ = {
+    getMissingKeys,
+    rawBodyForFallback,
+    withTimeout,
+    errorResponse,
+    tryFallback
+};

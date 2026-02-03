@@ -179,7 +179,10 @@ export async function POST(req: NextRequest) {
                 }
             });
             return new Response(mockStream, {
-                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                headers: {
+                    'Content-Type': 'text/plain; charset=utf-8',
+                    'X-Agent-Backend': 'adk'
+                }
             });
         }
 
@@ -194,7 +197,10 @@ export async function POST(req: NextRequest) {
                 { text: answer, delayMs: 100 }
             ]);
             return new Response(stream, {
-                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                headers: {
+                    'Content-Type': 'text/plain; charset=utf-8',
+                    'X-Agent-Backend': 'adk'
+                }
             });
         }
 
@@ -227,7 +233,10 @@ export async function POST(req: NextRequest) {
                 { text: answer, delayMs: 100 }
             ]);
             return new Response(stream, {
-                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                headers: {
+                    'Content-Type': 'text/plain; charset=utf-8',
+                    'X-Agent-Backend': 'adk'
+                }
             });
         }
         if (timeoutId) clearTimeout(timeoutId);
@@ -245,7 +254,10 @@ export async function POST(req: NextRequest) {
             ]);
 
             return new Response(errorStream, {
-                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                headers: {
+                    'Content-Type': 'text/plain; charset=utf-8',
+                    'X-Agent-Backend': 'adk'
+                }
             });
         }
 
@@ -263,6 +275,7 @@ export async function POST(req: NextRequest) {
                         'Content-Type': 'text/plain; charset=utf-8',
                         'Cache-Control': 'no-cache',
                         'Connection': 'keep-alive',
+                        'X-Agent-Backend': 'adk'
                     },
                 });
             }
@@ -272,6 +285,7 @@ export async function POST(req: NextRequest) {
                     'Content-Type': upstreamContentType || 'text/plain; charset=utf-8',
                     'Cache-Control': 'no-cache',
                     'Connection': 'keep-alive',
+                    'X-Agent-Backend': 'adk'
                 },
             });
         }
@@ -321,6 +335,7 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'text/plain; charset=utf-8',
                 'Cache-Control': 'no-cache',
                 'Connection': 'keep-alive',
+                'X-Agent-Backend': 'adk'
             },
         });
 
@@ -351,7 +366,10 @@ export async function POST(req: NextRequest) {
         });
 
         return new Response(errorStream, {
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'X-Agent-Backend': 'adk'
+            }
         });
     }
 }

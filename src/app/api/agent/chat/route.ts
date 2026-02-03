@@ -75,7 +75,8 @@ export async function POST(req: NextRequest) {
                     headers: {
                         'Content-Type': 'text/plain; charset=utf-8',
                         'Cache-Control': 'no-cache, no-transform',
-                        'X-Accel-Buffering': 'no'
+                        'X-Accel-Buffering': 'no',
+                        'X-Agent-Backend': 'v1'
                     }
                 });
             }
@@ -210,7 +211,8 @@ export async function POST(req: NextRequest) {
         headers: {
             'Content-Type': 'text/plain; charset=utf-8',
             'Cache-Control': 'no-cache, no-transform',
-            'X-Accel-Buffering': 'no'
+            'X-Accel-Buffering': 'no',
+            'X-Agent-Backend': 'v1'
         }
     });
 }
