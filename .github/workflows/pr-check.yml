@@ -119,6 +119,16 @@ jobs:
           cat /tmp/next-start.log
           exit 1
 
+      - name: Preflight E2E endpoint
+        env:
+          AGENT_E2E_KEY: ${{ secrets.AGENT_E2E_KEY }}
+        run: |
+          echo "Preflight /api/agent/e2e"
+          curl -s -D - -X POST http://localhost:3000/api/agent/e2e \
+            -H "Content-Type: application/json" \
+            -H "X-Agent-E2E-Key: ${AGENT_E2E_KEY}" \
+            -d '{"text":"從東京到新宿怎麼去？","locale":"zh-TW"}' | head -n 40
+
       - name: Agent E2E Test
         run: npm run test:agent
 

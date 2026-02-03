@@ -47,6 +47,17 @@ async function runCase(testCase) {
 
   const body = await res.text();
 
+  if (!res.ok) {
+    return {
+      ...testCase,
+      ok: false,
+      reason: `http ${res.status}`,
+      backend,
+      requestId,
+      responsePreview: body.slice(0, 300)
+    };
+  }
+
   if (e2eEndpoint.includes('/api/agent/e2e')) {
     const payload = JSON.parse(body || '{}');
     const expected = testCase.expectedTools || [];
@@ -141,6 +152,9 @@ async function main() {
     console.log('\nFailed cases:');
     for (const f of failed) {
       console.log(`- ${f.id}: ${f.reason || 'tool mismatch'} (backend=${f.backend || 'n/a'}) expected=${(f.expectedTools || []).join(',')} got=${(f.toolCalls || []).join(',')}`);
+      if (f.responsePreview) {
+        console.log(`  response: ${f.responsePreview}`);
+      }
     }
   }
 
