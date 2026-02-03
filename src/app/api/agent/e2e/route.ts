@@ -126,13 +126,18 @@ export async function POST(req: NextRequest) {
             text: textResult || ''
         });
     } catch (error: any) {
+        const provider = 'openrouter';
         return NextResponse.json({
             ok: false,
             requestId: randomUUID(),
             backend: 'e2e',
             toolCalls: [],
             latencyMs: Date.now() - start,
-            error: error?.message || 'E2E execution failed'
+            error: error?.message || 'E2E execution failed',
+            errorName: error?.name || null,
+            provider,
+            hasOpenRouterKey: Boolean(process.env.OPENROUTER_API_KEY),
+            hasZeaburKey: Boolean(process.env.ZEABUR_API_KEY)
         }, { status: 500 });
     }
 }

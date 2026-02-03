@@ -129,6 +129,10 @@ jobs:
             -H "X-Agent-E2E-Key: ${AGENT_E2E_KEY}" \
             -d '{"text":"從東京到新宿怎麼去？","locale":"zh-TW"}' | head -n 40
 
+      - name: Env probe
+        run: |
+          node -e "console.log({OPENROUTER: !!process.env.OPENROUTER_API_KEY, ZEABUR: !!process.env.ZEABUR_API_KEY, E2E: !!process.env.AGENT_E2E_KEY})"
+
       - name: Agent E2E Test
         run: npm run test:agent
 
