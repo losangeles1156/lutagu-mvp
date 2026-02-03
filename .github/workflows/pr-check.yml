@@ -64,3 +64,57 @@ jobs:
             coverage
             coverage/lcov.info
           if-no-files-found: ignore
+
+  agent-e2e:
+    name: Agent E2E (Real APIs)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      NEXT_PUBLIC_AGENT_V2: "true"
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      ZEABUR_API_KEY: ${{ secrets.ZEABUR_API_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      ODPT_API_KEY: ${{ secrets.ODPT_API_KEY }}
+      ODPT_API_KEY_METRO: ${{ secrets.ODPT_API_KEY_METRO }}
+      ODPT_API_TOKEN: ${{ secrets.ODPT_API_KEY }}
+      ODPT_API_TOKEN_BACKUP: ${{ secrets.ODPT_API_TOKEN_BACKUP }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      AGENT_E2E_MIN_ACCURACY: "0.9"
+      AGENT_E2E_BASE_URL: "http://localhost:3000"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start server
+        run: |
+          PORT=3000 npm run start > /tmp/next-start.log 2>&1 &
+          for i in {1..30}; do
+            if curl -sSf http://localhost:3000/api/agent/health >/dev/null; then
+              echo "Server ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Server failed to start"
+          cat /tmp/next-start.log
+          exit 1
+
+      - name: Agent E2E Test
+        run: npm run test:agent

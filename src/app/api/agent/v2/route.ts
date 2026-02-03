@@ -14,7 +14,7 @@ import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '@/lib/utils/logger';
-import { recordAgentError, recordAgentFallback } from '@/lib/agent/healthState';
+import { recordAgentError, recordAgentFallback, recordAgentResult } from '@/lib/agent/healthState';
 
 export const runtime = 'nodejs';
 
@@ -80,6 +80,8 @@ interface Message {
 }
 
 export async function POST(req: NextRequest) {
+    const requestId = randomUUID();
+    const startTimeMs = Date.now();
     const rawBody = await req.text();
     let body: Record<string, unknown> = {};
 
@@ -254,10 +256,18 @@ export async function POST(req: NextRequest) {
             reason,
             locale
         });
-        if (fallback) return fallback;
-        return errorResponse(locale, reason, 503);
+        if (fallback) return withRequestIdHeader(fallback, requestId);
+        recordAgentResult({
+            requestId,
+            backend: 'v2',
+            toolCalls: [],
+            latencyMs: Date.now() - startTimeMs,
+            success: false
+        });
+        return errorResponse(locale, reason, 503, requestId);
     }
 
+    let toolResultsForSummary: any[] = [];
     try {
         // Use streamWithFallback for automatic model failover
         logDebug(`Starting streamWithFallback with ${Object.keys(tools).length} tools, last msg: ${messages[messages.length - 1]?.content?.slice(0, 100)}`);
@@ -271,6 +281,14 @@ export async function POST(req: NextRequest) {
             onFinish: ({ text, toolCalls, steps }: { text: string; toolCalls?: Array<{ toolName: string }>; steps?: unknown[] }) => {
                 const stepCount = steps?.length || 0;
                 const toolNames = toolCalls?.map(tc => tc.toolName) || [];
+                toolResultsForSummary = extractToolResults(steps);
+                recordAgentResult({
+                    requestId,
+                    backend: 'v2',
+                    toolCalls: toolNames,
+                    latencyMs: Date.now() - startTimeMs,
+                    success: true
+                });
 
                 logDebug(`=== STREAM FINISHED ===`);
                 logDebug(`Steps: ${stepCount}`);
@@ -283,13 +301,36 @@ export async function POST(req: NextRequest) {
             },
         } as any, simulateFailure), AI_TIMEOUT_MS, 'Agent v2 timeout');
 
-        // Return the stream directly
-        return result.toTextStreamResponse({
+        const encoder = new TextEncoder();
+        let hasOutput = false;
+        const stream = new ReadableStream({
+            async start(controller) {
+                try {
+                    for await (const chunk of result.textStream) {
+                        if (chunk) {
+                            hasOutput = true;
+                            controller.enqueue(encoder.encode(chunk));
+                        }
+                    }
+                    if (!hasOutput) {
+                        const fallbackText = await buildFallbackFromTools(toolResultsForSummary, locale);
+                        if (fallbackText) {
+                            controller.enqueue(encoder.encode(fallbackText));
+                        }
+                    }
+                } finally {
+                    controller.close();
+                }
+            }
+        });
+
+        return new Response(stream, {
             headers: {
                 'Content-Type': 'text/plain; charset=utf-8',
                 'Cache-Control': 'no-cache, no-transform',
                 'X-Accel-Buffering': 'no',
-                'X-Agent-Backend': 'v2'
+                'X-Agent-Backend': 'v2',
+                'X-Agent-Request-Id': requestId
             },
         });
 
@@ -307,9 +348,18 @@ export async function POST(req: NextRequest) {
             reason,
             locale
         });
-        if (fallback) return fallback;
+        if (fallback) {
+            return withRequestIdHeader(fallback, requestId);
+        }
 
-        return errorResponse(locale, reason, 500);
+        recordAgentResult({
+            requestId,
+            backend: 'v2',
+            toolCalls: [],
+            latencyMs: Date.now() - startTimeMs,
+            success: false
+        });
+        return errorResponse(locale, reason, 500, requestId);
     }
 }
 
@@ -342,7 +392,7 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): P
     }
 }
 
-function errorResponse(locale: string, reason: string, status: number): Response {
+function errorResponse(locale: string, reason: string, status: number, requestId?: string): Response {
     const errorMessage = locale === 'en'
         ? 'Sorry, an error occurred. Please try again.'
         : '抱歉，發生錯誤，請重試。';
@@ -350,7 +400,8 @@ function errorResponse(locale: string, reason: string, status: number): Response
         status,
         headers: {
             'Content-Type': 'text/plain; charset=utf-8',
-            'X-Agent-Backend': 'v2'
+            'X-Agent-Backend': 'v2',
+            ...(requestId ? { 'X-Agent-Request-Id': requestId } : {})
         },
     });
 }
@@ -411,3 +462,44 @@ async function tryFallback(params: {
     errorResponse,
     tryFallback
 };
+
+function withRequestIdHeader(res: Response, requestId: string): Response {
+    const headers = new Headers(res.headers);
+    headers.set('X-Agent-Request-Id', requestId);
+    return new Response(res.body, { status: res.status, headers });
+}
+
+function extractToolResults(steps?: unknown[]) {
+    if (!Array.isArray(steps)) return [];
+    const results: any[] = [];
+    for (const step of steps) {
+        const toolResults = (step as any)?.toolResults;
+        if (Array.isArray(toolResults)) {
+            results.push(...toolResults);
+        }
+    }
+    return results;
+}
+
+async function buildFallbackFromTools(toolResults: any[], locale: string): Promise<string> {
+    if (!toolResults || toolResults.length === 0) {
+        return locale === 'en'
+            ? 'I was unable to retrieve results. Please try again.'
+            : '目前無法取得結果，請稍後再試。';
+    }
+
+    const prompt = `You are a transit assistant. Based on the tool results JSON below, provide a concise answer in ${locale}.\n\nTool Results JSON:\n${JSON.stringify(toolResults).slice(0, 6000)}`;
+
+    try {
+        const summary = await generateText({
+            model: getModel(MODEL_CONFIG.primary),
+            prompt
+        });
+        return summary.text || '';
+    } catch (error) {
+        console.error('[Agent 2.0] Fallback summarization failed:', error);
+        return locale === 'en'
+            ? 'I was unable to summarize the results. Please try again.'
+            : '目前無法整理結果，請稍後再試。';
+    }
+}

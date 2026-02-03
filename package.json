@@ -12,6 +12,7 @@
     "test": "node -e \"const { spawnSync } = require('node:child_process'); const fs = require('node:fs'); const path = require('node:path'); const root = path.join(process.cwd(), 'src'); const files = []; const walk = (dir) => { if (!fs.existsSync(dir)) return; for (const entry of fs.readdirSync(dir, { withFileTypes: true })) { const full = path.join(dir, entry.name); if (entry.isDirectory()) walk(full); else if (/\\.(test|spec)\\.ts$/.test(entry.name) && !/\\.ui\\.(test|spec)\\.ts$/.test(entry.name)) files.push(full); } }; walk(root); const args = ['--import','tsx','--test','--test-concurrency=1', ...files]; const res = spawnSync(process.execPath, args, { stdio: 'inherit' }); process.exit(typeof res.status === 'number' ? res.status : 1);\"",
     "test:ui": "node --test --test-concurrency=1 --import tsx src/ui/tags.ui.test.ts src/ui/l2-live.ui.test.ts",
     "test:e2e": "playwright test",
+    "test:agent": "node scripts/agent_e2e_test.js",
     "crawl:l1": "tsx scripts/l1_pipeline/run.ts --all",
     "crawl:l3": "tsx scripts/l3_fill_coin_lockers.ts",
     "crawl:l3:toilets": "tsx scripts/l3_fill_toilets.ts",

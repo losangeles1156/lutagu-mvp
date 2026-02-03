@@ -85,7 +85,7 @@ export const createFindRouteTool = (ctx: ToolContext) => tool({
     execute: async ({ origin, destination }: { origin: string; destination: string; preference?: string }) => {
         const logMsg = `[Tool:findRoute] CALLED with origin="${origin}", destination="${destination}"`;
         console.log(logMsg);
-        fs.appendFileSync(path.join(process.cwd(), 'AGENT_DEBUG.log'), `[${new Date().toISOString()}] ${logMsg}\n`);
+        safeAppendAgentLog(`[${new Date().toISOString()}] ${logMsg}\n`);
 
 
         try {
@@ -126,7 +126,7 @@ export const createFindRouteTool = (ctx: ToolContext) => tool({
         } catch (error: any) {
             const errorMsg = `[Tool:findRoute] Error: ${error.message}`;
             console.error(errorMsg);
-            require('fs').appendFileSync(require('path').join(process.cwd(), 'AGENT_DEBUG.log'), `[${new Date().toISOString()}] ${errorMsg}\n`);
+            safeAppendAgentLog(`[${new Date().toISOString()}] ${errorMsg}\n`);
 
             return {
                 success: false,
@@ -382,7 +382,7 @@ export const createGetTransitStatusTool = (ctx: ToolContext) => tool({
     execute: async ({ lineOrStation }: { lineOrStation: string }) => {
         const logMsg = `[Tool:getTransitStatus] Checking: ${lineOrStation}`;
         console.log(logMsg);
-        fs.appendFileSync(path.join(process.cwd(), 'AGENT_DEBUG.log'), `[${new Date().toISOString()}] ${logMsg}\n`);
+        safeAppendAgentLog(`[${new Date().toISOString()}] ${logMsg}\n`);
 
         try {
             // Fetch real-time status from ODPT service
@@ -439,6 +439,15 @@ export const createGetTransitStatusTool = (ctx: ToolContext) => tool({
         }
     },
 } as any);
+
+function safeAppendAgentLog(message: string) {
+    if (process.env.NODE_ENV === 'production') return;
+    try {
+        fs.appendFileSync(path.join(process.cwd(), 'AGENT_DEBUG.log'), message);
+    } catch (error) {
+        console.warn('[AgentTools] Debug log write failed:', error);
+    }
+}
 
 // =============================================================================
 // Subagent Tool (Phase 3: Isolation)

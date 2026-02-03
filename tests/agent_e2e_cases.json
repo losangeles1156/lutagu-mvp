@@ -1,0 +1,122 @@
+[
+  {
+    "id": "route_tokyo_shinjuku",
+    "text": "從東京到新宿怎麼去？",
+    "locale": "zh-TW",
+    "expectedTools": ["findRoute"]
+  },
+  {
+    "id": "route_shibuya_ueno",
+    "text": "如何從渋谷到上野？",
+    "locale": "ja",
+    "expectedTools": ["findRoute"]
+  },
+  {
+    "id": "route_shinjuku_akihabara",
+    "text": "How do I get from Shinjuku to Akihabara?",
+    "locale": "en",
+    "expectedTools": ["findRoute"]
+  },
+  {
+    "id": "status_yamanote",
+    "text": "山手線現在有延誤嗎？",
+    "locale": "zh-TW",
+    "expectedTools": ["getTransitStatus"]
+  },
+  {
+    "id": "status_ginza",
+    "text": "銀座線の運行状況は？",
+    "locale": "ja",
+    "expectedTools": ["getTransitStatus"]
+  },
+  {
+    "id": "status_chuo",
+    "text": "Any delays on the Chuo Line?",
+    "locale": "en",
+    "expectedTools": ["getTransitStatus"]
+  },
+  {
+    "id": "station_info_locker",
+    "text": "新宿站有寄物櫃嗎？",
+    "locale": "zh-TW",
+    "expectedTools": ["getStationInfo"]
+  },
+  {
+    "id": "station_info_accessibility",
+    "text": "上野站有電梯嗎？",
+    "locale": "zh-TW",
+    "expectedTools": ["getStationInfo"]
+  },
+  {
+    "id": "station_info_basic",
+    "text": "Tell me about Tokyo Station.",
+    "locale": "en",
+    "expectedTools": ["getStationInfo"]
+  },
+  {
+    "id": "poi_ueno",
+    "text": "上野附近有什麼景點？",
+    "locale": "zh-TW",
+    "expectedTools": ["searchPOI"]
+  },
+  {
+    "id": "poi_shibuya",
+    "text": "渋谷周辺のおすすめスポットは？",
+    "locale": "ja",
+    "expectedTools": ["searchPOI"]
+  },
+  {
+    "id": "poi_ginza",
+    "text": "Any good places to visit near Ginza?",
+    "locale": "en",
+    "expectedTools": ["searchPOI"]
+  },
+  {
+    "id": "weather_tokyo",
+    "text": "東京今天天氣如何？",
+    "locale": "zh-TW",
+    "expectedTools": ["getWeather"]
+  },
+  {
+    "id": "weather_tokyo_en",
+    "text": "What's the weather in Tokyo today?",
+    "locale": "en",
+    "expectedTools": ["getWeather"]
+  },
+  {
+    "id": "weather_tokyo_ja",
+    "text": "東京の天気は？",
+    "locale": "ja",
+    "expectedTools": ["getWeather"]
+  },
+  {
+    "id": "route_shibuya_tokyo",
+    "text": "從澀谷到東京站最快路線？",
+    "locale": "zh-TW",
+    "expectedTools": ["findRoute"]
+  },
+  {
+    "id": "route_osaka_tokyo",
+    "text": "從東京到大阪怎麼走？",
+    "locale": "zh-TW",
+    "expectedTools": ["findRoute"]
+  },
+  {
+    "id": "status_oedo",
+    "text": "大江戶線有沒有停駛？",
+    "locale": "zh-TW",
+    "expectedTools": ["getTransitStatus"]
+  },
+  {
+    "id": "station_info_toilets",
+    "text": "新宿駅にトイレはありますか？",
+    "locale": "ja",
+    "expectedTools": ["getStationInfo"]
+  },
+  {
+    "id": "poi_food_shinjuku",
+    "text": "新宿附近有什麼美食？",
+    "locale": "zh-TW",
+    "expectedTools": ["searchPOI"]
+  }
+]

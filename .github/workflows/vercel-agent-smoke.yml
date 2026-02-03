@@ -1,0 +1,21 @@
+name: Vercel Agent Smoke
+
+on:
+  deployment_status:
+
+jobs:
+  smoke:
+    if: ${{ github.event.deployment_status.state == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Agent smoke tests
+        env:
+          AGENT_E2E_BASE_URL: ${{ github.event.deployment_status.target_url }}
+          AGENT_E2E_MIN_ACCURACY: "0.9"
+        run: node scripts/agent_e2e_test.js
