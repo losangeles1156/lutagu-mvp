@@ -84,8 +84,9 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       AGENT_E2E_MIN_ACCURACY: "0.9"
       AGENT_E2E_BASE_URL: "http://localhost:3000"
-      AGENT_E2E_ENDPOINT: "/api/agent/v2"
+      AGENT_E2E_ENDPOINT: "/api/agent/e2e"
       AGENT_E2E_KEY: ${{ secrets.AGENT_E2E_KEY }}
+      AGENT_V2_FALLBACK: "none"
 
     steps:
       - name: Checkout

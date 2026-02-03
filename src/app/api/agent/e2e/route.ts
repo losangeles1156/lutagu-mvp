@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateText } from 'ai';
+import { streamText } from 'ai';
 import { createAgentTools, ToolContext } from '@/lib/agent/tools/AgentTools';
 import { createAgentSystemPrompt, TOKYO_SYSTEM_PROMPT_CONFIG } from '@/lib/agent/prompts/SystemPrompt';
 import { randomUUID } from 'crypto';
+import { getModel, MODEL_CONFIG } from '@/lib/agent/openRouterConfig';
 
 export const runtime = 'nodejs';
 
@@ -102,21 +103,27 @@ export async function POST(req: NextRequest) {
 
     const start = Date.now();
     try {
-        const result = await generateText({
+        let toolNames: string[] = [];
+        const result = await streamText({
+            model: getModel(MODEL_CONFIG.primary),
             system: systemPrompt,
             messages,
             tools,
             maxSteps: 5,
             toolChoice: 'auto',
+            onFinish: ({ toolCalls }: { toolCalls?: Array<{ toolName: string }> }) => {
+                toolNames = toolCalls?.map(tc => tc.toolName) || [];
+            },
         } as any);
 
+        const textResult = await result.text;
         return NextResponse.json({
             ok: true,
             requestId: randomUUID(),
             backend: 'e2e',
-            toolCalls: result.toolCalls?.map(tc => tc.toolName) || [],
+            toolCalls: toolNames,
             latencyMs: Date.now() - start,
-            text: result.text || ''
+            text: textResult || ''
         });
     } catch (error: any) {
         return NextResponse.json({

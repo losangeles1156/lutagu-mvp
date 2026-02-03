@@ -18,8 +18,9 @@ jobs:
         env:
           AGENT_E2E_BASE_URL: ${{ github.event.deployment_status.target_url }}
           AGENT_E2E_MIN_ACCURACY: "0.9"
-          AGENT_E2E_ENDPOINT: "/api/agent/v2"
+          AGENT_E2E_ENDPOINT: "/api/agent/e2e"
           AGENT_E2E_KEY: ${{ secrets.AGENT_E2E_KEY }}
+          AGENT_V2_FALLBACK: "none"
         run: node scripts/agent_e2e_test.js
 
       - name: Upload Agent E2E report
