@@ -39,6 +39,7 @@ function logDebug(message: string) {
 const MAX_STEPS = 5; // Allow up to 5 rounds of tool calls
 const AI_TIMEOUT_MS = Number(process.env.AGENT_V2_TIMEOUT_MS || 25000);
 const FALLBACK_MODE = (process.env.AGENT_V2_FALLBACK || 'chat').toLowerCase();
+const E2E_KEY = process.env.AGENT_E2E_KEY || '';
 
 // Use OpenRouter with DeepSeek V3.2 as primary model
 import {
@@ -82,6 +83,7 @@ interface Message {
 export async function POST(req: NextRequest) {
     const requestId = randomUUID();
     const startTimeMs = Date.now();
+    const e2eEnabled = Boolean(E2E_KEY) && req.headers.get('x-agent-e2e-key') === E2E_KEY;
     const rawBody = await req.text();
     let body: Record<string, unknown> = {};
 
@@ -249,14 +251,16 @@ export async function POST(req: NextRequest) {
         const reason = `Missing AI keys: ${missingKeys.join(', ')}`;
         logger.warn(`[Agent 2.0] ${reason}`);
         recordAgentError(reason);
-        const fallback = await tryFallback({
-            mode: FALLBACK_MODE,
-            req,
-            rawBody: rawBodyForProxy,
-            reason,
-            locale
-        });
-        if (fallback) return withRequestIdHeader(fallback, requestId);
+        if (!e2eEnabled) {
+            const fallback = await tryFallback({
+                mode: FALLBACK_MODE,
+                req,
+                rawBody: rawBodyForProxy,
+                reason,
+                locale
+            });
+            if (fallback) return withRequestIdHeader(fallback, requestId);
+        }
         recordAgentResult({
             requestId,
             backend: 'v2',
@@ -268,6 +272,7 @@ export async function POST(req: NextRequest) {
     }
 
     let toolResultsForSummary: any[] = [];
+    let toolNamesForSummary: string[] = [];
     try {
         // Use streamWithFallback for automatic model failover
         logDebug(`Starting streamWithFallback with ${Object.keys(tools).length} tools, last msg: ${messages[messages.length - 1]?.content?.slice(0, 100)}`);
@@ -281,6 +286,7 @@ export async function POST(req: NextRequest) {
             onFinish: ({ text, toolCalls, steps }: { text: string; toolCalls?: Array<{ toolName: string }>; steps?: unknown[] }) => {
                 const stepCount = steps?.length || 0;
                 const toolNames = toolCalls?.map(tc => tc.toolName) || [];
+                toolNamesForSummary = toolNames;
                 toolResultsForSummary = extractToolResults(steps);
                 recordAgentResult({
                     requestId,
@@ -318,6 +324,13 @@ export async function POST(req: NextRequest) {
                             controller.enqueue(encoder.encode(fallbackText));
                         }
                     }
+                    if (e2eEnabled) {
+                        const meta = {
+                            toolCalls: toolNamesForSummary,
+                            latencyMs: Date.now() - startTimeMs
+                        };
+                        controller.enqueue(encoder.encode(`\n[E2E_META]${JSON.stringify(meta)}[/E2E_META]`));
+                    }
                 } finally {
                     controller.close();
                 }
@@ -341,15 +354,17 @@ export async function POST(req: NextRequest) {
         recordAgentError(String(error?.message || error));
 
         const reason = error?.message || 'Agent v2 failure';
-        const fallback = await tryFallback({
-            mode: FALLBACK_MODE,
-            req,
-            rawBody: rawBodyForProxy,
-            reason,
-            locale
-        });
-        if (fallback) {
-            return withRequestIdHeader(fallback, requestId);
+        if (!e2eEnabled) {
+            const fallback = await tryFallback({
+                mode: FALLBACK_MODE,
+                req,
+                rawBody: rawBodyForProxy,
+                reason,
+                locale
+            });
+            if (fallback) {
+                return withRequestIdHeader(fallback, requestId);
+            }
         }
 
         recordAgentResult({

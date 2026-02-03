@@ -5,6 +5,8 @@ const baseUrl = process.env.AGENT_E2E_BASE_URL || 'http://localhost:3000';
 const minAccuracy = Number(process.env.AGENT_E2E_MIN_ACCURACY || 0.9);
 const casesPath = process.env.AGENT_E2E_CASES || path.join(process.cwd(), 'tests', 'agent_e2e_cases.json');
 const reportPath = process.env.AGENT_E2E_REPORT_PATH || path.join(process.cwd(), 'reports', 'agent_e2e_report.json');
+const e2eEndpoint = process.env.AGENT_E2E_ENDPOINT || '/api/agent/v2';
+const e2eKey = process.env.AGENT_E2E_KEY || '';
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -31,18 +33,53 @@ async function waitForRun(requestId, retries = 20, delayMs = 500) {
 }
 
 async function runCase(testCase) {
-  const res = await fetch(`${baseUrl}/api/agent/v2`, {
+  const res = await fetch(`${baseUrl}${e2eEndpoint}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(e2eKey ? { 'X-Agent-E2E-Key': e2eKey } : {})
+    },
     body: JSON.stringify({ text: testCase.text, locale: testCase.locale })
   });
 
-  const body = await res.text();
   const requestId = res.headers.get('x-agent-request-id');
   const backend = res.headers.get('x-agent-backend');
 
+  const body = await res.text();
+
+  if (e2eEndpoint.includes('/api/agent/e2e')) {
+    const payload = JSON.parse(body || '{}');
+    const expected = testCase.expectedTools || [];
+    const toolCalls = Array.isArray(payload.toolCalls) ? payload.toolCalls : [];
+    const hasAll = expected.every(t => toolCalls.includes(t));
+    return {
+      ...testCase,
+      ok: hasAll,
+      backend: payload.backend || backend || 'e2e',
+      requestId: payload.requestId || requestId || '',
+      toolCalls,
+      latencyMs: payload.latencyMs
+    };
+  }
+
   if (!requestId) {
     return { ...testCase, ok: false, reason: 'missing request id', backend };
+  }
+
+  const metaMatch = body.match(/\[E2E_META\]([\s\S]*?)\[\/E2E_META\]/);
+  if (metaMatch) {
+    const meta = JSON.parse(metaMatch[1]);
+    const expected = testCase.expectedTools || [];
+    const toolCalls = Array.isArray(meta.toolCalls) ? meta.toolCalls : [];
+    const hasAll = expected.every(t => toolCalls.includes(t));
+    return {
+      ...testCase,
+      ok: hasAll,
+      backend: backend || 'v2',
+      requestId: requestId || '',
+      toolCalls,
+      latencyMs: meta.latencyMs
+    };
   }
 
   if (!body || body.trim().length === 0) {
