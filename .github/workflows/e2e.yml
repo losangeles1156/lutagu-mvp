@@ -8,6 +8,15 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      ODPT_API_KEY: ${{ secrets.ODPT_API_KEY }}
+      ODPT_API_TOKEN: ${{ secrets.ODPT_API_TOKEN }}
+      ODPT_API_TOKEN_BACKUP: ${{ secrets.ODPT_API_TOKEN_BACKUP }}
+      VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      L2_REFRESH_SECRET: ${{ secrets.L2_REFRESH_SECRET }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -18,15 +27,6 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        ODPT_API_KEY: ${{ secrets.ODPT_API_KEY }}
-        ODPT_API_TOKEN: ${{ secrets.ODPT_API_TOKEN }}
-        ODPT_API_TOKEN_BACKUP: ${{ secrets.ODPT_API_TOKEN_BACKUP }}
-        VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        L2_REFRESH_SECRET: ${{ secrets.L2_REFRESH_SECRET }}
       run: npx playwright test
     - uses: actions/upload-artifact@v4
       if: always()
