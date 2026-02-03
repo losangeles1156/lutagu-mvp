@@ -118,3 +118,11 @@ jobs:
 
       - name: Agent E2E Test
         run: npm run test:agent
+
+      - name: Upload Agent E2E report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-e2e-report
+          path: reports/agent_e2e_report.json
+          if-no-files-found: ignore

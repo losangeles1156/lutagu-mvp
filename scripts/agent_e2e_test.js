@@ -4,6 +4,7 @@ const path = require('node:path');
 const baseUrl = process.env.AGENT_E2E_BASE_URL || 'http://localhost:3000';
 const minAccuracy = Number(process.env.AGENT_E2E_MIN_ACCURACY || 0.9);
 const casesPath = process.env.AGENT_E2E_CASES || path.join(process.cwd(), 'tests', 'agent_e2e_cases.json');
+const reportPath = process.env.AGENT_E2E_REPORT_PATH || path.join(process.cwd(), 'reports', 'agent_e2e_report.json');
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -61,7 +62,8 @@ async function runCase(testCase) {
     ok: hasAll,
     backend,
     requestId,
-    toolCalls: run.toolCalls
+    toolCalls: run.toolCalls,
+    latencyMs: run.latencyMs
   };
 }
 
@@ -85,8 +87,17 @@ async function main() {
   const passed = results.filter(r => r.ok).length;
   const total = results.length;
   const accuracy = total === 0 ? 0 : passed / total;
+  const avgLatency = (() => {
+    const latencies = results.map(r => r.latencyMs).filter(v => typeof v === 'number');
+    if (latencies.length === 0) return null;
+    const sum = latencies.reduce((a, b) => a + b, 0);
+    return Math.round(sum / latencies.length);
+  })();
 
   console.log(`\nAgent E2E accuracy: ${(accuracy * 100).toFixed(1)}% (${passed}/${total})`);
+  if (avgLatency !== null) {
+    console.log(`Average latency: ${avgLatency} ms`);
+  }
 
   const failed = results.filter(r => !r.ok);
   if (failed.length > 0) {
@@ -98,11 +109,26 @@ async function main() {
 
   if (accuracy < minAccuracy) {
     console.error(`\nAccuracy below threshold (${minAccuracy}).`);
+    await writeReport({ results, accuracy, passed, total, avgLatency, ok: false });
     process.exit(1);
   }
+
+  await writeReport({ results, accuracy, passed, total, avgLatency, ok: true });
 }
 
 main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
+
+async function writeReport(summary) {
+  const payload = {
+    timestamp: new Date().toISOString(),
+    baseUrl,
+    minAccuracy,
+    ...summary,
+  };
+  const dir = path.dirname(reportPath);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(reportPath, JSON.stringify(payload, null, 2));
+}

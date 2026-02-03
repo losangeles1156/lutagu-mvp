@@ -74,6 +74,7 @@ scripts/*.json
 !scripts/check_llm_health.ts
 !scripts/test_ai_chat.ts
 !scripts/agent_e2e_test.js
+reports/agent_e2e_report.json
 !scripts/verify_l4_client.ts
 !scripts/verify_l2_client.ts
 !scripts/benchmark_l1_performance.ts
