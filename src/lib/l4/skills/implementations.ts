@@ -4,6 +4,7 @@ import { DataMux } from '@/lib/data/DataMux';
 import { SignalCollector } from '@/lib/analytics/SignalCollector';
 import { generateLLMResponse } from '@/lib/ai/llmService';
 import {
+    TIMETABLE_SKILL,
     FARE_RULES_SKILL,
     ACCESSIBILITY_MASTER_SKILL,
     LUGGAGE_LOGISTICS_SKILL,
@@ -17,6 +18,7 @@ import {
 } from './provisional';
 import {
     ToolDefinition,
+    TIMETABLE_SCHEMA,
     FARE_RULES_SCHEMA,
     ACCESSIBILITY_SCHEMA,
     LUGGAGE_SCHEMA,
@@ -28,6 +30,12 @@ import {
     ROUTING_SCHEMA
 } from './schemas';
 import { algorithmProvider } from '../algorithms/AlgorithmProvider';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client for timetable queries
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ... (BaseSkill)
 
@@ -68,6 +76,158 @@ abstract class BaseSkill implements DeepResearchSkill {
     setGemCapabilities(caps: string[]) {
         this.gemCapabilities = caps;
         return this; // fluent
+    }
+}
+
+// ------------------------------------------------------------------
+// NEW: Timetable Skill (Supabase Data Fetch)
+// ------------------------------------------------------------------
+export class TimetableSkill extends BaseSkill {
+    constructor() {
+        super(
+            TIMETABLE_SKILL.name,
+            88, // Priority: High, below Emergency/Medical but above general skills
+            TIMETABLE_SKILL.keywords,
+            TIMETABLE_SCHEMA,
+            {
+                cacheTtlMs: 5 * 60 * 1000 // Cache for 5 minutes
+            }
+        );
+        this.setGemCapabilities(['TIMETABLE', 'SCHEDULE', 'DEPARTURE']);
+    }
+
+    calculateRelevance(input: string, context: RequestContext): number {
+        let score = 0.0;
+
+        // Keyword matching
+        if (this.keywords.some(k => input.includes(k))) score += 0.5;
+
+        // Intent boost (from class ifyQuestion)
+        if ((context.nodeContext?.intent as string) === 'timetable') score += 0.4;
+
+        return Math.min(score, 1.0);
+    }
+
+    // Protected method for dependency injection in tests
+    protected getSupabase() {
+        return supabase;
+    }
+
+    async execute(input: string, context: RequestContext, params?: any): Promise<SkillResult | null> {
+        console.log(`[Deep Research] Triggering Timetable Skill... Params:`, params);
+
+        // Extract station ID
+        const stationId = params?.station_id
+            || context.nodeContext?.primaryNodeId
+            || context.currentStation;
+
+        if (!stationId) {
+            return {
+                source: 'template',
+                type: 'text',
+                content: '請指定車站名稱，例如「新宿站時刻表」',
+                confidence: 1.0,
+                reasoning: 'Missing station ID for timetable query'
+            };
+        }
+
+        try {
+            // Query Supabase static_timetables
+            const { data, error } = await this.getSupabase()
+                .from('static_timetables')
+                .select('data')
+                .eq('station_id', stationId)
+                .single();
+
+            if (error || !data) {
+                console.error(`[Timetable] Query failed for ${stationId}:`, error);
+                return {
+                    source: 'template',
+                    type: 'text',
+                    content: `抱歉，無法取得 ${stationId.split('.').pop()} 的時刻表資料。該站可能不在資料庫中。`,
+                    confidence: 0.5,
+                    reasoning: 'Timetable data not found in database'
+                };
+            }
+
+            // Determine calendar type (Weekday/SaturdayHoliday/Holiday)
+            const calendarType = this.getCurrentCalendarType();
+
+            // Filter timetables by calendar type
+            const allTimetables = data.data as any[];
+            const matchingTimetables = allTimetables.filter(tt =>
+                tt['odpt:calendar']?.includes(calendarType)
+            );
+
+            if (matchingTimetables.length === 0) {
+                return {
+                    source: 'template',
+                    type: 'text',
+                    content: `未找到 ${calendarType} 的時刻表數據（${stationId.split('.').pop()}）`,
+                    confidence: 0.6,
+                    reasoning: 'No matching calendar type'
+                };
+            }
+
+            // Signal collection
+            SignalCollector.collectSignal({
+                stationId,
+                policyCategory: 'expert_rule', // Using existing category
+                intentTarget: 'schedule',
+                unmetNeed: false
+            });
+
+            // Return structured data for frontend rendering
+            return {
+                source: 'algorithm',
+                type: 'card', // Triggers TimetableCard in frontend
+                content: `${stationId.split('.').pop()} 站時刻表 (${this.getCalendarLabel(calendarType)})`,
+                data: {
+                    strategy: 'timetable_skill',
+                    stationId,
+                    calendarType,
+                    timetables: matchingTimetables // ODPT format array
+                },
+                confidence: 0.98,
+                reasoning: 'Fetched from static_timetables (ODPT format)'
+            };
+
+        } catch (e: any) {
+            console.error('[Timetable] Unexpected error:', e);
+            return {
+                source: 'template',
+                type: 'text',
+                content: '抱歉，查詢時刻表時發生錯誤，請稍後再試。',
+                confidence: 0.3,
+                reasoning: `Query error: ${e.message}`
+            };
+        }
+    }
+
+    /**
+     * Determines current calendar type based on date
+     * TODO: Integrate Japanese public holiday calendar
+     */
+    private getCurrentCalendarType(): 'Weekday' | 'SaturdayHoliday' | 'Holiday' {
+        const now = new Date();
+        const day = now.getDay();
+
+        // Simplified version
+        if (day === 0) return 'Holiday'; // Sunday
+        if (day === 6) return 'SaturdayHoliday'; // Saturday
+        return 'Weekday';
+    }
+
+    /**
+     * Returns user-friendly label for calendar type
+     */
+    private getCalendarLabel(type: string): string {
+        switch (type) {
+            case 'Weekday': return '平日';
+            case 'SaturdayHoliday': return '週六';
+            case 'Holiday': return '週日/假日';
+            default: return type;
+        }
     }
 }
 

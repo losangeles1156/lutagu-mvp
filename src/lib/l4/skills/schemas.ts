@@ -9,6 +9,25 @@ export interface ToolDefinition {
     };
 }
 
+export const TIMETABLE_SCHEMA: ToolDefinition = {
+    name: "get_station_timetable",
+    description: "Retrieves the departure timetable for a specific station from the database. Returns structured schedule data including train types, departure times, and destinations.",
+    parameters: {
+        type: "object",
+        properties: {
+            station_id: {
+                type: "string",
+                description: "ODPT Station ID (e.g., 'odpt.Station:JR-East.Yamanote.Shinjuku'). If not provided, uses current station from context."
+            },
+            direction: {
+                type: "string",
+                enum: ["Northbound", "Southbound", "Eastbound", "Westbound"],
+                description: "Optional: Filter by specific rail direction."
+            }
+        }
+    }
+};
+
 export const FARE_RULES_SCHEMA: ToolDefinition = {
     name: "search_fare_rules",
     description: "Search for official fare rules, ticket prices, age categories (child/infant), and discount passes (e.g., JR Pass, Subway Ticket).",

@@ -33,6 +33,7 @@ import { getPartnerUrl } from '@/config/partners';
 import { STATION_MAP } from '@/lib/api/nodes';
 import { searchVectorDB, VectorSearchResult } from '@/lib/api/vectorService';
 import {
+    TimetableSkill,
     FareRulesSkill,
     AccessibilitySkill,
     LuggageSkill,
@@ -75,6 +76,7 @@ export class HybridEngine {
         this.skillDispatcher = new TagDrivenDispatcher(skillRegistry);
 
         // Register Deep Research Skills
+        skillRegistry.register(new TimetableSkill()); // NEW: Timetable Skill
         skillRegistry.register(new FareRulesSkill());
         skillRegistry.register(new AccessibilitySkill());
         skillRegistry.register(new LuggageSkill());

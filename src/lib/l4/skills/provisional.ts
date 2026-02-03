@@ -1,3 +1,12 @@
+export const TIMETABLE_SKILL = {
+    name: 'get-timetable',
+    keywords: ['時刻表', 'timetable', 'schedule', '下一班', '終電', '始發', '時刻', 'ダイヤ', 'next train', 'last train', 'first train', '幾點', '發車'],
+    content: `
+# Timetable Skill
+> Fetches real departure timetables from Supabase static_timetables.
+`
+};
+
 export const FARE_RULES_SKILL = {
     name: 'check-fare-rules',
     keywords: ['票', '錢', 'suica', 'pasmo', '優惠', 'fare', 'cost', 'price', 'ticket', 'ic card', 'pass', 'jr pass', 'tokyo subway ticket', 'day pass'],

@@ -640,7 +640,7 @@ export function classifyQuestion(text: string, locale: SupportedLocale): { kind:
 
     if (hasStatus) return { kind: 'status', toStationId };
     if (hasAmenity) return { kind: 'amenity', toStationId };
-    if (hasTimetable) return { kind: 'timetable' };
+    if (hasTimetable) return { kind: 'timetable', toStationId }; // FIX: Now extracts station ID like other intents
     if (hasFare) return { kind: 'fare', toStationId };
     if (hasRoute) {
         const zhMatch = text.match(/從\s*([^到\s]+)\s*到\s*([^?\s]+)/) || text.match(/([^从\s]+)\s*到\s*([^?\s]+)/);
@@ -656,7 +656,7 @@ export function classifyQuestion(text: string, locale: SupportedLocale): { kind:
 
     if (locale?.startsWith('zh')) {
         if (trimmed.includes('票') || trimmed.includes('價')) return { kind: 'fare', toStationId };
-        if (trimmed.includes('車') && trimmed.includes('幾點')) return { kind: 'timetable' };
+        if (trimmed.includes('車') && trimmed.includes('幾點')) return { kind: 'timetable', toStationId }; // FIX: Extract station ID
     }
 
     return { kind: 'unknown' };

@@ -6,6 +6,7 @@ import { ActionCard, Action } from './ActionCard';
 import { HackCard } from './HackCard';
 import { TrapCard } from './TrapCard';
 import { PlaceCard } from '../node/PlaceCard';
+import { TimetableCard } from '../node/TimetableCard';
 import { useTranslations, useLocale } from 'next-intl';
 
 interface AgenticResponseCardProps {
@@ -123,6 +124,20 @@ export function AgenticResponseCard({ type, data, source, onAction }: AgenticRes
 
                     return <PlaceCard key={poi.poiId || idx} place={l1Place as any} isFeatured={idx === 0} />;
                 })}
+            </div>
+        );
+    }
+
+    // Timetable Strategy (from TimetableSkill)
+    if (type === 'card' && data?.strategy === 'timetable_skill' && data?.timetables) {
+        return (
+            <div className="mt-4 w-full">
+                <div className="flex items-center gap-2 mb-3 px-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+                        {tL4('timetableLabel') || '時刻表'}
+                    </span>
+                </div>
+                <TimetableCard data={data} />
             </div>
         );
     }
