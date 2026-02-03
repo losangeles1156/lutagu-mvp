@@ -3,12 +3,26 @@ import { streamText } from 'ai';
 import { createAgentTools, ToolContext } from '@/lib/agent/tools/AgentTools';
 import { createAgentSystemPrompt, TOKYO_SYSTEM_PROMPT_CONFIG } from '@/lib/agent/prompts/SystemPrompt';
 import { randomUUID } from 'crypto';
-import { getModel, MODEL_CONFIG } from '@/lib/agent/openRouterConfig';
+import { getModel, MODEL_CONFIG, zeabur, ZEABUR_MODEL_CONFIG } from '@/lib/agent/openRouterConfig';
 
 export const runtime = 'nodejs';
 
 function getE2EKey() {
     return process.env.AGENT_E2E_KEY || '';
+}
+
+function resolveE2EProvider() {
+    const requested = (process.env.E2E_PROVIDER || 'openrouter').toLowerCase();
+    const hasOpenRouterKey = Boolean(process.env.OPENROUTER_API_KEY);
+    const hasZeaburKey = Boolean(process.env.ZEABUR_API_KEY);
+
+    if (requested === 'openrouter' && !hasOpenRouterKey && hasZeaburKey) {
+        return { provider: 'zeabur', hasOpenRouterKey, hasZeaburKey };
+    }
+    if (requested === 'zeabur' && !hasZeaburKey && hasOpenRouterKey) {
+        return { provider: 'openrouter', hasOpenRouterKey, hasZeaburKey };
+    }
+    return { provider: requested, hasOpenRouterKey, hasZeaburKey };
 }
 
 export async function POST(req: NextRequest) {
@@ -102,10 +116,13 @@ export async function POST(req: NextRequest) {
     });
 
     const start = Date.now();
+    const providerInfo = resolveE2EProvider();
     try {
         let toolNames: string[] = [];
         const result = await streamText({
-            model: getModel(MODEL_CONFIG.primary),
+            model: providerInfo.provider === 'zeabur'
+                ? zeabur(ZEABUR_MODEL_CONFIG.model)
+                : getModel(MODEL_CONFIG.primary),
             system: systemPrompt,
             messages,
             tools,
@@ -123,10 +140,10 @@ export async function POST(req: NextRequest) {
             backend: 'e2e',
             toolCalls: toolNames,
             latencyMs: Date.now() - start,
-            text: textResult || ''
+            text: textResult || '',
+            provider: providerInfo.provider
         });
     } catch (error: any) {
-        const provider = 'openrouter';
         return NextResponse.json({
             ok: false,
             requestId: randomUUID(),
@@ -135,9 +152,9 @@ export async function POST(req: NextRequest) {
             latencyMs: Date.now() - start,
             error: error?.message || 'E2E execution failed',
             errorName: error?.name || null,
-            provider,
-            hasOpenRouterKey: Boolean(process.env.OPENROUTER_API_KEY),
-            hasZeaburKey: Boolean(process.env.ZEABUR_API_KEY)
+            provider: providerInfo.provider,
+            hasOpenRouterKey: providerInfo.hasOpenRouterKey,
+            hasZeaburKey: providerInfo.hasZeaburKey
         }, { status: 500 });
     }
 }
