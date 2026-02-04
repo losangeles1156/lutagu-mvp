@@ -3641,5 +3641,1737 @@
     "source": "osm",
     "source_id": "osm:443525189",
     "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_443698249",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "松林寺"
+    ],
+    "coordinates": {
+      "lat": 35.6863829,
+      "lng": 139.6208533
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:443698249",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "osm_448138884",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "伏見山 正法寺"
+    ],
+    "coordinates": {
+      "lat": 35.6643884,
+      "lng": 139.6517175
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:448138884",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "osm_448140871",
+    "category": "landmark",
+    "name": {
+      "en": "勝林寺",
+      "ja": "勝林寺",
+      "zh-TW": "勝林寺"
+    },
+    "aliases": [
+      "勝林寺"
+    ],
+    "coordinates": {
+      "lat": 35.6639113,
+      "lng": 139.6518863
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:448140871",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "osm_448141327",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "浄徳寺"
+    ],
+    "coordinates": {
+      "lat": 35.6632582,
+      "lng": 139.6518698
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:448141327",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "hiraki_ukiyoe_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Hiraki Ukiyoe Museum",
+      "ja": "Hiraki Ukiyoe Museum",
+      "zh-TW": "Hiraki Ukiyoe Museum"
+    },
+    "aliases": [
+      "Hiraki Ukiyoe Museum",
+      "平木浮世絵美術館"
+    ],
+    "coordinates": {
+      "lat": 35.655139,
+      "lng": 139.792778
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q11483041",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "the_university_art_museum_tokyo_university_of_the_arts",
+    "category": "landmark",
+    "name": {
+      "en": "The University Art Museum, Tokyo University of the Arts",
+      "ja": "The University Art Museum, Tokyo University of the Arts",
+      "zh-TW": "The University Art Museum, Tokyo University of the Arts"
+    },
+    "aliases": [
+      "The University Art Museum, Tokyo University of the Arts",
+      "Tōkyō Geijutsu Daigaku. Daigaku Bijutsukan"
+    ],
+    "coordinates": {
+      "lat": 35.884352777,
+      "lng": 140.114880555
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q11525123",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "meguro_history_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Meguro History Museum",
+      "ja": "Meguro History Museum",
+      "zh-TW": "Meguro History Museum"
+    },
+    "aliases": [
+      "Meguro History Museum"
+    ],
+    "coordinates": {
+      "lat": 35.639333,
+      "lng": 139.702583
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q11279688",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "tokyo_photographic_art_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Photographic Art Museum",
+      "ja": "Tokyo Photographic Art Museum",
+      "zh-TW": "Tokyo Photographic Art Museum"
+    },
+    "aliases": [
+      "Tokyo Photographic Art Museum",
+      "Tokyo Metropolitan Museum of Photography",
+      "TOP Museum"
+    ],
+    "coordinates": {
+      "lat": 35.6417,
+      "lng": 139.7132
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q862884",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "japanese_folk_crafts_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Japanese Folk Crafts Museum",
+      "ja": "Japanese Folk Crafts Museum",
+      "zh-TW": "Japanese Folk Crafts Museum"
+    },
+    "aliases": [
+      "Japanese Folk Crafts Museum",
+      "Japan Folk Crafts Museum",
+      "The Japan Folk Crafts Museum"
+    ],
+    "coordinates": {
+      "lat": 35.66083333,
+      "lng": 139.67916667
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q3789149",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "meguro_museum_of_art",
+    "category": "landmark",
+    "name": {
+      "en": "Meguro Museum of Art",
+      "ja": "Meguro Museum of Art",
+      "zh-TW": "Meguro Museum of Art"
+    },
+    "aliases": [
+      "Meguro Museum of Art"
+    ],
+    "coordinates": {
+      "lat": 35.634907,
+      "lng": 139.707663
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q3815450",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "takagi_bonsai_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Takagi Bonsai Museum",
+      "ja": "Takagi Bonsai Museum",
+      "zh-TW": "Takagi Bonsai Museum"
+    },
+    "aliases": [
+      "Takagi Bonsai Museum",
+      "高木盆栽美術館"
+    ],
+    "coordinates": {
+      "lat": 35.7031,
+      "lng": 139.772
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q3514129",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "akasaka_palace",
+    "category": "landmark",
+    "name": {
+      "en": "Akasaka Palace",
+      "ja": "Akasaka Palace",
+      "zh-TW": "Akasaka Palace"
+    },
+    "aliases": [
+      "Akasaka Palace",
+      "Akasaka State Guest House",
+      "State Guest House",
+      "The State Guest House"
+    ],
+    "coordinates": {
+      "lat": 35.68,
+      "lng": 139.72861111
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q555255",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "the_national_film_center",
+    "category": "landmark",
+    "name": {
+      "en": "The National Film Center",
+      "ja": "The National Film Center",
+      "zh-TW": "The National Film Center"
+    },
+    "aliases": [
+      "The National Film Center"
+    ],
+    "coordinates": {
+      "lat": 35.675537,
+      "lng": 139.77063
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q29570263",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "inokashira_park_zoo",
+    "category": "landmark",
+    "name": {
+      "en": "Inokashira Park Zoo",
+      "ja": "Inokashira Park Zoo",
+      "zh-TW": "Inokashira Park Zoo"
+    },
+    "aliases": [
+      "Inokashira Park Zoo"
+    ],
+    "coordinates": {
+      "lat": 35.700833,
+      "lng": 139.57275
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q10860225",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "meiji_university_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Meiji University Museum",
+      "ja": "Meiji University Museum",
+      "zh-TW": "Meiji University Museum"
+    },
+    "aliases": [
+      "Meiji University Museum"
+    ],
+    "coordinates": {
+      "lat": 35.6987,
+      "lng": 139.7619
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q85880847",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "institute_for_nature_study",
+    "category": "landmark",
+    "name": {
+      "en": "Institute for Nature Study",
+      "ja": "Institute for Nature Study",
+      "zh-TW": "Institute for Nature Study"
+    },
+    "aliases": [
+      "Institute for Nature Study",
+      "shizen kyōiku-en"
+    ],
+    "coordinates": {
+      "lat": 35.636007,
+      "lng": 139.721312
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q5557026",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "minato_city_local_history_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Minato City Local History Museum",
+      "ja": "Minato City Local History Museum",
+      "zh-TW": "Minato City Local History Museum"
+    },
+    "aliases": [
+      "Minato City Local History Museum"
+    ],
+    "coordinates": {
+      "lat": 35.640083,
+      "lng": 139.726889
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q115212362",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "tokyo_anime_center",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Anime Center",
+      "ja": "Tokyo Anime Center",
+      "zh-TW": "Tokyo Anime Center"
+    },
+    "aliases": [
+      "Tokyo Anime Center",
+      "東京アニメセンター in DNPプラザ"
+    ],
+    "coordinates": {
+      "lat": 35.661627777,
+      "lng": 139.700519444
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q6128676",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "drum_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Drum Museum",
+      "ja": "Drum Museum",
+      "zh-TW": "Drum Museum"
+    },
+    "aliases": [
+      "Drum Museum",
+      "Taiko kan",
+      "Taikokan"
+    ],
+    "coordinates": {
+      "lat": 35.711863,
+      "lng": 139.791783
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q104698257",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "historical_materials_section_yoshioka_yayoi_memorial_room_tokyo_",
+    "category": "landmark",
+    "name": {
+      "en": "Historical Materials Section, Yoshioka Yayoi Memorial Room Tokyo Women's Medical University",
+      "ja": "Historical Materials Section, Yoshioka Yayoi Memorial Room Tokyo Women's Medical University",
+      "zh-TW": "Historical Materials Section, Yoshioka Yayoi Memorial Room Tokyo Women's Medical University"
+    },
+    "aliases": [
+      "Historical Materials Section, Yoshioka Yayoi Memorial Room Tokyo Women's Medical University"
+    ],
+    "coordinates": {
+      "lat": 35.697551,
+      "lng": 139.720637
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q104698247",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "tsuri_bunka_shiryoukan",
+    "category": "landmark",
+    "name": {
+      "en": "Tsuri Bunka Shiryoukan",
+      "ja": "Tsuri Bunka Shiryoukan",
+      "zh-TW": "Tsuri Bunka Shiryoukan"
+    },
+    "aliases": [
+      "Tsuri Bunka Shiryoukan"
+    ],
+    "coordinates": {
+      "lat": 35.690926,
+      "lng": 139.719441
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q104698254",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "wikidata_q22120359",
+    "category": "landmark",
+    "name": {
+      "en": "町田市立博物館",
+      "ja": "町田市立博物館",
+      "zh-TW": "町田市立博物館"
+    },
+    "aliases": [
+      "町田市立博物館"
+    ],
+    "coordinates": {
+      "lat": 35.56722222,
+      "lng": 139.45111111
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q22120359",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "min_on_music_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Min-on Music Museum",
+      "ja": "Min-on Music Museum",
+      "zh-TW": "Min-on Music Museum"
+    },
+    "aliases": [
+      "Min-on Music Museum"
+    ],
+    "coordinates": {
+      "lat": 35.6823,
+      "lng": 139.71927
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q65272034",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "shusse_no_ishidan",
+    "category": "landmark",
+    "name": {
+      "en": "Shusse no Ishidan",
+      "ja": "Shusse no Ishidan",
+      "zh-TW": "Shusse no Ishidan"
+    },
+    "aliases": [
+      "Shusse no Ishidan"
+    ],
+    "coordinates": {
+      "lat": 35.66467,
+      "lng": 139.74889
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q99557139",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "mon_takanawa_the_museum_of_narratives",
+    "category": "landmark",
+    "name": {
+      "en": "MoN Takanawa: The Museum of Narratives",
+      "ja": "MoN Takanawa: The Museum of Narratives",
+      "zh-TW": "MoN Takanawa: The Museum of Narratives"
+    },
+    "aliases": [
+      "MoN Takanawa: The Museum of Narratives",
+      "MoN Takanawa"
+    ],
+    "coordinates": {
+      "lat": 35.63969,
+      "lng": 139.741829
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q136463408",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "shibuya_scramble_crossing",
+    "category": "landmark",
+    "name": {
+      "en": "Shibuya scramble crossing",
+      "ja": "Shibuya scramble crossing",
+      "zh-TW": "Shibuya scramble crossing"
+    },
+    "aliases": [
+      "Shibuya scramble crossing",
+      "Shibuya Crossing",
+      "Shibuya Sta. Crossing",
+      "Shibuya Station Crossing"
+    ],
+    "coordinates": {
+      "lat": 35.659502777,
+      "lng": 139.700544444
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q21083961",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "ky_do_no_mori",
+    "category": "landmark",
+    "name": {
+      "en": "Kyōdo-no-Mori",
+      "ja": "Kyōdo-no-Mori",
+      "zh-TW": "Kyōdo-no-Mori"
+    },
+    "aliases": [
+      "Kyōdo-no-Mori",
+      "郷土の森",
+      "郷土の森博物館"
+    ],
+    "coordinates": {
+      "lat": 35.65611111,
+      "lng": 139.47361111
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q3788904",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "yoku_moku_museum",
+    "category": "landmark",
+    "name": {
+      "en": "Yoku Moku Museum",
+      "ja": "Yoku Moku Museum",
+      "zh-TW": "Yoku Moku Museum"
+    },
+    "aliases": [
+      "Yoku Moku Museum"
+    ],
+    "coordinates": {
+      "lat": 35.6596,
+      "lng": 139.714
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q131904628",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "museum_of_marine_science_tokyo_university_of_marine_science_and_",
+    "category": "landmark",
+    "name": {
+      "en": "Museum of Marine Science, Tokyo University of Marine Science and Technology",
+      "ja": "Museum of Marine Science, Tokyo University of Marine Science and Technology",
+      "zh-TW": "Museum of Marine Science, Tokyo University of Marine Science and Technology"
+    },
+    "aliases": [
+      "Museum of Marine Science, Tokyo University of Marine Science and Technology",
+      "TUMSAT Museum of Marine Science"
+    ],
+    "coordinates": {
+      "lat": 35.627514,
+      "lng": 139.748205
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q133225949",
+    "last_verified": "2026-02-04T12:33:15.769Z"
+  },
+  {
+    "id": "keio_museum_commons",
+    "category": "landmark",
+    "name": {
+      "en": "Keio Museum Commons",
+      "ja": "Keio Museum Commons",
+      "zh-TW": "Keio Museum Commons"
+    },
+    "aliases": [
+      "Keio Museum Commons",
+      "KeMCo"
+    ],
+    "coordinates": {
+      "lat": 35.648767,
+      "lng": 139.744376
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "wikidata",
+    "source_id": "wikidata:Q133238216",
+    "last_verified": "2026-02-04T12:33:15.769Z"
   }
 ]
