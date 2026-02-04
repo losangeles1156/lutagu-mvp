@@ -9,7 +9,7 @@ const mockRoute: RouteOption = {
     label: 'Test Route',
     steps: [
         { kind: 'train', text: 'Take Yamanote to Ueno', note: '' },
-        { kind: 'transfer', text: 'Transfer', note: '' },
+        { kind: 'transfer', text: 'Transfer at Ueno', note: '' },
         { kind: 'train', text: 'Take Ginza Line to Asakusa', note: '' }
     ],
     sources: [],

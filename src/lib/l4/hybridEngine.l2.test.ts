@@ -234,7 +234,13 @@ test('HybridEngine uses deterministic normal response for status query (ja)', as
     assert.ok(/大きな遅延は見当たりません/.test(res.content));
 });
 
-test('Conversation matrix: HybridEngine routes deterministic paths without LLM', async () => {
+const hasVectorService = Boolean(
+    process.env.VECTOR_SEARCH_API_URL || process.env.VECTOR_SEARCH_SERVICE_URL
+);
+const hasLiteLLMKey = Boolean(process.env.LITELLM_API_KEY);
+const runConversationMatrixTest = (hasVectorService && hasLiteLLMKey) ? test : test.skip;
+
+runConversationMatrixTest('Conversation matrix: HybridEngine routes deterministic paths without LLM', async () => {
     const engine = new HybridEngine();
 
     const cases: Array<{
