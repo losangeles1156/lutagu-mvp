@@ -107,16 +107,34 @@ export const useAgentChat = (options: {
         }).join('');
     };
 
+    const extractHybridData = (content: string): { cleaned: string; type?: string; data?: any } => {
+        if (!content) return { cleaned: '' };
+        const match = content.match(/\[HYBRID_DATA\]([\s\S]*?)\[\/HYBRID_DATA\]/i);
+        if (!match) return { cleaned: content };
+        const jsonRaw = match[1];
+        let parsed: any = null;
+        try {
+            parsed = JSON.parse(jsonRaw);
+        } catch (error) {
+            parsed = null;
+        }
+        const cleaned = content.replace(match[0], '').trim();
+        return { cleaned, type: parsed?.type, data: parsed?.data };
+    };
+
     const messages: AgentMessage[] = aiMessages.map((m: any) => {
         const contentText = typeof m?.content === 'string' ? m.content : '';
         const contentFromContentParts = extractText(m?.content);
         const contentFromParts = extractText(m?.parts);
         const resolvedContent = contentText || contentFromContentParts || contentFromParts || '';
+        const hybridParsed = extractHybridData(resolvedContent);
 
         return {
             ...m,
-            content: resolvedContent,
-            rawContent: resolvedContent
+            content: hybridParsed.cleaned || resolvedContent,
+            rawContent: resolvedContent,
+            type: hybridParsed.type || m.type,
+            data: hybridParsed.data || m.data
         };
     }).filter((m: AgentMessage) => m.role !== 'system');
 

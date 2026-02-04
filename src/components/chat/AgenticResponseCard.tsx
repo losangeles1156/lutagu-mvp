@@ -8,6 +8,7 @@ import { TrapCard } from './TrapCard';
 import { PlaceCard } from '../node/PlaceCard';
 import { TimetableCard } from '../node/TimetableCard';
 import { useTranslations, useLocale } from 'next-intl';
+import { AirportAccessCard } from './AirportAccessCard';
 
 interface AgenticResponseCardProps {
     type: string; // 'options' | 'action' | 'card' ...
@@ -140,6 +141,11 @@ export function AgenticResponseCard({ type, data, source, onAction }: AgenticRes
                 <TimetableCard data={data} />
             </div>
         );
+    }
+
+    // Airport Access Comparison
+    if (type === 'airport_access') {
+        return <AirportAccessCard data={data} />;
     }
 
     // Single Action or Card

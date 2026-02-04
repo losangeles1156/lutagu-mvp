@@ -15,6 +15,13 @@ import fs from 'fs';
 import path from 'path';
 import { getTrainStatus } from '@/lib/odpt/service';
 import { deriveOfficialStatusFromText } from '@/lib/odpt/service';
+import { resolvePlace, type PlaceCandidateStation } from '@/lib/places/PlaceResolver';
+import { DataNormalizer } from '@/lib/l4/utils/Normalization';
+import { calcTransferPainIndex } from '@/lib/l4/algorithms/TransferPainIndex';
+import airportAccess from '@/data/airport_access_tokyo.json';
+import { searchL4Knowledge } from '@/lib/l4/searchService';
+import { getJSTTime } from '@/lib/utils/timeUtils';
+import { odptClient } from '@/lib/odpt/client';
 
 // =============================================================================
 // Type Definitions
@@ -77,6 +84,288 @@ const findRouteSchema = jsonSchema<{
     required: ['origin', 'destination'],
 });
 
+type ResolvedEndpoint =
+    | { kind: 'station'; label: string; stationId: string; walkMinutes: number; distanceMeters: number; tpiScore: number; complexity?: PlaceCandidateStation['complexity'] }
+    | { kind: 'place'; label: string; placeId: string; category: string; stations: Array<{ label: string; stationId: string; walkMinutes: number; distanceMeters: number; tpiScore: number; complexity?: PlaceCandidateStation['complexity'] }> }
+    | { kind: 'unknown'; label: string };
+
+function normalizeStationCandidate(candidate: PlaceCandidateStation, fallbackLabel: string): { label: string; stationId: string; walkMinutes: number; distanceMeters: number; tpiScore: number; complexity?: PlaceCandidateStation['complexity'] } | null {
+    const stationId = candidate.stationId || (candidate.stationName ? DataNormalizer.lookupStationId(candidate.stationName) : null);
+    if (!stationId) return null;
+
+    const walkMinutes = Math.max(0, candidate.walkMinutes || 0);
+    const distanceMeters = Math.max(0, candidate.distanceMeters || Math.round(walkMinutes * 80));
+    const complexity = candidate.complexity || { turnCount: 2, signageClarity: 2, exitCount: 6, underConstruction: false };
+
+    const tpi = calcTransferPainIndex({
+        transfer: {
+            fromStationId: stationId,
+            fromLineId: 'walk',
+            toStationId: stationId,
+            toLineId: 'walk',
+            walkingDistanceMeters: distanceMeters,
+            floorDifference: 0,
+            verticalMethod: 'mixed',
+            complexity: complexity,
+            baseTpi: 0,
+            peakHourMultiplier: 1
+        },
+        crowdLevel: 'normal',
+        userHasLuggage: false,
+        userAccessibilityNeeds: {
+            wheelchair: false,
+            stroller: false,
+            elderly: false,
+            visualImpairment: false
+        }
+    }, undefined, 'zh');
+
+    return {
+        label: candidate.stationName || fallbackLabel,
+        stationId,
+        walkMinutes,
+        distanceMeters,
+        tpiScore: tpi.score,
+        complexity
+    };
+}
+
+async function resolveEndpoint(input: string): Promise<ResolvedEndpoint> {
+    const trimmed = String(input || '').trim();
+    if (!trimmed) return { kind: 'unknown', label: '' };
+
+    const directId = /odpt[.:]Station:/i.test(trimmed) ? trimmed.replace(/^odpt:Station:/i, 'odpt.Station:') : null;
+    if (directId) {
+        return { kind: 'station', label: trimmed, stationId: directId, walkMinutes: 0, distanceMeters: 0, tpiScore: 0 };
+    }
+
+    const stationId = DataNormalizer.lookupStationId(trimmed);
+    if (stationId) {
+        return { kind: 'station', label: trimmed, stationId, walkMinutes: 0, distanceMeters: 0, tpiScore: 0 };
+    }
+
+    const place = await resolvePlace(trimmed);
+    if (place) {
+        const stations = (place.candidateStations || [])
+            .map((c) => normalizeStationCandidate(c, trimmed))
+            .filter(Boolean) as Array<{ label: string; stationId: string; walkMinutes: number; distanceMeters: number; tpiScore: number; complexity?: PlaceCandidateStation['complexity'] }>;
+
+        stations.sort((a, b) => {
+            const aDist = Number.isFinite(a.distanceMeters) ? a.distanceMeters : Number.MAX_SAFE_INTEGER;
+            const bDist = Number.isFinite(b.distanceMeters) ? b.distanceMeters : Number.MAX_SAFE_INTEGER;
+            return aDist - bDist;
+        });
+
+        if (stations.length > 0 || place.category === 'airport') {
+            return {
+                kind: 'place',
+                label: place.name?.['zh-TW'] || place.name?.en || trimmed,
+                placeId: place.placeId,
+                category: place.category || 'poi',
+                stations
+            };
+        }
+    }
+
+    return { kind: 'unknown', label: trimmed };
+}
+
+async function buildAirportAccessRecommendation(airportId: string, ctx: ToolContext, userProfile?: string) {
+    const airport = (airportAccess as any)?.airports?.find((a: any) => a.id === airportId);
+    if (!airport) return null;
+
+    const hasLuggage = /luggage|行李|スーツケース|嬰兒車|stroller/i.test(userProfile || '');
+    const rail = airport.modes?.rail || [];
+    const bus = airport.modes?.bus || [];
+    const taxi = airport.modes?.taxi || [];
+
+    const now = getJSTTime();
+    const timeKey = getHeadwayKey(now);
+    const weather = await getWeatherImpactKey(ctx);
+
+    const scored = [
+        ...await Promise.all(rail.map(async (opt: any) => scoreAirportOption('rail', opt, now, timeKey, weather, hasLuggage))),
+        ...await Promise.all(bus.map(async (opt: any) => scoreAirportOption('bus', opt, now, timeKey, weather, hasLuggage))),
+        ...await Promise.all(taxi.map(async (opt: any) => scoreAirportOption('taxi', opt, now, timeKey, weather, hasLuggage))),
+    ].filter((x) => x.option);
+
+    if (scored.length === 0) return null;
+
+    scored.sort((a, b) => a.score - b.score);
+    const recommended = scored[0];
+    const alternatives = scored.slice(1, 3);
+
+    return {
+        airport: airportId,
+        airportName: airport.name,
+        recommendation: recommended,
+        alternatives,
+        context: {
+            date: now.dateKey,
+            time: `${String(now.hour).padStart(2, '0')}:${String(now.minute).padStart(2, '0')}`,
+            weatherSummary: weather
+        }
+    };
+}
+
+type HeadwayKey = 'weekdayPeak' | 'weekdayOffpeak' | 'weekend' | 'lateNight';
+type WeatherKey = 'rain' | 'wind' | 'snow' | 'clear';
+
+const ODPT_HEADWAY_TTL_MS = 15 * 60 * 1000;
+const odptHeadwayCache = new Map<string, { value: number; expiresAt: number }>();
+
+function getHeadwayKey(now: ReturnType<typeof getJSTTime>): HeadwayKey {
+    const hour = now.hour;
+    if (hour < 6 || hour >= 23) return 'lateNight';
+    if (now.isHoliday) return 'weekend';
+    if ((hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20)) return 'weekdayPeak';
+    return 'weekdayOffpeak';
+}
+
+async function getWeatherImpactKey(ctx: ToolContext): Promise<WeatherKey> {
+    try {
+        const supabase = getSupabaseClient();
+        const { data } = await supabase.from('weather_sync').select('*').limit(1).maybeSingle();
+        const condition = String(data?.condition || '').toLowerCase();
+        const zhCondition = String(data?.condition_zh || '');
+        const jaCondition = String(data?.condition_ja || '');
+
+        if (condition.includes('rain') || zhCondition.includes('雨') || jaCondition.includes('雨')) return 'rain';
+        if (condition.includes('snow') || zhCondition.includes('雪') || jaCondition.includes('雪')) return 'snow';
+        if (condition.includes('wind') || zhCondition.includes('風') || jaCondition.includes('風')) return 'wind';
+        return 'clear';
+    } catch (error) {
+        return 'clear';
+    }
+}
+
+async function scoreAirportOption(
+    mode: 'rail' | 'bus' | 'taxi',
+    option: any,
+    now: ReturnType<typeof getJSTTime>,
+    headwayKey: HeadwayKey,
+    weatherKey: WeatherKey,
+    hasLuggage: boolean
+) {
+    const travelTime = Number(option.typicalTimeMin || 0);
+    const headways = option.headways || {};
+    const odptHeadway = await fetchHeadwayFromOdpt(option, now, headwayKey);
+    const headwayValue = typeof odptHeadway === 'number' ? odptHeadway : Number(headways[headwayKey] || 0);
+    const headwayPenalty = headwayValue * 0.5;
+
+    const transfer = option.transferPenalty || { baseMinutes: 0, tpiMultiplier: 0 };
+    const tpiScore = mode === 'rail' ? 30 : mode === 'bus' ? 15 : 0;
+    const transferPenalty = Number(transfer.baseMinutes || 0) + (tpiScore * Number(transfer.tpiMultiplier || 0));
+
+    const weatherImpact = option.weatherImpact || {};
+    const weatherMultiplier = weatherKey === 'clear' ? 1.0 : Number(weatherImpact[weatherKey] || 1.0);
+    const weatherPenalty = (travelTime + transferPenalty) * (weatherMultiplier - 1.0);
+
+    // Luggage bias: favor bus/taxi when luggage or stroller
+    const luggageBias = hasLuggage && (mode === 'bus' || mode === 'taxi') ? -5 : 0;
+
+    const timeWindowPenalty = isWithinTimeWindow(now, option.timeWindows) ? 0 : 999;
+    const score = travelTime + transferPenalty + headwayPenalty + weatherPenalty + luggageBias + timeWindowPenalty;
+
+    return {
+        mode,
+        option,
+        score: Math.round(score),
+        reasoning: {
+            travelTime,
+            transferPenalty: Math.round(transferPenalty),
+            headwayPenalty: Math.round(headwayPenalty),
+            weatherPenalty: Math.round(weatherPenalty),
+            luggageBias,
+            timeWindowPenalty,
+            odptHeadway: typeof odptHeadway === 'number' ? Math.round(odptHeadway) : null
+        },
+        weatherAdjusted: weatherKey !== 'clear'
+    };
+}
+
+async function fetchHeadwayFromOdpt(option: any, now: ReturnType<typeof getJSTTime>, headwayKey: HeadwayKey): Promise<number | null> {
+    const stationIds: string[] = Array.isArray(option?.odptStationIds) ? option.odptStationIds : [];
+    if (stationIds.length === 0) return null;
+
+    const stationId = stationIds[0];
+    const cacheKey = `${stationId}:${headwayKey}:${now.calendarSelector?.join(',') || ''}`;
+    const cached = odptHeadwayCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+        return cached.value;
+    }
+    try {
+        const timetables = await odptClient.getStationTimetable(stationId);
+        if (!Array.isArray(timetables) || timetables.length === 0) return null;
+
+        const calendarSelector = now.calendarSelector || ['Weekday'];
+        const relevant = timetables.filter((tt: any) => {
+            const cal = String(tt['odpt:calendar'] || '').replace('odpt.Calendar:', '');
+            return calendarSelector.includes(cal);
+        });
+        if (relevant.length === 0) return null;
+
+        const departures: number[] = [];
+        for (const tt of relevant) {
+            const objects = Array.isArray(tt['odpt:stationTimetableObject']) ? tt['odpt:stationTimetableObject'] : [];
+            for (const obj of objects) {
+                const time = obj['odpt:departureTime'];
+                if (!time) continue;
+                const [h, m] = String(time).split(':').map(Number);
+                if (Number.isNaN(h) || Number.isNaN(m)) continue;
+                const minutes = h * 60 + m;
+                departures.push(minutes);
+            }
+        }
+
+        if (departures.length < 2) return null;
+        departures.sort((a, b) => a - b);
+
+        const window = option?.timeWindows;
+        const filtered = window ? departures.filter((d) => isWithinTimeWindowMinutes(d, window)) : departures;
+        if (filtered.length < 2) return null;
+
+        const diffs: number[] = [];
+        for (let i = 1; i < filtered.length; i++) {
+            const diff = filtered[i] - filtered[i - 1];
+            if (diff > 0 && diff < 120) diffs.push(diff);
+        }
+        if (diffs.length === 0) return null;
+        const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+        odptHeadwayCache.set(cacheKey, { value: avg, expiresAt: Date.now() + ODPT_HEADWAY_TTL_MS });
+        return avg;
+    } catch (error) {
+        console.warn('[AirportAccess] ODPT headway fetch failed:', error);
+        return null;
+    }
+}
+
+function isWithinTimeWindowMinutes(currentMinutes: number, window: { start?: string; end?: string }): boolean {
+    if (!window?.start || !window?.end) return true;
+    const toMinutes = (t: string) => {
+        const [h, m] = t.split(':').map((x) => Number(x));
+        return (h * 60) + m;
+    };
+    const start = toMinutes(window.start);
+    const end = toMinutes(window.end);
+    if (start <= end) return currentMinutes >= start && currentMinutes <= end;
+    return currentMinutes >= start || currentMinutes <= end;
+}
+
+function isWithinTimeWindow(now: ReturnType<typeof getJSTTime>, window?: { start?: string; end?: string }): boolean {
+    if (!window?.start || !window?.end) return true;
+    const toMinutes = (t: string) => {
+        const [h, m] = t.split(':').map((x) => Number(x));
+        return (h * 60) + m;
+    };
+    const current = now.hour * 60 + now.minute;
+    const start = toMinutes(window.start);
+    const end = toMinutes(window.end);
+    if (start <= end) return current >= start && current <= end;
+    // spans midnight
+    return current >= start || current <= end;
+}
+
 export const createFindRouteTool = (ctx: ToolContext) => tool({
     description: `Find the best transit route between two locations. 
     Returns route options with transfer info, duration, and fare estimates.
@@ -87,16 +376,83 @@ export const createFindRouteTool = (ctx: ToolContext) => tool({
         console.log(logMsg);
         safeAppendAgentLog(`[${new Date().toISOString()}] ${logMsg}\n`);
 
-
         try {
             const provider = getAlgorithmProvider();
-            const routes = await provider.findRoutes({
-                originId: origin,
-                destinationId: destination,
-                locale: ctx.locale as SupportedLocale,
-            });
+            const resolvedOrigin = await resolveEndpoint(origin);
+            const resolvedDest = await resolveEndpoint(destination);
 
-            if (!routes || routes.length === 0) {
+            if (resolvedOrigin.kind === 'unknown' || resolvedDest.kind === 'unknown') {
+                return {
+                    success: false,
+                    message: ctx.locale === 'en'
+                        ? `Could not resolve station or place for ${origin} or ${destination}.`
+                        : `無法辨識 ${origin} 或 ${destination} 的站點/地點，請再提供更明確的名稱。`,
+                };
+            }
+
+            const originStations = resolvedOrigin.kind === 'station'
+                ? [resolvedOrigin]
+                : resolvedOrigin.stations.slice(0, 3);
+            const destStations = resolvedDest.kind === 'station'
+                ? [resolvedDest]
+                : resolvedDest.stations.slice(0, 3);
+
+            // If airport is involved, build access recommendation for better accuracy
+            if ((resolvedOrigin as any).category === 'airport' || (resolvedDest as any).category === 'airport') {
+                const airportId = (resolvedOrigin as any).category === 'airport'
+                    ? (resolvedOrigin as any).placeId?.includes('narita') ? 'narita' : (resolvedOrigin as any).placeId?.includes('haneda') ? 'haneda' : null
+                    : (resolvedDest as any).placeId?.includes('narita') ? 'narita' : (resolvedDest as any).placeId?.includes('haneda') ? 'haneda' : null;
+                const access = airportId ? await buildAirportAccessRecommendation(airportId, ctx, origin + ' ' + destination) : null;
+                if (access) {
+                    return {
+                        success: true,
+                        airportAccess: access,
+                        summary: ctx.locale === 'en'
+                            ? `Here is the recommended airport access for ${airportId}.`
+                            : `這是前往 ${airportId === 'narita' ? '成田' : '羽田'} 的建議交通方式。`,
+                    };
+                }
+            }
+
+            const scoredRoutes: Array<{
+                score: number;
+                route: any;
+                originStationId: string;
+                destinationStationId: string;
+                originWalk: number;
+                destWalk: number;
+                originTpi: number;
+                destTpi: number;
+            }> = [];
+
+            for (const o of originStations) {
+                for (const d of destStations) {
+                    const routes = await provider.findRoutes({
+                        originId: o.stationId,
+                        destinationId: d.stationId,
+                        locale: ctx.locale as SupportedLocale,
+                    });
+                    if (!routes || routes.length === 0) continue;
+
+                    routes.slice(0, 3).forEach((r) => {
+                        const duration = typeof r.duration === 'number' ? r.duration : 0;
+                        const transfers = typeof r.transfers === 'number' ? r.transfers : 0;
+                        const score = duration + (o.walkMinutes * 1.2) + (d.walkMinutes * 1.2) + (transfers * 6) + ((o.tpiScore + d.tpiScore) * 0.3);
+                        scoredRoutes.push({
+                            score,
+                            route: r,
+                            originStationId: o.stationId,
+                            destinationStationId: d.stationId,
+                            originWalk: o.walkMinutes,
+                            destWalk: d.walkMinutes,
+                            originTpi: o.tpiScore,
+                            destTpi: d.tpiScore
+                        });
+                    });
+                }
+            }
+
+            if (scoredRoutes.length === 0) {
                 return {
                     success: false,
                     message: ctx.locale === 'en'
@@ -105,23 +461,30 @@ export const createFindRouteTool = (ctx: ToolContext) => tool({
                 };
             }
 
-            // Return structured data for UI rendering
+            scoredRoutes.sort((a, b) => a.score - b.score);
+            const best = scoredRoutes[0];
+
             return {
                 success: true,
-                routes: routes.slice(0, 3).map((r) => ({
-                    totalDuration: r.duration,
-                    totalFare: r.fare,
-                    transfers: r.transfers,
-                    steps: r.steps?.map((s) => ({
+                routes: scoredRoutes.slice(0, 3).map((r) => ({
+                    totalDuration: r.route.duration,
+                    totalFare: r.route.fare,
+                    transfers: r.route.transfers,
+                    steps: r.route.steps?.map((s: any) => ({
                         kind: s.kind,
                         text: s.text,
                         railwayId: s.railwayId,
                         stationId: s.stationId,
                     })),
+                    originStationId: r.originStationId,
+                    destinationStationId: r.destinationStationId,
+                    walkMinutes: { origin: r.originWalk, destination: r.destWalk },
+                    tpiScore: { origin: r.originTpi, destination: r.destTpi },
+                    score: r.score
                 })),
                 summary: ctx.locale === 'en'
-                    ? `Found ${routes.length} route(s) from ${origin} to ${destination}.`
-                    : `找到 ${routes.length} 條從 ${origin} 到 ${destination} 的路線。`,
+                    ? `Found the best route from ${origin} to ${destination}.`
+                    : `已為您挑選從 ${origin} 到 ${destination} 的最佳路線。`,
             };
         } catch (error: any) {
             const errorMsg = `[Tool:findRoute] Error: ${error.message}`;
@@ -321,7 +684,7 @@ export const createSearchPOITool = (ctx: ToolContext) => tool({
 
             // Perform Vector Search
             // We search for more results to allow for post-filtering if needed
-            const vectorResults = await searchVectorDB(semanticQuery, 5);
+            const vectorResults = await searchVectorDB(semanticQuery, 5, ctx.currentStation ? { node_id: ctx.currentStation } : undefined);
 
             if (vectorResults.length === 0) {
                 return {
@@ -340,7 +703,8 @@ export const createSearchPOITool = (ctx: ToolContext) => tool({
                 category: r.payload.category || 'general',
                 rating: r.payload.rating || 0,
                 description: r.payload.content,
-                score: r.score
+                score: r.score,
+                station_candidates: r.payload.station_id ? [r.payload.station_id] : []
             }));
 
             const locationText = nearStation || (ctx.locale === 'en' ? 'Tokyo' : '東京');
@@ -435,6 +799,118 @@ export const createGetTransitStatusTool = (ctx: ToolContext) => tool({
             return {
                 success: false,
                 message: 'Failed to retrieve real-time transit status.',
+            };
+        }
+    },
+} as any);
+
+// =============================================================================
+// Airport Access Tool (Tokyo)
+// =============================================================================
+
+export const createGetAirportAccessTool = (ctx: ToolContext) => tool({
+    description: `Get recommended airport access options between Tokyo city and Narita/Haneda.
+    Use when user asks about going to or from the airport.`,
+    inputSchema: z.object({
+        airport: z.enum(['narita', 'haneda']).describe('Airport identifier'),
+        originStationId: z.string().optional().describe('Optional origin station ID'),
+        originArea: z.string().optional().describe('Optional origin area'),
+        userProfile: z.string().optional().describe('User profile hints (luggage, stroller, etc)'),
+    }),
+    execute: async ({ airport, originStationId, originArea, userProfile }: { airport: 'narita' | 'haneda'; originStationId?: string; originArea?: string; userProfile?: string }) => {
+        const logMsg = `[Tool:getAirportAccess] Airport=${airport}, OriginStation=${originStationId || 'N/A'}, OriginArea=${originArea || 'N/A'}`;
+        console.log(logMsg);
+        safeAppendAgentLog(`[${new Date().toISOString()}] ${logMsg}\n`);
+
+        try {
+            const access = await buildAirportAccessRecommendation(airport, ctx, userProfile);
+            if (!access) {
+                return {
+                    success: false,
+                    message: ctx.locale === 'en'
+                        ? 'Airport access data not found.'
+                        : '找不到機場交通資料。',
+                };
+            }
+
+            return {
+                success: true,
+                airportAccess: access,
+                summary: ctx.locale === 'en'
+                    ? `Recommended airport access for ${airport}.`
+                    : `已提供前往${airport === 'narita' ? '成田' : '羽田'}的建議交通方式。`,
+            };
+        } catch (error) {
+            console.error('[Tool:getAirportAccess] Error:', error);
+            return {
+                success: false,
+                message: 'Failed to retrieve airport access data.',
+            };
+        }
+    },
+} as any);
+
+// =============================================================================
+// Station Knowledge Tool (Vector KB)
+// =============================================================================
+
+export const createRetrieveStationKnowledgeTool = (ctx: ToolContext) => tool({
+    description: `Retrieve station-specific expert knowledge from vector KB.
+    Use this when user asks for tips, traps, hacks, or expert advice about a station.`,
+    inputSchema: z.object({
+        stationId: z.string().describe('Station ID to scope the knowledge search'),
+        query: z.string().optional().describe('Optional query to focus knowledge search'),
+        userProfile: z.string().optional().describe('User profile hints (luggage, stroller, etc)'),
+    }),
+    execute: async ({ stationId, query, userProfile }: { stationId: string; query?: string; userProfile?: string }) => {
+        const logMsg = `[Tool:retrieveStationKnowledge] Station=${stationId}, Query=${query || 'N/A'}`;
+        console.log(logMsg);
+        safeAppendAgentLog(`[${new Date().toISOString()}] ${logMsg}\n`);
+
+        try {
+            const results = await searchL4Knowledge({
+                query: query || `Tips for ${stationId}`,
+                stationId,
+                userContext: userProfile ? [userProfile] : [],
+                topK: 3
+            });
+
+            if (!results || results.length === 0) {
+                // Fallback to global search (no station scope)
+                const globalResults = await searchL4Knowledge({
+                    query: query || `Tips for ${stationId}`,
+                    topK: 3
+                });
+                if (!globalResults || globalResults.length === 0) {
+                    return {
+                        success: false,
+                        message: ctx.locale === 'en'
+                            ? 'No expert knowledge found for this station.'
+                            : '目前找不到該站的專家知識。',
+                    };
+                }
+
+                return {
+                    success: true,
+                    results: globalResults,
+                    summary: ctx.locale === 'en'
+                        ? 'Found related knowledge from global context.'
+                        : '已從全域知識庫找到相關資訊。',
+                };
+            }
+
+            return {
+                success: true,
+                results,
+                summary: ctx.locale === 'en'
+                    ? `Found ${results.length} knowledge items for this station.`
+                    : `找到 ${results.length} 筆該站的專家知識。`,
+            };
+        } catch (error) {
+            console.error('[Tool:retrieveStationKnowledge] Error:', error);
+            return {
+                success: false,
+                message: 'Knowledge base is currently unavailable.',
             };
         }
     },
@@ -560,6 +1036,8 @@ export function createAgentTools(ctx: ToolContext) {
         getWeather: createGetWeatherTool(ctx) as any,
         searchPOI: createSearchPOITool(ctx) as any,
         getTransitStatus: createGetTransitStatusTool(ctx) as any,
+        getAirportAccess: createGetAirportAccessTool(ctx) as any,
+        retrieveStationKnowledge: createRetrieveStationKnowledgeTool(ctx) as any,
         callSubagent: createCallSubagentTool(ctx) as any,
         loadSkill: createLoadSkillTool(ctx) as any,
     };
@@ -573,4 +1051,6 @@ Available Tools:
 - getWeather: Get current weather conditions
 - searchPOI: Search for nearby points of interest
 - getTransitStatus: Check real-time transit status
+- getAirportAccess: Get airport access options for Narita/Haneda
+- retrieveStationKnowledge: Retrieve station-specific expert knowledge
 `;

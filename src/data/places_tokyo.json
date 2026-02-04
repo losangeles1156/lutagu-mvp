@@ -1,0 +1,1600 @@
+[
+  {
+    "id": "sensoji",
+    "category": "landmark",
+    "name": {
+      "en": "Senso-ji Temple",
+      "ja": "浅草寺",
+      "zh-TW": "淺草寺"
+    },
+    "aliases": [
+      "淺草寺",
+      "浅草寺",
+      "Senso-ji",
+      "Sensoji Temple"
+    ],
+    "coordinates": {
+      "lat": 35.714722,
+      "lng": 139.796667
+    },
+    "candidateStations": [
+      {
+        "stationName": "淺草",
+        "walkMinutes": 5,
+        "distanceMeters": 400,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "田原町",
+        "walkMinutes": 10,
+        "distanceMeters": 760,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "本所吾妻橋",
+        "walkMinutes": 12,
+        "distanceMeters": 975,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "tokyo_tower",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Tower",
+      "ja": "東京タワー",
+      "zh-TW": "東京鐵塔"
+    },
+    "aliases": [
+      "東京鐵塔",
+      "東京塔",
+      "東京タワー",
+      "Tokyo Tower"
+    ],
+    "coordinates": {
+      "lat": 35.65825,
+      "lng": 139.745306
+    },
+    "candidateStations": [
+      {
+        "stationName": "赤羽橋",
+        "walkMinutes": 5,
+        "distanceMeters": 376,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "神谷町",
+        "walkMinutes": 7,
+        "distanceMeters": 525,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "御成門",
+        "walkMinutes": 8,
+        "distanceMeters": 616,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "tokyo_skytree",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Skytree",
+      "ja": "東京スカイツリー",
+      "zh-TW": "晴空塔"
+    },
+    "aliases": [
+      "晴空塔",
+      "東京晴空塔",
+      "スカイツリー",
+      "Tokyo Skytree"
+    ],
+    "coordinates": {
+      "lat": 35.71,
+      "lng": 139.810833
+    },
+    "candidateStations": [
+      {
+        "stationName": "押上",
+        "walkMinutes": 4,
+        "distanceMeters": 320,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "とうきょうスカイツリー",
+        "walkMinutes": 1,
+        "distanceMeters": 79,
+        "complexity": {
+          "turnCount": 1,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "本所吾妻橋",
+        "walkMinutes": 8,
+        "distanceMeters": 607,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "meiji_jingu",
+    "category": "landmark",
+    "name": {
+      "en": "Meiji Jingu Shrine",
+      "ja": "明治神宮",
+      "zh-TW": "明治神宮"
+    },
+    "aliases": [
+      "明治神宮",
+      "明治神宫",
+      "Meiji Jingu",
+      "Meiji Shrine"
+    ],
+    "coordinates": {
+      "lat": 35.676111,
+      "lng": 139.699167
+    },
+    "candidateStations": [
+      {
+        "stationName": "原宿",
+        "walkMinutes": 9,
+        "distanceMeters": 719,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "明治神宮前",
+        "walkMinutes": 9,
+        "distanceMeters": 720,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "参宮橋",
+        "walkMinutes": 7,
+        "distanceMeters": 576,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "tsukiji_market",
+    "category": "market",
+    "name": {
+      "en": "Tsukiji Outer Market",
+      "ja": "築地市場",
+      "zh-TW": "築地市場"
+    },
+    "aliases": [
+      "築地市場",
+      "築地外市場",
+      "Tsukiji Market",
+      "Tsukiji Outer Market"
+    ],
+    "coordinates": {
+      "lat": 35.665278,
+      "lng": 139.771667
+    },
+    "candidateStations": [
+      {
+        "stationName": "築地",
+        "walkMinutes": 4,
+        "distanceMeters": 323,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "築地市場",
+        "walkMinutes": 5,
+        "distanceMeters": 434,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "東銀座",
+        "walkMinutes": 8,
+        "distanceMeters": 643,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "shibuya_sky",
+    "category": "landmark",
+    "name": {
+      "en": "Shibuya Sky",
+      "ja": "渋谷スカイ",
+      "zh-TW": "澀谷Sky"
+    },
+    "aliases": [
+      "澀谷Sky",
+      "渋谷スカイ",
+      "Shibuya Sky"
+    ],
+    "coordinates": {
+      "lat": 35.658462,
+      "lng": 139.702264
+    },
+    "candidateStations": [
+      {
+        "stationName": "渋谷",
+        "walkMinutes": 1,
+        "distanceMeters": 119,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 12,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "神泉",
+        "walkMinutes": 10,
+        "distanceMeters": 805,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "表参道",
+        "walkMinutes": 15,
+        "distanceMeters": 1190,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 9,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "roppongi_hills_mori",
+    "category": "landmark",
+    "name": {
+      "en": "Roppongi Hills Observatory",
+      "ja": "六本木ヒルズ展望台",
+      "zh-TW": "六本木之丘展望台"
+    },
+    "aliases": [
+      "六本木之丘展望台",
+      "六本木ヒルズ展望台",
+      "Mori Tower Observatory",
+      "Roppongi Hills"
+    ],
+    "coordinates": {
+      "lat": 35.660556,
+      "lng": 139.729444
+    },
+    "candidateStations": [
+      {
+        "stationName": "六本木",
+        "walkMinutes": 5,
+        "distanceMeters": 406,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 9,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "麻布十番",
+        "walkMinutes": 11,
+        "distanceMeters": 918,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "乃木坂",
+        "walkMinutes": 9,
+        "distanceMeters": 734,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "tokyo_metropolitan_govt",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Metropolitan Government Building",
+      "ja": "東京都庁",
+      "zh-TW": "東京都廳"
+    },
+    "aliases": [
+      "東京都廳",
+      "東京都厅",
+      "都庁",
+      "Tokyo Metropolitan Government Building",
+      "Tokyo Metropolitan Gov't",
+      "Tocho"
+    ],
+    "coordinates": {
+      "lat": 35.689444,
+      "lng": 139.691667
+    },
+    "candidateStations": [
+      {
+        "stationName": "都庁前",
+        "walkMinutes": 2,
+        "distanceMeters": 166,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "新宿",
+        "walkMinutes": 9,
+        "distanceMeters": 680,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 12,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "西新宿",
+        "walkMinutes": 7,
+        "distanceMeters": 563,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "shinjuku_gyoen",
+    "category": "park",
+    "name": {
+      "en": "Shinjuku Gyoen",
+      "ja": "新宿御苑",
+      "zh-TW": "新宿御苑"
+    },
+    "aliases": [
+      "新宿御苑",
+      "Shinjuku Gyoen",
+      "Shinjuku Gyoen National Garden"
+    ],
+    "coordinates": {
+      "lat": 35.685278,
+      "lng": 139.71
+    },
+    "candidateStations": [
+      {
+        "stationName": "新宿御苑前",
+        "walkMinutes": 5,
+        "distanceMeters": 372,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "新宿三丁目",
+        "walkMinutes": 9,
+        "distanceMeters": 681,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "新宿",
+        "walkMinutes": 13,
+        "distanceMeters": 1045,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 12,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "imperial_palace",
+    "category": "landmark",
+    "name": {
+      "en": "Imperial Palace",
+      "ja": "皇居",
+      "zh-TW": "皇居"
+    },
+    "aliases": [
+      "皇居",
+      "Imperial Palace",
+      "Kokyo"
+    ],
+    "coordinates": {
+      "lat": 35.685,
+      "lng": 139.755
+    },
+    "candidateStations": [
+      {
+        "stationName": "大手町",
+        "walkMinutes": 13,
+        "distanceMeters": 1033,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "東京",
+        "walkMinutes": 16,
+        "distanceMeters": 1256,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 12,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "竹橋",
+        "walkMinutes": 8,
+        "distanceMeters": 660,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "ueno_park",
+    "category": "park",
+    "name": {
+      "en": "Ueno Park",
+      "ja": "上野公園",
+      "zh-TW": "上野公園"
+    },
+    "aliases": [
+      "上野公園",
+      "Ueno Park"
+    ],
+    "coordinates": {
+      "lat": 35.71222,
+      "lng": 139.77111
+    },
+    "candidateStations": [
+      {
+        "stationName": "上野",
+        "walkMinutes": 7,
+        "distanceMeters": 570,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "上野公園",
+        "walkMinutes": 4,
+        "distanceMeters": 320,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 3,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "京成上野",
+        "walkMinutes": 3,
+        "distanceMeters": 259,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "ueno_zoo",
+    "category": "landmark",
+    "name": {
+      "en": "Ueno Zoo",
+      "ja": "上野動物園",
+      "zh-TW": "上野動物園"
+    },
+    "aliases": [
+      "上野動物園",
+      "Ueno Zoo"
+    ],
+    "coordinates": {
+      "lat": 35.717222,
+      "lng": 139.771111
+    },
+    "candidateStations": [
+      {
+        "stationName": "上野",
+        "walkMinutes": 9,
+        "distanceMeters": 727,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "根津",
+        "walkMinutes": 12,
+        "distanceMeters": 960,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "京成上野",
+        "walkMinutes": 9,
+        "distanceMeters": 731,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "akihabara_electric",
+    "category": "district",
+    "name": {
+      "en": "Akihabara Electric Town",
+      "ja": "秋葉原電気街",
+      "zh-TW": "秋葉原電氣街"
+    },
+    "aliases": [
+      "秋葉原電氣街",
+      "秋葉原電気街",
+      "Akihabara Electric Town",
+      "Akihabara"
+    ],
+    "coordinates": {
+      "lat": 35.698333,
+      "lng": 139.772778
+    },
+    "candidateStations": [
+      {
+        "stationName": "秋葉原",
+        "walkMinutes": 0,
+        "distanceMeters": 31,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "末広町",
+        "walkMinutes": 7,
+        "distanceMeters": 521,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "岩本町",
+        "walkMinutes": 5,
+        "distanceMeters": 379,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "ginza",
+    "category": "district",
+    "name": {
+      "en": "Ginza",
+      "ja": "銀座",
+      "zh-TW": "銀座"
+    },
+    "aliases": [
+      "銀座",
+      "Ginza"
+    ],
+    "coordinates": {
+      "lat": 35.671667,
+      "lng": 139.765
+    },
+    "candidateStations": [
+      {
+        "stationName": "銀座",
+        "walkMinutes": 0,
+        "distanceMeters": 35,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "有楽町",
+        "walkMinutes": 7,
+        "distanceMeters": 544,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "東銀座",
+        "walkMinutes": 4,
+        "distanceMeters": 290,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 9,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "odaiba",
+    "category": "district",
+    "name": {
+      "en": "Odaiba Seaside Park",
+      "ja": "お台場海浜公園",
+      "zh-TW": "台場海濱公園"
+    },
+    "aliases": [
+      "台場",
+      "台場海濱公園",
+      "お台場",
+      "Odaiba"
+    ],
+    "coordinates": {
+      "lat": 35.630806,
+      "lng": 139.776611
+    },
+    "candidateStations": [
+      {
+        "stationName": "台場",
+        "walkMinutes": 9,
+        "distanceMeters": 719,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "東京テレポート",
+        "walkMinutes": 5,
+        "distanceMeters": 434,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "お台場海浜公園",
+        "walkMinutes": 3,
+        "distanceMeters": 219,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "toyosu_market",
+    "category": "market",
+    "name": {
+      "en": "Toyosu Market",
+      "ja": "豊洲市場",
+      "zh-TW": "豐洲市場"
+    },
+    "aliases": [
+      "豐洲市場",
+      "豊洲市場",
+      "Toyosu Market"
+    ],
+    "coordinates": {
+      "lat": 35.6475,
+      "lng": 139.786111
+    },
+    "candidateStations": [
+      {
+        "stationName": "市場前",
+        "walkMinutes": 2,
+        "distanceMeters": 194,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "新豊洲",
+        "walkMinutes": 5,
+        "distanceMeters": 397,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "豊洲",
+        "walkMinutes": 15,
+        "distanceMeters": 1229,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "tokyo_station_marunouchi",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Station (Marunouchi)",
+      "ja": "東京駅（丸の内）",
+      "zh-TW": "東京車站丸之內口"
+    },
+    "aliases": [
+      "東京車站丸之內口",
+      "東京駅丸の内",
+      "Tokyo Station Marunouchi"
+    ],
+    "coordinates": {
+      "lat": 35.681667,
+      "lng": 139.769444
+    },
+    "candidateStations": [
+      {
+        "stationName": "東京",
+        "walkMinutes": 2,
+        "distanceMeters": 153,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 12,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "大手町",
+        "walkMinutes": 8,
+        "distanceMeters": 639,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "二重橋前",
+        "walkMinutes": 9,
+        "distanceMeters": 720,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "nihonbashi",
+    "category": "district",
+    "name": {
+      "en": "Nihonbashi",
+      "ja": "日本橋",
+      "zh-TW": "日本橋"
+    },
+    "aliases": [
+      "日本橋",
+      "Nihonbashi"
+    ],
+    "coordinates": {
+      "lat": 35.68389,
+      "lng": 139.77444
+    },
+    "candidateStations": [
+      {
+        "stationName": "日本橋",
+        "walkMinutes": 3,
+        "distanceMeters": 260,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "三越前",
+        "walkMinutes": 4,
+        "distanceMeters": 359,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "東京",
+        "walkMinutes": 8,
+        "distanceMeters": 668,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 12,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "tokyo_dome",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Dome",
+      "ja": "東京ドーム",
+      "zh-TW": "東京巨蛋"
+    },
+    "aliases": [
+      "東京巨蛋",
+      "東京ドーム",
+      "Tokyo Dome"
+    ],
+    "coordinates": {
+      "lat": 35.705658,
+      "lng": 139.751914
+    },
+    "candidateStations": [
+      {
+        "stationName": "後楽園",
+        "walkMinutes": 6,
+        "distanceMeters": 480,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "水道橋",
+        "walkMinutes": 5,
+        "distanceMeters": 431,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "春日",
+        "walkMinutes": 8,
+        "distanceMeters": 640,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "korakuen",
+    "category": "district",
+    "name": {
+      "en": "Korakuen",
+      "ja": "後楽園",
+      "zh-TW": "後樂園"
+    },
+    "aliases": [
+      "後樂園",
+      "後楽園",
+      "Korakuen"
+    ],
+    "coordinates": {
+      "lat": 35.709167,
+      "lng": 139.751389
+    },
+    "candidateStations": [
+      {
+        "stationName": "後楽園",
+        "walkMinutes": 4,
+        "distanceMeters": 320,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "春日",
+        "walkMinutes": 6,
+        "distanceMeters": 480,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "水道橋",
+        "walkMinutes": 10,
+        "distanceMeters": 818,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "yoyogi_park",
+    "category": "park",
+    "name": {
+      "en": "Yoyogi Park",
+      "ja": "代々木公園",
+      "zh-TW": "代代木公園"
+    },
+    "aliases": [
+      "代代木公園",
+      "代々木公園",
+      "Yoyogi Park"
+    ],
+    "coordinates": {
+      "lat": 35.6725,
+      "lng": 139.6949
+    },
+    "candidateStations": [
+      {
+        "stationName": "代々木公園",
+        "walkMinutes": 7,
+        "distanceMeters": 579,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 3,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "原宿",
+        "walkMinutes": 9,
+        "distanceMeters": 726,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "代々木八幡",
+        "walkMinutes": 8,
+        "distanceMeters": 634,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "takeshita",
+    "category": "district",
+    "name": {
+      "en": "Takeshita Street",
+      "ja": "竹下通り",
+      "zh-TW": "竹下通"
+    },
+    "aliases": [
+      "竹下通",
+      "竹下通り",
+      "Takeshita Street"
+    ],
+    "coordinates": {
+      "lat": 35.670278,
+      "lng": 139.7025
+    },
+    "candidateStations": [
+      {
+        "stationName": "原宿",
+        "walkMinutes": 0,
+        "distanceMeters": 10,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "明治神宮前",
+        "walkMinutes": 8,
+        "distanceMeters": 640,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "北参道",
+        "walkMinutes": 12,
+        "distanceMeters": 951,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "meguro_river",
+    "category": "landmark",
+    "name": {
+      "en": "Meguro River",
+      "ja": "目黒川",
+      "zh-TW": "目黑川"
+    },
+    "aliases": [
+      "目黑川",
+      "目黒川",
+      "Meguro River"
+    ],
+    "coordinates": {
+      "lat": 35.6362,
+      "lng": 139.697
+    },
+    "candidateStations": [
+      {
+        "stationName": "中目黒",
+        "walkMinutes": 6,
+        "distanceMeters": 480,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "目黒",
+        "walkMinutes": 21,
+        "distanceMeters": 1710,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "恵比寿",
+        "walkMinutes": 21,
+        "distanceMeters": 1650,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "daikanyama",
+    "category": "district",
+    "name": {
+      "en": "Daikanyama",
+      "ja": "代官山",
+      "zh-TW": "代官山"
+    },
+    "aliases": [
+      "代官山",
+      "Daikanyama"
+    ],
+    "coordinates": {
+      "lat": 35.648333,
+      "lng": 139.703889
+    },
+    "candidateStations": [
+      {
+        "stationName": "代官山",
+        "walkMinutes": 1,
+        "distanceMeters": 57,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "中目黒",
+        "walkMinutes": 10,
+        "distanceMeters": 800,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "恵比寿",
+        "walkMinutes": 8,
+        "distanceMeters": 609,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "hamarikyu",
+    "category": "park",
+    "name": {
+      "en": "Hamarikyu Gardens",
+      "ja": "浜離宮恩賜庭園",
+      "zh-TW": "濱離宮恩賜庭園"
+    },
+    "aliases": [
+      "濱離宮恩賜庭園",
+      "浜離宮恩賜庭園",
+      "Hamarikyu"
+    ],
+    "coordinates": {
+      "lat": 35.659444,
+      "lng": 139.763056
+    },
+    "candidateStations": [
+      {
+        "stationName": "汐留",
+        "walkMinutes": 6,
+        "distanceMeters": 491,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "新橋",
+        "walkMinutes": 9,
+        "distanceMeters": 741,
+        "complexity": {
+          "turnCount": 4,
+          "signageClarity": 2,
+          "exitCount": 10,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "築地市場",
+        "walkMinutes": 9,
+        "distanceMeters": 696,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "shiba_park",
+    "category": "park",
+    "name": {
+      "en": "Shiba Park",
+      "ja": "芝公園",
+      "zh-TW": "芝公園"
+    },
+    "aliases": [
+      "芝公園",
+      "Shiba Park"
+    ],
+    "coordinates": {
+      "lat": 35.655278,
+      "lng": 139.747222
+    },
+    "candidateStations": [
+      {
+        "stationName": "芝公園",
+        "walkMinutes": 3,
+        "distanceMeters": 268,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "赤羽橋",
+        "walkMinutes": 4,
+        "distanceMeters": 294,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 2,
+          "exitCount": 6,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "三田",
+        "walkMinutes": 11,
+        "distanceMeters": 854,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "koishikawa_korakuen",
+    "category": "park",
+    "name": {
+      "en": "Koishikawa Korakuen Garden",
+      "ja": "小石川後楽園",
+      "zh-TW": "小石川後樂園"
+    },
+    "aliases": [
+      "小石川後樂園",
+      "小石川後楽園",
+      "Koishikawa Korakuen"
+    ],
+    "coordinates": {
+      "lat": 35.716684,
+      "lng": 139.752739
+    },
+    "candidateStations": [
+      {
+        "stationName": "飯田橋",
+        "walkMinutes": 22,
+        "distanceMeters": 1773,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "後楽園",
+        "walkMinutes": 8,
+        "distanceMeters": 640,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "水道橋",
+        "walkMinutes": 20,
+        "distanceMeters": 1630,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 7,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "national_art_center",
+    "category": "museum",
+    "name": {
+      "en": "The National Art Center, Tokyo",
+      "ja": "国立新美術館",
+      "zh-TW": "國立新美術館"
+    },
+    "aliases": [
+      "國立新美術館",
+      "国立新美術館",
+      "National Art Center"
+    ],
+    "coordinates": {
+      "lat": 35.665375,
+      "lng": 139.726403
+    },
+    "candidateStations": [
+      {
+        "stationName": "乃木坂",
+        "walkMinutes": 2,
+        "distanceMeters": 143,
+        "complexity": {
+          "turnCount": 2,
+          "signageClarity": 3,
+          "exitCount": 5,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "六本木",
+        "walkMinutes": 7,
+        "distanceMeters": 541,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 9,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "青山一丁目",
+        "walkMinutes": 11,
+        "distanceMeters": 851,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "narita_airport",
+    "category": "airport",
+    "name": {
+      "en": "Narita International Airport",
+      "ja": "成田空港",
+      "zh-TW": "成田機場"
+    },
+    "aliases": [
+      "成田機場",
+      "成田空港",
+      "Narita Airport",
+      "NRT",
+      "Narita International Airport"
+    ],
+    "coordinates": {
+      "lat": 35.7647,
+      "lng": 140.3864
+    },
+    "candidateStations": [
+      {
+        "stationName": "成田空港",
+        "walkMinutes": 0,
+        "distanceMeters": 0,
+        "complexity": {
+          "turnCount": 1,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "空港第2ビル",
+        "walkMinutes": 12,
+        "distanceMeters": 986,
+        "complexity": {
+          "turnCount": 1,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "成田空港第2ビル",
+        "walkMinutes": 2,
+        "distanceMeters": 160,
+        "complexity": {
+          "turnCount": 1,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "haneda_airport",
+    "category": "airport",
+    "name": {
+      "en": "Haneda Airport",
+      "ja": "羽田空港",
+      "zh-TW": "羽田機場"
+    },
+    "aliases": [
+      "羽田機場",
+      "羽田空港",
+      "Haneda Airport",
+      "HND"
+    ],
+    "coordinates": {
+      "lat": 35.5494,
+      "lng": 139.7798
+    },
+    "candidateStations": [
+      {
+        "stationName": "羽田空港",
+        "walkMinutes": 0,
+        "distanceMeters": 0,
+        "complexity": {
+          "turnCount": 1,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "羽田空港第1・第2ターミナル",
+        "walkMinutes": 7,
+        "distanceMeters": 571,
+        "complexity": {
+          "turnCount": 1,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "羽田空港第3ターミナル",
+        "walkMinutes": 16,
+        "distanceMeters": 1253,
+        "complexity": {
+          "turnCount": 1,
+          "signageClarity": 3,
+          "exitCount": 4,
+          "underConstruction": false
+        }
+      }
+    ]
+  }
+]

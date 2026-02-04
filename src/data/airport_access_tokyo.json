@@ -1,0 +1,139 @@
+{
+  "airports": [
+    {
+      "id": "narita",
+      "name": { "en": "Narita International Airport", "ja": "成田空港", "zh-TW": "成田機場" },
+      "modes": {
+        "rail": [
+          {
+            "id": "nex",
+            "name": "Narita Express (N'EX)",
+            "typicalTimeMin": 60,
+            "typicalFareYen": 3070,
+            "destinations": ["Tokyo", "Shinagawa", "Shibuya", "Shinjuku"],
+            "notes": ["Direct JR service", "Reserved seats", "Ideal with luggage"],
+            "odptStationIds": [
+              "odpt.Station:JR-East.NaritaExpress.NaritaAirportTerminal1",
+              "odpt.Station:JR-East.NaritaExpress.NaritaAirportTerminal2and3"
+            ],
+            "timeWindows": { "start": "06:00", "end": "21:30" },
+            "headways": { "weekdayPeak": 30, "weekdayOffpeak": 60, "weekend": 60, "lateNight": 90 },
+            "transferPenalty": { "baseMinutes": 6, "tpiMultiplier": 0.2 },
+            "weatherImpact": { "rain": 1.1, "wind": 1.05, "snow": 1.2 }
+          },
+          {
+            "id": "skyliner",
+            "name": "Keisei Skyliner",
+            "typicalTimeMin": 45,
+            "typicalFareYen": 2570,
+            "destinations": ["Ueno", "Nippori"],
+            "notes": ["Fastest rail option", "Connects to JR/Yamanote at Nippori"],
+            "odptStationIds": [
+              "odpt.Station:Keisei.Skyliner.NaritaAirportTerminal1",
+              "odpt.Station:Keisei.Skyliner.NaritaAirportTerminal2and3"
+            ],
+            "timeWindows": { "start": "05:40", "end": "22:20" },
+            "headways": { "weekdayPeak": 20, "weekdayOffpeak": 30, "weekend": 30, "lateNight": 60 },
+            "transferPenalty": { "baseMinutes": 8, "tpiMultiplier": 0.25 },
+            "weatherImpact": { "rain": 1.1, "wind": 1.05, "snow": 1.2 }
+          }
+        ],
+        "bus": [
+          {
+            "id": "limousine",
+            "name": "Airport Limousine Bus",
+            "typicalTimeMin": 75,
+            "typicalFareYen": 3200,
+            "destinations": ["Tokyo Station", "Shinjuku", "Shibuya", "Ikebukuro"],
+            "notes": ["Door-to-hotel style", "Good for large luggage"],
+            "timeWindows": { "start": "06:00", "end": "22:00" },
+            "headways": { "weekdayPeak": 30, "weekdayOffpeak": 60, "weekend": 60, "lateNight": 90 },
+            "transferPenalty": { "baseMinutes": 4, "tpiMultiplier": 0.15 },
+            "weatherImpact": { "rain": 1.0, "wind": 1.0, "snow": 1.0 }
+          }
+        ],
+        "taxi": [
+          {
+            "id": "taxi",
+            "name": "Taxi",
+            "typicalTimeMin": 70,
+            "typicalFareYenRange": [20000, 30000],
+            "notes": ["Best for late night", "Most expensive"],
+            "timeWindows": { "start": "00:00", "end": "23:59" },
+            "headways": { "weekdayPeak": 5, "weekdayOffpeak": 5, "weekend": 5, "lateNight": 5 },
+            "transferPenalty": { "baseMinutes": 0, "tpiMultiplier": 0.0 },
+            "weatherImpact": { "rain": 1.0, "wind": 1.0, "snow": 1.0 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "haneda",
+      "name": { "en": "Haneda Airport", "ja": "羽田空港", "zh-TW": "羽田機場" },
+      "modes": {
+        "rail": [
+          {
+            "id": "keikyu",
+            "name": "Keikyu Airport Line",
+            "typicalTimeMin": 20,
+            "typicalFareYen": 330,
+            "destinations": ["Shinagawa", "Asakusa", "Nihombashi"],
+            "notes": ["Fast access to Shinagawa", "Connects to Toei Asakusa Line"],
+            "odptStationIds": [
+              "odpt.Station:Keikyu.Airport.HanedaAirportTerminal1and2",
+              "odpt.Station:Keikyu.Airport.HanedaAirportTerminal3"
+            ],
+            "timeWindows": { "start": "05:00", "end": "23:30" },
+            "headways": { "weekdayPeak": 5, "weekdayOffpeak": 10, "weekend": 10, "lateNight": 20 },
+            "transferPenalty": { "baseMinutes": 4, "tpiMultiplier": 0.2 },
+            "weatherImpact": { "rain": 1.05, "wind": 1.05, "snow": 1.1 }
+          },
+          {
+            "id": "monorail",
+            "name": "Tokyo Monorail",
+            "typicalTimeMin": 15,
+            "typicalFareYen": 500,
+            "destinations": ["Hamamatsucho"],
+            "notes": ["Fast to JR Yamanote at Hamamatsucho"],
+            "odptStationIds": [
+              "odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal1",
+              "odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal2",
+              "odpt.Station:TokyoMonorail.Haneda.HanedaAirportTerminal3"
+            ],
+            "timeWindows": { "start": "05:00", "end": "23:00" },
+            "headways": { "weekdayPeak": 6, "weekdayOffpeak": 10, "weekend": 10, "lateNight": 20 },
+            "transferPenalty": { "baseMinutes": 6, "tpiMultiplier": 0.25 },
+            "weatherImpact": { "rain": 1.05, "wind": 1.05, "snow": 1.1 }
+          }
+        ],
+        "bus": [
+          {
+            "id": "limousine",
+            "name": "Airport Limousine Bus",
+            "typicalTimeMin": 45,
+            "typicalFareYen": 1300,
+            "destinations": ["Tokyo Station", "Shinjuku", "Shibuya"],
+            "notes": ["Comfortable with luggage", "Traffic dependent"],
+            "timeWindows": { "start": "05:30", "end": "23:00" },
+            "headways": { "weekdayPeak": 15, "weekdayOffpeak": 30, "weekend": 30, "lateNight": 60 },
+            "transferPenalty": { "baseMinutes": 4, "tpiMultiplier": 0.15 },
+            "weatherImpact": { "rain": 1.0, "wind": 1.0, "snow": 1.0 }
+          }
+        ],
+        "taxi": [
+          {
+            "id": "taxi",
+            "name": "Taxi",
+            "typicalTimeMin": 25,
+            "typicalFareYenRange": [6000, 10000],
+            "notes": ["Best for late night", "Door-to-door"],
+            "timeWindows": { "start": "00:00", "end": "23:59" },
+            "headways": { "weekdayPeak": 5, "weekdayOffpeak": 5, "weekend": 5, "lateNight": 5 },
+            "transferPenalty": { "baseMinutes": 0, "tpiMultiplier": 0.0 },
+            "weatherImpact": { "rain": 1.0, "wind": 1.0, "snow": 1.0 }
+          }
+        ]
+      }
+    }
+  ]
+}

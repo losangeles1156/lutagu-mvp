@@ -89,6 +89,7 @@ export const ParsedMessageContent = memo(({ content, role, thought, isStreaming 
         // Final thorough safety cleanup: remove any remaining partial or malformed tags
         text = text.replace(/(?:\[|\/?|<|\/?)THINK(?:ING)?(?:\]|\/?>)/gi, '');
         text = text.replace(/\[\/?SUGGESTED_QUESTIONS\]/gi, '');
+        text = text.replace(/\[HYBRID_DATA\][\s\S]*?\[\/HYBRID_DATA\]/gi, '');
 
         // Double check for ** marks and strip them again (just in case they were nested or added later)
         text = text.replace(/\*\*/g, '').trim();

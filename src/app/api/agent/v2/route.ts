@@ -40,6 +40,7 @@ const MAX_STEPS = 5; // Allow up to 5 rounds of tool calls
 const AI_TIMEOUT_MS = Number(process.env.AGENT_V2_TIMEOUT_MS || 25000);
 const FALLBACK_MODE = (process.env.AGENT_V2_FALLBACK || 'chat').toLowerCase();
 const E2E_KEY = process.env.AGENT_E2E_KEY || '';
+let lastModelUsed: string | null = null;
 
 // Use OpenRouter with DeepSeek V3.2 as primary model
 import {
@@ -62,6 +63,7 @@ async function streamWithFallback(
         try {
             console.log(`[Agent 2.0] Attempting model: ${modelId}${i === 0 && simulateFailure ? ' (WILL FAIL)' : ''}`);
             // Use 'as any' to bypass AI SDK type inference issues
+            lastModelUsed = modelId;
             return streamText({ ...params, model: getModel(modelId, i === 0 && simulateFailure) } as any);
         } catch (err: any) {
             console.warn(`[Agent 2.0] Model ${modelId} failed:`, err.message);
@@ -324,6 +326,10 @@ export async function POST(req: NextRequest) {
                             controller.enqueue(encoder.encode(fallbackText));
                         }
                     }
+                    const hybridData = buildHybridData(toolResultsForSummary, toolNamesForSummary);
+                    if (hybridData) {
+                        controller.enqueue(encoder.encode(`\n[HYBRID_DATA]${JSON.stringify(hybridData)}[/HYBRID_DATA]`));
+                    }
                     if (e2eEnabled) {
                         const meta = {
                             toolCalls: toolNamesForSummary,
@@ -343,6 +349,7 @@ export async function POST(req: NextRequest) {
                 'Cache-Control': 'no-cache, no-transform',
                 'X-Accel-Buffering': 'no',
                 'X-Agent-Backend': 'v2',
+                ...(lastModelUsed ? { 'X-LLM-Model': lastModelUsed } : {}),
                 'X-Agent-Request-Id': requestId
             },
         });
@@ -494,6 +501,40 @@ function extractToolResults(steps?: unknown[]) {
         }
     }
     return results;
+}
+
+function buildHybridData(toolResults: any[], toolNames: string[]) {
+    if (!toolResults || toolResults.length === 0) return null;
+    const lastResult = toolResults[toolResults.length - 1];
+    const lastTool = (lastResult as any)?.toolName || toolNames[toolNames.length - 1] || '';
+    const resultPayload = (lastResult as any)?.result ?? lastResult;
+
+    const mapType = (toolName: string, result: any) => {
+        if (result?.airportAccess) return 'airport_access';
+        switch (toolName) {
+            case 'findRoute':
+                return 'route';
+            case 'searchPOI':
+                return 'poi';
+            case 'getTransitStatus':
+                return 'status';
+            case 'getStationInfo':
+                return 'station';
+            case 'retrieveStationKnowledge':
+                return 'knowledge';
+            case 'getAirportAccess':
+                return 'airport_access';
+            default:
+                return 'text';
+        }
+    };
+
+    return {
+        type: mapType(lastTool, lastResult),
+        source: 'tool',
+        data: resultPayload,
+        toolName: lastTool
+    };
 }
 
 async function buildFallbackFromTools(toolResults: any[], locale: string): Promise<string> {

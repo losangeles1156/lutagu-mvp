@@ -37,6 +37,8 @@ export function createAgentSystemPrompt(config: SystemPromptConfig): string {
 - **getWeather**: Use when weather might affect travel plans.
 - **getTransitStatus**: Use for delay or disruption inquiries.
 - **searchPOI**: Use for attraction/restaurant recommendations near stations.
+- **getAirportAccess**: Use for airport access (Narita/Haneda) questions.
+- **retrieveStationKnowledge**: Use for station-specific expert tips or traps.
 - **callSubagent**: Delegate intensive specialized tasks to a new persona.
 - **loadSkill**: Retrieve deep expert knowledge from the project knowledge base.
 
