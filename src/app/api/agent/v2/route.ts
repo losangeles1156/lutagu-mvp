@@ -68,7 +68,9 @@ async function streamWithFallback(
         } catch (err: any) {
             console.warn(`[Agent 2.0] Model ${modelId} failed:`, err.message);
             if (i === FALLBACK_CHAIN.length - 1) {
-                throw err; // All models failed
+                // No more fallback models available
+                recordAgentError(`model-unavailable:${modelId}`);
+                throw new Error(`MODEL_UNAVAILABLE:${modelId}`);
             }
             console.log(`[Agent 2.0] Falling back to next model...`);
         }
@@ -415,14 +417,20 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): P
 }
 
 function errorResponse(locale: string, reason: string, status: number, requestId?: string): Response {
-    const errorMessage = locale === 'en'
-        ? 'Sorry, an error occurred. Please try again.'
-        : '抱歉，發生錯誤，請重試。';
+    const modelUnavailable = reason.startsWith('MODEL_UNAVAILABLE:');
+    const errorMessage = modelUnavailable
+        ? (locale === 'en'
+            ? 'Model service is temporarily unavailable. Please try again shortly.'
+            : '模型服務暫時異常，已記錄警示，請稍後再試。')
+        : (locale === 'en'
+            ? 'Sorry, an error occurred. Please try again.'
+            : '抱歉，發生錯誤，請重試。');
     return new Response(`${errorMessage}\n${IS_PROD ? '' : `[DEBUG] ${reason}`}`.trim(), {
         status,
         headers: {
             'Content-Type': 'text/plain; charset=utf-8',
             'X-Agent-Backend': 'v2',
+            ...(modelUnavailable ? { 'X-LLM-Alert': reason.replace('MODEL_UNAVAILABLE:', '') } : {}),
             ...(requestId ? { 'X-Agent-Request-Id': requestId } : {})
         },
     });
