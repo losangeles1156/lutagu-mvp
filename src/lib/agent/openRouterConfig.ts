@@ -2,7 +2,7 @@
  * OpenRouter Configuration
  * 
  * Central configuration for OpenRouter API integration.
- * Provides a fallback chain: DeepSeek V3.2 → Gemini 3 Flash → MiniMax M2.1
+ * Provides a fallback chain: DeepSeek V3.2 → DeepSeek V3.2 Exp
  */
 
 import { createOpenAI } from '@ai-sdk/openai';
@@ -31,15 +31,13 @@ export const ZEABUR_MODEL_CONFIG = {
 
 // Model configuration with fallback chain
 export const MODEL_CONFIG = {
-    primary: 'openai/gpt-4o-mini', // GPT-4o-mini has excellent tool calling support and lower cost
-    fallback1: 'google/gemini-2.0-flash-001',
-    fallback2: 'deepseek/deepseek-chat',
+    primary: 'deepseek/deepseek-v3.2',
+    fallback1: 'deepseek/deepseek-v3.2-exp',
 } as const;
 
 export const FALLBACK_CHAIN = [
     MODEL_CONFIG.primary,
     MODEL_CONFIG.fallback1,
-    MODEL_CONFIG.fallback2,
 ] as const;
 
 /**
