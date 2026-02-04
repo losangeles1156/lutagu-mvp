@@ -29,7 +29,7 @@ function assignStations(landmark, stations) {
   const distances = stations.map((s) => ({
     stationName: s.name,
     stationId: s.id,
-    distanceMeters: Math.round(haversine(landmark.coordinates, { lat: s.lat, lng: s.lng }))
+    distanceMeters: Math.round(haversine(landmark.coordinates, { lat: s.lat, lng: s.lng ?? s.lon }))
   }));
   distances.sort((a, b) => a.distanceMeters - b.distanceMeters);
   return distances.slice(0, 3).map((s) => ({
