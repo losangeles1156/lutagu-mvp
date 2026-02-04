@@ -1,5 +1,8 @@
 [
   {
+    "source": "manual",
+    "source_id": "manual:sensoji",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "sensoji",
     "category": "landmark",
     "name": {
@@ -54,6 +57,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:tokyo_tower",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "tokyo_tower",
     "category": "landmark",
     "name": {
@@ -108,6 +114,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:tokyo_skytree",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "tokyo_skytree",
     "category": "landmark",
     "name": {
@@ -162,6 +171,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:meiji_jingu",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "meiji_jingu",
     "category": "landmark",
     "name": {
@@ -216,6 +228,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:tsukiji_market",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "tsukiji_market",
     "category": "market",
     "name": {
@@ -270,6 +285,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:shibuya_sky",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "shibuya_sky",
     "category": "landmark",
     "name": {
@@ -323,6 +341,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:roppongi_hills_mori",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "roppongi_hills_mori",
     "category": "landmark",
     "name": {
@@ -377,6 +398,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:tokyo_metropolitan_govt",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "tokyo_metropolitan_govt",
     "category": "landmark",
     "name": {
@@ -433,6 +457,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:shinjuku_gyoen",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "shinjuku_gyoen",
     "category": "park",
     "name": {
@@ -486,6 +513,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:imperial_palace",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "imperial_palace",
     "category": "landmark",
     "name": {
@@ -539,6 +569,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:ueno_park",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "ueno_park",
     "category": "park",
     "name": {
@@ -591,6 +624,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:ueno_zoo",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "ueno_zoo",
     "category": "landmark",
     "name": {
@@ -643,6 +679,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:akihabara_electric",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "akihabara_electric",
     "category": "district",
     "name": {
@@ -697,6 +736,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:ginza",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "ginza",
     "category": "district",
     "name": {
@@ -749,6 +791,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:odaiba",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "odaiba",
     "category": "district",
     "name": {
@@ -803,6 +848,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:toyosu_market",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "toyosu_market",
     "category": "market",
     "name": {
@@ -856,6 +904,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:tokyo_station_marunouchi",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "tokyo_station_marunouchi",
     "category": "landmark",
     "name": {
@@ -909,6 +960,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:nihonbashi",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "nihonbashi",
     "category": "district",
     "name": {
@@ -961,6 +1015,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:tokyo_dome",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "tokyo_dome",
     "category": "landmark",
     "name": {
@@ -1014,6 +1071,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:korakuen",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "korakuen",
     "category": "district",
     "name": {
@@ -1067,6 +1127,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:yoyogi_park",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "yoyogi_park",
     "category": "park",
     "name": {
@@ -1120,6 +1183,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:takeshita",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "takeshita",
     "category": "district",
     "name": {
@@ -1173,6 +1239,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:meguro_river",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "meguro_river",
     "category": "landmark",
     "name": {
@@ -1226,6 +1295,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:daikanyama",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "daikanyama",
     "category": "district",
     "name": {
@@ -1278,6 +1350,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:hamarikyu",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "hamarikyu",
     "category": "park",
     "name": {
@@ -1331,6 +1406,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:shiba_park",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "shiba_park",
     "category": "park",
     "name": {
@@ -1383,6 +1461,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:koishikawa_korakuen",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "koishikawa_korakuen",
     "category": "park",
     "name": {
@@ -1436,6 +1517,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:national_art_center",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "national_art_center",
     "category": "museum",
     "name": {
@@ -1489,6 +1573,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:narita_airport",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "narita_airport",
     "category": "airport",
     "name": {
@@ -1544,6 +1631,9 @@
     ]
   },
   {
+    "source": "manual",
+    "source_id": "manual:haneda_airport",
+    "last_verified": "2026-02-04T12:02:00.273Z",
     "id": "haneda_airport",
     "category": "airport",
     "name": {
