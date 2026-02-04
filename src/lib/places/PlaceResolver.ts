@@ -23,8 +23,8 @@ export type PlaceMatch = {
   candidateStations: Array<PlaceCandidateStation & { stationId?: string; stationName?: string }>;
 };
 
-function normalizeText(input: string): string {
-  return String(input || '').trim().toLowerCase();
+function normalizeText(input: unknown): string {
+  return String(input ?? '').trim().toLowerCase();
 }
 
 function resolveCandidates(rawCandidates: PlaceCandidateStation[]): PlaceCandidateStation[] {
