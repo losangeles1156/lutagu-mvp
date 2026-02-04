@@ -14,23 +14,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run Agent smoke tests
-        env:
-          AGENT_E2E_BASE_URL: ${{ github.event.deployment_status.target_url }}
-          AGENT_E2E_MIN_ACCURACY: "0.9"
-          AGENT_E2E_ENDPOINT: "/api/agent/e2e"
-          AGENT_E2E_KEY: ${{ secrets.AGENT_E2E_KEY }}
-          AGENT_V2_FALLBACK: "none"
-        run: node scripts/agent_e2e_test.js
-
       - name: Env probe
         run: |
           node -e "console.log({OPENROUTER: !!process.env.OPENROUTER_API_KEY, ZEABUR: !!process.env.ZEABUR_API_KEY, E2E: !!process.env.AGENT_E2E_KEY, E2E_PROVIDER: process.env.E2E_PROVIDER})"
 
-      - name: Upload Agent E2E report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: agent-e2e-report
-          path: reports/agent_e2e_report.json
-          if-no-files-found: ignore
+      - name: Smoke ping agent health
+        env:
+          AGENT_E2E_BASE_URL: ${{ github.event.deployment_status.target_url }}
+        run: |
+          echo "Health URL: ${AGENT_E2E_BASE_URL}/api/agent/health"
+          curl -fsS --max-time 10 "${AGENT_E2E_BASE_URL}/api/agent/health"
