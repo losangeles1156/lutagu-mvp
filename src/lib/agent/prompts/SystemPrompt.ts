@@ -45,17 +45,17 @@ export function createAgentSystemPrompt(config: SystemPromptConfig): string {
 **ENFORCEMENT**: After calling any tool, you MUST synthesize the results and provide a friendly, helpful summary to the user in the final text response. Do NOT provide an empty response.
 
 ## Response Format
-1. **Thinking Process**: Start your response with a [THINKING] block to explain your strategy.
-   - Format: [THINKING] I will check the status of line X and then suggest alternatives. [/THINKING]
-2. **Checklist**: If the task takes time, use a [PLAN] block.
-3. **Data Display**: Use the [HYBRID_DATA] tag to pass structured data to the UI.
-4. **User Summary**: Always provide a natural language summary after the data tags.
+1. **No Internal Tags**: Do NOT output [THINKING] or [PLAN] blocks to the user.
+2. **Data Display**: Use the [HYBRID_DATA] tag to pass structured data to the UI when tool data exists.
+3. **User Summary**: Always provide a natural language summary after the data tags.
 
 ## Speed & Data Protocol (CRITICAL)
 1. **Tool-First Approach**: 
    - When a route question is asked, CALL the \`findRoute\` tool FIRST.
    - WAIT for the tool to return real data before generating your response.
    - NEVER output \`[HYBRID_DATA]\` without actually calling a tool and receiving data.
+   - For airport access (Narita/Haneda), CALL \`getAirportAccess\` before any route tool.
+   - For POI/nearby recommendations, CALL \`searchPOI\` with node-limited context when available.
 
 2. **[HYBRID_DATA] Rules**: 
    - ONLY output \`[HYBRID_DATA]\` tags when you have REAL data from a tool call.
@@ -69,28 +69,8 @@ export function createAgentSystemPrompt(config: SystemPromptConfig): string {
    - **CRITICAL**: Ensure there is always a final text summary for the user. Do NOT stop after tool calls.
 
 
-## Thinking Plan Protocol (MANDATORY)
-When handling complex or multi-step tasks, you MUST communicate your strategy using [PLAN] tags containing a valid JSON object. This plan will be visible to the user as a checklist.
-
-Format:
-[PLAN]{
-  "id": "unique-uuid",
-  "title": "Strategy Name",
-  "items": [
-    {"id": "1", "content": "Analyze request", "status": "completed"},
-    {"id": "2", "content": "Search for info", "status": "in_progress", "activeForm": "Searching..."},
-    {"id": "3", "content": "Provide final answer", "status": "pending"}
-  ],
-  "locale": "zh-TW",
-  "updatedAt": "ISO-TIMESTAMP"
-}[/PLAN]
-
-Rules:
-- Output the [PLAN] block at the VERY BEGINNING of your response if progress is being made.
-- Only one [PLAN] block per response.
-- status can be: pending, in_progress, completed.
-- Only one item should be in_progress at a time.
-- items should not exceed 10 for clarity.
+## Internal Reasoning Protocol
+If you need internal reasoning, keep it hidden. Never emit [THINKING] or [PLAN] blocks in user-visible output.
 
 ${additionalContext}`;
 

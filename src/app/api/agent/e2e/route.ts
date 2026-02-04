@@ -85,14 +85,16 @@ export async function POST(req: NextRequest) {
     if (lastMsg && lastMsg.role === 'user') {
         const query = lastMsg.content.toLowerCase();
         let reinforcement = '';
-        if (query.includes('route') || query.includes('go to') || query.includes('從') || query.includes('到')) {
+        if (query.includes('airport') || query.includes('機場') || query.includes('成田') || query.includes('羽田') || query.includes('nrt') || query.includes('hnd')) {
+            reinforcement = `\n\n[INSTRUCTION]: You MUST call the getAirportAccess tool first for airport access questions.`;
+        } else if (query.includes('nearby') || query.includes('附近') || query.includes('周辺') || query.includes('spot') || query.includes('景點') || query.includes('美食')) {
+            reinforcement = `\n\n[INSTRUCTION]: You MUST call the searchPOI tool.`;
+        } else if (query.includes('route') || query.includes('go to') || query.includes('從') || query.includes('到')) {
             reinforcement = `\n\n[INSTRUCTION]: You MUST call the findRoute tool to get real route data.`;
         } else if (query.includes('status') || query.includes('delay') || query.includes('延遲') || query.includes('運行')) {
             reinforcement = `\n\n[INSTRUCTION]: You MUST call the getTransitStatus tool to get real-time status.`;
         } else if (query.includes('locker') || query.includes('toilet') || query.includes('elevator') || query.includes('寄物') || query.includes('電梯') || query.includes('トイレ')) {
             reinforcement = `\n\n[INSTRUCTION]: You MUST call the getStationInfo tool.`;
-        } else if (query.includes('nearby') || query.includes('附近') || query.includes('周辺') || query.includes('spot') || query.includes('景點')) {
-            reinforcement = `\n\n[INSTRUCTION]: You MUST call the searchPOI tool.`;
         } else if (query.includes('weather') || query.includes('天氣') || query.includes('天気')) {
             reinforcement = `\n\n[INSTRUCTION]: You MUST call the getWeather tool.`;
         }

@@ -151,7 +151,11 @@ export async function POST(req: NextRequest) {
         const query = lastMsg.content.toLowerCase();
         let reinforcement = '';
 
-        if (query.includes('route') || query.includes('go to') || query.includes('從') || query.includes('到')) {
+        if (query.includes('airport') || query.includes('機場') || query.includes('成田') || query.includes('羽田') || query.includes('nrt') || query.includes('hnd')) {
+            reinforcement = `\n\n[INSTRUCTION]: You MUST call the getAirportAccess tool first for airport access questions. Provide a concise summary after tool results.`;
+        } else if (query.includes('nearby') || query.includes('附近') || query.includes('周辺') || query.includes('spot') || query.includes('景點') || query.includes('美食')) {
+            reinforcement = `\n\n[INSTRUCTION]: You MUST call the searchPOI tool for nearby/POI questions, and prefer node-limited context when available.`;
+        } else if (query.includes('route') || query.includes('go to') || query.includes('從') || query.includes('到')) {
             reinforcement = `\n\n[INSTRUCTION]: You MUST call the findRoute tool to get real route data. Do NOT output [HYBRID_DATA] without calling findRoute first.`;
         } else if (query.includes('status') || query.includes('delay') || query.includes('延遲') || query.includes('運行')) {
             reinforcement = `\n\n[INSTRUCTION]: You MUST call the getTransitStatus tool to get real-time status. Summarize the findings clearly for the user.`;
