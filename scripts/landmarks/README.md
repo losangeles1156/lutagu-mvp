@@ -9,23 +9,28 @@ This pipeline expands city landmark datasets (e.g., Tokyo 23 wards) into `places
 4. **Assign stations** (`assign_stations.ts`) using nearest 3 stations
 5. **Merge output** (`merge_output.ts`) into `src/data/places_<city>.json`
 
-## Example (Tokyo Phase)
+## Example (Tokyo Phase) - Node JS pipeline (no tsx)
 ```bash
 # 1) Fetch OSM (tourism core) - adjust limit per batch
-npx tsx scripts/landmarks/fetch_osm.ts --city=tokyo_23wards --limit=60 --out=tmp/osm_tokyo.json
+node scripts/landmarks/fetch_osm.js --city=tokyo_23wards --limit=60 --out=tmp/osm_tokyo.json
 
 # 2) Fetch Wikidata fallback (optional)
-npx tsx scripts/landmarks/fetch_wikidata.ts --city=tokyo_23wards --limit=60 --out=tmp/wd_tokyo.json
+node scripts/landmarks/fetch_wikidata.js --city=tokyo_23wards --limit=60 --out=tmp/wd_tokyo.json
 
-# 3) Normalize (prepare a combined raw list file first)
-# NOTE: You should merge OSM/Wikidata results into tmp/landmarks_raw.json
-npx tsx scripts/landmarks/normalize_landmarks.ts tmp/landmarks_raw.json tmp/landmarks_normalized.json
+# 3) Merge raw sources (OSM + Wikidata)
+node scripts/landmarks/merge_raw.js tmp/osm_tokyo.json tmp/wd_tokyo.json tmp/landmarks_raw.json
 
-# 4) Assign station candidates
-npx tsx scripts/landmarks/assign_stations.ts tmp/landmarks_normalized.json tmp/landmarks_with_stations.json
+# 4) Normalize
+node scripts/landmarks/normalize_landmarks.js tmp/landmarks_raw.json tmp/landmarks_normalized.json
 
-# 5) Merge into places file
-npx tsx scripts/landmarks/merge_output.ts tmp/landmarks_with_stations.json src/data/places_tokyo.json
+# 5) Assign station candidates
+node scripts/landmarks/assign_stations.js tmp/landmarks_normalized.json tmp/landmarks_with_stations.json
+
+# 6) Select a batch (30)
+node scripts/landmarks/select_batch.js tmp/landmarks_with_stations.json src/data/places_tokyo.json tmp/landmarks_batch.json 30
+
+# 7) Merge into places file
+node scripts/landmarks/merge_output.js tmp/landmarks_batch.json src/data/places_tokyo.json
 ```
 
 ## Schema

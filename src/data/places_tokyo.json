@@ -1686,5 +1686,1960 @@
         }
       }
     ]
+  },
+  {
+    "id": "chapel_of_adoration",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "Chapel of Adoration"
+    ],
+    "coordinates": {
+      "lat": 35.7279705,
+      "lng": 139.9146337
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:241823198",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "japan_traditional_crafts_centre",
+    "category": "landmark",
+    "name": {
+      "en": "Japan Traditional Crafts Centre",
+      "ja": "伝統工芸 青山スクエア",
+      "zh-TW": "伝統工芸 青山スクエア"
+    },
+    "aliases": [
+      "Japan Traditional Crafts Centre",
+      "伝統工芸 青山スクエア"
+    ],
+    "coordinates": {
+      "lat": 35.7288374,
+      "lng": 139.7093019
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:251055430",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "ntl_park_nature_study",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "Ntl Park Nature Study"
+    ],
+    "coordinates": {
+      "lat": 35.6397288,
+      "lng": 139.7177804
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:251055433",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "inari_jinja",
+    "category": "landmark",
+    "name": {
+      "en": "稲荷神社",
+      "ja": "稲荷神社",
+      "zh-TW": "稲荷神社"
+    },
+    "aliases": [
+      "Inari Jinja",
+      "稲荷神社"
+    ],
+    "coordinates": {
+      "lat": 35.822775,
+      "lng": 139.8999779
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:335853461",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_250668618",
+    "category": "landmark",
+    "name": {
+      "en": "Artizon Museum",
+      "ja": "アーティゾン美術館",
+      "zh-TW": "アーティゾン美術館"
+    },
+    "aliases": [
+      "アーティゾン美術館",
+      "Artizon Museum"
+    ],
+    "coordinates": {
+      "lat": 35.678749,
+      "lng": 139.7721285
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:250668618",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_250668627",
+    "category": "landmark",
+    "name": {
+      "en": "Tokyo Photographic Art Museum",
+      "ja": "東京都写真美術館",
+      "zh-TW": "東京都写真美術館"
+    },
+    "aliases": [
+      "東京都写真美術館",
+      "Tokyo Photographic Art Museum"
+    ],
+    "coordinates": {
+      "lat": 35.641543,
+      "lng": 139.7133962
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:250668627",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_252675438",
+    "category": "landmark",
+    "name": {
+      "en": "Kanze No Theater",
+      "ja": "Kanze No Theater",
+      "zh-TW": "Kanze No Theater"
+    },
+    "aliases": [
+      "観世能楽堂",
+      "Kanze No Theater"
+    ],
+    "coordinates": {
+      "lat": 35.6620432,
+      "lng": 139.6935718
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:252675438",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_260158760",
+    "category": "landmark",
+    "name": {
+      "en": "Kuramae Water Museum",
+      "ja": "Kuramae Water Museum",
+      "zh-TW": "Kuramae Water Museum"
+    },
+    "aliases": [
+      "蔵前水の館",
+      "Kuramae Water Museum"
+    ],
+    "coordinates": {
+      "lat": 35.7016508,
+      "lng": 139.7913627
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:260158760",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_260207768",
+    "category": "landmark",
+    "name": {
+      "en": "Shimoyama Memorial Monument",
+      "ja": "Shimoyama Memorial Monument",
+      "zh-TW": "Shimoyama Memorial Monument"
+    },
+    "aliases": [
+      "下山国鉄総裁追憶碑",
+      "Shimoyama Memorial Monument"
+    ],
+    "coordinates": {
+      "lat": 35.7609876,
+      "lng": 139.8155179
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:260207768",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_260408025",
+    "category": "landmark",
+    "name": {
+      "en": "Karasumori Shrine",
+      "ja": "Karasumori Shrine",
+      "zh-TW": "Karasumori Shrine"
+    },
+    "aliases": [
+      "烏森神社",
+      "Karasumori Shrine"
+    ],
+    "coordinates": {
+      "lat": 35.6667952,
+      "lng": 139.7568175
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:260408025",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_260409527",
+    "category": "landmark",
+    "name": {
+      "en": "The Imperial Hotel Plaza",
+      "ja": "The Imperial Hotel Plaza",
+      "zh-TW": "The Imperial Hotel Plaza"
+    },
+    "aliases": [
+      "帝国ホテルプラザ東京",
+      "The Imperial Hotel Plaza"
+    ],
+    "coordinates": {
+      "lat": 35.672127,
+      "lng": 139.7594638
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:260409527",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_302022636",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "新島のモヤイ像"
+    ],
+    "coordinates": {
+      "lat": 35.5623746,
+      "lng": 139.7169699
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:302022636",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_304422978",
+    "category": "landmark",
+    "name": {
+      "en": "Myofuku Ji",
+      "ja": "妙福寺",
+      "zh-TW": "妙福寺"
+    },
+    "aliases": [
+      "妙福寺",
+      "Myofuku Ji"
+    ],
+    "coordinates": {
+      "lat": 35.6011445,
+      "lng": 139.6920211
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:304422978",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_309047766",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "日本キリスト教団 代々木上原教会"
+    ],
+    "coordinates": {
+      "lat": 35.6656958,
+      "lng": 139.6774391
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:309047766",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_309053548",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "天理教原宿分教団"
+    ],
+    "coordinates": {
+      "lat": 35.6673128,
+      "lng": 139.6769193
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:309053548",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_334167696",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "天照皇大神"
+    ],
+    "coordinates": {
+      "lat": 35.5504333,
+      "lng": 139.663706
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:334167696",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_334232017",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "浅間神社"
+    ],
+    "coordinates": {
+      "lat": 35.5501783,
+      "lng": 139.6645881
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:334232017",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_340381542",
+    "category": "landmark",
+    "name": {
+      "en": "Ebisu Shrine",
+      "ja": "Ebisu Shrine",
+      "zh-TW": "Ebisu Shrine"
+    },
+    "aliases": [
+      "恵比寿神社",
+      "Ebisu Shrine"
+    ],
+    "coordinates": {
+      "lat": 35.6472232,
+      "lng": 139.7077849
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:340381542",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_370090849",
+    "category": "landmark",
+    "name": {
+      "en": "Memorial monument of Mikawashima rail accident",
+      "ja": "三河島事故慰霊碑",
+      "zh-TW": "三河島事故慰霊碑"
+    },
+    "aliases": [
+      "三河島事故慰霊碑",
+      "Memorial monument of Mikawashima rail accident"
+    ],
+    "coordinates": {
+      "lat": 35.7356233,
+      "lng": 139.7796059
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:370090849",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_389635180",
+    "category": "landmark",
+    "name": {
+      "en": "Myozoji Temple",
+      "ja": "Myozoji Temple",
+      "zh-TW": "Myozoji Temple"
+    },
+    "aliases": [
+      "妙像寺",
+      "Myozoji Temple"
+    ],
+    "coordinates": {
+      "lat": 35.6657457,
+      "lng": 139.7354859
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:389635180",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_390657439",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "川通稲荷神社"
+    ],
+    "coordinates": {
+      "lat": 35.8166931,
+      "lng": 139.9026569
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:390657439",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_410166105",
+    "category": "landmark",
+    "name": {
+      "en": "Japan Football Museum",
+      "ja": "Japan Football Museum",
+      "zh-TW": "Japan Football Museum"
+    },
+    "aliases": [
+      "日本サッカーミュージアム",
+      "Japan Football Museum"
+    ],
+    "coordinates": {
+      "lat": 35.7042546,
+      "lng": 139.7639427
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:410166105",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_417434075",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "神楽坂若宮八幡宮"
+    ],
+    "coordinates": {
+      "lat": 35.6997288,
+      "lng": 139.7401145
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:417434075",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_427886909",
+    "category": "landmark",
+    "name": {
+      "en": "Statue of Omura Masujiro",
+      "ja": "Statue of Omura Masujiro",
+      "zh-TW": "Statue of Omura Masujiro"
+    },
+    "aliases": [
+      "大村益次郎銅像",
+      "Statue of Omura Masujiro"
+    ],
+    "coordinates": {
+      "lat": 35.6947998,
+      "lng": 139.7463792
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:427886909",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_427893000",
+    "category": "landmark",
+    "name": {
+      "en": "Shiba Toshogu",
+      "ja": "Shiba Toshogu",
+      "zh-TW": "Shiba Toshogu"
+    },
+    "aliases": [
+      "芝東照宮",
+      "Shiba Toshogu"
+    ],
+    "coordinates": {
+      "lat": 35.6550961,
+      "lng": 139.7486263
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:427893000",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_430088810",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "天理教 南豊島分教会"
+    ],
+    "coordinates": {
+      "lat": 35.6564245,
+      "lng": 139.6460778
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:430088810",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_440068494",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "浜田山キリスト教会"
+    ],
+    "coordinates": {
+      "lat": 35.6833613,
+      "lng": 139.6311935
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:440068494",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_440069983",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "白山神社"
+    ],
+    "coordinates": {
+      "lat": 35.6869591,
+      "lng": 139.6371745
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:440069983",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_441655802",
+    "category": "landmark",
+    "name": {
+      "en": "The Ueno Royal Museum",
+      "ja": "上野の森美術館",
+      "zh-TW": "上野の森美術館"
+    },
+    "aliases": [
+      "上野の森美術館",
+      "The Ueno Royal Museum"
+    ],
+    "coordinates": {
+      "lat": 35.7128522,
+      "lng": 139.7747663
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:441655802",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_442095349",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "御観兵榎"
+    ],
+    "coordinates": {
+      "lat": 35.6759341,
+      "lng": 139.7208478
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:442095349",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_443387293",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "永福寺"
+    ],
+    "coordinates": {
+      "lat": 35.6722482,
+      "lng": 139.6441076
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:443387293",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_443397545",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "八幡神社"
+    ],
+    "coordinates": {
+      "lat": 35.6752302,
+      "lng": 139.6304234
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:443397545",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_443521328",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "カトリック喜多見教会"
+    ],
+    "coordinates": {
+      "lat": 35.6376173,
+      "lng": 139.5878117
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:443521328",
+    "last_verified": "2026-02-04T12:24:06.115Z"
+  },
+  {
+    "id": "osm_443525189",
+    "category": "landmark",
+    "name": {
+      "en": "Unknown",
+      "ja": "Unknown",
+      "zh-TW": "Unknown"
+    },
+    "aliases": [
+      "仙川教会"
+    ],
+    "coordinates": {
+      "lat": 35.6575565,
+      "lng": 139.5896523
+    },
+    "candidateStations": [
+      {
+        "stationName": "大門",
+        "stationId": 1926726026,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金台",
+        "stationId": 2012000223,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      },
+      {
+        "stationName": "白金高輪",
+        "stationId": 2179133140,
+        "distanceMeters": null,
+        "walkMinutes": null,
+        "complexity": {
+          "turnCount": 3,
+          "signageClarity": 2,
+          "exitCount": 8,
+          "underConstruction": false
+        }
+      }
+    ],
+    "source": "osm",
+    "source_id": "osm:443525189",
+    "last_verified": "2026-02-04T12:24:06.115Z"
   }
 ]
