@@ -2,7 +2,7 @@
  * OpenRouter Configuration
  * 
  * Central configuration for OpenRouter API integration.
- * Provides a fallback chain: DeepSeek V3.2 → DeepSeek V3.2 Exp
+ * Single-model configuration: DeepSeek V3.2
  */
 
 import { createOpenAI } from '@ai-sdk/openai';
@@ -32,12 +32,10 @@ export const ZEABUR_MODEL_CONFIG = {
 // Model configuration with fallback chain
 export const MODEL_CONFIG = {
     primary: 'deepseek/deepseek-v3.2',
-    fallback1: 'deepseek/deepseek-v3.2-exp',
 } as const;
 
 export const FALLBACK_CHAIN = [
     MODEL_CONFIG.primary,
-    MODEL_CONFIG.fallback1,
 ] as const;
 
 /**
