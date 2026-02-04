@@ -10,7 +10,7 @@ import { tool, jsonSchema } from 'ai';
 import { AlgorithmProvider } from '@/lib/l4/algorithms/AlgorithmProvider';
 import { createClient } from '@supabase/supabase-js';
 import { SubagentType } from '../types';
-import { SupportedLocale } from '@/lib/l4/assistantEngine';
+import { SupportedLocale, normalizeOdptStationId } from '@/lib/l4/assistantEngine';
 import fs from 'fs';
 import path from 'path';
 import { getTrainStatus } from '@/lib/odpt/service';
@@ -373,6 +373,28 @@ function detectAirportFromText(input: string): 'narita' | 'haneda' | null {
     return null;
 }
 
+function getStationLabelFromId(stationId?: string): string | null {
+    if (!stationId) return null;
+    const normalized = normalizeOdptStationId(stationId);
+    const raw = normalized.split(':').pop() || normalized;
+    const parts = raw.split('.');
+    return parts[parts.length - 1] || raw;
+}
+
+function isGenericPoiQuery(query: string): boolean {
+    const normalized = String(query || '').trim().toLowerCase();
+    if (!normalized) return true;
+    const generic = new Set([
+        'poi', 'spot', 'spots', 'place', 'places',
+        'attraction', 'attractions', 'sight', 'sights',
+        '景點', '景点', '附近', '周邊', '周邊', '周辺', '周围',
+        '美食', '餐廳', '餐馆', '吃的', 'restaurant', 'restaurants',
+        'food', 'shopping', 'shop', 'shops', '購物', '购物'
+    ]);
+    if (generic.has(normalized)) return true;
+    return normalized.length <= 2;
+}
+
 export const createFindRouteTool = (ctx: ToolContext) => tool({
     description: `Find the best transit route between two locations. 
     Returns route options with transfer info, duration, and fare estimates.
@@ -694,14 +716,21 @@ export const createSearchPOITool = (ctx: ToolContext) => tool({
         category: z.enum(['food', 'attraction', 'shopping', 'service', 'all']).optional(),
     }),
     execute: async ({ query, nearStation, category = 'all' }: { query: string; nearStation?: string; category?: 'food' | 'attraction' | 'shopping' | 'service' | 'all' }) => {
-        const logMsg = `[Tool:searchPOI] Query: "${query}", Near: "${nearStation || 'Any'}", Category: ${category}`;
+        const locationHint = nearStation || getStationLabelFromId(ctx.currentStation);
+        const shouldRewrite = isGenericPoiQuery(query);
+        const categoryHint = category !== 'all' ? category : query;
+        const rewrittenQuery = shouldRewrite && locationHint
+            ? `${locationHint} ${categoryHint}`.trim()
+            : query;
+
+        const logMsg = `[Tool:searchPOI] Query: "${query}", Rewritten: "${rewrittenQuery}", Near: "${locationHint || 'Any'}", Category: ${category}`;
         console.log(logMsg);
 
         try {
             // Construct semantic query with location context
-            const semanticQuery = nearStation
-                ? `${query} near ${nearStation}`
-                : query;
+            const semanticQuery = locationHint
+                ? `${rewrittenQuery} near ${locationHint}`
+                : rewrittenQuery;
 
             // Perform Vector Search
             // We search for more results to allow for post-filtering if needed
@@ -711,8 +740,8 @@ export const createSearchPOITool = (ctx: ToolContext) => tool({
                 return {
                     success: false,
                     message: ctx.locale === 'en'
-                        ? `No results found for "${query}".`
-                        : `找不到關於「${query}」的地點。`,
+                        ? `No results found for "${rewrittenQuery}".`
+                        : `找不到關於「${rewrittenQuery}」的地點。`,
                 };
             }
 
@@ -728,7 +757,7 @@ export const createSearchPOITool = (ctx: ToolContext) => tool({
                 station_candidates: r.payload.station_id ? [r.payload.station_id] : []
             }));
 
-            const locationText = nearStation || (ctx.locale === 'en' ? 'Tokyo' : '東京');
+            const locationText = locationHint || (ctx.locale === 'en' ? 'Tokyo' : '東京');
             const isChinese = ctx.locale === 'zh' || ctx.locale === 'zh-TW';
 
             return {
