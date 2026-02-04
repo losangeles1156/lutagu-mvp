@@ -23,6 +23,10 @@ jobs:
           AGENT_V2_FALLBACK: "none"
         run: node scripts/agent_e2e_test.js
 
+      - name: Env probe
+        run: |
+          node -e "console.log({OPENROUTER: !!process.env.OPENROUTER_API_KEY, ZEABUR: !!process.env.ZEABUR_API_KEY, E2E: !!process.env.AGENT_E2E_KEY, E2E_PROVIDER: process.env.E2E_PROVIDER})"
+
       - name: Upload Agent E2E report
         if: always()
         uses: actions/upload-artifact@v4
