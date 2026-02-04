@@ -366,6 +366,13 @@ function isWithinTimeWindow(now: ReturnType<typeof getJSTTime>, window?: { start
     return current >= start || current <= end;
 }
 
+function detectAirportFromText(input: string): 'narita' | 'haneda' | null {
+    const text = String(input || '').toLowerCase();
+    if (text.includes('narita') || text.includes('nrt') || text.includes('成田')) return 'narita';
+    if (text.includes('haneda') || text.includes('hnd') || text.includes('羽田')) return 'haneda';
+    return null;
+}
+
 export const createFindRouteTool = (ctx: ToolContext) => tool({
     description: `Find the best transit route between two locations. 
     Returns route options with transfer info, duration, and fare estimates.
@@ -377,6 +384,20 @@ export const createFindRouteTool = (ctx: ToolContext) => tool({
         safeAppendAgentLog(`[${new Date().toISOString()}] ${logMsg}\n`);
 
         try {
+            const airportFromText = detectAirportFromText(origin) || detectAirportFromText(destination);
+            if (airportFromText) {
+                const access = await buildAirportAccessRecommendation(airportFromText, ctx, origin + ' ' + destination);
+                if (access) {
+                    return {
+                        success: true,
+                        airportAccess: access,
+                        summary: ctx.locale === 'en'
+                            ? `Here is the recommended airport access for ${airportFromText}.`
+                            : `這是前往 ${airportFromText === 'narita' ? '成田' : '羽田'} 的建議交通方式。`,
+                    };
+                }
+            }
+
             const provider = getAlgorithmProvider();
             const resolvedOrigin = await resolveEndpoint(origin);
             const resolvedDest = await resolveEndpoint(destination);
