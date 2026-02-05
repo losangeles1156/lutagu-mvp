@@ -68,6 +68,15 @@ export interface RequestContext {
     nodeContext?: NodeContext; // New field for Phase 1.3
     relayText?: string;
     tagsContext?: string[];
+    scenarioPreview?: string; // Decision orchestrator preview
+    decisionTrace?: {
+        intent: any;
+        relay: any;
+        requiredTools: string[];
+        toolCalls: any[];
+        scenarioPreview: string;
+        warnings: string[];
+    };
 }
 
 export class HybridEngine {
