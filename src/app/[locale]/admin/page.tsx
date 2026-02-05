@@ -92,17 +92,19 @@ export default function AdminDashboardPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>
+                        {t('title')}
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
                         {t('overview')} • {new Date().toLocaleDateString(locale)}
                     </p>
                 </div>
                 <button
                     onClick={fetchData}
                     disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-colors"
                 >
                     <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
                     {t('refresh')}
@@ -111,7 +113,7 @@ export default function AdminDashboardPage() {
 
             {/* Error */}
             {error && (
-                <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
+                <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl">
                     {error}
                 </div>
             )}
@@ -120,9 +122,9 @@ export default function AdminDashboardPage() {
             {loading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
-                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
-                            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                        <div key={i} className="admin-kpi animate-pulse">
+                            <div className="h-4 bg-slate-200 rounded w-1/2 mb-3"></div>
+                            <div className="h-8 bg-slate-200 rounded w-3/4"></div>
                         </div>
                     ))}
                 </div>
@@ -131,20 +133,20 @@ export default function AdminDashboardPage() {
                     {statCards.map((stat, idx) => {
                         const Icon = stat.icon;
                         return (
-                            <div key={idx} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                            <div key={idx} className="admin-kpi hover:shadow-md transition-shadow">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className={`p-2 rounded-lg ${stat.color} text-white`}>
+                                    <div className={`p-2 rounded-xl ${stat.color} text-white shadow-sm`}>
                                         <Icon size={18} />
                                     </div>
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
                                         {stat.label}
                                     </span>
                                 </div>
-                                <div className="text-3xl font-bold text-gray-900">
+                                <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>
                                     {stat.value}
                                 </div>
                                 {stat.subtext && (
-                                    <div className="text-xs text-gray-500 mt-1">{stat.subtext}</div>
+                                    <div className="text-xs text-slate-500 mt-1">{stat.subtext}</div>
                                 )}
                             </div>
                         );
@@ -153,62 +155,62 @@ export default function AdminDashboardPage() {
             )}
 
             {/* Recent Sessions Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="font-bold text-gray-900">{t('table.recentSessions')}</h2>
+            <div className="admin-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 className="font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{t('table.recentSessions')}</h2>
                     <Link
                         href={`/${locale}/admin/metrics`}
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1"
                     >
                         {t('viewDetails')} <ArrowRight size={14} />
                     </Link>
                 </div>
 
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">
-                        <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
+                    <div className="p-8 text-center text-slate-500">
+                        <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-slate-400" />
                         {t('loading')}
                     </div>
                 ) : recentSessions.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                        <LayoutDashboard className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <div className="p-8 text-center text-slate-500">
+                        <LayoutDashboard className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                         <div className="font-medium">{t('noData')}</div>
                         <div className="text-sm">{t('userActivity')}</div>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                        <table className="admin-table min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3">
                                         {t('table.session')}
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3">
                                         {t('table.startTime')}
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3">
                                         {t('table.steps')}
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3">
                                         {t('table.conversion')}
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3">
                                         {t('table.feedback')}
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3">
                                         {t('table.partnerClicks')}
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-slate-100">
                                 {recentSessions.map((session) => (
-                                    <tr key={session.session_id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={session.session_id}>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                            <code className="text-xs bg-slate-100 px-2 py-1 rounded">
                                                 {session.session_id.substring(0, 8)}...
                                             </code>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             {new Date(session.session_start).toLocaleString(locale)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -218,22 +220,22 @@ export default function AdminDashboardPage() {
                                                         key={step}
                                                         className={`w-2 h-2 rounded-full ${step <= session.max_step_reached
                                                                 ? 'bg-emerald-500'
-                                                                : 'bg-gray-200'
+                                                                : 'bg-slate-200'
                                                             }`}
                                                     />
                                                 ))}
-                                                <span className="ml-2 text-xs text-gray-500">
+                                                <span className="ml-2 text-xs text-slate-500">
                                                     {session.funnel_steps_completed} {t('table.stepsUnit')}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {session.reached_conversion_step ? (
-                                                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
                                                     {t('table.converted')}
                                                 </span>
                                             ) : (
-                                                <span className="text-xs text-gray-400">-</span>
+                                                <span className="text-xs text-slate-400">-</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -242,14 +244,14 @@ export default function AdminDashboardPage() {
                                             ) : session.feedback_score_sum < 0 ? (
                                                 <span className="text-red-600 font-bold">{session.feedback_score_sum}</span>
                                             ) : (
-                                                <span className="text-gray-400">-</span>
+                                                <span className="text-slate-400">-</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             {session.partner_clicks > 0 ? (
                                                 <span className="font-bold text-amber-600">{session.partner_clicks}</span>
                                             ) : (
-                                                <span className="text-gray-400">0</span>
+                                                <span className="text-slate-400">0</span>
                                             )}
                                         </td>
                                     </tr>
@@ -273,11 +275,11 @@ export default function AdminDashboardPage() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+                            className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all"
                         >
-                            <Icon size={18} className="text-gray-400" />
-                            <span className="font-medium text-gray-700">{tQuickLinks(link.labelKey)}</span>
-                            <ArrowRight size={14} className="ml-auto text-gray-300" />
+                            <Icon size={18} className="text-slate-400" />
+                            <span className="font-medium text-slate-700">{tQuickLinks(link.labelKey)}</span>
+                            <ArrowRight size={14} className="ml-auto text-slate-300" />
                         </Link>
                     );
                 })}

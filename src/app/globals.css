@@ -57,6 +57,33 @@ body {
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-br from-indigo-600 to-violet-700;
   }
+
+  .admin-shell {
+    background-image:
+      radial-gradient(1200px 500px at 80% -10%, rgba(99, 102, 241, 0.12), transparent 60%),
+      radial-gradient(900px 400px at 0% 0%, rgba(20, 184, 166, 0.12), transparent 55%),
+      linear-gradient(180deg, rgba(248, 250, 252, 1), rgba(255, 255, 255, 1));
+  }
+
+  .admin-card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-sm;
+  }
+
+  .admin-kpi {
+    @apply bg-white rounded-2xl border border-slate-200 px-5 py-4 shadow-sm;
+  }
+
+  .admin-table {
+    @apply w-full text-sm;
+  }
+
+  .admin-table thead th {
+    @apply text-left text-[11px] uppercase tracking-wide text-slate-500 font-semibold;
+  }
+
+  .admin-table tbody tr {
+    @apply hover:bg-slate-50 transition-colors;
+  }
 }
 
 @keyframes slow-pulse {
@@ -75,6 +102,21 @@ body {
 
 .animate-slow-pulse {
   animation: slow-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes admin-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-fade-in {
+  animation: admin-fade-in 0.35s ease-out both;
 }
 
 /* Custom Scrollbar */

@@ -73,20 +73,20 @@ export default function MetricsAdminPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Activity className="text-indigo-600" />
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900 flex items-center gap-2" style={{ fontFamily: 'var(--font-admin-display)' }}>
+                        <Activity className="text-slate-900" />
                         效能指標
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-slate-500 mt-1">
                         過去 24 小時 • {lastUpdated ? `更新於 ${lastUpdated.toLocaleTimeString()}` : '載入中...'}
                     </p>
                 </div>
                 <button
                     onClick={fetchMetrics}
                     disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-colors"
                 >
                     <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
                     重新整理
@@ -95,29 +95,29 @@ export default function MetricsAdminPage() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                    <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wide mb-2">
+                <div className="admin-kpi">
+                    <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-wide mb-2">
                         <Server size={14} />
                         總請求數
                     </div>
-                    <div className="text-3xl font-bold text-gray-900">{totalRequests.toLocaleString()}</div>
+                    <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{totalRequests.toLocaleString()}</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                    <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wide mb-2">
+                <div className="admin-kpi">
+                    <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-wide mb-2">
                         <Clock size={14} />
                         平均回應時間
                     </div>
-                    <div className="text-3xl font-bold text-gray-900">{avgResponseTime}ms</div>
+                    <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{avgResponseTime}ms</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                    <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wide mb-2">
+                <div className="admin-kpi">
+                    <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-wide mb-2">
                         <Brain size={14} />
                         AI 請求數
                     </div>
-                    <div className="text-3xl font-bold text-gray-900">{aiTotalRequests.toLocaleString()}</div>
+                    <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{aiTotalRequests.toLocaleString()}</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                    <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wide mb-2">
+                <div className="admin-kpi">
+                    <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-wide mb-2">
                         <AlertTriangle size={14} />
                         錯誤數
                     </div>
@@ -127,35 +127,66 @@ export default function MetricsAdminPage() {
                 </div>
             </div>
 
+            {/* Pulse */}
+            <div className="admin-card p-5">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 text-slate-800 font-semibold" style={{ fontFamily: 'var(--font-admin-display)' }}>
+                        <TrendingUp size={16} className="text-emerald-600" />
+                        流量節奏
+                    </div>
+                    <span className="text-xs text-slate-500">過去 24 小時</span>
+                </div>
+                {loading && hourlyVolume.length === 0 ? (
+                    <div className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+                ) : hourlyVolume.length === 0 ? (
+                    <div className="text-sm text-slate-500">尚無資料</div>
+                ) : (
+                    <div className="grid grid-cols-12 gap-2 items-end h-28">
+                        {hourlyVolume.slice(0, 12).map((hour) => {
+                            const height = Math.max(8, Math.min(100, Math.round(hour.request_count / 4)));
+                            return (
+                                <div key={hour.hour} className="flex flex-col items-center gap-2">
+                                    <div
+                                        className="w-full rounded-full bg-slate-900/80"
+                                        style={{ height: `${height}px` }}
+                                    />
+                                    <span className="text-[10px] text-slate-400">{hour.hour}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
             {/* API Performance Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+            <div className="admin-card overflow-hidden">
+                <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
                     <Zap className="text-amber-500" size={18} />
-                    <h2 className="font-bold text-gray-800">API 端點效能</h2>
+                    <h2 className="font-semibold text-slate-800" style={{ fontFamily: 'var(--font-admin-display)' }}>API 端點效能</h2>
                 </div>
                 {loading && apiStats.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                        <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
+                    <div className="p-8 text-center text-slate-500">
+                        <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-slate-400" />
                         載入指標中...
                     </div>
                 ) : apiStats.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                        <Activity className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <div className="p-8 text-center text-slate-500">
+                        <Activity className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                         <div className="font-medium">尚無數據</div>
                         <div className="text-sm">請求產生後將顯示於此</div>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                        <table className="admin-table">
+                            <thead className="bg-slate-50">
                                 <tr>
-                                    <th className="text-left py-3 px-4 font-bold">端點</th>
-                                    <th className="text-right py-3 px-4 font-bold">請求數</th>
-                                    <th className="text-right py-3 px-4 font-bold">平均</th>
-                                    <th className="text-right py-3 px-4 font-bold">P50</th>
-                                    <th className="text-right py-3 px-4 font-bold">P95</th>
-                                    <th className="text-right py-3 px-4 font-bold">P99</th>
-                                    <th className="text-right py-3 px-4 font-bold">錯誤</th>
+                                    <th className="py-3 px-4">端點</th>
+                                    <th className="py-3 px-4 text-right">請求數</th>
+                                    <th className="py-3 px-4 text-right">平均</th>
+                                    <th className="py-3 px-4 text-right">P50</th>
+                                    <th className="py-3 px-4 text-right">P95</th>
+                                    <th className="py-3 px-4 text-right">P99</th>
+                                    <th className="py-3 px-4 text-right">錯誤</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
