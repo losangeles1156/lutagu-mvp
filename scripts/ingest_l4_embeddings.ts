@@ -138,12 +138,17 @@ async function main() {
                     entity_id: item.id,
                     entity_name: item.name,
                     content: item.content,
+                    content_original: item.content,
+                    content_en: item.content,
                     icon: item.icon,
                     category: item.category,
                     subcategory: item.subcategory,
                     user_context: item.user_context,
                     time_context: item.time_context,
                     embedding: embedding,
+                    embedding_original: embedding,
+                    embedding_en: embedding,
+                    language_mode: 'en',
                     source: 'expertKnowledgeBase'
                 });
 

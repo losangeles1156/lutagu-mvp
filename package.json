@@ -13,6 +13,8 @@
     "test:ui": "node --test --test-concurrency=1 --import tsx src/ui/tags.ui.test.ts src/ui/l2-live.ui.test.ts",
     "test:e2e": "playwright test",
     "test:agent": "node scripts/agent_e2e_test.js",
+    "env:check": "TSX_DISABLE_IPC=1 tsx scripts/check_env_local.ts",
+    "sync:knowledge:bilingual": "tsx scripts/sync_knowledge_embeddings_bilingual.ts",
     "crawl:l1": "tsx scripts/l1_pipeline/run.ts --all",
     "crawl:l3": "tsx scripts/l3_fill_coin_lockers.ts",
     "crawl:l3:toilets": "tsx scripts/l3_fill_toilets.ts",

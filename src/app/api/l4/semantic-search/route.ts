@@ -14,13 +14,24 @@ export async function POST(request: NextRequest) {
       user_context = [],
       time_context,
       top_k = 5,
-      threshold = 0.5
+      threshold = 0.5,
+      language_mode: _language_mode = 'en'
     } = body;
 
     if (!query) {
       return NextResponse.json(
         { error: 'Query is required' },
         { status: 400 }
+      );
+    }
+
+    // Enforce stable language mode from server config to avoid client-side overrides.
+    const enforcedLanguageMode =
+      (process.env.L4_LANGUAGE_MODE as 'en' | 'original' | 'dual') || 'en';
+
+    if (enforcedLanguageMode !== 'en') {
+      console.warn(
+        `[L4Search] WARNING: L4_LANGUAGE_MODE="${enforcedLanguageMode}". Expected "en" for stable bilingual retrieval.`
       );
     }
 
@@ -31,7 +42,8 @@ export async function POST(request: NextRequest) {
       userContext: user_context,
       timeContext: time_context,
       topK: top_k,
-      threshold
+      threshold,
+      languageMode: enforcedLanguageMode
     });
 
     // Step 3: Apply contextual scoring if user_context or time_context provided
@@ -87,7 +99,8 @@ export async function POST(request: NextRequest) {
           station_id,
           knowledge_type,
           user_context,
-          time_context
+          time_context,
+          language_mode: enforcedLanguageMode
         }
       }
     });

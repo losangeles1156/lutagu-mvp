@@ -10,6 +10,11 @@ import { streamText, generateText } from 'ai';
 import { createAgentTools, ToolContext } from '@/lib/agent/tools/AgentTools';
 import { createAgentSystemPrompt, TOKYO_SYSTEM_PROMPT_CONFIG } from '@/lib/agent/prompts/SystemPrompt';
 import { AGENT_TYPES } from '@/lib/agent/types';
+import { prepareDecision, deriveToolArgs } from '@/lib/agent/decision/DecisionOrchestrator';
+import { formatDecisionResponse } from '@/lib/agent/decision/responseFormatter';
+import { decisionMetrics } from '@/lib/agent/decision/DecisionMetrics';
+import { buildScenarioPreview } from '@/lib/agent/decision/scenarioPreview';
+import type { SupportedLocale } from '@/lib/l4/assistantEngine';
 import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -145,26 +150,7 @@ export async function POST(req: NextRequest) {
         messages.push({ role: 'user', content: currentText });
     }
 
-    // [P2 FIX] Enhance last user message with Tool Calling reinforcement to solve missing UI Cards
-    const lastMsg = messages[messages.length - 1];
-    if (lastMsg && lastMsg.role === 'user') {
-        const query = lastMsg.content.toLowerCase();
-        let reinforcement = '';
-
-        if (query.includes('airport') || query.includes('機場') || query.includes('成田') || query.includes('羽田') || query.includes('nrt') || query.includes('hnd')) {
-            reinforcement = `\n\n[INSTRUCTION]: You MUST call the getAirportAccess tool first for airport access questions. Provide a concise summary after tool results.`;
-        } else if (query.includes('nearby') || query.includes('附近') || query.includes('周辺') || query.includes('spot') || query.includes('景點') || query.includes('美食')) {
-            reinforcement = `\n\n[INSTRUCTION]: You MUST call the searchPOI tool for nearby/POI questions, and prefer node-limited context when available.`;
-        } else if (query.includes('route') || query.includes('go to') || query.includes('從') || query.includes('到')) {
-            reinforcement = `\n\n[INSTRUCTION]: You MUST call the findRoute tool to get real route data. Do NOT output [HYBRID_DATA] without calling findRoute first.`;
-        } else if (query.includes('status') || query.includes('delay') || query.includes('延遲') || query.includes('運行')) {
-            reinforcement = `\n\n[INSTRUCTION]: You MUST call the getTransitStatus tool to get real-time status. Summarize the findings clearly for the user.`;
-        }
-
-        if (reinforcement && !lastMsg.content.includes('[INSTRUCTION]')) {
-            lastMsg.content += reinforcement;
-        }
-    }
+    // Tool enforcement is handled by DecisionOrchestrator + prefetchRequiredTools
 
 
 
@@ -187,6 +173,71 @@ export async function POST(req: NextRequest) {
     // Create tools first
     const tools = createAgentTools(toolContext);
     console.log(`[Agent 2.0] Tools count:`, Object.keys(tools).length);
+
+    // Decision Orchestrator: Intent -> Relay -> Context -> Required Tools
+    const decision = await prepareDecision({
+        text: currentText || messages[messages.length - 1]?.content || '',
+        locale: locale as SupportedLocale,
+        currentStation
+    });
+    decisionMetrics.recordIntent(decision.intent.intent);
+    const derivedArgs = deriveToolArgs({
+        text: currentText || messages[messages.length - 1]?.content || '',
+        currentStation,
+        relayText: decision.context.relay.relayText,
+        tagsContext: decision.context.tags_context
+    });
+    const prefetchedToolResults = await prefetchRequiredTools({
+        requiredTools: decision.requiredTools,
+        tools,
+        derivedArgs
+    });
+    const prefetchedToolNames = prefetchedToolResults.map(p => p.toolName);
+    decisionMetrics.recordAdequacy(
+        decision.requiredTools.length === 0 ||
+        decision.requiredTools.every(t => prefetchedToolResults.some(p => p.toolName === t && p.success))
+    );
+
+    // Hard enforcement: if required tools are missing or failed, respond early with clarification or fallback.
+    if (decision.requiredTools.length > 0) {
+        const missingRequired = decision.requiredTools.filter(t => !prefetchedToolResults.some(p => p.toolName === t && p.success));
+        if (missingRequired.length > 0) {
+            const early = buildMissingInfoResponse({
+                locale,
+                requiredTools: missingRequired,
+                intent: decision.intent.intent
+            });
+            return new Response(early, {
+                headers: {
+                    'Content-Type': 'text/plain; charset=utf-8',
+                    'Cache-Control': 'no-cache, no-transform',
+                    'X-Accel-Buffering': 'no',
+                    'X-Agent-Backend': 'v2',
+                    'X-Agent-Request-Id': requestId
+                },
+            });
+        }
+    }
+
+    // Scenario preview precompute (for fallback or prompt grounding)
+    const scenarioPreview = buildScenarioPreview({
+        intent: decision.intent,
+        toolResults: prefetchedToolResults.map(p => ({ toolName: p.toolName, result: p.result })),
+        locale
+    });
+
+    const decisionTrace = {
+        intent: decision.intent,
+        relay: decision.context.relay,
+        requiredTools: decision.requiredTools,
+        toolCalls: prefetchedToolResults.map(p => ({
+            name: p.toolName,
+            args: p.args || {},
+            success: p.success
+        })),
+        scenarioPreview: scenarioPreview.preview,
+        warnings: []
+    };
 
     // Now inject runSubagent into context (it can now safely reference tools)
     toolContext.runSubagent = async ({ agentType, prompt, description }) => {
@@ -234,9 +285,30 @@ export async function POST(req: NextRequest) {
         }
     };
 
+    const decisionContextSummary = {
+        locale,
+        intent: decision.intent,
+        relay: decision.context.relay,
+        tags_context: decision.context.tags_context,
+        node: decision.context.nodeContext.primaryNodeId,
+        requiredTools: decision.requiredTools,
+        scenarioPreview,
+        decisionTrace,
+        prefetchedResults: prefetchedToolResults.map(p => ({
+            tool: p.toolName,
+            success: p.success,
+            result: p.result
+        })),
+        prefetched: prefetchedToolResults.map(p => ({
+            tool: p.toolName,
+            success: p.success,
+            summary: p.result?.summary || p.result?.message || null
+        }))
+    };
     const systemPrompt = createAgentSystemPrompt({
         ...TOKYO_SYSTEM_PROMPT_CONFIG,
         locale,
+        additionalContext: `\n## Decision Context\n${JSON.stringify(decisionContextSummary).slice(0, 3500)}`
     });
 
     // Agent loop stop condition
@@ -279,23 +351,32 @@ export async function POST(req: NextRequest) {
         return errorResponse(locale, reason, 503, requestId);
     }
 
-    let toolResultsForSummary: any[] = [];
-    let toolNamesForSummary: string[] = [];
+    let toolResultsForSummary: any[] = prefetchedToolResults.map(p => ({
+        toolName: p.toolName,
+        result: p.result,
+        success: p.success
+    }));
+    let toolNamesForSummary: string[] = prefetchedToolNames.slice();
     try {
         // Use streamWithFallback for automatic model failover
         logDebug(`Starting streamWithFallback with ${Object.keys(tools).length} tools, last msg: ${messages[messages.length - 1]?.content?.slice(0, 100)}`);
+
+        const hasRequiredTools = decision.requiredTools.length > 0;
+        const prefetchedAll = hasRequiredTools && decision.requiredTools.every(t =>
+            prefetchedToolResults.some(p => p.toolName === t && p.success)
+        );
 
         const result = await withTimeout(streamWithFallback({
             system: systemPrompt,
             messages,
             tools,
             maxSteps: MAX_STEPS as number, // Enable multi-step tool calling loop
-            toolChoice: 'auto', // Let model decide when to use tools
+            toolChoice: prefetchedAll ? 'none' : 'auto', // Avoid re-calling required tools
             onFinish: ({ text, toolCalls, steps }: { text: string; toolCalls?: Array<{ toolName: string }>; steps?: unknown[] }) => {
                 const stepCount = steps?.length || 0;
                 const toolNames = toolCalls?.map(tc => tc.toolName) || [];
-                toolNamesForSummary = toolNames;
-                toolResultsForSummary = extractToolResults(steps);
+                toolNamesForSummary = [...prefetchedToolNames, ...toolNames];
+                toolResultsForSummary = [...toolResultsForSummary, ...extractToolResults(steps)];
                 recordAgentResult({
                     requestId,
                     backend: 'v2',
@@ -312,6 +393,14 @@ export async function POST(req: NextRequest) {
                 if (toolNames.length === 0 && text?.includes('[HYBRID_DATA]')) {
                     logDebug(`WARNING: [HYBRID_DATA] output WITHOUT tool calls - this is hallucination!`);
                 }
+
+                // Scenario completeness heuristic: response should contain all four keys
+                const scenarioOk = Boolean(text && (
+                    (text.includes('最佳行動建議') && text.includes('情境預告') && text.includes('風險') && text.includes('下一步')) ||
+                    (text.includes('Best Action') && text.includes('Scenario Preview') && text.includes('Risk') && text.includes('Next Step'))
+                ));
+                decisionMetrics.recordScenarioCompleteness(scenarioOk);
+                decisionMetrics.logSnapshot('v2');
             },
         } as any, simulateFailure), AI_TIMEOUT_MS, 'Agent v2 timeout');
 
@@ -327,12 +416,12 @@ export async function POST(req: NextRequest) {
                         }
                     }
                     if (!hasOutput) {
-                        const fallbackText = await buildFallbackFromTools(toolResultsForSummary, locale);
+                        const fallbackText = await buildFallbackFromTools(toolResultsForSummary, locale, decisionContextSummary);
                         if (fallbackText) {
                             controller.enqueue(encoder.encode(fallbackText));
                         }
                     }
-                    const hybridData = buildHybridData(toolResultsForSummary, toolNamesForSummary);
+                    const hybridData = buildHybridData(toolResultsForSummary, toolNamesForSummary, decisionContextSummary);
                     if (hybridData) {
                         controller.enqueue(encoder.encode(`\n[HYBRID_DATA]${JSON.stringify(hybridData)}[/HYBRID_DATA]`));
                     }
@@ -515,7 +604,7 @@ function extractToolResults(steps?: unknown[]) {
     return results;
 }
 
-function buildHybridData(toolResults: any[], toolNames: string[]) {
+function buildHybridData(toolResults: any[], toolNames: string[], decisionContext?: any) {
     if (!toolResults || toolResults.length === 0) return null;
     const lastResult = toolResults[toolResults.length - 1];
     const lastTool = (lastResult as any)?.toolName || toolNames[toolNames.length - 1] || '';
@@ -541,22 +630,32 @@ function buildHybridData(toolResults: any[], toolNames: string[]) {
         }
     };
 
+    const scenarioPreview = decisionContext?.intent
+        ? buildScenarioPreview({ intent: decisionContext.intent, toolResults, locale: decisionContext?.locale || 'zh-TW' })
+        : undefined;
+
     return {
         type: mapType(lastTool, lastResult),
         source: 'tool',
         data: resultPayload,
-        toolName: lastTool
+        toolName: lastTool,
+        decisionContext: decisionContext
+            ? { ...decisionContext, scenarioPreview: decisionContext.scenarioPreview || scenarioPreview }
+            : undefined
     };
 }
 
-async function buildFallbackFromTools(toolResults: any[], locale: string): Promise<string> {
+async function buildFallbackFromTools(toolResults: any[], locale: string, decisionContext?: any): Promise<string> {
     if (!toolResults || toolResults.length === 0) {
         return locale === 'en'
             ? 'I was unable to retrieve results. Please try again.'
             : '目前無法取得結果，請稍後再試。';
     }
 
-    const prompt = `You are a transit assistant. Based on the tool results JSON below, provide a concise answer in ${locale}.\n\nTool Results JSON:\n${JSON.stringify(toolResults).slice(0, 6000)}`;
+    const prompt = `You are a transit assistant. Based on the tool results JSON below and decision context, provide a response strictly using this format:\n\n` +
+        `🎯 最佳行動建議: ...\n🔮 情境預告: ...\n⚠️ 風險提醒: ...\n➡️ 下一步: ...\n\n` +
+        `Decision Context:\n${JSON.stringify(decisionContext || {}).slice(0, 2000)}\n\n` +
+        `Tool Results JSON:\n${JSON.stringify(toolResults).slice(0, 6000)}`;
 
     try {
         const summary = await generateText({
@@ -566,8 +665,63 @@ async function buildFallbackFromTools(toolResults: any[], locale: string): Promi
         return summary.text || '';
     } catch (error) {
         console.error('[Agent 2.0] Fallback summarization failed:', error);
-        return locale === 'en'
-            ? 'I was unable to summarize the results. Please try again.'
-            : '目前無法整理結果，請稍後再試。';
+        const res = {
+            primary_answer: locale === 'en' ? 'Please proceed with the safest available option.' : '請先採取最安全的替代方案。',
+            scenario_preview: decisionContext?.scenarioPreview?.preview || (locale === 'en' ? 'Expect potential delays or crowding.' : '接下來可能遇到延誤或人潮。'),
+            risk_warning: decisionContext?.scenarioPreview?.risk || (locale === 'en' ? 'Tool data is unavailable.' : '目前工具資料暫時無法取得。'),
+            next_action: decisionContext?.scenarioPreview?.next || (locale === 'en' ? 'Try again in a few minutes.' : '請稍後再試一次。'),
+            fallback_used: true
+        };
+        return formatDecisionResponse(res, locale);
     }
+}
+
+async function prefetchRequiredTools(params: {
+    requiredTools: string[];
+    tools: Record<string, any>;
+    derivedArgs: Record<string, any>;
+}) {
+    const results: Array<{ toolName: string; args: any; result: any; success: boolean }> = [];
+    for (const name of params.requiredTools || []) {
+        const tool = params.tools[name];
+        const args = params.derivedArgs[name];
+        if (!tool?.execute || !args) {
+            results.push({
+                toolName: name,
+                args,
+                result: { success: false, message: 'Missing required input for tool.' },
+                success: false
+            });
+            continue;
+        }
+        try {
+            const result = await tool.execute(args);
+            results.push({ toolName: name, args, result, success: !!result?.success });
+        } catch (error: any) {
+            results.push({ toolName: name, args, result: { success: false, message: error?.message || 'Tool error' }, success: false });
+        }
+    }
+    return results;
+}
+
+function buildMissingInfoResponse(params: { locale: string; requiredTools: string[]; intent: string }) {
+    const { locale, requiredTools, intent } = params;
+    const isZh = locale.startsWith('zh');
+    const missing = requiredTools.join(', ');
+    const res = {
+        primary_answer: isZh
+            ? `我需要補充資訊才能完成「${intent}」決策。`
+            : `I need more details to complete the "${intent}" decision.`,
+        scenario_preview: isZh
+            ? `目前缺少必要資料，因此無法提供最安全的建議。`
+            : `Required data is missing, so I can't provide the safest recommendation yet.`,
+        risk_warning: isZh
+            ? `缺少工具資料：${missing}`
+            : `Missing tool data: ${missing}`,
+        next_action: isZh
+            ? `請提供更完整的起點/終點或關鍵細節。`
+            : `Please provide origin/destination or key details.`,
+        fallback_used: true
+    };
+    return formatDecisionResponse(res, locale);
 }

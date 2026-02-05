@@ -66,6 +66,8 @@ export interface RequestContext {
     currentStation?: string;
     strategyContext?: StrategyContext | null;
     nodeContext?: NodeContext; // New field for Phase 1.3
+    relayText?: string;
+    tagsContext?: string[];
 }
 
 export class HybridEngine {
@@ -120,6 +122,7 @@ export class HybridEngine {
      * Also loads L1 3-5-8 Profile into the context.
      */
     private async resolveNodeContext(text: string, locale: SupportedLocale, context?: RequestContext): Promise<NodeContext> {
+        if (context?.nodeContext) return context.nodeContext;
         // 1. Use existing classifier for intent and simple destination
         const classification = classifyQuestion(text, locale);
 
@@ -555,10 +558,13 @@ export class HybridEngine {
             let vectorKnowledge = '';
             try {
                 // Step 2: Load Tags (Simplified for MVP, can be expanded to fetch from DB)
-                const currentTags = nodeContext.loadedTags;
+                const currentTags = context?.tagsContext && context.tagsContext.length > 0
+                    ? context.tagsContext
+                    : nodeContext.loadedTags;
 
                 // Step 3: Context-Pruned Vector Search
-                const vectorResults = await searchVectorDB(text, 3, {
+                const queryText = context?.relayText || text;
+                const vectorResults = await searchVectorDB(queryText, 3, {
                     node_id: nodeContext.primaryNodeId || undefined,
                     tags: currentTags.length > 0 ? currentTags : undefined
                 });
@@ -844,7 +850,12 @@ export class HybridEngine {
 🔴 MISSING INFORMATION RULE - 資訊不足時主動詢問：
    - 當用戶詢問路線但缺少起點或終點時（例如「從哪裡出發？」），**不要假設**特定起點（如東京車站）。
    - 請用友善的語氣詢問用戶即時補充：「請問您現在在哪個車站出發呢？」或「您想從哪裡出發？」
-   - 只有在無法從上下文中推斷出起點時才詢問（若上下文包含位置資訊，請使用該位置）。`,
+   - 只有在無法從上下文中推斷出起點時才詢問（若上下文包含位置資訊，請使用該位置）。
+✅ 回覆格式（必須）：
+🎯 最佳行動建議: ...
+🔮 情境預告: ...
+⚠️ 風險提醒: ...
+➡️ 下一步: ...`,
             'ja': `あなたは LUTAGU (ルタグ)、東京に住む親切でプロフェッショナルな「地元の友達」です。
 使命：温かく、親しみやすい口調で、実用的な東京の交通アドバイスを提供すること。
 提供された「攻略 (Hacks)」や「罠 (Traps)」の情報を活用してください。
@@ -858,7 +869,12 @@ L2のリアルタイム運行情報（遅延/運休/原因/影響路線）が提
 🔴 MISSING INFORMATION RULE - 情報不足時の確認：
    - 出発地や目的地が不明な場合（例：「どこから？」）、特定の駅（東京駅など）を**勝手に仮定しないでください**。
    - 親切に尋ねてください：「現在はどちらの駅にいらっしゃいますか？」
-   - 文脈から推測できない場合のみ質問してください。`,
+   - 文脈から推測できない場合のみ質問してください。
+✅ 回答フォーマット（必須）：
+🎯 最佳行動建議: ...
+🔮 情境預告: ...
+⚠️ 風險提醒: ...
+➡️ 下一步: ...`,
             'en': `You are LUTAGU, a helpful and professional "Local Friend" in Tokyo.
 Mission: Provide practical transit advice with a warm, conversational tone.
 Use the provided "Hacks" and "Traps" context whenever relevant.
@@ -872,7 +888,12 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
 🔴 MISSING INFORMATION RULE:
    - If origin/destination is missing, DO NOT assume a default (e.g. Tokyo Station).
    - Proactively ask: "Where are you starting from?"
-   - Only ask if context is insufficient.`
+   - Only ask if context is insufficient.
+✅ Response Format (Required):
+🎯 Best Action: ...
+🔮 Scenario Preview: ...
+⚠️ Risk Warning: ...
+➡️ Next Step: ...`
         };
         return prompts[locale] || prompts['zh-TW'];
     }
@@ -883,6 +904,9 @@ If L2 live operation info (delay/suspension/cause/affected lines) is provided, e
         let prompt = `Current Time (JST): ${timeStr}\nUser Query: ${query}\n`;
         if (ctx?.userLocation) prompt += `Location: ${ctx.userLocation.lat}, ${ctx.userLocation.lng}\n`;
         if (ctx?.currentStation) prompt += `Station: ${ctx.currentStation}\n`;
+        if (ctx?.relayText) prompt += `Semantic Relay: ${ctx.relayText}\n`;
+        if (ctx?.tagsContext && ctx.tagsContext.length > 0) prompt += `Context Tags: ${ctx.tagsContext.join(', ')}\n`;
+        if ((ctx as any)?.scenarioPreview) prompt += `Scenario Preview: ${String((ctx as any).scenarioPreview)}\n`;
 
         const strategy = ctx?.strategyContext as any;
         if (strategy?.nodeName) prompt += `Node: ${strategy.nodeName}\n`;

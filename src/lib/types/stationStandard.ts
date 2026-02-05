@@ -115,6 +115,7 @@ export interface L4Knowledge {
     traps: L4Item[];
     hacks: L4Item[];
     facilities: L4FacilityHighlight[];
+    tags_context?: string[];
 }
 
 // --- ROOT PROFILE ---

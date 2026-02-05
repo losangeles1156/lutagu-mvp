@@ -21,14 +21,17 @@ jobs:
       pull-requests: read
 
     env:
-      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      LITELLM_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || '' }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || '' }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || '' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
+      LITELLM_API_KEY: ${{ secrets.GEMINI_API_KEY || '' }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || '' }}
+      ZEABUR_API_KEY: ${{ secrets.ZEABUR_API_KEY || '' }}
       L4_ROUTING_API_URL: http://localhost:8082
-      ODPT_API_KEY_METRO: ${{ secrets.ODPT_API_KEY_METRO }}
+      ODPT_API_KEY_METRO: ${{ secrets.ODPT_API_KEY_METRO || '' }}
+      ODPT_API_KEY_JR_EAST: ${{ secrets.ODPT_API_KEY_JR_EAST || '' }}
+      ODPT_API_KEY_PUBLIC: ${{ secrets.ODPT_API_KEY_PUBLIC || '' }}
 
     steps:
       - name: Checkout
@@ -50,10 +53,29 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Network probe
+        id: network_probe
+        run: |
+          set -e
+          echo "Checking DNS/network for external APIs..."
+          if getent hosts hnd1.aihub.zeabur.ai >/dev/null 2>&1 \
+            && getent hosts api-challenge.odpt.org >/dev/null 2>&1 \
+            && getent hosts api.open-meteo.com >/dev/null 2>&1; then
+            echo "network_ok=true" >> $GITHUB_OUTPUT
+            echo "Network OK"
+          else
+            echo "network_ok=false" >> $GITHUB_OUTPUT
+            echo "Network unavailable"
+          fi
+
       - name: Test
         run: |
-          if [[ -z \"${SUPABASE_URL}\" || -z \"${SUPABASE_KEY}\" || -z \"${ODPT_API_KEY_METRO}\" ]]; then
-            echo \"Skipping tests: missing SUPABASE_URL/SUPABASE_KEY/ODPT_API_KEY_METRO secrets.\"
+          if [[ -z \"${SUPABASE_URL}\" || -z \"${SUPABASE_KEY}\" || -z \"${ODPT_API_KEY_METRO}\" || -z \"${ODPT_API_KEY_JR_EAST}\" || -z \"${ODPT_API_KEY_PUBLIC}\" ]]; then
+            echo \"Skipping tests: missing SUPABASE_URL/SUPABASE_KEY/ODPT_API_KEY_* secrets.\"
+            exit 0
+          fi
+          if [[ \"${{ steps.network_probe.outputs.network_ok }}\" != \"true\" ]]; then
+            echo \"Skipping tests: external network/DNS not available in CI runner.\"
             exit 0
           fi
           npm run test
@@ -82,19 +104,19 @@ jobs:
 
     env:
       NEXT_PUBLIC_AGENT_V2: "true"
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-      ZEABUR_API_KEY: ${{ secrets.ZEABUR_API_KEY }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      ODPT_API_KEY: ${{ secrets.ODPT_API_KEY }}
-      ODPT_API_KEY_METRO: ${{ secrets.ODPT_API_KEY_METRO }}
-      ODPT_API_TOKEN: ${{ secrets.ODPT_API_KEY }}
-      ODPT_API_TOKEN_BACKUP: ${{ secrets.ODPT_API_TOKEN_BACKUP }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || '' }}
+      ZEABUR_API_KEY: ${{ secrets.ZEABUR_API_KEY || '' }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || '' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
+      ODPT_API_KEY: ${{ secrets.ODPT_API_KEY || '' }}
+      ODPT_API_KEY_METRO: ${{ secrets.ODPT_API_KEY_METRO || '' }}
+      ODPT_API_TOKEN: ${{ secrets.ODPT_API_KEY || '' }}
+      ODPT_API_TOKEN_BACKUP: ${{ secrets.ODPT_API_TOKEN_BACKUP || '' }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || '' }}
       AGENT_E2E_MIN_ACCURACY: "0.9"
       AGENT_E2E_BASE_URL: "http://localhost:3000"
       AGENT_E2E_ENDPOINT: "/api/agent/e2e"
-      AGENT_E2E_KEY: ${{ secrets.AGENT_E2E_KEY }}
+      AGENT_E2E_KEY: ${{ secrets.AGENT_E2E_KEY || '' }}
       AGENT_V2_FALLBACK: "none"
       E2E_PROVIDER: "zeabur"
 

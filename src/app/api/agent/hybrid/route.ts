@@ -2,6 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hybridEngine } from '@/lib/l4/HybridEngine';
 import { StrategyEngine } from '@/lib/ai/strategyEngine';
+import { prepareDecision } from '@/lib/agent/decision/DecisionOrchestrator';
+import { decisionMetrics } from '@/lib/agent/decision/DecisionMetrics';
+import { buildScenarioPreview } from '@/lib/agent/decision/scenarioPreview';
+import type { SupportedLocale } from '@/lib/l4/assistantEngine';
 
 export const runtime = 'nodejs';
 
@@ -20,6 +24,13 @@ export async function POST(req: NextRequest) {
         const effectiveNodeId = body.nodeId || body.current_station || strategyContext?.nodeId;
         const effectiveStationName = body.stationName || strategyContext?.nodeName;
 
+        const decision = await prepareDecision({
+            text,
+            locale: locale as SupportedLocale,
+            currentStation: effectiveNodeId
+        });
+        decisionMetrics.recordIntent(decision.intent.intent);
+
         // 2. Hybrid Engine Execution
         const hybridMatch = await hybridEngine.processRequest({
             text,
@@ -27,9 +38,30 @@ export async function POST(req: NextRequest) {
             context: {
                 ...context,
                 userLocation: userLocation?.lat ? { lat: userLocation.lat, lng: userLocation.lon } : undefined,
-                currentStation: effectiveNodeId
+                currentStation: effectiveNodeId,
+                nodeContext: decision.context.nodeContext,
+                relayText: decision.context.relay.relayText,
+                tagsContext: decision.context.tags_context,
+                scenarioPreview: buildScenarioPreview({
+                    intent: decision.intent,
+                    toolResults: [],
+                    locale
+                }).preview,
+                decisionTrace: {
+                    intent: decision.intent,
+                    relay: decision.context.relay,
+                    requiredTools: decision.requiredTools,
+                    toolCalls: [],
+                    scenarioPreview: buildScenarioPreview({
+                        intent: decision.intent,
+                        toolResults: [],
+                        locale
+                    }).preview,
+                    warnings: []
+                }
             }
         });
+        decisionMetrics.recordAdequacy(Boolean(hybridMatch));
 
         // 3. MiniMax Fallback with strict Anomaly Instruction
         let finalResult = hybridMatch;

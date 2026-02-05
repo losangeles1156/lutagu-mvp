@@ -21,6 +21,7 @@ export async function searchL4Knowledge(params: {
   timeContext?: string;
   topK?: number;
   threshold?: number;
+  languageMode?: 'en' | 'original' | 'dual';
 }) {
   const {
     query,
@@ -29,7 +30,8 @@ export async function searchL4Knowledge(params: {
     userContext = [],
     timeContext,
     topK = 5,
-    threshold = 0.5
+    threshold = 0.5,
+    languageMode = 'en'
   } = params;
 
   // Use the verified Voyage 4 embedding service
@@ -44,6 +46,7 @@ export async function searchL4Knowledge(params: {
         query_embedding: embedding,
         match_threshold: threshold, // Keep threshold low to recall more candidates
         match_count: topK * 4,     // Fetch 4x candidates for reranker to re-order
+        filter_language_mode: languageMode,
         filter_knowledge_type: knowledgeType || null,
         filter_entity_id: stationId || null,
         filter_category: null,

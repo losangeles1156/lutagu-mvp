@@ -714,8 +714,9 @@ export const createSearchPOITool = (ctx: ToolContext) => tool({
         query: z.string().describe('Search query (e.g., "ramen", "temple", "shopping")'),
         nearStation: z.string().optional().describe('Station name to filter by (optional)'),
         category: z.enum(['food', 'attraction', 'shopping', 'service', 'all']).optional(),
+        tagsContext: z.array(z.string()).optional().describe('Context tags to align retrieval'),
     }),
-    execute: async ({ query, nearStation, category = 'all' }: { query: string; nearStation?: string; category?: 'food' | 'attraction' | 'shopping' | 'service' | 'all' }) => {
+    execute: async ({ query, nearStation, category = 'all', tagsContext }: { query: string; nearStation?: string; category?: 'food' | 'attraction' | 'shopping' | 'service' | 'all'; tagsContext?: string[] }) => {
         const locationHint = nearStation || getStationLabelFromId(ctx.currentStation);
         const shouldRewrite = isGenericPoiQuery(query);
         const categoryHint = category !== 'all' ? category : query;
@@ -734,7 +735,13 @@ export const createSearchPOITool = (ctx: ToolContext) => tool({
 
             // Perform Vector Search
             // We search for more results to allow for post-filtering if needed
-            const vectorResults = await searchVectorDB(semanticQuery, 5, ctx.currentStation ? { node_id: ctx.currentStation } : undefined);
+            const vectorResults = await searchVectorDB(
+                semanticQuery,
+                5,
+                ctx.currentStation
+                    ? { node_id: ctx.currentStation, tags: tagsContext && tagsContext.length > 0 ? tagsContext : undefined }
+                    : (tagsContext && tagsContext.length > 0 ? { tags: tagsContext } : undefined)
+            );
 
             if (vectorResults.length === 0) {
                 return {
@@ -911,25 +918,29 @@ export const createRetrieveStationKnowledgeTool = (ctx: ToolContext) => tool({
         stationId: z.string().describe('Station ID to scope the knowledge search'),
         query: z.string().optional().describe('Optional query to focus knowledge search'),
         userProfile: z.string().optional().describe('User profile hints (luggage, stroller, etc)'),
+        tagsContext: z.array(z.string()).optional().describe('Context tags (rush, luggage, stroller, etc)'),
     }),
-    execute: async ({ stationId, query, userProfile }: { stationId: string; query?: string; userProfile?: string }) => {
+    execute: async ({ stationId, query, userProfile, tagsContext }: { stationId: string; query?: string; userProfile?: string; tagsContext?: string[] }) => {
         const logMsg = `[Tool:retrieveStationKnowledge] Station=${stationId}, Query=${query || 'N/A'}`;
         console.log(logMsg);
         safeAppendAgentLog(`[${new Date().toISOString()}] ${logMsg}\n`);
 
         try {
+            const languageMode = (process.env.L4_LANGUAGE_MODE as 'en' | 'original' | 'dual') || 'en';
             const results = await searchL4Knowledge({
                 query: query || `Tips for ${stationId}`,
                 stationId,
-                userContext: userProfile ? [userProfile] : [],
-                topK: 3
+                userContext: tagsContext && tagsContext.length > 0 ? tagsContext : (userProfile ? [userProfile] : []),
+                topK: 3,
+                languageMode
             });
 
             if (!results || results.length === 0) {
                 // Fallback to global search (no station scope)
                 const globalResults = await searchL4Knowledge({
                     query: query || `Tips for ${stationId}`,
-                    topK: 3
+                    topK: 3,
+                    languageMode
                 });
                 if (!globalResults || globalResults.length === 0) {
                     return {

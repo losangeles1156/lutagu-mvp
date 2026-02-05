@@ -4,6 +4,10 @@ import { randomUUID } from 'crypto';
 import { HybridEngine, type RequestContext } from '@/lib/l4/HybridEngine';
 import { StrategyEngine } from '@/lib/ai/strategyEngine';
 import { extractOdptStationIds } from '@/lib/l4/assistantEngine';
+import { prepareDecision } from '@/lib/agent/decision/DecisionOrchestrator';
+import { decisionMetrics } from '@/lib/agent/decision/DecisionMetrics';
+import { buildScenarioPreview } from '@/lib/agent/decision/scenarioPreview';
+import type { SupportedLocale } from '@/lib/l4/assistantEngine';
 
 export const runtime = 'nodejs';
 
@@ -164,16 +168,46 @@ export async function POST(req: NextRequest) {
                 sendThinking(locale === 'en' ? 'Thinking...' : '思考中...');
 
                 let streamedAnyToken = false;
+                const decision = await prepareDecision({
+                    text: trimmedQuery,
+                    locale: locale as SupportedLocale,
+                    currentStation: context?.currentStation
+                });
+                decisionMetrics.recordIntent(decision.intent.intent);
+
                 const result = await hybridEngine.processRequest({
                     text: trimmedQuery,
                     locale,
-                    context,
+                    context: {
+                        ...(context || {}),
+                        nodeContext: decision.context.nodeContext,
+                        relayText: decision.context.relay.relayText,
+                        tagsContext: decision.context.tags_context,
+                        scenarioPreview: buildScenarioPreview({
+                            intent: decision.intent,
+                            toolResults: [],
+                            locale
+                        }).preview,
+                        decisionTrace: {
+                            intent: decision.intent,
+                            relay: decision.context.relay,
+                            requiredTools: decision.requiredTools,
+                            toolCalls: [],
+                            scenarioPreview: buildScenarioPreview({
+                                intent: decision.intent,
+                                toolResults: [],
+                                locale
+                            }).preview,
+                            warnings: []
+                        }
+                    },
                     onProgress: (step) => sendThinking(step),
                     onToken: (delta) => {
                         streamedAnyToken = true;
                         sendUpdate(delta);
                     }
                 });
+                decisionMetrics.recordAdequacy(Boolean(result));
 
                 if (result) {
                     console.log(`[Chat API] Processing success: ${result.source}`);

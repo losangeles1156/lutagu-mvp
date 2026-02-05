@@ -115,10 +115,15 @@ async function ingest() {
                     entity_id: node.id,
                     entity_name: node.name, // JSONB
                     content: content,
+                    content_original: content,
+                    content_en: content,
                     icon: item.icon,
                     category: item.category, // 'trap' or 'hack'
                     subcategory: item.type, // 'warning' or 'tip'
                     embedding: embedding,
+                    embedding_original: embedding,
+                    embedding_en: embedding,
+                    language_mode: 'en',
                     source: 'riding_knowledge_node',
                     user_context: getContextTags(content), // Simple tagging
                     ward_context: [] // Could infer from node location if needed
