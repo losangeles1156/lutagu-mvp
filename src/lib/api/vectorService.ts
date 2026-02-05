@@ -50,7 +50,8 @@ export async function searchVectorDB(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query, limit: topK, filter }),
             // Short cache for real-time relevance
-            next: { revalidate: 30 }
+            next: { revalidate: 30 },
+            signal: AbortSignal.timeout(5000) // 5s Timeout to prevent deadlock
         });
 
         if (!res.ok) {

@@ -131,6 +131,7 @@ export default async function middleware(req: NextRequest) {
             pathname.startsWith('/api/chat') ||
             pathname.startsWith('/api/agent/hybrid') ||
             pathname.startsWith('/api/agent/adk') ||
+            pathname.startsWith('/api/l4/recommend') || // Exempt L4 public recommendation API
             pathname.startsWith('/api/agent/e2e');
 
         if (!isExemptedChatEndpoint) {

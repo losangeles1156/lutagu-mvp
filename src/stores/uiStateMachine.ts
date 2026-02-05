@@ -63,8 +63,8 @@ const MAX_MESSAGES = 50;
 
 // 預設狀態
 const getDefaultState = (): Pick<UIStateMachineState, 'uiState' | 'lastState' | 'sessionStartTime'> => ({
-  uiState: 'login',
-  lastState: 'login',
+  uiState: 'collapsed_desktop', // Default to collapsed instead of login to support Guest Mode
+  lastState: 'collapsed_desktop',
   sessionStartTime: Date.now(),
 });
 
