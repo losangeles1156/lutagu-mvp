@@ -192,15 +192,15 @@ export function NodeMerger() {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[600px] flex flex-col">
+        <div className="admin-card p-6 min-h-[600px] flex flex-col">
             {/* Header / Ward Selector */}
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
+            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
                 <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">選擇行政區</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">選擇行政區</label>
                     <select
                         value={selectedWard}
                         onChange={(e) => setSelectedWard(e.target.value)}
-                        className="w-full max-w-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full max-w-xs px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
                     >
                         <option value="">-- 請選擇 --</option>
                         {wards.map(w => (
@@ -208,16 +208,16 @@ export function NodeMerger() {
                         ))}
                     </select>
                 </div>
-                {loading && <RefreshCw className="animate-spin text-gray-400" />}
+                {loading && <RefreshCw className="animate-spin text-slate-400" />}
             </div>
 
             {/* Main Workspace */}
             <div className="flex-1 grid grid-cols-[1fr,auto,1fr] gap-6">
 
                 {/* Left: Target Hub Selection */}
-                <div className="border rounded-xl p-4 flex flex-col bg-gray-50/50">
-                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">1</div>
+                <div className="border border-slate-200 rounded-2xl p-4 flex flex-col bg-slate-50/50">
+                    <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">1</div>
                         選擇主節點 (Target Hub)
                     </h3>
                     <div className="flex-1 overflow-y-auto max-h-[500px] space-y-2 pr-2 custom-scrollbar">
@@ -232,18 +232,18 @@ export function NodeMerger() {
                                         setTargetHubId(node.id);
                                         setSelectedChildren(new Set());
                                     }}
-                                    className={`w-full text-left p-3 rounded-lg border transition-all cursor-pointer group ${isSelected
-                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-200'
-                                        : 'bg-white border-gray-200 hover:border-indigo-300'
+                                    className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer group ${isSelected
+                                        ? 'bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-slate-200'
+                                        : 'bg-white border-slate-200 hover:border-slate-400'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <div className="font-bold text-sm">{node.name.ja}</div>
-                                            <div className={`text-xs truncate ${isSelected ? 'text-indigo-100' : 'opacity-70'}`}>{node.id}</div>
+                                            <div className={`text-xs truncate ${isSelected ? 'text-slate-200' : 'opacity-70'}`}>{node.id}</div>
                                         </div>
                                         {children.length > 0 && (
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isSelected ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-600'
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
                                                 }`}>
                                                 {children.length} 成員
                                             </span>
@@ -252,15 +252,15 @@ export function NodeMerger() {
 
                                     {/* Children List */}
                                     {children.length > 0 && (
-                                        <div className={`mt-3 pt-2 border-t ${isSelected ? 'border-white/20' : 'border-gray-100'} space-y-1`}>
-                                            <div className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isSelected ? 'text-indigo-200' : 'text-gray-400'}`}>已合併成員</div>
+                                        <div className={`mt-3 pt-2 border-t ${isSelected ? 'border-white/20' : 'border-slate-100'} space-y-1`}>
+                                            <div className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isSelected ? 'text-slate-200' : 'text-slate-400'}`}>已合併成員</div>
                                             {children.map(child => (
-                                                <div key={child.id} className={`flex justify-between items-center text-xs p-1.5 rounded ${isSelected ? 'bg-black/20' : 'bg-gray-50'
+                                                <div key={child.id} className={`flex justify-between items-center text-xs p-1.5 rounded ${isSelected ? 'bg-black/20' : 'bg-slate-50'
                                                     }`}>
                                                     <span>{child.name.ja}</span>
                                                     <button
                                                         onClick={(e) => handleUnmerge(child.id, node.id, e)}
-                                                        className={`p-1 rounded hover:bg-red-500 hover:text-white transition ${isSelected ? 'text-indigo-100' : 'text-gray-400'
+                                                        className={`p-1 rounded hover:bg-red-500 hover:text-white transition ${isSelected ? 'text-slate-200' : 'text-slate-400'
                                                             }`}
                                                         title="移除此節點 (Unmerge)"
                                                     >
@@ -278,54 +278,54 @@ export function NodeMerger() {
                             );
                         })}
                         {hubs.length === 0 && !loading && (
-                            <div className="text-gray-400 text-center py-10 text-sm">請先選擇行政區</div>
+                            <div className="text-slate-400 text-center py-10 text-sm">請先選擇行政區</div>
                         )}
                     </div>
                 </div>
 
                 {/* Center: Action */}
                 <div className="flex flex-col justify-center items-center gap-4">
-                    <ArrowRight className="text-gray-300" />
+                    <ArrowRight className="text-slate-300" />
                     <button
                         onClick={handleMerge}
                         disabled={!targetHubId || selectedChildren.size === 0 || isSubmitting}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium transition-colors"
+                        className="px-4 py-2 bg-slate-900 text-white rounded-xl shadow-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium transition-colors"
                     >
                         {isSubmitting ? <RefreshCw className="animate-spin w-4 h-4" /> : <Merge className="w-4 h-4" />}
                         合併 ({selectedChildren.size})
                     </button>
                     {targetHubId && (
-                        <div className="text-xs text-center text-gray-500 max-w-[120px]">
+                        <div className="text-xs text-center text-slate-500 max-w-[120px]">
                             將選定的子節點合併至左側 Hub
                         </div>
                     )}
                 </div>
 
                 {/* Right: Child Selection */}
-                <div className="border rounded-xl p-4 flex flex-col bg-gray-50/50">
-                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs">2</div>
+                <div className="border border-slate-200 rounded-2xl p-4 flex flex-col bg-slate-50/50">
+                    <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">2</div>
                         選擇子節點 (Candidates)
                     </h3>
 
                     {!targetHubId ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-sm">
+                        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-sm">
                             <AlertCircle className="mb-2 opacity-50" />
                             請先選擇左側主 Hub
                         </div>
                     ) : (
                         <div className="flex-1 overflow-y-auto max-h-[500px] space-y-2 pr-2 custom-scrollbar">
-                            <div className="text-xs text-gray-500 mb-2 px-1">
+                            <div className="text-xs text-slate-500 mb-2 px-1">
                                 顯示可合併至 <b>{nodes.find(n => n.id === targetHubId)?.name.ja}</b> 的節點:
                             </div>
                             {isFetchingCandidates && (
-                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                <div className="flex flex-col items-center justify-center py-8 text-slate-400">
                                     <RefreshCw className="animate-spin w-6 h-6 mb-2" />
                                     <div className="text-xs">正在搜尋附近 1km 內的節點...</div>
                                 </div>
                             )}
                             {!isFetchingCandidates && candidates.length === 0 && (
-                                <div className="text-center py-10 text-gray-400 text-sm">
+                                <div className="text-center py-10 text-slate-400 text-sm">
                                     沒有符合條件的節點
                                     <div className="text-xs mt-2 opacity-70">
                                         (僅顯示主 Hub 1公里內的獨立節點)
@@ -341,21 +341,21 @@ export function NodeMerger() {
                                             else newSet.add(node.id);
                                             setSelectedChildren(newSet);
                                         }}
-                                        className={`w-full text-left p-3 rounded-lg border transition-all flex items-start gap-3 ${selectedChildren.has(node.id)
-                                            ? 'bg-green-50 border-green-500 shadow-sm'
-                                            : 'bg-white border-gray-200 hover:border-green-300'
+                                        className={`w-full text-left p-3 rounded-xl border transition-all flex items-start gap-3 ${selectedChildren.has(node.id)
+                                            ? 'bg-emerald-50 border-emerald-500 shadow-sm'
+                                            : 'bg-white border-slate-200 hover:border-emerald-300'
                                             }`}
                                     >
-                                        <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center ${selectedChildren.has(node.id) ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                                        <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center ${selectedChildren.has(node.id) ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300'
                                             }`}>
                                             {selectedChildren.has(node.id) && <div className="w-2 h-2 bg-white rounded-full" />}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-bold text-sm text-gray-800">{node.name.ja}</div>
+                                            <div className="font-semibold text-sm text-slate-800">{node.name.ja}</div>
                                             <div className="flex items-center gap-2">
-                                                <div className="text-xs text-gray-500 truncate max-w-[120px]">{node.id}</div>
+                                                <div className="text-xs text-slate-500 truncate max-w-[120px]">{node.id}</div>
                                                 {(node as any)._distance !== undefined && (
-                                                    <div className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">
+                                                    <div className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-full whitespace-nowrap">
                                                         {(node as any)._distance < 0.1
                                                             ? '<100m'
                                                             : `${((node as any)._distance).toFixed(1)}km`}
