@@ -82,40 +82,40 @@ export function UserList() {
     });
 
     return (
-        <div className="bg-white rounded-xl shadow border border-gray-200 p-6 min-h-[600px] flex flex-col">
+        <div className="admin-card p-6 min-h-[600px] flex flex-col">
             {/* Toolbar */}
             <div className="flex justify-between items-center mb-6 gap-4">
                 <div className="flex gap-4 items-center flex-1">
-                    <h2 className="text-lg font-bold text-gray-800 whitespace-nowrap">會員列表</h2>
+                    <h2 className="text-lg font-semibold text-slate-900 whitespace-nowrap" style={{ fontFamily: 'var(--font-admin-display)' }}>會員列表</h2>
 
                     {/* Search Bar */}
                     <div className="relative w-full max-w-sm">
-                        <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+                        <Search className="absolute left-3 top-2.5 text-slate-400 w-4 h-4" />
                         <input
                             type="text"
                             placeholder="搜尋名稱或 User ID..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
                         />
                     </div>
 
-                    <div className="flex bg-gray-100 rounded-lg p-1 shrink-0">
+                    <div className="flex bg-slate-100 rounded-xl p-1 shrink-0">
                         <button
                             onClick={() => setRoleFilter('all')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${roleFilter === 'all' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${roleFilter === 'all' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             全部
                         </button>
                         <button
                             onClick={() => setRoleFilter('member')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${roleFilter === 'member' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${roleFilter === 'member' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             一般
                         </button>
                         <button
                             onClick={() => setRoleFilter('admin')}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${roleFilter === 'admin' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${roleFilter === 'admin' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             管理員
                         </button>
@@ -125,14 +125,14 @@ export function UserList() {
                 <div className="flex gap-2 shrink-0">
                     <button
                         onClick={fetchMembers}
-                        className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
+                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
                         title="重新整理"
                     >
                         <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
                     </button>
                     <button
                         onClick={() => { setEditingUser(null); setIsEditorOpen(true); }}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+                        className="px-4 py-2 bg-slate-900 text-white rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
                     >
                         <Plus size={16} /> 新增
                     </button>
@@ -140,46 +140,46 @@ export function UserList() {
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+            <div className="flex-1 overflow-x-auto rounded-xl border border-slate-200">
+                <table className="admin-table">
+                    <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用戶 (User)</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">角色</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">註冊時間</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            <th className="px-6 py-3 text-left">用戶 (User)</th>
+                            <th className="px-6 py-3 text-left">角色</th>
+                            <th className="px-6 py-3 text-left">註冊時間</th>
+                            <th className="px-6 py-3 text-left">狀態</th>
+                            <th className="px-6 py-3 text-right">操作</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-slate-100">
                         {loading && members.length === 0 ? (
-                            <tr><td colSpan={5} className="py-20 text-center text-gray-400">載入中...</td></tr>
+                            <tr><td colSpan={5} className="py-20 text-center text-slate-400">載入中...</td></tr>
                         ) : filteredMembers.length === 0 ? (
-                            <tr><td colSpan={5} className="py-20 text-center text-gray-400">無符合資料</td></tr>
+                            <tr><td colSpan={5} className="py-20 text-center text-slate-400">無符合資料</td></tr>
                         ) : filteredMembers.map(member => (
-                            <tr key={member.user_id} className={`group transition-colors ${member.deleted_at ? 'bg-gray-50 opacity-60' : 'hover:bg-gray-50'}`}>
+                            <tr key={member.user_id} className={`group transition-colors ${member.deleted_at ? 'bg-slate-50 opacity-60' : 'hover:bg-slate-50'}`}>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${member.deleted_at ? 'bg-gray-200 text-gray-500' : 'bg-indigo-100 text-indigo-600'
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${member.deleted_at ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white'
                                             }`}>
                                             {(member.display_name?.[0] || 'U').toUpperCase()}
                                         </div>
                                         <div>
-                                            <div className="font-medium text-gray-900">{member.display_name || '未命名'}</div>
-                                            <div className="text-xs text-gray-400 font-mono text-[10px]">{member.user_id}</div>
+                                            <div className="font-medium text-slate-900">{member.display_name || '未命名'}</div>
+                                            <div className="text-xs text-slate-400 font-mono text-[10px]">{member.user_id}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${member.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                                            member.role === 'support' ? 'bg-blue-100 text-blue-800' :
-                                                'bg-gray-100 text-gray-700'
+                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${member.role === 'admin' ? 'bg-slate-900 text-white' :
+                                            member.role === 'support' ? 'bg-indigo-100 text-indigo-700' :
+                                                'bg-slate-100 text-slate-700'
                                         }`}>
                                         {member.role === 'admin' ? <Shield size={12} /> : <User size={12} />}
                                         <span className="capitalize">{member.role}</span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-gray-500">
+                                <td className="px-6 py-4 text-slate-500">
                                     {new Date(member.created_at).toLocaleDateString()}
                                 </td>
                                 <td className="px-6 py-4">
@@ -188,7 +188,7 @@ export function UserList() {
                                             已停用
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
                                             正常
                                         </span>
                                     )}
@@ -197,7 +197,7 @@ export function UserList() {
                                     <div className="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                                         <button
                                             onClick={() => { setEditingUser(member); setIsEditorOpen(true); }}
-                                            className="p-1.5 hover:bg-indigo-100 text-indigo-600 rounded transition-colors"
+                                            className="p-1.5 hover:bg-slate-100 text-slate-700 rounded transition-colors"
                                             title={member.deleted_at ? '檢視' : '編輯'}
                                         >
                                             <Edit size={16} />
@@ -221,22 +221,22 @@ export function UserList() {
             </div>
 
             {/* Simple Pagination */}
-            <div className="border-t border-gray-200 pt-4 mt-4 flex justify-between items-center">
-                <div className="text-xs text-gray-500">
+            <div className="border-t border-slate-200 pt-4 mt-4 flex justify-between items-center">
+                <div className="text-xs text-slate-500">
                     顯示 20 筆 (Page {page + 1})
                 </div>
                 <div className="flex gap-2">
                     <button
                         disabled={page === 0}
                         onClick={() => setPage(page - 1)}
-                        className="px-3 py-1 border rounded text-xs hover:bg-gray-50 disabled:opacity-50"
+                        className="px-3 py-1 border border-slate-200 rounded text-xs hover:bg-slate-50 disabled:opacity-50"
                     >
                         上一頁
                     </button>
                     <button
                         disabled={members.length < LIMIT}
                         onClick={() => setPage(page + 1)}
-                        className="px-3 py-1 border rounded text-xs hover:bg-gray-50 disabled:opacity-50"
+                        className="px-3 py-1 border border-slate-200 rounded text-xs hover:bg-slate-50 disabled:opacity-50"
                     >
                         下一頁
                     </button>

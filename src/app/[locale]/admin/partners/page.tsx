@@ -85,23 +85,23 @@ export default function PartnersAdminPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">合作夥伴管理</h1>
-                    <p className="text-sm text-gray-500 mt-1">管理商業合作夥伴與佣金設定</p>
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>合作夥伴管理</h1>
+                    <p className="text-sm text-slate-500 mt-1">管理商業合作夥伴與佣金設定</p>
                 </div>
                 <div className="flex gap-3">
                     <button
                         onClick={fetchPartners}
                         disabled={loading}
-                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-colors"
                     >
                         <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
                         重新整理
                     </button>
                     <Link
                         href="/admin/partners/new"
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors"
                     >
                         <Plus size={16} />
                         新增夥伴
@@ -110,16 +110,16 @@ export default function PartnersAdminPage() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200">
+            <div className="admin-card p-4">
                 <div className="flex flex-wrap gap-4">
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
                             狀態
                         </label>
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
                         >
                             {STATUS_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>
@@ -129,7 +129,7 @@ export default function PartnersAdminPage() {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                        <label className="block text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
                             搜尋
                         </label>
                         <input
@@ -137,7 +137,7 @@ export default function PartnersAdminPage() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="輸入名稱搜尋..."
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
                         />
                     </div>
                 </div>
@@ -145,68 +145,68 @@ export default function PartnersAdminPage() {
 
             {/* Error */}
             {error && (
-                <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
+                <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl">
                     {error}
                 </div>
             )}
 
             {/* Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="admin-card overflow-hidden">
+                <table className="admin-table min-w-full divide-y divide-slate-200">
+                    <thead className="bg-slate-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left">
                                 名稱
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left">
                                 聯絡方式
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left">
                                 佣金比例
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left">
                                 狀態
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left">
                                 建立時間
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left">
                                 操作
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-slate-100">
                         {loading ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
+                                <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
+                                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" />
                                     載入中...
                                 </td>
                             </tr>
                         ) : partners.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
                                     尚無合作夥伴
                                 </td>
                             </tr>
                         ) : (
                             partners.map((partner) => (
-                                <tr key={partner.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={partner.id}>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-gray-900">
+                                        <div className="text-sm font-medium text-slate-900">
                                             {partner.name}
                                         </div>
                                         {partner.name_ja && (
-                                            <div className="text-xs text-gray-400">
+                                            <div className="text-xs text-slate-400">
                                                 {partner.name_ja}
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                    <td className="px-6 py-4 text-sm text-slate-500">
                                         <div>{partner.contact_email || '-'}</div>
                                         <div>{partner.contact_phone || '-'}</div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                    <td className="px-6 py-4 text-sm text-slate-500">
                                         {partner.commission_rate
                                             ? `${(partner.commission_rate * 100).toFixed(1)}%`
                                             : '-'}
@@ -214,14 +214,14 @@ export default function PartnersAdminPage() {
                                     <td className="px-6 py-4">
                                         {getStatusBadge(partner.status)}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                    <td className="px-6 py-4 text-sm text-slate-500">
                                         {new Date(partner.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         <div className="flex gap-2">
                                             <Link
                                                 href={`/admin/partners/${partner.id}`}
-                                                className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                className="p-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                                                 title="編輯"
                                             >
                                                 <Pencil size={16} />
@@ -242,22 +242,22 @@ export default function PartnersAdminPage() {
                 </table>
 
                 {/* Pagination */}
-                <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200 bg-gray-50">
-                    <div className="text-sm text-gray-700">
+                <div className="px-6 py-4 flex items-center justify-between border-t border-slate-200 bg-slate-50">
+                    <div className="text-sm text-slate-700">
                         顯示 1 至 {Math.min(limit, total)} 筆，共 {total} 筆
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => setPage((p) => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 hover:bg-white transition-colors"
+                            className="px-4 py-2 border border-slate-200 rounded-lg text-sm disabled:opacity-50 hover:bg-white transition-colors"
                         >
                             上一頁
                         </button>
                         <button
                             onClick={() => setPage((p) => p + 1)}
                             disabled={page * limit >= total}
-                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 hover:bg-white transition-colors"
+                            className="px-4 py-2 border border-slate-200 rounded-lg text-sm disabled:opacity-50 hover:bg-white transition-colors"
                         >
                             下一頁
                         </button>
