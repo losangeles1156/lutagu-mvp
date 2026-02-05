@@ -417,7 +417,6 @@ export default function NewL1PlacePage() {
                         </button>
                     </div>
                 </form>
-            </div>
         </div>
     );
 }
