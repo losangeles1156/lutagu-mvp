@@ -122,16 +122,18 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
 
     if (loading) {
         return (
-            <div className="container mx-auto py-8 px-4 text-center">
-                <p>Loading...</p>
+            <div className="max-w-5xl mx-auto space-y-6">
+                <div className="admin-card p-6 text-center text-slate-500">
+                    載入中...
+                </div>
             </div>
         );
     }
 
     if (error && !place) {
         return (
-            <div className="container mx-auto py-8 px-4">
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div className="max-w-5xl mx-auto space-y-6">
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-xl">
                     {error}
                 </div>
             </div>
@@ -139,13 +141,14 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
     }
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-4 mb-6">
-                    <Link href="/admin/l1-places" className="text-blue-600 hover:text-blue-800">
-                        ← Back
-                    </Link>
-                    <h1 className="text-2xl font-bold">Edit L1 Place</h1>
+        <div className="max-w-5xl mx-auto space-y-6">
+            <div className="flex items-center gap-4">
+                <Link href="/admin/l1-places" className="text-slate-600 hover:text-slate-900">
+                    ← 返回
+                </Link>
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>
+                    編輯 L1 場所
+                </h1>
                     {place && (
                         <span className={`px-2 py-1 rounded-full text-xs ${
                             place.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -156,42 +159,42 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                             {place.status}
                         </span>
                     )}
+            </div>
+
+            {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-xl">
+                    {error}
                 </div>
+            )}
 
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={(e) => handleSubmit(e)} className="space-y-8">
+            <form onSubmit={(e) => handleSubmit(e)} className="space-y-8">
                     {/* Basic Info */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+                    <div className="admin-card p-6">
+                        <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>基本資訊</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Station ID *
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.station_id || ''}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, station_id: e.target.value }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="e.g., odpt.Station:JR-East.Yamanote.Ueno"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Category *
                                 </label>
                                 <select
                                     value={formData.category || ''}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     required
                                 >
                                     {CATEGORIES.map((cat) => (
@@ -203,14 +206,14 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Subcategory
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.subcategory || ''}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, subcategory: e.target.value }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="e.g., convenience_store"
                                 />
                             </div>
@@ -218,43 +221,43 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                     </div>
 
                     {/* Multilingual Names */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-lg font-semibold mb-4">Name (Multilingual)</h2>
+                    <div className="admin-card p-6">
+                        <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>名稱（多語系）</h2>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Japanese (日本語)
                                 </label>
                                 <input
                                     type="text"
                                     value={(formData.name_i18n as any)?.ja || ''}
                                     onChange={(e) => updateName('ja', e.target.value)}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="Japanese name"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     English
                                 </label>
                                 <input
                                     type="text"
                                     value={(formData.name_i18n as any)?.en || ''}
                                     onChange={(e) => updateName('en', e.target.value)}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="English name"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Traditional Chinese (繁體中文)
                                 </label>
                                 <input
                                     type="text"
                                     value={(formData.name_i18n as any)?.['zh-TW'] || ''}
                                     onChange={(e) => updateName('zh-TW', e.target.value)}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="Traditional Chinese name"
                                 />
                             </div>
@@ -262,42 +265,42 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                     </div>
 
                     {/* Multilingual Descriptions */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-lg font-semibold mb-4">Description (Multilingual)</h2>
+                    <div className="admin-card p-6">
+                        <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>描述（多語系）</h2>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Japanese (日本語)
                                 </label>
                                 <textarea
                                     value={(formData.description_i18n as any)?.ja || ''}
                                     onChange={(e) => updateDescription('ja', e.target.value)}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     rows={3}
                                     placeholder="Japanese description"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     English
                                 </label>
                                 <textarea
                                     value={(formData.description_i18n as any)?.en || ''}
                                     onChange={(e) => updateDescription('en', e.target.value)}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     rows={3}
                                     placeholder="English description"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Traditional Chinese (繁體中文)
                                 </label>
                                 <textarea
                                     value={(formData.description_i18n as any)?.['zh-TW'] || ''}
                                     onChange={(e) => updateDescription('zh-TW', e.target.value)}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     rows={3}
                                     placeholder="Traditional Chinese description"
                                 />
@@ -306,24 +309,24 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                     </div>
 
                     {/* Location */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-lg font-semibold mb-4">Location</h2>
+                    <div className="admin-card p-6">
+                        <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>位置</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Address
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.address || ''}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="Full address"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Latitude
                                 </label>
                                 <input
@@ -334,12 +337,12 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                                         ...prev,
                                         location: e.target.value ? { lat: parseFloat(e.target.value), lng: prev.location?.lng || 0 } : undefined
                                     }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="35.6762"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Longitude
                                 </label>
                                 <input
@@ -350,7 +353,7 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                                         ...prev,
                                         location: e.target.value ? { lat: prev.location?.lat || 0, lng: parseFloat(e.target.value) } : undefined
                                     }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                     placeholder="139.6503"
                                 />
                             </div>
@@ -358,8 +361,8 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                     </div>
 
                     {/* Partner Settings */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-lg font-semibold mb-4">Partner Settings</h2>
+                    <div className="admin-card p-6">
+                        <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>合作設定</h2>
 
                         <div className="space-y-4">
                             <div className="flex items-center gap-4">
@@ -370,20 +373,20 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                                         onChange={(e) => setFormData((prev) => ({ ...prev, is_partner: e.target.checked }))}
                                         className="rounded"
                                     />
-                                    <span className="text-sm font-medium text-gray-700">This is a partner store</span>
+                                    <span className="text-sm font-medium text-slate-700">此為合作夥伴店家</span>
                                 </label>
                             </div>
 
                             {formData.is_partner && (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">
                                             Partner
                                         </label>
                                         <select
                                             value={formData.partner_id || ''}
                                             onChange={(e) => setFormData((prev) => ({ ...prev, partner_id: e.target.value || undefined }))}
-                                            className="w-full border rounded px-3 py-2"
+                                            className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                         >
                                             <option value="">Select a partner...</option>
                                             {partners.map((partner) => (
@@ -395,14 +398,14 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">
                                             Affiliate URL
                                         </label>
                                         <input
                                             type="url"
                                             value={formData.affiliate_url || ''}
                                             onChange={(e) => setFormData((prev) => ({ ...prev, affiliate_url: e.target.value }))}
-                                            className="w-full border rounded px-3 py-2"
+                                            className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                             placeholder="https://..."
                                         />
                                     </div>
@@ -412,12 +415,12 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                     </div>
 
                     {/* Settings */}
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-lg font-semibold mb-4">Settings</h2>
+                    <div className="admin-card p-6">
+                        <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>設定</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Priority (1-100)
                                 </label>
                                 <input
@@ -426,28 +429,28 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                                     max="100"
                                     value={formData.priority || 100}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, priority: parseInt(e.target.value) || 100 }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Expires At
                                 </label>
                                 <input
                                     type="datetime-local"
                                     value={formData.expires_at ? formData.expires_at.slice(0, 16) : ''}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, expires_at: e.target.value || undefined }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Status
                                 </label>
                                 <select
                                     value={formData.status || 'draft'}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as any }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                 >
                                     <option value="draft">Draft</option>
                                     <option value="pending">Pending Review</option>
@@ -456,13 +459,13 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Active
                                 </label>
                                 <select
                                     value={formData.is_active === undefined ? 'true' : String(formData.is_active)}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.value === 'true' }))}
-                                    className="w-full border rounded px-3 py-2"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2"
                                 >
                                     <option value="true">Active</option>
                                     <option value="false">Inactive</option>
@@ -475,28 +478,27 @@ export default function EditL1PlacePage({ params }: { params: Promise<{ id: stri
                     <div className="flex justify-end gap-4">
                         <Link
                             href="/admin/l1-places"
-                            className="px-4 py-2 border rounded hover:bg-gray-50"
+                            className="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50"
                         >
-                            Cancel
+                            取消
                         </Link>
                         <button
                             type="button"
                             onClick={(e) => handleSubmit(e as any, 'pending')}
                             disabled={saving}
-                            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
+                            className="px-4 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 disabled:opacity-50"
                         >
                             {saving ? 'Saving...' : 'Submit for Review'}
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50"
                         >
                             {saving ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </form>
-            </div>
         </div>
     );
 }

@@ -84,16 +84,18 @@ export default function AnalyticsPage() {
 
     if (loading) {
         return (
-            <div className="container mx-auto py-8 px-4 text-center">
-                <p className="text-gray-500">Loading analytics...</p>
+            <div className="max-w-7xl mx-auto space-y-6">
+                <div className="admin-card p-6 text-center text-slate-500">
+                    載入分析中...
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="container mx-auto py-8 px-4">
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div className="max-w-7xl mx-auto space-y-6">
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-xl">
                     Error: {error}
                 </div>
             </div>
@@ -106,13 +108,18 @@ export default function AnalyticsPage() {
     const partnersGrowth = formatGrowth(data.growth_trends.partners_growth);
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">L1 Places Analytics</h1>
+        <div className="max-w-7xl mx-auto space-y-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>
+                        L1 場所分析
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">聚焦熱門站點、合作夥伴與類別分布</p>
+                </div>
                 <select
                     value={period}
                     onChange={(e) => setPeriod(e.target.value)}
-                    className="border rounded px-3 py-2"
+                    className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
                 >
                     {PERIOD_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
@@ -123,41 +130,41 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <div className="text-sm text-gray-500 mb-1">Total Places</div>
-                    <div className="text-3xl font-bold">{data.summary.total_places}</div>
-                    <div className={`text-sm mt-2 ${placesGrowth.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="admin-kpi">
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Places</div>
+                    <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{data.summary.total_places}</div>
+                    <div className={`text-xs mt-2 ${placesGrowth.isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
                         {placesGrowth.sign}{placesGrowth.value}% from last period
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <div className="text-sm text-gray-500 mb-1">Active Places</div>
-                    <div className="text-3xl font-bold">{data.summary.active_places}</div>
-                    <div className="text-sm text-gray-400 mt-2">
+                <div className="admin-kpi">
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Active Places</div>
+                    <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{data.summary.active_places}</div>
+                    <div className="text-xs text-slate-400 mt-2">
                         {data.summary.partner_places} partner places
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <div className="text-sm text-gray-500 mb-1">Total Partners</div>
-                    <div className="text-3xl font-bold">{data.summary.total_partners}</div>
-                    <div className={`text-sm mt-2 ${partnersGrowth.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                <div className="admin-kpi">
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Partners</div>
+                    <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{data.summary.total_partners}</div>
+                    <div className={`text-xs mt-2 ${partnersGrowth.isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
                         {partnersGrowth.sign}{partnersGrowth.value}% from last period
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <div className="text-sm text-gray-500 mb-1">Active Partners</div>
-                    <div className="text-3xl font-bold">{data.summary.active_partners}</div>
-                    <div className="text-sm text-gray-400 mt-2">
+                <div className="admin-kpi">
+                    <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Active Partners</div>
+                    <div className="text-3xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>{data.summary.active_partners}</div>
+                    <div className="text-xs text-slate-400 mt-2">
                         {Math.round((data.summary.active_partners / Math.max(1, data.summary.total_partners)) * 100)}% activation rate
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Category Distribution */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-lg font-semibold mb-4">Places by Category</h2>
+                <div className="admin-card p-6">
+                    <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>Places by Category</h2>
                     <div className="space-y-3">
                         {Object.entries(data.category_distribution)
                             .sort((a, b) => b[1] - a[1])
@@ -165,13 +172,13 @@ export default function AnalyticsPage() {
                                 const percentage = Math.round((count / data.summary.active_places) * 100);
                                 return (
                                     <div key={category}>
-                                        <div className="flex justify-between text-sm mb-1">
+                                        <div className="flex justify-between text-sm mb-1 text-slate-700">
                                             <span>{CATEGORY_LABELS[category] || category}</span>
                                             <span>{count} ({percentage}%)</span>
                                         </div>
-                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="w-full bg-slate-200 rounded-full h-2">
                                             <div
-                                                className="bg-blue-600 h-2 rounded-full"
+                                                className="bg-slate-900 h-2 rounded-full"
                                                 style={{ width: `${percentage}%` }}
                                             />
                                         </div>
@@ -182,8 +189,8 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Status Distribution */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-lg font-semibold mb-4">Places by Status</h2>
+                <div className="admin-card p-6">
+                    <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>Places by Status</h2>
                     <div className="flex gap-4 flex-wrap">
                         {Object.entries(data.status_distribution).map(([status, count]) => (
                             <div key={status} className="text-center">
@@ -199,34 +206,34 @@ export default function AnalyticsPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Top Stations */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-lg font-semibold mb-4">Top Stations by Place Count</h2>
+                <div className="admin-card p-6">
+                    <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>Top Stations by Place Count</h2>
                     <div className="space-y-2">
                         {data.top_stations.slice(0, 10).map((station, index) => (
                             <div key={station.station_id} className="flex items-center gap-3">
-                                <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
+                                <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-medium">
                                     {index + 1}
                                 </div>
-                                <div className="flex-1 truncate text-sm">
+                                <div className="flex-1 truncate text-sm text-slate-700">
                                     {station.station_id.split('.').pop() || station.station_id}
                                 </div>
-                                <div className="text-sm font-medium">{station.count} places</div>
+                                <div className="text-sm font-medium text-slate-900">{station.count} places</div>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Recent Places */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-lg font-semibold mb-4">Recently Added Places</h2>
+                <div className="admin-card p-6">
+                    <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>Recently Added Places</h2>
                     <div className="space-y-3">
                         {data.recent_places.map((place) => (
-                            <div key={place.id} className="flex items-center justify-between border-b pb-2 last:border-0">
+                            <div key={place.id} className="flex items-center justify-between border-b border-slate-100 pb-2 last:border-0">
                                 <div>
-                                    <div className="font-medium text-sm">
+                                    <div className="font-medium text-sm text-slate-900">
                                         {place.name_i18n?.['zh-TW'] || place.name_i18n?.ja || Object.values(place.name_i18n)[0]}
                                     </div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs text-slate-500">
                                         {place.category} • {new Date(place.created_at).toLocaleDateString()}
                                     </div>
                                 </div>
@@ -239,7 +246,7 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            <div className="mt-6 text-sm text-gray-400 text-center">
+            <div className="text-xs text-slate-400 text-center">
                 Data generated at {new Date(data.generated_at).toLocaleString()}
             </div>
         </div>

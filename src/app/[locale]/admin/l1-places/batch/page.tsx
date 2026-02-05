@@ -105,24 +105,26 @@ export default function BatchOperationsPage() {
     );
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="flex items-center gap-4 mb-6">
-                <Link href="/admin/l1-places" className="text-blue-600 hover:text-blue-800">
-                    ← Back
+        <div className="max-w-7xl mx-auto space-y-6">
+            <div className="flex items-center gap-4">
+                <Link href="/admin/l1-places" className="text-slate-600 hover:text-slate-900">
+                    ← 返回
                 </Link>
-                <h1 className="text-2xl font-bold">Batch Operations</h1>
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-admin-display)' }}>
+                    批次操作
+                </h1>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Export Section */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-lg font-semibold mb-4">Export Places</h2>
-                    <p className="text-sm text-gray-600 mb-4">
+                <div className="admin-card p-6">
+                    <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>匯出 Places</h2>
+                    <p className="text-sm text-slate-600 mb-4">
                         Export all places to CSV or JSON format for backup or analysis.
                     </p>
 
                     {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-xl mb-4">
                             {error}
                         </div>
                     )}
@@ -131,14 +133,14 @@ export default function BatchOperationsPage() {
                         <button
                             onClick={() => handleExport('json')}
                             disabled={exporting}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50"
                         >
                             {exporting ? 'Exporting...' : 'Export as JSON'}
                         </button>
                         <button
                             onClick={() => handleExport('csv')}
                             disabled={exporting}
-                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                            className="px-4 py-2 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 disabled:opacity-50"
                         >
                             {exporting ? 'Exporting...' : 'Export as CSV'}
                         </button>
@@ -146,20 +148,20 @@ export default function BatchOperationsPage() {
                 </div>
 
                 {/* Import Section */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-lg font-semibold mb-4">Import Places</h2>
-                    <p className="text-sm text-gray-600 mb-4">
+                <div className="admin-card p-6">
+                    <h2 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-admin-display)' }}>匯入 Places</h2>
+                    <p className="text-sm text-slate-600 mb-4">
                         Import places from JSON format. Each place must include station_id, name_i18n, and category.
                     </p>
 
                     {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-xl mb-4">
                             {error}
                         </div>
                     )}
 
                     {result && (
-                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                        <div className="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 px-4 py-3 rounded-xl mb-4">
                             <div className="font-medium">Import completed!</div>
                             <div className="text-sm">
                                 Success: {result.success} | Failed: {result.failed}
@@ -182,7 +184,7 @@ export default function BatchOperationsPage() {
                             value={importData}
                             onChange={(e) => setImportData(e.target.value)}
                             placeholder="Paste JSON array of places here..."
-                            className="w-full border rounded px-3 py-2 font-mono text-sm"
+                            className="w-full border border-slate-200 rounded-xl px-3 py-2 font-mono text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
                             rows={10}
                         />
                     </div>
@@ -190,14 +192,14 @@ export default function BatchOperationsPage() {
                     <div className="flex gap-4">
                         <button
                             onClick={() => setImportData(exampleImportData)}
-                            className="px-4 py-2 text-sm text-blue-600 hover:text-blue-800"
+                            className="px-4 py-2 text-sm text-slate-600 hover:text-slate-900"
                         >
                             Load Example
                         </button>
                         <button
                             onClick={handleImport}
                             disabled={importing || !importData}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50"
                         >
                             {importing ? 'Importing...' : 'Import Places'}
                         </button>
@@ -206,12 +208,12 @@ export default function BatchOperationsPage() {
             </div>
 
             {/* Import Format Guide */}
-            <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-                <h3 className="font-semibold mb-2">Import Format Guide</h3>
-                <p className="text-sm text-gray-600 mb-4">
+            <div className="admin-card p-6">
+                <h3 className="font-semibold mb-2" style={{ fontFamily: 'var(--font-admin-display)' }}>Import Format Guide</h3>
+                <p className="text-sm text-slate-600 mb-4">
                     Each place object should have the following structure:
                 </p>
-                <pre className="bg-white p-4 rounded border overflow-x-auto text-sm">
+                <pre className="bg-white p-4 rounded-xl border border-slate-200 overflow-x-auto text-sm">
 {`{
   "station_id": "odpt.Station:JR-East.Yamanote.Ueno",
   "name_i18n": {
