@@ -11,7 +11,7 @@ export async function GET() {
     return NextResponse.json({
         ok: missingKeys.length === 0,
         missingKeys,
-        fallbackMode: (process.env.AGENT_V2_FALLBACK || 'chat').toLowerCase(),
+        fallbackMode: (process.env.AGENT_V2_FALLBACK || 'adk').toLowerCase(),
         timeoutMs: Number(process.env.AGENT_V2_TIMEOUT_MS || 25000),
         snapshot
     });

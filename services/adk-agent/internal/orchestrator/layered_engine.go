@@ -5,7 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"math"
+	"os"
+	"path/filepath"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/lutagu/adk-agent/internal/agent"
@@ -36,6 +41,11 @@ type LayeredEngine struct {
 	fastAgent       *agent.GeneralAgent // SLM for fast answers
 	rootAgent       *agent.RootAgent    // Intent Classification
 	model           string
+	generalProvider string
+	fastProvider    string
+	routeProvider   string
+	statusProvider  string
+	rootProvider    string
 	metrics         *Metrics
 	factChecker     *validation.FactChecker
 	pathfinder      *router.Pathfinder
@@ -57,6 +67,11 @@ type LayeredEngineConfig struct {
 	FastAgent       *agent.GeneralAgent
 	RootAgent       *agent.RootAgent
 	Model           string
+	GeneralProvider string
+	FastProvider    string
+	RouteProvider   string
+	StatusProvider  string
+	RootProvider    string
 	FactChecker     *validation.FactChecker
 	Pathfinder      *router.Pathfinder
 }
@@ -78,6 +93,11 @@ func NewLayeredEngine(engineCfg LayeredEngineConfig) *LayeredEngine {
 		fastAgent:       engineCfg.FastAgent,
 		rootAgent:       engineCfg.RootAgent,
 		model:           engineCfg.Model,
+		generalProvider: engineCfg.GeneralProvider,
+		fastProvider:    engineCfg.FastProvider,
+		routeProvider:   engineCfg.RouteProvider,
+		statusProvider:  engineCfg.StatusProvider,
+		rootProvider:    engineCfg.RootProvider,
 		metrics:         NewMetrics(),
 		factChecker:     engineCfg.FactChecker,
 		pathfinder:      engineCfg.Pathfinder,
@@ -120,8 +140,9 @@ type ProcessResponse struct {
 }
 
 const (
-	toolTracePrefix     = "[[TOOL_TRACE]]"
-	decisionTracePrefix = "[[DECISION_TRACE]]"
+	toolTracePrefix      = "[[TOOL_TRACE]]"
+	decisionTracePrefix  = "[[DECISION_TRACE]]"
+	structuredDataPrefix = "[[STRUCTURED_DATA]]"
 )
 
 type intentRoute string
@@ -179,12 +200,12 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 			req.HistoryBudgetTokens = req.MaxContextTokens
 		}
 
-		timeToolRequired := isTimeSensitiveQuery(lastMessage)
-		routeExplainRequired := isRouteExplainQuery(lastMessage)
-		intentPath := routeIntent(lastMessage)
+		intent := analyzeIntent(lastMessage)
+		intentPath := intent.Route
 		emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
 			"type":           "intent_router",
 			"route":          string(intentPath),
+			"tags":           intent.Tags,
 			"token_profile":  req.TokenProfile,
 			"response_mode":  req.ResponseMode,
 			"context_tokens": req.MaxContextTokens,
@@ -199,6 +220,10 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// ============================
 		nodeCtx := e.nodeResolver.Resolve(ctx, lastMessage)
 		logs = append(logs, fmt.Sprintf("[L0] NodeResolver: primary=%s, confidence=%.2f", nodeCtx.PrimaryNodeID, nodeCtx.Confidence))
+		toolPlan := buildToolPlan(lastMessage, nodeCtx.IsRouteQuery, intent)
+		if nodeCtx.IsRouteQuery && !hasTag(toolPlan.IntentTags, "route") {
+			toolPlan.IntentTags = append(toolPlan.IntentTags, "route")
+		}
 		if nodeCtx.IsRouteQuery {
 			emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
 				"type":        "route_query_detected",
@@ -206,16 +231,25 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				"destination": nodeCtx.Destination,
 				"confidence":  nodeCtx.Confidence,
 			})
+		}
+		emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
+			"type":        "tool_plan",
+			"route_tool":  toolPlan.RouteTool,
+			"status_tool": toolPlan.StatusTool,
+			"time_tool":   toolPlan.TimeTool,
+			"tags":        toolPlan.IntentTags,
+		})
+		if toolPlan.RouteTool {
 			emitTraceChunk(outCh, toolTracePrefix, map[string]interface{}{
 				"tool":      "plan_route",
 				"required":  true,
-				"triggered": true,
+				"triggered": nodeCtx.IsRouteQuery,
 			})
 		}
 		emitTraceChunk(outCh, toolTracePrefix, map[string]interface{}{
 			"tool":      "get_current_time",
-			"required":  timeToolRequired,
-			"triggered": timeToolRequired,
+			"required":  toolPlan.TimeTool,
+			"triggered": toolPlan.TimeTool,
 		})
 
 		// Fetch L2 status (non-blocking with fallback)
@@ -272,13 +306,36 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		e.metrics.RecordLayerAttempt("L2")
 		l2Start := time.Now()
 
-		// Route queries are handled by L5 GeneralAgent + plan_route to keep explanations consistent.
+		// Route queries are handled by tool-first logic in L2.
 		if nodeCtx.IsRouteQuery {
-			logs = append(logs, fmt.Sprintf("[L2] Route query detected (defer to L5 tool-first): %s → %s", nodeCtx.Origin, nodeCtx.Destination))
+			logs = append(logs, fmt.Sprintf("[L2] Route query detected (tool-first): %s → %s", nodeCtx.Origin, nodeCtx.Destination))
+			routeResp := e.runRouteToolFirst(lastMessage, req.Locale, nodeCtx, weatherCtx)
+			if routeResp.Success {
+				e.metrics.RecordLayerSuccess("L2", time.Since(l2Start))
+				emitTraceChunk(outCh, toolTracePrefix, map[string]interface{}{
+					"tool":      "plan_route",
+					"required":  true,
+					"triggered": true,
+					"success":   true,
+				})
+				emitStructuredChunk(outCh, routeResp.Structured)
+				outCh <- routeResp.Text
+				e.metrics.IncCounter("tool_only_resolution_rate", 1)
+				logger.Info("Responded from L2 RouteToolFirst", "latency", time.Since(startTime))
+				return
+			}
+			emitTraceChunk(outCh, toolTracePrefix, map[string]interface{}{
+				"tool":      "plan_route",
+				"required":  true,
+				"triggered": true,
+				"success":   false,
+				"reason":    routeResp.Reason,
+			})
+			logs = append(logs, "[L2] RouteToolFirst fallthrough: "+routeResp.Reason)
 		}
 
 		// Check if it's a status query
-		if isStatusQuery(lastMessage) && e.statusAgent != nil {
+		if toolPlan.StatusTool && e.statusAgent != nil {
 			logs = append(logs, "[L2] Status query detected")
 
 			statusReqCtx := agent.RequestContext{
@@ -287,6 +344,8 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				UserID:              req.UserID,
 				MaxContextTokens:    req.MaxContextTokens,
 				HistoryBudgetTokens: req.HistoryBudgetTokens,
+				PromptProfile:       req.TokenProfile,
+				ResponseMode:        req.ResponseMode,
 			}
 			statusCh, err := e.statusAgent.Process(ctx, req.Messages, statusReqCtx)
 			if err == nil && statusCh != nil {
@@ -312,6 +371,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				NodeID:      nodeCtx.PrimaryNodeID,
 				NodeName:    nodeCtx.PrimaryNodeName,
 				Locale:      req.Locale,
+				Tags:        toolPlan.IntentTags,
 				L2Disrupted: l2Ctx != nil && l2Ctx.HasDisruption,
 			}
 
@@ -320,7 +380,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				Context: skillCtx,
 			}
 
-			if result, err := e.skillRegistry.Execute(ctx, lastMessage, skillRequest); err == nil && result != nil {
+			if result, err := e.skillRegistry.ExecuteWithFallback(ctx, lastMessage, skillRequest, 0.25, 3); err == nil && result != nil {
 				e.metrics.RecordLayerSuccess("L3", time.Since(l3Start))
 				logs = append(logs, fmt.Sprintf("[L3] Skill executed: %s (%.2f)", result.Category, result.Confidence))
 
@@ -344,10 +404,13 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		if e.vectorStore != nil && e.embeddingClient != nil {
 			queryEmbed, err := e.embeddingClient.EmbedQuery(ctx, lastMessage)
 			if err == nil {
+				graphNodeIDs := expandGraphNodeIDs(nodeCtx, e.pathfinder, e.cfg.Layer.GraphRAGHops, e.cfg.Layer.GraphRAGMaxNodes)
 				opts := supabase.SearchOptions{
 					Limit:     e.cfg.Layer.RAGTopK,
 					Threshold: e.cfg.Layer.RAGThreshold,
 					NodeID:    nodeCtx.PrimaryNodeID,
+					NodeIDs:   graphNodeIDs,
+					Tags:      toolPlan.IntentTags,
 				}
 
 				results, err := e.vectorStore.Search(ctx, queryEmbed, opts)
@@ -377,7 +440,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 
 		// Decision Tier Selection: Use FastAgent (SLM) for standard tasks
 		selectedAgent := e.generalAgent
-		systemPrompt := e.buildSystemPrompt(req.Locale, ragContext, l2Ctx, nodeCtx, weatherCtx, timeToolRequired, routeExplainRequired || nodeCtx.IsRouteQuery, req.Timezone, req.ClientNowISO, req.TokenProfile, req.ResponseMode)
+		systemPrompt := e.buildSystemPrompt(req.Locale, ragContext, l2Ctx, nodeCtx, weatherCtx, toolPlan.TimeTool, toolPlan.RequireRouteExplain, req.Timezone, req.ClientNowISO, req.TokenProfile, req.ResponseMode)
 		isFastPath := false
 
 		// Trigger SLM for high-confidence standard routing or status queries
@@ -395,14 +458,30 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		}
 
 		if selectedAgent != nil {
+			selectedProvider := e.generalProvider
+			selectedModel := e.cfg.Models.GeneralAgent
+			selectedName := "general"
+			if isFastPath {
+				selectedProvider = e.fastProvider
+				selectedModel = e.cfg.Models.FastAgent
+				selectedName = "fast"
+			}
+			emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
+				"type":              "llm_selection",
+				"selected_agent":    selectedName,
+				"selected_model":    selectedModel,
+				"selected_provider": selectedProvider,
+				"fast_path":         isFastPath,
+			})
+
 			reqCtx := agent.RequestContext{
 				Locale:               req.Locale,
 				SessionID:            req.SessionID,
 				UserID:               req.UserID,
 				IsAuthenticated:      req.IsAuthenticated,
 				Timezone:             req.Timezone,
-				RouteExplainRequired: routeExplainRequired || nodeCtx.IsRouteQuery,
-				TimeToolRequired:     timeToolRequired,
+				RouteExplainRequired: toolPlan.RequireRouteExplain,
+				TimeToolRequired:     toolPlan.TimeTool,
 				PromptProfile:        req.TokenProfile,
 				ResponseMode:         req.ResponseMode,
 				MaxContextTokens:     req.MaxContextTokens,
@@ -419,6 +498,15 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				e.metrics.IncCounter("llm_invocation_count", 1)
 				fullResponse := streamWithCompletionGuard(respCh, outCh, req.Locale, nodeCtx.IsRouteQuery)
 				e.metrics.IncCounter("completion_chars_total", int64(len([]rune(fullResponse))))
+				if busy, reason := detectBusyMessage(fullResponse); busy {
+					emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
+						"type":      "upstream_busy_detected",
+						"reason":    reason,
+						"provider":  selectedProvider,
+						"model":     selectedModel,
+						"fast_path": isFastPath,
+					})
+				}
 
 				// Post-processing: Fact Check (Localized)
 				if e.factChecker != nil {
@@ -573,28 +661,15 @@ func isStatusQuery(query string) bool {
 }
 
 func routeIntent(query string) intentRoute {
-	q := strings.ToLower(strings.TrimSpace(query))
-	if q == "" {
-		return intentTemplateOnly
-	}
-	if isStatusQuery(q) || isTimeSensitiveQuery(q) {
-		return intentAlgoTool
-	}
-	if strings.Contains(q, "路線") || strings.Contains(q, "route") || strings.Contains(q, "轉乘") || strings.Contains(q, "直達") {
-		return intentSLMOnly
-	}
-	if len([]rune(q)) <= 12 {
-		return intentTemplateOnly
-	}
-	return intentLLMRequired
+	return analyzeIntent(query).Route
 }
 
 func buildPromptDirectives(profile string) string {
 	switch strings.ToLower(strings.TrimSpace(profile)) {
 	case "aggressive":
-		return "Keep answers extremely short. Do not provide extended explanations unless asked."
+		return "Ultra-lean mode: final answer in <= 4 bullets, no narrative, no long comparisons unless explicitly requested."
 	case "quality":
-		return "Keep answers accurate and complete; include 1 concise reason."
+		return "Quality mode: include route rationale, risk note, and one alternative with reason; if timetable-related include explicit time feasibility check and confidence caveat."
 	default:
 		return "Balanced mode: concise first answer, expand only on user follow-up."
 	}
@@ -696,6 +771,610 @@ func emitTraceChunk(ch chan<- string, prefix string, payload map[string]interfac
 	ch <- prefix + string(bytes)
 }
 
+func emitStructuredChunk(ch chan<- string, payload map[string]interface{}) {
+	if len(payload) == 0 {
+		return
+	}
+	bytes, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+	ch <- structuredDataPrefix + string(bytes)
+}
+
+type routeToolFirstResponse struct {
+	Success    bool
+	Reason     string
+	Text       string
+	Structured map[string]interface{}
+}
+
+type endpointCandidate struct {
+	StationID      string
+	StationName    string
+	WalkMinutes    int
+	ComplexityHint int
+}
+
+type placeSpec struct {
+	ID         string
+	Name       string
+	Aliases    []string
+	Candidates []endpointCandidate
+}
+
+var (
+	placeSpecsOnce sync.Once
+	placeSpecsData []placeSpec
+)
+
+func (e *LayeredEngine) runRouteToolFirst(query, locale string, nodeCtx *layer.ResolvedContext, weatherCtx *weather.CurrentWeather) routeToolFirstResponse {
+	if e.pathfinder == nil || e.pathfinder.Graph() == nil {
+		return routeToolFirstResponse{Reason: "pathfinder_unavailable"}
+	}
+
+	originText := strings.TrimSpace(nodeCtx.Origin)
+	destText := strings.TrimSpace(nodeCtx.Destination)
+	if originText == "" || destText == "" {
+		return routeToolFirstResponse{Reason: "missing_origin_or_destination"}
+	}
+
+	originCandidates, originType := e.expandEndpointCandidates(originText)
+	destCandidates, destType := e.expandEndpointCandidates(destText)
+	if len(originCandidates) == 0 || len(destCandidates) == 0 {
+		return routeToolFirstResponse{Reason: "endpoint_resolution_failed"}
+	}
+
+	// Airport strategy has priority when one side is airport.
+	if originType == "airport" || destType == "airport" {
+		airportData := e.buildAirportStructured(originText, destText, locale, weatherCtx)
+		return routeToolFirstResponse{
+			Success:    true,
+			Text:       airportData["summary"].(string),
+			Structured: airportData,
+		}
+	}
+
+	type scoredRoute struct {
+		Result      *router.Result
+		Origin      endpointCandidate
+		Destination endpointCandidate
+		Score       float64
+		DurationMin int
+		Transfers   int
+	}
+
+	var scored []scoredRoute
+	for _, o := range originCandidates {
+		for _, d := range destCandidates {
+			res, err := e.pathfinder.FindPath(o.StationID, d.StationID, router.DeepContext{
+				IsRaining:   weatherCtx != nil && weatherCtx.IsRaining(),
+				UserUrgency: 6,
+			})
+			if err != nil || res == nil || len(res.Path) == 0 {
+				continue
+			}
+			durationMin := maxInt(1, res.TotalTime/60)
+			transfers := estimateTransfersFromNodes(res.Path)
+			walkMinutes := o.WalkMinutes + d.WalkMinutes
+			complexity := o.ComplexityHint + d.ComplexityHint
+			score := float64(durationMin) + float64(walkMinutes)*1.2 + float64(transfers)*6 + float64(complexity)*0.3
+			scored = append(scored, scoredRoute{
+				Result:      res,
+				Origin:      o,
+				Destination: d,
+				Score:       score,
+				DurationMin: durationMin,
+				Transfers:   transfers,
+			})
+		}
+	}
+	if len(scored) == 0 {
+		return routeToolFirstResponse{Reason: "no_route_found"}
+	}
+
+	sort.Slice(scored, func(i, j int) bool { return scored[i].Score < scored[j].Score })
+	best := scored[0]
+	alts := []map[string]interface{}{}
+	limit := minInt(3, len(scored))
+	for i := 1; i < limit; i++ {
+		s := scored[i]
+		alts = append(alts, map[string]interface{}{
+			"origin_station":      s.Origin.StationName,
+			"destination_station": s.Destination.StationName,
+			"duration_minutes":    s.DurationMin,
+			"transfers":           s.Transfers,
+			"score":               round2(s.Score),
+		})
+	}
+
+	steps := []map[string]interface{}{}
+	for _, n := range best.Result.Path {
+		steps = append(steps, map[string]interface{}{
+			"station": n.NameJA,
+			"line":    normalizeLineName(n.RailwayID),
+		})
+	}
+
+	routeType := "route"
+	if originType == "poi" || destType == "poi" {
+		routeType = "poi"
+	}
+	structured := map[string]interface{}{
+		"type":  routeType,
+		"query": query,
+		"recommendation": map[string]interface{}{
+			"origin_station":      best.Origin.StationName,
+			"destination_station": best.Destination.StationName,
+			"duration_minutes":    best.DurationMin,
+			"transfers":           best.Transfers,
+			"walk_minutes":        best.Origin.WalkMinutes + best.Destination.WalkMinutes,
+			"score":               round2(best.Score),
+			"steps":               steps,
+		},
+		"alternatives": alts,
+		"context": map[string]interface{}{
+			"weather_rain": weatherCtx != nil && weatherCtx.IsRaining(),
+		},
+	}
+
+	text := buildRouteSummary(locale, best.Origin.StationName, best.Destination.StationName, best.DurationMin, best.Transfers, routeType)
+	return routeToolFirstResponse{
+		Success:    true,
+		Text:       text,
+		Structured: structured,
+	}
+}
+
+func buildRouteSummary(locale string, originName, destinationName string, durationMin, transfers int, routeType string) string {
+	if strings.HasPrefix(locale, "ja") {
+		if routeType == "poi" {
+			return fmt.Sprintf("おすすめ経路: %s 付近は %s 駅を起点、%s 付近は %s 駅を終点にすると、約%d分（乗換%d回）です。", originName, originName, destinationName, destinationName, durationMin, transfers)
+		}
+		return fmt.Sprintf("おすすめ経路: %s から %s まで約%d分（乗換%d回）です。", originName, destinationName, durationMin, transfers)
+	}
+	if strings.HasPrefix(locale, "zh") {
+		if routeType == "poi" {
+			return fmt.Sprintf("推薦路線：起點建議從 %s 附近的 %s 站進站，終點建議走到 %s 附近的 %s 站，約 %d 分鐘、轉乘 %d 次。", originName, originName, destinationName, destinationName, durationMin, transfers)
+		}
+		return fmt.Sprintf("推薦路線：%s 到 %s 約 %d 分鐘，轉乘 %d 次。", originName, destinationName, durationMin, transfers)
+	}
+	return fmt.Sprintf("Recommended route: %s to %s in about %d minutes with %d transfer(s).", originName, destinationName, durationMin, transfers)
+}
+
+func (e *LayeredEngine) expandEndpointCandidates(raw string) ([]endpointCandidate, string) {
+	if isAirportKeyword(raw) {
+		id := e.resolveStationID(raw)
+		if id == "" {
+			return nil, "airport"
+		}
+		node := e.pathfinder.Graph().Nodes[id]
+		return []endpointCandidate{{StationID: id, StationName: displayStation(node), WalkMinutes: 0, ComplexityHint: 1}}, "airport"
+	}
+	if id := e.resolveStationID(raw); id != "" {
+		node := e.pathfinder.Graph().Nodes[id]
+		return []endpointCandidate{{StationID: id, StationName: displayStation(node), WalkMinutes: 0, ComplexityHint: 1}}, "station"
+	}
+	if spec := matchPlaceSpec(raw); spec != nil {
+		candidates := make([]endpointCandidate, 0, len(spec.Candidates))
+		for _, c := range spec.Candidates {
+			if id := e.resolveStationID(c.StationName); id != "" {
+				n := e.pathfinder.Graph().Nodes[id]
+				candidates = append(candidates, endpointCandidate{
+					StationID:      id,
+					StationName:    displayStation(n),
+					WalkMinutes:    c.WalkMinutes,
+					ComplexityHint: c.ComplexityHint,
+				})
+			}
+		}
+		return candidates, "poi"
+	}
+	// Fallback: try top fuzzy station candidates.
+	return e.resolveFuzzyStations(raw, 3), "station"
+}
+
+func (e *LayeredEngine) resolveStationID(input string) string {
+	term := strings.ToLower(strings.TrimSpace(input))
+	aliases := map[string]string{
+		"tokyo": "tokyo", "東京": "tokyo", "東京駅": "tokyo",
+		"shinjuku": "shinjuku", "新宿": "shinjuku",
+		"shibuya": "shibuya", "渋谷": "shibuya",
+		"ueno": "ueno", "上野": "ueno",
+		"asakusa": "asakusa", "浅草": "asakusa",
+		"ginza": "ginza", "銀座": "ginza",
+		"ikebukuro": "ikebukuro", "池袋": "ikebukuro",
+		"narita": "narita", "成田空港": "narita", "nrt": "narita", "成田機場": "narita",
+		"haneda": "haneda", "羽田空港": "haneda", "hnd": "haneda", "羽田機場": "haneda",
+		"tocho": "shinjuku", "都庁前": "shinjuku", "東京都廳": "shinjuku",
+	}
+	if mapped, ok := aliases[term]; ok {
+		term = mapped
+	}
+	bestID := ""
+	bestScore := 9999
+	for id, n := range e.pathfinder.Graph().Nodes {
+		score := 100
+		lid := strings.ToLower(id)
+		if strings.Contains(lid, term) {
+			score -= 40
+		}
+		if strings.Contains(strings.ToLower(n.NameJA), term) {
+			score -= 30
+		}
+		if strings.Contains(strings.ToLower(n.NameEN), term) {
+			score -= 30
+		}
+		if score < bestScore {
+			bestScore = score
+			bestID = id
+		}
+	}
+	if bestScore > 90 {
+		return ""
+	}
+	return bestID
+}
+
+func (e *LayeredEngine) resolveFuzzyStations(input string, max int) []endpointCandidate {
+	term := strings.ToLower(strings.TrimSpace(input))
+	type cand struct {
+		id    string
+		score int
+	}
+	cands := []cand{}
+	for id, n := range e.pathfinder.Graph().Nodes {
+		score := 100
+		if strings.Contains(strings.ToLower(id), term) {
+			score -= 40
+		}
+		if strings.Contains(strings.ToLower(n.NameJA), term) {
+			score -= 30
+		}
+		if strings.Contains(strings.ToLower(n.NameEN), term) {
+			score -= 30
+		}
+		if score < 95 {
+			cands = append(cands, cand{id: id, score: score})
+		}
+	}
+	sort.Slice(cands, func(i, j int) bool { return cands[i].score < cands[j].score })
+	out := []endpointCandidate{}
+	for i := 0; i < len(cands) && i < max; i++ {
+		n := e.pathfinder.Graph().Nodes[cands[i].id]
+		out = append(out, endpointCandidate{
+			StationID:      cands[i].id,
+			StationName:    displayStation(n),
+			WalkMinutes:    4 + i*2,
+			ComplexityHint: 2 + i,
+		})
+	}
+	return out
+}
+
+func matchPlaceSpec(input string) *placeSpec {
+	term := strings.ToLower(strings.TrimSpace(input))
+	for _, p := range getPlaceSpecs() {
+		for _, a := range p.Aliases {
+			if strings.Contains(term, strings.ToLower(a)) {
+				return &p
+			}
+		}
+	}
+	return nil
+}
+
+func getPlaceSpecs() []placeSpec {
+	placeSpecsOnce.Do(func() {
+		loaded := loadPlaceSpecsFromJSON()
+		if len(loaded) > 0 {
+			placeSpecsData = loaded
+			return
+		}
+		placeSpecsData = tokyoPlaceSpecs
+	})
+	return placeSpecsData
+}
+
+func loadPlaceSpecsFromJSON() []placeSpec {
+	candidates := []string{
+		"src/data/places_tokyo.json",
+		"../../src/data/places_tokyo.json",
+		"../../../src/data/places_tokyo.json",
+	}
+
+	var raw []byte
+	for _, c := range candidates {
+		p := c
+		if !filepath.IsAbs(p) {
+			p = filepath.Clean(p)
+		}
+		b, err := os.ReadFile(p)
+		if err == nil && len(b) > 0 {
+			raw = b
+			break
+		}
+	}
+	if len(raw) == 0 {
+		return nil
+	}
+
+	var entries []struct {
+		ID         string            `json:"id"`
+		Name       map[string]string `json:"name"`
+		Aliases    []string          `json:"aliases"`
+		Candidates []struct {
+			StationName string `json:"stationName"`
+			WalkMinutes int    `json:"walkMinutes"`
+			Complexity  struct {
+				TurnCount int `json:"turnCount"`
+				ExitCount int `json:"exitCount"`
+			} `json:"complexity"`
+		} `json:"candidateStations"`
+	}
+	if err := json.Unmarshal(raw, &entries); err != nil {
+		return nil
+	}
+
+	out := make([]placeSpec, 0, len(entries))
+	for _, e := range entries {
+		name := e.Name["en"]
+		if strings.TrimSpace(name) == "" {
+			name = e.Name["zh-TW"]
+		}
+		if strings.TrimSpace(name) == "" {
+			name = e.Name["ja"]
+		}
+		if strings.TrimSpace(name) == "" {
+			name = e.ID
+		}
+
+		aliases := append([]string{}, e.Aliases...)
+		for _, v := range e.Name {
+			if strings.TrimSpace(v) != "" {
+				aliases = append(aliases, v)
+			}
+		}
+
+		spec := placeSpec{
+			ID:         e.ID,
+			Name:       name,
+			Aliases:    dedupeStrings(aliases),
+			Candidates: make([]endpointCandidate, 0, len(e.Candidates)),
+		}
+		for _, c := range e.Candidates {
+			hint := c.Complexity.TurnCount + c.Complexity.ExitCount/4
+			if hint <= 0 {
+				hint = 2
+			}
+			spec.Candidates = append(spec.Candidates, endpointCandidate{
+				StationName:    c.StationName,
+				WalkMinutes:    maxInt(c.WalkMinutes, 1),
+				ComplexityHint: hint,
+			})
+		}
+		if len(spec.Candidates) > 0 {
+			out = append(out, spec)
+		}
+	}
+	return out
+}
+
+var tokyoPlaceSpecs = []placeSpec{
+	{
+		ID:      "tokyo_metropolitan_gov",
+		Name:    "Tokyo Metropolitan Government Building",
+		Aliases: []string{"東京都廳", "東京都庁", "都庁", "tocho", "tokyo metropolitan government building"},
+		Candidates: []endpointCandidate{
+			{StationName: "Shinjuku", WalkMinutes: 10, ComplexityHint: 4},
+			{StationName: "Nishi-Shinjuku", WalkMinutes: 6, ComplexityHint: 2},
+			{StationName: "Tochomae", WalkMinutes: 4, ComplexityHint: 2},
+		},
+	},
+	{
+		ID:      "sensoji",
+		Name:    "Senso-ji",
+		Aliases: []string{"淺草寺", "浅草寺", "sensoji"},
+		Candidates: []endpointCandidate{
+			{StationName: "Asakusa", WalkMinutes: 6, ComplexityHint: 2},
+			{StationName: "Tawaramachi", WalkMinutes: 8, ComplexityHint: 3},
+			{StationName: "Kuramae", WalkMinutes: 12, ComplexityHint: 3},
+		},
+	},
+	{
+		ID:      "tokyo_tower",
+		Name:    "Tokyo Tower",
+		Aliases: []string{"東京鐵塔", "東京タワー", "tokyo tower"},
+		Candidates: []endpointCandidate{
+			{StationName: "Akabanebashi", WalkMinutes: 6, ComplexityHint: 2},
+			{StationName: "Kamiyacho", WalkMinutes: 10, ComplexityHint: 3},
+			{StationName: "Onarimon", WalkMinutes: 10, ComplexityHint: 3},
+		},
+	},
+}
+
+func isAirportKeyword(input string) bool {
+	t := strings.ToLower(input)
+	keys := []string{"narita", "nrt", "成田", "haneda", "hnd", "羽田", "airport", "機場"}
+	for _, k := range keys {
+		if strings.Contains(t, k) {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *LayeredEngine) buildAirportStructured(origin, dest, locale string, weatherCtx *weather.CurrentWeather) map[string]interface{} {
+	airport := "narita"
+	airportName := "Narita Airport"
+	if strings.Contains(strings.ToLower(origin+dest), "haneda") || strings.Contains(origin+dest, "羽田") {
+		airport = "haneda"
+		airportName = "Haneda Airport"
+	}
+	now := time.Now().In(time.FixedZone("JST", 9*3600))
+	hour := now.Hour()
+	rain := weatherCtx != nil && weatherCtx.IsRaining()
+
+	options := []map[string]interface{}{}
+	if airport == "narita" {
+		options = []map[string]interface{}{
+			{"mode": "rail", "name": "Skyliner/N'EX", "duration_minutes": 55, "headway_min": 20, "transfers": 1, "time_window": "05:30-23:00"},
+			{"mode": "bus", "name": "Airport Limousine Bus", "duration_minutes": 90, "headway_min": 25, "transfers": 0, "time_window": "06:00-23:30"},
+			{"mode": "taxi", "name": "Taxi", "duration_minutes": 80, "headway_min": 0, "transfers": 0, "time_window": "00:00-24:00"},
+		}
+	} else {
+		options = []map[string]interface{}{
+			{"mode": "rail", "name": "Keikyu/Monorail", "duration_minutes": 40, "headway_min": 8, "transfers": 1, "time_window": "05:00-24:00"},
+			{"mode": "bus", "name": "Airport Limousine Bus", "duration_minutes": 55, "headway_min": 20, "transfers": 0, "time_window": "05:30-23:30"},
+			{"mode": "taxi", "name": "Taxi", "duration_minutes": 45, "headway_min": 0, "transfers": 0, "time_window": "00:00-24:00"},
+		}
+	}
+
+	for _, o := range options {
+		headway := toInt(o["headway_min"])
+		transfer := toInt(o["transfers"])
+		duration := toInt(o["duration_minutes"])
+		score := float64(duration) + float64(headway)*0.5 + float64(transfer)*8
+		if rain && o["mode"] == "rail" {
+			score += 4
+		}
+		if hour >= 23 || hour <= 5 {
+			if o["mode"] == "taxi" {
+				score -= 8
+			}
+			if o["mode"] == "rail" {
+				score += 10
+			}
+		}
+		o["score"] = round2(score)
+	}
+	sort.Slice(options, func(i, j int) bool { return toFloat(options[i]["score"]) < toFloat(options[j]["score"]) })
+	recommendation := options[0]
+	alts := []map[string]interface{}{}
+	for i := 1; i < len(options); i++ {
+		alts = append(alts, options[i])
+	}
+
+	summary := fmt.Sprintf("機場建議：%s -> 主要建議 `%s`（約 %d 分鐘）。", airportName, recommendation["name"], toInt(recommendation["duration_minutes"]))
+	if strings.HasPrefix(locale, "ja") {
+		summary = fmt.Sprintf("空港アクセス提案: %s -> 推奨は `%s`（約%d分）。", airportName, recommendation["name"], toInt(recommendation["duration_minutes"]))
+	}
+	if strings.HasPrefix(locale, "en") {
+		summary = fmt.Sprintf("Airport access recommendation: %s -> `%s` (~%d min).", airportName, recommendation["name"], toInt(recommendation["duration_minutes"]))
+	}
+
+	return map[string]interface{}{
+		"type":        "airport_access",
+		"origin":      origin,
+		"destination": dest,
+		"summary":     summary,
+		"context": map[string]interface{}{
+			"date_time_jst": now.Format(time.RFC3339),
+			"weather_rain":  rain,
+		},
+		"recommendation": recommendation,
+		"alternatives":   alts,
+	}
+}
+
+func displayStation(n *router.Node) string {
+	if n == nil {
+		return ""
+	}
+	if strings.TrimSpace(n.NameJA) != "" {
+		return n.NameJA
+	}
+	return n.NameEN
+}
+
+func normalizeLineName(lineID string) string {
+	switch {
+	case strings.Contains(lineID, "UenoTokyo"):
+		return "上野東京線"
+	case strings.Contains(lineID, "Yamanote"):
+		return "山手線"
+	case strings.Contains(lineID, "Chuo"):
+		return "中央線"
+	case strings.Contains(lineID, "KeihinTohoku"):
+		return "京浜東北線"
+	case strings.Contains(lineID, "Ginza"):
+		return "銀座線"
+	case strings.Contains(lineID, "Marunouchi"):
+		return "丸ノ内線"
+	default:
+		return lineID
+	}
+}
+
+func estimateTransfersFromNodes(path []*router.Node) int {
+	if len(path) < 2 {
+		return 0
+	}
+	transfers := 0
+	prevLine := path[0].RailwayID
+	for i := 1; i < len(path); i++ {
+		line := path[i].RailwayID
+		if line != "" && prevLine != "" && line != prevLine {
+			transfers++
+		}
+		if line != "" {
+			prevLine = line
+		}
+	}
+	return transfers
+}
+
+func round2(v float64) float64 {
+	return math.Round(v*100) / 100
+}
+
+func toInt(v interface{}) int {
+	switch t := v.(type) {
+	case int:
+		return t
+	case float64:
+		return int(t)
+	default:
+		return 0
+	}
+}
+
+func toFloat(v interface{}) float64 {
+	switch t := v.(type) {
+	case float64:
+		return t
+	case int:
+		return float64(t)
+	default:
+		return 0
+	}
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func dedupeStrings(in []string) []string {
+	seen := map[string]bool{}
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		v := strings.TrimSpace(s)
+		if v == "" {
+			continue
+		}
+		k := strings.ToLower(v)
+		if seen[k] {
+			continue
+		}
+		seen[k] = true
+		out = append(out, v)
+	}
+	return out
+}
+
 func streamWithCompletionGuard(in <-chan string, out chan<- string, locale string, routeQuery bool) string {
 	var fullText strings.Builder
 	for chunk := range in {
@@ -767,6 +1446,29 @@ func localizedConclusion(locale string, routeQuery bool, empty bool) string {
 		return "\n\nFinal conclusion: I included both recommended and not-recommended route reasons. I can add a direct-vs-transfer comparison if needed."
 	}
 	return "\n\nFinal conclusion: This is the best recommendation under current conditions."
+}
+
+func detectBusyMessage(text string) (bool, string) {
+	lc := strings.ToLower(text)
+	patterns := []struct {
+		rx     string
+		reason string
+	}{
+		{rx: "busy", reason: "busy_message"},
+		{rx: "混み合", reason: "busy_message"},
+		{rx: "稍後再", reason: "busy_message"},
+		{rx: "請稍後", reason: "busy_message"},
+		{rx: "timeout", reason: "timeout_message"},
+		{rx: "timed out", reason: "timeout_message"},
+		{rx: "model unavailable", reason: "model_unavailable"},
+		{rx: "tool error", reason: "tool_failure_message"},
+	}
+	for _, p := range patterns {
+		if strings.Contains(lc, p.rx) {
+			return true, p.reason
+		}
+	}
+	return false, ""
 }
 
 func japanHoliday(t time.Time) (string, bool) {

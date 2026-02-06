@@ -271,12 +271,12 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 
 func clipContent(content string, role string) string {
 	runes := []rune(strings.TrimSpace(content))
-	max := 1800
+	max := 1200
 	if role == "system" {
-		max = 1600
+		max = 900
 	}
 	if role == "user" {
-		max = 2200
+		max = 1400
 	}
 	if len(runes) <= max {
 		return string(runes)

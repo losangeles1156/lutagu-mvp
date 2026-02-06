@@ -1,0 +1,11 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/lutagu/adk-agent/internal/orchestrator
+BenchmarkAnalyzeIntent-10         	  717526	      1551 ns/op	      48 B/op	       1 allocs/op
+BenchmarkAnalyzeIntent-10         	  788698	      1588 ns/op	      48 B/op	       1 allocs/op
+BenchmarkAnalyzeIntent-10         	  721714	      1577 ns/op	      48 B/op	       1 allocs/op
+BenchmarkExpandGraphNodeIDs-10    	 3416570	       346.5 ns/op	     864 B/op	      11 allocs/op
+BenchmarkExpandGraphNodeIDs-10    	 3292795	       354.3 ns/op	     864 B/op	      11 allocs/op
+BenchmarkExpandGraphNodeIDs-10    	 3432619	       348.7 ns/op	     864 B/op	      11 allocs/op
+PASS
+ok  	github.com/lutagu/adk-agent/internal/orchestrator	9.369s

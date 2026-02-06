@@ -24,14 +24,14 @@ func NewRegistry() *Registry {
 func (r *Registry) Register(skill Skill) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	r.skills = append(r.skills, skill)
-	
+
 	// Sort by priority (descending)
 	sort.Slice(r.skills, func(i, j int) bool {
 		return r.skills[i].Priority() > r.skills[j].Priority()
 	})
-	
+
 	slog.Info("Skill registered", "name", skill.Name(), "priority", skill.Priority())
 }
 
@@ -45,9 +45,9 @@ type MatchResult struct {
 func (r *Registry) Match(ctx context.Context, query string, skillCtx SkillContext) *MatchResult {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	var bestMatch *MatchResult
-	
+
 	for _, skill := range r.skills {
 		confidence := skill.CanHandle(ctx, query, skillCtx)
 		if confidence > 0 {
@@ -59,15 +59,15 @@ func (r *Registry) Match(ctx context.Context, query string, skillCtx SkillContex
 			}
 		}
 	}
-	
+
 	if bestMatch != nil {
-		slog.Debug("Skill matched", 
-			"query", query[:min(50, len(query))], 
+		slog.Debug("Skill matched",
+			"query", query[:min(50, len(query))],
 			"skill", bestMatch.Skill.Name(),
 			"confidence", bestMatch.Confidence,
 		)
 	}
-	
+
 	return bestMatch
 }
 
@@ -75,9 +75,9 @@ func (r *Registry) Match(ctx context.Context, query string, skillCtx SkillContex
 func (r *Registry) MatchAll(ctx context.Context, query string, skillCtx SkillContext) []MatchResult {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	var matches []MatchResult
-	
+
 	for _, skill := range r.skills {
 		confidence := skill.CanHandle(ctx, query, skillCtx)
 		if confidence > 0.1 { // Minimum threshold
@@ -87,12 +87,12 @@ func (r *Registry) MatchAll(ctx context.Context, query string, skillCtx SkillCon
 			})
 		}
 	}
-	
+
 	// Sort by confidence (descending)
 	sort.Slice(matches, func(i, j int) bool {
 		return matches[i].Confidence > matches[j].Confidence
 	})
-	
+
 	return matches
 }
 
@@ -102,20 +102,50 @@ func (r *Registry) Execute(ctx context.Context, query string, request SkillReque
 	if match == nil {
 		return nil, nil // No skill matched
 	}
-	
-	slog.Info("Executing skill", 
-		"skill", match.Skill.Name(), 
+
+	slog.Info("Executing skill",
+		"skill", match.Skill.Name(),
 		"confidence", match.Confidence,
 	)
-	
+
 	return match.Skill.Execute(ctx, request)
+}
+
+// ExecuteWithFallback tries top-N matched skills in order until one returns a non-empty response.
+func (r *Registry) ExecuteWithFallback(ctx context.Context, query string, request SkillRequest, minConfidence float64, maxCandidates int) (*SkillResponse, error) {
+	matches := r.MatchAll(ctx, query, request.Context)
+	if len(matches) == 0 {
+		return nil, nil
+	}
+	if maxCandidates <= 0 || maxCandidates > len(matches) {
+		maxCandidates = len(matches)
+	}
+	for i := 0; i < maxCandidates; i++ {
+		m := matches[i]
+		if m.Confidence < minConfidence {
+			continue
+		}
+		resp, err := m.Skill.Execute(ctx, request)
+		if err != nil {
+			continue
+		}
+		if resp != nil && resp.Content != "" {
+			slog.Info("Executing skill (fallback mode)",
+				"skill", m.Skill.Name(),
+				"confidence", m.Confidence,
+				"rank", i+1,
+			)
+			return resp, nil
+		}
+	}
+	return nil, nil
 }
 
 // List returns all registered skills
 func (r *Registry) List() []Skill {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	result := make([]Skill, len(r.skills))
 	copy(result, r.skills)
 	return result

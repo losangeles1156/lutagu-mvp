@@ -78,8 +78,8 @@ export const useAgentChat = (options: {
         client_now_iso: new Date().toISOString(),
         response_mode: 'concise',
         token_profile: 'balanced',
-        max_context_tokens: 1000,
-        history_budget_tokens: 1000,
+        max_context_tokens: 800,
+        history_budget_tokens: 800,
     }), [normalizedLocale, stationId, userLocation, user?.id, sessionId]);
 
     const bodyRef = useRef(buildRequestBody());
@@ -135,17 +135,32 @@ export const useAgentChat = (options: {
         const withoutTraces = content
             .replace(/\[TOOL_TRACE\][\s\S]*?\[\/TOOL_TRACE\]/gi, '')
             .replace(/\[DECISION_TRACE\][\s\S]*?\[\/DECISION_TRACE\]/gi, '');
-        const match = withoutTraces.match(/\[HYBRID_DATA\]([\s\S]*?)\[\/HYBRID_DATA\]/i);
-        if (!match) return { cleaned: withoutTraces };
-        const jsonRaw = match[1];
-        let parsed: any = null;
-        try {
-            parsed = JSON.parse(jsonRaw);
-        } catch (error) {
-            parsed = null;
+        const hybridMatch = withoutTraces.match(/\[HYBRID_DATA\]([\s\S]*?)\[\/HYBRID_DATA\]/i);
+        if (hybridMatch) {
+            const jsonRaw = hybridMatch[1];
+            let parsed: any = null;
+            try {
+                parsed = JSON.parse(jsonRaw);
+            } catch (error) {
+                parsed = null;
+            }
+            const cleaned = withoutTraces.replace(hybridMatch[0], '').trim();
+            return { cleaned, type: parsed?.type, data: parsed?.data };
         }
-        const cleaned = withoutTraces.replace(match[0], '').trim();
-        return { cleaned, type: parsed?.type, data: parsed?.data };
+
+        const adkMatch = withoutTraces.match(/\[ADK_JSON\]([\s\S]*?)\[\/ADK_JSON\]/i);
+        if (adkMatch) {
+            const jsonRaw = adkMatch[1];
+            let parsed: any = null;
+            try {
+                parsed = JSON.parse(jsonRaw);
+            } catch (error) {
+                parsed = null;
+            }
+            const cleaned = withoutTraces.replace(adkMatch[0], '').trim();
+            return { cleaned, type: parsed?.type, data: parsed };
+        }
+        return { cleaned: withoutTraces };
     };
 
     const messages: AgentMessage[] = aiMessages.map((m: any) => {

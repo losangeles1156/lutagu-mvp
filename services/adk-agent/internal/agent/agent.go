@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"strings"
 
 	"google.golang.org/adk/model"
 )
@@ -44,4 +45,26 @@ type BaseAgent struct {
 
 func (b *BaseAgent) GetModel() string {
 	return b.ModelID
+}
+
+func historyTurnsFromBudget(budgetTokens int, fallback int) int {
+	if fallback <= 0 {
+		fallback = 3
+	}
+	if budgetTokens <= 0 {
+		return fallback
+	}
+	turns := budgetTokens / 300
+	if turns < 2 {
+		turns = 2
+	}
+	if turns > 10 {
+		turns = 10
+	}
+	return turns
+}
+
+func shouldStripInternalTags(profile string) bool {
+	p := strings.ToLower(strings.TrimSpace(profile))
+	return p != "quality"
 }

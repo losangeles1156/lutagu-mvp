@@ -1,4 +1,4 @@
-.PHONY: build run test clean docker lint
+.PHONY: build run test clean docker lint bench intent-eval
 
 # Build variables
 BINARY_NAME=adk-agent
@@ -41,6 +41,15 @@ test-coverage:
 	$(GO_BIN) test -coverprofile=coverage.out ./internal/...
 	$(GO_BIN) tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report: coverage.html"
+
+# Run benchmark baseline suite
+bench:
+	@echo "Running benchmark baseline..."
+	bash scripts/benchmark_baseline.sh
+
+intent-eval:
+	@echo "Running intent router accuracy eval..."
+	bash scripts/intent_eval.sh
 
 # Clean build artifacts
 clean:
@@ -118,6 +127,8 @@ help:
 	@echo "  test         - Run tests"
 	@echo "  test-race    - Run tests with race detection"
 	@echo "  test-coverage- Run tests with coverage"
+	@echo "  bench        - Run benchmark baseline suite"
+	@echo "  intent-eval  - Run intent router accuracy eval"
 	@echo "  clean        - Clean build artifacts"
 	@echo "  docker       - Build Docker image"
 	@echo "  docker-run   - Build and run Docker container"

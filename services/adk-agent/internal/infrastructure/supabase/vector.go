@@ -29,6 +29,7 @@ type SearchOptions struct {
 	Limit     int
 	Threshold float64
 	NodeID    string   // For context-pruned RAG
+	NodeIDs   []string // For GraphRAG neighbor expansion
 	Tags      []string // For tag filtering
 }
 
@@ -67,19 +68,51 @@ func (v *VectorStore) Search(ctx context.Context, embedding []float32, opts Sear
 	}
 
 	// Context-pruned filtering (post-processing)
-	if opts.NodeID != "" {
-		results = filterByNode(results, opts.NodeID)
+	nodeIDs := normalizeNodeIDs(opts.NodeID, opts.NodeIDs)
+	if len(nodeIDs) > 0 {
+		results = filterByNodes(results, nodeIDs)
+	}
+	if len(opts.Tags) > 0 {
+		results = filterByTags(results, opts.Tags)
 	}
 
 	return results, nil
 }
 
-// filterByNode filters results by node ID in metadata
-func filterByNode(results []SearchResult, nodeID string) []SearchResult {
+func normalizeNodeIDs(primary string, expanded []string) []string {
+	seen := map[string]struct{}{}
+	out := make([]string, 0, len(expanded)+1)
+	if primary != "" {
+		seen[primary] = struct{}{}
+		out = append(out, primary)
+	}
+	for _, id := range expanded {
+		if id == "" {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		out = append(out, id)
+	}
+	return out
+}
+
+// filterByNodes filters results by node IDs in metadata
+func filterByNodes(results []SearchResult, nodeIDs []string) []SearchResult {
+	allowed := make(map[string]struct{}, len(nodeIDs))
+	for _, id := range nodeIDs {
+		allowed[id] = struct{}{}
+	}
 	filtered := make([]SearchResult, 0, len(results))
 	for _, r := range results {
 		if metaNodeID, ok := r.Metadata["node_id"].(string); ok {
-			if metaNodeID == nodeID || metaNodeID == "" {
+			if metaNodeID == "" {
+				filtered = append(filtered, r)
+				continue
+			}
+			if _, exists := allowed[metaNodeID]; exists {
 				filtered = append(filtered, r)
 			}
 		} else {
@@ -88,6 +121,59 @@ func filterByNode(results []SearchResult, nodeID string) []SearchResult {
 		}
 	}
 	return filtered
+}
+
+func filterByTags(results []SearchResult, tags []string) []SearchResult {
+	allowed := make(map[string]struct{}, len(tags))
+	for _, t := range tags {
+		if t == "" {
+			continue
+		}
+		allowed[t] = struct{}{}
+	}
+	if len(allowed) == 0 {
+		return results
+	}
+
+	filtered := make([]SearchResult, 0, len(results))
+	for _, r := range results {
+		metaTags, ok := toStringSlice(r.Metadata["tags"])
+		if !ok || len(metaTags) == 0 {
+			// Keep docs without tags as generic knowledge.
+			filtered = append(filtered, r)
+			continue
+		}
+		if intersects(metaTags, allowed) {
+			filtered = append(filtered, r)
+		}
+	}
+	return filtered
+}
+
+func toStringSlice(v interface{}) ([]string, bool) {
+	switch vv := v.(type) {
+	case []string:
+		return vv, true
+	case []interface{}:
+		out := make([]string, 0, len(vv))
+		for _, item := range vv {
+			if s, ok := item.(string); ok && s != "" {
+				out = append(out, s)
+			}
+		}
+		return out, true
+	default:
+		return nil, false
+	}
+}
+
+func intersects(values []string, allowed map[string]struct{}) bool {
+	for _, v := range values {
+		if _, ok := allowed[v]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 // AddDocument adds a document to the vector store

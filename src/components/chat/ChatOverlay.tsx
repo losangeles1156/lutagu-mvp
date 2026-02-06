@@ -74,6 +74,7 @@ export function ChatOverlay() {
         clearMessages,
         messagesEndRef,
         isOffline: isOfflineFromHook,
+        sessionId,
     } = useAgentChat({
         stationId: currentNodeId || '',
         userLocation: undefined, // Add if needed
@@ -371,6 +372,13 @@ export function ChatOverlay() {
     const handleFeedback = async (index: number, score: number) => {
         const msg = (displayMessages as any[])[index];
         if (!msg || msg.role !== 'assistant') return;
+        const previousUser = (() => {
+            for (let i = index - 1; i >= 0; i--) {
+                const candidate = (displayMessages as any[])[i];
+                if (candidate?.role === 'user') return candidate;
+            }
+            return null;
+        })();
 
         // Optimistic update
         if (isDemoMode) {
@@ -393,10 +401,18 @@ export function ChatOverlay() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     score,
-                    messageId: `msg-${Date.now()}-${index}`, // Simple client-side ID for now
-                    sessionId: 'current-session', // Ideally from a session store
+                    helpful: score > 0,
+                    messageId: msg.id || `msg-${Date.now()}-${index}`,
+                    traceId: msg.traceId || '',
+                    sessionId,
+                    userId: agentUserId || '',
+                    locale,
+                    query: previousUser?.content || '',
+                    response: msg.rawContent || msg.content || '',
+                    nodeId: currentNodeId || '',
                     details: {
-                        content: msg.content,
+                        content: msg.rawContent || msg.content,
+                        query: previousUser?.content || '',
                         nodeId: currentNodeId
                     }
                 })

@@ -4,7 +4,7 @@ import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IBM_Plex_Sans, Space_Grotesk } from 'next/font/google';
-import { MapPin, FileCheck, Shield, Users, LayoutDashboard, MessageSquare, Activity, HeartPulse, ArrowLeft, Gauge, Sparkles } from 'lucide-react';
+import { MapPin, FileCheck, Shield, Users, LayoutDashboard, MessageSquare, Activity, HeartPulse, ArrowLeft, Gauge, Sparkles, LineChart } from 'lucide-react';
 import { Toaster } from 'sonner';
 
 const adminSans = IBM_Plex_Sans({
@@ -38,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 { href: `/${locale}/admin/users`, label: '會員管理', icon: Users },
                 { href: `/${locale}/admin/partners`, label: '合作夥伴', icon: Sparkles },
                 { href: `/${locale}/admin/feedback`, label: '用戶反饋', icon: MessageSquare },
+                { href: `/${locale}/admin/agent-feedback`, label: 'Agent 權重', icon: LineChart },
             ]
         },
         {

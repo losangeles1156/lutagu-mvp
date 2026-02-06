@@ -15,6 +15,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/engine/router"
 	"github.com/lutagu/adk-agent/internal/infrastructure/cache"
 	"github.com/lutagu/adk-agent/internal/infrastructure/embedding"
+	"github.com/lutagu/adk-agent/internal/infrastructure/feedback"
 	"github.com/lutagu/adk-agent/internal/infrastructure/memory"
 	"github.com/lutagu/adk-agent/internal/infrastructure/odpt"
 	"github.com/lutagu/adk-agent/internal/infrastructure/supabase"
@@ -34,6 +35,7 @@ var (
 	engine        *orchestrator.LayeredEngine
 	healthChecker *monitoring.HealthChecker
 	memoryStore   *memory.Store
+	feedbackStore *feedback.Store
 )
 
 func main() {
@@ -96,6 +98,17 @@ func main() {
 		MemberHotTTLHours:  cfg.Memory.MemberHotTTLHours,
 		PersistEveryNTurns: cfg.Memory.PersistEveryNTurns,
 	})
+	feedbackStore = feedback.NewStore(supabaseClient, redisStore)
+	if feedbackStore != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if weights, err := feedbackStore.LoadWeights(ctx); err == nil && len(weights) > 0 {
+			orchestrator.RestoreIntentFeedbackWeights(weights)
+			slog.Info("Restored feedback weights", "count", len(weights))
+		} else if err != nil {
+			slog.Warn("Failed to restore feedback weights", "error", err)
+		}
+		cancel()
+	}
 
 	var embeddingClient *embedding.VoyageClient
 	if cfg.Voyage.APIKey != "" {
@@ -142,8 +155,10 @@ func main() {
 	statusAgent, _ := agent.NewStatusAgent(orModelBridge, cfg.Models.StatusAgent, odptClient)
 
 	reasoningBridge := orModelBridge
+	generalProvider := "openrouter"
 	if zeaburModelBridge != nil {
 		reasoningBridge = zeaburModelBridge
+		generalProvider = "zeabur"
 	}
 
 	generalAgent, _ := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent, []tool.Tool{
@@ -184,6 +199,11 @@ func main() {
 		FastAgent:       fastAgent,
 		RootAgent:       rootAgent,
 		Model:           cfg.Models.GeneralAgent,
+		GeneralProvider: generalProvider,
+		FastProvider:    "openrouter",
+		RouteProvider:   "openrouter",
+		StatusProvider:  "openrouter",
+		RootProvider:    generalProvider,
 		FactChecker:     factChecker,
 		Pathfinder:      pathfinder,
 	})
@@ -192,6 +212,7 @@ func main() {
 	http.HandleFunc("/api/chat", handleChat)
 	http.HandleFunc("/agent/chat", handleChat)
 	http.HandleFunc("/agent/memory", handleMemory)
+	http.HandleFunc("/agent/feedback", handleFeedback)
 	http.HandleFunc("/health", healthChecker.HandleHealth)
 	http.HandleFunc("/health/ready", healthChecker.HandleHealthReady)
 	http.HandleFunc("/health/live", healthChecker.HandleHealthLive)
@@ -310,6 +331,10 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 			sendEvent("decision_trace", strings.TrimPrefix(chunk, "[[DECISION_TRACE]]"))
 			continue
 		}
+		if strings.HasPrefix(chunk, "[[STRUCTURED_DATA]]") {
+			sendEvent("structured_data", strings.TrimPrefix(chunk, "[[STRUCTURED_DATA]]"))
+			continue
+		}
 		assistantFull.WriteString(chunk)
 		dataBytes, _ := json.Marshal(map[string]string{"content": chunk})
 		sendEvent("telem", string(dataBytes))
@@ -350,11 +375,47 @@ func handleMemory(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "memory store unavailable", http.StatusServiceUnavailable)
 		return
 	}
-	if r.Method != http.MethodDelete {
+	switch r.Method {
+	case http.MethodGet:
+		handleMemoryGet(w, r)
+	case http.MethodDelete:
+		handleMemoryDelete(w, r)
+	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func handleMemoryGet(w http.ResponseWriter, r *http.Request) {
+	scope := strings.TrimSpace(r.URL.Query().Get("scope"))
+	if scope == "" {
+		scope = memory.GuestScope
+	}
+	userID := strings.TrimSpace(r.URL.Query().Get("user_id"))
+	sessionID := strings.TrimSpace(r.URL.Query().Get("session_id"))
+	if scope == memory.MemberScope && userID == "" {
+		http.Error(w, "user_id is required for member scope", http.StatusBadRequest)
+		return
+	}
+	if scope != memory.MemberScope && sessionID == "" {
+		http.Error(w, "session_id is required for guest scope", http.StatusBadRequest)
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	profile, err := memoryStore.LoadProfile(ctx, scope, userID, sessionID)
+	if err != nil {
+		http.Error(w, "failed to load memory", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"ok":      true,
+		"profile": profile,
+	})
+}
+
+func handleMemoryDelete(w http.ResponseWriter, r *http.Request) {
 	userID := strings.TrimSpace(r.URL.Query().Get("user_id"))
 	if userID == "" {
 		http.Error(w, "user_id is required", http.StatusBadRequest)
@@ -372,5 +433,57 @@ func handleMemory(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"ok":      true,
 		"user_id": userID,
+	})
+}
+
+func handleFeedback(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		TraceID    string   `json:"trace_id"`
+		UserID     string   `json:"user_id"`
+		SessionID  string   `json:"session_id"`
+		Locale     string   `json:"locale"`
+		Query      string   `json:"query"`
+		Response   string   `json:"response"`
+		Helpful    bool     `json:"helpful"`
+		IntentTags []string `json:"intent_tags"`
+		NodeID     string   `json:"node_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if len(req.IntentTags) == 0 && strings.TrimSpace(req.Query) != "" {
+		_, req.IntentTags = orchestrator.AnalyzeIntentForQuery(req.Query)
+	}
+	orchestrator.UpdateIntentTagFeedback(req.IntentTags, req.Helpful)
+
+	ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
+	defer cancel()
+	if feedbackStore != nil {
+		_ = feedbackStore.Record(ctx, feedback.Event{
+			TraceID:    req.TraceID,
+			UserID:     req.UserID,
+			SessionID:  req.SessionID,
+			Locale:     req.Locale,
+			Query:      req.Query,
+			Response:   req.Response,
+			Helpful:    req.Helpful,
+			IntentTags: req.IntentTags,
+			NodeID:     req.NodeID,
+		})
+		_ = feedbackStore.SaveWeights(ctx, orchestrator.GetIntentFeedbackWeights())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"ok":      true,
+		"tags":    req.IntentTags,
+		"helpful": req.Helpful,
+		"weights": orchestrator.GetIntentFeedbackWeights(),
 	})
 }

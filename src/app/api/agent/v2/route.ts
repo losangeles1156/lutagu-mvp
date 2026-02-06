@@ -43,7 +43,7 @@ function logDebug(message: string) {
 // Configuration
 const MAX_STEPS = 5; // Allow up to 5 rounds of tool calls
 const AI_TIMEOUT_MS = Number(process.env.AGENT_V2_TIMEOUT_MS || 25000);
-const FALLBACK_MODE = (process.env.AGENT_V2_FALLBACK || 'chat').toLowerCase();
+const FALLBACK_MODE = (process.env.AGENT_V2_FALLBACK || 'adk').toLowerCase();
 const E2E_KEY = process.env.AGENT_E2E_KEY || '';
 let lastModelUsed: string | null = null;
 
@@ -540,9 +540,7 @@ async function tryFallback(params: {
     if (mode === 'none') return null;
 
     const path =
-        mode === 'chat' ? '/api/agent/chat' :
-            mode === 'adk' ? '/api/agent/adk' :
-                null;
+        mode === 'adk' ? '/api/agent/adk' : null;
     if (!path) return null;
 
     const origin = params.req.nextUrl.origin;

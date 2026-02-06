@@ -67,7 +67,7 @@ export function useDifyChat(options: UseDifyChatOptions) {
 
     // AI SDK v6 transport-based architecture
     const transport = useMemo(() => new TextStreamChatTransport({
-        api: '/api/agent/chat',
+        api: '/api/agent/adk',
         body: {
             nodeId: stationId || '',
             stationName: stationName || '',

@@ -1,10 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { recordAdkObservation } from '@/lib/agent/healthState';
 
-// Support both ADK_SERVICE_URL and CHAT_API_URL for backward compatibility
-const ADK_SERVICE_URL = process.env.ADK_SERVICE_URL || process.env.CHAT_API_URL;
+const ADK_SERVICE_URL = process.env.ADK_SERVICE_URL;
 
 // Node.js runtime for better logging in dev
 export const runtime = 'nodejs';
+
+type AdkLayer = 'proxy' | 'upstream-network' | 'upstream-http' | 'upstream-stream' | 'upstream-model' | 'upstream-tool' | 'unknown';
+
+type StreamMetrics = {
+    toolTraceCount: number;
+    decisionTraceCount: number;
+    errorEventCount: number;
+    busyDetected: boolean;
+    busyReason: string;
+};
+
+type AdkObservation = {
+    status: 'ok' | 'degraded' | 'failed';
+    layer: AdkLayer;
+    reason: string;
+    httpStatus?: number;
+    latencyMs?: number;
+};
+
+function newRequestId(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    return `adk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function createStreamMetrics(): StreamMetrics {
+    return {
+        toolTraceCount: 0,
+        decisionTraceCount: 0,
+        errorEventCount: 0,
+        busyDetected: false,
+        busyReason: ''
+    };
+}
+
+function normalizeAdkEndpoint(raw: string | undefined): string | null {
+    const value = typeof raw === 'string' ? raw.trim() : '';
+    if (!value) return null;
+
+    let parsed: URL;
+    try {
+        parsed = new URL(value);
+    } catch {
+        return null;
+    }
+
+    if (!parsed.pathname || parsed.pathname === '/') {
+        parsed.pathname = '/api/chat';
+    }
+    return parsed.toString();
+}
+
+function detectBusy(content: string): { isBusy: boolean; reason: string } {
+    const normalized = content.toLowerCase();
+    const patterns: Array<{ rx: RegExp; reason: string }> = [
+        { rx: /混み合|busy|later|稍後再|請稍後|拥挤|繁忙/, reason: 'busy_message' },
+        { rx: /timeout|timed out|超時|逾時/, reason: 'timeout_message' },
+        { rx: /model unavailable|provider unavailable|model.*failed/, reason: 'model_unavailable' },
+        { rx: /tool.*fail|工具.*失敗|tool_error/, reason: 'tool_failure_message' }
+    ];
+    for (const p of patterns) {
+        if (p.rx.test(normalized)) return { isBusy: true, reason: p.reason };
+    }
+    return { isBusy: false, reason: '' };
+}
 
 /**
  * Transforms ADK Agent SSE format to Vercel AI SDK text stream format.
@@ -17,7 +83,10 @@ export const runtime = 'nodejs';
  * AI SDK Format:
  *   Just plain text chunks, no SSE wrappers
  */
-async function* transformAdkStream(reader: ReadableStreamDefaultReader<Uint8Array>): AsyncGenerator<string> {
+async function* transformAdkStream(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+    metrics: StreamMetrics
+): AsyncGenerator<string> {
     const decoder = new TextDecoder();
     let buffer = '';
 
@@ -44,7 +113,25 @@ async function* transformAdkStream(reader: ReadableStreamDefaultReader<Uint8Arra
             const trimmedEvent = event.trim();
             if (!trimmedEvent) continue;
 
-            const chunk = parseSseEvent(trimmedEvent);
+            const parsedEvent = extractSseEvent(trimmedEvent);
+            if (parsedEvent.eventType === 'tool_trace' && parsedEvent.eventData) {
+                metrics.toolTraceCount += 1;
+            }
+            if (parsedEvent.eventType === 'decision_trace' && parsedEvent.eventData) {
+                metrics.decisionTraceCount += 1;
+            }
+            if (parsedEvent.eventType === 'error' && parsedEvent.eventData) {
+                metrics.errorEventCount += 1;
+            }
+            if (parsedEvent.eventData) {
+                const busy = detectBusy(parsedEvent.eventData);
+                if (busy.isBusy) {
+                    metrics.busyDetected = true;
+                    metrics.busyReason = busy.reason;
+                }
+            }
+
+            const chunk = parseSseEvent(parsedEvent.eventType, parsedEvent.eventData);
             if (chunk) {
                 console.log(`[ADK Proxy] Processed event -> yielding ${chunk.length} chars`);
                 yield chunk;
@@ -54,7 +141,8 @@ async function* transformAdkStream(reader: ReadableStreamDefaultReader<Uint8Arra
 
     // Process any remaining buffer content
     if (buffer.trim()) {
-        const chunk = parseSseEvent(buffer);
+        const parsedEvent = extractSseEvent(buffer);
+        const chunk = parseSseEvent(parsedEvent.eventType, parsedEvent.eventData);
         if (chunk) yield chunk;
     }
 }
@@ -63,10 +151,10 @@ async function* transformAdkStream(reader: ReadableStreamDefaultReader<Uint8Arra
 function buildFallbackAnswer(input: { text: string; locale?: string }): string {
     const locale = typeof input.locale === 'string' ? input.locale : 'en';
     const errorMessages: Record<string, string> = {
-        'en': "⚠️ **System Notice**: The AI Service is currently not configured (ADK_SERVICE_URL missing). Please contact the administrator.",
-        'ja': "⚠️ **システム通知**: AIサービスが未設定です (ADK_SERVICE_URL missing)。管理者にご連絡ください。",
-        'zh-TW': "⚠️ **系統通知**: AI 服務尚未設定 (ADK_SERVICE_URL missing)。請聯繫管理員。",
-        'zh': "⚠️ **系统通知**: AI 服务尚未配置 (ADK_SERVICE_URL missing)。请联系管理员。",
+        'en': '⚠️ **System Notice**: The AI service is temporarily unavailable. Please try again shortly.',
+        'ja': '⚠️ **システム通知**: AIサービスに一時的に接続できません。しばらくしてから再試行してください。',
+        'zh-TW': '⚠️ **系統通知**: AI 服務暫時無法連線，請稍後再試。',
+        'zh': '⚠️ **系统通知**: AI 服务暂时无法连接，请稍后再试。',
     };
     return errorMessages[locale] || errorMessages['en'];
 }
@@ -89,24 +177,31 @@ function createPlainTextStream(chunks: Array<{ text: string; delayMs?: number }>
 /**
  * Helper to parse a single SSE event string.
  */
-function parseSseEvent(event: string): string | null {
+function extractSseEvent(event: string): { eventType: string; eventData: string } {
     let eventType = '';
-    let eventData = '';
+    const dataLines: string[] = [];
+    const normalized = event.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-    for (const line of event.split('\n')) {
+    for (const line of normalized.split('\n')) {
         if (line.startsWith('event:')) {
             eventType = line.slice(6).trim();
         } else if (line.startsWith('data:')) {
-            eventData = line.slice(5).trim();
+            dataLines.push(line.slice(5).trimStart());
         }
     }
+
+    const eventData = dataLines.join('\n').trim();
+    return { eventType, eventData };
+}
+
+function parseSseEvent(eventType: string, eventData: string): string | null {
 
     if (eventType === 'telem' && eventData) {
         try {
             const parsed = JSON.parse(eventData);
             return parsed.content || null;
         } catch {
-            return null;
+            return eventData;
         }
     }
 
@@ -136,11 +231,38 @@ function parseSseEvent(event: string): string | null {
         return `[DECISION_TRACE]${eventData}[/DECISION_TRACE]\n`;
     }
 
+    if (eventType === 'structured_data' && eventData) {
+        return `[ADK_JSON]${eventData}[/ADK_JSON]\n`;
+    }
+
     return null;
 }
 
 export async function POST(req: NextRequest) {
     let rawBody = '';
+    const requestStart = Date.now();
+    const requestId = req.headers.get('X-Agent-Request-Id') || req.headers.get('x-request-id') || newRequestId();
+    let recorded = false;
+    const streamMetrics = createStreamMetrics();
+
+    const finalizeObservation = (input: AdkObservation) => {
+        if (recorded) return;
+        recorded = true;
+        const latencyMs = input.latencyMs ?? Date.now() - requestStart;
+        recordAdkObservation({
+            requestId,
+            status: input.status,
+            layer: input.layer,
+            reason: input.reason,
+            httpStatus: input.httpStatus,
+            latencyMs,
+            busyDetected: streamMetrics.busyDetected,
+            toolTraceCount: streamMetrics.toolTraceCount,
+            decisionTraceCount: streamMetrics.decisionTraceCount,
+            errorEventCount: streamMetrics.errorEventCount
+        });
+    };
+
     try {
         rawBody = await req.text();
         console.log('[ADK Proxy] Raw request body:', rawBody);
@@ -168,6 +290,7 @@ export async function POST(req: NextRequest) {
                     content = content.replace(/\[THINKING\][\s\S]*?(\[\/THINKING\]|$)/gi, '').trim();
                     content = content.replace(/\[TOOL_TRACE\][\s\S]*?\[\/TOOL_TRACE\]/gi, '').trim();
                     content = content.replace(/\[DECISION_TRACE\][\s\S]*?\[\/DECISION_TRACE\]/gi, '').trim();
+                    content = content.replace(/\[ADK_JSON\][\s\S]*?\[\/ADK_JSON\]/gi, '').trim();
                 }
 
                 return {
@@ -191,12 +314,14 @@ export async function POST(req: NextRequest) {
             return new Response(mockStream, {
                 headers: {
                     'Content-Type': 'text/plain; charset=utf-8',
-                    'X-Agent-Backend': 'adk'
+                    'X-Agent-Backend': 'adk',
+                    'X-Agent-Request-Id': requestId
                 }
             });
         }
 
-        if (!ADK_SERVICE_URL) {
+        const adkEndpoint = normalizeAdkEndpoint(ADK_SERVICE_URL);
+        if (!adkEndpoint) {
             const lastUser = Array.isArray(body?.messages)
                 ? [...body.messages].reverse().find((m: any) => m?.role === 'user' || m?.role === 'model')
                 : null;
@@ -209,7 +334,8 @@ export async function POST(req: NextRequest) {
             return new Response(stream, {
                 headers: {
                     'Content-Type': 'text/plain; charset=utf-8',
-                    'X-Agent-Backend': 'adk'
+                    'X-Agent-Backend': 'adk',
+                    'X-Agent-Request-Id': requestId
                 }
             });
         }
@@ -222,7 +348,7 @@ export async function POST(req: NextRequest) {
             // Proxy timeout should be slightly longer than backend (30s > 25s)
             // to allow receiving proper error messages from upstream
             timeoutId = setTimeout(() => controller.abort(), 30000);
-            upstreamRes = await fetch(ADK_SERVICE_URL, {
+            upstreamRes = await fetch(adkEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -233,6 +359,13 @@ export async function POST(req: NextRequest) {
             });
         } catch (e) {
             if (timeoutId) clearTimeout(timeoutId);
+            const err = e as Error;
+            const isTimeout = err?.name === 'AbortError';
+            finalizeObservation({
+                status: 'failed',
+                layer: 'upstream-network',
+                reason: isTimeout ? 'upstream_timeout' : 'upstream_fetch_error'
+            });
             const lastUser = Array.isArray(body?.messages)
                 ? [...body.messages].reverse().find((m: any) => m?.role === 'user' || m?.role === 'model')
                 : null;
@@ -245,7 +378,8 @@ export async function POST(req: NextRequest) {
             return new Response(stream, {
                 headers: {
                     'Content-Type': 'text/plain; charset=utf-8',
-                    'X-Agent-Backend': 'adk'
+                    'X-Agent-Backend': 'adk',
+                    'X-Agent-Request-Id': requestId
                 }
             });
         }
@@ -255,6 +389,13 @@ export async function POST(req: NextRequest) {
             const errorText = await upstreamRes.text();
             console.error('[ADK Proxy] Upstream Error Status:', upstreamRes.status);
             console.error('[ADK Proxy] Upstream Error Body:', errorText);
+            const layer: AdkLayer = upstreamRes.status >= 500 ? 'upstream-model' : 'upstream-http';
+            finalizeObservation({
+                status: 'failed',
+                layer,
+                reason: `upstream_http_${upstreamRes.status}`,
+                httpStatus: upstreamRes.status
+            });
 
             const fallbackMessage = buildFallbackAnswer({ text: '', locale: body?.locale });
             const errorStream = createPlainTextStream([
@@ -266,13 +407,19 @@ export async function POST(req: NextRequest) {
             return new Response(errorStream, {
                 headers: {
                     'Content-Type': 'text/plain; charset=utf-8',
-                    'X-Agent-Backend': 'adk'
+                    'X-Agent-Backend': 'adk',
+                    'X-Agent-Request-Id': requestId
                 }
             });
         }
 
         if (!upstreamRes.body) {
             console.error('[ADK Proxy] No response body from upstream');
+            finalizeObservation({
+                status: 'failed',
+                layer: 'upstream-stream',
+                reason: 'empty_upstream_body'
+            });
             return NextResponse.json({ error: 'No response body' }, { status: 500 });
         }
 
@@ -280,22 +427,41 @@ export async function POST(req: NextRequest) {
         if (!upstreamContentType.includes('text/event-stream')) {
             if (upstreamContentType.includes('application/json')) {
                 const jsonText = await upstreamRes.text();
+                const busy = detectBusy(jsonText);
+                if (busy.isBusy) {
+                    streamMetrics.busyDetected = true;
+                    streamMetrics.busyReason = busy.reason;
+                }
+                finalizeObservation({
+                    status: busy.isBusy ? 'degraded' : 'ok',
+                    layer: busy.reason === 'tool_failure_message' ? 'upstream-tool' : (busy.reason === 'model_unavailable' ? 'upstream-model' : 'upstream-http'),
+                    reason: busy.isBusy ? busy.reason : 'upstream_json_response',
+                    httpStatus: upstreamRes.status
+                });
                 return new Response(jsonText, {
                     headers: {
                         'Content-Type': 'text/plain; charset=utf-8',
                         'Cache-Control': 'no-cache',
                         'Connection': 'keep-alive',
-                        'X-Agent-Backend': 'adk'
+                        'X-Agent-Backend': 'adk',
+                        'X-Agent-Request-Id': requestId
                     },
                 });
             }
 
+            finalizeObservation({
+                status: 'ok',
+                layer: 'upstream-http',
+                reason: 'upstream_non_sse_stream',
+                httpStatus: upstreamRes.status
+            });
             return new Response(upstreamRes.body, {
                 headers: {
                     'Content-Type': upstreamContentType || 'text/plain; charset=utf-8',
                     'Cache-Control': 'no-cache',
                     'Connection': 'keep-alive',
-                    'X-Agent-Backend': 'adk'
+                    'X-Agent-Backend': 'adk',
+                    'X-Agent-Request-Id': requestId
                 },
             });
         }
@@ -309,17 +475,47 @@ export async function POST(req: NextRequest) {
                 const encoder = new TextEncoder();
                 console.log('[ADK Proxy] Stream started');
                 try {
-                    for await (const chunk of transformAdkStream(reader)) {
+                    for await (const chunk of transformAdkStream(reader, streamMetrics)) {
                         // console.log(`[ADK Proxy] Yielding chunk (${chunk.length} chars)`); // Reduced log
                         if (!controllerClosed) {
                             controller.enqueue(encoder.encode(chunk));
                         }
+                    }
+                    if (streamMetrics.errorEventCount > 0) {
+                        finalizeObservation({
+                            status: 'degraded',
+                            layer: 'upstream-stream',
+                            reason: 'stream_error_event'
+                        });
+                    } else if (streamMetrics.busyDetected) {
+                        const layer: AdkLayer =
+                            streamMetrics.busyReason === 'tool_failure_message'
+                                ? 'upstream-tool'
+                                : streamMetrics.busyReason === 'model_unavailable'
+                                    ? 'upstream-model'
+                                    : 'unknown';
+                        finalizeObservation({
+                            status: 'degraded',
+                            layer,
+                            reason: streamMetrics.busyReason || 'busy_message'
+                        });
+                    } else {
+                        finalizeObservation({
+                            status: 'ok',
+                            layer: 'proxy',
+                            reason: 'stream_ok'
+                        });
                     }
                 } catch (error: any) {
                     if (error.name === 'TypeError' && error.message.includes('Controller is already closed')) {
                         // Ignore
                     } else {
                         console.error('[ADK Proxy] Stream Error during transformation:', error);
+                        finalizeObservation({
+                            status: 'failed',
+                            layer: 'upstream-stream',
+                            reason: error?.name === 'AbortError' ? 'stream_timeout_abort' : 'stream_transform_error'
+                        });
                     }
                 } finally {
                     console.log('[ADK Proxy] Stream closing');
@@ -337,6 +533,11 @@ export async function POST(req: NextRequest) {
                 console.log('[ADK Proxy] Stream canceled by client');
                 controllerClosed = true;
                 reader.cancel();
+                finalizeObservation({
+                    status: 'degraded',
+                    layer: 'proxy',
+                    reason: 'client_canceled'
+                });
             }
         });
 
@@ -345,12 +546,18 @@ export async function POST(req: NextRequest) {
                 'Content-Type': 'text/plain; charset=utf-8',
                 'Cache-Control': 'no-cache',
                 'Connection': 'keep-alive',
-                'X-Agent-Backend': 'adk'
+                'X-Agent-Backend': 'adk',
+                'X-Agent-Request-Id': requestId
             },
         });
 
     } catch (error) {
         console.error('[ADK Proxy] Fatal Error:', error);
+        finalizeObservation({
+            status: 'failed',
+            layer: 'proxy',
+            reason: 'proxy_fatal_error'
+        });
 
         // Attempt to extract locale from rawBody if available, for localized error messages
         let locale = 'en';
@@ -378,8 +585,15 @@ export async function POST(req: NextRequest) {
         return new Response(errorStream, {
             headers: {
                 'Content-Type': 'text/plain; charset=utf-8',
-                'X-Agent-Backend': 'adk'
+                'X-Agent-Backend': 'adk',
+                'X-Agent-Request-Id': requestId
             }
         });
     }
 }
+
+export const __private__ = {
+    normalizeAdkEndpoint,
+    extractSseEvent,
+    parseSseEvent
+};

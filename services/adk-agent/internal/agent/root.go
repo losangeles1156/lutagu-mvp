@@ -70,11 +70,12 @@ func (a *RootAgent) Process(ctx context.Context, messages []Message, reqCtx Requ
 		}()
 
 		respText, err := RunAgentStreamingWithOptions(ctx, a.Agent, history, internalCh, RunOptions{
-			SessionID:        reqCtx.SessionID,
-			UserID:           reqCtx.UserID,
-			AppName:          "lutagu",
-			MaxHistoryTurns:  2,
-			MaxContextTokens: reqCtx.MaxContextTokens,
+			SessionID:         reqCtx.SessionID,
+			UserID:            reqCtx.UserID,
+			AppName:           "lutagu",
+			MaxHistoryTurns:   historyTurnsFromBudget(reqCtx.HistoryBudgetTokens, 2),
+			MaxContextTokens:  reqCtx.MaxContextTokens,
+			StripInternalTags: shouldStripInternalTags(reqCtx.PromptProfile),
 		})
 		close(internalCh) // Close internal captured channel
 

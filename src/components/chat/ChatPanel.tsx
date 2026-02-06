@@ -58,6 +58,7 @@ export function ChatPanel() {
     const setDemoMode = useUIStore(s => s.setDemoMode);
 
     const currentNodeId = useNodeStore(s => s.currentNodeId);
+    const agentUserId = useUserStore(s => s.agentUserId);
 
     const storeMessages = useUIStore(s => s.messages);
     const clearStoreMessages = useUIStore(s => s.clearMessages);
@@ -207,18 +208,30 @@ export function ChatPanel() {
         const msg = messages[index];
 
         try {
-            const prevMsg = messages[index - 1];
-            const requestText = (prevMsg && prevMsg.role === 'user') ? prevMsg.content : "";
+            const previousUser = (() => {
+                for (let i = index - 1; i >= 0; i--) {
+                    const candidate = messages[i];
+                    if (candidate?.role === 'user') return candidate;
+                }
+                return null;
+            })();
 
-            const response = await fetch('/api/feedback', {
+            const response = await fetch('/api/agent/feedback', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     score,
-                    requestText, // Key for FeedbackStore lookup
-                    contextNodeId: msg.data?.contextNodeId, // Stateless ID
-                    messageId: msg.id || `msg-${index}`,
+                    helpful: score > 0,
+                    query: previousUser?.content || '',
+                    response: msg?.rawContent || msg?.content || '',
+                    nodeId: currentNodeId || msg?.data?.contextNodeId || '',
+                    messageId: msg?.id || `msg-${index}`,
                     sessionId: sessionId,
+                    userId: agentUserId || '',
+                    locale,
+                    details: {
+                        contextNodeId: currentNodeId || msg?.data?.contextNodeId || '',
+                    }
                 })
             });
 
@@ -231,7 +244,7 @@ export function ChatPanel() {
             logger.error('Feedback submission failed:', error);
             showToast?.(tChat('feedbackError', { defaultValue: 'Failed to send feedback' }), 'error');
         }
-    }, [messages, sessionId, showToast, tChat]);
+    }, [agentUserId, currentNodeId, locale, messages, sessionId, showToast, tChat]);
 
     const handleSend = useCallback((text: string) => {
         if (text.trim()) {

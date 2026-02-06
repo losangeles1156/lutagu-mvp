@@ -90,6 +90,7 @@ export const ParsedMessageContent = memo(({ content, role, thought, isStreaming 
         text = text.replace(/(?:\[|\/?|<|\/?)THINK(?:ING)?(?:\]|\/?>)/gi, '');
         text = text.replace(/\[\/?SUGGESTED_QUESTIONS\]/gi, '');
         text = text.replace(/\[HYBRID_DATA\][\s\S]*?\[\/HYBRID_DATA\]/gi, '');
+        text = text.replace(/\[ADK_JSON\][\s\S]*?\[\/ADK_JSON\]/gi, '');
 
         // Double check for ** marks and strip them again (just in case they were nested or added later)
         text = text.replace(/\*\*/g, '').trim();

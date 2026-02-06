@@ -56,6 +56,8 @@ type Config struct {
 		TemplateCacheTTL time.Duration
 		RAGThreshold     float64
 		RAGTopK          int
+		GraphRAGHops     int
+		GraphRAGMaxNodes int
 	}
 	Monitoring struct {
 		MetricsEnabled bool
@@ -100,7 +102,7 @@ func Load() *Config {
 	cfg.Models.StatusAgent = getEnv("MODEL_STATUS_AGENT", "deepseek-v3.2")
 	cfg.Models.FacilityAgent = getEnv("MODEL_FACILITY_AGENT", "deepseek-v3.2")
 	cfg.Models.GeneralAgent = getEnv("MODEL_GENERAL_AGENT", "deepseek-v3.2")
-	cfg.Models.FastAgent = getEnv("MODEL_FAST_AGENT", "google/gemini-2.0-flash-001") // Lightweight SLM for standard queries
+	cfg.Models.FastAgent = getEnv("MODEL_FAST_AGENT", "deepseek-v3.2")
 
 	// Redis
 	cfg.Redis.URL = getEnv("REDIS_URL", "redis://localhost:6379/0")
@@ -109,14 +111,16 @@ func Load() *Config {
 	cfg.Memory.PersistEveryNTurns, _ = strconv.Atoi(getEnv("MEMORY_PERSIST_EVERY_N_TURNS", "6"))
 	cfg.Token.DefaultProfile = getEnv("TOKEN_DEFAULT_PROFILE", "balanced")
 	cfg.Token.DefaultResponseMode = getEnv("TOKEN_DEFAULT_RESPONSE_MODE", "concise")
-	cfg.Token.DefaultContextTokens, _ = strconv.Atoi(getEnv("TOKEN_DEFAULT_CONTEXT_TOKENS", "1000"))
-	cfg.Token.RAGSummaryMaxChars, _ = strconv.Atoi(getEnv("TOKEN_RAG_SUMMARY_MAX_CHARS", "1400"))
+	cfg.Token.DefaultContextTokens, _ = strconv.Atoi(getEnv("TOKEN_DEFAULT_CONTEXT_TOKENS", "800"))
+	cfg.Token.RAGSummaryMaxChars, _ = strconv.Atoi(getEnv("TOKEN_RAG_SUMMARY_MAX_CHARS", "900"))
 
 	// Layer Configuration
 	ttlMs, _ := strconv.Atoi(getEnv("TEMPLATE_CACHE_TTL_MS", "300000"))
 	cfg.Layer.TemplateCacheTTL = time.Duration(ttlMs) * time.Millisecond
 	cfg.Layer.RAGThreshold, _ = strconv.ParseFloat(getEnv("RAG_THRESHOLD", "0.5"), 64)
 	cfg.Layer.RAGTopK, _ = strconv.Atoi(getEnv("RAG_TOP_K", "5"))
+	cfg.Layer.GraphRAGHops, _ = strconv.Atoi(getEnv("GRAPH_RAG_HOPS", "1"))
+	cfg.Layer.GraphRAGMaxNodes, _ = strconv.Atoi(getEnv("GRAPH_RAG_MAX_NODES", "8"))
 
 	// Monitoring
 	cfg.Monitoring.MetricsEnabled = getEnv("METRICS_ENABLED", "true") == "true"

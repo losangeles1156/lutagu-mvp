@@ -126,8 +126,7 @@ export default async function middleware(req: NextRequest) {
     if (isApi) {
         // Exempt AI chat endpoints from same-origin check
         // These endpoints use AI SDK TextStreamChatTransport which may not send Origin header correctly
-        const isExemptedChatEndpoint = pathname.startsWith('/api/agent/chat') ||
-            pathname.startsWith('/api/agent/v2') ||
+        const isExemptedChatEndpoint = pathname.startsWith('/api/agent/v2') ||
             pathname.startsWith('/api/chat') ||
             pathname.startsWith('/api/agent/hybrid') ||
             pathname.startsWith('/api/agent/adk') ||

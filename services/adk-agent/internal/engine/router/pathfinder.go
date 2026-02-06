@@ -15,6 +15,10 @@ func NewPathfinder(g *Graph) *Pathfinder {
 	return &Pathfinder{graph: g}
 }
 
+func (p *Pathfinder) Graph() *Graph {
+	return p.graph
+}
+
 // Result represents the optimal path found
 type Result struct {
 	Path          []*Node
