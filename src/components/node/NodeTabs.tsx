@@ -208,7 +208,7 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
                         transition={{ duration: 0.2 }}
                         className={`h-full w-full absolute inset-0 ${activeTab === 'lutagu' ? 'overflow-hidden' : 'overflow-y-auto p-4'}`}
                     >
-                        <ErrorBoundary>
+                        <ErrorBoundary variant="inline">
                             {activeTab === 'dna' && (
                                 <L1_DNA
                                     data={standardData}

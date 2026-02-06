@@ -23,7 +23,7 @@ func NewGeneralAgent(modelInstance model.LLM, modelID string, tools []tool.Tool)
 		Name:        "general_agent",
 		Model:       modelInstance,
 		Description: "General reasoning and conversation agent",
-		Instruction: "You are a helpful Tokyo transit assistant. You MUST use the 'plan_route' tool for EVERY routing request, even for simple routes like Tokyo to Shinjuku. Do not rely on your internal knowledge for routing. The 'plan_route' tool provides critical real-time weather and safety data that is required for a complete answer.",
+		Instruction: "You are a helpful Tokyo transit assistant. Policy: (1) Use plan_route for route questions, get_current_time for time-sensitive questions. (2) Respond with conclusion first in concise mode; only expand details when user asks why/details. (3) If user asks comparison, explain recommended and not-recommended option briefly. (4) Use exact line names when available (e.g., 上野東京線). (5) Always end with an actionable conclusion.",
 		Tools:       tools,
 	})
 	if err != nil {
@@ -49,7 +49,13 @@ func (a *GeneralAgent) Process(ctx context.Context, messages []Message, reqCtx R
 		defer close(ch)
 
 		// RunAgentStreaming pumps directly to 'ch'
-		_, err := RunAgentStreaming(ctx, a.Agent, history, ch)
+		_, err := RunAgentStreamingWithOptions(ctx, a.Agent, history, ch, RunOptions{
+			SessionID:        reqCtx.SessionID,
+			UserID:           reqCtx.UserID,
+			AppName:          "lutagu",
+			MaxHistoryTurns:  3,
+			MaxContextTokens: reqCtx.MaxContextTokens,
+		})
 		if err != nil {
 			ch <- fmt.Sprintf("Error: %v", err)
 			return

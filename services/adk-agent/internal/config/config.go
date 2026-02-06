@@ -41,6 +41,17 @@ type Config struct {
 	Redis struct {
 		URL string
 	}
+	Memory struct {
+		GuestTTLHours      int
+		MemberHotTTLHours  int
+		PersistEveryNTurns int
+	}
+	Token struct {
+		DefaultProfile       string
+		DefaultResponseMode  string
+		DefaultContextTokens int
+		RAGSummaryMaxChars   int
+	}
 	Layer struct {
 		TemplateCacheTTL time.Duration
 		RAGThreshold     float64
@@ -93,6 +104,13 @@ func Load() *Config {
 
 	// Redis
 	cfg.Redis.URL = getEnv("REDIS_URL", "redis://localhost:6379/0")
+	cfg.Memory.GuestTTLHours, _ = strconv.Atoi(getEnv("MEMORY_GUEST_TTL_HOURS", "24"))
+	cfg.Memory.MemberHotTTLHours, _ = strconv.Atoi(getEnv("MEMORY_MEMBER_HOT_TTL_HOURS", "168"))
+	cfg.Memory.PersistEveryNTurns, _ = strconv.Atoi(getEnv("MEMORY_PERSIST_EVERY_N_TURNS", "6"))
+	cfg.Token.DefaultProfile = getEnv("TOKEN_DEFAULT_PROFILE", "balanced")
+	cfg.Token.DefaultResponseMode = getEnv("TOKEN_DEFAULT_RESPONSE_MODE", "concise")
+	cfg.Token.DefaultContextTokens, _ = strconv.Atoi(getEnv("TOKEN_DEFAULT_CONTEXT_TOKENS", "1000"))
+	cfg.Token.RAGSummaryMaxChars, _ = strconv.Atoi(getEnv("TOKEN_RAG_SUMMARY_MAX_CHARS", "1400"))
 
 	// Layer Configuration
 	ttlMs, _ := strconv.Atoi(getEnv("TEMPLATE_CACHE_TTL_MS", "300000"))

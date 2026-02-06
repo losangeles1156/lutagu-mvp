@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/lutagu/adk-agent/internal/agent"
@@ -14,6 +15,7 @@ import (
 	"github.com/lutagu/adk-agent/internal/engine/router"
 	"github.com/lutagu/adk-agent/internal/infrastructure/cache"
 	"github.com/lutagu/adk-agent/internal/infrastructure/embedding"
+	"github.com/lutagu/adk-agent/internal/infrastructure/memory"
 	"github.com/lutagu/adk-agent/internal/infrastructure/odpt"
 	"github.com/lutagu/adk-agent/internal/infrastructure/supabase"
 	"github.com/lutagu/adk-agent/internal/infrastructure/weather"
@@ -31,6 +33,7 @@ var (
 	cfg           *config.Config
 	engine        *orchestrator.LayeredEngine
 	healthChecker *monitoring.HealthChecker
+	memoryStore   *memory.Store
 )
 
 func main() {
@@ -88,6 +91,11 @@ func main() {
 			vectorStore = supabase.NewVectorStore(supabaseClient)
 		}
 	}
+	memoryStore = memory.NewStore(redisStore, supabaseClient, memory.Options{
+		GuestTTLHours:      cfg.Memory.GuestTTLHours,
+		MemberHotTTLHours:  cfg.Memory.MemberHotTTLHours,
+		PersistEveryNTurns: cfg.Memory.PersistEveryNTurns,
+	})
 
 	var embeddingClient *embedding.VoyageClient
 	if cfg.Voyage.APIKey != "" {
@@ -139,6 +147,7 @@ func main() {
 	}
 
 	generalAgent, _ := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent, []tool.Tool{
+		&agent.GetCurrentTimeTool{},
 		&agent.SearchRouteTool{RoutingURL: cfg.RoutingServiceURL},
 		&agent.GetTrainStatusTool{FetchFunc: func() (string, error) {
 			statuses, err := odptClient.FetchTrainStatus()
@@ -182,6 +191,7 @@ func main() {
 	// 9. Setup HTTP Routes
 	http.HandleFunc("/api/chat", handleChat)
 	http.HandleFunc("/agent/chat", handleChat)
+	http.HandleFunc("/agent/memory", handleMemory)
 	http.HandleFunc("/health", healthChecker.HandleHealth)
 	http.HandleFunc("/health/ready", healthChecker.HandleHealthReady)
 	http.HandleFunc("/health/live", healthChecker.HandleHealthLive)
@@ -202,8 +212,17 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Messages []agent.Message `json:"messages"`
-		Locale   string          `json:"locale"`
+		Messages            []agent.Message `json:"messages"`
+		Locale              string          `json:"locale"`
+		UserID              string          `json:"user_id"`
+		SessionID           string          `json:"session_id"`
+		IsAuthenticated     bool            `json:"is_authenticated"`
+		Timezone            string          `json:"timezone"`
+		ClientNowISO        string          `json:"client_now_iso"`
+		ResponseMode        string          `json:"response_mode"`
+		TokenProfile        string          `json:"token_profile"`
+		MaxContextTokens    int             `json:"max_context_tokens"`
+		HistoryBudgetTokens int             `json:"history_budget_tokens"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -218,7 +237,8 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	traceID := fmt.Sprintf("trace-%d", time.Now().UnixNano())
-	slog.Info("Processing chat request", "traceID", traceID)
+	requestID := fmt.Sprintf("req-%d", time.Now().UnixNano())
+	slog.Info("Processing chat request", "traceID", traceID, "requestID", requestID)
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -235,17 +255,82 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 
-	sendEvent("meta", `{"status":"processing"}`)
+	if req.Timezone == "" {
+		req.Timezone = "Asia/Tokyo"
+	}
+	if req.SessionID == "" {
+		req.SessionID = fmt.Sprintf("guest-%d", time.Now().UnixNano())
+	}
+	if req.UserID == "" {
+		req.UserID = req.SessionID
+	}
+	memoryScope := memory.GuestScope
+	if req.IsAuthenticated && req.UserID != "" && req.UserID != req.SessionID {
+		memoryScope = memory.MemberScope
+	}
+
+	mergedMessages := req.Messages
+	if memoryStore != nil {
+		if profile, err := memoryStore.LoadProfile(ctx, memoryScope, req.UserID, req.SessionID); err == nil {
+			if msg := memoryStore.BuildContextMessage(profile, req.Locale); msg != nil {
+				mergedMessages = append([]agent.Message{*msg}, mergedMessages...)
+			}
+		}
+	}
+
+	metaBytes, _ := json.Marshal(map[string]string{
+		"status":     "processing",
+		"trace_id":   traceID,
+		"request_id": requestID,
+	})
+	sendEvent("meta", string(metaBytes))
 
 	respCh := engine.Process(ctx, orchestrator.ProcessRequest{
-		Messages: req.Messages,
-		Locale:   req.Locale,
-		TraceID:  traceID,
+		Messages:            mergedMessages,
+		Locale:              req.Locale,
+		TraceID:             traceID,
+		SessionID:           req.SessionID,
+		UserID:              req.UserID,
+		IsAuthenticated:     req.IsAuthenticated,
+		Timezone:            req.Timezone,
+		ClientNowISO:        req.ClientNowISO,
+		ResponseMode:        req.ResponseMode,
+		TokenProfile:        req.TokenProfile,
+		MaxContextTokens:    req.MaxContextTokens,
+		HistoryBudgetTokens: req.HistoryBudgetTokens,
 	})
 
+	var assistantFull strings.Builder
 	for chunk := range respCh {
+		if strings.HasPrefix(chunk, "[[TOOL_TRACE]]") {
+			sendEvent("tool_trace", strings.TrimPrefix(chunk, "[[TOOL_TRACE]]"))
+			continue
+		}
+		if strings.HasPrefix(chunk, "[[DECISION_TRACE]]") {
+			sendEvent("decision_trace", strings.TrimPrefix(chunk, "[[DECISION_TRACE]]"))
+			continue
+		}
+		assistantFull.WriteString(chunk)
 		dataBytes, _ := json.Marshal(map[string]string{"content": chunk})
 		sendEvent("telem", string(dataBytes))
+	}
+
+	lastUser := ""
+	for i := len(req.Messages) - 1; i >= 0; i-- {
+		if req.Messages[i].Role == "user" {
+			lastUser = req.Messages[i].Content
+			break
+		}
+	}
+	if memoryStore != nil {
+		_ = memoryStore.SaveTurn(ctx, memory.SaveTurnInput{
+			Scope:         memoryScope,
+			UserID:        req.UserID,
+			SessionID:     req.SessionID,
+			Locale:        req.Locale,
+			LastUser:      lastUser,
+			LastAssistant: assistantFull.String(),
+		})
 	}
 
 	sendEvent("done", "{}")
@@ -253,5 +338,39 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 
 func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"status": "ok"})
+	stats := engine.GetMetricsStats()
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":  "ok",
+		"metrics": stats,
+	})
+}
+
+func handleMemory(w http.ResponseWriter, r *http.Request) {
+	if memoryStore == nil {
+		http.Error(w, "memory store unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID := strings.TrimSpace(r.URL.Query().Get("user_id"))
+	if userID == "" {
+		http.Error(w, "user_id is required", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	if err := memoryStore.DeleteMemberMemory(ctx, userID); err != nil {
+		http.Error(w, "failed to delete memory", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"ok":      true,
+		"user_id": userID,
+	})
 }

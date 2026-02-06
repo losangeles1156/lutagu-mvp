@@ -16,6 +16,7 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  diagnosticId: string | null;
 }
 
 /**
@@ -27,10 +28,11 @@ export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
+    diagnosticId: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error, diagnosticId: `ui-${Date.now().toString(36)}` };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -39,7 +41,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     this.props.onReset?.();
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, diagnosticId: null });
   };
 
   private handleRefresh = () => {
@@ -70,6 +72,11 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-xs font-bold text-rose-600 mb-4">
               元件載入失敗，請嘗試重新整理或返回上頁。
             </p>
+            {this.state.diagnosticId && (
+              <p className="text-[10px] font-mono text-rose-500 mb-3">
+                診斷 ID: {this.state.diagnosticId}
+              </p>
+            )}
             <div className="flex gap-2 justify-center">
               <button
                 onClick={this.handleReset}
@@ -106,6 +113,11 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-sm font-bold text-slate-500 leading-relaxed">
               我們在載入頁面時遇到了一些問題。請嘗試重新整理頁面。
             </p>
+            {this.state.diagnosticId && (
+              <p className="text-[10px] font-mono text-slate-400">
+                診斷 ID: {this.state.diagnosticId}
+              </p>
+            )}
             <div className="flex gap-3 justify-center">
               <button
                 onClick={this.handleRefresh}

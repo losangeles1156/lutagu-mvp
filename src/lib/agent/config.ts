@@ -18,7 +18,10 @@ export const AGENT_CONFIG = {
 
     // Get the current endpoint based on feature flag
     get currentEndpoint() {
-        return this.useAgentV2 ? this.endpoints.v2 : this.endpoints.v1;
+        const forcedPath = (process.env.NEXT_PUBLIC_AGENT_PATH || 'adk').toLowerCase();
+        if (forcedPath === 'v2') return this.endpoints.v2;
+        if (forcedPath === 'v1') return this.endpoints.v1;
+        return this.endpoints.adk;
     },
 
     // Agent 2.0 settings

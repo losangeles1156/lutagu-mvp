@@ -57,7 +57,13 @@ func (a *RouteAgent) Process(ctx context.Context, messages []Message, reqCtx Req
 	go func() {
 		defer close(ch)
 
-		_, err := RunAgentStreaming(ctx, a.Agent, history, ch)
+		_, err := RunAgentStreamingWithOptions(ctx, a.Agent, history, ch, RunOptions{
+			SessionID:        reqCtx.SessionID,
+			UserID:           reqCtx.UserID,
+			AppName:          "lutagu",
+			MaxHistoryTurns:  3,
+			MaxContextTokens: reqCtx.MaxContextTokens,
+		})
 		if err != nil {
 			ch <- fmt.Sprintf("Error: %v", err)
 			return

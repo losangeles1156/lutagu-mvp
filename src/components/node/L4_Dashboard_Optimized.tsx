@@ -138,6 +138,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
     const [activeKind, setActiveKind] = useState<L4IntentKind | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>('');
+    const [diagnosticId, setDiagnosticId] = useState<string>('');
     const [task, setTask] = useState<L4Task>('route');
     const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
     const [templateCategory, setTemplateCategory] = useState<L4TemplateCategory>('basic');
@@ -162,6 +163,14 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
     const templatesContainerRef = useRef<HTMLDivElement | null>(null);
     const requestAbortRef = useRef<AbortController | null>(null);
     const requestSeqRef = useRef(0);
+    const requestIdRef = useRef(`l4-${Date.now().toString(36)}`);
+
+    const reportL4Error = useCallback((code: string, message: string, err?: unknown) => {
+        const id = `${code}-${Date.now().toString(36)}`;
+        setDiagnosticId(id);
+        logger.error(`[L4 Dashboard] ${code}`, { diagnosticId: id, requestId: requestIdRef.current, error: err });
+        setError(`${message} (${code} | ${id})`);
+    }, []);
 
     const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
         const scrollTop = e.currentTarget.scrollTop;
@@ -188,13 +197,13 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
             try {
                 const prefs = mapDemandToPreferences(demand);
                 const reqBody: RecommendRequest = { stationId, userPreferences: prefs, locale: uiLocale as 'zh-TW' | 'ja' | 'en' };
-                const res = await fetch('/api/l4/recommend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reqBody) });
+                const res = await fetch('/api/l4/recommend', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Request-ID': requestIdRef.current }, body: JSON.stringify(reqBody) });
                 if (res.ok) { const data = await res.json(); setRecommendations(data.cards || []); }
-            } catch (err) { logger.error('[L4 Dashboard] Failed to fetch recommendations:', err); }
+            } catch (err) { reportL4Error('L4_RECOMMEND_FETCH_FAILED', t('errors.unknown'), err); }
             finally { setIsRecommending(false); }
         };
         fetchRecommendations();
-    }, [stationId, demand, uiLocale, mapDemandToPreferences]);
+    }, [stationId, demand, uiLocale, mapDemandToPreferences, reportL4Error, t]);
 
     // Fetch markdown knowledge
     useEffect(() => {
@@ -202,19 +211,19 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
             if (!stationId || !/^odpt[.:]Station:/.test(stationId)) return;
             setIsKnowledgeLoading(true);
             try {
-                const res = await fetch(`/api/l4/knowledge?type=station&id=${stationId}&locale=${uiLocale}`);
+                const res = await fetch(`/api/l4/knowledge?type=station&id=${stationId}&locale=${uiLocale}`, { headers: { 'X-Request-ID': requestIdRef.current } });
                 if (res.ok) {
                     const data = await res.json();
                     setMarkdownKnowledge(data.tips || []);
                 }
             } catch (err) {
-                logger.error('[L4 Dashboard] Failed to fetch markdown knowledge:', err);
+                reportL4Error('L4_KNOWLEDGE_FETCH_FAILED', t('errors.unknown'), err);
             } finally {
                 setIsKnowledgeLoading(false);
             }
         };
         fetchMarkdownKnowledge();
-    }, [stationId, uiLocale]);
+    }, [stationId, uiLocale, reportL4Error, t]);
 
     // Reset on station change
     useEffect(() => {
@@ -404,7 +413,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                     setFareData(filtered);
                     setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, destinationStationName: currentDestName, demand, verified: true }));
                     return;
-                } catch (e: any) { if (e?.name !== 'AbortError') { setError(t('errors.fareQueryFailed')); setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, demand, verified: false })); } return; }
+                } catch (e: any) { if (e?.name !== 'AbortError') { reportL4Error('L4_FARE_QUERY_FAILED', t('errors.fareQueryFailed'), e); setSuggestion(buildFareSuggestion({ originStationId: from, originStationName: currentOriginName, destinationStationId: to, demand, verified: false })); } return; }
             }
 
             if (kind === 'timetable') {
@@ -445,9 +454,9 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                     setCachedRouteResult({ origin: currentOriginId, destination: destinationStationId, options: baseOptions, text });
                     setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: true, options: baseOptions, text }));
                     return;
-                } catch (e: any) { if (e?.name !== 'AbortError') { setError(t('errors.routePlanningFailed')); setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: false, options: [] })); } return; }
+                } catch (e: any) { if (e?.name !== 'AbortError') { reportL4Error('L4_ROUTE_API_FAILED', t('errors.routePlanningFailed'), e); setSuggestion(buildRouteSuggestion({ originStationId: currentOriginId, destinationStationId, demand, verified: false, options: [] })); } return; }
             }
-        } catch (e: any) { if (e?.name !== 'AbortError') { setError(String(e?.message || t('errors.unknown'))); } }
+        } catch (e: any) { if (e?.name !== 'AbortError') { reportL4Error('L4_RUNTIME_ERROR', String(e?.message || t('errors.unknown')), e); } }
         finally { if (mySeq === requestSeqRef.current) { setIsLoading(false); } }
     };
 
@@ -648,7 +657,7 @@ export default function L4_Dashboard({ currentNodeId, l4Knowledge }: L4Dashboard
                                 </AnimatePresence>
                             </div>
 
-                            <AnimatePresence>{error && <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="rounded-2xl bg-rose-50 border border-rose-100 p-4 flex items-start gap-3"><div className="p-2 bg-rose-100 rounded-full text-rose-600"><AlertTriangle size={16} /></div><div className="text-sm font-bold text-rose-800">{error}</div></motion.div>}</AnimatePresence>
+                            <AnimatePresence>{error && <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="rounded-2xl bg-rose-50 border border-rose-100 p-4 flex items-start gap-3"><div className="p-2 bg-rose-100 rounded-full text-rose-600"><AlertTriangle size={16} /></div><div className="text-sm font-bold text-rose-800"><div>{error}</div>{diagnosticId && <div className="text-xs font-mono text-rose-600 mt-1">Trace: {requestIdRef.current}</div>}</div></motion.div>}</AnimatePresence>
                             {error && task === 'route' && selectedOrigin?.id && selectedDestination?.id && (
                                 <div className="flex flex-wrap gap-2">
                                     <a

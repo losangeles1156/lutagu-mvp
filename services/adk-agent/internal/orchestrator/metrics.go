@@ -12,6 +12,7 @@ type Metrics struct {
 	layerSuccess  map[string]int64
 	layerLatency  map[string][]time.Duration
 	errors        map[string]int64
+	counters      map[string]int64
 	startTime     time.Time
 }
 
@@ -22,6 +23,7 @@ func NewMetrics() *Metrics {
 		layerSuccess:  make(map[string]int64),
 		layerLatency:  make(map[string][]time.Duration),
 		errors:        make(map[string]int64),
+		counters:      make(map[string]int64),
 		startTime:     time.Now(),
 	}
 }
@@ -39,7 +41,7 @@ func (m *Metrics) RecordLayerSuccess(layer string, latency time.Duration) {
 	defer m.mu.Unlock()
 	m.layerSuccess[layer]++
 	m.layerLatency[layer] = append(m.layerLatency[layer], latency)
-	
+
 	// Keep only last 1000 latencies
 	if len(m.layerLatency[layer]) > 1000 {
 		m.layerLatency[layer] = m.layerLatency[layer][500:]
@@ -53,15 +55,22 @@ func (m *Metrics) RecordError(category string) {
 	m.errors[category]++
 }
 
+func (m *Metrics) IncCounter(name string, delta int64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.counters[name] += delta
+}
+
 // Stats returns current metrics as a map
 type MetricsStats struct {
-	Uptime        time.Duration          `json:"uptime"`
-	LayerAttempts map[string]int64       `json:"layer_attempts"`
-	LayerSuccess  map[string]int64       `json:"layer_success"`
-	LayerHitRate  map[string]float64     `json:"layer_hit_rate"`
-	AvgLatency    map[string]float64     `json:"avg_latency_ms"`
-	P95Latency    map[string]float64     `json:"p95_latency_ms"`
-	Errors        map[string]int64       `json:"errors"`
+	Uptime        time.Duration      `json:"uptime"`
+	LayerAttempts map[string]int64   `json:"layer_attempts"`
+	LayerSuccess  map[string]int64   `json:"layer_success"`
+	LayerHitRate  map[string]float64 `json:"layer_hit_rate"`
+	AvgLatency    map[string]float64 `json:"avg_latency_ms"`
+	P95Latency    map[string]float64 `json:"p95_latency_ms"`
+	Errors        map[string]int64   `json:"errors"`
+	Counters      map[string]int64   `json:"counters"`
 }
 
 // GetStats returns current statistics
@@ -77,6 +86,7 @@ func (m *Metrics) GetStats() MetricsStats {
 		AvgLatency:    make(map[string]float64),
 		P95Latency:    make(map[string]float64),
 		Errors:        make(map[string]int64),
+		Counters:      make(map[string]int64),
 	}
 
 	for k, v := range m.layerAttempts {
@@ -97,7 +107,7 @@ func (m *Metrics) GetStats() MetricsStats {
 				sum += l
 			}
 			stats.AvgLatency[k] = float64(sum.Milliseconds()) / float64(len(latencies))
-			
+
 			// P95
 			if len(latencies) >= 20 {
 				sorted := make([]time.Duration, len(latencies))
@@ -112,6 +122,9 @@ func (m *Metrics) GetStats() MetricsStats {
 	for k, v := range m.errors {
 		stats.Errors[k] = v
 	}
+	for k, v := range m.counters {
+		stats.Counters[k] = v
+	}
 
 	return stats
 }
@@ -120,11 +133,12 @@ func (m *Metrics) GetStats() MetricsStats {
 func (m *Metrics) Reset() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.layerAttempts = make(map[string]int64)
 	m.layerSuccess = make(map[string]int64)
 	m.layerLatency = make(map[string][]time.Duration)
 	m.errors = make(map[string]int64)
+	m.counters = make(map[string]int64)
 	m.startTime = time.Now()
 }
 

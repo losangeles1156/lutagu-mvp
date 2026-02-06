@@ -128,6 +128,14 @@ function parseSseEvent(event: string): string | null {
         return `[ERROR] ${eventData}\n`;
     }
 
+    if (eventType === 'tool_trace' && eventData) {
+        return `[TOOL_TRACE]${eventData}[/TOOL_TRACE]\n`;
+    }
+
+    if (eventType === 'decision_trace' && eventData) {
+        return `[DECISION_TRACE]${eventData}[/DECISION_TRACE]\n`;
+    }
+
     return null;
 }
 
@@ -158,6 +166,8 @@ export async function POST(req: NextRequest) {
                 if (typeof content === 'string') {
                     // Remove [THINKING]...[/THINKING] blocks
                     content = content.replace(/\[THINKING\][\s\S]*?(\[\/THINKING\]|$)/gi, '').trim();
+                    content = content.replace(/\[TOOL_TRACE\][\s\S]*?\[\/TOOL_TRACE\]/gi, '').trim();
+                    content = content.replace(/\[DECISION_TRACE\][\s\S]*?\[\/DECISION_TRACE\]/gi, '').trim();
                 }
 
                 return {

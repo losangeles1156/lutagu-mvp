@@ -3,6 +3,7 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/google/jsonschema-go/jsonschema"
@@ -24,6 +25,12 @@ type PlanRouteArgs struct {
 	Origin      string `json:"origin"`
 	Destination string `json:"destination"`
 	Urgency     int    `json:"urgency"`
+}
+
+type PlanStep struct {
+	Station    string `json:"station"`
+	Line       string `json:"line"`
+	IsTransfer bool   `json:"is_transfer"`
 }
 
 // NewPlanRouteTool creates the tool using functiontool wrapper
@@ -99,17 +106,26 @@ func (t *PlanRouteTool) Run(ctx tool.Context, args PlanRouteArgs) (map[string]in
 	}
 
 	// 4. Format Result
-	type Step struct {
-		Station    string `json:"station"`
-		Line       string `json:"line"`
-		IsTransfer bool   `json:"is_transfer"`
-	}
-	var steps []Step
+	var steps []PlanStep
 	for _, node := range res.Path {
-		steps = append(steps, Step{
+		steps = append(steps, PlanStep{
 			Station: node.NameJA,
 			Line:    node.RailwayID,
 		})
+	}
+
+	directInfo := t.findDirectService(originID, destID)
+	comparison := map[string]interface{}{
+		"recommended_reason":     fmt.Sprintf("Fastest travel time with %d transfer(s).", estimateTransfers(steps)),
+		"not_recommended_reason": "Alternative direct routes may have longer in-station walking or lower frequency at this moment.",
+	}
+	if directInfo.Available {
+		comparison["direct_option"] = map[string]interface{}{
+			"line_id":         directInfo.LineID,
+			"line_name_hint":  normalizeLineName(directInfo.LineID),
+			"transfer_needed": false,
+			"reason_not_top":  "Direct option exists but may not be the best overall after walk/transfer penalties.",
+		}
 	}
 
 	advice := "Route optimized for time."
@@ -122,6 +138,7 @@ func (t *PlanRouteTool) Run(ctx tool.Context, args PlanRouteArgs) (map[string]in
 		"steps":              steps,
 		"deep_advice":        advice,
 		"is_rainy":           deepCtx.IsRaining,
+		"comparison":         comparison,
 	}
 
 	return output, nil
@@ -133,14 +150,136 @@ func (t *PlanRouteTool) resolveStation(input string) string {
 		return input
 	}
 
-	// Search by name
-	term := strings.ToLower(input)
+	term := normalizeStationTerm(input)
+	candidates := []string{}
 	for id, node := range t.Graph.Nodes {
-		if strings.Contains(strings.ToLower(node.NameJA), term) ||
-			strings.Contains(strings.ToLower(node.NameEN), term) ||
-			strings.Contains(strings.ToLower(node.ID), term) {
-			return id
+		nameJA := strings.ToLower(node.NameJA)
+		nameEN := strings.ToLower(node.NameEN)
+		idLower := strings.ToLower(node.ID)
+		if strings.Contains(nameJA, term) || strings.Contains(nameEN, term) || strings.Contains(idLower, term) {
+			candidates = append(candidates, id)
 		}
 	}
-	return ""
+
+	if len(candidates) == 0 {
+		return ""
+	}
+
+	sort.SliceStable(candidates, func(i, j int) bool {
+		return stationCandidateScore(candidates[i], term) < stationCandidateScore(candidates[j], term)
+	})
+
+	return candidates[0]
+}
+
+func normalizeStationTerm(s string) string {
+	term := strings.ToLower(strings.TrimSpace(s))
+	alias := map[string]string{
+		"上野公園":    "ueno",
+		"京成上野":    "keiseiueno",
+		"東京メトロ上野": "ueno",
+		"上野":      "ueno",
+		"銀座":      "ginza",
+		"東京":      "tokyo",
+	}
+	if mapped, ok := alias[term]; ok {
+		return mapped
+	}
+	return term
+}
+
+func stationCandidateScore(stationID, term string) int {
+	score := 100
+	id := strings.ToLower(stationID)
+	if strings.Contains(id, term) {
+		score -= 40
+	}
+	if strings.Contains(id, "tokyometro") {
+		score -= 10
+	}
+	if strings.Contains(id, "jr.east") {
+		score -= 6
+	}
+
+	// Ueno disambiguation for common user intent
+	if term == "ueno" {
+		if strings.Contains(id, "tokyometro.ginza.ueno") {
+			score -= 20
+		}
+		if strings.Contains(id, "jr.east.") && strings.Contains(id, ".ueno") {
+			score -= 15
+		}
+	}
+	return score
+}
+
+type directServiceInfo struct {
+	Available bool
+	LineID    string
+}
+
+func (t *PlanRouteTool) findDirectService(originID, destinationID string) directServiceInfo {
+	if t.Graph == nil {
+		return directServiceInfo{}
+	}
+	// Direct service means reachable via train edges on a single line.
+	type state struct {
+		ID     string
+		LineID string
+	}
+	visited := map[string]bool{}
+	queue := []state{{ID: originID, LineID: ""}}
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+		key := curr.ID + "|" + curr.LineID
+		if visited[key] {
+			continue
+		}
+		visited[key] = true
+
+		if curr.ID == destinationID && curr.LineID != "" {
+			return directServiceInfo{Available: true, LineID: curr.LineID}
+		}
+
+		for _, edge := range t.Graph.Edges[curr.ID] {
+			if edge.Type != router.EdgeTypeTrain {
+				continue
+			}
+			nextLine := curr.LineID
+			if nextLine == "" {
+				nextLine = edge.LineID
+			}
+			if edge.LineID != nextLine {
+				continue
+			}
+			queue = append(queue, state{ID: edge.ToID, LineID: nextLine})
+		}
+	}
+	return directServiceInfo{}
+}
+
+func estimateTransfers(steps []PlanStep) int {
+	if len(steps) < 2 {
+		return 0
+	}
+	transfers := 0
+	prevLine := steps[0].Line
+	for i := 1; i < len(steps); i++ {
+		if steps[i].Line != "" && prevLine != "" && steps[i].Line != prevLine {
+			transfers++
+		}
+		if steps[i].Line != "" {
+			prevLine = steps[i].Line
+		}
+	}
+	return transfers
+}
+
+func normalizeLineName(lineID string) string {
+	if strings.Contains(strings.ToLower(lineID), "ueno-tokyo") {
+		return "上野東京線"
+	}
+	return lineID
 }

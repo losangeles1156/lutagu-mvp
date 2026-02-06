@@ -28,6 +28,11 @@ export default function Error({
             <p className="text-slate-500 max-w-xs mb-10 leading-relaxed font-medium">
                 我們在載入頁面時遇到了一些問題。這可能是由於網路不穩定或系統暫時忙碌。
             </p>
+            {error?.digest && (
+                <p className="text-[10px] font-mono text-slate-400 mb-6">
+                    診斷 ID: {error.digest}
+                </p>
+            )}
 
             <div className="flex flex-col w-full max-w-xs gap-3">
                 <button

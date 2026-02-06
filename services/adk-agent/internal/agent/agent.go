@@ -15,9 +15,19 @@ type Message struct {
 
 // RequestContext holds session-specific info
 type RequestContext struct {
-	SessionID string
-	Locale    string
-	UserID    string
+	SessionID            string
+	Locale               string
+	UserID               string
+	IsAuthenticated      bool
+	Timezone             string
+	MemoryScope          string
+	MemoryTTLSec         int
+	RouteExplainRequired bool
+	TimeToolRequired     bool
+	PromptProfile        string
+	ResponseMode         string
+	MaxContextTokens     int
+	HistoryBudgetTokens  int
 }
 
 // Agent wraps the ADK logic with LUTAGU specific methods for backward compatibility

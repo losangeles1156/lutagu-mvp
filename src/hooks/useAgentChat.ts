@@ -59,15 +59,38 @@ export const useAgentChat = (options: {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const sessionId = useMemo(() => `session-${Date.now()}`, []);
 
-    const bodyRef = useRef({ locale: normalizedLocale, nodeId: stationId, userLocation });
+    const detectTimezone = () => {
+        try {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Tokyo';
+        } catch {
+            return 'Asia/Tokyo';
+        }
+    };
+
+    const buildRequestBody = useCallback(() => ({
+        locale: normalizedLocale,
+        nodeId: stationId,
+        userLocation,
+        user_id: user?.id || undefined,
+        session_id: sessionId,
+        is_authenticated: Boolean(user?.id),
+        timezone: detectTimezone(),
+        client_now_iso: new Date().toISOString(),
+        response_mode: 'concise',
+        token_profile: 'balanced',
+        max_context_tokens: 1000,
+        history_budget_tokens: 1000,
+    }), [normalizedLocale, stationId, userLocation, user?.id, sessionId]);
+
+    const bodyRef = useRef(buildRequestBody());
     useEffect(() => {
-        bodyRef.current = { locale: normalizedLocale, nodeId: stationId, userLocation };
-    }, [normalizedLocale, stationId, userLocation]);
+        bodyRef.current = buildRequestBody();
+    }, [buildRequestBody]);
 
     const transport = useMemo(() => new TextStreamChatTransport({
         api: agentEndpoint,
-        body: { locale: normalizedLocale, nodeId: stationId, userLocation }
-    }), [normalizedLocale, stationId, userLocation]);
+        body: buildRequestBody()
+    }), [buildRequestBody]);
 
     const chatHelpers = useChat({
         transport,
@@ -109,8 +132,11 @@ export const useAgentChat = (options: {
 
     const extractHybridData = (content: string): { cleaned: string; type?: string; data?: any } => {
         if (!content) return { cleaned: '' };
-        const match = content.match(/\[HYBRID_DATA\]([\s\S]*?)\[\/HYBRID_DATA\]/i);
-        if (!match) return { cleaned: content };
+        const withoutTraces = content
+            .replace(/\[TOOL_TRACE\][\s\S]*?\[\/TOOL_TRACE\]/gi, '')
+            .replace(/\[DECISION_TRACE\][\s\S]*?\[\/DECISION_TRACE\]/gi, '');
+        const match = withoutTraces.match(/\[HYBRID_DATA\]([\s\S]*?)\[\/HYBRID_DATA\]/i);
+        if (!match) return { cleaned: withoutTraces };
         const jsonRaw = match[1];
         let parsed: any = null;
         try {
@@ -118,7 +144,7 @@ export const useAgentChat = (options: {
         } catch (error) {
             parsed = null;
         }
-        const cleaned = content.replace(match[0], '').trim();
+        const cleaned = withoutTraces.replace(match[0], '').trim();
         return { cleaned, type: parsed?.type, data: parsed?.data };
     };
 
@@ -212,7 +238,7 @@ export const useAgentChat = (options: {
                     role: 'user',
                     content: text
                 }, {
-                    body: { ...bodyRef.current }
+                    body: { ...buildRequestBody(), ...bodyRef.current }
                 });
             } else if (sendText) {
                 await sendText({ text });

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"iter"
+	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
 	"google.golang.org/adk/model"
@@ -87,7 +88,7 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 					respBytes, _ := json.Marshal(p.FunctionResponse.Response)
 					toolResponses = append(toolResponses, openai.ChatCompletionMessage{
 						Role:       "tool",
-						Content:    string(respBytes),
+						Content:    clipContent(string(respBytes), "tool"),
 						ToolCallID: callID,
 					})
 				}
@@ -112,7 +113,7 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 
 			msg := openai.ChatCompletionMessage{
 				Role:    role,
-				Content: content,
+				Content: clipContent(content, role),
 			}
 			if len(toolCalls) > 0 {
 				msg.ToolCalls = toolCalls
@@ -136,6 +137,7 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 			fmt.Printf("DEBUG: Tool[%v] Type: %T\n", i, t)
 		}
 
+		allowedTools := inferAllowedTools(messages)
 		// Map Tools
 		if len(req.Tools) > 0 {
 			var oTools []openai.Tool
@@ -143,6 +145,9 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 				// Case 1: *genai.Tool (Standard ADK Tool)
 				if gt, ok := t.(*genai.Tool); ok {
 					for _, fd := range gt.FunctionDeclarations {
+						if !isToolAllowed(fd.Name, allowedTools) {
+							continue
+						}
 						// fmt.Printf("DEBUG: Schema for %s: %+v\n", fd.Name, fd.Parameters)
 						oTools = append(oTools, openai.Tool{
 							Type: openai.ToolTypeFunction,
@@ -162,6 +167,9 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 					Declaration() *genai.FunctionDeclaration
 				}); ok {
 					fd := dt.Declaration()
+					if !isToolAllowed(fd.Name, allowedTools) {
+						continue
+					}
 					fmt.Printf("DEBUG: Schema for %s: %+v\n", fd.Name, fd.Parameters)
 					oTools = append(oTools, openai.Tool{
 						Type: openai.ToolTypeFunction,
@@ -259,4 +267,68 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 			}, nil)
 		}
 	}
+}
+
+func clipContent(content string, role string) string {
+	runes := []rune(strings.TrimSpace(content))
+	max := 1800
+	if role == "system" {
+		max = 1600
+	}
+	if role == "user" {
+		max = 2200
+	}
+	if len(runes) <= max {
+		return string(runes)
+	}
+	return string(runes[:max]) + "...(truncated)"
+}
+
+func inferAllowedTools(messages []openai.ChatCompletionMessage) map[string]bool {
+	allowed := map[string]bool{}
+	lastUser := ""
+	for i := len(messages) - 1; i >= 0; i-- {
+		if messages[i].Role == "user" {
+			lastUser = strings.ToLower(messages[i].Content)
+			break
+		}
+	}
+	if lastUser == "" {
+		return allowed
+	}
+	allow := func(names ...string) {
+		for _, n := range names {
+			allowed[n] = true
+		}
+	}
+	if containsAnyKeyword(lastUser, []string{"幾點", "現在", "today", "deadline", "時刻", "timetable"}) {
+		allow("get_current_time", "get_timetable")
+	}
+	if containsAnyKeyword(lastUser, []string{"上野", "銀座", "怎麼去", "route", "from", "to", "搭", "轉乘"}) {
+		allow("plan_route", "search_route", "get_train_status", "get_current_time")
+	}
+	if containsAnyKeyword(lastUser, []string{"delay", "status", "延誤", "誤點", "運休", "見合わせ"}) {
+		allow("get_train_status")
+	}
+	if len(allowed) == 0 {
+		// conservative fallback
+		allow("get_current_time", "plan_route")
+	}
+	return allowed
+}
+
+func isToolAllowed(toolName string, allowed map[string]bool) bool {
+	if len(allowed) == 0 {
+		return true
+	}
+	return allowed[toolName]
+}
+
+func containsAnyKeyword(text string, keywords []string) bool {
+	for _, k := range keywords {
+		if strings.Contains(text, strings.ToLower(k)) {
+			return true
+		}
+	}
+	return false
 }

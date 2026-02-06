@@ -69,7 +69,13 @@ func (a *RootAgent) Process(ctx context.Context, messages []Message, reqCtx Requ
 			}
 		}()
 
-		respText, err := RunAgentStreaming(ctx, a.Agent, history, internalCh)
+		respText, err := RunAgentStreamingWithOptions(ctx, a.Agent, history, internalCh, RunOptions{
+			SessionID:        reqCtx.SessionID,
+			UserID:           reqCtx.UserID,
+			AppName:          "lutagu",
+			MaxHistoryTurns:  2,
+			MaxContextTokens: reqCtx.MaxContextTokens,
+		})
 		close(internalCh) // Close internal captured channel
 
 		if err != nil {
