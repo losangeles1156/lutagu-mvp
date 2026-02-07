@@ -709,42 +709,36 @@ LUTAGU:  transfer(0.9) + has_delay(0.7) + luggage_ok(0.5) = 2.1 > threshold(0.6)
 
 ---
 
-### 4.3 AI 多模型架構
+### 4.3 AI 多模型架構 (ADK + OpenRouter)
 
-LUTAGU 使用 **Vercel AI SDK** 整合多個 LLM，各司其職：
+LUTAGU 使用 **Google ADK (Go)** 作為主要 Agent 框架，透過 OpenRouter 整合多個 LLM 供應商，實現最佳性價比與彈性：
 
-```
-User Query
-    ↓
-[Gatekeeper] Gemini 2.5 Flash Lite
-    ├→ 意圖分類（simple/medium/complex）
-    ├→ 路由決策（Template/Algorithm/LLM）
-    └→ 輸入參數提取
-    ↓
-[Brain] MiniMax-M2.1 或 Gemini 3 Flash Preview
-    ├→ 複雜推理（多約束條件）
-    ├→ 策略決策（異常應對）
-    └→ 不確定性處理
-    ↓
-[Synthesizer] Gemini 3 Flash Preview
-    ├→ 自然語言生成
-    ├→ 情感語調適應
-    └→ 多語言回應
-    ↓
-[Fallback] Gemini 2.5 Flash
-    └→ 主模型失敗時啟動
+```mermaid
+graph TD
+    UserQuery[User Query] --> ADK[Go ADK Agent]
+    ADK --> |Intent Classification| Router[Router Model]
+    
+    subgraph "Model Strategy via OpenRouter"
+        Router --> |"Simple/General"| SLM[SLM: Gemini Flash Lite / MiniMax]
+        Router --> |"Complex Reasoning"| Reasoner[Reasoner: Gemini Pro / Claude Sonnet]
+        Router --> |"Creative/Persona"| Creative[Creative: Mistral Large / Gemini Flash]
+    end
+    
+    SLM --> Response
+    Reasoner --> Response
+    Creative --> Response
+    
+    Response --> |SSE Stream| Client
 ```
 
-**模型選擇指南**：
-- **Gatekeeper**：快速分類、簡單問答
-- **Brain**：多步驟推理、約束求解
-- **Synthesizer**：使用者面對回應、語調調整
-- **Fallback**：確保服務連續性
+**模型選擇策略 (動態配置)**：
+- **Router (Gatekeeper)**：使用輕量級模型 (如 Gemini Flash Lite) 快速識別意圖。
+- **Brain (Core Logic)**：處理複雜轉乘邏輯與異常應對，使用推理能力強的模型 (如 Gemini Pro, Claude 3.5 Sonnet)。
+- **Synthesizer (Persona)**：負責最終回應生成與語調調整，確保符合 LUTAGU 人設。
 
-**嵌入模型**：
-- 主要：Gemini text-embedding-004（768 維 → zero-pad 至 1536）
-- 備用：MiniMax Embo-01（速率限制時切換）
-- 用途：知識庫語義搜索、POI 相關性計算
+**嵌入模型 (RAG)**：
+- 主要：Gemini text-embedding-004
+- 用途：L4 知識庫語義搜索、POI 相關性計算
 
 ---
 
