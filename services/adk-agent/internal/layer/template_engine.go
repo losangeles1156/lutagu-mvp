@@ -197,6 +197,15 @@ func (e *TemplateEngine) Match(ctx TemplateContext) *MatchResult {
 	return &MatchResult{Matched: false}
 }
 
+func AllowTemplate(ctx TemplateContext, complexity string) bool {
+	switch strings.ToLower(strings.TrimSpace(complexity)) {
+	case "compound", "ambiguous":
+		return false
+	default:
+		return true
+	}
+}
+
 // Handler implementations
 
 func (e *TemplateEngine) handleAirportTransfer(matches []string, ctx TemplateContext) *templateResult {

@@ -54,3 +54,10 @@ func TestRestoreIntentFeedbackWeights(t *testing.T) {
 		t.Fatalf("expected status to be clamped to -2, got %v", weights["status"])
 	}
 }
+
+func TestFAQFastPath_Hit(t *testing.T) {
+	q := "成田機場到新宿怎麼去"
+	if !isFAQHit(q, "zh-TW") {
+		t.Fatalf("expected FAQ hit for airport transfer")
+	}
+}

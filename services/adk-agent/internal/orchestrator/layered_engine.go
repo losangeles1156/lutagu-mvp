@@ -290,7 +290,13 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		e.metrics.RecordLayerAttempt("L1")
 		templateStart := time.Now()
 
-		if e.templateEngine != nil && !nodeCtx.IsRouteQuery {
+		complexity := "simple"
+		if isLikelyCompoundIntent(lastMessage) {
+			complexity = "compound"
+		}
+		faqHit := isFAQHit(lastMessage, req.Locale)
+
+		if e.templateEngine != nil && (faqHit || !nodeCtx.IsRouteQuery) {
 			tmplCtx := layer.TemplateContext{
 				Query:      lastMessage,
 				Locale:     req.Locale,
@@ -300,7 +306,8 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				Time:       time.Now(),
 			}
 
-			if match := e.templateEngine.Match(tmplCtx); match != nil && match.Matched {
+			if layer.AllowTemplate(tmplCtx, complexity) {
+				if match := e.templateEngine.Match(tmplCtx); match != nil && match.Matched {
 				e.metrics.RecordLayerSuccess("L1", time.Since(templateStart))
 				emitStructuredChunk(outCh, map[string]interface{}{
 					"type": inferStructuredType(toolPlan, nodeCtx),
@@ -315,6 +322,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				e.metrics.IncCounter("tool_only_resolution_rate", 1)
 				logger.Info("Responded from L1 Template", "category", match.Category, "latency", time.Since(startTime))
 				return
+				}
 			}
 		}
 		logs = append(logs, "[L1] Template miss")
@@ -741,6 +749,16 @@ func buildPromptDirectives(profile string) string {
 	default:
 		return "Balanced mode: concise first answer, expand only on user follow-up."
 	}
+}
+
+func isLikelyCompoundIntent(query string) bool {
+	q := strings.ToLower(strings.TrimSpace(query))
+	if q == "" {
+		return false
+	}
+	routeTokens := []string{"去", "到", "怎麼去", "怎么去", "how to get", "from", "to", "前往", "移動", "搭車", "route"}
+	constraintTokens := []string{"行李", "大行李", "電梯", "无障碍", "無障礙", "wheelchair", "elevator", "趕時間", "赶时间"}
+	return hasAnyToken(q, routeTokens) && hasAnyToken(q, constraintTokens)
 }
 
 func summarizeRAGResults(results []supabase.SearchResult, maxChars int) string {
