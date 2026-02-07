@@ -4,6 +4,8 @@
   {"name":"status-ja","query":"銀座線現在有延遲嗎","expected_route":"ALGO_TOOL","expected_any_tags":["status"]},
   {"name":"status-en","query":"train status for yamanote line","expected_route":"ALGO_TOOL","expected_any_tags":["status"]},
   {"name":"time-sensitive-flight","query":"現在去羽田機場還來得及嗎","expected_route":"ALGO_TOOL","expected_any_tags":["time_sensitive"]},
+  {"name":"airport_transfer_narita","query":"成田機場到新宿怎麼去","expected_route":"SLM_ONLY","expected_any_tags":["route"]},
+  {"name":"airport_transfer_haneda","query":"羽田機場到品川怎麼去","expected_route":"SLM_ONLY","expected_any_tags":["route"]},
   {"name":"fare-zh","query":"從東京到上野票價多少","expected_route":"SLM_ONLY","expected_any_tags":["fare","route"]},
   {"name":"fare-en","query":"how much is fare to akihabara","expected_route":"LLM_REQUIRED","expected_any_tags":["fare"]},
   {"name":"accessibility-zh","query":"有無障礙電梯路線嗎","expected_route":"SLM_ONLY","expected_any_tags":["accessibility","route"]},
