@@ -283,6 +283,7 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 	mergedMessages := req.Messages
 	if memoryStore != nil {
 		if profile, err := memoryStore.LoadProfile(ctx, memoryScope, req.UserID, req.SessionID); err == nil {
+			// Prefer compact slot-based memory message (JourneyContext) to reduce prompt size.
 			if msg := memoryStore.BuildContextMessage(profile, req.Locale); msg != nil {
 				mergedMessages = append([]agent.Message{*msg}, mergedMessages...)
 			}

@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/lutagu/adk-agent/internal/agent"
@@ -23,6 +25,14 @@ type Turn struct {
 	Timestamp string `json:"timestamp"`
 }
 
+type JourneyContext struct {
+	Origin      string   `json:"origin,omitempty"`
+	Destination string   `json:"destination,omitempty"`
+	Mode        string   `json:"mode,omitempty"`
+	Constraints []string `json:"constraints,omitempty"`
+	LastUpdated string   `json:"last_updated,omitempty"`
+}
+
 type Profile struct {
 	UserID           string   `json:"user_id"`
 	SessionID        string   `json:"session_id"`
@@ -36,6 +46,7 @@ type Profile struct {
 	TurnCount        int      `json:"turn_count"`
 	UpdatedAt        string   `json:"updated_at"`
 	RecentTurns      []Turn   `json:"recent_turns,omitempty"`
+	JourneyContext   *JourneyContext `json:"journey_context,omitempty"`
 }
 
 type Store struct {
@@ -44,6 +55,8 @@ type Store struct {
 	guestTTL      time.Duration
 	memberHotTTL  time.Duration
 	persistEveryN int
+	memMu         sync.RWMutex
+	memGuest      map[string]*Profile
 }
 
 type Options struct {
@@ -72,11 +85,20 @@ func NewStore(redisStore *cache.RedisStore, supabaseClient *supabase.Client, opt
 		guestTTL:      guestTTL,
 		memberHotTTL:  memberHotTTL,
 		persistEveryN: persistN,
+		memGuest:      make(map[string]*Profile),
 	}
 }
 
 func (s *Store) LoadProfile(ctx context.Context, scope, userID, sessionID string) (*Profile, error) {
 	if s.redis == nil {
+		if normalizeScope(scope) == GuestScope {
+			s.memMu.RLock()
+			if profile := s.memGuest[sessionID]; profile != nil {
+				s.memMu.RUnlock()
+				return profile, nil
+			}
+			s.memMu.RUnlock()
+		}
 		return s.loadFromSupabase(ctx, scope, userID)
 	}
 
@@ -128,11 +150,16 @@ func (s *Store) SaveTurn(ctx context.Context, input SaveTurnInput) error {
 	profile.Constraints = mergeHints(profile.Constraints, extractHints(input.LastUser, []string{"不", "不要", "不能", "must", "need"}))
 	profile.Goals = mergeHints(profile.Goals, extractHints(input.LastUser, []string{"我要", "目標", "趕", "arrive", "airport", "機場"}))
 	profile.FrequentStations = mergeHints(profile.FrequentStations, extractStationHints(input.LastUser))
+	profile.JourneyContext = extractJourneyContext(input.LastUser, profile.JourneyContext)
 
 	if s.redis != nil {
 		if err := s.saveRedis(ctx, profile); err != nil {
 			return err
 		}
+	} else if scope == GuestScope {
+		s.memMu.Lock()
+		s.memGuest[input.SessionID] = profile
+		s.memMu.Unlock()
 	}
 
 	if scope == MemberScope && s.supa != nil && (input.ForcePersist || profile.TurnCount%s.persistEveryN == 0) {
@@ -161,7 +188,7 @@ func (s *Store) BuildContextMessage(profile *Profile, locale string) *agent.Mess
 	}
 
 	summary := strings.TrimSpace(profile.Summary)
-	if summary == "" && len(profile.Preferences) == 0 && len(profile.Goals) == 0 {
+	if summary == "" && len(profile.Preferences) == 0 && len(profile.Goals) == 0 && profile.JourneyContext == nil {
 		return nil
 	}
 
@@ -190,6 +217,29 @@ func (s *Store) BuildContextMessage(profile *Profile, locale string) *agent.Mess
 	if len(profile.FrequentStations) > 0 {
 		builder.WriteString("Frequent Stations: ")
 		builder.WriteString(strings.Join(profile.FrequentStations, ", "))
+		builder.WriteString("\n")
+	}
+	if profile.JourneyContext != nil {
+		builder.WriteString("Journey: ")
+		if profile.JourneyContext.Origin != "" {
+			builder.WriteString("origin=")
+			builder.WriteString(profile.JourneyContext.Origin)
+			builder.WriteString(" ")
+		}
+		if profile.JourneyContext.Destination != "" {
+			builder.WriteString("destination=")
+			builder.WriteString(profile.JourneyContext.Destination)
+			builder.WriteString(" ")
+		}
+		if profile.JourneyContext.Mode != "" {
+			builder.WriteString("mode=")
+			builder.WriteString(profile.JourneyContext.Mode)
+			builder.WriteString(" ")
+		}
+		if len(profile.JourneyContext.Constraints) > 0 {
+			builder.WriteString("constraints=")
+			builder.WriteString(strings.Join(profile.JourneyContext.Constraints, ","))
+		}
 		builder.WriteString("\n")
 	}
 	builder.WriteString("Use this only as preference context, prioritize current request.")
@@ -281,6 +331,71 @@ func normalizeScope(scope string) string {
 		return MemberScope
 	}
 	return GuestScope
+}
+
+var (
+	enRoutePattern = regexp.MustCompile(`(?i)from\\s+([^\\s]+)\\s+to\\s+([^\\s?]+)`)
+)
+
+func extractJourneyContext(text string, existing *JourneyContext) *JourneyContext {
+	q := strings.TrimSpace(text)
+	if q == "" {
+		return existing
+	}
+	updated := false
+	var ctx JourneyContext
+	if existing != nil {
+		ctx = *existing
+	}
+	if origin, dest, ok := splitZhRoute(q); ok {
+		ctx.Origin = origin
+		ctx.Destination = dest
+		updated = true
+	} else if matches := enRoutePattern.FindStringSubmatch(strings.ToLower(q)); len(matches) == 3 {
+		ctx.Origin = matches[1]
+		ctx.Destination = matches[2]
+		updated = true
+	}
+	lower := strings.ToLower(q)
+	if strings.Contains(lower, "計程車") || strings.Contains(lower, "taxi") {
+		ctx.Mode = "taxi"
+		updated = true
+	}
+	if strings.Contains(lower, "行李") || strings.Contains(lower, "luggage") {
+		ctx.Constraints = mergeHints(ctx.Constraints, []string{"has_luggage"})
+		updated = true
+	}
+	if updated {
+		ctx.LastUpdated = time.Now().UTC().Format(time.RFC3339)
+		return &ctx
+	}
+	return existing
+}
+
+func splitZhRoute(q string) (string, string, bool) {
+	fromIdx := strings.Index(q, "從")
+	toIdx := strings.Index(q, "到")
+	if fromIdx < 0 || toIdx < 0 || toIdx <= fromIdx {
+		return "", "", false
+	}
+	origin := strings.TrimSpace(q[fromIdx+len("從") : toIdx])
+	destRaw := strings.TrimSpace(q[toIdx+len("到"):])
+	dest := trimRouteSuffix(destRaw)
+	if origin == "" || dest == "" {
+		return "", "", false
+	}
+	return origin, dest, true
+}
+
+func trimRouteSuffix(input string) string {
+	dest := input
+	suffixTokens := []string{"搭", "坐", "怎麼", "怎么", "多少錢", "多少钱", "要", "想", "嗎", "吗", "?", "？", "。", "！", "!"}
+	for _, token := range suffixTokens {
+		if idx := strings.Index(dest, token); idx > 0 {
+			dest = dest[:idx]
+		}
+	}
+	return strings.TrimSpace(dest)
 }
 
 func (s *Store) ttlForScope(scope string) time.Duration {
