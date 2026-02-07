@@ -1,0 +1,232 @@
+{
+  "timestamp": "2026-02-07T03:41:02.794Z",
+  "base": "http://127.0.0.1:3020",
+  "endpoint": "/api/agent/adk",
+  "total": 20,
+  "routeCases": 5,
+  "routeHitRate": 0,
+  "busyRatio": 1,
+  "structuredCompletenessRate": 0,
+  "results": [
+    {
+      "id": "route_tokyo_shinjuku",
+      "expected": "findRoute",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": true,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "route_shibuya_ueno",
+      "expected": "findRoute",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": true,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "route_shinjuku_akihabara",
+      "expected": "findRoute",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": true,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "status_yamanote",
+      "expected": "getTransitStatus",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "status_ginza",
+      "expected": "getTransitStatus",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "status_chuo",
+      "expected": "getTransitStatus",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "station_info_locker",
+      "expected": "getStationInfo",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "station_info_accessibility",
+      "expected": "getStationInfo",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "station_info_basic",
+      "expected": "getStationInfo",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "poi_ueno",
+      "expected": "searchPOI",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "poi_shibuya",
+      "expected": "searchPOI",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "poi_ginza",
+      "expected": "searchPOI",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "weather_tokyo",
+      "expected": "getWeather",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "weather_tokyo_en",
+      "expected": "getWeather",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "weather_tokyo_ja",
+      "expected": "getWeather",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "route_shibuya_tokyo",
+      "expected": "findRoute",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": true,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "route_osaka_tokyo",
+      "expected": "findRoute",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": true,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "status_oedo",
+      "expected": "getTransitStatus",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "station_info_toilets",
+      "expected": "getStationInfo",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    },
+    {
+      "id": "poi_food_shinjuku",
+      "expected": "searchPOI",
+      "status": 0,
+      "isBusy": true,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": null,
+      "structuredComplete": false,
+      "error": "TypeError: fetch failed"
+    }
+  ]
+}

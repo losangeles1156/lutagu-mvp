@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -219,6 +220,16 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// L0: Context Resolution
 		// ============================
 		nodeCtx := e.nodeResolver.Resolve(ctx, lastMessage)
+		if coercedQuery, coercedCtx, ok := e.coerceRouteQuery(lastMessage, nodeCtx); ok {
+			lastMessage = coercedQuery
+			nodeCtx = coercedCtx
+			emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
+				"type":        "query_rewrite",
+				"rewritten":   lastMessage,
+				"origin":      nodeCtx.Origin,
+				"destination": nodeCtx.Destination,
+			})
+		}
 		logs = append(logs, fmt.Sprintf("[L0] NodeResolver: primary=%s, confidence=%.2f", nodeCtx.PrimaryNodeID, nodeCtx.Confidence))
 		toolPlan := buildToolPlan(lastMessage, nodeCtx.IsRouteQuery, intent)
 		if nodeCtx.IsRouteQuery && !hasTag(toolPlan.IntentTags, "route") {
@@ -279,7 +290,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		e.metrics.RecordLayerAttempt("L1")
 		templateStart := time.Now()
 
-		if e.templateEngine != nil {
+		if e.templateEngine != nil && !nodeCtx.IsRouteQuery {
 			tmplCtx := layer.TemplateContext{
 				Query:      lastMessage,
 				Locale:     req.Locale,
@@ -291,7 +302,15 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 
 			if match := e.templateEngine.Match(tmplCtx); match != nil && match.Matched {
 				e.metrics.RecordLayerSuccess("L1", time.Since(templateStart))
-
+				emitStructuredChunk(outCh, map[string]interface{}{
+					"type": inferStructuredType(toolPlan, nodeCtx),
+					"data": map[string]interface{}{
+						"query":   lastMessage,
+						"summary": truncate(match.Content, 180),
+						"source":  "template",
+						"node_id": nodeCtx.PrimaryNodeID,
+					},
+				})
 				outCh <- match.Content
 				e.metrics.IncCounter("tool_only_resolution_rate", 1)
 				logger.Info("Responded from L1 Template", "category", match.Category, "latency", time.Since(startTime))
@@ -337,6 +356,17 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		// Check if it's a status query
 		if toolPlan.StatusTool && e.statusAgent != nil {
 			logs = append(logs, "[L2] Status query detected")
+			emitStructuredChunk(outCh, map[string]interface{}{
+				"type": "status",
+				"data": map[string]interface{}{
+					"query":             lastMessage,
+					"node_id":           nodeCtx.PrimaryNodeID,
+					"has_disruption":    l2Ctx != nil && l2Ctx.HasDisruption,
+					"disrupted_lines":   disruptionLineNames(l2Ctx),
+					"status_confidence": nodeCtx.Confidence,
+					"source":            "status_agent",
+				},
+			})
 
 			statusReqCtx := agent.RequestContext{
 				Locale:              req.Locale,
@@ -391,6 +421,16 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 					logs = append(logs, "[L3] Skill requests LLM refinement")
 					// Fall through to L5
 				} else {
+					emitStructuredChunk(outCh, map[string]interface{}{
+						"type": "knowledge",
+						"data": map[string]interface{}{
+							"query":      lastMessage,
+							"summary":    truncate(result.Content, 180),
+							"category":   result.Category,
+							"confidence": result.Confidence,
+							"source":     "skill",
+						},
+					})
 					logger.Info("Responded from L3 Skill", "category", result.Category, "latency", time.Since(startTime))
 					e.metrics.IncCounter("tool_only_resolution_rate", 1)
 					return
@@ -427,6 +467,14 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		}
 
 		if intentPath == intentTemplateOnly && ragContext == "" {
+			emitStructuredChunk(outCh, map[string]interface{}{
+				"type": "knowledge",
+				"data": map[string]interface{}{
+					"query":   lastMessage,
+					"summary": localizedConciseFallback(req.Locale),
+					"source":  "template_fallback",
+				},
+			})
 			outCh <- localizedConciseFallback(req.Locale)
 			e.metrics.IncCounter("tool_only_resolution_rate", 1)
 			logger.Info("Responded with template-only fallback", "latency", time.Since(startTime))
@@ -497,6 +545,18 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 				e.metrics.RecordLayerSuccess("L5", time.Since(l5Start))
 				e.metrics.IncCounter("llm_invocation_count", 1)
 				fullResponse := streamWithCompletionGuard(respCh, outCh, req.Locale, nodeCtx.IsRouteQuery)
+				emitStructuredChunk(outCh, map[string]interface{}{
+					"type": inferStructuredType(toolPlan, nodeCtx),
+					"data": map[string]interface{}{
+						"query":      lastMessage,
+						"summary":    truncate(fullResponse, 220),
+						"provider":   selectedProvider,
+						"model":      selectedModel,
+						"fast_path":  isFastPath,
+						"token_mode": req.TokenProfile,
+						"source":     "llm",
+					},
+				})
 				e.metrics.IncCounter("completion_chars_total", int64(len([]rune(fullResponse))))
 				if busy, reason := detectBusyMessage(fullResponse); busy {
 					emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
@@ -525,6 +585,14 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		}
 
 		// Ultimate fallback
+		emitStructuredChunk(outCh, map[string]interface{}{
+			"type": "knowledge",
+			"data": map[string]interface{}{
+				"query":   lastMessage,
+				"summary": "抱歉，我目前無法處理您的請求。請稍後再試。",
+				"source":  "ultimate_fallback",
+			},
+		})
 		outCh <- "抱歉，我目前無法處理您的請求。請稍後再試。"
 		logger.Warn("All layers failed", "logs", logs)
 	}()
@@ -553,35 +621,35 @@ func (e *LayeredEngine) buildSystemPrompt(locale, ragContext string, l2Ctx *laye
 		holidayHint = "Yes"
 	}
 
-	weatherStr := "Unknown (Assume clear)"
-	weatherAdvice := "" // Dynamic advice based on weather
+	weatherStr := "Unknown"
+	weatherAdvice := ""
 	if weatherCtx != nil {
 		cond := weatherCtx.GetConditionText()
 		weatherStr = fmt.Sprintf("%s, %.1f°C", cond, weatherCtx.Temperature)
 		if weatherCtx.IsRaining() {
-			weatherAdvice = "\n- ☔ **RAIN ALERT**: It is currently raining. **Prioritize underground routes, indoor transfers, and covered walkways.** Suggest taxis for short distances."
+			weatherAdvice = "Rain: prioritize covered/indoor transfers."
 		} else if weatherCtx.Temperature > 30 {
-			weatherAdvice = "\n- ☀️ **HEAT ALERT**: High temperature detected. Suggest minimizing outdoor walking and staying hydrated."
+			weatherAdvice = "Heat: reduce outdoor walking."
 		}
 	}
 
 	directives := buildPromptDirectives(tokenProfile)
-	prompt := fmt.Sprintf(`You are LUTAGU, an expert Tokyo Transportation Concierge.
-Current Time (%s): %s%s
-Current Weather: %s
-Current Locale: %s
+	prompt := fmt.Sprintf(`You are LUTAGU, Tokyo transit concierge.
+Time(%s): %s%s
+Weather: %s
+Locale: %s
 Profile: %s
-Japan Holiday Today: %s
+Holiday: %s
 
-## CORE DIRECTIVES:
-1. **Dynamic Context Awareness**: ALWAYS checks the current time, weather, and disruption status before answering.
-2. **Time Policy**: If query includes urgency/deadline/timetable, call get_current_time first. Required=%t.
-3. **Route Explainability**: For route recommendation, explain "recommended route" and at least one "not recommended route" with clear reason. Required=%t.
-4. **Execution Mode**: %s
-5. **Behavior Pack**: %s
-6. **Weather Adaptive**: %s
-
-`, timezone, timeStr, clientNowHint, weatherStr, locale, tokenProfile, holidayHint, timeToolRequired, routeExplainRequired, responseMode, directives, weatherAdvice)
+Rules:
+1) Tool-first. If route/status/time is needed, call tools before final answer.
+2) Time policy: get_current_time required=%t.
+3) Route policy: include recommended and one rejected option required=%t.
+4) Mode: %s. Behavior: %s.
+5) Keep final answer concise.`, timezone, timeStr, clientNowHint, weatherStr, locale, tokenProfile, holidayHint, timeToolRequired, routeExplainRequired, responseMode, directives)
+	if weatherAdvice != "" {
+		prompt += "\n6) " + weatherAdvice
+	}
 
 	if l2Ctx != nil && l2Ctx.HasDisruption {
 		prompt += e.l2Injector.ForSystemPrompt(l2Ctx)
@@ -595,7 +663,7 @@ Japan Holiday Today: %s
 		prompt += fmt.Sprintf("## EXPERT KNOWLEDGE BASE (RAG)\n%s\n\n", ragContext)
 	}
 
-	prompt += `## RESPONSE GUIDELINES:
+	prompt += `\nResponse guidelines:
 - Lead with direct answer first.
 - Keep reasoning brief unless user explicitly asks "why" or requests details.
 - Answer primarily in the user's language (%s).`
@@ -782,6 +850,29 @@ func emitStructuredChunk(ch chan<- string, payload map[string]interface{}) {
 	ch <- structuredDataPrefix + string(bytes)
 }
 
+func inferStructuredType(toolPlan toolPlan, nodeCtx *layer.ResolvedContext) string {
+	if nodeCtx != nil && nodeCtx.IsRouteQuery {
+		return "route"
+	}
+	if toolPlan.StatusTool {
+		return "status"
+	}
+	return "knowledge"
+}
+
+func disruptionLineNames(l2Ctx *layer.L2Context) []string {
+	if l2Ctx == nil || len(l2Ctx.DisruptedLines) == 0 {
+		return []string{}
+	}
+	lines := make([]string, 0, len(l2Ctx.DisruptedLines))
+	for _, l := range l2Ctx.DisruptedLines {
+		if strings.TrimSpace(l.Railway) != "" {
+			lines = append(lines, l.Railway)
+		}
+	}
+	return lines
+}
+
 type routeToolFirstResponse struct {
 	Success    bool
 	Reason     string
@@ -809,30 +900,30 @@ var (
 )
 
 func (e *LayeredEngine) runRouteToolFirst(query, locale string, nodeCtx *layer.ResolvedContext, weatherCtx *weather.CurrentWeather) routeToolFirstResponse {
-	if e.pathfinder == nil || e.pathfinder.Graph() == nil {
-		return routeToolFirstResponse{Reason: "pathfinder_unavailable"}
-	}
-
-	originText := strings.TrimSpace(nodeCtx.Origin)
-	destText := strings.TrimSpace(nodeCtx.Destination)
+	originText := normalizeEndpointQuery(nodeCtx.Origin)
+	destText := normalizeEndpointQuery(nodeCtx.Destination)
 	if originText == "" || destText == "" {
 		return routeToolFirstResponse{Reason: "missing_origin_or_destination"}
+	}
+
+	// Airport strategy should not depend on graph availability.
+	if isAirportKeyword(originText) || isAirportKeyword(destText) {
+		airportData := e.buildAirportStructured(originText, destText, locale, weatherCtx)
+		return routeToolFirstResponse{
+			Success:    true,
+			Text:       toString(airportData["summary"]),
+			Structured: airportData,
+		}
+	}
+
+	if e.pathfinder == nil || e.pathfinder.Graph() == nil {
+		return routeToolFirstResponse{Reason: "pathfinder_unavailable"}
 	}
 
 	originCandidates, originType := e.expandEndpointCandidates(originText)
 	destCandidates, destType := e.expandEndpointCandidates(destText)
 	if len(originCandidates) == 0 || len(destCandidates) == 0 {
 		return routeToolFirstResponse{Reason: "endpoint_resolution_failed"}
-	}
-
-	// Airport strategy has priority when one side is airport.
-	if originType == "airport" || destType == "airport" {
-		airportData := e.buildAirportStructured(originText, destText, locale, weatherCtx)
-		return routeToolFirstResponse{
-			Success:    true,
-			Text:       airportData["summary"].(string),
-			Structured: airportData,
-		}
 	}
 
 	type scoredRoute struct {
@@ -900,8 +991,7 @@ func (e *LayeredEngine) runRouteToolFirst(query, locale string, nodeCtx *layer.R
 	if originType == "poi" || destType == "poi" {
 		routeType = "poi"
 	}
-	structured := map[string]interface{}{
-		"type":  routeType,
+	routeData := map[string]interface{}{
 		"query": query,
 		"recommendation": map[string]interface{}{
 			"origin_station":      best.Origin.StationName,
@@ -917,6 +1007,15 @@ func (e *LayeredEngine) runRouteToolFirst(query, locale string, nodeCtx *layer.R
 			"weather_rain": weatherCtx != nil && weatherCtx.IsRaining(),
 		},
 	}
+	structured := map[string]interface{}{
+		"type": routeType,
+		"data": routeData,
+		// backward compatible flattened fields
+		"query":          routeData["query"],
+		"recommendation": routeData["recommendation"],
+		"alternatives":   routeData["alternatives"],
+		"context":        routeData["context"],
+	}
 
 	text := buildRouteSummary(locale, best.Origin.StationName, best.Destination.StationName, best.DurationMin, best.Transfers, routeType)
 	return routeToolFirstResponse{
@@ -924,6 +1023,100 @@ func (e *LayeredEngine) runRouteToolFirst(query, locale string, nodeCtx *layer.R
 		Text:       text,
 		Structured: structured,
 	}
+}
+
+func normalizeEndpointQuery(input string) string {
+	s := strings.TrimSpace(input)
+	if s == "" {
+		return s
+	}
+	replacements := []string{
+		"怎麼走", "怎麼去", "如何去", "路線", "路线", "請規劃", "請规划",
+		"how to get", "how to go", "route", "please plan",
+	}
+	lower := strings.ToLower(s)
+	for _, token := range replacements {
+		if idx := strings.Index(lower, token); idx >= 0 {
+			s = strings.TrimSpace(s[:idx])
+			lower = strings.ToLower(s)
+		}
+	}
+	s = strings.Trim(s, " ，。,.!?！？：:;；")
+	return s
+}
+
+func containsRouteCue(input string) bool {
+	q := strings.ToLower(strings.TrimSpace(input))
+	cues := []string{
+		"怎麼", "怎么", "路線", "路线", "去", "到", "從", "从",
+		"from", "to", "route", "transfer", "how to get",
+	}
+	for _, c := range cues {
+		if strings.Contains(q, strings.ToLower(c)) {
+			return true
+		}
+	}
+	return false
+}
+
+func parseRouteEndpointsFromQuery(query string) (string, string) {
+	q := strings.TrimSpace(query)
+	patterns := []*regexp.Regexp{
+		regexp.MustCompile(`(?i)(?:我在|i am at)\s*(.+?)\s*(?:要去|想去|去|to)\s*(.+)`),
+		regexp.MustCompile(`(?i)(?:從|from)\s*(.+?)\s*(?:出發|depart|departure)?\s*(?:到|去|to)\s*(.+)`),
+		regexp.MustCompile(`(?i)(?:去|to)\s*(.+?)\s*[，,、 ]*(?:從|from)\s*(.+?)(?:出發|depart|departure)?`),
+	}
+	for i, p := range patterns {
+		if m := p.FindStringSubmatch(q); m != nil {
+			if i == 2 {
+				return normalizeEndpointQuery(m[2]), normalizeEndpointQuery(m[1])
+			}
+			return normalizeEndpointQuery(m[1]), normalizeEndpointQuery(m[2])
+		}
+	}
+	return "", ""
+}
+
+func (e *LayeredEngine) coerceRouteQuery(query string, nodeCtx *layer.ResolvedContext) (string, *layer.ResolvedContext, bool) {
+	if nodeCtx == nil || !containsRouteCue(query) {
+		return query, nodeCtx, false
+	}
+	if nodeCtx.IsRouteQuery && strings.TrimSpace(nodeCtx.Origin) != "" && strings.TrimSpace(nodeCtx.Destination) != "" {
+		return query, nodeCtx, false
+	}
+
+	origin, destination := parseRouteEndpointsFromQuery(query)
+	if origin == "" || destination == "" {
+		if spec := matchPlaceSpec(query); spec != nil {
+			destination = normalizeEndpointQuery(spec.Name)
+			if strings.TrimSpace(nodeCtx.PrimaryNodeName) != "" {
+				origin = normalizeEndpointQuery(nodeCtx.PrimaryNodeName)
+			}
+		}
+	}
+	if origin == "" || destination == "" {
+		return query, nodeCtx, false
+	}
+	if strings.EqualFold(origin, destination) {
+		return query, nodeCtx, false
+	}
+
+	clone := *nodeCtx
+	clone.IsRouteQuery = true
+	clone.Origin = origin
+	clone.Destination = destination
+	if clone.Confidence < 0.9 {
+		clone.Confidence = 0.9
+	}
+	rewritten := fmt.Sprintf("從%s到%s怎麼去", origin, destination)
+	return rewritten, &clone, true
+}
+
+func toString(v interface{}) string {
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
 }
 
 func buildRouteSummary(locale string, originName, destinationName string, durationMin, transfers int, routeType string) string {
@@ -1263,8 +1456,7 @@ func (e *LayeredEngine) buildAirportStructured(origin, dest, locale string, weat
 		summary = fmt.Sprintf("Airport access recommendation: %s -> `%s` (~%d min).", airportName, recommendation["name"], toInt(recommendation["duration_minutes"]))
 	}
 
-	return map[string]interface{}{
-		"type":        "airport_access",
+	data := map[string]interface{}{
 		"origin":      origin,
 		"destination": dest,
 		"summary":     summary,
@@ -1274,6 +1466,17 @@ func (e *LayeredEngine) buildAirportStructured(origin, dest, locale string, weat
 		},
 		"recommendation": recommendation,
 		"alternatives":   alts,
+	}
+	return map[string]interface{}{
+		"type": "airport_access",
+		"data": data,
+		// backward compatible flattened fields
+		"origin":         data["origin"],
+		"destination":    data["destination"],
+		"summary":        data["summary"],
+		"context":        data["context"],
+		"recommendation": data["recommendation"],
+		"alternatives":   data["alternatives"],
 	}
 }
 

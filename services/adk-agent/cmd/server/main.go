@@ -59,7 +59,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	orModelBridge := &openrouter.ADKModelBridge{Client: orClient}
+	orModelBridge := &openrouter.ADKModelBridge{
+		Client:       orClient,
+		DefaultModel: cfg.Models.GeneralAgent,
+	}
 
 	var zeaburModelBridge *openrouter.ADKModelBridge
 	zeaburClient, err := openrouter.NewZeaburClient(openrouter.ZeaburConfig{
@@ -156,26 +159,13 @@ func main() {
 
 	reasoningBridge := orModelBridge
 	generalProvider := "openrouter"
-	if zeaburModelBridge != nil {
-		reasoningBridge = zeaburModelBridge
-		generalProvider = "zeabur"
-	}
+	_ = zeaburModelBridge
 
 	generalAgent, _ := agent.NewGeneralAgent(reasoningBridge, cfg.Models.GeneralAgent, []tool.Tool{
-		&agent.GetCurrentTimeTool{},
-		&agent.SearchRouteTool{RoutingURL: cfg.RoutingServiceURL},
-		&agent.GetTrainStatusTool{FetchFunc: func() (string, error) {
-			statuses, err := odptClient.FetchTrainStatus()
-			if err != nil {
-				return "", err
-			}
-			bytes, err := json.Marshal(statuses)
-			if err != nil {
-				return "", err
-			}
-			return string(bytes), nil
-		}},
-		&agent.GetTimetableTool{Client: supabaseClient},
+		agent.NewGetCurrentTimeFunctionTool(),
+		agent.NewSearchRouteFunctionTool(cfg.RoutingServiceURL),
+		agent.NewGetTrainStatusFunctionTool(odptClient),
+		agent.NewGetTimetableFunctionTool(supabaseClient),
 		agent.NewPlanRouteTool(pathfinder, weatherClient, graph),
 	})
 	fastAgent, _ := agent.NewGeneralAgent(orModelBridge, cfg.Models.FastAgent, nil)

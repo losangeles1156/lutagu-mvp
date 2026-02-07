@@ -158,7 +158,7 @@ export const useAgentChat = (options: {
                 parsed = null;
             }
             const cleaned = withoutTraces.replace(adkMatch[0], '').trim();
-            return { cleaned, type: parsed?.type, data: parsed };
+            return { cleaned, type: parsed?.type, data: parsed?.data ?? parsed };
         }
         return { cleaned: withoutTraces };
     };

@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"google.golang.org/adk/agent"
@@ -80,7 +81,8 @@ func (a *RootAgent) Process(ctx context.Context, messages []Message, reqCtx Requ
 		close(internalCh) // Close internal captured channel
 
 		if err != nil {
-			ch <- fmt.Sprintf("Error: %v", err)
+			slog.Error("RootAgent processing failed", "error", err)
+			ch <- friendlyAgentError(reqCtx.Locale)
 			return
 		}
 

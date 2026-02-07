@@ -12,10 +12,10 @@ type NodeResolver struct {
 }
 
 type stationPattern struct {
-	regex     *regexp.Regexp
-	nodeID    string
-	nodeName  string
-	aliases   []string
+	regex    *regexp.Regexp
+	nodeID   string
+	nodeName string
+	aliases  []string
 }
 
 // ResolvedContext contains the resolved node context
@@ -55,6 +55,8 @@ func (r *NodeResolver) initPatterns() {
 		{"ginza", "銀座", []string{"ginza", "銀座駅", "ginza station"}},
 		{"asakusa", "浅草", []string{"asakusa", "浅草駅", "asakusa station"}},
 		{"odaiba", "お台場", []string{"odaiba", "台場", "daiba"}},
+		{"tochomae", "都庁前", []string{"tochomae", "都庁前駅", "東京都廳", "東京都庁", "都厅前", "tokyo metropolitan government"}},
+		{"nishi_shinjuku", "西新宿", []string{"nishi-shinjuku", "西新宿駅", "西新宿"}},
 		{"narita", "成田空港", []string{"narita", "成田", "nrt", "成田機場"}},
 		{"haneda", "羽田空港", []string{"haneda", "羽田", "hnd", "羽田機場"}},
 	}
@@ -90,6 +92,8 @@ func (r *NodeResolver) Resolve(ctx context.Context, query string) *ResolvedConte
 	routePatterns := []*regexp.Regexp{
 		regexp.MustCompile(`(?i)(從|から|from)\s*(.+?)\s*(到|へ|まで|to)\s*(.+)`),
 		regexp.MustCompile(`(?i)(.+?)\s*(到|へ|to)\s*(.+?)\s*(怎麼去|行き方|how to get)`),
+		regexp.MustCompile(`(?i)(.+?)\s*(到|去|to)\s*(.+?)\s*(怎麼走|怎麼去|路線|路线|行き方|how)`),
+		regexp.MustCompile(`(?i)(從|from)\s*(.+?)\s*(出發|departure|depart).*(到|去|to)\s*(.+)`),
 		regexp.MustCompile(`(?i)(怎麼|どうやって|how)\s*(去|行く|get to)\s*(.+)`),
 	}
 
@@ -99,6 +103,9 @@ func (r *NodeResolver) Resolve(ctx context.Context, query string) *ResolvedConte
 			if len(matches) >= 5 {
 				result.Origin = strings.TrimSpace(matches[2])
 				result.Destination = strings.TrimSpace(matches[4])
+			} else if len(matches) >= 6 {
+				result.Origin = strings.TrimSpace(matches[2])
+				result.Destination = strings.TrimSpace(matches[5])
 			} else if len(matches) >= 4 {
 				result.Destination = strings.TrimSpace(matches[3])
 			}
@@ -149,8 +156,27 @@ func (r *NodeResolver) Resolve(ctx context.Context, query string) *ResolvedConte
 			result.Origin = foundStations[0].name
 			result.Destination = foundStations[len(foundStations)-1].name
 			result.Confidence = 0.95
+		} else if !result.IsRouteQuery && len(foundStations) >= 2 && containsRouteHint(query) {
+			result.IsRouteQuery = true
+			result.Origin = foundStations[0].name
+			result.Destination = foundStations[len(foundStations)-1].name
+			result.Confidence = 0.9
 		}
 	}
 
 	return result
+}
+
+func containsRouteHint(query string) bool {
+	lc := strings.ToLower(query)
+	hints := []string{
+		"怎麼", "怎么", "路線", "路线", "到", "去", "轉乘", "换乘",
+		"from", "to", "route", "transfer",
+	}
+	for _, h := range hints {
+		if strings.Contains(lc, strings.ToLower(h)) {
+			return true
+		}
+	}
+	return false
 }

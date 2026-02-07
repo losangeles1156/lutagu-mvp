@@ -2,7 +2,7 @@ package agent
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
@@ -18,7 +18,7 @@ type GeneralAgent struct {
 
 // NewGeneralAgent creates a new general reasoning agent
 func NewGeneralAgent(modelInstance model.LLM, modelID string, tools []tool.Tool) (*GeneralAgent, error) {
-	fmt.Printf("DEBUG: NewGeneralAgent received %d tools\n", len(tools))
+	slog.Debug("NewGeneralAgent initialized", "tools", len(tools))
 	inner, err := llmagent.New(llmagent.Config{
 		Name:        "general_agent",
 		Model:       modelInstance,
@@ -58,7 +58,8 @@ func (a *GeneralAgent) Process(ctx context.Context, messages []Message, reqCtx R
 			StripInternalTags: shouldStripInternalTags(reqCtx.PromptProfile),
 		})
 		if err != nil {
-			ch <- fmt.Sprintf("Error: %v", err)
+			slog.Error("GeneralAgent processing failed", "error", err)
+			ch <- friendlyAgentError(reqCtx.Locale)
 			return
 		}
 	}()

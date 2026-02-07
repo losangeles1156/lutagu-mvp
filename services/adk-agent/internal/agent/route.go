@@ -2,7 +2,7 @@ package agent
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
@@ -16,7 +16,7 @@ type RouteAgent struct {
 }
 
 func NewRouteAgent(modelInstance model.LLM, modelID string, routingURL string) (*RouteAgent, error) {
-	routeTool := &SearchRouteTool{RoutingURL: routingURL}
+	routeTool := NewSearchRouteFunctionTool(routingURL)
 
 	systemPrompt := `
 You are the Route Agent for LUTAGU. 
@@ -66,7 +66,8 @@ func (a *RouteAgent) Process(ctx context.Context, messages []Message, reqCtx Req
 			StripInternalTags: shouldStripInternalTags(reqCtx.PromptProfile),
 		})
 		if err != nil {
-			ch <- fmt.Sprintf("Error: %v", err)
+			slog.Error("RouteAgent processing failed", "error", err)
+			ch <- friendlyAgentError(reqCtx.Locale)
 			return
 		}
 	}()

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"iter"
+	"log/slog"
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
@@ -121,9 +122,18 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 			messages = append(messages, msg)
 		}
 
-		modelID := req.Model
-		if m.DefaultModel != "" {
-			modelID = m.DefaultModel
+		modelID := strings.TrimSpace(req.Model)
+		// ADK may pass bridge name placeholders (e.g. openrouter_bridge) as model id.
+		// Normalize to a real model id.
+		if modelID == "" || modelID == "openrouter_bridge" {
+			if strings.TrimSpace(m.DefaultModel) != "" {
+				modelID = strings.TrimSpace(m.DefaultModel)
+			} else {
+				modelID = "deepseek-v3.2"
+			}
+		}
+		if modelID == "deepseek-v3.2" {
+			modelID = "deepseek/deepseek-v3.2"
 		}
 
 		openAIReq := openai.ChatCompletionRequest{
@@ -132,10 +142,7 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 			Stream:   stream,
 		}
 
-		fmt.Printf("DEBUG: GenContent Called. Model=%s, Tools=%d\n", modelID, len(req.Tools))
-		for i, t := range req.Tools {
-			fmt.Printf("DEBUG: Tool[%v] Type: %T\n", i, t)
-		}
+		slog.Debug("ADK bridge generate content", "model", modelID, "tools", len(req.Tools), "stream_requested", stream)
 
 		allowedTools := inferAllowedTools(messages)
 		// Map Tools
@@ -170,7 +177,7 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 					if !isToolAllowed(fd.Name, allowedTools) {
 						continue
 					}
-					fmt.Printf("DEBUG: Schema for %s: %+v\n", fd.Name, fd.Parameters)
+					slog.Debug("ADK bridge tool schema", "tool", fd.Name)
 					oTools = append(oTools, openai.Tool{
 						Type: openai.ToolTypeFunction,
 						Function: &openai.FunctionDefinition{
@@ -183,6 +190,14 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 				}
 			}
 			openAIReq.Tools = oTools
+		}
+
+		// OpenAI-compatible streaming tool calls are not fully reconstructed for ADK Runner.
+		// Force non-streaming when tools are present to preserve FunctionCall parts.
+		if stream && len(openAIReq.Tools) > 0 {
+			stream = false
+			openAIReq.Stream = false
+			slog.Debug("ADK bridge forced non-stream mode for tool calls")
 		}
 
 		if stream {
@@ -240,10 +255,9 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 			if len(resp.Choices[0].Message.ToolCalls) > 0 {
 				for _, tc := range resp.Choices[0].Message.ToolCalls {
 					var args map[string]interface{}
-					fmt.Printf("DEBUG: Tool Arguments JSON: %s\n", tc.Function.Arguments)
+					slog.Debug("ADK bridge tool arguments", "tool", tc.Function.Name)
 					if err := json.Unmarshal([]byte(tc.Function.Arguments), &args); err != nil {
-						// Fallback or log? For now empty map implies failure to parse
-						fmt.Printf("Error unmarshaling tool args: %v\n", err)
+						slog.Warn("Failed to unmarshal tool arguments", "tool", tc.Function.Name, "error", err)
 						args = make(map[string]interface{})
 					}
 					parts = append(parts, &genai.Part{
@@ -271,12 +285,15 @@ func (m *ADKModelBridge) GenerateContent(ctx context.Context, req *model.LLMRequ
 
 func clipContent(content string, role string) string {
 	runes := []rune(strings.TrimSpace(content))
-	max := 1200
+	max := 4000
 	if role == "system" {
-		max = 900
+		max = 6000
 	}
 	if role == "user" {
-		max = 1400
+		max = 3000
+	}
+	if role == "tool" {
+		max = 2000
 	}
 	if len(runes) <= max {
 		return string(runes)
@@ -285,36 +302,8 @@ func clipContent(content string, role string) string {
 }
 
 func inferAllowedTools(messages []openai.ChatCompletionMessage) map[string]bool {
-	allowed := map[string]bool{}
-	lastUser := ""
-	for i := len(messages) - 1; i >= 0; i-- {
-		if messages[i].Role == "user" {
-			lastUser = strings.ToLower(messages[i].Content)
-			break
-		}
-	}
-	if lastUser == "" {
-		return allowed
-	}
-	allow := func(names ...string) {
-		for _, n := range names {
-			allowed[n] = true
-		}
-	}
-	if containsAnyKeyword(lastUser, []string{"幾點", "現在", "today", "deadline", "時刻", "timetable"}) {
-		allow("get_current_time", "get_timetable")
-	}
-	if containsAnyKeyword(lastUser, []string{"上野", "銀座", "怎麼去", "route", "from", "to", "搭", "轉乘"}) {
-		allow("plan_route", "search_route", "get_train_status", "get_current_time")
-	}
-	if containsAnyKeyword(lastUser, []string{"delay", "status", "延誤", "誤點", "運休", "見合わせ"}) {
-		allow("get_train_status")
-	}
-	if len(allowed) == 0 {
-		// conservative fallback
-		allow("get_current_time", "plan_route")
-	}
-	return allowed
+	// Empty map means "all tools allowed".
+	return map[string]bool{}
 }
 
 func isToolAllowed(toolName string, allowed map[string]bool) bool {

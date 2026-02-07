@@ -1,0 +1,232 @@
+{
+  "timestamp": "2026-02-07T04:00:21.911Z",
+  "base": "http://127.0.0.1:3020",
+  "endpoint": "/api/agent/adk",
+  "total": 20,
+  "routeCases": 5,
+  "routeHitRate": 1,
+  "busyRatio": 0,
+  "structuredCompletenessRate": 1,
+  "results": [
+    {
+      "id": "route_tokyo_shinjuku",
+      "expected": "findRoute",
+      "status": 200,
+      "latencyMs": 4519,
+      "isBusy": false,
+      "routeExpected": true,
+      "routeHit": true,
+      "structuredType": "route",
+      "structuredComplete": true
+    },
+    {
+      "id": "route_shibuya_ueno",
+      "expected": "findRoute",
+      "status": 200,
+      "latencyMs": 316,
+      "isBusy": false,
+      "routeExpected": true,
+      "routeHit": true,
+      "structuredType": "route",
+      "structuredComplete": true
+    },
+    {
+      "id": "route_shinjuku_akihabara",
+      "expected": "findRoute",
+      "status": 200,
+      "latencyMs": 264,
+      "isBusy": false,
+      "routeExpected": true,
+      "routeHit": true,
+      "structuredType": "route",
+      "structuredComplete": true
+    },
+    {
+      "id": "status_yamanote",
+      "expected": "getTransitStatus",
+      "status": 200,
+      "latencyMs": 10972,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "status",
+      "structuredComplete": true
+    },
+    {
+      "id": "status_ginza",
+      "expected": "getTransitStatus",
+      "status": 200,
+      "latencyMs": 23855,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "status",
+      "structuredComplete": true
+    },
+    {
+      "id": "status_chuo",
+      "expected": "getTransitStatus",
+      "status": 200,
+      "latencyMs": 7724,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "status",
+      "structuredComplete": true
+    },
+    {
+      "id": "station_info_locker",
+      "expected": "getStationInfo",
+      "status": 200,
+      "latencyMs": 273,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "station_info_accessibility",
+      "expected": "getStationInfo",
+      "status": 200,
+      "latencyMs": 325,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "station_info_basic",
+      "expected": "getStationInfo",
+      "status": 200,
+      "latencyMs": 5074,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "poi_ueno",
+      "expected": "searchPOI",
+      "status": 200,
+      "latencyMs": 8003,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "poi_shibuya",
+      "expected": "searchPOI",
+      "status": 200,
+      "latencyMs": 9670,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "poi_ginza",
+      "expected": "searchPOI",
+      "status": 200,
+      "latencyMs": 323,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": true,
+      "structuredType": "route",
+      "structuredComplete": true
+    },
+    {
+      "id": "weather_tokyo",
+      "expected": "getWeather",
+      "status": 200,
+      "latencyMs": 576,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "weather_tokyo_en",
+      "expected": "getWeather",
+      "status": 200,
+      "latencyMs": 1849,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "weather_tokyo_ja",
+      "expected": "getWeather",
+      "status": 200,
+      "latencyMs": 563,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "route_shibuya_tokyo",
+      "expected": "findRoute",
+      "status": 200,
+      "latencyMs": 2779,
+      "isBusy": false,
+      "routeExpected": true,
+      "routeHit": true,
+      "structuredType": "route",
+      "structuredComplete": true
+    },
+    {
+      "id": "route_osaka_tokyo",
+      "expected": "findRoute",
+      "status": 200,
+      "latencyMs": 7402,
+      "isBusy": false,
+      "routeExpected": true,
+      "routeHit": true,
+      "structuredType": "route",
+      "structuredComplete": true
+    },
+    {
+      "id": "status_oedo",
+      "expected": "getTransitStatus",
+      "status": 200,
+      "latencyMs": 7483,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "status",
+      "structuredComplete": true
+    },
+    {
+      "id": "station_info_toilets",
+      "expected": "getStationInfo",
+      "status": 200,
+      "latencyMs": 1912,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    },
+    {
+      "id": "poi_food_shinjuku",
+      "expected": "searchPOI",
+      "status": 200,
+      "latencyMs": 5768,
+      "isBusy": false,
+      "routeExpected": false,
+      "routeHit": false,
+      "structuredType": "knowledge",
+      "structuredComplete": true
+    }
+  ]
+}

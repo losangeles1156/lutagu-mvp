@@ -61,10 +61,10 @@ function normalizeAdkEndpoint(raw: string | undefined): string | null {
 function detectBusy(content: string): { isBusy: boolean; reason: string } {
     const normalized = content.toLowerCase();
     const patterns: Array<{ rx: RegExp; reason: string }> = [
-        { rx: /混み合|busy|later|稍後再|請稍後|拥挤|繁忙/, reason: 'busy_message' },
+        { rx: /混み合|\\bbusy\\b|later|稍後再|請稍後|拥挤|繁忙/, reason: 'busy_message' },
         { rx: /timeout|timed out|超時|逾時/, reason: 'timeout_message' },
         { rx: /model unavailable|provider unavailable|model.*failed/, reason: 'model_unavailable' },
-        { rx: /tool.*fail|工具.*失敗|tool_error/, reason: 'tool_failure_message' }
+        { rx: /工具.*失敗|tool_error/, reason: 'tool_failure_message' }
     ];
     for (const p of patterns) {
         if (p.rx.test(normalized)) return { isBusy: true, reason: p.reason };
@@ -123,8 +123,21 @@ async function* transformAdkStream(
             if (parsedEvent.eventType === 'error' && parsedEvent.eventData) {
                 metrics.errorEventCount += 1;
             }
-            if (parsedEvent.eventData) {
-                const busy = detectBusy(parsedEvent.eventData);
+            // Busy detection should only evaluate user-visible content/error events,
+            // not internal traces that may include words like "failed".
+            if (parsedEvent.eventData && (parsedEvent.eventType === 'telem' || parsedEvent.eventType === 'error' || parsedEvent.eventType === 'meta')) {
+                let busyTarget = parsedEvent.eventData;
+                if (parsedEvent.eventType === 'telem') {
+                    try {
+                        const parsed = JSON.parse(parsedEvent.eventData);
+                        if (typeof parsed?.content === 'string') {
+                            busyTarget = parsed.content;
+                        }
+                    } catch {
+                        // Keep raw eventData when JSON parsing fails.
+                    }
+                }
+                const busy = detectBusy(busyTarget);
                 if (busy.isBusy) {
                     metrics.busyDetected = true;
                     metrics.busyReason = busy.reason;
@@ -274,6 +287,11 @@ export async function POST(req: NextRequest) {
 
         const body = JSON.parse(rawBody);
         console.log('[ADK Proxy] Parsed request body (summary):', JSON.stringify({ ...body, messages: body.messages?.length }));
+
+        // Backward compatibility: allow { text, locale } request body
+        if ((!body.messages || !Array.isArray(body.messages)) && typeof body.text === 'string' && body.text.trim().length > 0) {
+            body.messages = [{ role: 'user', content: body.text.trim() }];
+        }
 
         // Sanitize messages for Go backend
         // AI SDK might send 'parts' or other complex structures that Go's string Content can't handle

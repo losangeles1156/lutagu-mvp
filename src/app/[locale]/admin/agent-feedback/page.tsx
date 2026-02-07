@@ -28,6 +28,21 @@ type Summary = {
     negativeCount: number;
     totalTags: number;
     avgWeight: number;
+    alertThreshold?: number;
+    alertCount?: number;
+};
+
+type TrendRow = {
+    day: string;
+    positive: number;
+    negative: number;
+    total: number;
+};
+
+type AlertRow = {
+    tag: string;
+    weight: number;
+    level: 'high' | 'medium';
 };
 
 export default function AgentFeedbackAdminPage() {
@@ -35,17 +50,28 @@ export default function AgentFeedbackAdminPage() {
     const [weights, setWeights] = useState<FeedbackWeight[]>([]);
     const [events, setEvents] = useState<FeedbackEvent[]>([]);
     const [summary, setSummary] = useState<Summary | null>(null);
+    const [trend, setTrend] = useState<TrendRow[]>([]);
+    const [alerts, setAlerts] = useState<AlertRow[]>([]);
+    const [alertThreshold, setAlertThreshold] = useState<number>(1.2);
+    const [trendDays, setTrendDays] = useState<number>(14);
+    const [tagInput, setTagInput] = useState('');
+    const [weightInput, setWeightInput] = useState<string>('0');
     const [loading, setLoading] = useState(true);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/admin/agent-feedback?limit=100', { cache: 'no-store' });
+            const res = await fetch(
+                `/api/admin/agent-feedback?limit=100&trend_days=${trendDays}&alert_threshold=${alertThreshold}`,
+                { cache: 'no-store' }
+            );
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             setWeights(data.weights || []);
             setEvents(data.events || []);
             setSummary(data.summary || null);
+            setTrend(data.trend || []);
+            setAlerts(data.alerts || []);
         } catch (error) {
             console.error('Failed to fetch agent feedback data:', error);
         } finally {
@@ -55,7 +81,47 @@ export default function AgentFeedbackAdminPage() {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [trendDays, alertThreshold]);
+
+    const handleResetAll = async () => {
+        const ok = window.confirm('確定要將所有標籤權重重置為 0？');
+        if (!ok) return;
+        const res = await fetch('/api/admin/agent-feedback', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'reset_all' }),
+        });
+        if (!res.ok) {
+            alert('重置失敗');
+            return;
+        }
+        await fetchData();
+    };
+
+    const handleSetTag = async () => {
+        const tag = tagInput.trim();
+        const weight = Number(weightInput);
+        if (!tag) {
+            alert('請輸入 tag');
+            return;
+        }
+        if (!Number.isFinite(weight)) {
+            alert('weight 必須是數字');
+            return;
+        }
+        const res = await fetch('/api/admin/agent-feedback', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'set_tag', tag, weight }),
+        });
+        if (!res.ok) {
+            alert('更新失敗');
+            return;
+        }
+        setTagInput('');
+        setWeightInput('0');
+        await fetchData();
+    };
 
     const topWeights = useMemo(
         () => [...weights].sort((a, b) => b.weight - a.weight).slice(0, 20),
@@ -114,6 +180,62 @@ export default function AgentFeedbackAdminPage() {
                 <StatCard title="平均權重" value={summary?.avgWeight ?? 0} />
             </div>
 
+            <div className="admin-card p-4 space-y-4">
+                <div className="text-sm font-semibold text-slate-900">權重管理與告警設定</div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                    <div className="flex items-center gap-2">
+                        <label className="text-xs text-slate-500 w-24">Alert 閾值</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            value={alertThreshold}
+                            onChange={(e) => setAlertThreshold(Number(e.target.value))}
+                            className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <label className="text-xs text-slate-500 w-24">趨勢天數</label>
+                        <input
+                            type="number"
+                            min={3}
+                            max={60}
+                            value={trendDays}
+                            onChange={(e) => setTrendDays(Number(e.target.value))}
+                            className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm"
+                        />
+                    </div>
+                    <button
+                        onClick={handleResetAll}
+                        className="px-4 py-2 text-sm font-medium rounded-lg border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100"
+                    >
+                        重置全部權重
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_auto] gap-3">
+                    <input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        placeholder="tag（例如 route）"
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                    />
+                    <input
+                        type="number"
+                        step="0.1"
+                        value={weightInput}
+                        onChange={(e) => setWeightInput(e.target.value)}
+                        placeholder="weight (-2 ~ 2)"
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                    />
+                    <button
+                        onClick={handleSetTag}
+                        className="px-4 py-2 text-sm font-medium rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+                    >
+                        單標籤調整
+                    </button>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <section className="admin-card overflow-hidden">
                     <div className="px-4 py-3 border-b border-slate-100 font-semibold text-slate-900">
@@ -163,6 +285,57 @@ export default function AgentFeedbackAdminPage() {
                     </div>
                 </section>
             </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <section className="admin-card overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 font-semibold text-slate-900">
+                        回饋趨勢（{trendDays} 天）
+                    </div>
+                    <div className="p-4 space-y-2">
+                        {trend.length === 0 && <div className="text-sm text-slate-500">暫無趨勢資料</div>}
+                        {trend.map((row) => (
+                            <div key={row.day} className="space-y-1">
+                                <div className="flex justify-between text-xs text-slate-500">
+                                    <span>{row.day}</span>
+                                    <span>+{row.positive} / -{row.negative} (total {row.total})</span>
+                                </div>
+                                <div className="h-2 rounded-full bg-slate-100 overflow-hidden flex">
+                                    <div
+                                        className="bg-emerald-500 h-full"
+                                        style={{ width: `${row.total > 0 ? (row.positive / row.total) * 100 : 0}%` }}
+                                    />
+                                    <div
+                                        className="bg-rose-500 h-full"
+                                        style={{ width: `${row.total > 0 ? (row.negative / row.total) * 100 : 0}%` }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                <section className="admin-card overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100 font-semibold text-slate-900">
+                        權重告警（threshold: {alertThreshold}）
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                        {alerts.length === 0 && <div className="p-4 text-sm text-slate-500">無告警</div>}
+                        {alerts.map((alert) => (
+                            <div key={alert.tag} className="px-4 py-3 flex items-center justify-between">
+                                <div className="text-sm font-medium text-slate-800">{alert.tag}</div>
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${alert.level === 'high' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
+                                        {alert.level}
+                                    </span>
+                                    <span className={`text-sm font-semibold ${alert.weight >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                        {alert.weight.toFixed(4)}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            </div>
         </div>
     );
 }
@@ -179,4 +352,3 @@ function StatCard({ title, value, tone = 'default' }: { title: string; value: nu
         </div>
     );
 }
-

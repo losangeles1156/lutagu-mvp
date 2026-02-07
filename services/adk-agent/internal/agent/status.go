@@ -2,7 +2,7 @@ package agent
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 
 	"github.com/lutagu/adk-agent/internal/infrastructure/odpt"
 	"google.golang.org/adk/agent"
@@ -17,29 +17,7 @@ type StatusAgent struct {
 }
 
 func NewStatusAgent(modelInstance model.LLM, modelID string, odptClient *odpt.Client) (*StatusAgent, error) {
-	statusTool := &GetTrainStatusTool{
-		FetchFunc: func() (string, error) {
-			if odptClient == nil {
-				return "ODPT client not configured.", nil
-			}
-			statusList, err := odptClient.FetchTrainStatus()
-			if err != nil {
-				return "", err
-			}
-			var result string
-			count := 0
-			for _, s := range statusList {
-				if s.Status != "normal" {
-					result += fmt.Sprintf("- %s: %s (Status: %s)\n", s.Railway, s.Text, s.Status)
-					count++
-				}
-			}
-			if count == 0 {
-				return "All lines are operating normally.", nil
-			}
-			return result, nil
-		},
-	}
+	statusTool := NewGetTrainStatusFunctionTool(odptClient)
 
 	systemPrompt := `
 You are the Status Agent for LUTAGU.
@@ -89,7 +67,8 @@ func (a *StatusAgent) Process(ctx context.Context, messages []Message, reqCtx Re
 			StripInternalTags: shouldStripInternalTags(reqCtx.PromptProfile),
 		})
 		if err != nil {
-			ch <- fmt.Sprintf("Error: %v", err)
+			slog.Error("StatusAgent processing failed", "error", err)
+			ch <- friendlyAgentError(reqCtx.Locale)
 			return
 		}
 	}()
