@@ -170,7 +170,31 @@ export function HomeLogic({
                 .then(({ node, profile }) => {
                     if (seq !== nodeRequestSeqRef.current) return;
                     setNodeData(node || fallbackNode || null);
-                    setProfile(profile || fallbackProfile || null);
+                    const resolvedProfile = profile || fallbackProfile || null;
+                    setProfile(resolvedProfile);
+
+                    const isFallbackL2 = (() => {
+                        const l2 = resolvedProfile?.l2_status;
+                        if (!l2 || !Array.isArray(l2.line_status)) return true;
+                        if (l2.line_status.length === 0) return true;
+                        if (l2.line_status.length === 1 && l2.line_status[0]?.line === 'Transit') return true;
+                        return false;
+                    })();
+
+                    const nodeTabParam = useUIStore.getState().nodeActiveTab;
+                    if (typeof window !== 'undefined' && nodeTabParam === 'live' && isFallbackL2) {
+                        void (async () => {
+                            try {
+                                const res = await fetch(`/api/l2/status?station_id=${encodeURIComponent(currentNodeId)}`);
+                                if (seq !== nodeRequestSeqRef.current) return;
+                                if (res.ok) {
+                                    const l2 = await res.json();
+                                    setProfile({ ...(resolvedProfile || {}), l2_status: l2 });
+                                }
+                            } catch {
+                            }
+                        })();
+                    }
                 })
                 .catch(() => {
                     if (seq !== nodeRequestSeqRef.current) return;

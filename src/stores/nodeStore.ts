@@ -9,3 +9,7 @@ export const useNodeStore = create<NodeState>((set) => ({
     currentNodeId: null,
     setCurrentNode: (id) => set({ currentNodeId: id }),
 }));
+
+if (typeof window !== 'undefined') {
+    (window as any).__LUTAGU_NODE_STORE__ = useNodeStore;
+}
