@@ -610,8 +610,3 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export const __private__ = {
-    normalizeAdkEndpoint,
-    extractSseEvent,
-    parseSseEvent
-};

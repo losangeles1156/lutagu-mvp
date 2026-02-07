@@ -277,8 +277,3 @@ export async function PUT(req: NextRequest) {
     }
 }
 
-export const __private__ = {
-    buildTrendSeries,
-    buildWeightAlerts,
-    clampWeight,
-};
