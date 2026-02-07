@@ -250,6 +250,21 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 			"time_tool":   toolPlan.TimeTool,
 			"tags":        toolPlan.IntentTags,
 		})
+
+		ruleConfidence := estimateRuleConfidence(lastMessage, intent.Tags)
+		hasContext := hasContextFromMessages(req.Messages) || (nodeCtx.Origin != "" || nodeCtx.Destination != "")
+		ladder := DecideIntentLadder(lastMessage, ruleConfidence, hasContext)
+		if ladder.RequireDeepIntent && intentPath != intentLLMRequired {
+			intentPath = intentLLMRequired
+		}
+		emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
+			"type":             "intent_ladder",
+			"complexity":       ladder.Complexity,
+			"confidence":       ladder.Confidence,
+			"require_deep":     ladder.RequireDeepIntent,
+			"rule_confidence":  ruleConfidence,
+			"context_detected": hasContext,
+		})
 		if toolPlan.RouteTool {
 			emitTraceChunk(outCh, toolTracePrefix, map[string]interface{}{
 				"tool":      "plan_route",
@@ -290,9 +305,9 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		e.metrics.RecordLayerAttempt("L1")
 		templateStart := time.Now()
 
-		complexity := "simple"
-		if isLikelyCompoundIntent(lastMessage) {
-			complexity = "compound"
+		complexity := ladder.Complexity
+		if strings.TrimSpace(complexity) == "" {
+			complexity = "simple"
 		}
 		faqHit := isFAQHit(lastMessage, req.Locale)
 
@@ -730,6 +745,18 @@ func isStatusQuery(query string) bool {
 	lc := strings.ToLower(query)
 	for _, p := range statusPatterns {
 		if strings.Contains(lc, p) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasContextFromMessages(messages []agent.Message) bool {
+	for _, msg := range messages {
+		if msg.Role != "system" {
+			continue
+		}
+		if strings.Contains(msg.Content, "Journey:") {
 			return true
 		}
 	}

@@ -61,3 +61,10 @@ func TestFAQFastPath_Hit(t *testing.T) {
 		t.Fatalf("expected FAQ hit for airport transfer")
 	}
 }
+
+func TestIntentLadder_EscalationRules(t *testing.T) {
+	decision := DecideIntentLadder("那計程車多少錢", 0.6, true)
+	if !decision.RequireDeepIntent {
+		t.Fatalf("expected deep intent for low confidence + context")
+	}
+}
