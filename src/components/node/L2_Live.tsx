@@ -245,11 +245,12 @@ interface L2_LiveProps {
 export function L2_Live({ data, hubDetails }: L2_LiveProps) {
     const tL2 = useTranslations('l2');
     const locale = useLocale();
-    const { lines, crowd, updatedAt } = (data.l2 || {
+    const { lines, crowd, updatedAt, weather, explanations } = (data.l2 || {
         lines: [],
         weather: { temp: 0, condition: 'Clear', windSpeed: 0 },
         crowd: { level: 1, trend: 'stable', userVotes: { total: 0, distribution: [0, 0, 0, 0, 0] } },
-        updatedAt: undefined
+        updatedAt: undefined,
+        explanations: undefined
     });
 
     // [New] Airport Logic
@@ -372,6 +373,11 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                                 </span>
                             )
                         )}
+                        {weather?.alertLevel === 'watch' && delayedLines.length === 0 && (
+                            <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[9px] font-bold rounded-full flex items-center gap-1">
+                                <AlertTriangle size={10} /> {tL2('weatherWatchOnly', { defaultValue: 'Weather watch (operation normal)' })}
+                            </span>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -386,6 +392,16 @@ export function L2_Live({ data, hubDetails }: L2_LiveProps) {
                 </div>
 
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-1">
+                    {explanations && (
+                        <div className="mx-2 my-2 rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-2">
+                            <p className="text-[11px] text-indigo-900 font-semibold">
+                                {locale.startsWith('en') ? explanations.plain_en : explanations.plain_zh_tw}
+                            </p>
+                            {explanations.official_ja && (
+                                <p className="text-[10px] text-indigo-600 mt-1 line-clamp-2">原文: {explanations.official_ja}</p>
+                            )}
+                        </div>
+                    )}
                     {lines.length === 0 ? (
                         <div className="p-8 text-center space-y-3">
                             <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-50 rounded-full">

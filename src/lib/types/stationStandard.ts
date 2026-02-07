@@ -50,6 +50,13 @@ export interface StationLine {
     color: string;
     status: LineStatusType;
     message?: LocaleString;
+    canonical_line_id?: string;
+    service_group?: string | null;
+    match_confidence?: number;
+    match_reasons?: string[];
+    advisory_level?: 'none' | 'watch' | 'warning';
+    status_detail?: 'normal' | 'delay_minor' | 'delay_major' | 'halt' | 'canceled' | 'unknown';
+    delay_minutes?: number | null;
 }
 
 export interface WeatherInfo {
@@ -57,6 +64,8 @@ export interface WeatherInfo {
     condition: string;
     windSpeed: number; // m/s
     iconCode?: string;
+    alertLevel?: 'none' | 'watch' | 'warning';
+    railImpactLevel?: 'none' | 'potential' | 'active';
 }
 
 export interface CrowdInfo {
@@ -141,6 +150,11 @@ export interface StationUIProfile {
         weather: WeatherInfo;
         crowd: CrowdInfo;
         updatedAt?: string;
+        explanations?: {
+            plain_zh_tw: string;
+            plain_en: string;
+            official_ja?: string;
+        };
     };
 
     // L3: Services (Stacked)

@@ -278,6 +278,7 @@
         "noLiveDataDesc": "目前無延誤或異常通報。",
         "issuesCount": "{count} 項異常",
         "allGood": "運行良好",
+        "weatherWatchOnly": "氣象提醒（目前正常）",
         "sourceOdpt": "來源：ODPT",
         "liveCrowd": "即時人潮"
     },

@@ -15,6 +15,8 @@ const __private__ = (GET as any).__private__ as {
     getDisruptionSource: (input: any) => 'odpt' | 'yahoo' | 'snapshot' | 'unknown';
     getDisruptionSourceRank: (source: string) => number;
     normalizeRailwayId: (input: string) => string;
+    toWeatherAlertLevel: (alerts: Array<{ severity?: string }>) => 'none' | 'watch' | 'warning';
+    toRailImpactLevel: (params: { hasRailIssue: boolean; weatherAlertLevel: 'none' | 'watch' | 'warning' }) => 'none' | 'potential' | 'active';
 };
 
 test('extractDelayMinutesFromText extracts Japanese delay minutes', () => {
@@ -110,5 +112,29 @@ test('normalizeRailwayId normalizes odpt railway prefix', () => {
     assert.equal(
         __private__.normalizeRailwayId('odpt:Railway:TokyoMetro.Ginza'),
         'odpt.Railway:TokyoMetro.Ginza'
+    );
+});
+
+test('weather alert level and rail impact split behaves as expected', () => {
+    assert.equal(
+        __private__.toWeatherAlertLevel([{ severity: 'advisory' }]),
+        'watch'
+    );
+    assert.equal(
+        __private__.toWeatherAlertLevel([{ severity: 'warning' }]),
+        'warning'
+    );
+    assert.equal(
+        __private__.toWeatherAlertLevel([]),
+        'none'
+    );
+
+    assert.equal(
+        __private__.toRailImpactLevel({ hasRailIssue: false, weatherAlertLevel: 'watch' }),
+        'potential'
+    );
+    assert.equal(
+        __private__.toRailImpactLevel({ hasRailIssue: true, weatherAlertLevel: 'watch' }),
+        'active'
     );
 });

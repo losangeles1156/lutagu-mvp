@@ -142,6 +142,8 @@ export function getOperatorAbbreviation(operator: string): string {
     return abbreviations[operator] || '';
 }
 
+// NOTE (Phase1): This registry is now a UI-oriented fallback metadata source.
+// Canonical line matching is handled by /lib/l2-skills/engine.ts.
 export const STATION_LINES: Record<string, StationLineDef[]> = {
     // --- MAJOR HUBS (Multi-Operator Aggregates) ---
 

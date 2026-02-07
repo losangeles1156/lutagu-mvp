@@ -2,10 +2,18 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { STATION_LINES, LINES, StationLineDef, OPERATOR_COLORS, ODPT_LINE_SEGMENT_BY_NAME_EN } from '@/lib/constants/stationLines';
-import { resolveStationWeather } from '@/lib/weather/service';
+import { fetchWeatherAlerts, resolveStationWeather } from '@/lib/weather/service';
 import { rustL2Client } from '@/lib/services/RustL2Client';
 import { getAllIdVariants, normalizeToLogicalId } from '@/lib/nodes/nodeIdNormalizer';
 import { logger } from '@/lib/utils/logger';
+import {
+    buildTravelerExplanation,
+    classifyIncidentDetail,
+    mapConditionToIconCode,
+    matchLineWithDisruption,
+    toRailImpactLevel,
+    toWeatherAlertLevel
+} from '@/lib/l2-skills/engine';
 
 // API Keys
 const API_KEY_STANDARD = process.env.ODPT_API_KEY || process.env.ODPT_API_TOKEN; // Permanent (Metro/Toei)
@@ -296,26 +304,16 @@ function pickWorstSeverity(disruptions: any[]) {
 }
 
 function matchDisruptionToLine(lineDef: any, disruption: any) {
-    const railwayId = normalizeRailwayId(disruption?.railway_id || '');
-    if (railwayId) {
-        const expected = getExpectedRailwayIds(lineDef);
-        if (expected.length > 0) return expected.includes(railwayId);
-    }
-
-    const enA = String(lineDef?.name?.en || '');
-    const jaA = String(lineDef?.name?.ja || '');
-    const enB = String(disruption?.line_name?.en || '');
-    const jaB = String(disruption?.line_name?.ja || '');
-
-    const nEnA = normalizeLineToken(enA);
-    const nEnB = normalizeLineToken(enB);
-    if (nEnA && nEnB && nEnA === nEnB) return true;
-
-    const nJaA = normalizeLineToken(jaA);
-    const nJaB = normalizeLineToken(jaB);
-    if (nJaA && nJaB && nJaA === nJaB) return true;
-
-    return false;
+    const expected = getExpectedRailwayIds(lineDef);
+    const matched = matchLineWithDisruption({
+        lineNameEn: String(lineDef?.name?.en || ''),
+        lineNameJa: String(lineDef?.name?.ja || ''),
+        railwayId: expected[0],
+        disruptionRailwayId: String(disruption?.railway_id || disruption?.['odpt:railway'] || ''),
+        disruptionLineNameEn: String(disruption?.line_name?.en || ''),
+        disruptionLineNameJa: String(disruption?.line_name?.ja || '')
+    });
+    return matched.matched;
 }
 
 
@@ -558,7 +556,7 @@ export async function GET(request: Request) {
                             const msgEn = (typeof msgObj === 'object' && msgObj) ? (msgObj.en || '') : '';
                             const msgZh = (typeof msgObj === 'object' && msgObj) ? (msgObj['zh-TW'] || msgObj.zh || '') : '';
 
-                            const classified = classifyLineStatusFromText({
+                            const classified = classifyIncidentDetail({
                                 severity: String(d?.severity || ''),
                                 statusText,
                                 messageJa: msgJa,
@@ -583,7 +581,11 @@ export async function GET(request: Request) {
 
                             return {
                                 d,
-                                classified,
+                                classified: {
+                                    status: classified.status,
+                                    detail: classified.detail,
+                                    delayMinutes: classified.delayMinutes
+                                },
                                 rank: lineStatusDetailRank(classified.detail),
                                 severityRank,
                                 sourceRank,
@@ -620,7 +622,7 @@ export async function GET(request: Request) {
                         : String(primary?.status_label || '');
 
                 const classified = pick?.classified ||
-                    classifyLineStatusFromText({
+                    classifyIncidentDetail({
                         severity: String(primary?.severity || ''),
                         statusText,
                         messageJa: msgJa,
@@ -630,6 +632,15 @@ export async function GET(request: Request) {
 
                 const isActuallyNormal = classified.detail === 'normal' || msgJa.includes('ダイヤ乱れは解消');
                 const status = isActuallyNormal ? 'normal' : classified.status;
+
+                const matchMetadata = matchLineWithDisruption({
+                    lineNameEn: String(lineDef.name?.en || ''),
+                    lineNameJa: String(lineDef.name?.ja || ''),
+                    railwayId: expectedRailwayId,
+                    disruptionRailwayId: String(primary?.railway_id || primary?.['odpt:railway'] || ''),
+                    disruptionLineNameEn: String(primary?.line_name?.en || ''),
+                    disruptionLineNameJa: String(primary?.line_name?.ja || ''),
+                });
 
                 const message = (msgJa || msgEn || msgZh) && !isActuallyNormal
                     ? {
@@ -650,7 +661,14 @@ export async function GET(request: Request) {
                     status_detail: isActuallyNormal ? 'normal' : classified.detail,
                     delay_minutes: isActuallyNormal ? null : classified.delayMinutes,
                     severity: String(worst || ''),
-                    message
+                    message,
+                    canonical_line_id: matchMetadata.canonicalLineId || `fallback:${String(lineDef.name?.en || lineDef.name?.ja || 'line').toLowerCase().replace(/\s+/g, '_')}`,
+                    service_group: matchMetadata.serviceGroup,
+                    match_confidence: matchMetadata.confidence,
+                    match_reasons: matchMetadata.reasons,
+                    advisory_level: matchMetadata.matched && !isActuallyNormal
+                        ? (classified.detail === 'canceled' || classified.detail === 'halt' || classified.detail === 'delay_major' ? 'warning' : 'watch')
+                        : 'none'
                 };
             }
 
@@ -666,7 +684,12 @@ export async function GET(request: Request) {
                 status_detail: 'normal',
                 delay_minutes: null,
                 severity: 'none',
-                message: undefined
+                message: undefined,
+                canonical_line_id: `fallback:${String(lineDef.name?.en || lineDef.name?.ja || 'line').toLowerCase().replace(/\s+/g, '_')}`,
+                service_group: null,
+                match_confidence: 0.4,
+                match_reasons: ['no_disruption_match'],
+                advisory_level: 'none'
             };
         });
 
@@ -706,6 +729,12 @@ export async function GET(request: Request) {
             snapshotWeather: baseData.weather_info,
             snapshotUpdatedAt: baseData.updated_at
         });
+        const weatherAlerts = await fetchWeatherAlerts('ja');
+        const weatherAlertLevel = toWeatherAlertLevel(weatherAlerts || []);
+        const railImpactLevel = toRailImpactLevel({
+            hasRailIssue: hasDelay || hasSuspension,
+            weatherAlertLevel
+        });
 
         // Calculate Crowd Level from Reports
         // Distribution: [Level 1, Level 2, Level 3, Level 4, Level 5]
@@ -737,6 +766,17 @@ export async function GET(request: Request) {
             finalCrowdLevel = Math.round(voteSum / voteCount);
         }
 
+        const firstLine = lineStatusArray.find((line) => line.status !== 'normal');
+        const travelerExplanation = buildTravelerExplanation({
+            lineName: firstLine?.name?.zh || firstLine?.name?.en || '路線',
+            status: hasSuspension ? 'suspended' : hasDelay ? 'delay' : 'normal',
+            weatherAlertLevel,
+            railImpactLevel,
+            delayMinutes: typeof firstLine?.delay_minutes === 'number' ? firstLine.delay_minutes : null
+        });
+
+        const firstOfficialJa = firstLine?.message?.ja || undefined;
+
         const l2Status = {
             congestion: finalCrowdLevel,
             crowd: {
@@ -751,7 +791,15 @@ export async function GET(request: Request) {
             weather: {
                 temp: weatherInfo?.temp || 0,
                 condition: weatherInfo?.condition || 'Unknown',
-                wind: weatherInfo?.wind || 0
+                wind: weatherInfo?.wind || 0,
+                icon_code: mapConditionToIconCode(weatherInfo?.condition || ''),
+                alert_level: weatherAlertLevel,
+                rail_impact_level: railImpactLevel
+            },
+            explanations: {
+                plain_zh_tw: travelerExplanation.plain_zh_tw,
+                plain_en: travelerExplanation.plain_en,
+                official_ja: firstOfficialJa
             },
             updated_at: new Date().toISOString(),
             is_stale: false,
@@ -886,4 +934,6 @@ export async function GET(request: Request) {
     getDisruptionSource,
     getDisruptionSourceRank,
     normalizeRailwayId,
+    toWeatherAlertLevel,
+    toRailImpactLevel,
 };

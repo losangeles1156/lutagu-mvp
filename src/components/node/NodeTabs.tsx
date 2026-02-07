@@ -86,12 +86,20 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
                 status_detail: l.status_detail || undefined,
                 delay_minutes: typeof l.delay_minutes === 'number' ? l.delay_minutes : null,
                 severity: l.severity || undefined,
-                message: getLocaleString(l.message, locale)
+                message: getLocaleString(l.message, locale),
+                canonical_line_id: l.canonical_line_id || undefined,
+                service_group: l.service_group ?? null,
+                match_confidence: typeof l.match_confidence === 'number' ? l.match_confidence : undefined,
+                match_reasons: Array.isArray(l.match_reasons) ? l.match_reasons : undefined,
+                advisory_level: l.advisory_level || 'none'
             })),
             weather: {
                 temp: source.weather?.temp || 0,
                 condition: source.weather?.condition || 'Clear',
-                windSpeed: source.weather?.wind || 0
+                windSpeed: source.weather?.wind || 0,
+                iconCode: source.weather?.icon_code || source.weather?.iconCode || undefined,
+                alertLevel: source.weather?.alert_level || source.weather?.alertLevel || 'none',
+                railImpactLevel: source.weather?.rail_impact_level || source.weather?.railImpactLevel || 'none'
             },
             crowd: {
                 level: source.congestion || 1,
@@ -101,7 +109,8 @@ export function NodeTabs({ nodeData, profile }: { nodeData?: any, profile?: any 
                     distribution: [0, 0, 0, 0, 0]
                 }
             },
-            updatedAt: source.updated_at
+            updatedAt: source.updated_at,
+            explanations: source.explanations
         };
     })();
 

@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "zh-TW": {
+    "delay": "{line}目前有延誤，建議預留額外 {buffer_minutes} 分鐘並留意現場廣播。",
+    "suspended": "{line}目前可能有停駛或大幅調整，建議先準備替代路線。",
+    "weather_watch_no_rail_impact": "目前有天氣警示，但此路線暫時正常運行；建議提早出門並持續留意最新資訊。",
+    "normal": "目前此路線運行正常。"
+  },
+  "en": {
+    "delay": "{line} is delayed. Add about {buffer_minutes} extra minutes and watch station announcements.",
+    "suspended": "{line} may be suspended or heavily adjusted. Prepare an alternative route.",
+    "weather_watch_no_rail_impact": "A weather alert is active, but this line is currently operating normally. Leave earlier and keep checking updates.",
+    "normal": "This line is currently operating normally."
+  }
+}

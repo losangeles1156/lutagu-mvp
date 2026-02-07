@@ -16,6 +16,8 @@ interface WeatherData {
     wind: number;
     humidity: number;
     precipitationProbability: number | null;
+    alertLevel?: 'none' | 'watch' | 'warning';
+    railImpactLevel?: 'none' | 'potential' | 'active';
 }
 
 interface JMAAlert {
@@ -46,10 +48,19 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
         if (initialData) {
             // Map simple WeatherInfo to rich WeatherData
             // Note: We won't have humidity/precip initially, so default them
-            const code = initialData.iconCode ? parseInt(initialData.iconCode) : 0;
+            const code = initialData.iconCode || '';
             let emoji = '☁️';
-            if (code <= 1) emoji = '☀️';
-            else if (code >= 51) emoji = '🌧️';
+            const numericCode = Number(code);
+            if (!Number.isNaN(numericCode)) {
+                if (numericCode <= 1) emoji = '☀️';
+                else if (numericCode >= 51) emoji = '🌧️';
+            } else {
+                if (code === 'sunny') emoji = '☀️';
+                else if (code === 'snow') emoji = '❄️';
+                else if (code === 'thunder') emoji = '⛈️';
+                else if (code === 'rain') emoji = '🌧️';
+                else if (code === 'fog') emoji = '🌫️';
+            }
 
             return {
                 temp: initialData.temp,
@@ -58,7 +69,9 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
                 emoji: emoji,
                 wind: initialData.windSpeed,
                 humidity: 0, // Hidden until hydrated
-                precipitationProbability: null
+                precipitationProbability: null,
+                alertLevel: initialData.alertLevel,
+                railImpactLevel: initialData.railImpactLevel
             };
         }
         return null;
@@ -137,7 +150,8 @@ export function SmartWeatherCard({ onAdviceUpdate, initialData }: SmartWeatherCa
         );
     }
 
-    const isEmergencyMode = alert && (alert.severity === 'warning' || alert.severity === 'critical');
+    const isEmergencyMode = (alert && (alert.severity === 'warning' || alert.severity === 'critical'))
+        || weather.alertLevel === 'warning';
     const isCritical = alert?.severity === 'critical';
 
     // Dynamic Gradient based on mode

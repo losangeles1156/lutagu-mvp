@@ -21,6 +21,7 @@ const OPERATOR_MAP: Record<string, string[]> = {
 
 import { getRedisCache, initRedisCacheFromEnv } from '@/lib/cache/redisCacheService';
 import { createHash } from 'node:crypto';
+import { getTopologyLineByRailwayId } from '@/lib/l2-skills/engine';
 
 const redisCache = getRedisCache<any>('odpt');
 let redisInit: Promise<any> | null = null;
@@ -301,6 +302,7 @@ export async function getTrainStatus(operator?: string) {
 
     const enhancedResults = odptResults.map(item => {
         const railwayId = item['odpt:railway'];
+        const topologyLine = getTopologyLineByRailwayId(railwayId);
         const isYahooReporting = railwayId && yahooStatusMap.has(railwayId);
 
         let trust_level: 'verified' | 'unverified' | 'discrepancy' = 'unverified';
@@ -336,6 +338,8 @@ export async function getTrainStatus(operator?: string) {
                 ja: jaText,
                 en: ((existingTextObj as any).en || 'Delay information') + suffix
             },
+            canonical_line_id: topologyLine?.canonical_line_id,
+            service_group: topologyLine?.service_group ?? null,
             trust_level,
             confidence,
             secondary_source: isYahooReporting ? 'Yahoo Transit' : undefined,

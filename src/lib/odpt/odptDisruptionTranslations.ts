@@ -21,6 +21,7 @@ export const DISRUPTION_CAUSES: Record<string, { en: string; zh: string }> = {
     '強風': { en: 'Strong wind', zh: '強風' },
     '大雪': { en: 'Heavy snow', zh: '大雪' },
     '積雪': { en: 'Snow accumulation', zh: '積雪' },
+    '降雪': { en: 'Snowfall', zh: '降雪' },
     '濃霧': { en: 'Dense fog', zh: '濃霧' },
     '地震': { en: 'Earthquake', zh: '地震' },
     '落雷': { en: 'Lightning strike', zh: '落雷' },
@@ -73,6 +74,8 @@ export const DISRUPTION_PHRASES: Record<string, { en: string; zh: string }> = {
     '運転見合わせ': { en: 'Service suspended', zh: '暫停運行' },
     '遅れ': { en: 'Delay', zh: '延誤' },
     '大幅な遅れ': { en: 'Major delay', zh: '嚴重延誤' },
+    '今後の気象情報にご注意ください': { en: 'Please keep checking weather updates', zh: '請持續留意最新氣象資訊' },
+    '運休が発生する可能性': { en: 'Service suspension is possible', zh: '可能臨時停駛' },
 };
 
 // Merge for full translation

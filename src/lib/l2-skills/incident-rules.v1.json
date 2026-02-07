@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "priority": ["canceled", "halt", "delay_major", "delay_minor", "normal", "unknown"],
+  "delay_major_threshold_minutes": 30,
+  "rules": {
+    "normal": [
+      "平常",
+      "通常",
+      "平常運転",
+      "normal operation",
+      "operating normally",
+      "service is normal",
+      "no delays"
+    ],
+    "canceled": [
+      "運休",
+      "運転取り止め",
+      "service cancelled",
+      "service canceled",
+      "cancelled"
+    ],
+    "halt": [
+      "運転見合わせ",
+      "運転を見合わせ",
+      "運転中止",
+      "運転休止",
+      "service suspended",
+      "suspended",
+      "stopped"
+    ],
+    "delay": [
+      "遅れ",
+      "遅延",
+      "delay",
+      "delayed",
+      "ダイヤ乱れ"
+    ]
+  },
+  "weather_to_rail_impact": {
+    "warning": "potential",
+    "watch": "potential",
+    "none": "none"
+  }
+}

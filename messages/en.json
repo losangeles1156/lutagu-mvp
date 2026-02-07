@@ -278,6 +278,7 @@
         "viewJmaDetails": "View JMA Details",
         "issuesCount": "{count} Issues",
         "allGood": "All Good",
+        "weatherWatchOnly": "Weather watch (operation normal)",
         "sourceOdpt": "Source: ODPT",
         "liveCrowd": "LIVE CROWD"
     },

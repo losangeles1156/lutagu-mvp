@@ -1,0 +1,112 @@
+{
+  "version": "1.0.0",
+  "scope": "jr-kanto-phase1",
+  "lines": [
+    {
+      "canonical_line_id": "jr_ueno_tokyo",
+      "service_group": "jr_kanto_through_service",
+      "display_names": {
+        "ja": "上野東京ライン",
+        "en": "Ueno-Tokyo Line",
+        "zh": "上野東京線"
+      },
+      "aliases": ["上野東京線", "UenoTokyo", "上野東京ライン"],
+      "railway_ids": ["odpt.Railway:JR-East.UenoTokyo"],
+      "related_railway_ids": [
+        "odpt.Railway:JR-East.Tokaido",
+        "odpt.Railway:JR-East.Utsunomiya",
+        "odpt.Railway:JR-East.Takasaki",
+        "odpt.Railway:JR-East.Joban"
+      ]
+    },
+    {
+      "canonical_line_id": "jr_tokaido",
+      "service_group": "jr_kanto_through_service",
+      "display_names": {
+        "ja": "東海道線",
+        "en": "Tokaido Line",
+        "zh": "東海道線"
+      },
+      "aliases": ["東海道本線", "Tokaido"],
+      "railway_ids": ["odpt.Railway:JR-East.Tokaido"],
+      "related_railway_ids": ["odpt.Railway:JR-East.UenoTokyo", "odpt.Railway:JR-East.ShonanShinjuku"]
+    },
+    {
+      "canonical_line_id": "jr_keihin_tohoku",
+      "service_group": "jr_core_tokyo",
+      "display_names": {
+        "ja": "京浜東北線",
+        "en": "Keihin-Tohoku Line",
+        "zh": "京濱東北線"
+      },
+      "aliases": ["京浜東北・根岸線", "KeihinTohoku", "Keihin-Tohoku-Negishi"],
+      "railway_ids": ["odpt.Railway:JR-East.KeihinTohoku", "odpt.Railway:JR-East.Negishi"],
+      "related_railway_ids": ["odpt.Railway:JR-East.Yamanote"]
+    },
+    {
+      "canonical_line_id": "jr_yokosuka",
+      "service_group": "jr_kanto_through_service",
+      "display_names": {
+        "ja": "横須賀線",
+        "en": "Yokosuka Line",
+        "zh": "橫須賀線"
+      },
+      "aliases": ["Yokosuka"],
+      "railway_ids": ["odpt.Railway:JR-East.Yokosuka"],
+      "related_railway_ids": ["odpt.Railway:JR-East.SobuKaisoku"]
+    },
+    {
+      "canonical_line_id": "jr_shonan_shinjuku",
+      "service_group": "jr_kanto_through_service",
+      "display_names": {
+        "ja": "湘南新宿ライン",
+        "en": "Shonan-Shinjuku Line",
+        "zh": "湘南新宿線"
+      },
+      "aliases": ["湘南新宿線", "ShonanShinjuku"],
+      "railway_ids": ["odpt.Railway:JR-East.ShonanShinjuku"],
+      "related_railway_ids": [
+        "odpt.Railway:JR-East.Tokaido",
+        "odpt.Railway:JR-East.Utsunomiya",
+        "odpt.Railway:JR-East.Takasaki",
+        "odpt.Railway:JR-East.Yokosuka"
+      ]
+    },
+    {
+      "canonical_line_id": "jr_utsunomiya",
+      "service_group": "jr_kanto_through_service",
+      "display_names": {
+        "ja": "宇都宮線",
+        "en": "Utsunomiya Line",
+        "zh": "宇都宮線"
+      },
+      "aliases": ["東北本線(宇都宮)", "Utsunomiya"],
+      "railway_ids": ["odpt.Railway:JR-East.Utsunomiya"],
+      "related_railway_ids": ["odpt.Railway:JR-East.UenoTokyo"]
+    },
+    {
+      "canonical_line_id": "jr_takasaki",
+      "service_group": "jr_kanto_through_service",
+      "display_names": {
+        "ja": "高崎線",
+        "en": "Takasaki Line",
+        "zh": "高崎線"
+      },
+      "aliases": ["Takasaki"],
+      "railway_ids": ["odpt.Railway:JR-East.Takasaki"],
+      "related_railway_ids": ["odpt.Railway:JR-East.UenoTokyo"]
+    },
+    {
+      "canonical_line_id": "jr_joban",
+      "service_group": "jr_kanto_through_service",
+      "display_names": {
+        "ja": "常磐線",
+        "en": "Joban Line",
+        "zh": "常磐線"
+      },
+      "aliases": ["常磐快速線", "Joban"],
+      "railway_ids": ["odpt.Railway:JR-East.Joban", "odpt.Railway:JR-East.JobanRapid"],
+      "related_railway_ids": ["odpt.Railway:JR-East.UenoTokyo"]
+    }
+  ]
+}
