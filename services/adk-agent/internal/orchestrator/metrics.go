@@ -61,6 +61,15 @@ func (m *Metrics) IncCounter(name string, delta int64) {
 	m.counters[name] += delta
 }
 
+func (m *Metrics) RecordIntentLadder(faqHit bool, deepIntent bool) {
+	if faqHit {
+		m.IncCounter("faq_hit_count", 1)
+	}
+	if deepIntent {
+		m.IncCounter("deep_intent_invocation_count", 1)
+	}
+}
+
 // Stats returns current metrics as a map
 type MetricsStats struct {
 	Uptime        time.Duration      `json:"uptime"`

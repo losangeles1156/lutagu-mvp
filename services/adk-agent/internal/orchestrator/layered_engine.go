@@ -201,6 +201,7 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 			req.HistoryBudgetTokens = req.MaxContextTokens
 		}
 
+		faqHit := isFAQHit(lastMessage, req.Locale)
 		intent := analyzeIntent(lastMessage)
 		intentPath := intent.Route
 		emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
@@ -257,6 +258,9 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		if ladder.RequireDeepIntent && intentPath != intentLLMRequired {
 			intentPath = intentLLMRequired
 		}
+		if e.metrics != nil {
+			e.metrics.RecordIntentLadder(faqHit, ladder.RequireDeepIntent)
+		}
 		emitTraceChunk(outCh, decisionTracePrefix, map[string]interface{}{
 			"type":             "intent_ladder",
 			"complexity":       ladder.Complexity,
@@ -309,7 +313,6 @@ func (e *LayeredEngine) Process(ctx context.Context, req ProcessRequest) <-chan 
 		if strings.TrimSpace(complexity) == "" {
 			complexity = "simple"
 		}
-		faqHit := isFAQHit(lastMessage, req.Locale)
 
 		if e.templateEngine != nil && (faqHit || !nodeCtx.IsRouteQuery) {
 			tmplCtx := layer.TemplateContext{
